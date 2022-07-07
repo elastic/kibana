@@ -29,9 +29,10 @@ import {
   ReduxEmbeddableWrapperPropsWithChildren,
   SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { OverlayRef } from '@kbn/core/public';
+
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -39,13 +40,17 @@ import {
   ControlsPanels,
   CONTROL_GROUP_TYPE,
 } from '../types';
+import {
+  cachedChildEmbeddableOrder,
+  ControlGroupChainingSystems,
+  controlOrdersAreEqual,
+} from './control_group_chaining_system';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { ControlGroupChainingSystems } from './control_group_chaining_system';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 
 const ControlGroupReduxWrapper = withSuspense<
@@ -57,24 +62,6 @@ export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
   flyoutRef = newRef;
 };
 
-export interface ChildEmbeddableOrderCache {
-  IdsToOrder: { [key: string]: number };
-  idsInOrder: string[];
-  lastChildId: string;
-}
-
-const controlOrdersAreEqual = (panelsA: ControlsPanels, panelsB: ControlsPanels) => {
-  const ordersA = Object.values(panelsA).map((panel) => ({
-    id: panel.explicitInput.id,
-    order: panel.order,
-  }));
-  const ordersB = Object.values(panelsB).map((panel) => ({
-    id: panel.explicitInput.id,
-    order: panel.order,
-  }));
-  return deepEqual(ordersA, ordersB);
-};
-
 export class ControlGroupContainer extends Container<
   ControlInput,
   ControlGroupInput,
@@ -84,7 +71,6 @@ export class ControlGroupContainer extends Container<
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
-  private childOrderCache: ChildEmbeddableOrderCache;
   private recalculateFilters$: Subject<null>;
 
   private relevantDataViewId?: string;
@@ -122,7 +108,11 @@ export class ControlGroupContainer extends Container<
       <CreateControlButton
         buttonType={buttonType}
         defaultControlWidth={this.getInput().defaultControlWidth}
+        defaultControlGrow={this.getInput().defaultControlGrow}
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+        updateDefaultGrow={(defaultControlGrow: boolean) =>
+          this.updateInput({ defaultControlGrow })
+        }
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
         closePopover={closePopover}
         getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
@@ -172,9 +162,6 @@ export class ControlGroupContainer extends Container<
 
     this.recalculateFilters$ = new Subject();
 
-    // set up order cache so that it is aligned on input changes.
-    this.childOrderCache = this.getEmbeddableOrderCache();
-
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
       this.recalculateDataViews();
@@ -193,13 +180,11 @@ export class ControlGroupContainer extends Container<
           skip(1),
           distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
         )
-        .subscribe(() => {
+        .subscribe((input) => {
           this.recalculateDataViews();
           this.recalculateFilters();
-          this.childOrderCache = this.getEmbeddableOrderCache();
-          this.childOrderCache.idsInOrder.forEach((id) =>
-            this.getChild(id)?.refreshInputFromParent()
-          );
+          const childOrderCache = cachedChildEmbeddableOrder(input.panels);
+          childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
         })
     );
 
@@ -236,7 +221,7 @@ export class ControlGroupContainer extends Container<
           this.recalculateDataViews();
           ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
             childOutputChangedId,
-            childOrder: this.childOrderCache,
+            childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
             getChild: (id) => this.getChild(id),
             recalculateFilters$: this.recalculateFilters$,
           });
@@ -249,20 +234,6 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
     );
-  };
-
-  private getEmbeddableOrderCache = (): ChildEmbeddableOrderCache => {
-    const panels = this.getInput().panels;
-    const IdsToOrder: { [key: string]: number } = {};
-    const idsInOrder: string[] = [];
-    Object.values(panels)
-      .sort((a, b) => (a.order > b.order ? 1 : -1))
-      .forEach((panel) => {
-        IdsToOrder[panel.explicitInput.id] = panel.order;
-        idsInOrder.push(panel.explicitInput.id);
-      });
-    const lastChildId = idsInOrder[idsInOrder.length - 1];
-    return { IdsToOrder, idsInOrder, lastChildId };
   };
 
   public getPanelCount = () => {
@@ -303,17 +274,19 @@ export class ControlGroupContainer extends Container<
     return {
       order: nextOrder,
       width: this.getInput().defaultControlWidth,
+      grow: this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
 
   protected onRemoveEmbeddable(idToRemove: string) {
     const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
-    const removedOrder = this.childOrderCache.IdsToOrder[idToRemove];
-    for (let i = removedOrder + 1; i < this.childOrderCache.idsInOrder.length; i++) {
-      const currentOrder = newPanels[this.childOrderCache.idsInOrder[i]].order;
-      newPanels[this.childOrderCache.idsInOrder[i]] = {
-        ...newPanels[this.childOrderCache.idsInOrder[i]],
+    const childOrderCache = cachedChildEmbeddableOrder(this.getInput().panels);
+    const removedOrder = childOrderCache.IdsToOrder[idToRemove];
+    for (let i = removedOrder + 1; i < childOrderCache.idsInOrder.length; i++) {
+      const currentOrder = newPanels[childOrderCache.idsInOrder[i]].order;
+      newPanels[childOrderCache.idsInOrder[i]] = {
+        ...newPanels[childOrderCache.idsInOrder[i]],
         order: currentOrder - 1,
       };
     }
@@ -321,11 +294,12 @@ export class ControlGroupContainer extends Container<
   }
 
   protected getInheritedInput(id: string): ControlInput {
-    const { filters, query, ignoreParentSettings, timeRange, chainingSystem } = this.getInput();
+    const { filters, query, ignoreParentSettings, timeRange, chainingSystem, panels } =
+      this.getInput();
 
     const precedingFilters = ControlGroupChainingSystems[chainingSystem].getPrecedingFilters({
       id,
-      childOrder: this.childOrderCache,
+      childOrder: cachedChildEmbeddableOrder(panels),
       getChild: (getChildId: string) => this.getChild<ControlEmbeddable>(getChildId),
     });
     const allFilters = [
@@ -349,7 +323,10 @@ export class ControlGroupContainer extends Container<
     if (panelsLoading()) {
       return new Promise<void>((resolve, reject) => {
         const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-          if (this.destroyed) reject();
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
           if (!panelsLoading()) {
             subscription.unsubscribe();
             resolve();

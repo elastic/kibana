@@ -36,6 +36,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
+    getCurrentIndexPatternId: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((_state, _layerId) => {}),

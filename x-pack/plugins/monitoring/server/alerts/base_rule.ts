@@ -344,6 +344,7 @@ export class BaseRule {
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }
-    return `${Globals.app.url}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
+
+    return `${Globals.app.url ?? ''}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

@@ -8,12 +8,14 @@
 
 export type { ServiceFactory, SharedUxServices, SharedUxServicesContext } from './types';
 export type {
+  MockServicesFactoryParams,
   SharedUxApplicationService,
   SharedUxDocLinksService,
   SharedUxEditorsService,
   SharedUxHttpService,
   SharedUxPlatformService,
   SharedUxUserPermissionsService,
+  SharedUxDataService,
 } from './services';
 
 export {
@@ -24,6 +26,7 @@ export {
   useHttp,
   usePermissions,
   usePlatformService,
+  useData,
   useSharedUxServices,
 } from './context';
 

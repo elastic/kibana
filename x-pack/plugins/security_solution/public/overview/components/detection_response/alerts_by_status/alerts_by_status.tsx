@@ -20,7 +20,7 @@ import { LegendItem } from '../../../../common/components/charts/legend_item';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
-  ALERTS_TITLE,
+  ALERTS_TEXT,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -105,12 +105,12 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
     []
   );
 
+  const openCount = donutData?.open?.total ?? 0;
+  const acknowledgedCount = donutData?.acknowledged?.total ?? 0;
+  const closedCount = donutData?.closed?.total ?? 0;
+
   const totalAlerts =
-    loading || donutData == null
-      ? 0
-      : (donutData?.open?.total ?? 0) +
-        (donutData?.acknowledged?.total ?? 0) +
-        (donutData?.closed?.total ?? 0);
+    loading || donutData == null ? 0 : openCount + acknowledgedCount + closedCount;
 
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
@@ -130,7 +130,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={ALERTS_TITLE}
+            title={ALERTS_TEXT}
+            titleSize="s"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}
@@ -152,10 +153,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
             <>
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiText className="eui-textCenter" size="s">
-                    {loading ? (
-                      <EuiSpacer size="l" />
-                    ) : (
+                  {totalAlerts !== 0 && (
+                    <EuiText className="eui-textCenter" size="s">
                       <>
                         <b>
                           <FormattedCount count={totalAlerts} />
@@ -163,9 +162,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                         <> </>
                         <small>{ALERTS(totalAlerts)}</small>
                       </>
-                    )}
-                  </EuiText>
-
+                    </EuiText>
+                  )}
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
                     <StyledFlexItem key="alerts-status-open" grow={false}>
@@ -174,8 +172,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                         fillColor={fillColor}
                         height={donutHeight}
                         label={STATUS_OPEN}
-                        title={<ChartLabel count={donutData?.open?.total ?? 0} />}
-                        totalCount={donutData?.open?.total ?? 0}
+                        title={<ChartLabel count={openCount} />}
+                        totalCount={openCount}
                       />
                     </StyledFlexItem>
                     <StyledFlexItem key="alerts-status-acknowledged" grow={false}>
@@ -184,8 +182,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                         fillColor={fillColor}
                         height={donutHeight}
                         label={STATUS_ACKNOWLEDGED}
-                        title={<ChartLabel count={donutData?.acknowledged?.total ?? 0} />}
-                        totalCount={donutData?.acknowledged?.total ?? 0}
+                        title={<ChartLabel count={acknowledgedCount} />}
+                        totalCount={acknowledgedCount}
                       />
                     </StyledFlexItem>
                     <StyledFlexItem key="alerts-status-closed" grow={false}>
@@ -194,8 +192,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                         fillColor={fillColor}
                         height={donutHeight}
                         label={STATUS_CLOSED}
-                        title={<ChartLabel count={donutData?.closed?.total ?? 0} />}
-                        totalCount={donutData?.closed?.total ?? 0}
+                        title={<ChartLabel count={closedCount} />}
+                        totalCount={closedCount}
                       />
                     </StyledFlexItem>
                   </EuiFlexGroup>

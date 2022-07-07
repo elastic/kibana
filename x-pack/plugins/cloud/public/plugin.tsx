@@ -13,21 +13,16 @@ import type {
   PluginInitializerContext,
   HttpStart,
   IBasePath,
-  ExecutionContextStart,
   AnalyticsServiceSetup,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, from, of, Subscription } from 'rxjs';
-import { exhaustMap, filter, map } from 'rxjs/operators';
-import { compact } from 'lodash';
+import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
 
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Sha256 } from '@kbn/core/public/utils';
+import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
   ELASTIC_SUPPORT_LINK,
@@ -49,6 +44,7 @@ export interface CloudConfigType {
   full_story: {
     enabled: boolean;
     org_id?: string;
+    eventTypesAllowlist?: string[];
   };
   /** Configuration to enable live chat in Cloud-enabled instances of Kibana. */
   chat: {
@@ -90,11 +86,6 @@ interface SetupFullStoryDeps {
   analytics: AnalyticsServiceSetup;
   basePath: IBasePath;
 }
-interface SetupTelemetryContextDeps extends CloudSetupDependencies {
-  analytics: AnalyticsServiceSetup;
-  executionContextPromise: Promise<ExecutionContextStart>;
-  cloudId?: string;
-}
 
 interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
   http: CoreSetup['http'];
@@ -103,7 +94,6 @@ interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private isCloudEnabled: boolean;
-  private appSubscription?: Subscription;
   private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -112,19 +102,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    const executionContextPromise = core.getStartServices().then(([coreStart]) => {
-      return coreStart.executionContext;
-    });
-
-    this.setupTelemetryContext({
-      analytics: core.analytics,
-      security,
-      executionContextPromise,
-      cloudId: this.config.id,
-    }).catch((e) => {
-      // eslint-disable-next-line no-console
-      console.debug(`Error setting up TelemetryContext: ${e.toString()}`);
-    });
+    this.setupTelemetryContext(core.analytics, security, this.config.id);
 
     this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
       // eslint-disable-next-line no-console
@@ -212,9 +190,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
   }
 
-  public stop() {
-    this.appSubscription?.unsubscribe();
-  }
+  public stop() {}
 
   /**
    * Determines if the current user should see links back to Cloud.
@@ -249,7 +225,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
    * @private
    */
   private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
-    const { enabled, org_id: fullStoryOrgId } = this.config.full_story;
+    const { enabled, org_id: fullStoryOrgId, eventTypesAllowlist } = this.config.full_story;
     if (!enabled || !fullStoryOrgId) {
       return; // do not load any FullStory code in the browser if not enabled
     }
@@ -257,6 +233,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
     const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
     analytics.registerShipper(FullStoryShipper, {
+      eventTypesAllowlist,
       fullStoryOrgId,
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
       scriptUrl: basePath.prepend(
@@ -270,132 +247,54 @@ export class CloudPlugin implements Plugin<CloudSetup> {
    * Set up the Analytics context providers.
    * @param analytics Core's Analytics service. The Setup contract.
    * @param security The security plugin.
-   * @param executionContextPromise Core's executionContext's start contract.
-   * @param esOrgId The Cloud Org ID.
+   * @param cloudId The Cloud Org ID.
    * @private
    */
-  private async setupTelemetryContext({
-    analytics,
-    security,
-    executionContextPromise,
-    cloudId,
-  }: SetupTelemetryContextDeps) {
-    // Some context providers can be moved to other places for better domain isolation.
-    // Let's use https://github.com/elastic/kibana/issues/125690 for that purpose.
-    analytics.registerContextProvider({
-      name: 'kibana_version',
-      context$: of({ version: this.initializerContext.env.packageInfo.version }),
-      schema: { version: { type: 'keyword', _meta: { description: 'The version of Kibana' } } },
-    });
+  private setupTelemetryContext(
+    analytics: AnalyticsServiceSetup,
+    security?: Pick<SecurityPluginSetup, 'authc'>,
+    cloudId?: string
+  ) {
+    registerCloudDeploymentIdAnalyticsContext(analytics, cloudId);
 
-    analytics.registerContextProvider({
-      name: 'cloud_org_id',
-      context$: of({ cloudId }),
-      schema: {
-        cloudId: {
-          type: 'keyword',
-          _meta: { description: 'The Cloud ID', optional: true },
-        },
-      },
-    });
-
-    // This needs to be called synchronously to be sure that we populate the user ID soon enough to make sessions merging
-    // across domains work
     if (security) {
       analytics.registerContextProvider({
         name: 'cloud_user_id',
-        context$: from(loadUserId({ getCurrentUser: security.authc.getCurrentUser })).pipe(
-          filter((userId): userId is string => Boolean(userId)),
-          exhaustMap(async (userId) => {
-            const { sha256 } = await import('js-sha256');
-            // Join the cloud org id and the user to create a truly unique user id.
-            // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-            return { userId: sha256(cloudId ? `${cloudId}:${userId}` : `${userId}`) };
-          })
+        context$: from(security.authc.getCurrentUser()).pipe(
+          map((user) => {
+            if (user.elastic_cloud_user) {
+              // If the user is managed by ESS, use the plain username as the user ID:
+              // The username is expected to be unique for these users,
+              // and it matches how users are identified in the Cloud UI, so it allows us to correlate them.
+              return { userId: user.username, isElasticCloudUser: true };
+            }
+
+            return {
+              // For the rest of the authentication providers, we want to add the cloud deployment ID to make it unique.
+              // Especially in the case of Elasticsearch-backed authentication, where users are commonly repeated
+              // across multiple deployments (i.e.: `elastic` superuser).
+              userId: cloudId ? `${cloudId}:${user.username}` : user.username,
+              isElasticCloudUser: false,
+            };
+          }),
+          // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+          map(({ userId, isElasticCloudUser }) => ({ userId: sha256(userId), isElasticCloudUser })),
+          catchError(() => of({ userId: undefined, isElasticCloudUser: false }))
         ),
         schema: {
           userId: {
             type: 'keyword',
             _meta: { description: 'The user id scoped as seen by Cloud (hashed)' },
           },
+          isElasticCloudUser: {
+            type: 'boolean',
+            _meta: {
+              description: '`true` if the user is managed by ESS.',
+            },
+          },
         },
       });
     }
-
-    const executionContext = await executionContextPromise;
-    analytics.registerContextProvider({
-      name: 'execution_context',
-      context$: executionContext.context$.pipe(
-        // Update the current context every time it changes
-        map(({ name, page, id }) => ({
-          pageName: `${compact([name, page]).join(':')}`,
-          applicationId: name ?? 'unknown',
-          page,
-          entityId: id,
-        }))
-      ),
-      schema: {
-        pageName: {
-          type: 'keyword',
-          _meta: { description: 'The name of the current page' },
-        },
-        page: {
-          type: 'keyword',
-          _meta: { description: 'The current page', optional: true },
-        },
-        applicationId: {
-          type: 'keyword',
-          _meta: { description: 'The id of the current application' },
-        },
-        entityId: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'The id of the current entity (dashboard, visualization, canvas, lens, etc)',
-            optional: true,
-          },
-        },
-      },
-    });
-
-    analytics.registerEventType({
-      eventType: 'Loaded Kibana',
-      schema: {
-        kibana_version: {
-          type: 'keyword',
-          _meta: { description: 'The version of Kibana', optional: true },
-        },
-        memory_js_heap_size_limit: {
-          type: 'long',
-          _meta: { description: 'The maximum size of the heap', optional: true },
-        },
-        memory_js_heap_size_total: {
-          type: 'long',
-          _meta: { description: 'The total size of the heap', optional: true },
-        },
-        memory_js_heap_size_used: {
-          type: 'long',
-          _meta: { description: 'The used size of the heap', optional: true },
-        },
-      },
-    });
-
-    // Get performance information from the browser (non standard property
-    // @ts-expect-error 2339
-    const memory = window.performance.memory;
-    let memoryInfo = {};
-    if (memory) {
-      memoryInfo = {
-        memory_js_heap_size_limit: memory.jsHeapSizeLimit,
-        memory_js_heap_size_total: memory.totalJSHeapSize,
-        memory_js_heap_size_used: memory.usedJSHeapSize,
-      };
-    }
-
-    analytics.reportEvent('Loaded Kibana', {
-      kibana_version: this.initializerContext.env.packageInfo.version,
-      ...memoryInfo,
-    });
   }
 
   private async setupChat({ http, security }: SetupChatDeps) {
@@ -436,32 +335,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 }
 
-/** @internal exported for testing */
-export const loadUserId = async ({
-  getCurrentUser,
-}: {
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-}) => {
-  try {
-    const currentUser = await getCurrentUser().catch(() => undefined);
-    if (!currentUser) {
-      return undefined;
-    }
-
-    // Log very defensively here so we can debug this easily if it breaks
-    if (!currentUser.username) {
-      // eslint-disable-next-line no-console
-      console.debug(
-        `[cloud.analytics] username not specified. User metadata: ${JSON.stringify(
-          currentUser.metadata
-        )}`
-      );
-    }
-
-    return currentUser.username;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`[cloud.analytics] Error loading the current user: ${e.toString()}`, e);
-    return undefined;
-  }
-};
+function sha256(str: string) {
+  return new Sha256().update(str, 'utf8').digest('hex');
+}

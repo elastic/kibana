@@ -16,7 +16,6 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 import { isAlertType } from './types';
-import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 
@@ -92,10 +91,8 @@ export const getRulesFromObjects = async (
   const chunkedObjects = chunk(objects, 1024);
   const filter = chunkedObjects
     .map((chunkedArray) => {
-      const joinedIds = chunkedArray
-        .map((object) => `"${INTERNAL_RULE_ID_KEY}:${object.rule_id}"`)
-        .join(' OR ');
-      return `alert.attributes.tags: (${joinedIds})`;
+      const joinedIds = chunkedArray.map((object) => object.rule_id).join(' OR ');
+      return `alert.attributes.params.ruleId: (${joinedIds})`;
     })
     .join(' OR ');
   const rules = await findRules({

@@ -5,20 +5,16 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
+import type { ComponentType, ReactNode } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { ComponentType } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridCellValueElementProps,
-} from '@elastic/eui';
+import type { IconType, EuiFlyoutSize } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -46,8 +42,22 @@ import {
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import React from 'react';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
+import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
+import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from './application/sections/rules_list/components/rule_tag_badge';
+import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
+import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
+import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -80,6 +90,14 @@ export type {
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
+  RuleTagFilterProps,
+  RuleStatusFilterProps,
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+  RuleEventLogListProps,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
+  RulesListNotifyBadgeProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -100,23 +118,15 @@ export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
   TypeRegistry<AlertsTableConfigurationRegistry>
 >;
 
-export type ActionConnectorFieldsCallbacks = {
-  beforeActionConnectorSave?: () => Promise<void>;
-  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
-} | null;
-export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
-  React.SetStateAction<ActionConnectorFieldsCallbacks>
->;
+export interface ConnectorValidationError {
+  message: ReactNode;
+}
 
-export interface ActionConnectorFieldsProps<TActionConnector> {
-  action: TActionConnector;
-  editActionConfig: (property: string, value: unknown) => void;
-  editActionSecrets: (property: string, value: unknown) => void;
-  errors: IErrorObject;
+export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
+export interface ActionConnectorFieldsProps {
   readOnly: boolean;
-  consumer?: string;
-  setCallbacks: ActionConnectorFieldsSetCallbacks;
   isEdit: boolean;
+  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 export enum RuleFlyoutCloseReason {
@@ -159,16 +169,11 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (
-    connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<
-      ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
-    >
+    ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
@@ -182,11 +187,6 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export interface ConnectorValidationResult<Config, Secrets> {
-  config?: GenericValidationResult<Config>;
-  secrets?: GenericValidationResult<Secrets>;
-}
-
 export interface ActionConnectorProps<Config, Secrets> {
   secrets: Secrets;
   id: string;
@@ -195,6 +195,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isDeprecated: boolean;
   isMissingSecrets?: boolean;
 }
 
@@ -303,32 +304,16 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  defaultRecoveryMessage?: string;
 }
 
 export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
 }
 
-export interface ConnectorAddFlyoutProps {
-  onClose: () => void;
-  actionTypes?: ActionType[];
-  onTestConnector?: (connector: ActionConnector) => void;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
-export enum EditConectorTabs {
+export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
-}
-
-export interface ConnectorEditFlyoutProps {
-  initialConnector: ActionConnector;
-  onClose: () => void;
-  tab?: EditConectorTabs;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export interface RuleEditProps<MetaData = Record<string, any>> {
@@ -358,6 +343,12 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   ruleTypeIndex?: RuleTypeIndex;
   filteredSolutions?: string[] | undefined;
 }
+export interface RuleDefinitionProps {
+  rule: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onEditRule: () => Promise<void>;
+}
 
 export enum Percentiles {
   P50 = 'P50',
@@ -366,25 +357,30 @@ export enum Percentiles {
 }
 
 export interface TriggersActionsUiConfig {
+  isUsingSecurity: boolean;
   minimumScheduleInterval?: {
     value: string;
     enforce: boolean;
   };
 }
 
-export type AlertsData = Record<string, any[]>;
+export enum AlertsField {
+  name = 'kibana.alert.rule.name',
+  reason = 'kibana.alert.reason',
+}
 
 export interface FetchAlertData {
   activePage: number;
-  alerts: AlertsData[];
+  alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
+  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
+  sort: SortCombinations[];
 }
 
 export interface BulkActionsObjectProp {
@@ -394,23 +390,85 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
-  configurationId: string;
-  consumers: AlertConsumers[];
+  alertsTableConfiguration: AlertsTableConfigurationRegistry;
+  columns: EuiDataGridColumn[];
   bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
+  flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
   showCheckboxes: boolean;
+  showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
+  visibleColumns: string[];
   'data-test-subj': string;
 }
+
+// TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
+export type GetRenderCellValue = ({
+  setFlyoutAlert,
+}: {
+  setFlyoutAlert?: (data: unknown) => void;
+}) => (props: unknown) => React.ReactNode;
+
+export type AlertTableFlyoutComponent =
+  | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+  | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
+  | null;
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
+  useInternalFlyout?: () => {
+    header: AlertTableFlyoutComponent;
+    body: AlertTableFlyoutComponent;
+    footer: AlertTableFlyoutComponent;
+  };
+  sort?: SortCombinations[];
+  getRenderCellValue?: GetRenderCellValue;
+  useActionsColumn?: () => {
+    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    width?: number;
+  };
+}
+
+export interface AlertsTableFlyoutBaseProps {
+  alert: EcsFieldsResponse;
+  isLoading: boolean;
+}
+
+export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export enum RRuleFrequency {
+  YEARLY = 0,
+  MONTHLY = 1,
+  WEEKLY = 2,
+  DAILY = 3,
+}
+
+export interface RecurrenceSchedule {
+  freq: RRuleFrequency;
+  interval: number;
+  until?: Moment;
+  count?: number;
+  byweekday?: string[];
+  bymonthday?: number[];
+  bymonth?: number[];
+}
+
+export interface SnoozeSchedule {
+  id: string | null;
+  duration: number;
+  rRule: Partial<RecurrenceSchedule> & {
+    dtstart: string;
+    tzid: string;
+  };
+}
+
+export interface ConnectorServices {
+  validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
 }

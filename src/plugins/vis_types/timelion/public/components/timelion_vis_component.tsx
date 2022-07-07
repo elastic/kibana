@@ -16,6 +16,7 @@ import {
   TooltipType,
   LegendPositionConfig,
   LayoutDirection,
+  Placement,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -57,6 +58,7 @@ interface TimelionVisComponentProps {
   onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   renderComplete: IInterpreterRenderHandlers['done'];
   ariaLabel?: string;
+  syncTooltips?: boolean;
 }
 
 const DefaultYAxis = () => (
@@ -101,6 +103,7 @@ export const TimelionVisComponent = ({
   renderComplete,
   onBrushEvent,
   ariaLabel,
+  syncTooltips,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -201,6 +204,9 @@ export const TimelionVisComponent = ({
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={handleCursorUpdate}
+          externalPointerEvents={{
+            tooltip: { visible: syncTooltips, placement: Placement.Right },
+          }}
           theme={chartTheme}
           baseTheme={chartBaseTheme}
           tooltip={{
@@ -208,7 +214,6 @@ export const TimelionVisComponent = ({
             headerFormatter: ({ value }) => tickFormat(value),
             type: TooltipType.VerticalCursor,
           }}
-          externalPointerEvents={{ tooltip: { visible: false } }}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
         />

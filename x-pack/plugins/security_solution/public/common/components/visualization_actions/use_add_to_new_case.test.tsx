@@ -5,26 +5,45 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { useKibana } from '../../lib/kibana';
+import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToNewCase } from './use_add_to_new_case';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana/kibana_react');
 
+const mockedUseKibana = mockUseKibana();
+const mockGetUseCasesAddToNewCaseFlyout = jest.fn();
+
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+
+  return {
+    ...original,
+    useGetUserCasesPermissions: jest.fn(),
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: {
+          hooks: {
+            getUseCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
+          },
+        },
+      },
+    }),
+  };
+});
+
 describe('useAddToNewCase', () => {
-  const mockCases = mockCasesContract();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
   };
-  const owner = 'securitySolution';
-  const type = 'user';
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        cases: mockCases,
-      },
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+      crud: true,
+      read: true,
     });
   });
 
@@ -33,53 +52,44 @@ describe('useAddToNewCase', () => {
       useAddToNewCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
-        userCanCrud: true,
       })
     );
-    expect(mockCases.hooks.getUseCasesAddToNewCaseFlyout).toHaveBeenCalledWith({
-      attachments: [
-        {
-          comment: `!{lens${JSON.stringify({
-            timeRange,
-            attributes: kpiHostMetricLensAttributes,
-          })}}`,
-          owner,
-          type,
-        },
-      ],
+    expect(mockGetUseCasesAddToNewCaseFlyout).toHaveBeenCalledWith({
       toastContent: 'Successfully added visualization to the case',
     });
     expect(result.current.disabled).toEqual(false);
   });
 
-  it("button disalbled if user Can't Crud", () => {
+  it("button disabled if user Can't Crud", () => {
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+      crud: false,
+      read: true,
+    });
+
     const { result } = renderHook(() =>
       useAddToNewCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
-        userCanCrud: false,
       })
     );
     expect(result.current.disabled).toEqual(true);
   });
 
-  it('button disalbled if no lensAttributes', () => {
+  it('button disabled if no lensAttributes', () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
         lensAttributes: null,
         timeRange,
-        userCanCrud: true,
       })
     );
     expect(result.current.disabled).toEqual(true);
   });
 
-  it('button disalbled if no timeRange', () => {
+  it('button disabled if no timeRange', () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange: null,
-        userCanCrud: true,
       })
     );
     expect(result.current.disabled).toEqual(true);

@@ -18,7 +18,7 @@ export interface PluginStartContract {
 
 interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  alerting?: AlertingPluginSetup;
+  alerting: AlertingPluginSetup;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
@@ -49,7 +49,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       this.logger,
       router,
       BASE_TRIGGERS_ACTIONS_UI_API_PATH,
-      plugins.alerting?.getConfig()
+      plugins.alerting.getConfig
     );
   }
 

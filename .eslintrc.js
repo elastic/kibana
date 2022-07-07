@@ -94,6 +94,31 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const KBN_HANDLEBARS_HEADER = `
+/*
+ * Elasticsearch B.V licenses this file to you under the MIT License.
+ * See \`packages/kbn-handlebars/LICENSE\` for more information.
+ */
+`;
+
+const KBN_HANDLEBARS_HANDLEBARS_HEADER = `
+/*
+  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`packages/kbn-handlebars/LICENSE\` for more information.
+  */
+`;
+
+const VENN_DIAGRAM_HEADER = `
+/*
+  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
+  */
+`;
+
 const packagePkgJsons = globby.sync('*/package.json', {
   cwd: Path.resolve(__dirname, 'packages'),
   absolute: true,
@@ -230,7 +255,7 @@ const RESTRICTED_IMPORTS = [
 module.exports = {
   root: true,
 
-  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
+  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -293,6 +318,9 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -304,7 +332,7 @@ module.exports = {
      */
     {
       files: [
-        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -325,6 +353,9 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -364,6 +395,9 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -393,11 +427,15 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
       },
     },
+
     {
       files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
@@ -418,6 +456,9 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -443,6 +484,101 @@ module.exports = {
               OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * @kbn/handlebars package requires special license headers
+     */
+    {
+      files: ['packages/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: KBN_HANDLEBARS_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['packages/kbn-handlebars/src/upstream/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: KBN_HANDLEBARS_HANDLEBARS_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * venn.js fork requires special license headers
+     */
+    {
+      files: ['x-pack/plugins/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: VENN_DIAGRAM_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -571,6 +707,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/performance/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -871,6 +1008,19 @@ module.exports = {
       },
     },
 
+    {
+      // disable imports from legacy uptime plugin
+      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['**/legacy_uptime/*'],
+          },
+        ],
+      },
+    },
+
     /**
      * Fleet overrides
      */
@@ -956,6 +1106,13 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
+            paths: [
+              {
+                name: 'react-router-dom',
+                importNames: ['Route'],
+                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
+              },
+            ],
           },
         ],
       },
@@ -1335,6 +1492,8 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        'sort-keys': 1, // warning
+        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
@@ -1603,23 +1762,12 @@ module.exports = {
       },
     },
 
-    {
-      files: ['packages/kbn-type-summarizer/**/*.ts'],
-      rules: {
-        'no-bitwise': 'off',
-      },
-    },
-
     /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */
     {
       files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
+      rules: require('eslint-config-prettier').rules,
     },
     /**
      * Enterprise Search Prettier override
@@ -1629,6 +1777,17 @@ module.exports = {
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+      },
+    },
+
+    /**
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     */
+    {
+      files: '.buildkite/**/*.{js,ts}',
+      rules: {
+        'no-console': 'off',
+        '@kbn/imports/no_unresolvable_imports': 'off',
       },
     },
   ],

@@ -14,6 +14,25 @@ is_pr() {
   false
 }
 
+is_pr_with_label() {
+  match="$1"
+
+  IFS=',' read -ra labels <<< "${GITHUB_PR_LABELS:-}"
+
+  for label in "${labels[@]}"
+  do
+    if [ "$label" == "$match" ]; then
+      return
+    fi
+  done
+
+  false
+}
+
+is_auto_commit_disabled() {
+  is_pr_with_label "ci:no-auto-commit"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -23,7 +42,7 @@ check_for_changed_files() {
   GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
 
   if [ "$GIT_CHANGES" ]; then
-    if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
@@ -121,4 +140,31 @@ set_git_merge_base() {
   fi
 
   export GITHUB_PR_MERGE_BASE
+}
+
+# If npm install is terminated early, e.g. because the build was cancelled in buildkite,
+# a package directory is left behind in a bad state that can cause all subsequent installs to fail
+# So this function contains some cleanup/retry logic to try to recover from this kind of situation
+npm_install_global() {
+  package="$1"
+  version="${2:-latest}"
+  toInstall="$package@$version"
+
+  npmRoot=$(npm root -g)
+  packageRoot="${npmRoot:?}/$package"
+
+  # The success flag file exists just to try to make sure we know that the full install was done
+  # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
+  successFlag="${packageRoot:?}/.install-success"
+
+  if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
+    echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
+    rm -rf "$packageRoot"
+  fi
+
+  if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
+    rm -rf "$packageRoot"
+    echo "Trying again to install $toInstall..."
+    npm install -g "$toInstall" && touch "$successFlag"
+  fi
 }

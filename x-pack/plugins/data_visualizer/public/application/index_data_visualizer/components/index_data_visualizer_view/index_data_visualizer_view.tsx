@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { Query, generateFilters } from '@kbn/data-plugin/public';
+import { Filter, Query } from '@kbn/es-query';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -48,7 +48,7 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { ResultLink } from '../../../common/components/results_links';
+import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
@@ -110,7 +110,7 @@ export interface IndexDataVisualizerViewProps {
   currentDataView: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
-  additionalLinks?: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 const restorableDefaults = getDefaultDataVisualizerListState();
 
@@ -129,7 +129,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentDataView, additionalLinks, currentSessionId } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -287,7 +287,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         field,
         values,
         operation,
-        String(currentDataView.id)
+        currentDataView
       );
       if (newFilters) {
         data.query.filterManager.addFilters(newFilters);
@@ -398,8 +398,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <EuiPageContentHeader className="dataVisualizerPageHeader">
               <EuiPageContentHeaderSection>
                 <div className="dataViewTitleHeader">
-                  <EuiTitle>
-                    <h1>{currentDataView.title}</h1>
+                  <EuiTitle size={'s'}>
+                    <h2>{currentDataView.title}</h2>
                   </EuiTitle>
                   <DataVisualizerDataViewManagement
                     currentDataView={currentDataView}
@@ -487,7 +487,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 dataView={currentDataView}
                 searchQueryLanguage={searchQueryLanguage}
                 searchString={searchString}
-                additionalLinks={additionalLinks ?? []}
+                getAdditionalLinks={getAdditionalLinks}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

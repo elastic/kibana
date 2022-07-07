@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isEqual } from 'lodash';
@@ -37,6 +38,7 @@ import {
   changeLayerIndexPattern,
   extractReferences,
   injectReferences,
+  loadIndexPatterns,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -183,6 +185,10 @@ export function getIndexPatternDatasource({
       return extractReferences(state);
     },
 
+    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
+      return state.currentIndexPatternId;
+    },
+
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
       return {
         ...state,
@@ -235,6 +241,7 @@ export function getIndexPatternDatasource({
       if (staticValue == null) {
         return state;
       }
+
       return mergeLayer({
         state,
         layerId,
@@ -374,6 +381,7 @@ export function getIndexPatternDatasource({
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
+                dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
@@ -445,6 +453,30 @@ export function getIndexPatternDatasource({
         : undefined;
     },
 
+    updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
+      handleChangeIndexPattern(indexPatternId, state, setState);
+    },
+
+    refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
+      const newlyMappedIndexPattern = await loadIndexPatterns({
+        indexPatternsService: dataViews,
+        cache: {},
+        patterns: [indexPatternId],
+      });
+      const indexPatternRefs = await dataViews.getIdsWithTitle();
+      const indexPattern = newlyMappedIndexPattern[indexPatternId];
+      setState((s) => {
+        return {
+          ...s,
+          indexPatterns: {
+            ...s.indexPatterns,
+            [indexPattern.id]: indexPattern,
+          },
+          indexPatternRefs,
+        };
+      });
+    },
+
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId }) => {
@@ -502,8 +534,14 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData']) =>
-          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
+          getFiltersInLayer(
+            layer,
+            visibleColumnIds,
+            activeData?.[layerId],
+            state.indexPatterns[layer.indexPatternId],
+            timeRange
+          ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },
@@ -580,8 +618,14 @@ export function getIndexPatternDatasource({
     },
     getWarningMessages: (state, frame, setState) => {
       return [
-        ...(getStateTimeShiftWarningMessages(state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks, setState),
+        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frame,
+          core.docLinks,
+          setState
+        ),
       ];
     },
     checkIntegrity: (state) => {

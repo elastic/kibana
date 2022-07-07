@@ -50,7 +50,7 @@ export function fakeEvent(overrides = {}) {
         action: 'execute',
         start: '2020-03-30T14:55:47.054Z',
         end: '2020-03-30T14:55:47.055Z',
-        duration: 1000000,
+        duration: '1000000',
       },
       kibana: {
         saved_objects: [

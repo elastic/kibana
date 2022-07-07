@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { formatColumn } from '.';
 
@@ -156,6 +155,33 @@ describe('format_column', () => {
           id: 'myformatter',
           params: {
             innerParam: 456,
+          },
+        },
+      });
+    });
+
+    it('applies suffix formatter even if there is a parent format', async () => {
+      datatable.columns[0].meta.params = {
+        id: 'wrapper',
+        params: { wrapperParam: 0, id: 'myformatter', params: { innerParam: 456 } },
+      };
+      const result = await fn(datatable, {
+        columnId: 'test',
+        format: '',
+        suffix: 'abc',
+        parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
+      });
+      expect(result.columns[0].meta.params).toEqual({
+        id: 'suffix',
+        params: {
+          suffixString: 'abc',
+          id: 'wrapper',
+          params: {
+            wrapperParam: 123,
+            id: 'myformatter',
+            params: {
+              innerParam: 456,
+            },
           },
         },
       });

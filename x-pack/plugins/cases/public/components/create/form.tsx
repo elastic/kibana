@@ -35,6 +35,7 @@ import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { CaseAttachments } from '../../types';
+import { Severity } from './severity';
 
 interface ContainerProps {
   big?: boolean;
@@ -88,6 +89,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
+            <Container>
+              <Severity isLoading={isSubmitting} />
+            </Container>
             {canShowCaseSolutionSelection && (
               <Container big>
                 <CreateCaseOwnerSelector
@@ -99,6 +103,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container big>
               <Description isLoading={isSubmitting} />
             </Container>
+            <Container />
           </>
         ),
       }),

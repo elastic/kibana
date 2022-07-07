@@ -48,7 +48,7 @@ export interface NetworkDnsArgs {
 }
 
 interface UseNetworkDns {
-  id?: string;
+  id: string;
   docValueFields: DocValueFields[];
   indexNames: string[];
   type: networkModel.NetworkType;
@@ -62,6 +62,7 @@ export const useNetworkDns = ({
   docValueFields,
   endDate,
   filterQuery,
+  id,
   indexNames,
   skip,
   startDate,
@@ -96,7 +97,7 @@ export const useNetworkDns = ({
   const [networkDnsResponse, setNetworkDnsResponse] = useState<NetworkDnsArgs>({
     networkDns: [],
     histogram: [],
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],

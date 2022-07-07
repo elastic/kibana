@@ -7,7 +7,7 @@ exports[`rendering renders correctly 1`] = `
   <EuiPanel
     borderRadius="none"
     color="subdued"
-    paddingSize="s"
+    paddingSize="none"
   >
     <FiltersGlobalContainer
       data-test-subj="filters-global-container"

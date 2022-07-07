@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Filter } from '../../../../common';
+import { Filter } from '@kbn/es-query';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: DataView, key?: string) {
@@ -20,12 +20,20 @@ function getValueFormatter(indexPattern?: DataView, key?: string) {
   if (!field) {
     throw new Error(
       i18n.translate('data.filter.filterBar.fieldNotFound', {
-        defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
-        values: { key, indexPattern: indexPattern.title },
+        defaultMessage: 'Field {key} not found in data view {dataView}',
+        values: { key, dataView: indexPattern.title },
       })
     );
   }
   return indexPattern.getFormatterForField(field);
+}
+
+export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
+  const { key } = filter.meta;
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  if (!indexPattern) return '';
+  const field = indexPattern.fields.find((f: DataViewField) => f.name === key);
+  return field?.customLabel ?? '';
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {

@@ -11,8 +11,7 @@
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": [
-    "linux_anomalous_user_name_ecs",
-    "v2_linux_anomalous_user_name_ecs"
+    "v3_linux_anomalous_user_name"
   ],
   "name": "Unusual Linux Username",
   "note": "## Triage and analysis\n\n### Investigating an Unusual Linux User\nDetection alerts from this rule indicate activity for a Linux user name that is rare and unusual. Here are some possible avenues of investigation:\n- Consider the user as identified by the username field. Is this program part of an expected workflow for the user who ran this program on this host? Could this be related to troubleshooting or debugging activity by a developer or site reliability engineer?\n- Examine the history of user activity. If this user only manifested recently, it might be a service account for a new software package. If it has a consistent cadence (for example if it runs monthly or quarterly), it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks that the user is performing.",
@@ -30,5 +29,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 7
+  "version": 8
 }

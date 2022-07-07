@@ -19,6 +19,7 @@ describe('updateActionConnector', () => {
     const apiResponse = {
       connector_type_id: 'te/st',
       is_preconfigured: false,
+      is_deprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -29,6 +30,7 @@ describe('updateActionConnector', () => {
     const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'te/st',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'My test',
       config: {},
       secrets: {},

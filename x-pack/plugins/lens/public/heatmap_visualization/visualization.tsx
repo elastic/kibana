@@ -14,6 +14,7 @@ import { Position } from '@elastic/charts';
 import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
@@ -153,6 +154,8 @@ export const getHeatmapVisualization = ({
   },
 
   getSuggestions,
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
   getConfiguration({ state, frame, layerId }) {
     const datasourceLayer = frame.datasourceLayers[layerId];
@@ -295,8 +298,14 @@ export const getHeatmapVisualization = ({
     }
   },
 
-  toExpression(state, datasourceLayers, attributes): Ast | null {
+  toExpression(
+    state,
+    datasourceLayers,
+    attributes,
+    datasourceExpressionsByLayers = {}
+  ): Ast | null {
     const datasource = datasourceLayers[state.layerId];
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
@@ -304,9 +313,11 @@ export const getHeatmapVisualization = ({
     if (!originalOrder || !state.valueAccessor) {
       return null;
     }
+
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: FUNCTION_NAME,
@@ -382,8 +393,9 @@ export const getHeatmapVisualization = ({
     };
   },
 
-  toPreviewExpression(state, datasourceLayers): Ast | null {
+  toPreviewExpression(state, datasourceLayers, datasourceExpressionsByLayers = {}): Ast | null {
     const datasource = datasourceLayers[state.layerId];
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
@@ -395,6 +407,7 @@ export const getHeatmapVisualization = ({
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: FUNCTION_NAME,

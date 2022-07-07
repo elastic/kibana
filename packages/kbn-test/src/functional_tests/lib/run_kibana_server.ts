@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ProcRunner } from '@kbn/dev-utils';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { resolve, relative } from 'path';
 import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';
@@ -31,18 +31,20 @@ export async function runKibanaServer({
   procs,
   config,
   options,
+  onEarlyExit,
 }: {
   procs: ProcRunner;
   config: Config;
   options: { installDir?: string; extraKbnOpts?: string[] };
+  onEarlyExit?: (msg: string) => void;
 }) {
-  const { installDir } = options;
   const runOptions = config.get('kbnTestServer.runOptions');
+  const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const env = config.get('kbnTestServer.env');
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: filterCliArgs(collectCliArgs(config, options)),
+    args: filterCliArgs(collectCliArgs(config, installDir, options.extraKbnOpts)),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -51,6 +53,7 @@ export async function runKibanaServer({
     },
     cwd: installDir || KIBANA_ROOT,
     wait: runOptions.wait,
+    onEarlyExit,
   });
 }
 
@@ -70,10 +73,7 @@ function getKibanaCmd(installDir?: string) {
  * passed, we run from source code. We also allow passing in extra
  * Kibana server options, so we tack those on here.
  */
-function collectCliArgs(
-  config: Config,
-  { installDir, extraKbnOpts }: { installDir?: string; extraKbnOpts?: string[] }
-) {
+function collectCliArgs(config: Config, installDir?: string, extraKbnOpts: string[] = []) {
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
@@ -82,7 +82,7 @@ function collectCliArgs(
     serverArgs,
     (args) => (installDir ? args.filter((a: string) => a !== '--oss') : args),
     (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
-    (args) => args.concat(extraKbnOpts || [])
+    (args) => args.concat(extraKbnOpts)
   );
 }
 

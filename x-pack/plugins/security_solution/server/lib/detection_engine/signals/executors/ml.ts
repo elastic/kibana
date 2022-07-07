@@ -97,21 +97,21 @@ export const mlExecutor = async ({
       exceptionItems,
     });
 
-    const filteredAnomalyResults = await filterEventsAgainstList({
+    const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
       exceptionsList: exceptionItems,
       logger,
-      eventSearchResult: anomalyResults,
+      events: anomalyResults.hits.hits,
       buildRuleMessage,
     });
 
-    const anomalyCount = filteredAnomalyResults.hits.hits.length;
+    const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
       logger.debug(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
     }
     const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
       await bulkCreateMlSignals({
-        someResult: filteredAnomalyResults,
+        anomalyHits: filteredAnomalyHits,
         completeRule,
         services,
         logger,
@@ -124,7 +124,7 @@ export const mlExecutor = async ({
     // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
     const shardFailures =
       (
-        filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+        anomalyResults._shards as typeof anomalyResults._shards & {
           failures: [];
         }
       ).failures ?? [];
@@ -134,7 +134,7 @@ export const mlExecutor = async ({
     return mergeReturns([
       result,
       createSearchAfterReturnType({
-        success: success && filteredAnomalyResults._shards.failed === 0,
+        success: success && anomalyResults._shards.failed === 0,
         errors: [...errors, ...searchErrors],
         createdSignalsCount: createdItemsCount,
         createdSignals: createdItems,

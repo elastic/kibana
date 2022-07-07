@@ -49,6 +49,8 @@ export const getHostRiskScoreColumns = ({
               kqlQuery: '',
               queryMatch: { field: 'host.name', value: hostName, operator: IS_OPERATOR },
             }}
+            isAggregatable={true}
+            fieldType={'keyword'}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>

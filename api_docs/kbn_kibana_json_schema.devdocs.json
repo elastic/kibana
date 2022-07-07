@@ -1,0 +1,844 @@
+{
+  "id": "@kbn/kibana-json-schema",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/kibana-json-schema",
+        "id": "def-server.KibanaJsonSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "KibanaJsonSchema",
+        "description": [],
+        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-json-schema",
+            "id": "def-server.KibanaJsonSchema.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"object\""
+            ],
+            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/kibana-json-schema",
+            "id": "def-server.KibanaJsonSchema.required",
+            "type": "Array",
+            "tags": [],
+            "label": "required",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/kibana-json-schema",
+            "id": "def-server.KibanaJsonSchema.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [],
+            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.id",
+                "type": "Object",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.id.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.id.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"string\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.id.pattern",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pattern",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.version",
+                "type": "Object",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.version.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.version.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"string\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.version.pattern",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pattern",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.kibanaVersion",
+                "type": "Object",
+                "tags": [],
+                "label": "kibanaVersion",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.kibanaVersion.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.kibanaVersion.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"string\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.kibanaVersion.pattern",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pattern",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.type",
+                "type": "Object",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.type.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.type.enum",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "enum",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.configPath",
+                "type": "Object",
+                "tags": [],
+                "label": "configPath",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.configPath.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.configPath.oneOf",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "oneOf",
+                    "description": [],
+                    "signature": [
+                      "({ type: \"string\"; } | { type: \"array\"; items: { type: \"string\"; }; })[]"
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.requiredPlugins",
+                "type": "Object",
+                "tags": [],
+                "label": "requiredPlugins",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.requiredPlugins.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.requiredPlugins.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"array\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.requiredPlugins.items",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "items",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.requiredPlugins.items.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"string\""
+                        ],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.optionalPlugins",
+                "type": "Object",
+                "tags": [],
+                "label": "optionalPlugins",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.optionalPlugins.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.optionalPlugins.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"array\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.optionalPlugins.items",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "items",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.optionalPlugins.items.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"string\""
+                        ],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.requiredBundles",
+                "type": "Object",
+                "tags": [],
+                "label": "requiredBundles",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.requiredBundles.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.requiredBundles.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"array\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.requiredBundles.items",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "items",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.requiredBundles.items.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"string\""
+                        ],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.ui",
+                "type": "Object",
+                "tags": [],
+                "label": "ui",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.ui.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.ui.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.server",
+                "type": "Object",
+                "tags": [],
+                "label": "server",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.server.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.server.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.extraPublicDirs",
+                "type": "Object",
+                "tags": [],
+                "label": "extraPublicDirs",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.extraPublicDirs.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.extraPublicDirs.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"array\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.extraPublicDirs.items",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "items",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.extraPublicDirs.items.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"string\""
+                        ],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.serviceFolders",
+                "type": "Object",
+                "tags": [],
+                "label": "serviceFolders",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.serviceFolders.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.serviceFolders.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"array\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.serviceFolders.items",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "items",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.serviceFolders.items.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"string\""
+                        ],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.owner.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"object\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.owner.required",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.owner.properties",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "properties",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.owner.properties.name",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "name",
+                        "description": [],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/kibana-json-schema",
+                            "id": "def-server.KibanaJsonSchema.properties.owner.properties.name.description",
+                            "type": "string",
+                            "tags": [],
+                            "label": "description",
+                            "description": [],
+                            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                            "deprecated": false
+                          },
+                          {
+                            "parentPluginId": "@kbn/kibana-json-schema",
+                            "id": "def-server.KibanaJsonSchema.properties.owner.properties.name.type",
+                            "type": "string",
+                            "tags": [],
+                            "label": "type",
+                            "description": [],
+                            "signature": [
+                              "\"string\""
+                            ],
+                            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                            "deprecated": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/kibana-json-schema",
+                        "id": "def-server.KibanaJsonSchema.properties.owner.properties.githubTeam",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "githubTeam",
+                        "description": [],
+                        "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                        "deprecated": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/kibana-json-schema",
+                            "id": "def-server.KibanaJsonSchema.properties.owner.properties.githubTeam.description",
+                            "type": "string",
+                            "tags": [],
+                            "label": "description",
+                            "description": [],
+                            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                            "deprecated": false
+                          },
+                          {
+                            "parentPluginId": "@kbn/kibana-json-schema",
+                            "id": "def-server.KibanaJsonSchema.properties.owner.properties.githubTeam.type",
+                            "type": "string",
+                            "tags": [],
+                            "label": "type",
+                            "description": [],
+                            "signature": [
+                              "\"string\""
+                            ],
+                            "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                            "deprecated": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.description",
+                "type": "Object",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.description.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.description.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"string\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/kibana-json-schema",
+                "id": "def-server.KibanaJsonSchema.properties.enabledOnAnonymousPages",
+                "type": "Object",
+                "tags": [],
+                "label": "enabledOnAnonymousPages",
+                "description": [],
+                "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.enabledOnAnonymousPages.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/kibana-json-schema",
+                    "id": "def-server.KibanaJsonSchema.properties.enabledOnAnonymousPages.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\""
+                    ],
+                    "path": "packages/kbn-kibana-json-schema/src/kibana_json_schema.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

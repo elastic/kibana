@@ -27,6 +27,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -48,6 +49,7 @@ export interface DependencyCache {
   dashboard: DashboardStart | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
+  aiops: AiopsPluginStart | null;
   dataViews: DataViewsContract | null;
 }
 
@@ -71,6 +73,7 @@ const cache: DependencyCache = {
   dashboard: null,
   maps: null,
   dataVisualizer: null,
+  aiops: null,
   dataViews: null,
 };
 
@@ -93,6 +96,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.i18n = deps.i18n || null;
   cache.dashboard = deps.dashboard || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
+  cache.aiops = deps.aiops || null;
   cache.dataViews = deps.dataViews || null;
 }
 

@@ -17,9 +17,7 @@ const baseAllowlistFields: AllowlistFields = {
   command_line: true,
   hash: true,
   pid: true,
-  pe: {
-    original_file_name: true,
-  },
+  pe: true,
   uptime: true,
   Ext: {
     architecture: true,
@@ -27,11 +25,15 @@ const baseAllowlistFields: AllowlistFields = {
     dll: true,
     malware_signature: true,
     memory_region: true,
+    protection: true,
     real: {
       entity_id: true,
     },
     token: {
+      elevation: true,
+      elevation_type: true,
       integrity_level_name: true,
+      security_attributes: true,
     },
   },
   thread: true,
@@ -44,10 +46,9 @@ const allowlistBaseEventFields: AllowlistFields = {
     name: true,
     path: true,
     code_signature: true,
+    hash: true,
     malware_signature: true,
-    pe: {
-      original_file_name: true,
-    },
+    pe: true,
   },
   dns: true,
   event: true,
@@ -61,6 +62,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     mtime: true,
     directory: true,
     hash: true,
+    pe: true,
     Ext: {
       bytes_compressed: true,
       bytes_compressed_present: true,
@@ -73,6 +75,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       quarantine_message: true,
     },
   },
+  message: true,
   process: {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,

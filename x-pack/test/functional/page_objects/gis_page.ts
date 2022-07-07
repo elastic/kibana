@@ -195,6 +195,14 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.missingOrFail('addLayerButton');
   }
 
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
+  }
+
   async expectExistAddLayerButton() {
     await this.testSubjects.existOrFail('addLayerButton');
   }
@@ -556,7 +564,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openInspectorMapView() {
-    await this.inspector.openInspectorView('~inspectorViewChooserMap');
+    await this.inspector.openInspectorView('Map details');
   }
 
   // Method should only be used when multiple requests are expected
@@ -600,6 +608,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
+    await this.inspector.openInspectorRequestsView();
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);

@@ -14,11 +14,10 @@ import { EuiText, EuiTitle } from '@elastic/eui';
 import { ConfigurationIntro } from './configuration_intro';
 
 describe('ConfigurationIntro', () => {
-  const advanceStep = jest.fn();
   const props = {
     header: <h1>Header</h1>,
     name: 'foo',
-    advanceStep,
+    advanceStepTo: '',
   };
 
   it('renderscontext', () => {

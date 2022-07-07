@@ -19,7 +19,7 @@ import {
   Hit,
   TotalHit,
 } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import { CommonFields, RequestOptionsPaginated } from '../..';
 
 export interface UserAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
@@ -59,7 +59,7 @@ export interface LastSourceHost {
 }
 
 export interface AuthenticationHit extends Hit {
-  _source: {
+  fields: {
     '@timestamp': string;
     lastSuccess?: LastSourceHost;
     lastFailure?: LastSourceHost;
@@ -70,6 +70,14 @@ export interface AuthenticationHit extends Hit {
   cursor?: string;
   sort: StringOrNumber[];
 }
+
+type AuthenticationFields = CommonFields &
+  Partial<{
+    [Property in keyof SourceEcs as `source.${Property}`]: unknown[];
+  }> &
+  Partial<{
+    [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+  }>;
 
 export interface AuthenticationBucket {
   key: string;
@@ -83,7 +91,7 @@ export interface AuthenticationBucket {
   authentication: {
     hits: {
       total: TotalHit;
-      hits: ArrayLike<AuthenticationHit>;
+      hits: ArrayLike<AuthenticationFields>;
     };
   };
 }

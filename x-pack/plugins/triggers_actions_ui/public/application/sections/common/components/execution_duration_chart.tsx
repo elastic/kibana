@@ -38,7 +38,7 @@ const NUM_EXECUTIONS_OPTIONS = [120, 60, 30, 15].map((value) => ({
   text: i18n.translate(
     'xpack.triggersActionsUI.sections.executionDurationChart.numberOfExecutionsOption',
     {
-      defaultMessage: '{value} executions',
+      defaultMessage: '{value} runs',
       values: {
         value,
       },
@@ -70,7 +70,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
             <h4>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTitle"
-                defaultMessage="Recent execution durations"
+                defaultMessage="Recent run durations"
               />
             </h4>
           </EuiTitle>
@@ -84,7 +84,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               aria-label={i18n.translate(
                 'xpack.triggersActionsUI.sections.executionDurationChart.selectNumberOfExecutionDurationsLabel',
                 {
-                  defaultMessage: 'Select number of executions',
+                  defaultMessage: 'Select number of runs',
                 }
               )}
               onChange={onChange}
@@ -161,7 +161,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData"
-                      defaultMessage="There are no available executions for this rule."
+                      defaultMessage="There is no available run duration information for this rule."
                     />
                   </p>
                 </>

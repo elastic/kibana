@@ -2,8 +2,8 @@
   height: 100%;
 }
 
-.lnsTableCell {
-  @include euiTextTruncate;
+.lnsTableCell--multiline {
+  white-space: pre-wrap;
 }
 
 .lnsTableCell--left {

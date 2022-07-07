@@ -9,7 +9,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
@@ -120,7 +120,6 @@ export const SearchPanel: FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="s"
-      alignItems="flexStart"
       data-test-subj="dataVisualizerSearchPanel"
       className={'dvSearchPanel__container'}
       responsive={false}

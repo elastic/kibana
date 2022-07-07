@@ -19,6 +19,7 @@ Array [
     metric={
       Object {
         "bgColor": undefined,
+        "colIndex": 0,
         "color": undefined,
         "label": "1st percentile of bytes",
         "lightText": false,
@@ -26,6 +27,8 @@ Array [
         "value": 182,
       }
     }
+    onFilter={[Function]}
+    renderComplete={[MockFunction]}
     style={
       Object {
         "bgColor": false,
@@ -53,6 +56,7 @@ Array [
     metric={
       Object {
         "bgColor": undefined,
+        "colIndex": 1,
         "color": undefined,
         "label": "99th percentile of bytes",
         "lightText": false,
@@ -60,6 +64,7 @@ Array [
         "value": 445842.4634666484,
       }
     }
+    renderComplete={[MockFunction]}
     style={
       Object {
         "bgColor": false,
@@ -91,6 +96,7 @@ exports[`MetricVisComponent should render correct structure for single metric 1`
   metric={
     Object {
       "bgColor": undefined,
+      "colIndex": 0,
       "color": undefined,
       "label": "Count",
       "lightText": false,
@@ -98,6 +104,8 @@ exports[`MetricVisComponent should render correct structure for single metric 1`
       "value": 4301021,
     }
   }
+  onFilter={[Function]}
+  renderComplete={[MockFunction]}
   style={
     Object {
       "bgColor": false,

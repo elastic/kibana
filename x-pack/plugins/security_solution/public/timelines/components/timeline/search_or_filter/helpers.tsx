@@ -61,7 +61,7 @@ export const options = [
         <strong>{modes.filter.selectText}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">{modes.filter.description}</p>
+          <p>{modes.filter.description}</p>
         </EuiText>
       </>
     ),
@@ -81,7 +81,7 @@ export const options = [
         <strong>{modes.search.selectText}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">{modes.search.description}</p>
+          <p>{modes.search.description}</p>
         </EuiText>
       </>
     ),

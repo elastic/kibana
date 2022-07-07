@@ -36,7 +36,7 @@ export function SeriesDatePicker({ series, seriesId }: Props) {
   const { setSeries, reportType, allSeries } = useSeriesStorage();
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
-    onRefreshTimeRange();
+    onRefreshTimeRange?.();
     if (reportType === ReportTypes.KPI) {
       allSeries.forEach((currSeries, seriesIndex) => {
         setSeries(seriesIndex, { ...currSeries, time: { from: start, to: end } });

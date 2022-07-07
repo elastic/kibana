@@ -6,8 +6,8 @@
  */
 
 import { renderHook as _renderHook, RenderHookResult, act } from '@testing-library/react-hooks';
-import { ConsoleManager, useConsoleManager } from './console_manager';
-import React, { memo } from 'react';
+import { useConsoleManager } from './console_manager';
+import React from 'react';
 import type {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
@@ -17,7 +17,11 @@ import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { ConsoleManagerTestComponent, getNewConsoleRegistrationMock } from './mocks';
+import {
+  ConsoleManagerTestComponent,
+  getConsoleManagerMockRenderResultQueriesAndActions,
+  getNewConsoleRegistrationMock,
+} from './mocks';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { enterConsoleCommand } from '../../mocks';
@@ -42,18 +46,9 @@ describe('When using ConsoleManager', () => {
     beforeEach(() => {
       const { AppWrapper } = createAppRootMockRenderer();
 
-      const RenderWrapper = memo(({ children }) => {
-        return (
-          <AppWrapper>
-            <ConsoleManager>{children}</ConsoleManager>
-          </AppWrapper>
-        );
-      });
-      RenderWrapper.displayName = 'RenderWrapper';
-
       renderHook = () => {
         renderResult = _renderHook(useConsoleManager, {
-          wrapper: RenderWrapper,
+          wrapper: AppWrapper,
         });
 
         return renderResult;
@@ -83,7 +78,6 @@ describe('When using ConsoleManager', () => {
 
       expect(renderResult.result.current.getOne(newConsole.id)).toEqual({
         id: newConsole.id,
-        title: newConsole.title,
         meta: newConsole.meta,
         show: expect.any(Function),
         hide: expect.any(Function),
@@ -147,17 +141,6 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.result.current.getOne(consoleId)).toBeUndefined();
     });
 
-    it('should call `onBeforeTerminate()`', () => {
-      renderHook();
-      const { id: consoleId, onBeforeTerminate } = registerNewConsole();
-
-      act(() => {
-        renderResult.result.current.terminate(consoleId);
-      });
-
-      expect(onBeforeTerminate).toHaveBeenCalled();
-    });
-
     it('should throw if attempting to terminate a console with invalid `id`', () => {
       renderHook();
 
@@ -188,7 +171,6 @@ describe('When using ConsoleManager', () => {
         expect(registeredConsole).toEqual({
           id: expect.any(String),
           meta: expect.any(Object),
-          title: expect.anything(),
           show: expect.any(Function),
           hide: expect.any(Function),
           terminate: expect.any(Function),
@@ -222,39 +204,27 @@ describe('When using ConsoleManager', () => {
     });
   });
 
-  describe('and when the console popup is rendered into the page', () => {
+  describe('and when the console page overlay is rendered into the page', () => {
+    type ConsoleManagerQueriesAndActions = ReturnType<
+      typeof getConsoleManagerMockRenderResultQueriesAndActions
+    >;
+
     let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
     let renderResult: ReturnType<AppContextTestRender['render']>;
-
-    const clickOnRegisterNewConsole = () => {
-      act(() => {
-        userEvent.click(renderResult.getByTestId('registerNewConsole'));
-      });
-    };
-
-    const openRunningConsole = async () => {
-      act(() => {
-        userEvent.click(renderResult.queryAllByTestId('showRunningConsole')[0]);
-      });
-
-      await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(false);
-      });
-    };
+    let clickOnRegisterNewConsole: ConsoleManagerQueriesAndActions['clickOnRegisterNewConsole'];
+    let openRunningConsole: ConsoleManagerQueriesAndActions['openRunningConsole'];
+    let hideOpenedConsole: ConsoleManagerQueriesAndActions['hideOpenedConsole'];
 
     beforeEach(() => {
       const mockedContext = createAppRootMockRenderer();
 
       render = async () => {
-        renderResult = mockedContext.render(
-          <ConsoleManager>
-            <ConsoleManagerTestComponent />
-          </ConsoleManager>
-        );
+        renderResult = mockedContext.render(<ConsoleManagerTestComponent />);
 
-        clickOnRegisterNewConsole();
+        ({ clickOnRegisterNewConsole, openRunningConsole, hideOpenedConsole } =
+          getConsoleManagerMockRenderResultQueriesAndActions(renderResult));
+
+        await clickOnRegisterNewConsole();
 
         await waitFor(() => {
           expect(renderResult.queryAllByTestId('runningConsole').length).toBeGreaterThan(0);
@@ -269,7 +239,9 @@ describe('When using ConsoleManager', () => {
     it('should show the title', async () => {
       await render();
 
-      expect(renderResult.getByTestId('consolePopupHeader').textContent).toMatch(/Test console/);
+      expect(renderResult.getByTestId('consolePageOverlay-layout-titleHolder').textContent).toMatch(
+        /Test console/
+      );
     });
 
     it('should show the console', async () => {
@@ -278,45 +250,31 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.getByTestId('testRunningConsole')).toBeTruthy();
     });
 
-    it('should show `terminate` button', async () => {
+    it('should show `Done` button', async () => {
       await render();
 
-      expect(renderResult.getByTestId('consolePopupTerminateButton')).toBeTruthy();
+      expect(renderResult.getByTestId('consolePageOverlay-doneButton')).toBeTruthy();
     });
 
-    it('should show `hide` button', async () => {
+    it('should hide the console page overlay', async () => {
       await render();
+      userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
 
-      expect(renderResult.getByTestId('consolePopupHideButton')).toBeTruthy();
-    });
-
-    it('should hide the console popup', async () => {
-      await render();
-      userEvent.click(renderResult.getByTestId('consolePopupHideButton'));
-
-      await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(true);
-      });
+      expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });
 
     it("should persist a console's command output history on hide/show", async () => {
       await render();
       enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
-      enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
+      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
       });
 
-      userEvent.click(renderResult.getByTestId('consolePopupHideButton'));
-      await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(true);
-      });
+      await hideOpenedConsole();
 
+      // Open the console back up and ensure prior items still there
       await openRunningConsole();
 
       await waitFor(() => {
@@ -324,46 +282,38 @@ describe('When using ConsoleManager', () => {
       });
     });
 
-    describe('and the terminate confirmation is shown', () => {
-      const clickOnTerminateButton = async () => {
-        userEvent.click(renderResult.getByTestId('consolePopupTerminateButton'));
+    it('should provide console rendering state between show/hide', async () => {
+      const expectedStoreValue = JSON.stringify({ foo: 'bar' }, null, 2);
+      await render();
+      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
 
-        await waitFor(() => {
-          expect(renderResult.getByTestId('consolePopupTerminateConfirmModal')).toBeTruthy();
-        });
-      };
+      // Command should have `pending` status and no store values
+      expect(renderResult.getByTestId('exec-output-statusState').textContent).toEqual(
+        'status: pending'
+      );
+      expect(renderResult.getByTestId('exec-output-storeStateJson').textContent).toEqual('{}');
 
-      beforeEach(async () => {
-        await render();
-        await clickOnTerminateButton();
+      // Wait for component to update the status and store values
+      await waitFor(() => {
+        expect(renderResult.getByTestId('exec-output-statusState').textContent).toMatch(
+          'status: success'
+        );
       });
+      expect(renderResult.getByTestId('exec-output-storeStateJson').textContent).toEqual(
+        expectedStoreValue
+      );
 
-      it('should show confirmation when terminate button is clicked', async () => {
-        expect(renderResult.getByTestId('consolePopupTerminateConfirmMessage')).toBeTruthy();
-      });
+      await hideOpenedConsole();
 
-      it('should show cancel and terminate buttons', async () => {
-        expect(renderResult.getByTestId('consolePopupTerminateModalCancelButton')).toBeTruthy();
-        expect(renderResult.getByTestId('consolePopupTerminateModalTerminateButton')).toBeTruthy();
-      });
+      // Open the console back up and ensure `status` and `store` are the last set of values
+      await openRunningConsole();
 
-      it('should hide the confirmation when cancel is clicked', async () => {
-        userEvent.click(renderResult.getByTestId('consolePopupTerminateModalCancelButton'));
-
-        await waitFor(() => {
-          expect(renderResult.queryByTestId('consolePopupTerminateConfirmModal')).toBeNull();
-        });
-      });
-
-      it('should terminate when terminate is clicked', async () => {
-        userEvent.click(renderResult.getByTestId('consolePopupTerminateModalTerminateButton'));
-
-        await waitFor(() => {
-          expect(
-            renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-          ).toBe(true);
-        });
-      });
+      expect(renderResult.getByTestId('exec-output-statusState').textContent).toMatch(
+        'status: success'
+      );
+      expect(renderResult.getByTestId('exec-output-storeStateJson').textContent).toEqual(
+        expectedStoreValue
+      );
     });
   });
 });

@@ -18,6 +18,7 @@ export const useAssetsStatus = () => {
     () => http.get('/internal/osquery/assets'),
     {
       keepPreviousData: true,
+      retry: false,
     }
   );
 };

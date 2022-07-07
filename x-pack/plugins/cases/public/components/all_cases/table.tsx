@@ -19,13 +19,14 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import { AllCases, Case, FilterOptions } from '../../../common/ui/types';
+import { Cases, Case, FilterOptions } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns'];
-  data: AllCases;
+  data: Cases;
   filterOptions: FilterOptions;
   goToCreateCase?: () => void;
   handleIsLoading: (a: boolean) => void;
@@ -42,11 +43,10 @@ interface CasesTableProps {
   sorting: EuiBasicTableProps<Case>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
-  userCanCrud: boolean;
 }
 
 const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
@@ -68,8 +68,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   sorting,
   tableRef,
   tableRowProps,
-  userCanCrud,
 }) => {
+  const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const navigateToCreateCaseClick = useCallback(
     (ev) => {
@@ -109,11 +109,11 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
             titleSize="xs"
-            body={userCanCrud ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
+            body={permissions.all ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
             actions={
-              userCanCrud && (
+              permissions.all && (
                 <LinkButton
-                  isDisabled={!userCanCrud}
+                  isDisabled={!permissions.all}
                   fill
                   size="s"
                   onClick={navigateToCreateCaseClick}

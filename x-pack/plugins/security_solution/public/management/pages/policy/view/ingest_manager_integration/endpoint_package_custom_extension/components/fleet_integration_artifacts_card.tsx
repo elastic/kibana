@@ -18,7 +18,7 @@ import { LinkWithIcon } from './link_with_icon';
 import { StyledEuiFlexItem } from './styled_components';
 import { useSummaryArtifact } from '../../../../../../hooks/artifacts';
 import { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
-import { useTestIdGenerator } from '../../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 
 const ARTIFACTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>

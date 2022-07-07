@@ -11,30 +11,32 @@ import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
 import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCases } from '../../containers/use_get_cases';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_action_license', () => {
+  return {
+    useGetActionLicense: jest.fn(),
+  };
+});
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('AllCases', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
@@ -43,7 +45,6 @@ describe('AllCases', () => {
 
   const defaultGetCases = {
     ...useGetCasesMockState,
-    dispatchUpdateCaseProperty,
     refetchCases,
     setFilters,
     setQueryParams,
@@ -58,13 +59,13 @@ describe('AllCases', () => {
   };
 
   const defaultActionLicense = {
-    actionLicense: null,
+    data: null,
     isLoading: false,
     isError: false,
   };
 
   beforeAll(() => {
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],
@@ -72,11 +73,7 @@ describe('AllCases', () => {
       isError: false,
       fetchReporters: jest.fn(),
     });
-    (useGetActionLicense as jest.Mock).mockReturnValue({
-      actionLicense: null,
-      isLoading: false,
-    });
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
@@ -89,7 +86,6 @@ describe('AllCases', () => {
   it('should render the stats', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
     const wrapper = mount(
@@ -150,7 +146,7 @@ describe('AllCases', () => {
   it('should not allow the user to enter configuration page with basic license', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
-      actionLicense: {
+      data: {
         id: '.jira',
         name: 'Jira',
         minimumLicenseRequired: 'gold',
@@ -176,7 +172,7 @@ describe('AllCases', () => {
   it('should allow the user to enter configuration page with gold license and above', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
-      actionLicense: {
+      data: {
         id: '.jira',
         name: 'Jira',
         minimumLicenseRequired: 'gold',

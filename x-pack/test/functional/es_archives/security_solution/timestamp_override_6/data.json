@@ -1,0 +1,38 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "fake.index.1",
+    "source": {
+      "@timestamp": 1608131778,
+      "locale": "pt",
+      "created_at": 1622676795
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "fake.index.1",
+    "source": {
+      "@timestamp": 1608131778,
+      "locale": "es",
+      "created_at": 1622676790
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "fake.index.1",
+    "source": {
+      "@timestamp": 1608131779,
+      "locale": "ua",
+      "created_at": 1622676785
+    },
+    "type": "_doc"
+  }
+}

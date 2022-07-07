@@ -50,7 +50,7 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
       (bucket: AllUsersAggEsItem) => ({
         name: bucket.key,
         lastSeen: getOr(null, `lastSeen.value_as_string`, bucket),
-        domain: getOr(null, `domain.hits.hits[0]._source.user.domain`, bucket),
+        domain: getOr(null, `domain.hits.hits[0].fields['user.domain']`, bucket),
       }),
       {}
     );

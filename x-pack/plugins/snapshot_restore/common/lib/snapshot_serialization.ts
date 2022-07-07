@@ -103,6 +103,7 @@ export function deserializeSnapshotDetails(
     indices: snapshotIndicesWithoutSystemIndices,
     dataStreams: [...dataStreams].sort(),
     includeGlobalState,
+    featureStates: featureStates.map((feature) => feature.feature_name),
     state,
     startTime,
     startTimeInMillis,
@@ -129,6 +130,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
     indices,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
+    feature_states: featureStates,
     partial,
     metadata,
   } = snapshotConfigEs;
@@ -137,6 +139,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
     indices,
     ignoreUnavailable,
     includeGlobalState,
+    featureStates,
     partial,
     metadata,
   };
@@ -150,7 +153,8 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
 }
 
 export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): SnapshotConfigEs {
-  const { indices, ignoreUnavailable, includeGlobalState, partial, metadata } = snapshotConfig;
+  const { indices, ignoreUnavailable, includeGlobalState, featureStates, partial, metadata } =
+    snapshotConfig;
 
   const maybeIndicesArray = csvToArray(indices);
 
@@ -158,6 +162,7 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
     indices: maybeIndicesArray,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
+    feature_states: featureStates,
     partial,
     metadata,
   };

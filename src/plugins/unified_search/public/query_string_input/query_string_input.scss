@@ -1,0 +1,70 @@
+.kbnQueryBar__wrap {
+  width: 100%;
+  z-index: $euiZContentMenu;
+  height: $euiFormControlHeight;
+  display: flex;
+
+  >[aria-expanded='true'] {
+    // Using filter allows it to adhere the children's bounds
+    filter: drop-shadow(0 5.7px 12px rgba($euiShadowColor, shadowOpacity(.05)));
+  }
+}
+
+.kbnQueryBar__textareaWrap {
+  position: relative;
+  overflow: visible !important; // Override EUI form control
+  display: flex;
+  flex: 1 1 100%;
+}
+
+.kbnQueryBar__textarea {
+  z-index: $euiZContentMenu;
+  resize: none !important; // When in the group, it will autosize
+  height: $euiFormControlHeight;
+  // Unlike most inputs within layout control groups, the text area still needs a border
+  // for multi-line content. These adjusts help it sit above the control groups
+  // shadow to line up correctly.
+  padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
+  // Firefox adds margin to textarea
+  margin: 0;
+
+  &:not(.kbnQueryBar__textarea--autoHeight) {
+    overflow-y: hidden;
+    overflow-x: hidden;
+  }
+
+  // When focused, let it scroll
+  &.kbnQueryBar__textarea--autoHeight {
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: normal;
+
+  }
+
+  &.kbnQueryBar__textarea--isSuggestionsVisible {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &--isClearable {
+    @include euiFormControlWithIcon($isIconOptional: false, $side: 'right');
+  }
+
+  @include euiFormControlWithIcon($isIconOptional: true);
+
+  ~.euiFormControlLayoutIcons {
+    // By default form control layout icon is vertically centered, but our textarea
+    // can expand to be multi-line, so we position it with padding that matches
+    // the parent textarea padding
+    z-index: $euiZContentMenu + 1;
+    top: $euiSizeM;
+    bottom: unset;
+  }
+
+  &--withPrepend {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+    width: calc(100% + 1px);
+  }
+}

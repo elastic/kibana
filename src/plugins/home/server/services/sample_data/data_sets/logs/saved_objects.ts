@@ -370,6 +370,7 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_logs',
+      name: 'Kibana Sample Data Logs',
       timeFieldName: 'timestamp',
       fieldFormatMap: '{"hour_of_day":{}}',
       runtimeFieldMap:

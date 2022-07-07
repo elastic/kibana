@@ -55,6 +55,8 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
                 operator: IS_OPERATOR,
               },
             }}
+            isAggregatable={true}
+            fieldType={'keyword'}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>

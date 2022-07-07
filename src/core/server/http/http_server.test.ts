@@ -13,6 +13,7 @@ import { omit } from 'lodash';
 import { join } from 'path';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { HttpConfig } from './http_config';
 import {
   Router,
@@ -22,10 +23,9 @@ import {
   RouteValidationResultFactory,
   RouteValidationFunction,
 } from './router';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
-import { RequestHandlerContext } from '..';
+import { RequestHandlerContextBase } from '..';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import { of } from 'rxjs';
@@ -466,7 +466,7 @@ test('not inline handler - KibanaRequest', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
   const handler = (
-    context: RequestHandlerContext,
+    context: RequestHandlerContextBase,
     req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
     res: KibanaResponseFactory
   ) => {

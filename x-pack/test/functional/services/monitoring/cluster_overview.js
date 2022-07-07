@@ -33,7 +33,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const SUBJ_ES_ML_JOBS = `${SUBJ_ES_PANEL} > esMlJobs`;
 
   const SUBJ_KBN_PANEL = `${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}Kibana`;
-  const SUBJ_KBN_STATUS = `${SUBJ_KBN_PANEL} > statusIcon`;
+  const SUBJ_KBN_STATUS = `${SUBJ_KBN_PANEL} > status`;
   const SUBJ_KBN_REQUESTS = `${SUBJ_KBN_PANEL} > kbnRequests`;
   const SUBJ_KBN_MAX_RESPONSE_TIME = `${SUBJ_KBN_PANEL} > kbnMaxResponseTime`;
   const SUBJ_KBN_CONNECTIONS = `${SUBJ_KBN_PANEL} > kbnConnections`;

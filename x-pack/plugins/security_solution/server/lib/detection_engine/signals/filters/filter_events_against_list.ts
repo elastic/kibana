@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { entriesList, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import { FilterEventsAgainstListOptions } from './types';
-import { filterEvents } from './filter_events';
+import { FilterEventsAgainstListOptions, FilterEventsAgainstListReturn } from './types';
+import { partitionEvents } from './filter_events';
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
 
 /**
@@ -39,9 +38,9 @@ export const filterEventsAgainstList = async <T>({
   listClient,
   exceptionsList,
   logger,
-  eventSearchResult,
+  events,
   buildRuleMessage,
-}: FilterEventsAgainstListOptions<T>): Promise<estypes.SearchResponse<T>> => {
+}: FilterEventsAgainstListOptions<T>): Promise<FilterEventsAgainstListReturn<T>> => {
   try {
     const atLeastOneLargeValueList = exceptionsList.some(({ entries }) =>
       hasLargeValueList(entries)
@@ -51,46 +50,41 @@ export const filterEventsAgainstList = async <T>({
       logger.debug(
         buildRuleMessage('no exception items of type list found - returning original search result')
       );
-      return eventSearchResult;
+      return [events, []];
     }
 
     const valueListExceptionItems = exceptionsList.filter((listItem: ExceptionListItemSchema) => {
       return listItem.entries.every((entry) => entriesList.is(entry));
     });
 
-    const res = await valueListExceptionItems.reduce<Promise<Array<estypes.SearchHit<T>>>>(
+    // Every event starts out in the 'included' list, and each value list item checks all the
+    // current 'included' events and moves events that match the exception to the 'excluded' list
+    return valueListExceptionItems.reduce<Promise<FilterEventsAgainstListReturn<T>>>(
       async (
-        filteredAccum: Promise<Array<estypes.SearchHit<T>>>,
+        filteredAccum: Promise<FilterEventsAgainstListReturn<T>>,
         exceptionItem: ExceptionListItemSchema
       ) => {
-        const events = await filteredAccum;
+        const [includedEvents, excludedEvents] = await filteredAccum;
         const fieldAndSetTuples = await createFieldAndSetTuples({
-          events,
+          events: includedEvents,
           exceptionItem,
           listClient,
           logger,
           buildRuleMessage,
         });
-        const filteredEvents = filterEvents({ events, fieldAndSetTuples });
-        const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
+        const [nextIncludedEvents, nextExcludedEvents] = partitionEvents({
+          events: includedEvents,
+          fieldAndSetTuples,
+        });
         logger.debug(
-          buildRuleMessage(`Exception with id ${exceptionItem.id} filtered out ${diff} events`)
+          buildRuleMessage(
+            `Exception with id ${exceptionItem.id} filtered out ${nextExcludedEvents.length} events`
+          )
         );
-        return filteredEvents;
+        return [nextIncludedEvents, [...excludedEvents, ...nextExcludedEvents]];
       },
-      Promise.resolve<Array<estypes.SearchHit<T>>>(eventSearchResult.hits.hits)
+      Promise.resolve<FilterEventsAgainstListReturn<T>>([events, []])
     );
-
-    return {
-      took: eventSearchResult.took,
-      timed_out: eventSearchResult.timed_out,
-      _shards: eventSearchResult._shards,
-      hits: {
-        total: res.length,
-        max_score: eventSearchResult.hits.max_score,
-        hits: res,
-      },
-    };
   } catch (exc) {
     throw new Error(`Failed to query large value based lists index. Reason: ${exc.message}`);
   }

@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuid';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -35,7 +35,7 @@ import {
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
 import { metadataCurrentIndexPattern } from '../constants';
-import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
+import { EndpointDataLoadingError, mergeAndAppendArrays, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
@@ -141,7 +141,7 @@ export async function indexEndpointHostDocs({
           epmEndpointPackage.version
         );
 
-        merge(response, createdPolicies);
+        mergeAndAppendArrays(response, createdPolicies);
 
         // eslint-disable-next-line require-atomic-updates
         realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
@@ -160,11 +160,15 @@ export async function indexEndpointHostDocs({
         );
 
         enrolledAgent = indexedAgentResponse.agents[0];
-        merge(response, indexedAgentResponse);
+        mergeAndAppendArrays(response, indexedAgentResponse);
       }
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
         ...hostMetadata,
+        agent: {
+          ...hostMetadata.agent,
+          id: enrolledAgent?.id ?? hostMetadata.agent.id,
+        },
         elastic: {
           ...hostMetadata.elastic,
           agent: {
@@ -188,19 +192,12 @@ export async function indexEndpointHostDocs({
       await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
     }
 
-    hostMetadata = {
-      ...hostMetadata,
-      // since the united transform uses latest metadata transform as a source
-      // there is an extra delay and fleet-agents gets populated much sooner.
-      // we manually add a delay to the time sync field so that the united transform
-      // will pick up the latest metadata doc.
-      '@timestamp': hostMetadata['@timestamp'] + 60000,
-    };
     await client
       .index({
         index: metadataIndex,
         body: hostMetadata,
         op_type: 'create',
+        refresh: 'wait_for',
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -214,6 +211,7 @@ export async function indexEndpointHostDocs({
         index: policyResponseIndex,
         body: hostPolicyResponse,
         op_type: 'create',
+        refresh: 'wait_for',
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -317,9 +315,9 @@ export const deleteIndexedEndpointHosts = async (
       .catch(wrapErrorAndRejectPromise);
   }
 
-  merge(response, await deleteIndexedFleetAgents(esClient, indexedData));
-  merge(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
-  merge(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
+  mergeAndAppendArrays(response, await deleteIndexedFleetAgents(esClient, indexedData));
+  mergeAndAppendArrays(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
+  mergeAndAppendArrays(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 
   return response;
 };

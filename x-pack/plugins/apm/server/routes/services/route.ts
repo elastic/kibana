@@ -52,7 +52,8 @@ import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -104,7 +105,14 @@ const servicesRoute = createApmServerRoute({
       }
     >;
   }> {
-    const { context, params, logger } = resources;
+    const {
+      context,
+      params,
+      logger,
+      request,
+      plugins: { security },
+    } = resources;
+
     const {
       environment,
       kuery,
@@ -115,11 +123,12 @@ const servicesRoute = createApmServerRoute({
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const [setup, serviceGroup] = await Promise.all([
+    const [setup, serviceGroup, randomSampler] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
         ? getServiceGroup({ savedObjectsClient, serviceGroupId })
         : Promise.resolve(null),
+      getRandomSampler({ security, request, probability }),
     ]);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
@@ -127,34 +136,32 @@ const servicesRoute = createApmServerRoute({
       start,
       end,
     });
+
     return getServices({
       environment,
       kuery,
-      probability,
       setup,
       searchAggregatedTransactions,
       logger,
       start,
       end,
       serviceGroup,
+      randomSampler,
     });
   },
 });
 
 const servicesDetailedStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/detailed_statistics',
+  endpoint: 'POST /internal/apm/services/detailed_statistics',
   params: t.type({
     query: t.intersection([
-      // t.intersection seemingly only supports 5 arguments so let's wrap them in another intersection
-      t.intersection([
-        environmentRt,
-        kueryRt,
-        rangeRt,
-        offsetRt,
-        probabilityRt,
-      ]),
-      t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      probabilityRt,
     ]),
+    body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -191,17 +198,22 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       }>;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
     const {
-      environment,
-      kuery,
-      offset,
-      serviceNames,
-      start,
-      end,
-      probability,
-    } = params.query;
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const { environment, kuery, offset, start, end, probability } =
+      params.query;
+
+    const { serviceNames } = params.body;
+
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       start,
@@ -222,7 +234,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       serviceNames,
       start,
       end,
-      probability,
+      randomSampler,
     });
   },
 });
@@ -1118,8 +1130,10 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
+// TODO: remove this endpoint in favour of
 const serviceInfrastructureRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -1159,7 +1173,11 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, t.type({ transactionType: t.string })]),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({ transactionType: t.string }),
+    ]),
   }),
   options: {
     tags: ['access:apm'],
@@ -1179,7 +1197,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { start, end, transactionType },
+      query: { start, end, transactionType, environment },
     } = resources.params;
 
     try {
@@ -1190,6 +1208,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
         end,
         mlSetup: setup.ml,
         logger: resources.logger,
+        environment,
       });
 
       return {

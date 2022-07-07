@@ -911,7 +911,10 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
-    advanced?: {};
+    advanced?: {
+      [key: string]: unknown;
+      rollback?: string | boolean;
+    };
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;

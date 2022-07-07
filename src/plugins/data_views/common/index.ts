@@ -12,12 +12,13 @@ export {
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from './constants';
-export type { IFieldType, IIndexPatternFieldList } from './fields';
+
+export type { ToSpecConfig } from './fields';
+export type { IIndexPatternFieldList } from './fields';
 export {
   isFilterable,
   fieldList,
   DataViewField,
-  IndexPatternField,
   isNestedField,
   isMultiField,
   getFieldSubtypeMulti,
@@ -29,39 +30,39 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
-  IIndexPattern,
   DataViewAttributes,
-  IndexPatternAttributes,
-  FieldAttrs,
-  FieldAttrSet,
   OnNotification,
   OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommonFindArgs,
   SavedObjectsClientCommon,
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,
-  FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
   DataViewSpec,
   SourceFilter,
   HasDataService,
+  RuntimeTypeExceptComposite,
+  RuntimeFieldBase,
+  FieldConfiguration,
+  SavedObjectsClientCommonFindArgs,
+  FieldAttrs,
+  FieldAttrSet,
 } from './types';
 export { DataViewType } from './types';
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
-export { IndexPatternsService, DataViewsService } from './data_views';
+
+export type { DataViewsContract, DataViewsServiceDeps } from './data_views';
+export { DataViewsService, DataViewPersistableStateService } from './data_views';
 export type {
   DataViewListItem,
   DataViewsServicePublicMethods,
   TimeBasedDataView,
 } from './data_views';
-export { IndexPattern, DataView } from './data_views';
+export { DataView } from './data_views';
 export {
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,

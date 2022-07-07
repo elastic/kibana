@@ -29,8 +29,6 @@ export default function ({
 
   // FLAKY: https://github.com/elastic/kibana/issues/87425
   describe('Resolver test app', function () {
-    this.tags('ciGroup7');
-
     // Note: these tests are intended to run on the same page in serial.
     before(async function () {
       await pageObjects.common.navigateToApp('resolverTest');

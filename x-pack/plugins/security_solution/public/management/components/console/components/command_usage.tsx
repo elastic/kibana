@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,34 +16,55 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
+import { ConsoleCodeBlock } from './console_code_block';
+import { getArgumentsForCommand } from '../service/parsed_command_input';
 import { CommandDefinition } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
-    return usageFromCommandDefinition(commandDef);
+    return getArgumentsForCommand(commandDef).map((usage) => {
+      return (
+        <EuiText size="s">
+          <EuiBadge>{commandDef.name}</EuiBadge>
+          <ConsoleCodeBlock>{usage}</ConsoleCodeBlock>
+        </EuiText>
+      );
+    });
   }, [commandDef]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandUsage.inputUsage"
-            defaultMessage="Usage:"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <code>
-          <EuiText>
-            <code>{usageHelp}</code>
+    <>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandUsage.inputUsage"
+              defaultMessage="Usage:"
+            />
           </EuiText>
-        </code>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <code>{usageHelp}</code>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {commandDef.exampleUsage && (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandUsage.exampleUsage"
+                defaultMessage="Example:"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 });
 CommandInputUsage.displayName = 'CommandInputUsage';
@@ -54,17 +76,50 @@ export interface CommandUsageProps {
 export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
+
+  type CommandDetails = Array<{
+    title: string;
+    description: string;
+  }>;
+
   const commandOptions = useMemo(() => {
-    // `command.args` only here to silence TS check
     if (!hasArgs || !commandDef.args) {
-      return [];
+      return {
+        required: [],
+        exclusiveOr: [],
+        optional: [],
+      };
     }
 
-    return Object.entries(commandDef.args).map(([option, { about: description }]) => ({
-      title: `--${option}`,
-      description,
-    }));
+    const enteredCommands = Object.entries(commandDef.args).reduce<{
+      required: CommandDetails;
+      exclusiveOr: CommandDetails;
+      optional: CommandDetails;
+    }>(
+      (acc, curr) => {
+        const item = {
+          title: `--${curr[0]}`,
+          description: curr[1].about,
+        };
+        if (curr[1].required) {
+          acc.required.push(item);
+        } else if (curr[1].exclusiveOr) {
+          acc.exclusiveOr.push(item);
+        } else {
+          acc.optional.push(item);
+        }
+
+        return acc;
+      },
+      {
+        required: [],
+        exclusiveOr: [],
+        optional: [],
+      }
+    );
+    return enteredCommands;
   }, [commandDef.args, hasArgs]);
+
   const additionalProps = useMemo(
     () => ({
       className: 'euiTruncateText',
@@ -76,31 +131,73 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     <EuiPanel color="transparent" data-test-subj={getTestId('commandUsage')}>
       <EuiText>{commandDef.about}</EuiText>
       <CommandInputUsage commandDef={commandDef} />
-      {hasArgs && (
+      {commandOptions.required && commandOptions.required.length > 0 && (
         <>
           <EuiSpacer />
-          <p>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.securitySolution.console.commandUsage.optionsLabel"
-                defaultMessage="Options:"
-              />
-              {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
-                <EuiText size="s" color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
-                    defaultMessage="Note: at least one option must be used"
-                  />
-                </EuiText>
-              )}
-            </EuiText>
-          </p>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandUsage.requiredLabel"
+              defaultMessage="Required parameters:"
+            />
+            {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
+                  defaultMessage="Note: at least one option must be used"
+                />
+              </EuiText>
+            )}
+          </EuiText>
           {commandDef.args && (
             <EuiDescriptionList
               compressed
               type="column"
               className="descriptionList-20_80"
-              listItems={commandOptions}
+              listItems={commandOptions.required}
+              descriptionProps={additionalProps}
+              titleProps={additionalProps}
+              data-test-subj={getTestId('commandUsage-options')}
+            />
+          )}
+        </>
+      )}
+      {commandOptions.exclusiveOr && commandOptions.exclusiveOr.length > 0 && (
+        <>
+          <EuiSpacer />
+          <EuiText>
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandUsage.exclusiveOr"
+              defaultMessage="Include only one of the following required parameters:"
+            />
+          </EuiText>
+          {commandDef.args && (
+            <EuiDescriptionList
+              compressed
+              type="column"
+              className="descriptionList-20_80"
+              listItems={commandOptions.exclusiveOr}
+              descriptionProps={additionalProps}
+              titleProps={additionalProps}
+              data-test-subj={getTestId('commandUsage-options')}
+            />
+          )}
+        </>
+      )}
+      {commandOptions.optional && commandOptions.optional.length > 0 && (
+        <>
+          <EuiSpacer />
+          <EuiText>
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandUsage.optionalLabel"
+              defaultMessage="Optional parameters:"
+            />
+          </EuiText>
+          {commandDef.args && (
+            <EuiDescriptionList
+              compressed
+              type="column"
+              className="descriptionList-20_80"
+              listItems={commandOptions.optional}
               descriptionProps={additionalProps}
               titleProps={additionalProps}
               data-test-subj={getTestId('commandUsage-options')}

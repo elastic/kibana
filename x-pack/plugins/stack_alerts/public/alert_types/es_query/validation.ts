@@ -5,25 +5,17 @@
  * 2.0.
  */
 
+import { defaultsDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryAlertParams } from './types';
+import { EsQueryAlertParams, ExpressionErrors } from './types';
 import { isSearchSourceAlert } from './util';
+import { EXPRESSION_ERRORS } from './constants';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
   const { size, threshold, timeWindowSize, thresholdComparator } = alertParams;
   const validationResult = { errors: {} };
-  const errors = {
-    index: new Array<string>(),
-    timeField: new Array<string>(),
-    esQuery: new Array<string>(),
-    size: new Array<string>(),
-    threshold0: new Array<string>(),
-    threshold1: new Array<string>(),
-    thresholdComparator: new Array<string>(),
-    timeWindowSize: new Array<string>(),
-    searchConfiguration: new Array<string>(),
-  };
+  const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
   validationResult.errors = errors;
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(

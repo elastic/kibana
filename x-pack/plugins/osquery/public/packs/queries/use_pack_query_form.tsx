@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, xor } from 'lodash';
+import { isArray, isEmpty, xor, map } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
 import { useMemo } from 'react';
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { FormConfig, useForm } from '../../shared_imports';
 import { createFormSchema } from './schema';
 
@@ -37,11 +38,14 @@ export interface PackFormData {
   platform?: string | undefined;
   version?: string | undefined;
   ecs_mapping?:
-    | Record<
-        string,
-        {
-          field: string;
-        }
+    | Array<
+        Record<
+          string,
+          {
+            field?: string;
+            value?: string;
+          }
+        >
       >
     | undefined;
 }
@@ -76,7 +80,7 @@ export const usePackQueryForm = ({
       id: '',
       query: '',
       interval: 3600,
-      ecs_mapping: {},
+      ecs_mapping: [],
     },
     // @ts-expect-error update types
     serializer: (payload) =>
@@ -100,6 +104,9 @@ export const usePackQueryForm = ({
 
         if (isEmpty(draft.ecs_mapping)) {
           delete draft.ecs_mapping;
+        } else {
+          // @ts-expect-error update types
+          draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
         }
 
         return draft;
@@ -114,7 +121,17 @@ export const usePackQueryForm = ({
         interval: payload.interval,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
-        ecs_mapping: payload.ecs_mapping ?? {},
+        ecs_mapping: !isArray(payload.ecs_mapping)
+          ? map(payload.ecs_mapping, (value, key) => ({
+              key,
+              result: {
+                // @ts-expect-error update types
+                type: Object.keys(value)[0],
+                // @ts-expect-error update types
+                value: Object.values(value)[0],
+              },
+            }))
+          : payload.ecs_mapping,
       };
     },
     // @ts-expect-error update types

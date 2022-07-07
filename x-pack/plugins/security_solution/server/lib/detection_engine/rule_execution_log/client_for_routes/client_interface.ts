@@ -9,7 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ExecutionLogTableSortColumns,
   RuleExecutionEvent,
-  RuleExecutionStatusType,
+  RuleExecutionStatus,
   RuleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
@@ -19,7 +19,7 @@ export interface GetAggregateExecutionEventsArgs {
   start: string;
   end: string;
   queryText: string;
-  statusFilters: RuleExecutionStatusType[];
+  statusFilters: RuleExecutionStatus[];
   page: number;
   perPage: number;
   sortField: ExecutionLogTableSortColumns;

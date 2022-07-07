@@ -8,6 +8,7 @@
 
 import { Fit } from '@elastic/charts';
 import { EndValue, FittingFunction } from '../../common';
+import { EndValues } from '../../common/constants';
 
 export function getFitEnum(fittingFunction?: FittingFunction | EndValue) {
   if (fittingFunction) {
@@ -17,10 +18,10 @@ export function getFitEnum(fittingFunction?: FittingFunction | EndValue) {
 }
 
 export function getEndValue(endValue?: EndValue) {
-  if (endValue === 'Nearest') {
+  if (endValue === EndValues.NEAREST) {
     return Fit[endValue];
   }
-  if (endValue === 'Zero') {
+  if (endValue === EndValues.ZERO) {
     return 0;
   }
   return undefined;

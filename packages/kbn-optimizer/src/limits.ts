@@ -11,7 +11,7 @@ import Path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 

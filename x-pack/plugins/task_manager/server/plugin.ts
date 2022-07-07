@@ -28,11 +28,10 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
-
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -48,7 +47,7 @@ export interface TaskManagerSetupContract {
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'runNow' | 'ephemeralRunNow' | 'ensureScheduled'
+  'schedule' | 'runSoon' | 'ephemeralRunNow' | 'ensureScheduled' | 'bulkUpdateSchedules'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
@@ -67,6 +66,7 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -75,6 +75,7 @@ export class TaskManagerPlugin
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
+    this.shouldRunBackgroundTasks = initContext.node.roles.backgroundTasks;
   }
 
   public setup(
@@ -114,6 +115,7 @@ export class TaskManagerPlugin
       kibanaIndexName: core.savedObjects.getKibanaIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      shouldRunTasks: this.shouldRunBackgroundTasks,
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -186,45 +188,47 @@ export class TaskManagerPlugin
       startingPollInterval: this.config!.poll_interval,
     });
 
-    this.taskPollingLifecycle = new TaskPollingLifecycle({
-      config: this.config!,
-      definitions: this.definitions,
-      unusedTypes: REMOVED_TYPES,
-      logger: this.logger,
-      executionContext,
-      taskStore,
-      usageCounter: this.usageCounter,
-      middleware: this.middleware,
-      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-      ...managedConfiguration,
-    });
+    // Only poll for tasks if configured to run tasks
+    if (this.shouldRunBackgroundTasks) {
+      this.taskPollingLifecycle = new TaskPollingLifecycle({
+        config: this.config!,
+        definitions: this.definitions,
+        unusedTypes: REMOVED_TYPES,
+        logger: this.logger,
+        executionContext,
+        taskStore,
+        usageCounter: this.usageCounter,
+        middleware: this.middleware,
+        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        ...managedConfiguration,
+      });
 
-    this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
-      config: this.config!,
-      definitions: this.definitions,
-      logger: this.logger,
-      executionContext,
-      middleware: this.middleware,
-      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-      pool: this.taskPollingLifecycle.pool,
-      lifecycleEvent: this.taskPollingLifecycle.events,
-    });
+      this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
+        config: this.config!,
+        definitions: this.definitions,
+        logger: this.logger,
+        executionContext,
+        middleware: this.middleware,
+        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        pool: this.taskPollingLifecycle.pool,
+        lifecycleEvent: this.taskPollingLifecycle.events,
+      });
+    }
 
     createMonitoringStats(
-      this.taskPollingLifecycle,
-      this.ephemeralTaskLifecycle,
       taskStore,
       this.elasticsearchAndSOAvailability$!,
       this.config!,
       managedConfiguration,
-      this.logger
+      this.logger,
+      this.taskPollingLifecycle,
+      this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      taskPollingLifecycle: this.taskPollingLifecycle,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
       definitions: this.definitions,
       taskManagerId: taskStore.taskManagerId,
@@ -237,9 +241,11 @@ export class TaskManagerPlugin
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
-      runNow: (...args) => taskScheduling.runNow(...args),
+      runSoon: (...args) => taskScheduling.runSoon(...args),
+      bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
-      supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
+      supportsEphemeralTasks: () =>
+        this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
     };
   }
 

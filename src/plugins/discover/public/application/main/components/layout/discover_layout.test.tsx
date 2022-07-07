@@ -26,20 +26,24 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../utils/use_saved_search';
+} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
-import { ElasticSearchHit } from '../../../../types';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
+function mountComponent(
+  indexPattern: DataView,
+  prevSidebarClosed?: boolean,
+  mountOptions: { attachTo?: HTMLElement } = {}
+) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
     ...discoverServiceMock,
@@ -62,7 +66,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits as ElasticSearchHit[],
+    result: esHits.map((esHit) => buildDataTableRecord(esHit, indexPattern)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -145,14 +149,22 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
+    stateContainer: {
+      setAppState: () => {},
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverLayout {...(props as DiscoverLayoutProps)} />
-    </KibanaContextProvider>
+    </KibanaContextProvider>,
+    mountOptions
   );
 }
 
@@ -165,6 +177,17 @@ describe('Discover component', () => {
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountComponent(indexPatternWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+  });
+
+  test('the saved search title h1 gains focus on navigate', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const component = mountComponent(indexPatternWithTimefieldMock, undefined, {
+      attachTo: container,
+    });
+    expect(
+      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
+    ).toHaveFocus();
   });
 
   describe('sidebar', () => {

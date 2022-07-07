@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/126422
-  describe.skip('results view content and total feature importance', function () {
+  describe('results view content and total feature importance', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -269,7 +268,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/132399
+      describe.skip(`${testData.suiteTitle}`, function () {
         before(async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
@@ -284,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should display the total feature importance in the results view', async () => {
+          await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(true);
           await ml.dataFrameAnalyticsResults.assertTotalFeatureImportanceEvaluatePanelExists();
         });
 

@@ -20,9 +20,9 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
-import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
+import { buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 
-import { authenticationsFields, formatAuthenticationData, getHits } from './helpers';
+import { formatAuthenticationData, getHits } from './helpers';
 
 export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
   buildDsl: (options: UserAuthenticationsRequestOptions) => {
@@ -42,7 +42,7 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationData(authenticationsFields, hit, auditdFieldsMap)
+      formatAuthenticationData(hit)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);

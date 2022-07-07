@@ -18,7 +18,6 @@ jest.mock('../../hooks/use_request', () => {
   return {
     ...module,
     useGetSettings: jest.fn(),
-    sendGetFleetStatus: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
     useGetAgents: jest.fn(),
     useGetAgentPolicies: jest.fn(),
@@ -36,14 +35,14 @@ jest.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhea
 });
 
 jest.mock(
-  '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions',
+  '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form',
   () => {
     const module = jest.requireActual(
-      '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions'
+      '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form'
     );
     return {
       ...module,
-      useFleetServerInstructions: jest.fn(),
+      useAdvancedForm: jest.fn(),
     };
   }
 );
@@ -82,6 +81,9 @@ jest.mock('./steps', () => {
   };
 });
 
-jest.mock('../../applications/fleet/sections/agents/services/has_fleet_server', () => {
-  return { policyHasFleetServer: jest.fn().mockReturnValue(true) };
+jest.mock('../../services', () => {
+  return {
+    ...jest.requireActual('../../services'),
+    policyHasFleetServer: jest.fn().mockReturnValue(true),
+  };
 });

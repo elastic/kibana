@@ -6,19 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevels, CoreStatus } from './types';
+import {
+  ServiceStatus,
+  ServiceStatusLevels,
+  CoreStatus,
+  InternalStatusServiceSetup,
+} from './types';
 import { StatusService } from './status_service';
-import { first } from 'rxjs/operators';
-import { mockCoreContext } from '../core_context.mock';
+import { first, take, toArray } from 'rxjs/operators';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
-import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { configServiceMock } from '../config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { AnalyticsServiceSetup } from '..';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
@@ -47,6 +54,7 @@ describe('StatusService', () => {
   type SetupDeps = Parameters<StatusService['setup']>[0];
   const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
     return {
+      analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       elasticsearch: {
         status$: of(available),
       },
@@ -533,6 +541,51 @@ describe('StatusService', () => {
           },
           expect.any(Function)
         );
+      });
+    });
+
+    describe('analytics', () => {
+      let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+      let setup: InternalStatusServiceSetup;
+
+      beforeEach(async () => {
+        analyticsMock = analyticsServiceMock.createAnalyticsServiceSetup();
+        setup = await service.setup(setupDeps({ analytics: analyticsMock }));
+      });
+
+      test('registers a context provider', async () => {
+        expect(analyticsMock.registerContextProvider).toHaveBeenCalledTimes(1);
+        const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
+        await expect(firstValueFrom(context$.pipe(take(2), toArray()))).resolves
+          .toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "overall_status_level": "initializing",
+                "overall_status_summary": "Kibana is starting up",
+              },
+              Object {
+                "overall_status_level": "available",
+                "overall_status_summary": "All services are available",
+              },
+            ]
+          `);
+      });
+
+      test('registers and reports an event', async () => {
+        expect(analyticsMock.registerEventType).toHaveBeenCalledTimes(1);
+        expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(0);
+        // wait for an emission of overall$
+        await firstValueFrom(setup.overall$);
+        expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(1);
+        expect(analyticsMock.reportEvent.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "core-overall_status_changed",
+            Object {
+              "overall_status_level": "available",
+              "overall_status_summary": "All services are available",
+            },
+          ]
+        `);
       });
     });
   });

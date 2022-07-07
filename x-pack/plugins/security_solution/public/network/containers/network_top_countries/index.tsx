@@ -38,27 +38,29 @@ export interface NetworkTopCountriesArgs {
   inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
+  networkTopCountries: NetworkTopCountriesEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  networkTopCountries: NetworkTopCountriesEdges[];
   totalCount: number;
 }
 
 interface UseNetworkTopCountries {
-  flowTarget: FlowTargetSourceDest;
-  ip?: string;
-  indexNames: string[];
-  type: networkModel.NetworkType;
-  filterQuery?: ESTermQuery | string;
   endDate: string;
-  startDate: string;
+  filterQuery?: ESTermQuery | string;
+  flowTarget: FlowTargetSourceDest;
+  id: string;
+  indexNames: string[];
+  ip?: string;
   skip: boolean;
+  startDate: string;
+  type: networkModel.NetworkType;
 }
 
 export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
+  id,
   indexNames,
   ip,
   skip,
@@ -74,7 +76,6 @@ export const useNetworkTopCountries = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
 
   const [networkTopCountriesRequest, setHostRequest] =
     useState<NetworkTopCountriesRequestOptions | null>(null);
@@ -99,7 +100,7 @@ export const useNetworkTopCountries = ({
   const [networkTopCountriesResponse, setNetworkTopCountriesResponse] =
     useState<NetworkTopCountriesArgs>({
       networkTopCountries: [],
-      id: queryId,
+      id,
       inspect: {
         dsl: [],
         response: [],

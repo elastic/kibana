@@ -53,10 +53,7 @@ to any newly saved rule:
         "_source" : {
           "alert" : {
             "name" : "kql test rule 1",
-            "tags" : [
-              "__internal_rule_id:4ec223b9-77fa-4895-8539-6b3e586a2858",
-              "__internal_immutable:false"
-            ],
+            "tags" : [],
             "alertTypeId" : "siem.signals",
             "other data... other data": "other data...other data",
               "exceptionsList" : [

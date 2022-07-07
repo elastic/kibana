@@ -9,13 +9,19 @@
 import expect from '@kbn/expect';
 import {
   OPTIONS_LIST_CONTROL,
-  ControlWidth,
   RANGE_SLIDER_CONTROL,
+  ControlWidth,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 import { FtrService } from '../ftr_provider_context';
+
+const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
+  default: 'Please select a field',
+  [OPTIONS_LIST_CONTROL]: 'Options list',
+  [RANGE_SLIDER_CONTROL]: 'Range slider',
+};
 
 export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -33,7 +39,14 @@ export class DashboardPageControls extends FtrService {
   public async enableControlsLab() {
     await this.header.clickStackManagement();
     await this.settings.clickKibanaSettings();
-    await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
+
+    const currentValue = await this.settings.getAdvancedSettingAriaCheckbox(
+      'labs:dashboard:dashboardControls'
+    );
+
+    if (currentValue !== 'true') {
+      await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
+    }
   }
 
   public async expectControlsEmpty() {
@@ -75,14 +88,14 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async openCreateControlFlyout(type: string) {
-    this.log.debug(`Opening flyout for ${type} control`);
+  public async openCreateControlFlyout() {
+    this.log.debug(`Opening flyout for creating a control`);
     await this.testSubjects.click('dashboard-controls-menu-button');
     await this.testSubjects.click('controls-create-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
-    await this.testSubjects.click(`create-${type}-control`);
+    await this.controlEditorVerifyType('default');
   }
 
   /* -----------------------------------------------------------
@@ -113,21 +126,6 @@ export class DashboardPageControls extends FtrService {
     await this.openControlGroupSettingsFlyout();
     await this.testSubjects.existOrFail('control-group-layout-options');
     await this.testSubjects.click(`control-editor-layout-${layout}`);
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateControlsSize(width: ControlWidth, applyToAll: boolean = false) {
-    this.log.debug(
-      `Update default control size to ${width}`,
-      applyToAll ? ' for all controls' : ''
-    );
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.existOrFail('control-group-default-size-options');
-    await this.testSubjects.click(`control-editor-width-${width}`);
-    if (applyToAll) {
-      const checkbox = await this.find.byXPath('//label[@for="editControls_setAllSizesCheckbox"]');
-      await checkbox.click();
-    }
     await this.testSubjects.click('control-group-editor-save');
   }
 
@@ -234,6 +232,35 @@ export class DashboardPageControls extends FtrService {
     return controlElement;
   }
 
+  public async createControl({
+    controlType,
+    dataViewTitle,
+    fieldName,
+    grow,
+    title,
+    width,
+  }: {
+    controlType: string;
+    title?: string;
+    fieldName: string;
+    width?: ControlWidth;
+    dataViewTitle?: string;
+    grow?: boolean;
+  }) {
+    this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
+    await this.openCreateControlFlyout();
+
+    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
+
+    if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
+
+    if (title) await this.controlEditorSetTitle(title);
+    if (width) await this.controlEditorSetWidth(width);
+    if (grow !== undefined) await this.controlEditorSetGrow(grow);
+
+    await this.controlEditorSave();
+  }
+
   public async hoverOverExistingControl(controlId: string) {
     const elementToHover = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
@@ -261,6 +288,14 @@ export class DashboardPageControls extends FtrService {
     await this.hoverOverExistingControl(controlId);
     await this.testSubjects.click(`control-action-${controlId}-delete`);
     await this.common.clickConfirmOnModal();
+  }
+
+  public async verifyControlType(controlId: string, expectedType: string) {
+    const controlButton = await this.find.byXPath(
+      `//div[@id='controlFrame--${controlId}']//button`
+    );
+    const testSubj = await controlButton.getAttribute('data-test-subj');
+    expect(testSubj).to.equal(`${expectedType}-${controlId}`);
   }
 
   // Options list functions
@@ -343,9 +378,20 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`control-editor-width-${width}`);
   }
 
+  public async controlEditorSetGrow(grow: boolean) {
+    this.log.debug(`Setting control grow to ${grow}`);
+    const growSwitch = await this.testSubjects.find('control-editor-grow-switch');
+    if ((await growSwitch.getAttribute('aria-checked')) !== `'${grow}'`) {
+      await growSwitch.click();
+    }
+  }
+
   public async controlEditorSave() {
     this.log.debug(`Saving changes in control editor`);
     await this.testSubjects.click(`control-editor-save`);
+    await this.retry.waitFor('flyout to close', async () => {
+      return !(await this.testSubjects.exists('control-editor-flyout'));
+    });
   }
 
   public async controlEditorCancel(confirm?: boolean) {
@@ -365,7 +411,11 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
 
-  public async controlsEditorSetfield(fieldName: string, shouldSearch: boolean = false) {
+  public async controlsEditorSetfield(
+    fieldName: string,
+    expectedType?: string,
+    shouldSearch: boolean = false
+  ) {
     this.log.debug(`Setting control field to ${fieldName}`);
     if (shouldSearch) {
       await this.testSubjects.setValue('field-search-input', fieldName);
@@ -374,34 +424,19 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
     });
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
+    if (expectedType) await this.controlEditorVerifyType(expectedType);
+  }
+
+  public async controlEditorVerifyType(type: string) {
+    this.log.debug(`Verifying that the control editor picked the type ${type}`);
+    const autoSelectedType = await this.testSubjects.getVisibleText('control-editor-type');
+    expect(autoSelectedType).to.equal(CONTROL_DISPLAY_NAMES[type]);
   }
 
   // Options List editor functions
-  public async createOptionsListControl({
-    dataViewTitle,
-    fieldName,
-    width,
-    title,
-  }: {
-    title?: string;
-    fieldName: string;
-    width?: ControlWidth;
-    dataViewTitle?: string;
-  }) {
-    this.log.debug(`Creating options list control ${title ?? fieldName}`);
-    await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
-
-    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName);
-    if (title) await this.controlEditorSetTitle(title);
-    if (width) await this.controlEditorSetWidth(width);
-
-    await this.controlEditorSave();
-  }
-
   public async optionsListEditorGetCurrentDataView(openAndCloseFlyout?: boolean) {
     if (openAndCloseFlyout) {
-      await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
+      await this.openCreateControlFlyout();
     }
     const dataViewName = (await this.testSubjects.find('open-data-view-picker')).getVisibleText();
     if (openAndCloseFlyout) {
@@ -475,28 +510,5 @@ export class DashboardPageControls extends FtrService {
     await this.rangeSliderOpenPopover(controlId);
     await this.rangeSliderPopoverAssertOpen();
     await this.testSubjects.click('rangeSlider__clearRangeButton');
-  }
-
-  // Range slider editor functions
-  public async createRangeSliderControl({
-    dataViewTitle,
-    fieldName,
-    width,
-    title,
-  }: {
-    title?: string;
-    fieldName: string;
-    width?: ControlWidth;
-    dataViewTitle?: string;
-  }) {
-    this.log.debug(`Creating range slider control ${title ?? fieldName}`);
-    await this.openCreateControlFlyout(RANGE_SLIDER_CONTROL);
-
-    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName);
-    if (title) await this.controlEditorSetTitle(title);
-    if (width) await this.controlEditorSetWidth(width);
-
-    await this.controlEditorSave();
   }
 }

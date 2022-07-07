@@ -52,6 +52,7 @@ describe('schedule_throttle_notification_actions', () => {
       severityMapping: [],
       threat: [],
       timestampOverride: undefined,
+      dataViewId: undefined,
       to: 'now',
       type: 'query',
       references: ['http://www.example.com'],
@@ -59,6 +60,9 @@ describe('schedule_throttle_notification_actions', () => {
       note: '# sample markdown',
       version: 1,
       exceptionsList: [],
+      relatedIntegrations: [],
+      requiredFields: [],
+      setup: '',
     };
   });
 

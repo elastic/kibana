@@ -11,10 +11,29 @@ import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 
+jest.mock('../components/detection_response/alerts_by_status', () => ({
+  AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+}));
+
+jest.mock('../components/detection_response/cases_table', () => ({
+  CasesTable: () => <div data-test-subj="mock_CasesTable" />,
+}));
+
+jest.mock('../components/detection_response/host_alerts_table', () => ({
+  HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
+}));
+
 jest.mock('../components/detection_response/rule_alerts_table', () => ({
   RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
 }));
-// TODO: add all sections mocks
+
+jest.mock('../components/detection_response/user_alerts_table', () => ({
+  UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
+}));
+
+jest.mock('../components/detection_response/cases_by_status', () => ({
+  CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
+}));
 
 jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: () => <div data-test-subj="mock_globalDatePicker" />,
@@ -30,14 +49,22 @@ jest.mock('../../common/containers/sourcerer', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 
-const defaultUseUserInfoReturn = {
-  signalIndexName: '',
-  canUserREAD: true,
+const defaultUseAlertsPrivilegesReturn = {
+  hasKibanaREAD: true,
   hasIndexRead: true,
 };
-const mockUseUserInfo = jest.fn(() => defaultUseUserInfoReturn);
-jest.mock('../../detections/components/user_info', () => ({
-  useUserInfo: () => mockUseUserInfo(),
+
+const defaultUseSignalIndexReturn = {
+  signalIndexName: '',
+};
+
+const mockUseSignalIndex = jest.fn(() => defaultUseSignalIndexReturn);
+jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
+  useSignalIndex: () => mockUseSignalIndex(),
+}));
+const mockUseAlertsPrivileges = jest.fn(() => defaultUseAlertsPrivilegesReturn);
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: () => mockUseAlertsPrivileges(),
 }));
 
 const defaultUseCasesPermissionsReturn = { read: true };
@@ -54,7 +81,8 @@ describe('DetectionResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
-    mockUseUserInfo.mockReturnValue(defaultUseUserInfoReturn);
+    mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
+    mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockUseCasesPermissions.mockReturnValue(defaultUseCasesPermissionsReturn);
   });
 
@@ -114,9 +142,9 @@ describe('DetectionResponse', () => {
   });
 
   it('should not render alerts data sections if user has not index read permission', () => {
-    mockUseUserInfo.mockReturnValue({
-      ...defaultUseUserInfoReturn,
+    mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: false,
+      hasKibanaREAD: true,
     });
 
     const result = render(
@@ -128,15 +156,19 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesByStatus')).toBeInTheDocument();
+
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
-    // TODO: assert other alert sections are not in the document
-    // TODO: assert cases sections are in the document
+    expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_UserAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
   });
 
   it('should not render alerts data sections if user has not kibana read permission', () => {
-    mockUseUserInfo.mockReturnValue({
-      ...defaultUseUserInfoReturn,
-      canUserREAD: false,
+    mockUseAlertsPrivileges.mockReturnValue({
+      hasIndexRead: true,
+      hasKibanaREAD: false,
     });
 
     const result = render(
@@ -148,9 +180,13 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesByStatus')).toBeInTheDocument();
+
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
-    // TODO: assert all alert sections are not in the document
-    // TODO: assert all cases sections are in the document
+    expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_UserAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
   });
 
   it('should not render cases data sections if user has not cases read permission', () => {
@@ -164,16 +200,20 @@ describe('DetectionResponse', () => {
       </TestProviders>
     );
 
+    expect(result.queryByTestId('mock_CasesTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesByStatus')).not.toBeInTheDocument();
+
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();
-    // TODO: assert all alert sections are in the document
-    // TODO: assert all cases sections are not in the document
+    expect(result.queryByTestId('mock_HostAlertsTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_UserAlertsTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).toBeInTheDocument();
   });
 
   it('should render page permissions message if user has any read permission', () => {
     mockUseCasesPermissions.mockReturnValue({ read: false });
-    mockUseUserInfo.mockReturnValue({
-      ...defaultUseUserInfoReturn,
+    mockUseAlertsPrivileges.mockReturnValue({
+      hasKibanaREAD: true,
       hasIndexRead: false,
     });
 

@@ -1,0 +1,90 @@
+{
+  "id": "@kbn/bazel-runner",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/bazel-runner",
+        "id": "def-server.runBazel",
+        "type": "Function",
+        "tags": [],
+        "label": "runBazel",
+        "description": [],
+        "signature": [
+          "(options: BazelRunOptions) => Promise<void>"
+        ],
+        "path": "packages/kbn-bazel-runner/src/bazel_runner.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bazel-runner",
+            "id": "def-server.runBazel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "BazelRunOptions"
+            ],
+            "path": "packages/kbn-bazel-runner/src/bazel_runner.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/bazel-runner",
+        "id": "def-server.runIBazel",
+        "type": "Function",
+        "tags": [],
+        "label": "runIBazel",
+        "description": [],
+        "signature": [
+          "(options: BazelRunOptions) => Promise<void>"
+        ],
+        "path": "packages/kbn-bazel-runner/src/bazel_runner.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bazel-runner",
+            "id": "def-server.runIBazel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "BazelRunOptions"
+            ],
+            "path": "packages/kbn-bazel-runner/src/bazel_runner.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

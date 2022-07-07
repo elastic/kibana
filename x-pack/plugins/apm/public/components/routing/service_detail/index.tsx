@@ -28,7 +28,8 @@ import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { offsetRt } from '../../../../common/offset_rt';
+import { offsetRt } from '../../../../common/comparison_rt';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function page({
   title,
@@ -63,7 +64,11 @@ function page({
 
 export const serviceDetail = {
   '/services/{serviceName}': {
-    element: <ApmServiceWrapper />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <ApmServiceWrapper />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.intersection([
       t.type({
         path: t.type({
@@ -269,14 +274,16 @@ export const serviceDetail = {
         }),
         element: <ServiceProfiling />,
       }),
-      '/services/{serviceName}/infra': page({
-        tab: 'infra',
+      '/services/{serviceName}/infrastructure': page({
+        tab: 'infrastructure',
         title: i18n.translate('xpack.apm.views.infra.title', {
           defaultMessage: 'Infrastructure',
         }),
         element: <InfraOverview />,
         searchBarOptions: {
-          hidden: true,
+          showKueryBar: false,
+          showTimeComparison: false,
+          showTransactionTypeSelector: false,
         },
       }),
       '/services/{serviceName}/': {

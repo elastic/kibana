@@ -48,7 +48,6 @@ const defaultProps = {
   enableShapeEditing: () => {},
   enablePointEditing: () => {},
   openLayerSettings: () => {},
-  editModeActiveForLayer: false,
   numLayers: 2,
   showThisLayerOnly: () => {},
 };
@@ -105,9 +104,7 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('should disable Edit features when edit mode active for layer', async () => {
-    const component = shallow(
-      <TOCEntryActionsPopover {...defaultProps} editModeActiveForLayer={true} />
-    );
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

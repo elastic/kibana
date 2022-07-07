@@ -12,9 +12,6 @@ import { join } from 'path';
 import * as Rx from 'rxjs';
 import { map, mergeAll, mergeMap } from 'rxjs/operators';
 
-// @ts-ignore
-import { assertAbsolute } from './fs';
-
 const getStat$ = Rx.bindNodeCallback<[string], [Fs.Stats]>(Fs.stat);
 const getReadDir$ = Rx.bindNodeCallback<[string], [string[]]>(Fs.readdir);
 

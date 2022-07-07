@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+// FIXME: Once/if we have the ability to get page count directly from Chrome/puppeteer
+// we should get rid of this lib.
+import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.js';
+
+import type { PackageInfo } from '@kbn/core/server';
 import { groupBy } from 'lodash';
-import type { Values } from '@kbn/utility-types';
-import type { Logger, PackageInfo } from '@kbn/core/server';
-import type { LayoutParams } from '../../../common';
-import { LayoutTypes } from '../../../common';
+import type { LayoutParams, LayoutType } from '../../../common';
 import type { Layout } from '../../layouts';
-import type { CaptureOptions, CaptureResult, CaptureMetrics } from '../../screenshots';
+import type { CaptureMetrics, CaptureOptions, CaptureResult } from '../../screenshots';
+import { EventLogger, Transactions } from '../../screenshots/event_logger';
 import { pngsToPdf } from './pdf_maker';
 
 /**
@@ -20,9 +23,7 @@ import { pngsToPdf } from './pdf_maker';
  * => When creating a PDF intended for print multiple PNGs will be spread out across pages
  * => When creating a PDF from a Canvas workpad, each page in the workpad will be placed on a separate page
  */
-export type PdfLayoutParams = LayoutParams<
-  Values<Pick<typeof LayoutTypes, 'PRESERVE_LAYOUT' | 'CANVAS' | 'PRINT'>>
->;
+export type PdfLayoutParams = LayoutParams<LayoutType>;
 
 /**
  * Options that should be provided to a PDF screenshot request.
@@ -92,35 +93,57 @@ function getTimeRange(results: CaptureResult['results']) {
 }
 
 export async function toPdf(
-  logger: Logger,
+  eventLogger: EventLogger,
   packageInfo: PackageInfo,
   layout: Layout,
   { logo, title }: PdfScreenshotOptions,
   { metrics, results }: CaptureResult
 ): Promise<PdfScreenshotResult> {
-  const timeRange = getTimeRange(results);
-  try {
-    const { buffer, pages } = await pngsToPdf({
-      title: title ? `${title}${timeRange ? ` - ${timeRange}` : ''}` : undefined,
-      results,
-      layout,
-      logo,
-      packageInfo,
-      logger,
+  let buffer: Buffer;
+  let pages: number;
+  const shouldConvertPngsToPdf = layout.id !== 'print';
+  if (shouldConvertPngsToPdf) {
+    const timeRange = getTimeRange(results);
+    try {
+      ({ buffer, pages } = await pngsToPdf({
+        title: title ? `${title}${timeRange ? ` - ${timeRange}` : ''}` : undefined,
+        results,
+        layout,
+        logo,
+        packageInfo,
+        eventLogger,
+      }));
+
+      return {
+        metrics: {
+          ...(metrics ?? {}),
+          pages,
+        },
+        data: buffer,
+        errors: results.flatMap(({ error }) => (error ? [error] : [])),
+        renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),
+      };
+    } catch (error) {
+      eventLogger.kbnLogger.error(`Could not generate the PDF buffer!`);
+      eventLogger.error(error, Transactions.PDF);
+      throw error;
+    }
+  } else {
+    buffer = results[0].screenshots[0].data; // This buffer is already the PDF
+    pages = await PDFJS.getDocument({ data: buffer }).promise.then((doc) => {
+      const numPages = doc.numPages;
+      doc.destroy();
+      return numPages;
     });
-
-    return {
-      metrics: {
-        ...(metrics ?? {}),
-        pages,
-      },
-      data: buffer,
-      errors: results.flatMap(({ error }) => (error ? [error] : [])),
-      renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),
-    };
-  } catch (error) {
-    logger.error(`Could not generate the PDF buffer!`);
-
-    throw error;
   }
+
+  return {
+    metrics: {
+      ...(metrics ?? {}),
+      pages,
+    },
+    data: buffer,
+    errors: results.flatMap(({ error }) => (error ? [error] : [])),
+    renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),
+  };
 }

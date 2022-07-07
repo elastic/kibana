@@ -11,15 +11,18 @@ import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
+import { errorsToResults } from './crud';
 import {
   getAgentById,
   getAgents,
   updateAgent,
   getAgentPolicyForAgent,
   bulkUpdateAgents,
+  processAgentsInBatches,
 } from './crud';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -53,7 +56,7 @@ export async function unenrollAgent(
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
   });
@@ -68,11 +71,35 @@ export async function unenrollAgents(
   options: GetAgentsOptions & {
     force?: boolean;
     revoke?: boolean;
+    batchSize?: number;
   }
 ): Promise<{ items: BulkActionResult[] }> {
-  // start with all agents specified
-  const givenAgents = await getAgents(esClient, options);
+  if ('agentIds' in options) {
+    const givenAgents = await getAgents(esClient, options);
+    return await unenrollBatch(soClient, esClient, givenAgents, options);
+  }
+  return await processAgentsInBatches(
+    esClient,
+    {
+      kuery: options.kuery,
+      showInactive: options.showInactive ?? false,
+      batchSize: options.batchSize,
+    },
+    async (agents: Agent[], skipSuccess?: boolean) =>
+      await unenrollBatch(soClient, esClient, agents, options, skipSuccess)
+  );
+}
 
+async function unenrollBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  givenAgents: Agent[],
+  options: {
+    force?: boolean;
+    revoke?: boolean;
+  },
+  skipSuccess?: boolean
+): Promise<{ items: BulkActionResult[] }> {
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
     if (options.revoke) {
@@ -80,21 +107,22 @@ export async function unenrollAgents(
     }
     return !agent.unenrollment_started_at && !agent.unenrolled_at;
   });
-  // And which are allowed to unenroll
-  const agentResults = await Promise.allSettled(
-    agentsEnrolled.map((agent) =>
-      unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
-    )
-  );
+
+  const hostedPolicies = await getHostedPolicies(soClient, agentsEnrolled);
+
   const outgoingErrors: Record<Agent['id'], Error> = {};
+
+  // And which are allowed to unenroll
   const agentsToUpdate = options.force
     ? agentsEnrolled
-    : agentResults.reduce<Agent[]>((agents, result, index) => {
-        if (result.status === 'fulfilled') {
-          agents.push(result.value);
-        } else {
+    : agentsEnrolled.reduce<Agent[]>((agents, agent, index) => {
+        if (isHostedAgent(hostedPolicies, agent)) {
           const id = givenAgents[index].id;
-          outgoingErrors[id] = result.reason;
+          outgoingErrors[id] = new HostedAgentPolicyRestrictionRelatedError(
+            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+          );
+        } else {
+          agents.push(agent);
         }
         return agents;
       }, []);
@@ -105,14 +133,11 @@ export async function unenrollAgents(
     await invalidateAPIKeysForAgents(agentsToUpdate);
   } else {
     // Create unenroll action for each agent
-    await bulkCreateAgentActions(
-      esClient,
-      agentsToUpdate.map((agent) => ({
-        agent_id: agent.id,
-        created_at: now,
-        type: 'UNENROLL',
-      }))
-    );
+    await createAgentAction(esClient, {
+      agents: agentsToUpdate.map((agent) => agent.id),
+      created_at: now,
+      type: 'UNENROLL',
+    });
   }
 
   // Update the necessary agents
@@ -125,20 +150,8 @@ export async function unenrollAgents(
     agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
   );
 
-  const getResultForAgent = (agent: Agent) => {
-    const hasError = agent.id in outgoingErrors;
-    const result: BulkActionResult = {
-      id: agent.id,
-      success: !hasError,
-    };
-    if (hasError) {
-      result.error = outgoingErrors[agent.id];
-    }
-    return result;
-  };
-
   return {
-    items: givenAgents.map(getResultForAgent),
+    items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
   };
 }
 

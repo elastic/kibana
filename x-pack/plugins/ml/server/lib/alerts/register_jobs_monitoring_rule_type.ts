@@ -140,6 +140,7 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
+    doesSetRecoveryContext: true,
     async executor(options) {
       const { services, name } = options;
 
@@ -151,17 +152,29 @@ export function registerJobsMonitoringRuleType({
       );
       const executionResult = await getTestsResults(options);
 
-      if (executionResult.length > 0) {
+      const unhealthyTests = executionResult.filter(({ isHealthy }) => !isHealthy);
+
+      if (unhealthyTests.length > 0) {
         logger.debug(
-          `"${name}" rule is scheduling actions for tests: ${executionResult
+          `"${name}" rule is scheduling actions for tests: ${unhealthyTests
             .map((v) => v.name)
             .join(', ')}`
         );
 
-        executionResult.forEach(({ name: alertInstanceName, context }) => {
+        unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
           const alertInstance = services.alertFactory.create(alertInstanceName);
           alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
         });
+      }
+
+      // Set context for recovered alerts
+      const { getRecoveredAlerts } = services.alertFactory.done();
+      for (const recoveredAlert of getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.getId();
+        const testResult = executionResult.find((v) => v.name === recoveredAlertId);
+        if (testResult) {
+          recoveredAlert.setContext(testResult.context);
+        }
       }
     },
   });

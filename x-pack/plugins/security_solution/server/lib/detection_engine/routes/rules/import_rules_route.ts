@@ -184,6 +184,7 @@ export const importRulesRoute = (
         const importRules: ImportRulesResponseSchema = {
           success: errorsResp.length === 0,
           success_count: successes.length,
+          rules_count: rules.length,
           errors: errorsResp,
           exceptions_errors: exceptionsErrors,
           exceptions_success: exceptionsSuccess,

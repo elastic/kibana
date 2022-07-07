@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
@@ -27,7 +26,7 @@ import {
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 // @ts-expect-error
-import { getMakiSymbol, PREFERRED_ICONS } from './symbol_utils';
+import { getMakiSymbol } from './symbol_utils';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { getHasLabel } from './style_util';
@@ -116,6 +115,12 @@ export interface IVectorStyle extends IStyle {
     mbMap: MbMap,
     mbSourceId: string
   ) => boolean;
+
+  /*
+   * Returns true when "Label" style configuration is complete and map shows a label for layer features.
+   */
+  hasLabels: () => boolean;
+
   arePointsSymbolizedAsCircles: () => boolean;
   setMBPaintProperties: ({
     alpha,
@@ -675,14 +680,14 @@ export class VectorStyle implements IVectorStyle {
   }
 
   _getLegendDetailStyleProperties = () => {
-    const hasLabel = getHasLabel(this._labelStyleProperty);
+    const hasLabels = this.hasLabels();
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
       const styleName = styleProperty.getStyleName();
       if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
         return false;
       }
 
-      if (!hasLabel && LABEL_STYLES.includes(styleName)) {
+      if (!hasLabels && LABEL_STYLES.includes(styleName)) {
         // do not render legend for label styles when there is no label
         return false;
       }
@@ -767,6 +772,10 @@ export class VectorStyle implements IVectorStyle {
 
   arePointsSymbolizedAsCircles() {
     return !this._symbolizeAsStyleProperty.isSymbolizedAsIcon();
+  }
+
+  hasLabels() {
+    return getHasLabel(this._labelStyleProperty);
   }
 
   setMBPaintProperties({

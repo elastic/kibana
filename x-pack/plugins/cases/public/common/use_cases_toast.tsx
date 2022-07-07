@@ -34,6 +34,22 @@ const EuiTextStyled = styled(EuiText)`
   `}
 `;
 
+function getAlertsCount(attachments: CaseAttachments): number {
+  let alertsCount = 0;
+  for (const attachment of attachments) {
+    if (attachment.type === CommentType.alert) {
+      // alertId might be an array
+      if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
+        alertsCount += attachment.alertId.length;
+      } else {
+        // or might be a single string
+        alertsCount++;
+      }
+    }
+  }
+  return alertsCount;
+}
+
 function getToastTitle({
   theCase,
   title,
@@ -47,10 +63,9 @@ function getToastTitle({
     return title;
   }
   if (attachments !== undefined) {
-    for (const attachment of attachments) {
-      if (attachment.type === CommentType.alert) {
-        return CASE_ALERT_SUCCESS_TOAST(theCase.title);
-      }
+    const alertsCount = getAlertsCount(attachments);
+    if (alertsCount > 0) {
+      return CASE_ALERT_SUCCESS_TOAST(theCase.title, alertsCount);
     }
   }
   return CASE_SUCCESS_TOAST(theCase.title);

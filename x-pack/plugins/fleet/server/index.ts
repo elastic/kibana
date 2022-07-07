@@ -11,6 +11,9 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
+import { getExperimentalAllowedValues, isValidExperimentalValue } from '../common';
+const allowedExperimentalValues = getExperimentalAllowedValues();
+
 import {
   PreconfiguredPackagesSchema,
   PreconfiguredAgentPoliciesSchema,
@@ -44,6 +47,7 @@ export type {
 export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
+const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -51,6 +55,7 @@ export const config: PluginConfigDescriptor = {
     agents: {
       enabled: true,
     },
+    enableExperimental: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -138,6 +143,30 @@ export const config: PluginConfigDescriptor = {
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+    }),
+    packageVerification: schema.object({
+      gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
+    }),
+    /**
+     * For internal use. A list of string values (comma delimited) that will enable experimental
+     * type of functionality that is not yet released.
+     *
+     * @example
+     * xpack.fleet.enableExperimental:
+     *   - feature1
+     *   - feature2
+     */
+    enableExperimental: schema.arrayOf(schema.string(), {
+      defaultValue: () => [],
+      validate(list) {
+        for (const key of list) {
+          if (!isValidExperimentalValue(key)) {
+            return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
+              ', '
+            )}`;
+          }
+        }
+      },
     }),
   }),
 };

@@ -30,8 +30,6 @@ export interface Group {
   createdAt: string;
   updatedAt: string;
   contentSources: ContentSource[];
-  users: User[];
-  usersCount: number;
   color?: string;
 }
 
@@ -64,6 +62,7 @@ export interface Configuration {
   needsBaseUrl: boolean;
   needsSubdomain?: boolean;
   needsConfiguration?: boolean;
+  needsCredentials?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
   documentationUrl: string;
@@ -74,18 +73,14 @@ export interface Configuration {
 
 export interface SourceDataItem {
   name: string;
-  iconName: string;
   categories?: string[];
   serviceType: string;
+  baseServiceType?: string;
   configuration: Configuration;
-  configured?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
   accountContextOnly: boolean;
-  internalConnectorAvailable?: boolean;
-  externalConnectorAvailable?: boolean;
-  customConnectorAvailable?: boolean;
   isBeta?: boolean;
 }
 
@@ -245,6 +240,7 @@ export interface Connector {
   serviceType: string;
   name: string;
   configured: boolean;
+  externalConnectorServiceDescribed?: boolean;
   supportedByLicense: boolean;
   accountContextOnly: boolean;
 }

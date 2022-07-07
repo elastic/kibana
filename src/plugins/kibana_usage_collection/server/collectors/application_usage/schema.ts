@@ -133,8 +133,10 @@ export const applicationUsageSchema = {
   // X-Pack
   apm: commonSchema,
   canvas: commonSchema,
+  csp: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   graph: commonSchema,
@@ -166,5 +168,6 @@ export const applicationUsageSchema = {
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
+  synthetics: commonSchema,
   ux: commonSchema,
 };

@@ -6,18 +6,18 @@
  */
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnlyEsQueryAlertParams } from '../types';
+import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
 /**
- * Fetching matching documents for a given alert from elasticsearch by a given index and query
+ * Fetching matching documents for a given rule from elasticsearch by a given index and query
  */
 export async function fetchEsQuery(
-  alertId: string,
+  ruleId: string,
   name: string,
-  params: OnlyEsQueryAlertParams,
+  params: OnlyEsQueryRuleParams,
   timestamp: string | undefined,
   services: {
     scopedClusterClient: IScopedClusterClient;
@@ -70,14 +70,12 @@ export async function fetchEsQuery(
     track_total_hits: true,
   });
 
-  logger.debug(
-    `es query alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`
-  );
+  logger.debug(`es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(query)}`);
 
   const { body: searchResult } = await esClient.search(query, { meta: true });
 
   logger.debug(
-    ` es query alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
+    ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
   return {
     numMatches: (searchResult.hits.total as estypes.SearchTotalHits).value,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../services/ml/security_common';
@@ -22,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with full ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     describe('with no data loaded', function () {
       for (const testUser of testUsers) {
@@ -123,12 +121,8 @@ export default function ({ getService }: FtrProviderContext) {
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
 
-      const uploadFilePath = path.join(
-        __dirname,
-        '..',
-        'data_visualizer',
-        'files_to_import',
-        'artificial_server_log'
+      const uploadFilePath = require.resolve(
+        '../data_visualizer/files_to_import/artificial_server_log'
       );
       const expectedUploadFileTitle = 'artificial_server_log';
 
@@ -541,15 +535,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToStackManagementJobsListPage();
 
             await ml.testExecution.logTestStep('should display the AD job in the list');
-            await ml.jobTable.filterWithSearchString(adJobId, 1, 'stackMgmtJobList');
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'anomaly-detector',
+              adJobId,
+              1
+            );
 
             await ml.testExecution.logTestStep(
               'should load the analytics jobs list page in stack management'
             );
             await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-
             await ml.testExecution.logTestStep('should display the DFA job in the list');
-            await ml.dataFrameAnalyticsTable.filterWithSearchString(dfaJobId, 1);
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'data-frame-analytics',
+              dfaJobId,
+              1
+            );
           });
         });
       }

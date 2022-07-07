@@ -24,10 +24,13 @@ describe('DetailPanelCopy component', () => {
   describe('When DetailPanelCopy is mounted', () => {
     it('renders DetailPanelCopy correctly', async () => {
       renderResult = mockedContext.render(
-        <DetailPanelCopy textToCopy={TEST_TEXT_COPY}>{TEST_CHILD}</DetailPanelCopy>
+        <DetailPanelCopy textToCopy={TEST_TEXT_COPY} tooltipContent={TEST_TEXT_COPY}>
+          {TEST_CHILD}
+        </DetailPanelCopy>
       );
 
       expect(renderResult.queryByText(TEST_TEXT_COPY)).toBeVisible();
+      expect(renderResult).toMatchSnapshot();
     });
   });
 });

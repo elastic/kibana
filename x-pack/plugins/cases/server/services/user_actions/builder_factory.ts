@@ -17,6 +17,7 @@ import { TagsUserActionBuilder } from './builders/tags';
 import { SettingsUserActionBuilder } from './builders/settings';
 import { DeleteCaseUserActionBuilder } from './builders/delete_case';
 import { UserActionBuilder } from './abstract_builder';
+import { SeverityUserActionBuilder } from './builders/severity';
 
 const builderMap = {
   title: TitleUserActionBuilder,
@@ -27,6 +28,7 @@ const builderMap = {
   pushed: PushedUserActionBuilder,
   tags: TagsUserActionBuilder,
   status: StatusUserActionBuilder,
+  severity: SeverityUserActionBuilder,
   settings: SettingsUserActionBuilder,
   delete_case: DeleteCaseUserActionBuilder,
 };

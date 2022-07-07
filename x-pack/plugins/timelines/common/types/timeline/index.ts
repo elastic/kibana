@@ -314,7 +314,7 @@ export enum TimelineId {
   usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
-  hostsPageSessions = 'hosts-page-sessions',
+  hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -323,6 +323,7 @@ export enum TimelineId {
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -335,6 +336,7 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
   runtimeTypes.literal(TimelineId.rulePreview),
+  runtimeTypes.literal(TimelineId.kubernetesPageSessions),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
@@ -503,20 +505,16 @@ export type TimelineExpandedUserType =
       };
     }
   | EmptyObject;
-
-enum FlowTarget {
-  client = 'client',
+enum FlowTargetSourceDest {
   destination = 'destination',
-  server = 'server',
   source = 'source',
 }
-
 export type TimelineExpandedNetworkType =
   | {
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       };
     }
   | EmptyObject;

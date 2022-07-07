@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
 import { LayerTypes } from '../constants';
-import { DataLayerConfigResult, LensMultiTable, XYArgs } from '../types';
+import { DataLayerConfig, ExtendedDataLayerConfig, XYProps } from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -46,9 +46,28 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
   rows,
 });
 
-export const sampleLayer: DataLayerConfigResult = {
-  type: 'dataLayer',
+export const sampleLayer: DataLayerConfig = {
   layerId: 'first',
+  type: 'dataLayer',
+  layerType: LayerTypes.DATA,
+  showLines: true,
+  seriesType: 'line',
+  xAccessor: 'c',
+  accessors: ['a', 'b'],
+  splitAccessor: 'd',
+  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+  xScaleType: 'ordinal',
+  isHistogram: false,
+  isHorizontal: false,
+  isPercentage: false,
+  isStacked: false,
+  palette: mockPaletteOutput,
+  table: createSampleDatatableWithRows([]),
+};
+
+export const sampleExtendedLayer: ExtendedDataLayerConfig = {
+  layerId: 'first',
+  type: 'extendedDataLayer',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
   xAccessor: 'c',
@@ -56,15 +75,18 @@ export const sampleLayer: DataLayerConfigResult = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
   isHistogram: false,
+  isHorizontal: false,
+  isStacked: false,
+  isPercentage: false,
   palette: mockPaletteOutput,
+  table: createSampleDatatableWithRows([]),
 };
 
-export const createArgsWithLayers = (layers: DataLayerConfigResult[] = [sampleLayer]): XYArgs => ({
-  xTitle: '',
-  yTitle: '',
-  yRightTitle: '',
+export const createArgsWithLayers = (
+  layers: DataLayerConfig | DataLayerConfig[] = sampleLayer
+): XYProps => ({
+  showTooltip: true,
   legend: {
     type: 'legendConfig',
     isVisible: false,
@@ -72,57 +94,54 @@ export const createArgsWithLayers = (layers: DataLayerConfigResult[] = [sampleLa
   },
   valueLabels: 'hide',
   valuesInLegend: false,
-  axisTitlesVisibilitySettings: {
-    type: 'axisTitlesVisibilityConfig',
-    x: true,
-    yLeft: true,
-    yRight: true,
+  xAxisConfig: {
+    type: 'xAxisConfig',
+    position: 'bottom',
+    showGridLines: true,
+    labelsOrientation: 0,
+    showLabels: true,
+    showTitle: true,
+    title: '',
   },
-  tickLabelsVisibilitySettings: {
-    type: 'tickLabelsConfig',
-    x: true,
-    yLeft: false,
-    yRight: false,
-  },
-  labelsOrientation: {
-    type: 'labelsOrientationConfig',
-    x: 0,
-    yLeft: -90,
-    yRight: -45,
-  },
-  gridlinesVisibilitySettings: {
-    type: 'gridlinesConfig',
-    x: true,
-    yLeft: false,
-    yRight: false,
-  },
-  yLeftExtent: {
-    mode: 'full',
-    type: 'axisExtentConfig',
-  },
-  yRightExtent: {
-    mode: 'full',
-    type: 'axisExtentConfig',
-  },
-  layers,
+  yAxisConfigs: [
+    {
+      type: 'yAxisConfig',
+      position: 'right',
+      showGridLines: false,
+      labelsOrientation: -45,
+      showLabels: false,
+      showTitle: true,
+      title: '',
+      extent: {
+        mode: 'full',
+        type: 'axisExtentConfig',
+      },
+    },
+    {
+      type: 'yAxisConfig',
+      position: 'left',
+      showGridLines: false,
+      labelsOrientation: -90,
+      showLabels: false,
+      showTitle: true,
+      title: '',
+      extent: {
+        mode: 'full',
+        type: 'axisExtentConfig',
+      },
+    },
+  ],
+  layers: Array.isArray(layers) ? layers : [layers],
 });
 
 export function sampleArgs() {
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      first: createSampleDatatableWithRows([
-        { a: 1, b: 2, c: 'I', d: 'Foo' },
-        { a: 1, b: 5, c: 'J', d: 'Bar' },
-      ]),
-    },
-    dateRange: {
-      fromDate: new Date('2019-01-02T05:00:00.000Z'),
-      toDate: new Date('2019-01-03T05:00:00.000Z'),
-    },
+  const data = createSampleDatatableWithRows([
+    { a: 1, b: 2, c: 1652034840000, d: 'Foo' },
+    { a: 1, b: 5, c: 1652122440000, d: 'Bar' },
+  ]);
+
+  return {
+    data,
+    args: createArgsWithLayers({ ...sampleLayer, table: data }),
   };
-
-  const args: XYArgs = createArgsWithLayers();
-
-  return { data, args };
 }

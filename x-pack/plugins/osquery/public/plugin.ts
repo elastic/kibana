@@ -45,6 +45,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       title: PLUGIN_NAME,
       order: 9030,
       category: DEFAULT_APP_CATEGORIES.management,
+      euiIconType: 'logoOsquery',
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();

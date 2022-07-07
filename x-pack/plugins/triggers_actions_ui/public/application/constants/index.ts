@@ -67,6 +67,12 @@ export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [
   'schedule_delay',
 ];
 
+export const RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS = [
+  'num_new_alerts',
+  'num_active_alerts',
+  'num_recovered_alerts',
+];
+
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
   'timestamp',
   'execution_duration',

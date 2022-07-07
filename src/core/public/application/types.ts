@@ -10,8 +10,8 @@ import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { MountPoint } from '../types';
-import { CoreTheme } from '../theme';
 import { Capabilities } from './capabilities';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
@@ -762,6 +762,10 @@ export interface NavigateToUrlOptions {
    * if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)
    */
   forceRedirect?: boolean;
+  /**
+   * optional state to forward to the application
+   */
+  state?: unknown;
 }
 
 /** @public */

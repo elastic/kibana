@@ -45,9 +45,10 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
+    excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category } = options;
+  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
@@ -63,7 +64,23 @@ export async function getPackages(
       )
     )
     .sort(sortByName);
-  return packageList;
+
+  if (!excludeInstallStatus) {
+    return packageList;
+  }
+
+  // Exclude the `installStatus` value if the `excludeInstallStatus` query parameter is set to true
+  // to better facilitate response caching
+  const packageListWithoutStatus = packageList.map((pkg) => {
+    const newPkg = {
+      ...pkg,
+      status: undefined,
+    };
+
+    return newPkg;
+  });
+
+  return packageListWithoutStatus;
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
@@ -71,7 +88,10 @@ export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
+  const allPackages = await getPackages({
+    savedObjectsClient,
+    experimental: true,
+  });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
   );
@@ -156,7 +176,6 @@ export async function getPackageInfo({
         : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: true,
     notice: Registry.getNoticePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };

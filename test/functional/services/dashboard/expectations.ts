@@ -19,6 +19,7 @@ export class DashboardExpectService extends FtrService {
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly pieChart = this.ctx.getService('pieChart');
   private readonly tagCloud = this.ctx.getPageObject('tagCloud');
   private readonly findTimeout = 2500;
 
@@ -39,11 +40,11 @@ export class DashboardExpectService extends FtrService {
   async selectedLegendColorCount(color: string, expectedCount: number) {
     this.log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
     await this.retry.try(async () => {
-      const selectedLegendColor = await this.testSubjects.findAll(
-        `legendSelectedColor-${color}`,
-        this.findTimeout
-      );
-      expect(selectedLegendColor.length).to.be(expectedCount);
+      const slicesColors = await this.pieChart.getAllPieSlicesColors();
+      const selectedColors = slicesColors.filter((sliceColor) => {
+        return sliceColor === color;
+      });
+      expect(selectedColors.length).to.be(expectedCount);
     });
   }
 

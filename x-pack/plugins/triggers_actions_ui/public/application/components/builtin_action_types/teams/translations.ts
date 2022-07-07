@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const WEBHOOK_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredWebhookUrlText',
+export const WEBHOOK_URL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.webhookUrlTextLabel',
   {
-    defaultMessage: 'Webhook URL is required.',
+    defaultMessage: 'Webhook URL',
   }
 );
 
@@ -18,13 +18,6 @@ export const WEBHOOK_URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.invalidWebhookUrlText',
   {
     defaultMessage: 'Webhook URL is invalid.',
-  }
-);
-
-export const WEBHOOK_URL_HTTP_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requireHttpsWebhookUrlText',
-  {
-    defaultMessage: 'Webhook URL must start with https://.',
   }
 );
 

@@ -8,15 +8,18 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { getSavedSearchObjectType } from './saved_objects';
+import { registerSampleData } from './sample_data';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(
     core: CoreSetup,
     plugins: {
       data: DataPluginSetup;
+      home?: HomeServerPluginSetup;
     }
   ) {
     const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
@@ -25,6 +28,10 @@ export class DiscoverServerPlugin implements Plugin<object, object> {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings(core.docLinks));
     core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
+
+    if (plugins.home) {
+      registerSampleData(plugins.home.sampleData);
+    }
 
     return {};
   }

@@ -29,8 +29,21 @@ interface Tile {
 }
 
 export class TileStatusTracker {
-  private _tileCache: Tile[];
-  private _tileErrorCache: Record<string, TileError[]>;
+  // Tile cache tracks active tile requests
+  // 'sourcedataloading' event adds tile request to cache
+  // 'sourcedata' and 'error' events remove tile request from cache
+  // Tile requests with 'aborted' status are removed from cache when reporting 'areTilesLoaded' status
+  private _tileCache: Tile[] = [];
+
+  // Tile error cache tracks tile request errors per layer
+  // Error cache is cleared when map center tile changes
+  private _tileErrorCache: Record<string, TileError[]> = {};
+
+  // Layer cache tracks layers that have requested one or more tiles
+  // Layer cache is used so that only a layer that has requested one or more tiles reports 'areTilesLoaded' status
+  // layer cache is never cleared
+  private _layerCache: Map<string, boolean> = new Map<string, boolean>();
+
   private _prevCenterTileKey?: string;
   private readonly _mbMap: MapboxMap;
   private readonly _updateTileStatus: (
@@ -48,6 +61,14 @@ export class TileStatusTracker {
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
+      const targetLayer = this._getCurrentLayerList().find((layer) => {
+        return layer.ownsMbSourceId(e.sourceId);
+      });
+      const layerId = targetLayer ? targetLayer.getId() : undefined;
+      if (layerId && !this._layerCache.has(layerId)) {
+        this._layerCache.set(layerId, true);
+      }
+
       const tracked = this._tileCache.find((tile) => {
         return (
           tile.mbKey === (e.tile.tileID.key as unknown as string) && tile.mbSourceId === e.sourceId
@@ -127,8 +148,6 @@ export class TileStatusTracker {
     updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => void;
     getCurrentLayerList: () => ILayer[];
   }) {
-    this._tileCache = [];
-    this._tileErrorCache = {};
     this._updateTileStatus = updateTileStatus;
     this._getCurrentLayerList = getCurrentLayerList;
 
@@ -146,6 +165,12 @@ export class TileStatusTracker {
     const layerList = this._getCurrentLayerList();
     for (let i = 0; i < layerList.length; i++) {
       const layer: ILayer = layerList[i];
+
+      if (!this._layerCache.has(layer.getId())) {
+        // do not report status for layers that have not started loading tiles.
+        continue;
+      }
+
       let atLeastOnePendingTile = false;
       for (let j = 0; j < this._tileCache.length; j++) {
         const tile = this._tileCache[j];

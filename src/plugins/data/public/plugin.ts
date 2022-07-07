@@ -73,6 +73,7 @@ export class DataPublicPlugin
       usageCollection,
       inspector,
       fieldFormats,
+      management,
     }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -83,6 +84,7 @@ export class DataPublicPlugin
       bfetch,
       usageCollection,
       expressions,
+      management,
       nowProvider: this.nowProvider,
     });
 
@@ -117,7 +119,7 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, screenshotMode }: DataStartDependencies
   ): DataPublicPluginStart {
     const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
@@ -131,7 +133,12 @@ export class DataPublicPlugin
       uiSettings,
     });
 
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
+    const search = this.searchService.start(core, {
+      fieldFormats,
+      indexPatterns: dataViews,
+      screenshotMode,
+      nowProvider: this.nowProvider,
+    });
     setSearchService(search);
 
     uiActions.addTriggerAction(

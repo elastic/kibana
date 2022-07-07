@@ -11,6 +11,7 @@ const createAppToastsMock = (): jest.Mocked<UseAppToasts> => ({
   addError: jest.fn(),
   addSuccess: jest.fn(),
   addWarning: jest.fn(),
+  remove: jest.fn(),
   api: {
     get$: jest.fn(),
     add: jest.fn(),

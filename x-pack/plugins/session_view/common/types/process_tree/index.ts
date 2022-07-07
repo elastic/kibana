@@ -97,8 +97,8 @@ export interface ProcessEventHost {
   architecture?: string;
   hostname?: string;
   id?: string;
-  ip?: string;
-  mac?: string;
+  ip?: string[];
+  mac?: string[];
   name?: string;
   os?: {
     family?: string;
@@ -149,6 +149,8 @@ export interface ProcessEvent {
   kibana?: {
     alert?: ProcessEventAlert;
   };
+  container?: ProcessEventContainer;
+  orchestrator?: ProcessEventOrchestrator;
 }
 
 export interface ProcessEventsPage {
@@ -165,9 +167,10 @@ export interface Process {
   orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
-  searchMatched: string | null; // either false, or set to searchQuery
+  searchMatched: number[] | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
   addAlert(alert: ProcessEvent): void;
+  addChild(child: Process): void;
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
@@ -187,3 +190,31 @@ export interface Process {
 export type ProcessMap = {
   [key: string]: Process;
 };
+
+export interface ProcessEventContainer {
+  id?: string;
+  name?: string;
+  image?: {
+    name?: string;
+    tag?: string;
+    hash?: {
+      all?: string;
+    };
+  };
+}
+
+export interface ProcessEventOrchestrator {
+  resource?: {
+    name?: string;
+    type?: string;
+    ip?: string;
+  };
+  namespace?: string;
+  cluster?: {
+    name?: string;
+    id?: string;
+  };
+  parent?: {
+    type?: string;
+  };
+}

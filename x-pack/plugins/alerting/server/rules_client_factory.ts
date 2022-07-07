@@ -26,7 +26,7 @@ export interface RulesClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpaceId: (request: KibanaRequest) => string | undefined;
+  getSpaceId: (request: KibanaRequest) => string;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
@@ -44,7 +44,7 @@ export class RulesClientFactory {
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
-  private getSpaceId!: (request: KibanaRequest) => string | undefined;
+  private getSpaceId!: (request: KibanaRequest) => string;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private actions!: ActionsPluginStartContract;

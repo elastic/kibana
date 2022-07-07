@@ -7,13 +7,16 @@
  */
 
 import { lastValueFrom, of, throwError } from 'rxjs';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs/operators';
 import { Filter } from '@kbn/es-query';
+import { stubIndexPattern } from '../../stubs';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -26,17 +29,18 @@ const mockSource = { excludes: ['foo-*'] };
 const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = {
+  id: '1234',
   title: 'foo',
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
 const indexPattern3 = {
@@ -51,7 +55,7 @@ const indexPattern3 = {
   },
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const runtimeFieldDef = {
   type: 'keyword',
@@ -62,10 +66,13 @@ const runtimeFieldDef = {
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;
-  let searchSourceDependencies: SearchSourceDependencies;
+  let searchSourceDependencies: MockedKeys<SearchSourceDependencies>;
   let searchSource: SearchSource;
 
   beforeEach(() => {
+    const aggsMock = {
+      createAggConfigs: jest.fn(),
+    } as unknown as jest.Mocked<SearchSourceDependencies['aggs']>;
     const getConfigMock = jest
       .fn()
       .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
@@ -81,6 +88,7 @@ describe('SearchSource', () => {
       );
 
     searchSourceDependencies = {
+      aggs: aggsMock,
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
@@ -127,9 +135,14 @@ describe('SearchSource', () => {
     test('sets the value for the property with AggConfigs', () => {
       const typesRegistry = mockAggTypesRegistry();
 
-      const ac = new AggConfigs(indexPattern3, [{ type: 'avg', params: { field: 'field1' } }], {
-        typesRegistry,
-      });
+      const ac = new AggConfigs(
+        indexPattern3,
+        [{ type: 'avg', params: { field: 'field1' } }],
+        {
+          typesRegistry,
+        },
+        jest.fn()
+      );
 
       searchSource.setField('aggs', ac);
       const request = searchSource.getSearchRequestBody();
@@ -147,7 +160,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp'],
             runtimeFields,
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['hello']);
@@ -164,7 +177,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['@timestamp'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['@timestamp']);
         searchSource.setField('fieldsFromSource', ['foo']);
 
@@ -180,7 +193,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['hello'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', ['world']);
 
@@ -197,7 +210,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'a', format: 'date_time' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', [{ field: 'b', format: 'date_time' }]);
         searchSource.setField('fields', ['c']);
@@ -223,7 +236,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -239,7 +252,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello']);
 
         const request = searchSource.getSearchRequestBody();
@@ -260,7 +273,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time', a: 'test', b: 'test' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: 'hello', a: 'a', c: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -278,7 +291,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('script_fields', { world: {} });
 
@@ -298,7 +311,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -314,7 +327,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -330,7 +343,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fieldsFromSource', ['hello', 'a']);
 
         const request = searchSource.getSearchRequestBody();
@@ -433,7 +446,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['@timestamp', 'exclude-me'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error Typings for excludes filters need to be fixed.
         searchSource.setField('source', { excludes: ['exclude-*'] });
 
@@ -449,7 +462,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['@timestamp', 'foo-bar', 'foo-baz'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['@timestamp']);
@@ -463,7 +476,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello']);
 
         const request = searchSource.getSearchRequestBody();
@@ -478,7 +491,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [
           'hello',
           'foo-bar',
@@ -499,7 +512,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -514,7 +527,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -529,7 +542,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -551,7 +564,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['timestamp', '*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -568,7 +581,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fieldsFromSource', [
           'hello',
           'world',
@@ -592,7 +605,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
 
         const request = searchSource.getSearchRequestBody();
@@ -611,7 +624,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp', 'date'],
             runtimeFields,
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fieldsFromSource', [
           'hello',
           '@timestamp',
@@ -638,7 +651,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date', 'time'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
         searchSource.setField('fieldsFromSource', ['foo-b', 'date', 'baz']);
 
@@ -665,7 +678,7 @@ describe('SearchSource', () => {
             getByType: () => [{ name: '@timestamp', esTypes: ['date_nanos'] }],
           },
           getSourceFiltering: () => ({ excludes: [] }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -693,7 +706,7 @@ describe('SearchSource', () => {
           }),
           fields: indexPatternFields,
           getSourceFiltering: () => ({ excludes: ['custom_date'] }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -795,13 +808,29 @@ describe('SearchSource', () => {
   });
 
   describe('#serialize', () => {
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
     test('should reference index patterns', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
       expect(references[0].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
+    });
+
+    test('should contain persisted data view by value', () => {
+      const localDataView = {
+        id: 'local-123',
+        isPersisted: () => false,
+        toSpec: () => ({ id: 'local-123' }),
+      } as DataView;
+      searchSource.setField('index', localDataView);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references.length).toEqual(0);
+      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot(`
+        Object {
+          "id": "local-123",
+        }
+      `);
     });
 
     test('should add other fields', () => {
@@ -838,7 +867,6 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
@@ -874,7 +902,7 @@ describe('SearchSource', () => {
           scriptFields: {},
           docvalueFields: [],
         }),
-      } as unknown as IndexPattern);
+      } as unknown as DataView);
       const request = searchSource.getSearchRequestBody();
       expect(request.stored_fields).toEqual(['geometry', 'prop1']);
       expect(request.docvalue_fields).toEqual(['prop1']);
@@ -895,8 +923,9 @@ describe('SearchSource', () => {
       },
     ];
 
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+
     test('should return serialized fields', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('filter', () => {
         return filter;
@@ -928,7 +957,6 @@ describe('SearchSource', () => {
     });
 
     test('should support nested search sources', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('from', 123);
       const childSearchSource = searchSource.createChild();
@@ -1146,7 +1174,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
       }
 
@@ -1231,7 +1260,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1266,7 +1296,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1307,6 +1338,148 @@ describe('SearchSource', () => {
         expect(fetchSub.error).toHaveBeenCalledTimes(1);
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('#toExpressionAst()', () => {
+    function toString(ast: ExpressionAstExpression) {
+      return buildExpression(ast).toString();
+    }
+
+    test('should generate an expression AST', () => {
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esdsl dsl=\\"{}\\""
+      `);
+    });
+
+    test('should generate query argument', () => {
+      searchSource.setField('query', { language: 'kuery', query: 'something' });
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context q={kql q=\\"something\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
+    });
+
+    test('should generate filters argument', () => {
+      const filter1 = {
+        query: { query_string: { query: 'query1' } },
+        meta: {},
+      };
+      const filter2 = {
+        query: { query_string: { query: 'query2' } },
+        meta: {},
+      };
+      searchSource.setField('filter', [filter1, filter2]);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
+          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
+    });
+
+    test('should resolve filters if set as a function', () => {
+      const filter = {
+        query: { query_string: { query: 'query' } },
+        meta: {},
+      };
+      searchSource.setField('filter', () => filter);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query\\\\\\"}}\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
+    });
+
+    test('should merge properties from parent search sources', () => {
+      const filter1 = {
+        query: { query_string: { query: 'query1' } },
+        meta: {},
+      };
+      const filter2 = {
+        query: { query_string: { query: 'query2' } },
+        meta: {},
+      };
+      searchSource.setField('query', { language: 'kuery', query: 'something1' });
+      searchSource.setField('filter', filter1);
+
+      const childSearchSource = searchSource.createChild();
+      childSearchSource.setField('query', { language: 'kuery', query: 'something2' });
+      childSearchSource.setField('filter', filter2);
+
+      expect(toString(childSearchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context q={kql q=\\"something2\\"} q={kql q=\\"something1\\"} filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
+          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
+    });
+
+    test('should include a data view identifier', () => {
+      searchSource.setField('index', indexPattern);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
+      `);
+    });
+
+    test('should include size if present', () => {
+      searchSource.setField('size', 1000);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esdsl size=1000 dsl=\\"{}\\""
+      `);
+    });
+
+    test('should generate the `esaggs` function if there are aggregations', () => {
+      const typesRegistry = mockAggTypesRegistry();
+      const aggConfigs = new AggConfigs(
+        stubIndexPattern,
+        [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry },
+        jest.fn()
+      );
+      searchSource.setField('aggs', aggConfigs);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+      `);
+    });
+
+    test('should generate the `esaggs` function if there are aggregations configs', () => {
+      const typesRegistry = mockAggTypesRegistry();
+      searchSourceDependencies.aggs.createAggConfigs.mockImplementationOnce(
+        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry }, jest.fn())
+      );
+      searchSource.setField('index', stubIndexPattern);
+      searchSource.setField('aggs', [
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+      ]);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+      `);
+    });
+
+    test('should not include the `esdsl` function to the chain if the `asDatatable` option is false', () => {
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
+        `"kibana_context"`
+      );
+    });
+
+    test('should not include the `esaggs` function to the chain if the `asDatatable` option is false', () => {
+      searchSource.setField('aggs', [
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+      ]);
+
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
+        `"kibana_context"`
+      );
     });
   });
 });

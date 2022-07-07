@@ -7,15 +7,18 @@
 
 import React, { FormEvent } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
@@ -26,79 +29,55 @@ import {
   PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
 } from '../../../../../components/layout';
-import { NAV, REMOVE_BUTTON } from '../../../../../constants';
-import { SourceDataItem } from '../../../../../types';
+import { NAV } from '../../../../../constants';
 
-import { staticExternalSourceData } from '../../../source_data';
-
+import { getSourceData } from '../../../source_data';
 import { AddSourceHeader } from '../add_source_header';
 import { ConfigDocsLinks } from '../config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from '../constants';
 
 import { ExternalConnectorDocumentation } from './external_connector_documentation';
 import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
-interface SaveConfigProps {
-  sourceData: SourceDataItem;
-  goBack?: () => void;
-  onDeleteConfig?: () => void;
-}
-
-export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
-  sourceData,
-  goBack,
-  onDeleteConfig,
-}) => {
-  const serviceType = 'external';
+export const ExternalConnectorConfig: React.FC = () => {
+  const { baseServiceType } = useParams<{ baseServiceType?: string }>();
+  const sourceData = getSourceData('external', baseServiceType);
   const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
-  const {
-    formDisabled,
-    buttonLoading,
-    externalConnectorUrl,
-    externalConnectorApiKey,
-    sourceConfigData,
-    urlValid,
-  } = useValues(ExternalConnectorLogic);
+  const { formDisabled, buttonLoading, urlValid } = useValues(ExternalConnectorLogic);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
-    saveExternalConnectorConfig({ url: externalConnectorUrl, apiKey: externalConnectorApiKey });
+    saveExternalConnectorConfig();
   };
 
-  const { name, categories } = sourceConfigData;
-  const {
-    configuration: { applicationLinkTitle, applicationPortalUrl },
-  } = sourceData;
   const { isOrganization } = useValues(AppLogic);
 
+  if (!sourceData) {
+    return null;
+  }
+
   const {
-    configuration: { documentationUrl },
-  } = staticExternalSourceData;
+    name,
+    categories = [],
+    configuration: { applicationLinkTitle, applicationPortalUrl, documentationUrl },
+  } = sourceData;
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
-      {OAUTH_SAVE_CONFIG_BUTTON}
+      {i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.registerButtonLabel',
+        {
+          defaultMessage: 'Register deployment',
+        }
+      )}
     </EuiButton>
   );
-
-  const deleteButton = (
-    <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
-      {REMOVE_BUTTON}
-    </EuiButton>
-  );
-
-  const backButton = <EuiButtonEmpty onClick={goBack}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
 
   const formActions = (
     <EuiFormRow>
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {goBack && backButton}
-          {onDeleteConfig && deleteButton}
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   );
@@ -110,6 +89,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
         documentationUrl={documentationUrl}
         applicationPortalUrl={applicationPortalUrl}
         applicationLinkTitle={applicationLinkTitle}
+        discussUrl="https://discuss.elastic.co/c/enterprise-search/84"
       />
       <EuiSpacer />
       <EuiForm isInvalid={!urlValid}>
@@ -132,11 +112,17 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     },
   ];
 
-  const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const header = (
+    <AddSourceHeader
+      name={name}
+      serviceType={baseServiceType || 'external'}
+      categories={categories}
+    />
+  );
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={false}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]} isLoading={false}>
       {header}
       <EuiSpacer size="l" />
       <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
@@ -144,6 +130,27 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} />
       </form>
+      <EuiSpacer />
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="email"
+            title={
+              <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
+                  {
+                    defaultMessage:
+                      'Have feedback about deploying a connector package? Let us know.',
+                  }
+                )}
+              </EuiLink>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Layout>
   );
 };

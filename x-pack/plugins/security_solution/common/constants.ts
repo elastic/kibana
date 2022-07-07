@@ -76,27 +76,25 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
    */
-  blocklist = 'blocklist',
-  case = 'cases',
-  caseConfigure = 'cases_configure',
-  caseCreate = 'cases_create',
+  case = 'cases', // must match `CasesDeepLinkId.cases`
+  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
+  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
-  explore = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
-  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
   landing = 'get_started',
   network = 'network',
@@ -107,7 +105,9 @@ export enum SecurityPageName {
   networkTls = 'network-tls',
   overview = 'overview',
   policies = 'policy',
+  responseActions = 'response_actions',
   rules = 'rules',
+  rulesCreate = 'rules-create',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
@@ -119,8 +119,19 @@ export enum SecurityPageName {
   sessions = 'sessions',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
+  kubernetes = 'kubernetes',
+  exploreLanding = 'explore',
+  dashboardsLanding = 'dashboards',
+  noPage = '',
+  cloudSecurityPosture = 'cloud_security_posture',
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
 }
 
+export const EXPLORE_PATH = '/explore' as const;
+export const DASHBOARDS_PATH = '/dashboards' as const;
+export const MANAGE_PATH = '/manage' as const;
 export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
@@ -129,9 +140,11 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
+export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
@@ -141,11 +154,18 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const CLOUD_SECURITY_POSTURE_PATH = '/cloud_security_posture' as const;
+export const CLOUD_SECURITY_POSTURE_DASHBOARD_PATH = '/cloud_security_posture/dashboard' as const;
+export const CLOUD_SECURITY_POSTURE_FINDINGS_PATH = '/cloud_security_posture/findings' as const;
+export const CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH = '/cloud_security_posture/benchmarks' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
+export const APP_EXPLORE_PATH = `${APP_PATH}${EXPLORE_PATH}` as const;
+export const APP_DASHBOARDS_PATH = `${APP_PATH}${DASHBOARDS_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
@@ -154,6 +174,7 @@ export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
 export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
+export const APP_KUBERNETES_PATH = `${APP_PATH}${KUBERNETES_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -163,18 +184,27 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
+
+// cloud logs to exclude from default index pattern
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
-export const DEFAULT_INDEX_PATTERN = [
+export const INCLUDE_INDEX_PATTERN = [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
 ];
+/** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
+export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
+
+/** This Kibana Advanced Setting enables the grouped navigation in Security Solution */
+export const ENABLE_GROUPED_NAVIGATION = 'securitySolution:enableGroupedNav' as const;
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
@@ -200,20 +230,15 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
+/** This Kibana Advanced Setting shows related integrations on the Rules Table */
+export const SHOW_RELATED_INTEGRATIONS_SETTING =
+  'securitySolution:showRelatedIntegrations' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
-
-/**
- * Special internal structure for tags for signals. This is used
- * to filter out tags that have internal structures within them.
- */
-export const INTERNAL_IDENTIFIER = '__internal' as const;
-export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id` as const;
-export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id` as const;
-export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable` as const;
 
 /**
  * Internal actions route
@@ -250,6 +275,8 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
+export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -361,6 +388,11 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.FAILED,
   TRANSFORM_STATES.STOPPED,
   TRANSFORM_STATES.STOPPING,
+]);
+
+export const STARTED_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.INDEXING,
+  TRANSFORM_STATES.STARTED,
 ]);
 
 /**

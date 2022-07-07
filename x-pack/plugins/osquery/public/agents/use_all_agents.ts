@@ -11,11 +11,7 @@ import { useQuery } from 'react-query';
 import { GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
-
-interface UseAllAgents {
-  osqueryPolicies: string[];
-  osqueryPoliciesLoading: boolean;
-}
+import { useOsqueryPolicies } from './use_osquery_policies';
 
 interface RequestOptions {
   perPage?: number;
@@ -23,22 +19,24 @@ interface RequestOptions {
 }
 
 // TODO: break out the paginated vs all cases into separate hooks
-export const useAllAgents = (
-  { osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents,
-  searchValue = '',
-  opts: RequestOptions = { perPage: 9000 }
-) => {
+export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage: 9000 }) => {
   const { perPage } = opts;
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const { data: osqueryPolicies, isFetched } = useOsqueryPolicies();
+
   return useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
+      let kuery = '';
 
-      if (searchValue) {
-        kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
+      if (osqueryPolicies?.length) {
+        kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
+
+        if (searchValue) {
+          kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
+        }
       }
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
@@ -51,7 +49,7 @@ export const useAllAgents = (
     {
       // @ts-expect-error update types
       select: (data) => data?.agents || [],
-      enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
+      enabled: isFetched && !!osqueryPolicies?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         // @ts-expect-error update types

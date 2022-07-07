@@ -17,7 +17,7 @@ import { pageObjects } from './page_objects';
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry that updates Synthetics.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:e1a3906e0c9944ecade05308022ba35eb0ebd00a';
+  'docker.elastic.co/package-registry/distribution:93ffe45d8c4ae11365bc70b1038643121049b9fe';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -28,7 +28,7 @@ export default async function ({ readConfigFile }) {
     require.resolve('../../../test/common/config.js')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   // mount the config file for the package registry as well as
@@ -75,7 +75,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
     // the apps section defines the urls that

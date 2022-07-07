@@ -5,103 +5,118 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiLoadingChart } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { CommandExecutionFailure } from './command_execution_failure';
+import moment from 'moment';
+import { LongRunningCommandHint } from './long_running_command_hint';
+import { CommandExecutionResult } from './command_execution_result';
+import type { CommandExecutionComponentProps } from '../types';
+import type { CommandExecutionState, CommandHistoryItem } from './console_state/types';
 import { UserCommandInput } from './user_command_input';
-import { Command } from '../types';
-import { useCommandService } from '../hooks/state_selectors/use_command_service';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 
 const CommandOutputContainer = styled.div`
   position: relative;
 
-  .run-in-background {
-    position: absolute;
-    right: 0;
-    top: 1em;
+  .busy-indicator {
+    margin-left: 0.5em;
   }
 `;
 
 export interface CommandExecutionOutputProps {
-  command: Command;
+  item: CommandHistoryItem;
 }
-export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ command }) => {
-  const commandService = useCommandService();
-  const [isRunning, setIsRunning] = useState<boolean>(true);
-  const [output, setOutput] = useState<ReactNode | null>(null);
-  const dispatch = useConsoleStateDispatch();
+export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
+  ({ item: { command, state, id, enteredAt } }) => {
+    const dispatch = useConsoleStateDispatch();
+    const RenderComponent = command.commandDefinition.RenderComponent;
+    const [isLongRunningCommand, setIsLongRunningCommand] = useState(false);
 
-  // FIXME:PT implement the `run in the background` functionality
-  const [showRunInBackground, setShowRunInTheBackground] = useState(false);
-  const handleRunInBackgroundClick = useCallback(() => {
-    setShowRunInTheBackground(false);
-  }, []);
+    const isRunning = useMemo(() => {
+      return state.status === 'pending';
+    }, [state.status]);
 
-  useEffect(() => {
-    (async () => {
-      const timeoutId = setTimeout(() => {
-        setShowRunInTheBackground(true);
-      }, 15000);
+    /** Updates the Command's status */
+    const setCommandStatus = useCallback(
+      (status: CommandExecutionState['status']) => {
+        dispatch({
+          type: 'updateCommandStatusState',
+          payload: {
+            id,
+            value: status,
+          },
+        });
+      },
+      [dispatch, id]
+    );
 
-      try {
-        const commandOutput = await commandService.executeCommand(command);
-        setOutput(commandOutput.result);
+    /** Updates the Command's execution store */
+    const setCommandStore: CommandExecutionComponentProps['setStore'] = useCallback(
+      (updateStoreFn) => {
+        dispatch({
+          type: 'updateCommandStoreState',
+          payload: {
+            id,
+            value: updateStoreFn,
+          },
+        });
+      },
+      [dispatch, id]
+    );
 
-        // FIXME: PT the console should scroll the bottom as well
-      } catch (error) {
-        setOutput(<CommandExecutionFailure error={error} />);
+    // keep track if this becomes a long running command
+    useEffect(() => {
+      let timeoutId: ReturnType<typeof setTimeout>;
+
+      if (isRunning && !isLongRunningCommand) {
+        const elapsedSeconds = moment().diff(moment(enteredAt), 'seconds');
+
+        if (elapsedSeconds >= 15) {
+          setIsLongRunningCommand(true);
+          return;
+        }
+
+        timeoutId = setTimeout(() => {
+          setIsLongRunningCommand(true);
+        }, (15 - elapsedSeconds) * 1000);
       }
 
-      clearTimeout(timeoutId);
-      setIsRunning(false);
-      setShowRunInTheBackground(false);
-    })();
-  }, [command, commandService]);
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [enteredAt, isLongRunningCommand, isRunning]);
 
-  useEffect(() => {
-    if (!isRunning) {
-      dispatch({ type: 'scrollDown' });
-    }
-  }, [isRunning, dispatch]);
-
-  return (
-    <CommandOutputContainer>
-      {showRunInBackground && (
-        <div className="run-in-background">
-          <EuiButton
-            fill
-            color="text"
-            size="s"
-            onClick={handleRunInBackgroundClick}
-            title={i18n.translate(
-              'xpack.securitySolution.console.commandOutput.runInBackgroundMsg',
-              {
-                defaultMessage:
-                  'Command response is taking a bit long. Click here to run it in the background and be notified when a response is received',
-              }
-            )}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.console.commandOutput.runInBackgroundButtonLabel"
-              defaultMessage="Run in background"
-            />
-          </EuiButton>
+    return (
+      <CommandOutputContainer>
+        <div>
+          <UserCommandInput input={command.input} />
         </div>
-      )}
-      <div>
-        <UserCommandInput input={command.input} />
-        {isRunning && (
-          <>
-            <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />
-          </>
-        )}
-      </div>
-      <div>{output}</div>
-    </CommandOutputContainer>
-  );
-});
+        <div>
+          <EuiSpacer size="s" />
+
+          <RenderComponent
+            command={command}
+            store={state.store}
+            status={state.status}
+            setStore={setCommandStore}
+            setStatus={setCommandStatus}
+            ResultComponent={CommandExecutionResult}
+          />
+
+          {isRunning && <EuiLoadingChart className="busy-indicator" mono={true} />}
+
+          {isRunning && isLongRunningCommand && (
+            <>
+              <EuiSpacer size="s" />
+              <LongRunningCommandHint />
+            </>
+          )}
+        </div>
+      </CommandOutputContainer>
+    );
+  }
+);
 CommandExecutionOutput.displayName = 'CommandExecutionOutput';

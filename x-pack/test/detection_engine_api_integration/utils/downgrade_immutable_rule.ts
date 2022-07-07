@@ -7,7 +7,6 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import { INTERNAL_RULE_ID_KEY } from '@kbn/security-solution-plugin/common/constants';
 import { countDownES } from './count_down_es';
 
 export const downgradeImmutableRule = async (
@@ -29,7 +28,7 @@ export const downgradeImmutableRule = async (
             },
             query: {
               term: {
-                'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+                'alert.params.ruleId': ruleId,
               },
             },
           },

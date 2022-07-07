@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
+import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
-  EuiDataGridProps,
   EuiDataGrid,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -19,9 +19,10 @@ import {
   htmlIdGenerator,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiDataGridRefProps,
+  EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -42,15 +43,17 @@ import {
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
-import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
-import { SortPairArr } from '../doc_table/lib/get_sort';
+import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
+import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { ElasticSearchHit } from '../../types';
-import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
+import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { convertValueToString } from '../../utils/convert_value_to_string';
 
 interface SortObj {
   id: string;
@@ -73,7 +76,7 @@ export interface DiscoverGridProps {
   /**
    * If set, the given document is displayed in a flyout
    */
-  expandedDoc?: ElasticSearchHit;
+  expandedDoc?: DataTableRecord;
   /**
    * The used index pattern
    */
@@ -110,7 +113,7 @@ export interface DiscoverGridProps {
   /**
    * Array of documents provided by Elasticsearch
    */
-  rows?: ElasticSearchHit[];
+  rows?: DataTableRecord[];
   /**
    * The max size of the documents returned by Elasticsearch
    */
@@ -118,7 +121,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -165,9 +168,7 @@ export interface DiscoverGridProps {
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
-export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
-  return <EuiDataGrid {...props} />;
-});
+export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 
@@ -199,6 +200,7 @@ export const DiscoverGrid = ({
   rowHeightState,
   onUpdateRowHeight,
 }: DiscoverGridProps) => {
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -208,7 +210,7 @@ export const DiscoverGrid = ({
     if (!selectedDocs.length || !rows?.length) {
       return [];
     }
-    const idMap = rows.reduce((map, row) => map.set(getDocId(row), true), new Map());
+    const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
     // filter out selected docs that are no longer part of the current data
     const result = selectedDocs.filter((docId) => idMap.get(docId));
     if (result.length === 0 && isFilterActive) {
@@ -224,13 +226,27 @@ export const DiscoverGrid = ({
     if (!isFilterActive || usedSelectedDocs.length === 0) {
       return rows;
     }
-    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(getDocId(row)));
+    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(row.id));
     if (!rowsFiltered.length) {
       // in case the selected docs are no longer part of the sample of 500, show all docs
       return rows;
     }
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
+
+  const valueToStringConverter: ValueToStringConverter = useCallback(
+    (rowIndex, columnId, options) => {
+      return convertValueToString({
+        rowIndex,
+        rows: displayedRows,
+        dataView: indexPattern,
+        columnId,
+        services,
+        options,
+      });
+    },
+    [displayedRows, indexPattern, services]
+  );
 
   /**
    * Pagination
@@ -290,14 +306,10 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRows
-          ? displayedRows.map((hit) =>
-              flattenHit(hit, indexPattern, { includeIgnoredValues: true })
-            )
-          : [],
         useNewFieldsApi,
         fieldsToShow,
-        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
+        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
+        () => dataGridRef.current?.closeCellPopover()
       ),
     [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
   );
@@ -310,15 +322,28 @@ export const DiscoverGrid = ({
 
   const euiGridColumns = useMemo(
     () =>
-      getEuiGridColumns(
-        displayedColumns,
+      getEuiGridColumns({
+        columns: displayedColumns,
+        rowsCount: displayedRows.length,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
-        isSortEnabled
-      ),
-    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
+        isSortEnabled,
+        services,
+        valueToStringConverter,
+      }),
+    [
+      displayedColumns,
+      displayedRows,
+      indexPattern,
+      showTimeCol,
+      settings,
+      defaultColumns,
+      isSortEnabled,
+      services,
+      valueToStringConverter,
+    ]
   );
 
   const hideTimeColumn = useMemo(
@@ -442,45 +467,60 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
+        valueToStringConverter,
       }}
     >
-      <span
-        data-test-subj="discoverDocTable"
-        data-render-complete={!isLoading}
-        data-shared-item=""
-        data-title={searchTitle}
-        data-description={searchDescription}
-        data-document-number={displayedRows.length}
-        className={className}
-      >
-        <EuiDataGridMemoized
-          aria-describedby={randomId}
-          aria-labelledby={ariaLabelledBy}
-          columns={euiGridColumns}
-          columnVisibility={columnsVisibility}
-          data-test-subj="docTable"
-          leadingControlColumns={lead}
-          onColumnResize={onResize}
-          pagination={paginationObj}
-          renderCellValue={renderCellValue}
-          rowCount={rowCount}
-          schemaDetectors={schemaDetectors}
-          sorting={sorting as EuiDataGridSorting}
-          toolbarVisibility={toolbarVisibility}
-          rowHeightsOptions={rowHeightsOptions}
-          gridStyle={GRID_STYLE}
-        />
-
+      <span className="dscDiscoverGrid__inner">
+        <div
+          data-test-subj="discoverDocTable"
+          data-render-complete={!isLoading}
+          data-shared-item=""
+          data-title={searchTitle}
+          data-description={searchDescription}
+          data-document-number={displayedRows.length}
+          className={classnames(className, 'dscDiscoverGrid__table')}
+        >
+          <EuiDataGridMemoized
+            aria-describedby={randomId}
+            aria-labelledby={ariaLabelledBy}
+            columns={euiGridColumns}
+            columnVisibility={columnsVisibility}
+            data-test-subj="docTable"
+            leadingControlColumns={lead}
+            onColumnResize={onResize}
+            pagination={paginationObj}
+            renderCellValue={renderCellValue}
+            ref={dataGridRef}
+            rowCount={rowCount}
+            schemaDetectors={schemaDetectors}
+            sorting={sorting as EuiDataGridSorting}
+            toolbarVisibility={toolbarVisibility}
+            rowHeightsOptions={rowHeightsOptions}
+            gridStyle={GRID_STYLE}
+          />
+        </div>
         {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer">
+          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
-              id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
-              defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
-              values={{ sampleSize }}
+              id="discover.gridSampleSize.description"
+              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To change this value, go to {advancedSettingsLink}."
+              values={{
+                sampleSize,
+                advancedSettingsLink: (
+                  <EuiLink
+                    href={services.addBasePath(
+                      `/app/management/kibana/settings?query=${SAMPLE_SIZE_SETTING}`
+                    )}
+                    data-test-subj="discoverTableSampleSizeSettingsLink"
+                  >
+                    <FormattedMessage
+                      id="discover.gridSampleSize.advancedSettingsLinkLabel"
+                      defaultMessage="Advanced Settings"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
-            <a href={`#${ariaLabelledBy}`}>
-              <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-            </a>
           </p>
         )}
         {searchTitle && (

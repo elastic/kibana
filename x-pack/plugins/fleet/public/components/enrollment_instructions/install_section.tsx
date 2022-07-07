@@ -7,24 +7,34 @@
 
 import React from 'react';
 
+import type { CommandsByPlatform } from '../../applications/fleet/components/fleet_server_instructions/utils';
+
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
 
 import type { K8sMode } from '../agent_enrollment_flyout/types';
-
-import type { CommandsByPlatform } from '../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
-
-import { PlatformSelector } from './manual/platform_selector';
+import { PlatformSelector } from '../platform_selector';
 
 interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
+  fullCopyButton?: boolean;
+  isManaged?: boolean;
+  onCopy?: () => void;
 }
 
-export const InstallSection: React.FunctionComponent<Props> = ({ installCommand, isK8s }) => {
+export const InstallSection: React.FunctionComponent<Props> = ({
+  installCommand,
+  isK8s,
+  fullCopyButton = false,
+  isManaged = true,
+  onCopy,
+}) => {
   return (
     <>
-      <InstallationMessage isK8s={isK8s} />
+      <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
       <PlatformSelector
+        fullCopyButton={fullCopyButton}
+        onCopy={onCopy}
         linuxCommand={installCommand.linux}
         macCommand={installCommand.mac}
         windowsCommand={installCommand.windows}

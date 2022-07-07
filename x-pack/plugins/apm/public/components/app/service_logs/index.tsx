@@ -36,7 +36,7 @@ export function ServiceLogs() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure',
+          'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
           {
             params: {
               path: { serviceName },
@@ -85,18 +85,20 @@ export function ServiceLogs() {
 
   return (
     <LogStream
+      logView={{ type: 'log-view-reference', logViewId: 'default' }}
       columns={[{ type: 'timestamp' }, { type: 'message' }]}
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
       query={getInfrastructureKQLFilter(data, serviceName)}
+      showFlyoutAction
     />
   );
 }
 
 export const getInfrastructureKQLFilter = (
   data:
-    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs'>
     | undefined,
   serviceName: string
 ) => {

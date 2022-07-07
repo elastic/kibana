@@ -44,7 +44,7 @@ describe('OverwrittenSessionPage', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(AuthenticationStatePage)).toMatchSnapshot();
+    expect(wrapper.find(AuthenticationStatePage).render()).toMatchSnapshot();
   });
 
   it('properly parses `next` parameter', async () => {

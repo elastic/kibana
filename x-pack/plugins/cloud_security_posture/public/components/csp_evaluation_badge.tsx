@@ -22,9 +22,9 @@ const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
 export const CspEvaluationBadge = ({ type }: Props) => (
   <EuiBadge color={getColor(type)}>
     {type === 'failed' ? (
-      <FormattedMessage id="xpack.csp.cspEvaluationBadge.failedLabel" defaultMessage="FAILED" />
+      <FormattedMessage id="xpack.csp.cspEvaluationBadge.failLabel" defaultMessage="Fail" />
     ) : (
-      <FormattedMessage id="xpack.csp.cspEvaluationBadge.passedLabel" defaultMessage="PASSED" />
+      <FormattedMessage id="xpack.csp.cspEvaluationBadge.passLabel" defaultMessage="Pass" />
     )}
   </EuiBadge>
 );

@@ -214,6 +214,7 @@ export const AvailablePackages: React.FC = memo(() => {
     error: eprPackageLoadingError,
   } = useGetPackages({
     category: '',
+    excludeInstallStatus: true,
   });
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
@@ -350,11 +351,11 @@ export const AvailablePackages: React.FC = memo(() => {
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint Security',
+                defaultMessage: 'Endpoint and Cloud Security',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:
-                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
               })}
             />
           </TrackApplicationView>

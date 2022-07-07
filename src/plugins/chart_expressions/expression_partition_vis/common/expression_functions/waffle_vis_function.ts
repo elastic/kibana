@@ -8,6 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
@@ -63,8 +64,17 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       strict: true,
     },
     legendSize: {
-      types: ['number'],
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
       help: strings.getLegendSizeArgHelp(),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
     truncateLegend: {
       types: ['boolean'],
@@ -129,6 +139,9 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         context,
         [

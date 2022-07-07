@@ -29,7 +29,6 @@ import { DataRequestContext } from '../../../../actions';
 import {
   DataRequestMeta,
   StyleMetaDescriptor,
-  TileMetaFeature,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../../../sources/es_search_source';
@@ -39,10 +38,14 @@ import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
 import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { pluckStyleMeta } from './pluck_style_meta';
+import {
+  ES_MVT_HITS_TOTAL_RELATION,
+  ES_MVT_HITS_TOTAL_VALUE,
+  ES_MVT_META_LAYER_NAME,
+  getAggsMeta,
+  getHitsMeta,
+} from '../../../util/tile_meta_feature_utils';
 
-export const ES_MVT_META_LAYER_NAME = 'meta';
-const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
-const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 
 export class MvtVectorLayer extends AbstractVectorLayer {
@@ -66,6 +69,12 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   constructor(args: VectorLayerArguments) {
     super(args);
     this._source = args.source as IMvtVectorSource;
+  }
+
+  isInitialDataLoadComplete(): boolean {
+    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
+      ? false
+      : super.isInitialDataLoadComplete();
   }
 
   async getBounds(syncContext: DataRequestContext) {
@@ -116,19 +125,15 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     //
     // TODO ES MVT specific - move to es_tiled_vector_layer implementation
     //
-
-    const tileMetaFeatures = this._getMetaFromTiles();
-    if (!tileMetaFeatures.length) {
-      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
-    }
-
-    if (this.getSource().getType() !== SOURCE_TYPES.ES_SEARCH) {
-      // aggregation ES sources are never trimmed
-      return {
-        icon: this.getCurrentStyle().getIcon(false),
-        tooltipContent: null,
-        areResultsTrimmed: false,
-      };
+    if (this.getSource().getType() === SOURCE_TYPES.ES_GEO_GRID) {
+      const { docCount } = getAggsMeta(this._getMetaFromTiles());
+      return docCount === 0
+        ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT
+        : {
+            icon: this.getCurrentStyle().getIcon(false),
+            tooltipContent: null,
+            areResultsTrimmed: false,
+          };
     }
 
     const maxResultWindow = this._getMaxResultWindow();
@@ -140,28 +145,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       };
     }
 
-    let totalFeaturesCount = 0;
-    let tilesWithFeatures = 0;
-    tileMetaFeatures.forEach((tileMeta: Feature) => {
-      const count =
-        tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
-      if (count > 0) {
-        totalFeaturesCount += count;
-        tilesWithFeatures++;
-      }
-    });
+    const { totalFeaturesCount, tilesWithFeatures, tilesWithTrimmedResults } = getHitsMeta(
+      this._getMetaFromTiles(),
+      maxResultWindow
+    );
 
     if (totalFeaturesCount === 0) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const areResultsTrimmed: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
-      if (tileMeta?.properties?.[ES_MVT_HITS_TOTAL_RELATION] === 'gte') {
-        return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= maxResultWindow + 1;
-      } else {
-        return false;
-      }
-    });
+    const areResultsTrimmed = tilesWithTrimmedResults > 0;
 
     // Documents may be counted multiple times if geometry crosses tile boundaries.
     const canMultiCountShapes =
@@ -226,13 +219,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
     await syncMvtSourceData({
+      hasLabels: this.getCurrentStyle().hasLabels(),
       layerId: this.getId(),
+      layerName: await this.getDisplayName(),
       prevDataRequest: this.getSourceDataRequest(),
       requestMeta: await this._getVectorSourceRequestMeta(
         syncContext.isForceRefresh,
         syncContext.dataFilters,
         this.getSource(),
-        this.getCurrentStyle()
+        this.getCurrentStyle(),
+        syncContext.isFeatureEditorOpenForLayer
       ),
       source: this.getSource() as IMvtVectorSource,
       syncContext,

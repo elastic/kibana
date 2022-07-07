@@ -13,6 +13,18 @@ import type { ShipperName } from '../analytics_client';
  */
 export interface EventContext {
   /**
+   * The UUID of the cluster
+   */
+  cluster_uuid?: string;
+  /**
+   * The name of the cluster.
+   */
+  cluster_name?: string;
+  /**
+   * The license ID.
+   */
+  license_id?: string;
+  /**
    * The unique user ID.
    */
   userId?: string;
@@ -20,6 +32,10 @@ export interface EventContext {
    * The Cloud ID.
    */
   cloudId?: string;
+  /**
+   * `true` if the user is logged in via the Elastic Cloud authentication provider.
+   */
+  isElasticCloudUser?: boolean;
   /**
    * The product's version.
    */
@@ -36,7 +52,10 @@ export interface EventContext {
    * The current entity ID (dashboard ID, visualization ID, etc.).
    */
   entityId?: string;
-  // TODO: Extend with known keys
+
+  /**
+   * Additional keys are allowed.
+   */
   [key: string]: unknown;
 }
 
@@ -46,39 +65,26 @@ export interface EventContext {
 export type EventType = string;
 
 /**
- * Types of the Telemetry Counter: It allows to differentiate what happened to the events
+ * Indicates if the event contains data about succeeded, failed or dropped events:
+ * - enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).
+ * - sent_to_shipper: The event was sent to at least one shipper.
+ * - succeeded: The event was successfully sent by the shipper.
+ * - failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.
+ * - dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason.
  */
-export enum TelemetryCounterType {
-  /**
-   * The event was accepted and will be sent to the shippers when they become available (and opt-in === true).
-   */
-  enqueued = 'enqueued',
-  /**
-   * The event was sent to at least one shipper.
-   */
-  sent_to_shipper = 'sent_to_shipper',
-  /**
-   * The event was successfully sent by the shipper.
-   */
-  succeeded = 'succeeded',
-  /**
-   * There was an error when processing/shipping the event.
-   * Refer to the Telemetry Counter's code for the reason.
-   */
-  failed = 'failed',
-  /**
-   * The event was dropped from the queue.
-   * Refer to the Telemetry Counter's code for the reason.
-   */
-  dropped = 'dropped',
-}
+export type TelemetryCounterType =
+  | 'enqueued'
+  | 'sent_to_shipper'
+  | 'succeeded'
+  | 'failed'
+  | 'dropped';
 
 /**
  * Shape of the events emitted by the telemetryCounter$ observable
  */
 export interface TelemetryCounter {
   /**
-   * Indicates if the event contains data about succeeded, failed or dropped events.
+   * {@link TelemetryCounterType}
    */
   type: TelemetryCounterType;
   /**

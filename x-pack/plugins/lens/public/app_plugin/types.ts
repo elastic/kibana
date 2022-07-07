@@ -30,6 +30,8 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { VisualizeFieldContext, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
@@ -140,6 +142,8 @@ export interface LensAppServices {
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
+  dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export interface LensTopNavTooltips {

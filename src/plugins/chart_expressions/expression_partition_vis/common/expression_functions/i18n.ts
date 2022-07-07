@@ -47,7 +47,7 @@ export const strings = {
     }),
   getLegendSizeArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.legendSizeHelpText', {
-      defaultMessage: 'Specifies the legend size in pixels',
+      defaultMessage: 'Specifies the legend size',
     }),
   getNestedLegendArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.nestedLegendHelpText', {

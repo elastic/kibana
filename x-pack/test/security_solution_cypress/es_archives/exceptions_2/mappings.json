@@ -11,7 +11,7 @@
         "refresh_interval": "5s"
       }
     },
-    "index": "exceptions-0001",
+    "index": "exceptions-0002",
     "mappings": {
       "properties": {
         "@timestamp": {

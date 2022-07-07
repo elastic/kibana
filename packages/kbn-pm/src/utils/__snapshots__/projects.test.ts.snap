@@ -2,37 +2,28 @@
 
 exports[`#buildProjectGraph builds full project graph 1`] = `
 Object {
-  "bar": Array [
-    "foo",
-  ],
+  "bar": Array [],
   "baz": Array [],
   "foo": Array [],
   "kibana": Array [
     "foo",
   ],
-  "quux": Array [
-    "bar",
-    "baz",
-  ],
-  "zorge": Array [
-    "foo",
-  ],
+  "quux": Array [],
+  "zorge": Array [],
 }
 `;
 
 exports[`#topologicallyBatchProjects batches projects topologically based on their project dependencies 1`] = `
 Array [
   Array [
+    "bar",
     "foo",
     "baz",
-  ],
-  Array [
-    "kibana",
-    "bar",
+    "quux",
     "zorge",
   ],
   Array [
-    "quux",
+    "kibana",
   ],
 ]
 `;
@@ -43,10 +34,8 @@ Array [
     "kibana",
     "bar",
     "baz",
-    "zorge",
-  ],
-  Array [
     "quux",
+    "zorge",
   ],
 ]
 `;

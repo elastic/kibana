@@ -9,11 +9,21 @@ import {
   ENRICHMENT_COUNT_NOTIFICATION,
   JSON_VIEW_WRAPPER,
   JSON_VIEW_TAB,
+  OVERVIEW_TAB,
   TABLE_TAB,
+  FILTER_INPUT,
 } from '../screens/alerts_details';
+
+export const filterBy = (value: string) => {
+  cy.get(FILTER_INPUT).type(value);
+};
 
 export const openJsonView = () => {
   cy.get(JSON_VIEW_TAB).click();
+};
+
+export const openOverview = () => {
+  cy.get(OVERVIEW_TAB).click();
 };
 
 export const openTable = () => {

@@ -13,6 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { docLinks } from '../../../shared/doc_links';
 import { WEB_CRAWLER_DOCS_URL, WEB_CRAWLER_LOG_DOCS_URL } from '../../routes';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
@@ -43,6 +46,34 @@ export const CrawlerOverview: React.FC = () => {
       pageHeader={{
         pageTitle: CRAWLER_TITLE,
         rightSideItems: [<ManageCrawlsPopover />, <CrawlerStatusIndicator />],
+        description: (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.crawler.pdfExtractionMessage"
+            defaultMessage="Interested in extracting additional content types? Install the {ingestPluginDocumentationLink} and {deploymentSettingsDocumentationLink}."
+            values={{
+              ingestPluginDocumentationLink: (
+                <EuiLink href={docLinks.pluginsIngestAttachment} target="_blank" external>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.crawler.ingestionPluginDocumentationLink',
+                    { defaultMessage: 'Elasticsearch ingest attachment plugin' }
+                  )}
+                </EuiLink>
+              ),
+              deploymentSettingsDocumentationLink: (
+                <EuiLink
+                  href={`${docLinks.appSearchWebCrawlerReference}#web-crawler-reference-binary-content-extraction`}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.crawler.deploymentSettingsDocumentationLink',
+                    { defaultMessage: 'review your deployment settings' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
       }}
       isLoading={dataLoading}
     >

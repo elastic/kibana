@@ -493,7 +493,7 @@ const updateTimeline = async ({
   };
 };
 
-const updatePartialSavedTimeline = async (
+export const updatePartialSavedTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
   timeline: SavedTimeline
@@ -528,7 +528,7 @@ const updatePartialSavedTimeline = async (
 
   const populatedTimeline =
     timelineFieldsMigrator.populateFieldsFromReferencesForPatch<TimelineWithoutExternalRefs>({
-      dataBeforeRequest: timelineUpdateAttributes,
+      dataBeforeRequest: timeline,
       dataReturnedFromRequest: updatedTimeline,
     });
 

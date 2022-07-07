@@ -13,12 +13,9 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useKibana } from '../../lib/kibana';
-import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 
@@ -29,6 +26,8 @@ export interface UseHoverActionItemsProps {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   handleHoverActionClicked: () => void;
   hideAddToTimeline: boolean;
   hideTopN: boolean;
@@ -59,6 +58,8 @@ export const useHoverActionItems = ({
   draggableId,
   enableOverflowButton,
   field,
+  fieldType,
+  isAggregatable,
   handleHoverActionClicked,
   hideTopN,
   hideAddToTimeline,
@@ -102,23 +103,6 @@ export const useHoverActionItems = ({
         : filterManagerBackup,
     [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
   );
-
-  //  Regarding data from useManageTimeline:
-  //  * `indexToAdd`, which enables the alerts index to be appended to
-  //    the `indexPattern` returned by `useWithSource`, may only be populated when
-  //    this component is rendered in the context of the active timeline. This
-  //    behavior enables the 'All events' view by appending the alerts index
-  //    to the index pattern.
-  const activeScope: SourcererScopeName =
-    timelineId === TimelineId.active
-      ? SourcererScopeName.timeline
-      : timelineId != null &&
-        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-          timelineId as TimelineId
-        )
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const { browserFields } = useSourcererDataView(activeScope);
 
   /*
    * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
@@ -222,7 +206,8 @@ export const useHoverActionItems = ({
           </div>
         ) : null,
         allowTopN({
-          browserField: getAllFieldsByName(browserFields)[field],
+          fieldType,
+          isAggregatable,
           fieldName: field,
           hideTopN,
         })
@@ -246,13 +231,14 @@ export const useHoverActionItems = ({
         return item != null;
       }),
     [
-      browserFields,
       dataProvider,
       dataType,
       defaultFocusedButtonRef,
       draggableId,
       enableOverflowButton,
       field,
+      fieldType,
+      isAggregatable,
       filterManager,
       getAddToTimelineButton,
       getColumnToggleButton,

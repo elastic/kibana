@@ -6,23 +6,23 @@
  */
 
 import { useMemo } from 'react';
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
-import { euiLightVars } from '@kbn/ui-theme'; // using this temporarily until the euiTheme hook is updated to include proper hex values
+import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, font, size } = euiTheme;
     const defaultSelectionColor = colors.primary;
 
-    const scroller: CSSObject = {
+    const sessionViewProcessTree: CSSObject = {
       position: 'relative',
       fontFamily: font.familyCode,
       overflow: 'auto',
       height: '100%',
-      backgroundColor: euiLightVars.euiColorLightestShade,
+      backgroundColor: euiVars.euiColorLightestShade,
       paddingTop: size.base,
       paddingLeft: size.s,
     };
@@ -43,12 +43,12 @@ export const useStyles = () => {
     const alertSelected = transparentize(colors.danger, 0.008);
 
     return {
-      scroller,
+      sessionViewProcessTree,
       selectionArea,
       defaultSelected,
       alertSelected,
     };
-  }, [euiTheme]);
+  }, [euiTheme, euiVars]);
 
   return cached;
 };

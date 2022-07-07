@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -20,26 +18,14 @@ export default function ({ getService }: FtrProviderContext) {
     { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124413
-  // FLAKY: https://github.com/elastic/kibana/issues/122838
-  describe.skip('for user with full ML access', function () {
+  describe('for user with full ML access', function () {
     for (const testUser of testUsers) {
       describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
 
-        const uploadFilePath = path.join(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          '..',
-          'functional',
-          'apps',
-          'ml',
-          'data_visualizer',
-          'files_to_import',
-          'artificial_server_log'
+        const uploadFilePath = require.resolve(
+          '../../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
         const expectedUploadFileTitle = 'artificial_server_log';
 

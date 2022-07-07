@@ -6,13 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import { CaseMetricsFeature } from '../../containers/types';
+import { SingleCaseMetricsFeature } from '../../containers/types';
 import { useCasesContext } from './use_cases_context';
 
 export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
-  metricsFeatures: CaseMetricsFeature[];
+  metricsFeatures: SingleCaseMetricsFeature[];
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {

@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.Registry",
+        "id": "def-common.Registry",
         "type": "Class",
         "tags": [],
         "label": "Registry",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.Registry",
+            "section": "def-common.Registry",
             "text": "Registry"
           },
           "<ItemSpec, Item>"
@@ -32,7 +40,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.Unnamed",
+            "id": "def-common.Registry.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,7 +53,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
-                "id": "def-server.Registry.Unnamed.$1",
+                "id": "def-common.Registry.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "prop",
@@ -62,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.wrapper",
+            "id": "def-common.Registry.wrapper",
             "type": "Function",
             "tags": [],
             "label": "wrapper",
@@ -75,7 +83,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
-                "id": "def-server.Registry.wrapper.$1",
+                "id": "def-common.Registry.wrapper.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "obj",
@@ -92,7 +100,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.register",
+            "id": "def-common.Registry.register",
             "type": "Function",
             "tags": [],
             "label": "register",
@@ -105,7 +113,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
-                "id": "def-server.Registry.register.$1",
+                "id": "def-common.Registry.register.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -122,7 +130,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.toJS",
+            "id": "def-common.Registry.toJS",
             "type": "Function",
             "tags": [],
             "label": "toJS",
@@ -137,7 +145,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.toArray",
+            "id": "def-common.Registry.toArray",
             "type": "Function",
             "tags": [],
             "label": "toArray",
@@ -152,7 +160,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.get",
+            "id": "def-common.Registry.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -165,7 +173,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
-                "id": "def-server.Registry.get.$1",
+                "id": "def-common.Registry.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -182,7 +190,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.getProp",
+            "id": "def-common.Registry.getProp",
             "type": "Function",
             "tags": [],
             "label": "getProp",
@@ -197,7 +205,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.Registry.reset",
+            "id": "def-common.Registry.reset",
             "type": "Function",
             "tags": [],
             "label": "reset",
@@ -217,7 +225,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.fromExpression",
+        "id": "def-common.fromExpression",
         "type": "Function",
         "tags": [],
         "label": "fromExpression",
@@ -226,9 +234,9 @@
           "(expression: string, type: string) => ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.Ast",
+            "section": "def-common.Ast",
             "text": "Ast"
           }
         ],
@@ -237,7 +245,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.fromExpression.$1",
+            "id": "def-common.fromExpression.$1",
             "type": "string",
             "tags": [],
             "label": "expression",
@@ -251,7 +259,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.fromExpression.$2",
+            "id": "def-common.fromExpression.$2",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -269,7 +277,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.getType",
+        "id": "def-common.getType",
         "type": "Function",
         "tags": [],
         "label": "getType",
@@ -282,7 +290,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.getType.$1",
+            "id": "def-common.getType.$1",
             "type": "Any",
             "tags": [],
             "label": "node",
@@ -300,7 +308,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.isAst",
+        "id": "def-common.isAst",
         "type": "Function",
         "tags": [],
         "label": "isAst",
@@ -313,7 +321,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.isAst.$1",
+            "id": "def-common.isAst.$1",
             "type": "Any",
             "tags": [],
             "label": "value",
@@ -331,7 +339,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.isAstWithMeta",
+        "id": "def-common.isAstWithMeta",
         "type": "Function",
         "tags": [],
         "label": "isAstWithMeta",
@@ -344,7 +352,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.isAstWithMeta.$1",
+            "id": "def-common.isAstWithMeta.$1",
             "type": "Any",
             "tags": [],
             "label": "value",
@@ -362,7 +370,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.safeElementFromExpression",
+        "id": "def-common.safeElementFromExpression",
         "type": "Function",
         "tags": [],
         "label": "safeElementFromExpression",
@@ -371,9 +379,9 @@
           "(expression: string) => ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.Ast",
+            "section": "def-common.Ast",
             "text": "Ast"
           }
         ],
@@ -382,7 +390,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.safeElementFromExpression.$1",
+            "id": "def-common.safeElementFromExpression.$1",
             "type": "string",
             "tags": [],
             "label": "expression",
@@ -400,7 +408,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.toExpression",
+        "id": "def-common.toExpression",
         "type": "Function",
         "tags": [],
         "label": "toExpression",
@@ -409,9 +417,9 @@
           "(ast: ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstNode",
+            "section": "def-common.AstNode",
             "text": "AstNode"
           },
           ", options: string | Options) => string"
@@ -421,7 +429,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.toExpression.$1",
+            "id": "def-common.toExpression.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "ast",
@@ -429,9 +437,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/interpreter",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnInterpreterPluginApi",
-                "section": "def-server.AstNode",
+                "section": "def-common.AstNode",
                 "text": "AstNode"
               }
             ],
@@ -441,7 +449,7 @@
           },
           {
             "parentPluginId": "@kbn/interpreter",
-            "id": "def-server.toExpression.$2",
+            "id": "def-common.toExpression.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "options",
@@ -463,7 +471,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.Ast",
+        "id": "def-common.Ast",
         "type": "Type",
         "tags": [],
         "label": "Ast",
@@ -472,9 +480,9 @@
           "{ type: \"expression\"; chain: ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstFunction",
+            "section": "def-common.AstFunction",
             "text": "AstFunction"
           },
           "[]; }"
@@ -485,7 +493,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.AstArgument",
+        "id": "def-common.AstArgument",
         "type": "Type",
         "tags": [],
         "label": "AstArgument",
@@ -494,9 +502,9 @@
           "string | number | boolean | ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.Ast",
+            "section": "def-common.Ast",
             "text": "Ast"
           }
         ],
@@ -506,7 +514,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.AstArgumentWithMeta",
+        "id": "def-common.AstArgumentWithMeta",
         "type": "Type",
         "tags": [],
         "label": "AstArgumentWithMeta",
@@ -514,9 +522,9 @@
         "signature": [
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstWithMeta",
+            "section": "def-common.AstWithMeta",
             "text": "AstWithMeta"
           },
           " | WithMeta<string> | WithMeta<number> | WithMeta<false> | WithMeta<true>"
@@ -527,7 +535,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.AstFunction",
+        "id": "def-common.AstFunction",
         "type": "Type",
         "tags": [],
         "label": "AstFunction",
@@ -536,9 +544,9 @@
           "{ type: \"function\"; function: string; arguments: Record<string, ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstArgument",
+            "section": "def-common.AstArgument",
             "text": "AstArgument"
           },
           "[]>; }"
@@ -549,7 +557,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.AstFunctionWithMeta",
+        "id": "def-common.AstFunctionWithMeta",
         "type": "Type",
         "tags": [],
         "label": "AstFunctionWithMeta",
@@ -558,17 +566,17 @@
           "WithMeta<Replace<",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstFunction",
+            "section": "def-common.AstFunction",
             "text": "AstFunction"
           },
           ", { arguments: { [key: string]: ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstArgumentWithMeta",
+            "section": "def-common.AstArgumentWithMeta",
             "text": "AstArgumentWithMeta"
           },
           "[]; }; }>>"
@@ -579,7 +587,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.AstNode",
+        "id": "def-common.AstNode",
         "type": "Type",
         "tags": [],
         "label": "AstNode",
@@ -587,17 +595,17 @@
         "signature": [
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstFunction",
+            "section": "def-common.AstFunction",
             "text": "AstFunction"
           },
           " | ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstArgument",
+            "section": "def-common.AstArgument",
             "text": "AstArgument"
           }
         ],
@@ -607,7 +615,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.AstWithMeta",
+        "id": "def-common.AstWithMeta",
         "type": "Type",
         "tags": [],
         "label": "AstWithMeta",
@@ -616,17 +624,17 @@
           "WithMeta<Replace<",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.Ast",
+            "section": "def-common.Ast",
             "text": "Ast"
           },
           ", { chain: ",
           {
             "pluginId": "@kbn/interpreter",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnInterpreterPluginApi",
-            "section": "def-server.AstFunctionWithMeta",
+            "section": "def-common.AstFunctionWithMeta",
             "text": "AstFunctionWithMeta"
           },
           "[]; }>>"
@@ -637,7 +645,7 @@
       },
       {
         "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.typedParse",
+        "id": "def-common.typedParse",
         "type": "Any",
         "tags": [],
         "label": "typedParse",
@@ -650,14 +658,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

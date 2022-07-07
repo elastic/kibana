@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { formatSecrets } from '@kbn/synthetics-plugin/server/lib/synthetics_service/utils/secrets';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[GET] /internal/uptime/service/monitors', () => {
+  describe('[GET] /internal/uptime/service/monitors', function () {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _monitors: MonitorFields[];
@@ -97,7 +98,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.attributes).eql({
           ...monitors[0],
           revision: 1,
-          secrets: formatSecrets(monitors[0]).secrets,
         });
       });
 
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.message).eql(expected404Message);
       });
 
-      it('validates param length for sanity', async () => {
+      it('validates param length', async () => {
         const veryLargeMonId = new Array(1050).fill('1').join('');
 
         await supertest

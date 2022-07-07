@@ -36,6 +36,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -53,6 +54,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import { visualizeEditorTrigger } from './triggers';
@@ -88,6 +90,7 @@ import {
   setSpaces,
   setTheme,
   setExecutionContext,
+  setFieldFormats,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 
@@ -118,6 +121,7 @@ export interface VisualizationsSetupDeps {
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   expressions: ExpressionsStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
@@ -134,6 +138,7 @@ export interface VisualizationsStartDeps {
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   screenshotMode: ScreenshotModePluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -239,9 +244,6 @@ export class VisualizationsPlugin
 
         // make sure the index pattern list is up to date
         pluginsStart.dataViews.clearCache();
-        // make sure a default index pattern exists
-        // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.dataViews.ensureDefaultDataView();
 
         appMounted();
 
@@ -269,6 +271,8 @@ export class VisualizationsPlugin
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
+          core: coreStart,
+          dataViewEditor: pluginsStart.dataViewEditor,
           dataViews: pluginsStart.dataViews,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
@@ -358,6 +362,7 @@ export class VisualizationsPlugin
       spaces,
       savedObjectsTaggingOss,
       usageCollection,
+      fieldFormats,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -376,6 +381,7 @@ export class VisualizationsPlugin
     setOverlays(core.overlays);
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
+    setFieldFormats(fieldFormats);
 
     if (spaces) {
       setSpaces(spaces);

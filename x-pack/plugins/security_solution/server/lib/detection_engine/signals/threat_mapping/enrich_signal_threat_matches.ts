@@ -8,7 +8,7 @@
 import { get, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../common/cti/constants';
 
-import type { SignalSearchResponse, SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 import type {
   GetMatchedThreats,
   ThreatEnrichment,
@@ -109,17 +109,16 @@ export const buildEnrichments = ({
   });
 
 export const enrichSignalThreatMatches = async (
-  signals: SignalSearchResponse,
+  signals: SignalSourceHit[],
   getMatchedThreats: GetMatchedThreats,
   indicatorPath: string,
   signalMatchesArg?: SignalMatch[]
-): Promise<SignalSearchResponse> => {
-  const signalHits = signals.hits.hits;
-  if (signalHits.length === 0) {
+): Promise<SignalSourceHit[]> => {
+  if (signals.length === 0) {
     return signals;
   }
 
-  const uniqueHits = groupAndMergeSignalMatches(signalHits);
+  const uniqueHits = groupAndMergeSignalMatches(signals);
   const signalMatches: SignalMatch[] = signalMatchesArg
     ? signalMatchesArg
     : uniqueHits.map((signalHit) => ({
@@ -137,13 +136,14 @@ export const enrichSignalThreatMatches = async (
   ];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
 
-  const enrichmentsWithoutAtomic = signalMatches.map((signalMatch) =>
-    buildEnrichments({
+  const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
+  signalMatches.forEach((signalMatch) => {
+    enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
       indicatorPath,
       queries: signalMatch.queries,
       threats: matchedThreats,
-    })
-  );
+    });
+  });
 
   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
     const threat = get(signalHit._source, 'threat') ?? {};
@@ -156,7 +156,7 @@ export const enrichSignalThreatMatches = async (
     // new issues.
     const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
     const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[i];
+    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id] ?? [];
     const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
       ...enrichment,
       matched: {
@@ -177,14 +177,5 @@ export const enrichSignalThreatMatches = async (
     };
   });
 
-  return {
-    ...signals,
-    hits: {
-      ...signals.hits,
-      hits: enrichedSignals,
-      total: isObject(signals.hits.total)
-        ? { ...signals.hits.total, value: enrichedSignals.length }
-        : enrichedSignals.length,
-    },
-  };
+  return enrichedSignals;
 };

@@ -12,8 +12,16 @@ import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
 import { SessionsComponentsProps } from './types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
+
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../url_state/normalize_time_range');
 
@@ -109,10 +117,11 @@ describe('SessionsView', () => {
       expect(wrapper.getByTestId(`${TEST_PREFIX}:startDate`)).toHaveTextContent(startDate);
       expect(wrapper.getByTestId(`${TEST_PREFIX}:endDate`)).toHaveTextContent(endDate);
       expect(wrapper.getByTestId(`${TEST_PREFIX}:timelineId`)).toHaveTextContent(
-        'hosts-page-sessions'
+        'hosts-page-sessions-v2'
       );
     });
   });
+
   it('passes in the right filters to TGrid', async () => {
     render(
       <TestProviders>

@@ -209,17 +209,13 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   };
 
   const collapse = {
-    field: 'process.entity_id',
-    inner_hits: {
-      name: 'last_event',
-      size: 1,
-      sort: [{ '@timestamp': 'desc' }],
-    },
+    field: 'process.entry_leader.entity_id',
   };
+
   const aggs = {
     total: {
       cardinality: {
-        field: 'process.entity_id',
+        field: 'process.entry_leader.entity_id',
       },
     },
   };

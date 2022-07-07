@@ -29,7 +29,9 @@ const AlertSummaryViewComponent: React.FC<{
     [browserFields, data, eventId, isDraggable, timelineId, isReadOnly]
   );
 
-  return <SummaryView rows={summaryRows} title={title} goToTable={goToTable} />;
+  return (
+    <SummaryView rows={summaryRows} title={title} goToTable={goToTable} isReadOnly={isReadOnly} />
+  );
 };
 
 export const AlertSummaryView = React.memo(AlertSummaryViewComponent);

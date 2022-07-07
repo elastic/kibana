@@ -7,7 +7,7 @@
 
 import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
@@ -59,6 +59,7 @@ const TableWrapper = styled.div`
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   flex: 1;
   overflow: auto;
+  overflow-x: hidden;
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
@@ -130,6 +131,32 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     vertical-align: top;
   }
 `;
+
+// Match structure in discover
+const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
+
+// Encapsulating the pagination logic for the table.
+const useFieldBrowserPagination = () => {
+  const [pagination, setPagination] = useState<{ pageIndex: number }>({
+    pageIndex: 0,
+  });
+
+  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
+    setPagination({ pageIndex: index });
+  }, []);
+  const paginationTableProp = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+    }),
+    [pagination]
+  );
+
+  return {
+    onTableChange,
+    paginationTableProp,
+  };
+};
 
 /**
  * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
@@ -274,6 +301,9 @@ export const EventFieldsBrowser = React.memo<Props>(
       focusSearchInput();
     }, [focusSearchInput]);
 
+    // Pagination
+    const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
+
     return (
       <TableWrapper onKeyDown={onKeyDown} ref={containerElement}>
         <StyledEuiInMemoryTable
@@ -281,7 +311,8 @@ export const EventFieldsBrowser = React.memo<Props>(
           items={items}
           itemId="field"
           columns={columns}
-          pagination={false}
+          onTableChange={onTableChange}
+          pagination={paginationTableProp}
           rowProps={onSetRowProps}
           search={search}
           sorting={false}

@@ -16,7 +16,8 @@ import {
   createTransportMock,
   ClientMock,
 } from './configure_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
@@ -107,6 +108,21 @@ describe('configureClient', () => {
     expect(ClientMock).toHaveBeenCalledWith(
       expect.objectContaining({
         Transport: mockedTransport,
+      })
+    );
+    expect(client).toBe(ClientMock.mock.results[0].value);
+  });
+
+  it('constructs a client using `ClusterConnectionPool` for `ConnectionPool` ', () => {
+    const mockedTransport = { mockTransport: true };
+    createTransportMock.mockReturnValue(mockedTransport);
+
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ConnectionPool: ClusterConnectionPool,
       })
     );
     expect(client).toBe(ClientMock.mock.results[0].value);

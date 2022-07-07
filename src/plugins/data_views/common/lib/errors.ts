@@ -22,9 +22,3 @@ export class DataViewMissingIndices extends KbnError {
     );
   }
 }
-
-/**
- * @deprecated Use DataViewMissingIndices. All index pattern interfaces were renamed.
- */
-
-export class IndexPatternMissingIndices extends DataViewMissingIndices {}

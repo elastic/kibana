@@ -93,6 +93,7 @@ describe('interpreter/functions#tagcloud', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

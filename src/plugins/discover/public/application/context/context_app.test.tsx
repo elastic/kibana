@@ -70,7 +70,8 @@ describe('ContextApp test', () => {
   const topNavProps = {
     appName: 'context',
     showSearchBar: true,
-    showQueryBar: false,
+    showQueryBar: true,
+    showQueryInput: false,
     showFilterBar: true,
     showSaveQuery: false,
     showDatePicker: false,

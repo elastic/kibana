@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
@@ -39,6 +38,25 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   visualizeServices: VisualizeServices
 ) => {
   const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
+
+  let savedSearch: SavedSearch | undefined;
+
+  if (vis.data.savedSearchId) {
+    try {
+      savedSearch = await getSavedSearch(vis.data.savedSearchId, {
+        search: data.search,
+        savedObjectsClient: savedObjects.client,
+        spaces,
+      });
+    } catch (e) {
+      // skip this catch block
+    }
+
+    if (savedSearch) {
+      await throwErrorOnSavedSearchUrlConflict(savedSearch);
+    }
+  }
+
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -54,18 +72,6 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
       );
     }
   });
-
-  let savedSearch: SavedSearch | undefined;
-
-  if (vis.data.savedSearchId) {
-    savedSearch = await getSavedSearch(vis.data.savedSearchId, {
-      search: data.search,
-      savedObjectsClient: savedObjects.client,
-      spaces,
-    });
-
-    await throwErrorOnSavedSearchUrlConflict(savedSearch);
-  }
 
   return { savedSearch, embeddableHandler };
 };
@@ -101,6 +107,7 @@ export const getVisualizationInstanceFromInput = async (
       // skip this catch block
     }
   }
+
   const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
     vis,
     visualizeServices

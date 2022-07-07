@@ -19,7 +19,7 @@ const mockTheme = getMockTheme({
     euiLineHeight: 10,
     euiBreakpoints: { s: '10px' },
     euiSize: '10px',
-    paddingSizes: { m: '16px' },
+    euiSizeM: '16px',
   },
 });
 

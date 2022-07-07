@@ -8,7 +8,7 @@
 
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
-import type { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
@@ -30,7 +30,7 @@ export const extendSearchParamsWithRuntimeFields = async (
     let runtimeMappings = requestParams.body?.runtime_mappings;
 
     if (!runtimeMappings) {
-      const indexPattern = (await indexPatterns.find(indexPatternString)).find(
+      const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
         (index) => index.title === indexPatternString
       );
       runtimeMappings = indexPattern?.getRuntimeMappings();
@@ -47,7 +47,6 @@ export const extendSearchParamsWithRuntimeFields = async (
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
-  injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
   indexPatterns: DataViewsPublicPluginStart;
 }

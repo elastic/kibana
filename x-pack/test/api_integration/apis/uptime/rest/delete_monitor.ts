@@ -12,7 +12,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[DELETE] /internal/uptime/service/monitors', () => {
+  describe('[DELETE] /internal/uptime/service/monitors', function () {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;
@@ -70,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
-    it('validates param length for sanity', async () => {
+    it('validates param length', async () => {
       const veryLargeMonId = new Array(1050).fill('1').join('');
 
       await supertest

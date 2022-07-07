@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,16 +27,28 @@ import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_p
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const mapJobId = globalState?.ml?.jobId;
-  const mapModelId = globalState?.ml?.modelId;
+  const jobId = globalState?.ml?.jobId;
+  const modelId = globalState?.ml?.modelId;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(
-    !mapJobId && !mapModelId
+    !jobId && !modelId
   );
   const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
-  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
+
+  const setAnalyticsId = useCallback(
+    (analyticsId: AnalyticsSelectorIds) => {
+      setGlobalState({
+        ml: {
+          ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
+          ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
+        },
+      });
+    },
+    [setGlobalState]
+  );
+
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -58,20 +70,6 @@ export const Page: FC = () => {
   useEffect(function checkJobs() {
     checkJobsExist();
   }, []);
-
-  useEffect(
-    function updateUrl() {
-      if (analyticsId !== undefined) {
-        setGlobalState({
-          ml: {
-            ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
-            ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
-          },
-        });
-      }
-    },
-    [analyticsId?.job_id, analyticsId?.model_id]
-  );
 
   const getEmptyState = () => {
     if (jobsExist === false) {
@@ -95,14 +93,11 @@ export const Page: FC = () => {
     );
   };
 
-  const jobId = mapJobId ?? analyticsId?.job_id;
-  const modelId = mapModelId ?? analyticsId?.model_id;
-
   return (
     <>
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
-        selectedId={jobId || modelId}
+        selectedId={jobId ?? modelId}
       />
       {isIdSelectorFlyoutVisible ? (
         <AnalyticsIdSelector
@@ -119,7 +114,7 @@ export const Page: FC = () => {
           />
         </MlPageHeader>
       ) : null}
-      {jobId !== undefined ? (
+      {jobId !== undefined && modelId === undefined ? (
         <MlPageHeader>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
@@ -129,7 +124,7 @@ export const Page: FC = () => {
           />
         </MlPageHeader>
       ) : null}
-      {modelId !== undefined ? (
+      {modelId !== undefined && jobId === undefined ? (
         <MlPageHeader>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
@@ -145,10 +140,11 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
-      {mapJobId || mapModelId || analyticsId ? (
+      {jobId || modelId ? (
         <JobMap
-          analyticsId={mapJobId || analyticsId?.job_id}
-          modelId={mapModelId || analyticsId?.model_id}
+          key={`${jobId ?? modelId}-id`}
+          analyticsId={jobId}
+          modelId={modelId}
           forceRefresh={isLoading}
         />
       ) : (

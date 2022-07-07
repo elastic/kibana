@@ -6,8 +6,9 @@
  */
 
 import Semver from 'semver';
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -19,6 +20,8 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
@@ -51,9 +54,18 @@ import {
   RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
+  RuleSnooze,
+  RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
+import {
+  validateRuleTypeParams,
+  ruleExecutionStatusFromRaw,
+  getRuleNotifyWhenType,
+  validateMutatedRuleTypeParams,
+  convertRuleIdsToKueryNode,
+  getRuleSnoozeEndTime,
+} from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -69,9 +81,14 @@ import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
+import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { mapSortField, validateOperationOnAttributes } from './lib';
+import {
+  mapSortField,
+  validateOperationOnAttributes,
+  retryIfBulkEditConflicts,
+  applyBulkEditOperation,
+} from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -90,9 +107,10 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { IExecutionLogWithErrorsResult } from '../../common';
-import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
+import { getActiveSnoozes } from '../lib/is_rule_snoozed';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -133,6 +151,21 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  tags: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
+export interface RuleBulkEditAggregation {
+  alertTypeId: {
+    buckets: Array<{
+      key: string[];
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -144,7 +177,7 @@ export interface ConstructorOptions {
   ruleTypeRegistry: RuleTypeRegistry;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  spaceId?: string;
+  spaceId: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
@@ -161,7 +194,7 @@ export interface MuteOptions extends IndexType {
 }
 
 export interface SnoozeOptions extends IndexType {
-  snoozeEndTime: string | -1;
+  snoozeSchedule: RuleSnoozeSchedule;
 }
 
 export interface FindOptions extends IndexType {
@@ -178,6 +211,64 @@ export interface FindOptions extends IndexType {
   };
   fields?: string[];
   filter?: string;
+}
+
+export type BulkEditFields = keyof Pick<
+  Rule,
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+>;
+
+export type BulkEditOperation =
+  | {
+      operation: 'add' | 'delete' | 'set';
+      field: Extract<BulkEditFields, 'tags'>;
+      value: string[];
+    }
+  | {
+      operation: 'add' | 'set';
+      field: Extract<BulkEditFields, 'actions'>;
+      value: NormalizedAlertAction[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'schedule'>;
+      value: Rule['schedule'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'throttle'>;
+      value: Rule['throttle'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'notifyWhen'>;
+      value: Rule['notifyWhen'];
+    };
+
+type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
+
+export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
+  filter?: string | KueryNode;
+  operations: BulkEditOperation[];
+  paramsModifier?: RuleParamsModifier<Params>;
+}
+
+export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
+  ids: string[];
+  operations: BulkEditOperation[];
+  paramsModifier?: RuleParamsModifier<Params>;
+}
+
+export type BulkEditOptions<Params extends RuleTypeParams> =
+  | BulkEditOptionsFilter<Params>
+  | BulkEditOptionsIds<Params>;
+
+export interface BulkEditError {
+  message: string;
+  rule: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AggregateOptions extends IndexType {
@@ -200,6 +291,7 @@ export interface AggregateResult {
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
+  ruleTags?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -223,7 +315,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-    | 'snoozeEndTime'
+    | 'snoozeSchedule'
+    | 'isSnoozedUntil'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -274,6 +367,10 @@ const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 
+const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
+const API_KEY_GENERATE_CONCURRENCY = 50;
+const RULE_TYPE_CHECKS_CONCURRENCY = 50;
+
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
@@ -281,7 +378,7 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 export class RulesClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
-  private readonly spaceId?: string;
+  private readonly spaceId: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -300,7 +397,7 @@ export class RulesClient {
   private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
     'monitoring',
     'mapped_params',
-    'snoozeEndTime',
+    'snoozeSchedule',
   ];
 
   constructor({
@@ -413,7 +510,8 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: null,
+      isSnoozedUntil: null,
+      snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -449,11 +547,12 @@ export class RulesClient {
       );
     } catch (e) {
       // Avoid unused API key
-      markApiKeyForInvalidation(
-        { apiKey: rawRule.apiKey },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: rawRule.apiKey ? [rawRule.apiKey] : [] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
+
       throw e;
     }
     if (data.enabled) {
@@ -921,9 +1020,12 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        tags: {
+          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+        },
         snoozed: {
           date_range: {
-            field: 'alert.attributes.snoozeEndTime',
+            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
             format: 'strict_date_time',
             ranges: [{ from: 'now' }],
           },
@@ -989,6 +1091,9 @@ export class RulesClient {
     ret.ruleSnoozedStatus = {
       snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
+
+    const tagsBuckets = resp.aggregations.tags?.buckets || [];
+    ret.ruleTags = tagsBuckets.map((bucket) => bucket.key);
 
     return ret;
   }
@@ -1056,8 +1161,8 @@ export class RulesClient {
     await Promise.all([
       taskIdToRemove ? this.taskManager.removeIfExists(taskIdToRemove) : null,
       apiKeyToInvalidate
-        ? markApiKeyForInvalidation(
-            { apiKey: apiKeyToInvalidate },
+        ? bulkMarkApiKeysForInvalidation(
+            { apiKeys: [apiKeyToInvalidate] },
             this.logger,
             this.unsecuredSavedObjectsClient
           )
@@ -1133,8 +1238,8 @@ export class RulesClient {
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
-        ? markApiKeyForInvalidation(
-            { apiKey: alertSavedObject.attributes.apiKey },
+        ? bulkMarkApiKeysForInvalidation(
+            { apiKeys: [alertSavedObject.attributes.apiKey] },
             this.logger,
             this.unsecuredSavedObjectsClient
           )
@@ -1142,20 +1247,23 @@ export class RulesClient {
       (async () => {
         if (
           updateResult.scheduledTaskId &&
+          updateResult.schedule &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
-          this.taskManager
-            .runNow(updateResult.scheduledTaskId)
-            .then(() => {
-              this.logger.debug(
-                `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
-              );
-            })
-            .catch((err: Error) => {
-              this.logger.error(
-                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-              );
-            });
+          try {
+            const { tasks } = await this.taskManager.bulkUpdateSchedules(
+              [updateResult.scheduledTaskId],
+              updateResult.schedule
+            );
+
+            this.logger.debug(
+              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId} to run at: ${tasks?.[0]?.runAt}`
+            );
+          } catch (err) {
+            this.logger.error(
+              `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: ${err.message}`
+            );
+          }
         }
       })(),
     ]);
@@ -1233,11 +1341,12 @@ export class RulesClient {
       );
     } catch (e) {
       // Avoid unused API key
-      markApiKeyForInvalidation(
-        { apiKey: createAttributes.apiKey },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: createAttributes.apiKey ? [createAttributes.apiKey] : [] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
+
       throw e;
     }
 
@@ -1256,6 +1365,379 @@ export class RulesClient {
       false,
       true
     );
+  }
+
+  public async bulkEdit<Params extends RuleTypeParams>(
+    options: BulkEditOptions<Params>
+  ): Promise<{
+    rules: Array<SanitizedRule<Params>>;
+    errors: BulkEditError[];
+    total: number;
+  }> {
+    const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
+    const ids = (options as BulkEditOptionsIds<Params>).ids;
+
+    if (ids && queryFilter) {
+      throw Boom.badRequest(
+        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+      );
+    }
+
+    let qNodeQueryFilter: null | KueryNode;
+    if (!queryFilter) {
+      qNodeQueryFilter = null;
+    } else if (typeof queryFilter === 'string') {
+      qNodeQueryFilter = fromKueryExpression(queryFilter);
+    } else {
+      qNodeQueryFilter = queryFilter;
+    }
+
+    const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        alertingAuthorizationFilterOpts
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.BULK_EDIT,
+          error,
+        })
+      );
+      throw error;
+    }
+    const { filter: authorizationFilter } = authorizationTuple;
+    const qNodeFilterWithAuth =
+      authorizationFilter && qNodeFilter
+        ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
+        : qNodeFilter;
+
+    const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
+      RawRule,
+      RuleBulkEditAggregation
+    >({
+      filter: qNodeFilterWithAuth,
+      page: 1,
+      perPage: 0,
+      type: 'alert',
+      aggs: {
+        alertTypeId: {
+          multi_terms: {
+            terms: [
+              { field: 'alert.attributes.alertTypeId' },
+              { field: 'alert.attributes.consumer' },
+            ],
+          },
+        },
+      },
+    });
+
+    if (total > MAX_RULES_NUMBER_FOR_BULK_EDIT) {
+      throw Boom.badRequest(
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`
+      );
+    }
+    const buckets = aggregations?.alertTypeId.buckets;
+
+    if (buckets === undefined) {
+      throw Error('No rules found for bulk edit');
+    }
+
+    await pMap(
+      buckets,
+      async ({ key: [ruleType, consumer] }) => {
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+
+        try {
+          await this.authorization.ensureAuthorized({
+            ruleTypeId: ruleType,
+            consumer,
+            operation: WriteOperations.BulkEdit,
+            entity: AlertingAuthorizationEntity.Rule,
+          });
+        } catch (error) {
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.BULK_EDIT,
+              error,
+            })
+          );
+          throw error;
+        }
+      },
+      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+    );
+
+    const { apiKeysToInvalidate, results, errors } = await retryIfBulkEditConflicts(
+      this.logger,
+      `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
+        options.paramsModifier ? '[Function]' : undefined
+      }')`,
+      (filterKueryNode: KueryNode | null) =>
+        this.bulkEditOcc({
+          filter: filterKueryNode,
+          operations: options.operations,
+          paramsModifier: options.paramsModifier,
+        }),
+      qNodeFilterWithAuth
+    );
+
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      this.logger,
+      this.unsecuredSavedObjectsClient
+    );
+
+    const updatedRules = results.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw<Params>(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    // update schedules only if schedule operation is present
+    const scheduleOperation = options.operations.find(
+      (
+        operation
+      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        operation.field === 'schedule'
+    );
+
+    if (scheduleOperation?.value) {
+      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+        if (rule.scheduledTaskId) {
+          acc.push(rule.scheduledTaskId);
+        }
+        return acc;
+      }, []);
+
+      try {
+        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+        this.logger.debug(
+          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to update schedules for underlying tasks: ${taskIds.join(
+            ', '
+          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
+        );
+      }
+    }
+
+    return { rules: updatedRules, errors, total };
+  }
+
+  private async bulkEditOcc<Params extends RuleTypeParams>({
+    filter,
+    operations,
+    paramsModifier,
+  }: {
+    filter: KueryNode | null;
+    operations: BulkEditOptions<Params>['operations'];
+    paramsModifier: BulkEditOptions<Params>['paramsModifier'];
+  }): Promise<{
+    apiKeysToInvalidate: string[];
+    rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+    resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
+    errors: BulkEditError[];
+  }> {
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const errors: BulkEditError[] = [];
+    const apiKeysToInvalidate: string[] = [];
+    const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
+    const username = await this.getUserName();
+
+    for await (const response of rulesFinder.find()) {
+      await pMap(
+        response.saved_objects,
+        async (rule) => {
+          try {
+            if (rule.attributes.apiKey) {
+              apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
+            }
+
+            const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+
+            let attributes = cloneDeep(rule.attributes);
+            let ruleActions = {
+              actions: this.injectReferencesIntoActions(
+                rule.id,
+                rule.attributes.actions,
+                rule.references || []
+              ),
+            };
+            for (const operation of operations) {
+              switch (operation.field) {
+                case 'actions':
+                  await this.validateActions(ruleType, operation.value);
+                  ruleActions = applyBulkEditOperation(operation, ruleActions);
+                  break;
+                default:
+                  attributes = applyBulkEditOperation(operation, attributes);
+              }
+            }
+
+            // validate schedule interval
+            if (attributes.schedule.interval) {
+              const isIntervalInvalid =
+                parseDuration(attributes.schedule.interval as string) <
+                this.minimumScheduleIntervalInMs;
+              if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
+                throw Error(
+                  `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+                );
+              } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
+                this.logger.warn(
+                  `Rule schedule interval (${attributes.schedule.interval}) for "${ruleType.id}" rule type with ID "${attributes.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+                );
+              }
+            }
+
+            const ruleParams = paramsModifier
+              ? await paramsModifier(attributes.params as Params)
+              : attributes.params;
+
+            // validate rule params
+            const validatedAlertTypeParams = validateRuleTypeParams(
+              ruleParams,
+              ruleType.validate?.params
+            );
+            const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
+              validatedAlertTypeParams,
+              rule.attributes.params,
+              ruleType.validate?.params
+            );
+
+            const {
+              actions: rawAlertActions,
+              references,
+              params: updatedParams,
+            } = await this.extractReferences(
+              ruleType,
+              ruleActions.actions,
+              validatedMutatedAlertTypeParams
+            );
+
+            // create API key
+            let createdAPIKey = null;
+            try {
+              createdAPIKey = attributes.enabled
+                ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
+                : null;
+            } catch (error) {
+              throw Error(`Error updating rule: could not create API key - ${error.message}`);
+            }
+
+            const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+
+            // collect generated API keys
+            if (apiKeyAttributes.apiKey) {
+              apiKeysMap.set(rule.id, {
+                ...apiKeysMap.get(rule.id),
+                newApiKey: apiKeyAttributes.apiKey,
+              });
+            }
+
+            // get notifyWhen
+            const notifyWhen = getRuleNotifyWhenType(
+              attributes.notifyWhen,
+              attributes.throttle ?? null
+            );
+
+            const updatedAttributes = this.updateMeta({
+              ...attributes,
+              ...apiKeyAttributes,
+              params: updatedParams as RawRule['params'],
+              actions: rawAlertActions,
+              notifyWhen,
+              updatedBy: username,
+              updatedAt: new Date().toISOString(),
+            });
+
+            // add mapped_params
+            const mappedParams = getMappedParams(updatedParams);
+
+            if (Object.keys(mappedParams).length) {
+              updatedAttributes.mapped_params = mappedParams;
+            }
+
+            rules.push({
+              ...rule,
+              references,
+              attributes: updatedAttributes,
+            });
+          } catch (error) {
+            errors.push({
+              message: error.message,
+              rule: {
+                id: rule.id,
+                name: rule.attributes?.name,
+              },
+            });
+            this.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.BULK_EDIT,
+                error,
+              })
+            );
+          }
+        },
+        { concurrency: API_KEY_GENERATE_CONCURRENCY }
+      );
+    }
+
+    let result;
+    try {
+      result = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+    } catch (e) {
+      // avoid unused newly generated API keys
+      if (apiKeysMap.size > 0) {
+        await bulkMarkApiKeysForInvalidation(
+          {
+            apiKeys: Array.from(apiKeysMap.values()).reduce<string[]>((acc, value) => {
+              if (value.newApiKey) {
+                acc.push(value.newApiKey);
+              }
+              return acc;
+            }, []),
+          },
+          this.logger,
+          this.unsecuredSavedObjectsClient
+        );
+      }
+      throw e;
+    }
+
+    result.saved_objects.map(({ id, error }) => {
+      const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
+      const newApiKey = apiKeysMap.get(id)?.newApiKey;
+
+      // if SO wasn't saved and has new API key it will be invalidated
+      if (error && newApiKey) {
+        apiKeysToInvalidate.push(newApiKey);
+        // if SO saved and has old Api Key it will be invalidate
+      } else if (!error && oldApiKey) {
+        apiKeysToInvalidate.push(oldApiKey);
+      }
+    });
+
+    return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
 
   private apiKeyAsAlertAttributes(
@@ -1360,8 +1842,8 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
       // Avoid unused API key
-      markApiKeyForInvalidation(
-        { apiKey: updateAttributes.apiKey },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
@@ -1369,8 +1851,8 @@ export class RulesClient {
     }
 
     if (apiKeyToInvalidate) {
-      await markApiKeyForInvalidation(
-        { apiKey: apiKeyToInvalidate },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: [apiKeyToInvalidate] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
@@ -1386,7 +1868,7 @@ export class RulesClient {
   }
 
   private async enableWithOCC({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
+    let existingApiKey: string | null = null;
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -1395,14 +1877,11 @@ export class RulesClient {
         await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
-      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      existingApiKey = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
     } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-      );
+      this.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
       // Still attempt to load the attributes and version using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
@@ -1444,19 +1923,10 @@ export class RulesClient {
     if (attributes.enabled === false) {
       const username = await this.getUserName();
 
-      let createdAPIKey = null;
-      try {
-        createdAPIKey = await this.createAPIKey(
-          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-        );
-      } catch (error) {
-        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
-      }
-
       const updateAttributes = this.updateMeta({
         ...attributes,
+        ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
         enabled: true,
-        ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
         executionStatus: {
@@ -1467,15 +1937,10 @@ export class RulesClient {
           warning: null,
         },
       });
+
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
       } catch (e) {
-        // Avoid unused API key
-        markApiKeyForInvalidation(
-          { apiKey: updateAttributes.apiKey },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
         throw e;
       }
       const scheduledTask = await this.scheduleRule({
@@ -1488,14 +1953,26 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
-      if (apiKeyToInvalidate) {
-        await markApiKeyForInvalidation(
-          { apiKey: apiKeyToInvalidate },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
-      }
     }
+  }
+
+  private async createNewAPIKeySet({
+    attributes,
+    username,
+  }: {
+    attributes: RawRule;
+    username: string | null;
+  }): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner'>> {
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
+    } catch (error) {
+      throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
+    }
+
+    return this.apiKeyAsAlertAttributes(createdAPIKey, username);
   }
 
   public async disable({ id }: { id: string }): Promise<void> {
@@ -1507,7 +1984,6 @@ export class RulesClient {
   }
 
   private async disableWithOCC({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -1516,14 +1992,10 @@ export class RulesClient {
         await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
-      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
     } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-      );
+      this.logger.error(`disable(): Failed to load API key of alert ${id}: ${e.message}`);
       // Still attempt to load the attributes and version using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
@@ -1616,54 +2088,48 @@ export class RulesClient {
           ...attributes,
           enabled: false,
           scheduledTaskId: null,
-          apiKey: null,
-          apiKeyOwner: null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
         }),
         { version }
       );
-
-      await Promise.all([
-        attributes.scheduledTaskId
-          ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
-          : null,
-        apiKeyToInvalidate
-          ? await markApiKeyForInvalidation(
-              { apiKey: apiKeyToInvalidate },
-              this.logger,
-              this.unsecuredSavedObjectsClient
-            )
-          : null,
-      ]);
+      if (attributes.scheduledTaskId) {
+        await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+      }
     }
   }
 
   public async snooze({
     id,
-    snoozeEndTime,
+    snoozeSchedule,
   }: {
     id: string;
-    snoozeEndTime: string | -1;
+    snoozeSchedule: RuleSnoozeSchedule;
   }): Promise<void> {
-    if (typeof snoozeEndTime === 'string') {
-      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
-      if (snoozeDateValidationMsg) {
-        throw new RuleMutedError(snoozeDateValidationMsg);
-      }
+    const snoozeDateValidationMsg = validateSnoozeStartDate(snoozeSchedule.rRule.dtstart);
+    if (snoozeDateValidationMsg) {
+      throw new RuleMutedError(snoozeDateValidationMsg);
     }
+
     return await retryIfConflicts(
       this.logger,
-      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
-      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+      `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
+      async () => await this.snoozeWithOCC({ id, snoozeSchedule })
     );
   }
 
-  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+  private async snoozeWithOCC({
+    id,
+    snoozeSchedule,
+  }: {
+    id: string;
+    snoozeSchedule: RuleSnoozeSchedule;
+  }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
+    const { id: snoozeId, duration } = snoozeSchedule;
 
     try {
       await this.authorization.ensureAuthorized({
@@ -1697,11 +2163,20 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If snoozeEndTime is -1, instead mute all
+    // If duration is -1, instead mute all
     const newAttrs =
-      snoozeEndTime === -1
-        ? { muteAll: true, snoozeEndTime: null }
-        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
+      duration === -1
+        ? {
+            muteAll: true,
+            snoozeSchedule: clearUnscheduledSnooze(attributes),
+          }
+        : {
+            snoozeSchedule: (snoozeId
+              ? clearScheduledSnoozesById(attributes, [snoozeId])
+              : clearUnscheduledSnooze(attributes)
+            ).concat(snoozeSchedule),
+            muteAll: false,
+          };
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
@@ -1715,18 +2190,24 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    );
+    ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
-  public async unsnooze({ id }: { id: string }): Promise<void> {
+  public async unsnooze({
+    id,
+    scheduleIds,
+  }: {
+    id: string;
+    scheduleIds?: string[];
+  }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.unsnooze('${id}')`,
-      async () => await this.unsnoozeWithOCC({ id })
+      async () => await this.unsnoozeWithOCC({ id, scheduleIds })
     );
   }
 
-  private async unsnoozeWithOCC({ id }: { id: string }) {
+  private async unsnoozeWithOCC({ id, scheduleIds }: { id: string; scheduleIds?: string[] }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
@@ -1765,8 +2246,34 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeEndTime: null,
-      muteAll: false,
+      snoozeSchedule: scheduleIds
+        ? clearScheduledSnoozesById(attributes, scheduleIds)
+        : clearCurrentActiveSnooze(attributes),
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+      ...(!scheduleIds ? { muteAll: false } : {}),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    ).then(() => this.updateSnoozedUntilTime({ id }));
+  }
+
+  public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
+    if (!isSnoozedUntil && !attributes.isSnoozedUntil) return;
+
+    const updateAttributes = this.updateMeta({
+      isSnoozedUntil: isSnoozedUntil ? isSnoozedUntil.toISOString() : null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1829,7 +2336,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1892,7 +2399,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2140,15 +2647,23 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
-      snoozeEndTime,
+      snoozeSchedule,
+      isSnoozedUntil,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
-    const snoozeEndTimeDate = snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime;
-    const includeSnoozeEndTime = snoozeEndTimeDate !== undefined && !excludeFromPublicApi;
+    const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
+      ...s,
+      rRule: {
+        ...s.rRule,
+        dtstart: new Date(s.rRule.dtstart),
+        ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
+      },
+    }));
+    const includeSnoozeSchedule = snoozeSchedule !== undefined;
     const rule = {
       id,
       notifyWhen,
@@ -2158,9 +2673,10 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-      ...(includeSnoozeEndTime ? { snoozeEndTime: snoozeEndTimeDate } : {}),
+      ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+      ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
@@ -2374,4 +2890,31 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   }
 
   return parsedDate;
+}
+
+function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+  // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
+    : [];
+}
+
+function clearScheduledSnoozesById(attributes: { snoozeSchedule?: RuleSnooze }, ids: string[]) {
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
+    : [];
+}
+
+function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; muteAll: boolean }) {
+  // First attempt to cancel a simple (unscheduled) snooze
+  const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
+  // Now clear any scheduled snoozes that are currently active and never recur
+  const activeSnoozes = getActiveSnoozes(attributes);
+  const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
+    if (!activeSnoozeIds.includes(s.id!)) return true;
+    // Check if this is a recurring snooze, and return true if so
+    if (s.rRule.freq && s.rRule.count !== 1) return true;
+  });
+  return clearedNonRecurringActiveSnoozes;
 }
