@@ -19,6 +19,7 @@ import { savedObjectsExporterMock } from '../../export/saved_objects_exporter.mo
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];
@@ -41,7 +42,8 @@ describe('POST /api/saved_objects/_export', () => {
     );
     exporter = handlerContext.savedObjects.getExporter();
 
-    const router = httpSetup.createRouter('/api/saved_objects/');
+    const router =
+      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     handlerContext.savedObjects.getExporter = jest
       .fn()
       .mockImplementation(() => exporter as ReturnType<typeof savedObjectsExporterMock.create>);

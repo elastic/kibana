@@ -26,12 +26,12 @@ import {
 } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
-  benchmarksInputSchema,
-  BenchmarksQuerySchema,
+  benchmarksQueryParamsSchema,
+  BenchmarksQueryParams,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
-import type { CspRuleType } from '../../../common/schemas';
+import type { CspRule } from '../../../common/schemas';
 import {
   createCspRuleSearchFilterByPackagePolicy,
   isNonNullable,
@@ -53,7 +53,7 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
-  queryParams: Partial<BenchmarksQuerySchema>
+  queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService is undefined');
@@ -107,8 +107,8 @@ export interface RulesStatusAggregation {
 export const getCspRulesStatus = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<CspRuleType, RulesStatusAggregation>> => {
-  const cspRules = soClient.find<CspRuleType, RulesStatusAggregation>({
+): Promise<SavedObjectsFindResponse<CspRule, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<CspRule, RulesStatusAggregation>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: packagePolicy.id,
@@ -200,7 +200,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: benchmarksInputSchema },
+      validate: { query: benchmarksQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },

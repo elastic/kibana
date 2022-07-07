@@ -11,7 +11,12 @@ import {
   JSON_VIEW_TAB,
   OVERVIEW_TAB,
   TABLE_TAB,
+  FILTER_INPUT,
 } from '../screens/alerts_details';
+
+export const filterBy = (value: string) => {
+  cy.get(FILTER_INPUT).type(value);
+};
 
 export const openJsonView = () => {
   cy.get(JSON_VIEW_TAB).click();
