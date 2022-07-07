@@ -357,6 +357,7 @@ export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListR
 
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
+  allMonitorIds: t.array(t.string),
   pages: t.record(
     t.number,
     t.array(
