@@ -27,7 +27,6 @@ export const BUILT_IN_SO_TYPES = [
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
-  'application_usage_transactional',
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
