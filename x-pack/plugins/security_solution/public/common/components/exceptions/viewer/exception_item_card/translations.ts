@@ -111,18 +111,30 @@ export const CONDITION_AND = i18n.translate(
   }
 );
 
-export const CONDITION_OS = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.os', {
-  defaultMessage: 'OS',
-});
+export const CONDITION_OS = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.os',
+  {
+    defaultMessage: 'OS',
+  }
+);
 
-export const OS_WINDOWS = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.windows', {
-  defaultMessage: 'Windows',
-});
+export const OS_WINDOWS = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.windows',
+  {
+    defaultMessage: 'Windows',
+  }
+);
 
-export const OS_LINUX = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.linux', {
-  defaultMessage: 'Linux',
-});
+export const OS_LINUX = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.linux',
+  {
+    defaultMessage: 'Linux',
+  }
+);
 
-export const OS_MAC = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.macos', {
-  defaultMessage: 'Mac',
-});
+export const OS_MAC = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.macos',
+  {
+    defaultMessage: 'Mac',
+  }
+);

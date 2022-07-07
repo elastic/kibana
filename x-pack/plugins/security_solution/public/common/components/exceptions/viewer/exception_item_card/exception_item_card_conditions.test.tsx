@@ -48,9 +48,9 @@ describe('ExceptionItemCardConditions', () => {
     );
 
     // Text is gonna look a bit off unformatted
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemConditions-os"]').at(0).text()
-    ).toEqual(' OSIS Linux');
+    expect(wrapper.find('[data-test-subj="exceptionItemConditions-os"]').at(0).text()).toEqual(
+      ' OSIS Linux'
+    );
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(0).text()
     ).toEqual(' host.nameIS host');
@@ -97,9 +97,7 @@ describe('ExceptionItemCardConditions', () => {
     );
 
     // Text is gonna look a bit off unformatted
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemConditions-os"]').exists()
-    ).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionItemConditions-os"]').exists()).toBeFalsy();
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(0).text()
     ).toEqual(' host.nameIS host');

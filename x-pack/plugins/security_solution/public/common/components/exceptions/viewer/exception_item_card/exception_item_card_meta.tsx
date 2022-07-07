@@ -34,9 +34,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           <MetaInfoDetails
             fieldName="created_by"
             label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
-            value1={
-              <FormattedDate fieldName="created_by" value={item.created_at} />
-            }
+            value1={<FormattedDate fieldName="created_by" value={item.created_at} />}
             value2={item.created_by}
             dataTestSubj={`${dataTestSubj}-createdBy`}
           />

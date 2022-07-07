@@ -64,7 +64,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           .map((osValue) => OS_LABELS[osValue as keyof typeof OS_LABELS] ?? osValue)
           .join(', ');
       }
-      
+
       return null;
     }, [os]);
 
@@ -138,7 +138,9 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
             <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
               <div className="eui-xScroll">
                 <EuiExpression
-                  description={index === 0 ? '' : <StyledCondition>{i18n.CONDITION_AND}</StyledCondition>}
+                  description={
+                    index === 0 ? '' : <StyledCondition>{i18n.CONDITION_AND}</StyledCondition>
+                  }
                   value={field}
                   color={index === 0 ? 'primary' : 'subdued'}
                 />
