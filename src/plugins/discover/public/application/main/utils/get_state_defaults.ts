@@ -16,7 +16,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-import { DEFAULT_ROWS_PER_PAGE } from '../../../constants';
 import { SavedSearch } from '../../../services/saved_searches';
 
 import { AppState } from '../services/discover_state';
@@ -70,7 +69,7 @@ export function getStateDefaults({
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
-    rowsPerPage: DEFAULT_ROWS_PER_PAGE,
+    rowsPerPage: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
