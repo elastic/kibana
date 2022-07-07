@@ -8,8 +8,8 @@
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { RequestHandlerContextBase } from '@kbn/core-http-server';
-import { ContextContainer } from './context';
-import { httpServerMock } from '../../http/http_server.mocks';
+import { ContextContainer } from './context_container';
+import { httpServerMock } from '../http/http_server.mocks';
 
 const pluginA = Symbol('pluginA');
 const pluginB = Symbol('pluginB');
