@@ -28,7 +28,7 @@ export const buildSearchUIConfig = (
     }, {});
 
   const resultFields = Object.entries(schema)
-    .filter(([_, schemaField]) => schemaField.type !== SchemaType.Nested)
+    .filter(([, schemaField]) => schemaField.type !== SchemaType.Nested)
     .reduce((acc, [fieldName, schemaField]) => {
       if (schemaField.capabilities.snippet) {
         return {  ...acc,  [fieldName]: {  raw: {},  snippet: { size: 300 } } };
