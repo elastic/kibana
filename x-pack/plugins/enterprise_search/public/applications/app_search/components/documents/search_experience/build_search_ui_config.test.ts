@@ -15,11 +15,23 @@ describe('buildSearchUIConfig', () => {
   it('builds a configuration object for Search UI', () => {
     const connector = {};
     const schema = {
-      foo: SchemaType.Text,
-      bar: SchemaType.Number,
+      foo: {
+        type: SchemaType.Text,
+        capabilities: {
+          snippet: true,
+          facet: true,
+        }
+      },
+      bar: {
+        type: SchemaType.Number,
+        capabilities: {
+          snippet: false,
+          facet: false,
+        }
+      },
     };
     const fields = {
-      filterFields: ['fieldA', 'fieldB'],
+      filterFields: ['foo', 'bar'],
       sortFields: [],
     };
 
@@ -32,13 +44,9 @@ describe('buildSearchUIConfig', () => {
         sortField: 'id',
       },
       searchQuery: {
-        disjunctiveFacets: ['fieldA', 'fieldB'],
+        disjunctiveFacets: ['foo'],
         facets: {
-          fieldA: {
-            size: 30,
-            type: 'value',
-          },
-          fieldB: {
+          foo: {
             size: 30,
             type: 'value',
           },
@@ -50,7 +58,6 @@ describe('buildSearchUIConfig', () => {
           foo: {
             raw: {},
             snippet: {
-              fallback: true,
               size: 300,
             },
           },
