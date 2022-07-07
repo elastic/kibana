@@ -97,7 +97,7 @@ example, you will need to go to *Stack Management* > *Rules and Connectors*,
 multi-select the failed rules that need to be fixed, click on *Manage rules* > *Disable*, 
 then click on *Manage rules* > *Enable* to restore the alerting rule to a functional
 state. It should be noted that the disable-enable operation causes the 
-alerting rule to run as the user that performed the operation. For more details
+alerting rule to run as the user that performed the operation and reset the rule state. For more details
 about API key authorization, refer to <<alerting-authorization>>.
 
 Example error message::
@@ -167,7 +167,7 @@ example, you will need to go to *Stack Management* > *Rules and Connectors*,
 multi-select the failed rules that need to be fixed, click on *Manage rules* > *Disable*, 
 then click on *Manage rules* > *Enable* to restore the alerting rule to a functional
 state. It should be noted that the disable-enable operation causes the 
-alerting rule to run as the user that performed the operation. For more details
+alerting rule to run as the user that performed the operation and reset the rule state. For more details
 about API key authorization, refer to <<alerting-authorization>>.
 
 Example error message::
