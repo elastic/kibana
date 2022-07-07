@@ -27,12 +27,13 @@ export const SearchSourceExpression = ({
   setRuleProperty,
 }: SearchSourceExpressionProps) => {
   const {
-    searchConfiguration,
     thresholdComparator,
     threshold,
     timeWindowSize,
     timeWindowUnit,
     size,
+    savedQueryId,
+    searchConfiguration,
   } = ruleParams;
   const { data } = useTriggersAndActionsUiDeps();
 
@@ -46,31 +47,45 @@ export const SearchSourceExpression = ({
   );
 
   useEffect(() => {
-    setRuleProperty('params', {
-      searchConfiguration,
-      searchType: SearchType.searchSource,
-      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ?? DEFAULT_VALUES.SIZE,
-    });
+    const initSearchSource = async () => {
+      let initialSearchConfiguration = searchConfiguration;
 
-    const initSearchSource = () =>
+      // Init searchConfiguration when creating rule from Stack Management page
+      if (!searchConfiguration) {
+        const newSearchSource = data.search.searchSource.createEmpty();
+        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        if (defaultDataView) {
+          newSearchSource.setField('index', defaultDataView);
+        }
+        initialSearchConfiguration = newSearchSource.getSerializedFields();
+      }
+
+      setRuleProperty('params', {
+        searchConfiguration: initialSearchConfiguration,
+        searchType: SearchType.searchSource,
+        timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+        timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+        threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+        thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+        size: size ?? DEFAULT_VALUES.SIZE,
+      });
+
       data.search.searchSource
-        .create(searchConfiguration)
+        .create(initialSearchConfiguration)
         .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
         .catch(setParamsError);
+    };
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource, data.dataViews]);
 
   useEffect(() => {
-    if (ruleParams.savedQueryId) {
-      data.query.savedQueries.getSavedQuery(ruleParams.savedQueryId).then(setSavedQuery);
+    if (savedQueryId) {
+      data.query.savedQueries.getSavedQuery(savedQueryId).then(setSavedQuery);
     }
-  }, [data.query.savedQueries, ruleParams.savedQueryId]);
+  }, [data.query.savedQueries, savedQueryId]);
 
   if (paramsError) {
     return (
@@ -89,9 +104,9 @@ export const SearchSourceExpression = ({
 
   return (
     <SearchSourceExpressionForm
+      ruleParams={ruleParams}
       searchSource={searchSource}
       errors={errors}
-      ruleParams={ruleParams}
       initialSavedQuery={savedQuery}
       setParam={setParam}
     />

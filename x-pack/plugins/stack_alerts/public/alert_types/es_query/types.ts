@@ -9,6 +9,7 @@ import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { EXPRESSION_ERRORS } from './constants';
 
 export interface Comparator {
@@ -40,8 +41,8 @@ export interface OnlyEsQueryAlertParams {
   timeField: string;
 }
 export interface OnlySearchSourceAlertParams {
-  searchType: 'searchSource';
-  searchConfiguration: SerializedSearchSourceFields;
+  searchType?: 'searchSource';
+  searchConfiguration?: SerializedSearchSourceFields;
   savedQueryId?: string;
 }
 
@@ -53,4 +54,5 @@ export type ErrorKey = keyof ExpressionErrors & unknown;
 
 export interface TriggersAndActionsUiDeps {
   data: DataPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
 }

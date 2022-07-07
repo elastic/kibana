@@ -18,15 +18,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestQuery } from './use_test_query';
 
-export function TestQueryRow({
-  fetch,
-  copyQuery,
-  hasValidationErrors,
-}: {
+export interface TestQueryRowProps {
   fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>;
   copyQuery?: () => string;
   hasValidationErrors: boolean;
-}) {
+}
+
+export const TestQueryRow: React.FC<TestQueryRowProps> = ({
+  fetch,
+  copyQuery,
+  hasValidationErrors,
+}) => {
   const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
 
@@ -119,4 +121,4 @@ export function TestQueryRow({
       )}
     </>
   );
-}
+};
