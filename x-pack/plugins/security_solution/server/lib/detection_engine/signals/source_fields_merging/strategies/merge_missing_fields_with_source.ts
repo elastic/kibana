@@ -43,12 +43,8 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
       }
 
       const valueInMergedDocument = get(fieldsKey, merged);
-
       const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-
-      const setFieldInMerged = set(merged, fieldsKey, valueToMerge);
-
-      return setFieldInMerged;
+      return set(merged, fieldsKey, valueToMerge);
     },
     { ...source }
   );
