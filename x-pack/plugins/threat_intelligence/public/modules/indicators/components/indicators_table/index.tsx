@@ -14,33 +14,33 @@ import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
 
 interface Column {
   id: RawIndicatorFieldId | ComputedIndicatorFieldId;
-  label: string;
+  displayAsText: string;
 }
 
 const columns: Column[] = [
   {
     id: ComputedIndicatorFieldId.DisplayValue,
-    label: 'Indicator',
+    displayAsText: 'Indicator',
   },
   {
     id: RawIndicatorFieldId.Type,
-    label: 'Indicator type',
+    displayAsText: 'Indicator type',
   },
   {
     id: RawIndicatorFieldId.Feed,
-    label: 'Feed',
+    displayAsText: 'Feed',
   },
   {
     id: RawIndicatorFieldId.FirstSeen,
-    label: 'First seen',
+    displayAsText: 'First seen',
   },
   {
     id: RawIndicatorFieldId.LastSeen,
-    label: 'Last seen',
+    displayAsText: 'Last seen',
   },
   {
     id: RawIndicatorFieldId.MarkingTLP,
-    label: 'TLP Marking',
+    displayAsText: 'TLP Marking',
   },
 ];
 
