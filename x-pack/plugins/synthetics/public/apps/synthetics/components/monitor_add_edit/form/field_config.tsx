@@ -284,9 +284,9 @@ export const FIELD: Record<string, FieldMeta> = {
       return {
         'data-test-subj': 'syntheticsMonitorConfigURL',
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value);
+          setValue(ConfigKey.URLS, event.target.value, { shouldValidate: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
           }
         },
       };
@@ -307,9 +307,9 @@ export const FIELD: Record<string, FieldMeta> = {
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value);
+          setValue(ConfigKey.URLS, event.target.value, { shouldValidate: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigURL',
@@ -328,9 +328,9 @@ export const FIELD: Record<string, FieldMeta> = {
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value);
+          setValue(ConfigKey.HOSTS, event.target.value, { shouldValidate: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
@@ -349,9 +349,9 @@ export const FIELD: Record<string, FieldMeta> = {
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value);
+          setValue(ConfigKey.HOSTS, event.target.value, { shouldValidate: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
@@ -449,7 +449,8 @@ export const FIELD: Record<string, FieldMeta> = {
             updatedValues.map((location) => ({
               id: location.id,
               isServiceManaged: location.isServiceManaged,
-            })) as MonitorServiceLocations
+            })) as MonitorServiceLocations,
+            { shouldValidate: true }
           );
         },
       };
