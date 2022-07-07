@@ -11,4 +11,5 @@ module.exports = {
   rootDir: '../..',
   roots: ['<rootDir>/src/core'],
   testRunner: 'jasmine2',
+  testPathIgnorePatterns: ['<rootDir>/src/core/server', '<rootDir>/src/core/public'],
 };
