@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 
 export const exceptionListType = t.keyof({
   detection: null,
-  detection_rule_default: null,
+  rule_default: null,
   endpoint: null,
   endpoint_trusted_apps: null,
   endpoint_events: null,
@@ -22,6 +22,7 @@ export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
 export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
+  RULE_DEFAULT = 'rule_default',
   ENDPOINT = 'endpoint',
   ENDPOINT_TRUSTED_APPS = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',

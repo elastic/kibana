@@ -26,6 +26,7 @@ import {
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
 import {
+  CreateRuleDefaultExceptionListSchema,
   FullResponseSchema,
   PreviewResponse,
 } from '../../../../../common/detection_engine/schemas/request';
@@ -115,7 +116,7 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
  *
  * @throws An error if response is not OK
  */
- export const createDefaultExceptionListForRule = async ({ list, ruleSoId, ruleId, signal }: PatchRuleProps): Promise<RulesSchema> =>
+ export const createAndAssociateExceptionList = async ({ list, ruleSoId, ruleId, signal }: CreateRuleDefaultExceptionListSchema & { signal: AbortSignal }): Promise<RulesSchema> =>
  KibanaServices.get().http.fetch<RulesSchema>(`${DETECTION_ENGINE_RULES_URL}/exceptions`, {
    method: 'POST',
    body: JSON.stringify({ list, rule_so_id: ruleSoId, rule_id: ruleId }),
