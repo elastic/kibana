@@ -504,7 +504,7 @@ let tokenize;
         return "keyword";
       }
 
-      if (JSX_TAG.test(token.value) && (text[offset - 1] === "<" || text.substr(offset - 2, 2) == "</")) {
+      if (JSX_TAG.test(token.value) && (text[offset - 1] === "<" || text.slice(offset - 2, offset) == "</")) {
         return "jsxIdentifier";
       }
 
@@ -22782,7 +22782,7 @@ const pathKey = (options = {}) => {
 		return 'PATH';
 	}
 
-	return Object.keys(environment).find(key => key.toUpperCase() === 'PATH') || 'Path';
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
 };
 
 module.exports = pathKey;
@@ -26541,107 +26541,6 @@ function duplex(writer, reader) {
 
 /***/ }),
 
-/***/ "../../node_modules/end-of-stream/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var once = __webpack_require__("../../node_modules/once/once.js");
-
-var noop = function() {};
-
-var isRequest = function(stream) {
-	return stream.setHeader && typeof stream.abort === 'function';
-};
-
-var isChildProcess = function(stream) {
-	return stream.stdio && Array.isArray(stream.stdio) && stream.stdio.length === 3
-};
-
-var eos = function(stream, opts, callback) {
-	if (typeof opts === 'function') return eos(stream, null, opts);
-	if (!opts) opts = {};
-
-	callback = once(callback || noop);
-
-	var ws = stream._writableState;
-	var rs = stream._readableState;
-	var readable = opts.readable || (opts.readable !== false && stream.readable);
-	var writable = opts.writable || (opts.writable !== false && stream.writable);
-	var cancelled = false;
-
-	var onlegacyfinish = function() {
-		if (!stream.writable) onfinish();
-	};
-
-	var onfinish = function() {
-		writable = false;
-		if (!readable) callback.call(stream);
-	};
-
-	var onend = function() {
-		readable = false;
-		if (!writable) callback.call(stream);
-	};
-
-	var onexit = function(exitCode) {
-		callback.call(stream, exitCode ? new Error('exited with error code: ' + exitCode) : null);
-	};
-
-	var onerror = function(err) {
-		callback.call(stream, err);
-	};
-
-	var onclose = function() {
-		process.nextTick(onclosenexttick);
-	};
-
-	var onclosenexttick = function() {
-		if (cancelled) return;
-		if (readable && !(rs && (rs.ended && !rs.destroyed))) return callback.call(stream, new Error('premature close'));
-		if (writable && !(ws && (ws.ended && !ws.destroyed))) return callback.call(stream, new Error('premature close'));
-	};
-
-	var onrequest = function() {
-		stream.req.on('finish', onfinish);
-	};
-
-	if (isRequest(stream)) {
-		stream.on('complete', onfinish);
-		stream.on('abort', onclose);
-		if (stream.req) onrequest();
-		else stream.on('request', onrequest);
-	} else if (writable && !ws) { // legacy streams
-		stream.on('end', onlegacyfinish);
-		stream.on('close', onlegacyfinish);
-	}
-
-	if (isChildProcess(stream)) stream.on('exit', onexit);
-
-	stream.on('end', onend);
-	stream.on('finish', onfinish);
-	if (opts.error !== false) stream.on('error', onerror);
-	stream.on('close', onclose);
-
-	return function() {
-		cancelled = true;
-		stream.removeListener('complete', onfinish);
-		stream.removeListener('abort', onclose);
-		stream.removeListener('request', onrequest);
-		if (stream.req) stream.req.removeListener('finish', onfinish);
-		stream.removeListener('end', onlegacyfinish);
-		stream.removeListener('close', onlegacyfinish);
-		stream.removeListener('finish', onfinish);
-		stream.removeListener('exit', onexit);
-		stream.removeListener('end', onend);
-		stream.removeListener('error', onerror);
-		stream.removeListener('close', onclose);
-	};
-};
-
-module.exports = eos;
-
-
-/***/ }),
-
 /***/ "../../node_modules/error-ex/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -26815,10 +26714,10 @@ const npmRunPath = __webpack_require__("../../node_modules/npm-run-path/index.js
 const onetime = __webpack_require__("../../node_modules/onetime/index.js");
 const makeError = __webpack_require__("../../node_modules/execa/lib/error.js");
 const normalizeStdio = __webpack_require__("../../node_modules/execa/lib/stdio.js");
-const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__("../../node_modules/execa/lib/kill.js");
+const {spawnedKill, spawnedCancel, setupTimeout, validateTimeout, setExitHandler} = __webpack_require__("../../node_modules/execa/lib/kill.js");
 const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__("../../node_modules/execa/lib/stream.js");
 const {mergePromise, getSpawnedPromise} = __webpack_require__("../../node_modules/execa/lib/promise.js");
-const {joinCommand, parseCommand} = __webpack_require__("../../node_modules/execa/lib/command.js");
+const {joinCommand, parseCommand, getEscapedCommand} = __webpack_require__("../../node_modules/execa/lib/command.js");
 
 const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
 
@@ -26882,6 +26781,9 @@ const handleOutput = (options, value, error) => {
 const execa = (file, args, options) => {
 	const parsed = handleArguments(file, args, options);
 	const command = joinCommand(file, args);
+	const escapedCommand = getEscapedCommand(file, args);
+
+	validateTimeout(parsed.options);
 
 	let spawned;
 	try {
@@ -26895,6 +26797,7 @@ const execa = (file, args, options) => {
 			stderr: '',
 			all: '',
 			command,
+			escapedCommand,
 			parsed,
 			timedOut: false,
 			isCanceled: false,
@@ -26927,6 +26830,7 @@ const execa = (file, args, options) => {
 				stderr,
 				all,
 				command,
+				escapedCommand,
 				parsed,
 				timedOut,
 				isCanceled: context.isCanceled,
@@ -26942,6 +26846,7 @@ const execa = (file, args, options) => {
 
 		return {
 			command,
+			escapedCommand,
 			exitCode: 0,
 			stdout,
 			stderr,
@@ -26955,8 +26860,6 @@ const execa = (file, args, options) => {
 
 	const handlePromiseOnce = onetime(handlePromise);
 
-	crossSpawn._enoent.hookChildProcess(spawned, parsed.parsed);
-
 	handleInput(spawned, parsed.options.input);
 
 	spawned.all = makeAllStream(spawned, parsed.options);
@@ -26969,6 +26872,7 @@ module.exports = execa;
 module.exports.sync = (file, args, options) => {
 	const parsed = handleArguments(file, args, options);
 	const command = joinCommand(file, args);
+	const escapedCommand = getEscapedCommand(file, args);
 
 	validateInputSync(parsed.options);
 
@@ -26982,6 +26886,7 @@ module.exports.sync = (file, args, options) => {
 			stderr: '',
 			all: '',
 			command,
+			escapedCommand,
 			parsed,
 			timedOut: false,
 			isCanceled: false,
@@ -27000,6 +26905,7 @@ module.exports.sync = (file, args, options) => {
 			signal: result.signal,
 			exitCode: result.status,
 			command,
+			escapedCommand,
 			parsed,
 			timedOut: result.error && result.error.code === 'ETIMEDOUT',
 			isCanceled: false,
@@ -27015,6 +26921,7 @@ module.exports.sync = (file, args, options) => {
 
 	return {
 		command,
+		escapedCommand,
 		exitCode: 0,
 		stdout,
 		stderr,
@@ -27042,8 +26949,12 @@ module.exports.node = (scriptPath, args, options = {}) => {
 	}
 
 	const stdio = normalizeStdio.node(options);
+	const defaultExecArgv = process.execArgv.filter(arg => !arg.startsWith('--inspect'));
 
-	const {nodePath = process.execPath, nodeOptions = process.execArgv} = options;
+	const {
+		nodePath = process.execPath,
+		nodeOptions = defaultExecArgv
+	} = options;
 
 	return execa(
 		nodePath,
@@ -27071,41 +26982,55 @@ module.exports.node = (scriptPath, args, options = {}) => {
 
 "use strict";
 
-const SPACES_REGEXP = / +/g;
-
-const joinCommand = (file, args = []) => {
+const normalizeArgs = (file, args = []) => {
 	if (!Array.isArray(args)) {
-		return file;
+		return [file];
 	}
 
-	return [file, ...args].join(' ');
+	return [file, ...args];
 };
 
-// Allow spaces to be escaped by a backslash if not meant as a delimiter
-const handleEscaping = (tokens, token, index) => {
-	if (index === 0) {
-		return [token];
+const NO_ESCAPE_REGEXP = /^[\w.-]+$/;
+const DOUBLE_QUOTES_REGEXP = /"/g;
+
+const escapeArg = arg => {
+	if (typeof arg !== 'string' || NO_ESCAPE_REGEXP.test(arg)) {
+		return arg;
 	}
 
-	const previousToken = tokens[tokens.length - 1];
-
-	if (previousToken.endsWith('\\')) {
-		return [...tokens.slice(0, -1), `${previousToken.slice(0, -1)} ${token}`];
-	}
-
-	return [...tokens, token];
+	return `"${arg.replace(DOUBLE_QUOTES_REGEXP, '\\"')}"`;
 };
+
+const joinCommand = (file, args) => {
+	return normalizeArgs(file, args).join(' ');
+};
+
+const getEscapedCommand = (file, args) => {
+	return normalizeArgs(file, args).map(arg => escapeArg(arg)).join(' ');
+};
+
+const SPACES_REGEXP = / +/g;
 
 // Handle `execa.command()`
 const parseCommand = command => {
-	return command
-		.trim()
-		.split(SPACES_REGEXP)
-		.reduce(handleEscaping, []);
+	const tokens = [];
+	for (const token of command.trim().split(SPACES_REGEXP)) {
+		// Allow spaces to be escaped by a backslash if not meant as a delimiter
+		const previousToken = tokens[tokens.length - 1];
+		if (previousToken && previousToken.endsWith('\\')) {
+			// Merge previous token with current one
+			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
+		} else {
+			tokens.push(token);
+		}
+	}
+
+	return tokens;
 };
 
 module.exports = {
 	joinCommand,
+	getEscapedCommand,
 	parseCommand
 };
 
@@ -27151,6 +27076,7 @@ const makeError = ({
 	signal,
 	exitCode,
 	command,
+	escapedCommand,
 	timedOut,
 	isCanceled,
 	killed,
@@ -27179,6 +27105,7 @@ const makeError = ({
 
 	error.shortMessage = shortMessage;
 	error.command = command;
+	error.escapedCommand = escapedCommand;
 	error.exitCode = exitCode;
 	error.signal = signal;
 	error.signalDescription = signalDescription;
@@ -27283,10 +27210,6 @@ const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise
 		return spawnedPromise;
 	}
 
-	if (!Number.isFinite(timeout) || timeout < 0) {
-		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
-	}
-
 	let timeoutId;
 	const timeoutPromise = new Promise((resolve, reject) => {
 		timeoutId = setTimeout(() => {
@@ -27299,6 +27222,12 @@ const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise
 	});
 
 	return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+
+const validateTimeout = ({timeout}) => {
+	if (timeout !== undefined && (!Number.isFinite(timeout) || timeout < 0)) {
+		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+	}
 };
 
 // `cleanup` option handling
@@ -27320,6 +27249,7 @@ module.exports = {
 	spawnedKill,
 	spawnedCancel,
 	setupTimeout,
+	validateTimeout,
 	setExitHandler
 };
 
@@ -27387,20 +27317,20 @@ module.exports = {
 
 const aliases = ['stdin', 'stdout', 'stderr'];
 
-const hasAlias = opts => aliases.some(alias => opts[alias] !== undefined);
+const hasAlias = options => aliases.some(alias => options[alias] !== undefined);
 
-const normalizeStdio = opts => {
-	if (!opts) {
+const normalizeStdio = options => {
+	if (!options) {
 		return;
 	}
 
-	const {stdio} = opts;
+	const {stdio} = options;
 
 	if (stdio === undefined) {
-		return aliases.map(alias => opts[alias]);
+		return aliases.map(alias => options[alias]);
 	}
 
-	if (hasAlias(opts)) {
+	if (hasAlias(options)) {
 		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
 	}
 
@@ -27419,8 +27349,8 @@ const normalizeStdio = opts => {
 module.exports = normalizeStdio;
 
 // `ipc` is pushed unless it is already present
-module.exports.node = opts => {
-	const stdio = normalizeStdio(opts);
+module.exports.node = options => {
+	const stdio = normalizeStdio(options);
 
 	if (stdio === 'ipc') {
 		return 'ipc';
@@ -27446,13 +27376,13 @@ module.exports.node = opts => {
 "use strict";
 
 const isStream = __webpack_require__("../../node_modules/is-stream/index.js");
-const getStream = __webpack_require__("../../node_modules/get-stream/index.js");
+const getStream = __webpack_require__("../../node_modules/execa/node_modules/get-stream/index.js");
 const mergeStream = __webpack_require__("../../node_modules/merge-stream/index.js");
 
 // `input` option
 const handleInput = (spawned, input) => {
 	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
-	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
+	// @todo remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
 	if (input === undefined || spawned.stdin === undefined) {
 		return;
 	}
@@ -27541,6 +27471,135 @@ module.exports = {
 	validateInputSync
 };
 
+
+
+/***/ }),
+
+/***/ "../../node_modules/execa/node_modules/get-stream/buffer-stream.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const {PassThrough: PassThroughStream} = __webpack_require__("stream");
+
+module.exports = options => {
+	options = {...options};
+
+	const {array} = options;
+	let {encoding} = options;
+	const isBuffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || isBuffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (isBuffer) {
+		encoding = null;
+	}
+
+	const stream = new PassThroughStream({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	let length = 0;
+	const chunks = [];
+
+	stream.on('data', chunk => {
+		chunks.push(chunk);
+
+		if (objectMode) {
+			length = chunks.length;
+		} else {
+			length += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return chunks;
+		}
+
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+	};
+
+	stream.getBufferedLength = () => length;
+
+	return stream;
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/execa/node_modules/get-stream/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const {constants: BufferConstants} = __webpack_require__("buffer");
+const stream = __webpack_require__("stream");
+const {promisify} = __webpack_require__("util");
+const bufferStream = __webpack_require__("../../node_modules/execa/node_modules/get-stream/buffer-stream.js");
+
+const streamPipelinePromisified = promisify(stream.pipeline);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
+}
+
+async function getStream(inputStream, options) {
+	if (!inputStream) {
+		throw new Error('Expected a stream');
+	}
+
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
+
+	const {maxBuffer} = options;
+	const stream = bufferStream(options);
+
+	await new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			// Don't retrieve an oversized buffer.
+			if (error && stream.getBufferedLength() <= BufferConstants.MAX_LENGTH) {
+				error.bufferedData = stream.getBufferedValue();
+			}
+
+			reject(error);
+		};
+
+		(async () => {
+			try {
+				await streamPipelinePromisified(inputStream, stream);
+				resolve();
+			} catch (error) {
+				rejectPromise(error);
+			}
+		})();
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	});
+
+	return stream.getBufferedValue();
+}
+
+module.exports = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
@@ -29582,132 +29641,6 @@ module.exports = function bind(that) {
 var implementation = __webpack_require__("../../node_modules/function-bind/implementation.js");
 
 module.exports = Function.prototype.bind || implementation;
-
-
-/***/ }),
-
-/***/ "../../node_modules/get-stream/buffer-stream.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const {PassThrough: PassThroughStream} = __webpack_require__("stream");
-
-module.exports = options => {
-	options = {...options};
-
-	const {array} = options;
-	let {encoding} = options;
-	const isBuffer = encoding === 'buffer';
-	let objectMode = false;
-
-	if (array) {
-		objectMode = !(encoding || isBuffer);
-	} else {
-		encoding = encoding || 'utf8';
-	}
-
-	if (isBuffer) {
-		encoding = null;
-	}
-
-	const stream = new PassThroughStream({objectMode});
-
-	if (encoding) {
-		stream.setEncoding(encoding);
-	}
-
-	let length = 0;
-	const chunks = [];
-
-	stream.on('data', chunk => {
-		chunks.push(chunk);
-
-		if (objectMode) {
-			length = chunks.length;
-		} else {
-			length += chunk.length;
-		}
-	});
-
-	stream.getBufferedValue = () => {
-		if (array) {
-			return chunks;
-		}
-
-		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
-	};
-
-	stream.getBufferedLength = () => length;
-
-	return stream;
-};
-
-
-/***/ }),
-
-/***/ "../../node_modules/get-stream/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const pump = __webpack_require__("../../node_modules/pump/index.js");
-const bufferStream = __webpack_require__("../../node_modules/get-stream/buffer-stream.js");
-
-class MaxBufferError extends Error {
-	constructor() {
-		super('maxBuffer exceeded');
-		this.name = 'MaxBufferError';
-	}
-}
-
-async function getStream(inputStream, options) {
-	if (!inputStream) {
-		return Promise.reject(new Error('Expected a stream'));
-	}
-
-	options = {
-		maxBuffer: Infinity,
-		...options
-	};
-
-	const {maxBuffer} = options;
-
-	let stream;
-	await new Promise((resolve, reject) => {
-		const rejectPromise = error => {
-			if (error) { // A null check
-				error.bufferedData = stream.getBufferedValue();
-			}
-
-			reject(error);
-		};
-
-		stream = pump(inputStream, bufferStream(options), error => {
-			if (error) {
-				rejectPromise(error);
-				return;
-			}
-
-			resolve();
-		});
-
-		stream.on('data', () => {
-			if (stream.getBufferedLength() > maxBuffer) {
-				rejectPromise(new MaxBufferError());
-			}
-		});
-	});
-
-	return stream.getBufferedValue();
-}
-
-module.exports = getStream;
-// TODO: Remove this for the next major release
-module.exports.default = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
-module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
-module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
@@ -36695,47 +36628,130 @@ function sync (path, options) {
 
 /***/ }),
 
-/***/ "../../node_modules/json-parse-better-errors/index.js":
+/***/ "../../node_modules/json-parse-even-better-errors/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = parseJson
-function parseJson (txt, reviver, context) {
+const hexify = char => {
+  const h = char.charCodeAt(0).toString(16).toUpperCase()
+  return '0x' + (h.length % 2 ? '0' : '') + h
+}
+
+const parseError = (e, txt, context) => {
+  if (!txt) {
+    return {
+      message: e.message + ' while parsing empty string',
+      position: 0,
+    }
+  }
+  const badToken = e.message.match(/^Unexpected token (.) .*position\s+(\d+)/i)
+  const errIdx = badToken ? +badToken[2]
+    : e.message.match(/^Unexpected end of JSON.*/i) ? txt.length - 1
+    : null
+
+  const msg = badToken ? e.message.replace(/^Unexpected token ./, `Unexpected token ${
+      JSON.stringify(badToken[1])
+    } (${hexify(badToken[1])})`)
+    : e.message
+
+  if (errIdx !== null && errIdx !== undefined) {
+    const start = errIdx <= context ? 0
+      : errIdx - context
+
+    const end = errIdx + context >= txt.length ? txt.length
+      : errIdx + context
+
+    const slice = (start === 0 ? '' : '...') +
+      txt.slice(start, end) +
+      (end === txt.length ? '' : '...')
+
+    const near = txt === slice ? '' : 'near '
+
+    return {
+      message: msg + ` while parsing ${near}${JSON.stringify(slice)}`,
+      position: errIdx,
+    }
+  } else {
+    return {
+      message: msg + ` while parsing '${txt.slice(0, context * 2)}'`,
+      position: 0,
+    }
+  }
+}
+
+class JSONParseError extends SyntaxError {
+  constructor (er, txt, context, caller) {
+    context = context || 20
+    const metadata = parseError(er, txt, context)
+    super(metadata.message)
+    Object.assign(this, metadata)
+    this.code = 'EJSONPARSE'
+    this.systemError = er
+    Error.captureStackTrace(this, caller || this.constructor)
+  }
+  get name () { return this.constructor.name }
+  set name (n) {}
+  get [Symbol.toStringTag] () { return this.constructor.name }
+}
+
+const kIndent = Symbol.for('indent')
+const kNewline = Symbol.for('newline')
+// only respect indentation if we got a line break, otherwise squash it
+// things other than objects and arrays aren't indented, so ignore those
+// Important: in both of these regexps, the $1 capture group is the newline
+// or undefined, and the $2 capture group is the indent, or undefined.
+const formatRE = /^\s*[{\[]((?:\r?\n)+)([\s\t]*)/
+const emptyRE = /^(?:\{\}|\[\])((?:\r?\n)+)?$/
+
+const parseJson = (txt, reviver, context) => {
+  const parseText = stripBOM(txt)
   context = context || 20
   try {
-    return JSON.parse(txt, reviver)
+    // get the indentation so that we can save it back nicely
+    // if the file starts with {" then we have an indent of '', ie, none
+    // otherwise, pick the indentation of the next line after the first \n
+    // If the pattern doesn't match, then it means no indentation.
+    // JSON.stringify ignores symbols, so this is reasonably safe.
+    // if the string is '{}' or '[]', then use the default 2-space indent.
+    const [, newline = '\n', indent = '  '] = parseText.match(emptyRE) ||
+      parseText.match(formatRE) ||
+      [, '', '']
+
+    const result = JSON.parse(parseText, reviver)
+    if (result && typeof result === 'object') {
+      result[kNewline] = newline
+      result[kIndent] = indent
+    }
+    return result
   } catch (e) {
-    if (typeof txt !== 'string') {
+    if (typeof txt !== 'string' && !Buffer.isBuffer(txt)) {
       const isEmptyArray = Array.isArray(txt) && txt.length === 0
-      const errorMessage = 'Cannot parse ' +
-      (isEmptyArray ? 'an empty array' : String(txt))
-      throw new TypeError(errorMessage)
+      throw Object.assign(new TypeError(
+        `Cannot parse ${isEmptyArray ? 'an empty array' : String(txt)}`
+      ), {
+        code: 'EJSONPARSE',
+        systemError: e,
+      })
     }
-    const syntaxErr = e.message.match(/^Unexpected token.*position\s+(\d+)/i)
-    const errIdx = syntaxErr
-    ? +syntaxErr[1]
-    : e.message.match(/^Unexpected end of JSON.*/i)
-    ? txt.length - 1
-    : null
-    if (errIdx != null) {
-      const start = errIdx <= context
-      ? 0
-      : errIdx - context
-      const end = errIdx + context >= txt.length
-      ? txt.length
-      : errIdx + context
-      e.message += ` while parsing near '${
-        start === 0 ? '' : '...'
-      }${txt.slice(start, end)}${
-        end === txt.length ? '' : '...'
-      }'`
-    } else {
-      e.message += ` while parsing '${txt.slice(0, context * 2)}'`
-    }
-    throw e
+
+    throw new JSONParseError(e, parseText, context, parseJson)
   }
+}
+
+// Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+// because the buffer-to-string conversion in `fs.readFileSync()`
+// translates it to FEFF, the UTF-16 BOM.
+const stripBOM = txt => String(txt).replace(/^\uFEFF/, '')
+
+module.exports = parseJson
+parseJson.JSONParseError = JSONParseError
+
+parseJson.noExceptions = (txt, reviver) => {
+  try {
+    return JSON.parse(stripBOM(txt), reviver)
+  } catch (e) {}
 }
 
 
@@ -41182,7 +41198,7 @@ const pathKey = (options = {}) => {
 		return 'PATH';
 	}
 
-	return Object.keys(environment).find(key => key.toUpperCase() === 'PATH') || 'Path';
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
 };
 
 module.exports = pathKey;
@@ -42825,7 +42841,7 @@ module.exports = {
 "use strict";
 
 const errorEx = __webpack_require__("../../node_modules/error-ex/index.js");
-const fallback = __webpack_require__("../../node_modules/json-parse-better-errors/index.js");
+const fallback = __webpack_require__("../../node_modules/json-parse-even-better-errors/index.js");
 const {default: LinesAndColumns} = __webpack_require__("../../node_modules/lines-and-columns/dist/index.mjs");
 const {codeFrameColumns} = __webpack_require__("../../node_modules/@babel/code-frame/lib/index.js");
 
@@ -42834,7 +42850,7 @@ const JSONError = errorEx('JSONError', {
 	codeFrame: errorEx.append('\n\n%s\n')
 });
 
-module.exports = (string, reviver, filename) => {
+const parseJson = (string, reviver, filename) => {
 	if (typeof reviver === 'string') {
 		filename = reviver;
 		reviver = null;
@@ -42849,7 +42865,7 @@ module.exports = (string, reviver, filename) => {
 		}
 	} catch (error) {
 		error.message = error.message.replace(/\n/g, '');
-		const indexMatch = error.message.match(/in JSON at position (\d+) while parsing near/);
+		const indexMatch = error.message.match(/in JSON at position (\d+) while parsing/);
 
 		const jsonError = new JSONError(error);
 		if (filename) {
@@ -42873,6 +42889,10 @@ module.exports = (string, reviver, filename) => {
 		throw jsonError;
 	}
 };
+
+parseJson.JSONError = JSONError;
+
+module.exports = parseJson;
 
 
 /***/ }),
@@ -45146,95 +45166,6 @@ exports.wrapOutput = (input, state = {}, options = {}) => {
   }
   return output;
 };
-
-
-/***/ }),
-
-/***/ "../../node_modules/pump/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var once = __webpack_require__("../../node_modules/once/once.js")
-var eos = __webpack_require__("../../node_modules/end-of-stream/index.js")
-var fs = __webpack_require__("fs") // we only need fs to get the ReadStream and WriteStream prototypes
-
-var noop = function () {}
-var ancient = /^v?\.0/.test(process.version)
-
-var isFn = function (fn) {
-  return typeof fn === 'function'
-}
-
-var isFS = function (stream) {
-  if (!ancient) return false // newer node version do not need to care about fs is a special way
-  if (!fs) return false // browser
-  return (stream instanceof (fs.ReadStream || noop) || stream instanceof (fs.WriteStream || noop)) && isFn(stream.close)
-}
-
-var isRequest = function (stream) {
-  return stream.setHeader && isFn(stream.abort)
-}
-
-var destroyer = function (stream, reading, writing, callback) {
-  callback = once(callback)
-
-  var closed = false
-  stream.on('close', function () {
-    closed = true
-  })
-
-  eos(stream, {readable: reading, writable: writing}, function (err) {
-    if (err) return callback(err)
-    closed = true
-    callback()
-  })
-
-  var destroyed = false
-  return function (err) {
-    if (closed) return
-    if (destroyed) return
-    destroyed = true
-
-    if (isFS(stream)) return stream.close(noop) // use close for fs streams to avoid fd leaks
-    if (isRequest(stream)) return stream.abort() // request.destroy just do .end - .abort is what we want
-
-    if (isFn(stream.destroy)) return stream.destroy()
-
-    callback(err || new Error('stream was destroyed'))
-  }
-}
-
-var call = function (fn) {
-  fn()
-}
-
-var pipe = function (from, to) {
-  return from.pipe(to)
-}
-
-var pump = function () {
-  var streams = Array.prototype.slice.call(arguments)
-  var callback = isFn(streams[streams.length - 1] || noop) && streams.pop() || noop
-
-  if (Array.isArray(streams[0])) streams = streams[0]
-  if (streams.length < 2) throw new Error('pump requires two streams per minimum')
-
-  var error
-  var destroys = streams.map(function (stream, i) {
-    var reading = i < streams.length - 1
-    var writing = i > 0
-    return destroyer(stream, reading, writing, function (err) {
-      if (!error) error = err
-      if (err) destroys.forEach(call)
-      if (reading) return
-      destroys.forEach(call)
-      callback(error)
-    })
-  })
-
-  return streams.reduce(pipe)
-}
-
-module.exports = pump
 
 
 /***/ }),
