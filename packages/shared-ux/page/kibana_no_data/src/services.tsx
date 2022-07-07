@@ -13,6 +13,8 @@ import {
   NoDataViewsPromptKibanaProvider,
 } from '@kbn/shared-ux-prompt-no-data-views';
 
+import { NoDataCardProvider, NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
+
 import { LegacyServicesProvider, getLegacyServices } from './legacy_services';
 
 /**
@@ -33,8 +35,6 @@ type DataView = unknown;
 interface DataViewEditorOptions {
   /** Handler to be invoked when the Data View Editor completes a save operation. */
   onSave: (dataView: DataView) => void;
-  /** If set to false, will skip empty prompt in data view editor. */
-  showEmptyPrompt?: boolean;
 }
 
 /**
@@ -85,7 +85,9 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
 }) => (
   <KibanaNoDataPageContext.Provider value={services}>
     <NoDataViewsPromptProvider {...services}>
-      <LegacyServicesProvider {...getLegacyServices(services)}>{children}</LegacyServicesProvider>
+      <NoDataCardProvider {...services}>
+        <LegacyServicesProvider {...getLegacyServices(services)}>{children}</LegacyServicesProvider>
+      </NoDataCardProvider>
     </NoDataViewsPromptProvider>
   </KibanaNoDataPageContext.Provider>
 );
@@ -159,7 +161,9 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   return (
     <KibanaNoDataPageContext.Provider value={value}>
       <NoDataViewsPromptKibanaProvider {...dependencies}>
-        <LegacyServicesProvider {...getLegacyServices(value)}>{children}</LegacyServicesProvider>
+        <NoDataCardKibanaProvider {...dependencies}>
+          <LegacyServicesProvider {...getLegacyServices(value)}>{children}</LegacyServicesProvider>
+        </NoDataCardKibanaProvider>
       </NoDataViewsPromptKibanaProvider>
     </KibanaNoDataPageContext.Provider>
   );

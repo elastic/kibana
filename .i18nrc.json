@@ -7,7 +7,11 @@
     "bfetch": "src/plugins/bfetch",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
-    "core": "src/core",
+    "core": [
+      "src/core",
+      "packages/core/i18n/core-i18n-browser-internal",
+      "packages/core/fatal-errors/core-fatal-errors-browser-internal"
+    ],
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
     "controls": "src/plugins/controls",
@@ -36,6 +40,7 @@
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "home": "src/plugins/home",
+    "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
     "indexPatternFieldEditor": "src/plugins/data_view_field_editor",
     "indexPatternManagement": "src/plugins/data_view_management",

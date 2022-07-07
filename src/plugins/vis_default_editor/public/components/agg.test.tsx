@@ -129,7 +129,7 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
     expect(defaultProps.setAggsState).toBeCalledTimes(0);
 
-    comp.find('.euiAccordion__button').simulate('click');
+    comp.find('.euiAccordion__button').last().simulate('click');
     // make sure that the accordion is collapsed
     expect(comp.find('.euiAccordion-isOpen').exists()).toBeFalsy();
 

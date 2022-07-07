@@ -22,11 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import {
   useKibana,
-  KibanaPageTemplateSolutionNavAvatar,
   overviewPageActions,
   OverviewPageFooter,
 } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
@@ -298,13 +298,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                             className={`kbnOverviewSolution ${id}`}
                             description={description ? description : ''}
                             href={addBasePath(path)}
-                            icon={
-                              <KibanaPageTemplateSolutionNavAvatar
-                                name={title}
-                                iconType={icon}
-                                size="xl"
-                              />
-                            }
+                            icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
                             image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
                             title={title}
                             titleElement="h3"

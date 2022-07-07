@@ -41,10 +41,7 @@ import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import {
-  SavedSearchURLConflictCallout,
-  useSavedSearchAliasMatchRedirect,
-} from '../../../../services/saved_searches';
+import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -121,8 +118,6 @@ export function DiscoverLayout({
     }
   }, [dataState.fetchStatus]);
 
-  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
-
   // We treat rollup v1 data views as non time based in Discover, since we query them
   // in a non time based way using the regular _search API, since the internal
   // representation of those documents does not have the time field that _field_caps
@@ -172,13 +167,7 @@ export function DiscoverLayout({
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
-      const newFilters = generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        String(indexPattern.id)
-      );
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
@@ -251,7 +240,6 @@ export function DiscoverLayout({
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
         onEditRuntimeField={onEditRuntimeField}
-        useNewFieldsApi={useNewFieldsApi}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

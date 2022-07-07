@@ -42,8 +42,8 @@ const FormWrapper = styled.div`
       margin-top: 0;
     }
 
-    padding-top: ${theme.eui.paddingSizes.xl};
-    padding-bottom: ${theme.eui.paddingSizes.xl};
+    padding-top: ${theme.eui.euiSizeXL};
+    padding-bottom: ${theme.eui.euiSizeXL};
     .euiFlyout {
       z-index: ${theme.eui.euiZNavigation + 1};
     }
@@ -51,7 +51,7 @@ const FormWrapper = styled.div`
 `;
 
 export const ConfigureCases: React.FC = React.memo(() => {
-  const { userCanCrud } = useCasesContext();
+  const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
 
@@ -225,7 +225,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             <SectionWrapper>
               <ClosureOptions
                 closureTypeSelected={closureType}
-                disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+                disabled={persistLoading || isLoadingConnectors || !permissions.all}
                 onChangeClosureType={onChangeClosureType}
               />
             </SectionWrapper>
@@ -233,13 +233,13 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <Connectors
                 actionTypes={actionTypes}
                 connectors={connectors ?? []}
-                disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+                disabled={persistLoading || isLoadingConnectors || !permissions.all}
                 handleShowEditFlyout={onClickUpdateConnector}
                 isLoading={isLoadingAny}
                 mappings={mappings}
                 onChangeConnector={onChangeConnector}
                 selectedConnector={connector}
-                updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
+                updateConnectorDisabled={updateConnectorDisabled || !permissions.all}
               />
             </SectionWrapper>
             {ConnectorAddFlyout}

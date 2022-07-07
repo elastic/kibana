@@ -22,7 +22,8 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { KueryNode, SearchSessionSavedObjectAttributes } from '../../../common';
+import { KueryNode } from '@kbn/es-query';
+import { SearchSessionSavedObjectAttributes } from '../../../common';
 import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
 import { SearchSessionsConfigSchema, ConfigSchema } from '../../../config';
 

@@ -35,11 +35,14 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
-  RELEASE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   metadataTransformPrefix,
   ENDPOINT_ACTIONS_INDEX,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import {
   ActionDetails,
@@ -220,6 +223,22 @@ describe('Response actions', () => {
       getActionDetailsByIdSpy.mockClear();
     });
 
+    it('correctly redirects legacy isolate to new route', async () => {
+      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      expect(mockResponse.custom).toBeCalled();
+      const response = mockResponse.custom.mock.calls[0][0];
+      expect(response.statusCode).toEqual(308);
+      expect(response.headers?.location).toEqual(ISOLATE_HOST_ROUTE_V2);
+    });
+
+    it('correctly redirects legacy release to new route', async () => {
+      await callRoute(UNISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      expect(mockResponse.custom).toBeCalled();
+      const response = mockResponse.custom.mock.calls[0][0];
+      expect(response.statusCode).toEqual(308);
+      expect(response.headers?.location).toEqual(UNISOLATE_HOST_ROUTE_V2);
+    });
+
     it('succeeds when an endpoint ID is provided', async () => {
       await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'] } });
       expect(mockResponse.ok).toBeCalled();
@@ -349,7 +368,7 @@ describe('Response actions', () => {
     });
 
     it('sends the unisolate command payload from the unisolate route', async () => {
-      const ctx = await callRoute(RELEASE_HOST_ROUTE, {
+      const ctx = await callRoute(UNISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
@@ -381,10 +400,21 @@ describe('Response actions', () => {
       expect(actionDoc.data.command).toEqual('suspend-process');
     });
 
+    it('sends the running-processes command payload from the running processes route', async () => {
+      const ctx = await callRoute(GET_PROCESSES_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+      });
+      const actionDoc: EndpointAction = (
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
+      expect(actionDoc.data.command).toEqual('running-processes');
+    });
+
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
-          RELEASE_HOST_ROUTE,
+          UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
           },
@@ -495,10 +525,37 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
+      it('handles running-processes', async () => {
+        const ctx = await callRoute(
+          GET_PROCESSES_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+          },
+          { endpointDsExists: true }
+        );
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('running-processes');
+        expect(actionDocs[1].body!.data.command).toEqual('running-processes');
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeUndefined();
+      });
+
       it('handles errors', async () => {
         const ErrMessage = 'Uh oh!';
         await callRoute(
-          RELEASE_HOST_ROUTE,
+          UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
             idxResponse: {
@@ -539,7 +596,7 @@ describe('Response actions', () => {
 
       it('allows any license level to unisolate', async () => {
         licenseEmitter.next(Gold);
-        await callRoute(RELEASE_HOST_ROUTE, {
+        await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           license: Gold,
         });
@@ -556,7 +613,7 @@ describe('Response actions', () => {
       });
 
       it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
-        await callRoute(RELEASE_HOST_ROUTE, {
+        await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
         });
         expect(mockResponse.ok).toBeCalled();
@@ -571,7 +628,7 @@ describe('Response actions', () => {
       });
 
       it('prohibits user from performing un-isolation if canUnIsolateHost is false', async () => {
-        await callRoute(RELEASE_HOST_ROUTE, {
+        await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
         });

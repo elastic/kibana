@@ -12,7 +12,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
@@ -49,7 +49,6 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
@@ -264,10 +263,6 @@ export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) 
 
 export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
-}
-
-export function disableScrollZoom() {
-  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
 }
 
 export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {

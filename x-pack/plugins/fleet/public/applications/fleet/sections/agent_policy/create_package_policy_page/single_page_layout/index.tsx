@@ -68,7 +68,7 @@ import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from '.
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
-    padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+    padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
   // compensating for EuiBottomBar hiding the content

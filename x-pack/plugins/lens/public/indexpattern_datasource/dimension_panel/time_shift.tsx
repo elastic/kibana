@@ -10,7 +10,8 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { Query } from '@kbn/data-plugin/public';
+
+import type { Query } from '@kbn/es-query';
 import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
@@ -162,7 +163,7 @@ export function TimeShift({
         }
         isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiComboBox
               fullWidth

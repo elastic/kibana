@@ -553,14 +553,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
@@ -919,7 +911,7 @@
           {
             "pluginId": "core",
             "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
+            "docId": "kibCorePluginApi",
             "section": "def-server.RequestHandler",
             "text": "RequestHandler"
           },
@@ -1113,7 +1105,7 @@
           {
             "pluginId": "core",
             "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
+            "docId": "kibCorePluginApi",
             "section": "def-server.RequestHandler",
             "text": "RequestHandler"
           },
@@ -1339,7 +1331,7 @@
               {
                 "pluginId": "core",
                 "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
+                "docId": "kibCorePluginApi",
                 "section": "def-server.RequestHandler",
                 "text": "RequestHandler"
               },
@@ -2311,14 +2303,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
               },
               {
                 "plugin": "securitySolution",

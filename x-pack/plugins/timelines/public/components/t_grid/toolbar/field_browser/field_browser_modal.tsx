@@ -17,23 +17,23 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback } from 'react';
 
 import type { BrowserFields } from '../../../../../common/search_strategy';
 import type { FieldBrowserProps, ColumnHeaderOptions } from '../../../../../common/types';
 import { Search } from './search';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
-import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
-import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
 
-export type FieldBrowserModalProps = Pick<FieldBrowserProps, 'timelineId' | 'width' | 'options'> & {
+export type FieldBrowserModalProps = Pick<
+  FieldBrowserProps,
+  'width' | 'onResetColumns' | 'onToggleColumn' | 'options'
+> & {
   /**
    * The current timeline column headers
    */
@@ -93,6 +93,8 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
   filterSelectedEnabled,
   isSearching,
   onFilterSelectedChange,
+  onToggleColumn,
+  onResetColumns,
   setSelectedCategoryIds,
   onSearchInputChange,
   onHide,
@@ -100,17 +102,8 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
   restoreFocusTo,
   searchInput,
   selectedCategoryIds,
-  timelineId,
   width = FIELD_BROWSER_WIDTH,
 }) => {
-  const dispatch = useDispatch();
-
-  const onUpdateColumns = useCallback(
-    (columns: ColumnHeaderOptions[]) =>
-      dispatch(tGridActions.updateColumns({ id: timelineId, columns })),
-    [dispatch, timelineId]
-  );
-
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
     setTimeout(() => {
@@ -119,15 +112,10 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
     }, 0);
   }, [onHide, restoreFocusTo]);
 
-  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId)
-  );
-
-  const onResetColumns = useCallback(() => {
-    onUpdateColumns(defaultColumns);
+  const resetColumns = useCallback(() => {
+    onResetColumns();
     closeAndRestoreFocus();
-  }, [onUpdateColumns, closeAndRestoreFocus, defaultColumns]);
+  }, [closeAndRestoreFocus, onResetColumns]);
 
   /** Invoked when the user types in the input to filter the field browser */
   const onInputChange = useCallback(
@@ -159,7 +147,6 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
                 isSearching={isSearching}
                 onSearchInputChange={onInputChange}
                 searchInput={searchInput}
-                timelineId={timelineId}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -170,9 +157,7 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateFieldButton && dataViewId != null && dataViewId.length > 0 && (
-                <CreateFieldButton onHide={onHide} />
-              )}
+              {CreateFieldButton && <CreateFieldButton onHide={onHide} />}
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -184,13 +169,13 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
           <EuiSpacer size="l" />
 
           <FieldTable
-            timelineId={timelineId}
             columnHeaders={columnHeaders}
             filteredBrowserFields={filteredBrowserFields}
             filterSelectedEnabled={filterSelectedEnabled}
             searchInput={appliedFilterInput}
             selectedCategoryIds={selectedCategoryIds}
             onFilterSelectedChange={onFilterSelectedChange}
+            onToggleColumn={onToggleColumn}
             getFieldTableColumns={getFieldTableColumns}
             onHide={onHide}
           />
@@ -201,7 +186,7 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
             <EuiButtonEmpty
               className={RESET_FIELDS_CLASS_NAME}
               data-test-subj="reset-fields"
-              onClick={onResetColumns}
+              onClick={resetColumns}
             >
               {i18n.RESET_FIELDS}
             </EuiButtonEmpty>

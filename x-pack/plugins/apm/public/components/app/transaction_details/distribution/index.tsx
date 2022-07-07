@@ -5,65 +5,32 @@
  * 2.0.
  */
 
-import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { XYBrushEvent } from '@elastic/charts';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { i18n } from '@kbn/i18n';
-
-import { useUiTracker } from '@kbn/observability-plugin/public';
-
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
-
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-
-import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
 
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
+import { ProcessorEvent } from '../../../../../common/processor_event';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { HeightRetainer } from '../../../shared/height_retainer';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
-import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
-import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
-
-// Enforce min height so it's consistent across all tabs on the same level
-// to prevent "flickering" behavior
-export const MIN_TAB_TITLE_HEIGHT = 56;
-
-type Selection = [number, number];
-
-// Format the selected latency range for the "Clear selection" badge.
-// If the two values share the same unit, it will only displayed once.
-// For example: 12 - 23 ms / 12 ms - 3 s
-export function getFormattedSelection(selection: Selection): string {
-  const from = getDurationFormatter(selection[0])(selection[0]);
-  const to = getDurationFormatter(selection[1])(selection[1]);
-
-  return `${from.unit === to.unit ? from.value : from.formatted} - ${
-    to.formatted
-  }`;
-}
+import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
   onClearSelection: () => void;
-  selection?: Selection;
+  selection?: [number, number];
   traceSamples: TabContentProps['traceSamples'];
   traceSamplesStatus: FETCH_STATUS;
 }
@@ -102,34 +69,8 @@ export function TransactionDistribution({
     waterfallStatus === FETCH_STATUS.LOADING ||
     traceSamplesStatus === FETCH_STATUS.LOADING;
 
-  const markerCurrentTransaction =
+  const markerCurrentEvent =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
-
-  const emptySelectionText = i18n.translate(
-    'xpack.apm.transactionDetails.emptySelectionText',
-    {
-      defaultMessage: 'Click and drag to select a range',
-    }
-  );
-
-  const clearSelectionAriaLabel = i18n.translate(
-    'xpack.apm.transactionDetails.clearSelectionAriaLabel',
-    {
-      defaultMessage: 'Clear selection',
-    }
-  );
-
-  const trackApmEvent = useUiTracker({ app: 'apm' });
-
-  const onTrackedChartSelection = (brushEvent: XYBrushEvent) => {
-    onChartSelection(brushEvent);
-    trackApmEvent({ metric: 'transaction_distribution_chart_selection' });
-  };
-
-  const onTrackedClearSelection = () => {
-    onClearSelection();
-    trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
-  };
 
   const { chartData, hasData, percentileThresholdValue, status } =
     useTransactionDistributionChartData();
@@ -137,84 +78,16 @@ export function TransactionDistribution({
   return (
     <HeightRetainer>
       <div data-test-subj="apmTransactionDistributionTabContent">
-        <EuiFlexGroup
-          style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h5 data-test-subj="apmTransactionDistributionChartTitle">
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.distribution.panelTitle',
-                  {
-                    defaultMessage: 'Latency distribution',
-                  }
-                )}
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <ChartTitleToolTip />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiFlexGroup
-              justifyContent="flexEnd"
-              alignItems="center"
-              gutterSize="xs"
-            >
-              {selection ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    iconType="cross"
-                    iconSide="left"
-                    onClick={onTrackedClearSelection}
-                    onClickAriaLabel={clearSelectionAriaLabel}
-                    iconOnClick={onTrackedClearSelection}
-                    iconOnClickAriaLabel={clearSelectionAriaLabel}
-                    data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
-                  >
-                    {i18n.translate(
-                      'xpack.apm.transactionDetails.distribution.selectionText',
-                      {
-                        defaultMessage: `Selection: {formattedSelection}`,
-                        values: {
-                          formattedSelection: getFormattedSelection(selection),
-                        },
-                      }
-                    )}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ) : (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type="iInCircle"
-                      title={emptySelectionText}
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">{emptySelectionText}</EuiText>
-                  </EuiFlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        <TransactionDistributionChart
-          data={chartData}
-          markerCurrentTransaction={markerCurrentTransaction}
-          markerValue={percentileThresholdValue ?? 0}
-          onChartSelection={onTrackedChartSelection as BrushEndListener}
-          hasData={hasData}
+        <DurationDistributionChartWithScrubber
+          onChartSelection={onChartSelection}
+          onClearSelection={onClearSelection}
           selection={selection}
           status={status}
+          markerCurrentEvent={markerCurrentEvent}
+          chartData={chartData}
+          hasData={hasData}
+          percentileThresholdValue={percentileThresholdValue}
+          eventType={ProcessorEvent.transaction}
         />
 
         <EuiSpacer size="s" />

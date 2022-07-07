@@ -17,7 +17,8 @@ export type EditorEvent =
   | 'changeCursor'
   | 'changeScrollTop'
   | 'change'
-  | 'changeSelection';
+  | 'changeSelection'
+  | 'changeFold';
 
 export type AutoCompleterFunction = (
   pos: Position,
@@ -272,4 +273,19 @@ export interface CoreEditor {
    * Release any resources in use by the editor.
    */
   destroy(): void;
+
+  /**
+   * Indent document within request range
+   */
+  autoIndent(reqRange: Range): void;
+
+  /*
+   * Get all fold ranges in document
+   */
+  getAllFoldRanges(): Range[];
+
+  /**
+   * Add folds at given ranges
+   */
+  addFoldsAtRanges(foldRanges: Range[]): void;
 }

@@ -15,6 +15,7 @@ import { UserActionMarkdownRefObject } from './markdown_form';
 import { CasesNavigation } from '../links';
 import { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -29,7 +30,6 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
-  userCanCrud: boolean;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
@@ -37,11 +37,11 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 
 export interface UserActionBuilderArgs {
   caseData: Case;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   userAction: CaseUserActions;
   caseServices: CaseServices;
   comments: Comment[];
   index: number;
-  userCanCrud: boolean;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
   >;

@@ -24,30 +24,32 @@ export const renderApp = (
   const { notifications, http } = core;
   const { newsfeed, home, navigation } = deps;
   const newsfeed$ = newsfeed?.createNewsFeed$(NewsfeedApiEndpoint.KIBANA_ANALYTICS);
-  const navLinks = core.chrome.navLinks.getAll();
-  const solutions = home.featureCatalogue
-    .getSolutions()
-    .filter(({ id }) => id !== 'kibana')
-    .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
   const features = home.featureCatalogue.get();
 
   core.chrome.setBreadcrumbs([
     { text: i18n.translate('kibanaOverview.breadcrumbs.title', { defaultMessage: 'Analytics' }) },
   ]);
 
-  ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaContextProvider services={{ ...core, ...deps }}>
-          <KibanaOverviewApp
-            basename={appBasePath}
-            {...{ notifications, http, navigation, newsfeed$, solutions, features }}
-          />
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </I18nProvider>,
-    element
-  );
+  core.chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
+    const solutions = home.featureCatalogue
+      .getSolutions()
+      .filter(({ id }) => id !== 'kibana')
+      .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
+
+    ReactDOM.render(
+      <I18nProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider services={{ ...core, ...deps }}>
+            <KibanaOverviewApp
+              basename={appBasePath}
+              {...{ notifications, http, navigation, newsfeed$, solutions, features }}
+            />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>,
+      element
+    );
+  });
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -81,9 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       hostedPolicy = agentPolicy;
 
-      const {
-        body: { item: packagePolicy },
-      } = await supertest
+      const packagePolicyResponse = await supertest
         .post('/api/fleet/package_policies')
         .set('kbn-xsrf', 'true')
         .send({
@@ -101,7 +99,15 @@ export default function ({ getService }: FtrProviderContext) {
           description: '123',
           id: '123',
         });
-      packagePolicyId = packagePolicy.id;
+
+      if (!packagePolicyResponse.body.item) {
+        // eslint-disable-next-line no-console
+        console.error({ MISSING: packagePolicyResponse });
+      }
+
+      expect(packagePolicyResponse.status).to.be(200);
+
+      packagePolicyId = packagePolicyResponse.body.item.id;
 
       const createPackResponse = await supertest
         .post('/internal/osquery/packs')

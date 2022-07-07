@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import type { ComponentType, ReactNode } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -12,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -49,7 +50,10 @@ import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
-import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -89,6 +93,7 @@ export type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
   RuleEventLogListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -338,6 +343,12 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   ruleTypeIndex?: RuleTypeIndex;
   filteredSolutions?: string[] | undefined;
 }
+export interface RuleDefinitionProps {
+  rule: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onEditRule: () => Promise<void>;
+}
 
 export enum Percentiles {
   P50 = 'P50',
@@ -385,7 +396,7 @@ export interface AlertsTableProps {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  flyoutState: AlertsTableFlyoutState;
+  flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -408,21 +419,21 @@ export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
-  externalFlyout?: {
-    header?: AlertTableFlyoutComponent;
-    body?: AlertTableFlyoutComponent;
-    footer?: AlertTableFlyoutComponent;
-  };
   useInternalFlyout?: () => {
-    header?: AlertTableFlyoutComponent;
-    body?: AlertTableFlyoutComponent;
-    footer?: AlertTableFlyoutComponent;
+    header: AlertTableFlyoutComponent;
+    body: AlertTableFlyoutComponent;
+    footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  useActionsColumn?: () => {
+    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    width?: number;
+  };
 }
 
 export interface AlertsTableFlyoutBaseProps {
@@ -430,12 +441,33 @@ export interface AlertsTableFlyoutBaseProps {
   isLoading: boolean;
 }
 
-export enum AlertsTableFlyoutState {
-  internal = 'internal',
-  external = 'external',
+export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export enum RRuleFrequency {
+  YEARLY = 0,
+  MONTHLY = 1,
+  WEEKLY = 2,
+  DAILY = 3,
 }
 
-export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+export interface RecurrenceSchedule {
+  freq: RRuleFrequency;
+  interval: number;
+  until?: Moment;
+  count?: number;
+  byweekday?: string[];
+  bymonthday?: number[];
+  bymonth?: number[];
+}
+
+export interface SnoozeSchedule {
+  id: string | null;
+  duration: number;
+  rRule: Partial<RecurrenceSchedule> & {
+    dtstart: string;
+    tzid: string;
+  };
+}
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
