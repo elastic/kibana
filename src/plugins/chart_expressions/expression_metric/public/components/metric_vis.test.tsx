@@ -19,17 +19,17 @@ const mockDeserialize = jest.fn(() => ({
   getConverterFor: jest.fn(() => () => 'formatted duration'),
 }));
 
+const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
+
 jest.mock('../services', () => ({
   getFormatService: () => {
     return {
       deserialize: mockDeserialize,
     };
   },
-  getPaletteService: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getPaletteService } = require('../__mocks__/palette_service');
-    return getPaletteService();
-  },
+  getPaletteService: () => ({
+    get: jest.fn(() => ({ getColorForValue: mockGetColorForValue })),
+  }),
   getThemeService: () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getThemeService } = require('../__mocks__/theme_service');
@@ -331,8 +331,55 @@ describe('MetricVisComponent', function () {
         (getConfig(basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
       ).toBe('horizontal');
     });
+
     it('should fetch color from palette if provided', () => {
-      // TODO
+      const colorFromPalette = 'color-from-palette';
+
+      mockGetColorForValue.mockReturnValue(colorFromPalette);
+
+      const component = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: {
+              ...config.metric,
+              palette: {
+                colors: [],
+                gradient: true,
+                stops: [],
+                range: 'number',
+                rangeMin: 2,
+                rangeMax: 10,
+              },
+            },
+          }}
+          data={table}
+          renderComplete={() => {}}
+        />
+      );
+
+      const [[datum]] = component.find(Metric).props().data!;
+
+      expect(datum!.color).toBe(colorFromPalette);
+      expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            28.984375,
+            Object {
+              "colors": Array [],
+              "gradient": true,
+              "range": "number",
+              "rangeMax": 10,
+              "rangeMin": 2,
+              "stops": Array [],
+            },
+            Object {
+              "max": 10,
+              "min": 2,
+            },
+          ],
+        ]
+      `);
     });
   });
 
@@ -682,10 +729,6 @@ describe('MetricVisComponent', function () {
           ],
         ]
       `);
-    });
-
-    it('should fetch color from palette if provided', () => {
-      // TODO
     });
   });
 
