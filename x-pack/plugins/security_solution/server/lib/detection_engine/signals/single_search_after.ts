@@ -81,13 +81,17 @@ export const singleSearchAfter = async ({
         );
       const end = performance.now();
 
+      const searchDuration = makeFloatString(end - start);
+
+      logger.debug(buildRuleMessage(`Search took: ${searchDuration}`));
+
       const searchErrors = createErrorsFromShard({
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
       return {
         searchResult: nextSearchAfterResult,
-        searchDuration: makeFloatString(end - start),
+        searchDuration,
         searchErrors,
       };
     } catch (exc) {

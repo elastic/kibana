@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
+
 import { get } from 'lodash/fp';
-import { set } from '@elastic/safer-lodash-set/fp';
+// import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { SignalSource } from '../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
 import type { FieldsType, MergeStrategyFunction } from '../types';
@@ -30,8 +33,11 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
   const fieldEntries = Object.entries(fields);
   const filteredEntries = filterFieldEntries(fieldEntries, ignoreFields);
 
+  const startReduce = performance.now();
   const transformedSource = filteredEntries.reduce(
     (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {
+      const startLoop = performance.now();
+      // console.error('iterating with fields key...', fieldsKey);
       if (
         hasEarlyReturnConditions({
           fieldsValue,
@@ -42,12 +48,35 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
         return merged;
       }
 
+      const gettingFieldFromMerged = performance.now();
       const valueInMergedDocument = get(fieldsKey, merged);
+      const gotFieldFromMerged = performance.now();
+      // console.error(
+      //   'how long did it take to get field from merged?',
+      //   Number(gotFieldFromMerged - gettingFieldFromMerged).toFixed(2)
+      // );
+      const unboxingFieldTimeStart = performance.now();
       const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-      return set(fieldsKey, valueToMerge, merged);
+      const unboxingFieldTimeEnd = performance.now();
+      // console.error(
+      //   'how long did it take to recursively unbox?',
+      //   Number(unboxingFieldTimeEnd - unboxingFieldTimeStart).toFixed(2)
+      // );
+      const settingFieldStart = performance.now();
+      // const setFieldInMerged = set(fieldsKey, valueToMerge, merged);
+      const setFieldInMerged = set(merged, fieldsKey, valueToMerge);
+      const settingFieldEnd = performance.now();
+      // console.error('SET?', Number(settingFieldEnd - settingFieldStart).toFixed(2));
+
+      // console.error('one loop', Number(settingFieldEnd - startLoop).toFixed(2));
+
+      return setFieldInMerged;
     },
     { ...source }
   );
+  const endReduce = performance.now();
+
+  console.error('finished', Number(endReduce - startReduce).toFixed(2));
 
   return {
     ...doc,
@@ -75,12 +104,18 @@ const hasEarlyReturnConditions = ({
   fieldsKey: string;
   merged: SignalSource;
 }) => {
+  const start = performance.now();
+
   const valueInMergedDocument = get(fieldsKey, merged);
-  return (
+  const toReturn =
     fieldsValue.length === 0 ||
     valueInMergedDocument !== undefined ||
     arrayInPathExists(fieldsKey, merged) ||
     isNestedObject(fieldsValue) ||
-    isTypeObject(fieldsValue)
-  );
+    isTypeObject(fieldsValue);
+  const end = performance.now();
+
+  const searchDuration = Number(end - start).toFixed(2);
+
+  return toReturn;
 };
