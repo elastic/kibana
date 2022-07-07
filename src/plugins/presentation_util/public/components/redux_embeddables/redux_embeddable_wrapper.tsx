@@ -58,21 +58,6 @@ const getDefaultProps = <InputType extends EmbeddableInput = EmbeddableInput>():
   },
 });
 
-const embeddableIsContainer = (
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
-): embeddable is IContainer => embeddable.isContainer;
-
-export const getExplicitInput = <InputType extends EmbeddableInput = EmbeddableInput>(
-  embeddable: IEmbeddable<InputType, EmbeddableOutput>
-): InputType => {
-  const root = embeddable.getRoot();
-  if (!embeddableIsContainer(embeddable) && embeddableIsContainer(root)) {
-    return (root.getInput().panels[embeddable.id]?.explicitInput ??
-      embeddable.getInput()) as InputType;
-  }
-  return embeddable.getInput() as InputType;
-};
-
 /**
  * Place this wrapper around the react component when rendering an embeddable to automatically set up
  * redux for use with the embeddable via the supplied reducers. Any child components can then use ReduxEmbeddableContext
@@ -81,85 +66,6 @@ export const getExplicitInput = <InputType extends EmbeddableInput = EmbeddableI
 export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = EmbeddableInput>(
   props: ReduxEmbeddableWrapperPropsWithChildren<InputType>
 ) => {
-  const { embeddable, reducers, diffInput } = useMemo(
-    () => ({ ...getDefaultProps<InputType>(), ...props }),
-    [props]
-  );
-
-  const containerActions: ReduxContainerContextServices['containerActions'] | undefined =
-    useMemo(() => {
-      if (embeddableIsContainer(embeddable)) {
-        return {
-          untilEmbeddableLoaded: embeddable.untilEmbeddableLoaded.bind(embeddable),
-          updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
-          removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
-          addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
-          replaceEmbeddable: embeddable.replaceEmbeddable.bind(embeddable),
-        };
-      }
-      return;
-    }, [embeddable]);
-
-  const ReduxEmbeddableStoreProvider = useMemo(
-    () =>
-      ({ children }: PropsWithChildren<{}>) =>
-        <Provider store={getManagedEmbeddablesStore()}>{children}</Provider>,
-    []
-  );
-
-  const reduxEmbeddableContext: ReduxEmbeddableContextServices | ReduxContainerContextServices =
-    useMemo(() => {
-      const key = `${embeddable.type}_${embeddable.id}`;
-      const store = getManagedEmbeddablesStore();
-
-      const initialState = getExplicitInput<InputType>(embeddable);
-      if (stateContainsFilters(initialState)) {
-        initialState.filters = cleanFiltersForSerialize(initialState.filters);
-      }
-
-      // A generic reducer used to update redux state when the embeddable input changes
-      const updateEmbeddableReduxState = (
-        state: Draft<InputType>,
-        action: PayloadAction<Partial<InputType>>
-      ) => {
-        return { ...state, ...action.payload };
-      };
-
-      // A generic reducer used to clear redux state when the embeddable is destroyed
-      const clearEmbeddableReduxState = () => {
-        return undefined;
-      };
-
-      const slice = createSlice<InputType, SliceCaseReducers<InputType>>({
-        initialState,
-        name: key,
-        reducers: { ...reducers, updateEmbeddableReduxState, clearEmbeddableReduxState },
-      });
-
-      if (store.asyncReducers[key]) {
-        // if the store already has reducers set up for this embeddable type & id, update the existing state.
-        const updateExistingState = (slice.actions as ReduxEmbeddableContextServices['actions'])
-          .updateEmbeddableReduxState;
-        store.dispatch(updateExistingState(initialState));
-      } else {
-        store.injectReducer({
-          key,
-          asyncReducer: slice.reducer,
-        });
-      }
-
-      const useEmbeddableSelector: TypedUseSelectorHook<InputType> = () =>
-        useSelector((state: ReturnType<typeof store.getState>) => state[key]);
-
-      return {
-        useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
-        useEmbeddableSelector,
-        ReduxEmbeddableStoreProvider,
-        actions: slice.actions as ReduxEmbeddableContextServices['actions'],
-        containerActions,
-      };
-    }, [reducers, embeddable, containerActions, ReduxEmbeddableStoreProvider]);
-
   return (
     <ReduxEmbeddableStoreProvider>
       <ReduxEmbeddableContext.Provider value={reduxEmbeddableContext}>
