@@ -33,7 +33,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await browser.removeLocalStorageItem('xpack.observability.tourState');
+      await browser.removeLocalStorageItem('guidedOnboarding.observability.tourActive');
+      await browser.removeLocalStorageItem('guidedOnboarding.observability.tourStep');
     });
 
     describe('Tour enabled', () => {
