@@ -128,6 +128,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
 
   useEffect(() => {
     if (hasAnyData !== true) {
@@ -199,7 +200,7 @@ export function OverviewPage({ routeParams }: Props) {
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
-                  userCanCrud={userPermissions?.crud ?? false}
+                  permissions={casesPermissions}
                   features={{ alerts: { sync: false } }}
                 >
                   <AlertsTableTGrid
