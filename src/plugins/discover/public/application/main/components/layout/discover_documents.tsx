@@ -50,6 +50,7 @@ function DiscoverDocumentsComponent({
   setExpandedDoc,
   state,
   stateContainer,
+  onFieldEdited,
 }: {
   documents$: DataDocuments$;
   expandedDoc?: DataTableRecord;
@@ -60,6 +61,7 @@ function DiscoverDocumentsComponent({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
+  onFieldEdited: () => void;
 }) {
   const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -188,6 +190,7 @@ function DiscoverDocumentsComponent({
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              onFieldEdited={onFieldEdited}
             />
           </div>
         </>

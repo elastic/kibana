@@ -45,14 +45,14 @@ function getProps() {
   };
 }
 
-function getComponent() {
-  const Proxy = (props: DiscoverGridProps) => (
+function getComponent(props: DiscoverGridProps = getProps()) {
+  const Proxy = (innerProps: DiscoverGridProps) => (
     <KibanaContextProvider services={discoverServiceMock}>
-      <DiscoverGrid {...props} />
+      <DiscoverGrid {...innerProps} />
     </KibanaContextProvider>
   );
 
-  return mountWithIntl(<Proxy {...getProps()} />);
+  return mountWithIntl(<Proxy {...props} />);
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
@@ -170,6 +170,39 @@ describe('DiscoverGrid', () => {
       expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
         `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
       );
+    });
+  });
+
+  describe('edit field button', () => {
+    it('should render the edit field button if onFieldEdited is provided', () => {
+      const component = getComponent({
+        ...getProps(),
+        columns: ['message'],
+        onFieldEdited: jest.fn(),
+      });
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        false
+      );
+      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        true
+      );
+      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
+    });
+
+    it('should not render the edit field button if onFieldEdited is not provided', () => {
+      const component = getComponent({
+        ...getProps(),
+        columns: ['message'],
+      });
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        false
+      );
+      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        true
+      );
+      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
     });
   });
 });
