@@ -97,9 +97,9 @@ export const useBulkActionsDryRun: UseBulkActionsDryRun = ({
           isDryRun: true,
         });
       } catch (err) {
-        // if body doesn't have rules_count, action failed altogether and no data available for dry run
-        if (err.body?.rules_count === undefined) {
-          throw err;
+        // if body doesn't have summary data, action failed altogether and no data available for dry run
+        if ((err.body as BulkActionResponse)?.attributes?.summary?.total === undefined) {
+          return;
         }
         result = err.body;
       }
