@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
 interface TotalStatsProps {
-  lastUpdated: string;
   documentCount: number;
-  indexHealth: string;
+  indexHealth?: string;
   ingestionType: string;
+  lastUpdated: string;
 }
 
 export const TotalStats: React.FC<TotalStatsProps> = ({
@@ -25,25 +25,25 @@ export const TotalStats: React.FC<TotalStatsProps> = ({
   return (
     <EuiFlexGroup direction="row">
       <EuiFlexItem>
-        <EuiPanel color="success" hasShadow={false} paddingSize="l">
-          <EuiStat description="Ingestion type" title={ingestionType} />
+        <EuiPanel color="primary" hasShadow={false} paddingSize="l">
+          <EuiStat titleSize="m" description="Ingestion type" title={ingestionType} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Document count" title={documentCount} />
+          <EuiStat titleSize="m" description="Document count" title={documentCount} />
         </EuiPanel>
       </EuiFlexItem>
-
+      {indexHealth && (
+        <EuiFlexItem>
+          <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
+            <EuiStat titleSize="m" description="Index health" title={indexHealth} />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Index health" title={indexHealth} />
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Last Updated" title={lastUpdated} />
+          <EuiStat titleSize="m" description="Last Updated" title={lastUpdated} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

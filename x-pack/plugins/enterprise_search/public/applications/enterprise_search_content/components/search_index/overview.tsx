@@ -10,13 +10,13 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiCodeBlock,
-  EuiText,
-  EuiFlexGroup,
   EuiButton,
-  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { Status } from '../../../../../common/types/api';
@@ -25,6 +25,7 @@ import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/ex
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
+import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
 import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
@@ -35,51 +36,58 @@ export const SearchIndexOverview: React.FC = () => {
 
   return (
     <>
+      <GenerateApiKeyModal />
       {status === Status.SUCCESS && data && (
-        <TotalStats
-          lastUpdated={'TODO'}
-          documentCount={data.index.total.docs.count ?? 0}
-          indexHealth={data.index.health ?? ''}
-          ingestionType={data.connector ? 'Connector' : data.crawler ? 'Crawler' : 'API'}
-        />
-      )}
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <>
+          <EuiSpacer />
+          <TotalStats
+            lastUpdated={'TODO'}
+            documentCount={data.index.total.docs.count ?? 0}
+            indexHealth={data.index.health ?? ''}
+            ingestionType={data.connector ? 'Connector' : data.crawler ? 'Crawler' : 'API'}
+          />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiPanel>
+                <EuiFlexGroup direction="column">
                   <EuiFlexItem>
-                    <EuiText>
-                      <h2>Indexing by API</h2>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+                    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                       <EuiFlexItem>
-                        <EuiButtonIcon iconType="iInCircle" />
+                        <EuiTitle size="s">
+                          <h2>Adding documents to your index</h2>
+                        </EuiTitle>
                       </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiButton>Generate an API key</EuiButton>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+                          <EuiFlexItem>
+                            <EuiButton iconType="arrowDown" iconSide="right">
+                              Client Libraries
+                            </EuiButton>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiButton fill>Generate an API key</EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-                  {`\
-curl -X POST '${searchIndexApiUrl}${name}/document' \\
+                  <EuiSpacer />
+                  <EuiFlexItem>
+                    <EuiCodeBlock language="bash" fontSize="m" isCopyable>
+                      {`\
+curl -X POST '${searchIndexApiUrl}${data.index?.name}/document' \\
   -H 'Content-Type: application/json' \\
   -H 'Authorization: Bearer ${apiKey}' \\
   -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
 `}
-                </EuiCodeBlock>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                    </EuiCodeBlock>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };
