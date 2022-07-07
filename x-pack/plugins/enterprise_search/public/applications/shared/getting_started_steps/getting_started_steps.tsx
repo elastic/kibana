@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
@@ -32,9 +21,6 @@ export interface GettingStartedStepsProps {
 }
 
 export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step = 'first' }) => {
-  // TODO replace with logic file
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -84,65 +70,6 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                   </EuiText>
                   <EuiSpacer size="m" />
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        button={
-                          <EuiButton
-                            disabled={step !== 'second'}
-                            iconType="arrowDown"
-                            iconSide="right"
-                            fill
-                            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.overview.gettingStartedSteps.createASearchEngineButton',
-                              { defaultMessage: 'Create a search engine' }
-                            )}
-                          </EuiButton>
-                        }
-                        isOpen={isPopoverOpen}
-                        closePopover={() => setIsPopoverOpen(false)}
-                      >
-                        {/* TODO add onclick for these links*/}
-                        <EuiContextMenuPanel
-                          items={[
-                            <EuiContextMenuItem key="" onClick={() => {}}>
-                              <EuiText size="s">
-                                <h4>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.overview.gettingStartedSteps.createAppSearchEngine.title',
-                                    { defaultMessage: 'Create an App Search engine' }
-                                  )}
-                                </h4>
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.overview.gettingStartedSteps.createAppSearchEngine.description',
-                                  {
-                                    defaultMessage:
-                                      'All the power of Elasticsearch, without the learning curve.',
-                                  }
-                                )}
-                              </EuiText>
-                            </EuiContextMenuItem>,
-                            <EuiContextMenuItem key="" onClick={() => {}}>
-                              <EuiText size="s">
-                                <h4>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.overview.gettingStartedSteps.createWorkplaceSearchGroup.title',
-                                    { defaultMessage: 'Create a Workplace Search group' }
-                                  )}
-                                </h4>
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.overview.gettingStartedSteps.createWorkplaceSearchGroup.description',
-                                  {
-                                    defaultMessage: 'A secure search experience for internal teams',
-                                  }
-                                )}
-                              </EuiText>
-                            </EuiContextMenuItem>,
-                          ]}
-                        />
-                      </EuiPopover>
-                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiLinkTo shouldNotCreateHref to={ELASTICSEARCH_PLUGIN.URL}>
                         <EuiIcon type="iInCircle" />
