@@ -64,3 +64,20 @@ export interface FieldCoercionError {
   error: string;
 }
 export type FieldCoercionErrors = Record<string, FieldCoercionError[]>;
+
+export interface SchemaFieldCapabilities {
+  fulltext?: boolean;
+  filter?: boolean;
+  facet?: boolean;
+  sort?: boolean;
+  snippet?: boolean;
+  boost?: boolean;
+}
+
+export interface AdvancedSchemaField {
+  type: SchemaType;
+  nestedPath?: string;
+  capabilities: SchemaFieldCapabilities;
+}
+
+export type AdvancedSchema = Record<string, AdvancedSchemaField>;
