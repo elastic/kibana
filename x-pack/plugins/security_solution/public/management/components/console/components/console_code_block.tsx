@@ -29,7 +29,7 @@ export const ConsoleCodeBlock = memo<{
             } else {
               return props.theme.eui.euiColorDarkestShade;
             }
-          }} !important;
+          }};
           font-weight: ${(props) => {
             return bold ? props.theme.eui.euiFontWeightBold : props.theme.eui.euiFontWeightRegular;
           }};
