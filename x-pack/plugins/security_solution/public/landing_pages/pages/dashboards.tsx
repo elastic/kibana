@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
+import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
 import { HeaderPage } from '../../common/components/header_page';
 import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -16,10 +18,26 @@ import { DASHBOARDS_PAGE_TITLE } from './translations';
 export const DashboardsLandingPage = () => {
   const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
 
+  // TODO: translate 2
   return (
     <SecuritySolutionPageWrapper>
       <HeaderPage title={DASHBOARDS_PAGE_TITLE} />
+      <EuiSpacer size="s" />
+
+      <EuiTitle size="xxxs">
+        <h2>{'FAVORITE'}</h2>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
       <LandingImageCards items={dashboardLinks} />
+      <EuiSpacer size="xxl" />
+
+      <EuiTitle size="xxxs">
+        <h2>{'ALL'}</h2>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+      <EuiSpacer size="m" />
+      <DashboardsTable />
+
       <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
     </SecuritySolutionPageWrapper>
   );
