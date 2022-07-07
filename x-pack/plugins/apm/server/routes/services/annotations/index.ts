@@ -36,6 +36,9 @@ export async function getServiceAnnotations({
   start: number;
   end: number;
 }) {
+  // Variable to store any error happened on getDerivedServiceAnnotations other than RequestAborted
+  let derivedAnnotationError: Error | undefined;
+
   // start fetching derived annotations (based on transactions), but don't wait on it
   // it will likely be significantly slower than the stored annotations
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
@@ -52,7 +55,8 @@ export async function getServiceAnnotations({
     ) {
       return [];
     }
-    throw error;
+    // When another error was thrown, save it and wait for Stored annotations before re-throwing it
+    derivedAnnotationError = error;
   });
 
   const storedAnnotations = annotationsClient
@@ -68,10 +72,14 @@ export async function getServiceAnnotations({
     : [];
 
   if (storedAnnotations.length) {
-    derivedAnnotationsPromise.catch(() => {
-      // handle error silently to prevent Kibana from crashing
-    });
     return { annotations: storedAnnotations };
+  }
+
+  // At this point storedAnnotations returned an empty array,
+  // so if derivedAnnotationError is not undefined throws the error reported by getDerivedServiceAnnotations
+  // and there's no reason to await the function anymore
+  if (derivedAnnotationError) {
+    throw derivedAnnotationError;
   }
 
   return {
