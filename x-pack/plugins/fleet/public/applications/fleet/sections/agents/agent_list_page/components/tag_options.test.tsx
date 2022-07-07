@@ -56,7 +56,14 @@ describe('TagOptions', () => {
 
     fireEvent.click(result.getByText('Delete tag'));
 
-    expect(mockBulkUpdateTags).toHaveBeenCalledWith('tags:agent', [], ['agent'], expect.anything());
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'tags:agent',
+      [],
+      ['agent'],
+      expect.anything(),
+      'Tag deleted',
+      'Tag delete failed'
+    );
   });
 
   it('should rename tag when rename button is clicked', async () => {
@@ -74,7 +81,9 @@ describe('TagOptions', () => {
       'tags:agent',
       ['newName'],
       ['agent'],
-      expect.anything()
+      expect.anything(),
+      'Tag renamed',
+      'Tag rename failed'
     );
   });
 });
