@@ -50,6 +50,7 @@ describe('RuleActionsField', () => {
             field={field}
             messageVariables={messageVariables}
             hasErrorOnCreationCaseAction={false}
+            isOsqueryDisabled={false}
           />
         </Form>
       );
@@ -80,7 +81,8 @@ describe('RuleActionsField', () => {
     ];
 
     it('if we have an error on case action creation, we do not support case connector', () => {
-      expect(getSupportedActions(actions, true)).toMatchInlineSnapshot(`
+      expect(getSupportedActions(actions, { '.case': true, '.osquery': true }))
+        .toMatchInlineSnapshot(`
         Array [
           Object {
             "enabled": true,
