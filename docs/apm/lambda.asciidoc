@@ -20,7 +20,7 @@ Cold starts are an unavoidable byproduct of the serverless world, but visibility
 [[apm-lambda-cold-start-rate]]
 ===== Cold start rate
 
-The cold start rate is displayed per service and per transaction.
+The cold start rate (i.e. proportion of requests that experience a cold start) is displayed per service and per transaction.
 
 [role="screenshot"]
 image::apm/images/lambda-cold-start.png[lambda cold start graph]
