@@ -87,10 +87,10 @@ export const useNavigationProps = ({
   );
 
   const singleDocHref = addBasePath(
-    `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
+    `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
   );
   const surDocsHref = addBasePath(
-    `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+    `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
       rowId
     )}?${contextSearchHash}`
   );
