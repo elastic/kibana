@@ -385,6 +385,7 @@ export const AvailablePackages: React.FC<{
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
+      showCardLabels={false}
     />
   );
 };

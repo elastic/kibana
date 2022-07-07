@@ -41,6 +41,7 @@ export function PackageCard({
   id,
   fromIntegrations,
   isUnverified,
+  showLabels = true,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -55,7 +56,7 @@ export function PackageCard({
     );
   }
 
-  if (isUnverified) {
+  if (isUnverified && showLabels) {
     releaseBadge = (
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
