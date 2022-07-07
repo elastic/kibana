@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export interface AiopsPluginSetupDeps {
   data: PluginSetup;
+  licensing: LicensingPluginStart;
 }
 
 export interface AiopsPluginStartDeps {
@@ -26,3 +28,7 @@ export interface AiopsPluginSetup {}
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiopsPluginStart {}
+
+export interface AiopsLicense {
+  isActivePlatinumLicense: boolean;
+}

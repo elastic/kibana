@@ -9,9 +9,10 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
 import { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
+import { KQL_NODE_TYPE_WILDCARD } from './node_types/wildcard';
 
 /** @public */
-export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | 'wildcard';
+export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | typeof KQL_NODE_TYPE_WILDCARD;
 
 /** @public */
 export interface KueryNode {
@@ -46,4 +47,14 @@ export interface KueryQueryOptions {
    * The `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
    */
   nestedIgnoreUnmapped?: boolean;
+}
+
+/** @public */
+export interface KqlContext {
+  nested?: {
+    /**
+     * For nested queries, we pass along the path to the nested document so we can properly craft the query DSL.
+     */
+    path: string;
+  };
 }

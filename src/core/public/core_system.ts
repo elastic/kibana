@@ -18,9 +18,12 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { filter, firstValueFrom } from 'rxjs';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
@@ -33,7 +36,6 @@ import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
-import { ExecutionContextService } from './execution_context';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { KBN_LOAD_MARKS } from './utils';
 
@@ -145,6 +147,7 @@ export class CoreSystem {
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
+      protocol: window.location.protocol,
       ...fetchOptionalMemoryInfo(),
       ...this.getLoadMarksInfo(),
     });
@@ -301,14 +304,11 @@ export class CoreSystem {
       });
 
       // Wait for the first app navigation to report Kibana Loaded
-      const appSub = application.currentAppId$.subscribe((appId) => {
-        if (appId === undefined) return;
-
+      firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
         performance.mark(KBN_LOAD_MARKS, {
           detail: 'first_app_nav',
         });
         this.reportKibanaLoadedEvent(analytics);
-        appSub.unsubscribe();
       });
 
       return {
@@ -387,6 +387,12 @@ export class CoreSystem {
           _meta: {
             description: 'When the application emits the first app navigation',
             optional: true,
+          },
+        },
+        protocol: {
+          type: 'keyword',
+          _meta: {
+            description: 'Value from window.location.protocol',
           },
         },
       },

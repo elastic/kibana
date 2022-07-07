@@ -201,7 +201,7 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      ...(casePermissions?.crud
+      ...(casePermissions.crud
         ? [
             <EuiContextMenuItem
               data-test-subj="add-to-existing-case-action"
@@ -246,7 +246,7 @@ function ObservabilityActions({
       ],
     ];
   }, [
-    casePermissions?.crud,
+    casePermissions.crud,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     linkToRule,
@@ -325,6 +325,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     timelines,
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
@@ -432,7 +433,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: kuery ?? '',
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert, observabilityRuleTypeRegistry }),
       rowRenderers: NO_ROW_RENDER,
       // TODO: implement Kibana data view runtime fields in observability
       runtimeMappings: {},
@@ -471,6 +472,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     hasAlertsCrudPermissions,
     indexNames,
     itemsPerPage,
+    observabilityRuleTypeRegistry,
     onStateChange,
     kuery,
     rangeFrom,
@@ -480,7 +482,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
-  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   return (
     <>

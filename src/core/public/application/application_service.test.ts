@@ -798,46 +798,6 @@ describe('#start()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path', 'my-state');
     });
 
-    it('updates currentApp$ after mounting', async () => {
-      service.setup(setupDeps);
-
-      const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject<void>();
-      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
-
-      await navigateToApp('alpha');
-      await navigateToApp('beta');
-      await navigateToApp('gamma');
-      await navigateToApp('delta');
-      stop$.next();
-
-      const appIds = await promise;
-
-      expect(appIds).toMatchInlineSnapshot(`
-        Array [
-          "alpha",
-          "beta",
-          "gamma",
-          "delta",
-        ]
-      `);
-    });
-
-    it("when openInNewTab is true it doesn't update currentApp$ after mounting", async () => {
-      service.setup(setupDeps);
-
-      const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject<void>();
-      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
-
-      await navigateToApp('delta', { openInNewTab: true });
-      stop$.next();
-
-      const appIds = await promise;
-
-      expect(appIds).toBeUndefined();
-    });
-
     it('updates httpLoadingCount$ while mounting', async () => {
       // Use a memory history so that mounting the component will work
       const { createMemoryHistory } = jest.requireActual('history');
@@ -1170,6 +1130,17 @@ describe('#start()', () => {
 
         expect(setupDeps.redirectTo).toHaveBeenCalledWith('/an-app-path');
         expect(MockHistory.push).not.toHaveBeenCalled();
+      });
+
+      it('calls `navigateToApp` with `state` option', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+        service.setup(setupDeps);
+        const { navigateToUrl } = await service.start(startDeps);
+
+        await navigateToUrl('/an-app-path', { state: { toto: 123 } });
+
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', { toto: 123 });
+        expect(setupDeps.redirectTo).not.toHaveBeenCalled();
       });
 
       it('removes the beforeunload listener and calls `redirectTo` when `forceRedirect` and `skipAppLeave` option are both true', async () => {

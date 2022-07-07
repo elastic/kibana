@@ -33,8 +33,14 @@ import type {
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { ExecutionContextSetup, ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
+import type {
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  FatalErrorInfo,
+} from '@kbn/core-fatal-errors-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -57,7 +63,6 @@ import {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
@@ -66,7 +71,6 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
-import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -91,8 +95,8 @@ export type {
   OptInConfig,
   ContextProviderOpts,
   TelemetryCounter,
+  TelemetryCounterType,
 } from '@kbn/analytics-client';
-export { TelemetryCounterType } from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -212,11 +216,12 @@ export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './type
 
 export { URL_MAX_LENGTH } from './core_app';
 
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+
 export type {
-  KibanaExecutionContext,
   ExecutionContextSetup,
   ExecutionContextStart,
-} from './execution_context';
+} from '@kbn/core-execution-context-browser';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
