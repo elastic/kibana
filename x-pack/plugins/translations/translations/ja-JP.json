@@ -24571,7 +24571,6 @@
     "xpack.securitySolution.console.commandList.footerText": "上記のコマンドの詳細については、{helpOption}引数を使用してください。例：{cmdExample}",
     "xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage": "注記：1つ以上のオプションを使用する必要があります",
     "xpack.securitySolution.console.commandUsage.inputUsage": "使用方法：",
-    "xpack.securitySolution.console.commandUsage.optionsLabel": "オプション：",
     "xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce": "引数{argName}は一度だけ使用できます",
     "xpack.securitySolution.console.commandValidation.invalidArgValue": "無効な引数値：{argName}。{error}",
     "xpack.securitySolution.console.commandValidation.missingRequiredArg": "不足している必須の引数：{argName}",

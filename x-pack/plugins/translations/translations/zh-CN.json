@@ -24595,7 +24595,6 @@
     "xpack.securitySolution.console.commandList.footerText": "有关上述命令的更多详情，请使用 {helpOption} 参数。示例：{cmdExample}",
     "xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage": "注意：必须至少使用一个选项",
     "xpack.securitySolution.console.commandUsage.inputUsage": "用法：",
-    "xpack.securitySolution.console.commandUsage.optionsLabel": "选项：",
     "xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce": "参数只能使用一次：{argName}",
     "xpack.securitySolution.console.commandValidation.invalidArgValue": "无效的参数值：{argName}。{error}",
     "xpack.securitySolution.console.commandValidation.missingRequiredArg": "缺少所需参数：{argName}",
