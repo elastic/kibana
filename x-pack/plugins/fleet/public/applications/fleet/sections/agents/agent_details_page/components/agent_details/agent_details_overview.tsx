@@ -25,6 +25,7 @@ import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
+import { Tags } from '../../../agent_list_page/components/tags';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -173,6 +174,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   defaultMessage="Disabled"
                 />
               ),
+          },
+          {
+            title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
+              defaultMessage: 'Tags',
+            }),
+            description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
           },
         ].map(({ title, description }) => {
           return (
