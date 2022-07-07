@@ -9,19 +9,19 @@ import React, { ReactNode, useState } from 'react';
 import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 
-export interface RowContainerNameHelperDeps {
+export interface ContainerNameRowDeps {
   name: string;
   index?: number;
   filterButtonIn?: ReactNode;
   filterButtonOut?: ReactNode;
 }
 
-export const RowContainerNameHelper = ({
+export const ContainerNameRow = ({
   name,
   index,
   filterButtonIn,
   filterButtonOut,
-}: RowContainerNameHelperDeps) => {
+}: ContainerNameRowDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
 
   const styles = useStyles();

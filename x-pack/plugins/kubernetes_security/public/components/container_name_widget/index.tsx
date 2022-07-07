@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState, useRef } from 'react';
+import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react';
 import { EuiBasicTable, EuiTableSortingType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useStyles } from './styles';
-import { RowContainerNameHelper } from './row_container_name_helper';
+import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter, useScroll } from '../../hooks';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchContainerNameData } from './hooks';
 import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
+import {
+  CONTAINER_NAME_SESSION,
+  CONTAINER_NAME_SESSION_COUNT_COLUMN,
+} from '../../../common/translations';
 
 export interface ContainerNameWidgetDataValueMap {
   key: string;
@@ -71,13 +74,13 @@ export const ContainerNameWidget = ({
     sortDirection
   );
 
-  const onTableChange = ({ sort = {} }) => {
+  const onTableChange = useCallback(({ sort = {} }) => {
     // @ts-ignore
     const { field: sortingField, direction: sortingDirection } = sort;
 
     setSortField(sortingField);
     setSortDirection(sortingDirection);
-  };
+  }, []);
 
   const sorting: EuiTableSortingType<ContainerNameArrayDataValue> = {
     sort: {
@@ -130,13 +133,6 @@ export const ContainerNameWidget = ({
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
 
-  const widgetTitle = i18n.translate(
-    'xpack.kubernetesSecurity.containerNameWidget.ContainerImage',
-    {
-      defaultMessage: 'Container Images Session',
-    }
-  );
-
   const containerNameArray = useMemo((): ContainerNameArrayDataValue[] => {
     return data
       ? data?.pages
@@ -156,7 +152,7 @@ export const ContainerNameWidget = ({
     return [
       {
         field: 'name',
-        name: widgetTitle,
+        name: CONTAINER_NAME_SESSION,
         'data-test-subj': 'containerImageNameSessionNameColumn',
         render: (name: string) => {
           const indexHelper = containerNameArray.findIndex((obj) => {
@@ -164,7 +160,7 @@ export const ContainerNameWidget = ({
           });
 
           return (
-            <RowContainerNameHelper
+            <ContainerNameRow
               name={name}
               index={indexHelper}
               filterButtonIn={filterButtons.filterForButtons[indexHelper]}
@@ -178,7 +174,7 @@ export const ContainerNameWidget = ({
       },
       {
         field: 'count',
-        name: 'Count',
+        name: CONTAINER_NAME_SESSION_COUNT_COLUMN,
         width: '76px',
         'data-test-subj': 'containerImageNameSessionCountColumn',
         render: (count: number) => {
@@ -188,13 +184,7 @@ export const ContainerNameWidget = ({
         align: 'right',
       },
     ];
-  }, [
-    filterButtons.filterForButtons,
-    filterButtons.filterOutButtons,
-    containerNameArray,
-    styles,
-    widgetTitle,
-  ]);
+  }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray, styles]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useScroll({
@@ -214,7 +204,6 @@ export const ContainerNameWidget = ({
       ref={scrollerRef}
     >
       <EuiBasicTable
-        tableCaption="Container Name Session Table"
         aria-label="Container Name Session Widget"
         items={containerNameArray}
         columns={columns}

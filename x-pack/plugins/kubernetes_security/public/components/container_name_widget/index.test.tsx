@@ -11,6 +11,8 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
 import { ContainerNameWidget } from '.';
 import { useFetchContainerNameData } from './hooks';
+import { ContainerNameRow } from './container_name_row';
+import { fireEvent } from '@testing-library/react';
 
 const TABLE_ID = 'containerNameSessionTable';
 const TABLE_CONTAINER_NAME_ID = 'containerImageNameSessionNameColumn';
@@ -68,7 +70,7 @@ jest.mock('../../hooks/use_filter', () => ({
 jest.mock('./hooks');
 const mockUseFetchData = useFetchContainerNameData as jest.Mock;
 
-describe('PercentWidget component', () => {
+describe('ContainerNameWidget component', () => {
   let renderResult: ReturnType<typeof render>;
   const mockedContext = createAppRootMockRenderer();
   const render: () => ReturnType<AppContextTestRender['render']> = () =>
@@ -81,7 +83,7 @@ describe('PercentWidget component', () => {
       />
     ));
 
-  describe('When PercentWidget is mounted', () => {
+  describe('When ContainerNameWidget is mounted', () => {
     describe('with data', () => {
       beforeEach(() => {
         mockUseFetchData.mockImplementation(() => ({
@@ -118,5 +120,38 @@ describe('PercentWidget component', () => {
         expect(renderResult.getByTestId(TABLE_ID)).toBeVisible();
       });
     });
+  });
+});
+
+const TEST_NAME = 'TEST ROW';
+const TEST_BUTTON_FILTER = <div>Filter In</div>;
+const TEST_BUTTON_FILTER_OUT = <div>Filter Out</div>;
+
+describe('ContainerNameRow component with valid row', () => {
+  let renderResult: ReturnType<typeof render>;
+  const mockedContext = createAppRootMockRenderer();
+  const render: () => ReturnType<AppContextTestRender['render']> = () =>
+    (renderResult = mockedContext.render(
+      <ContainerNameRow
+        name={TEST_NAME}
+        index={1}
+        filterButtonIn={TEST_BUTTON_FILTER}
+        filterButtonOut={TEST_BUTTON_FILTER_OUT}
+      />
+    ));
+
+  it('should show the row element as well as the pop up filter button when mouse hovers above it', async () => {
+    render();
+    expect(renderResult.getByText(TEST_NAME)).toBeVisible();
+    fireEvent.mouseOver(renderResult.queryByText(TEST_NAME)!);
+    expect(renderResult.getByText('Filter In')).toBeVisible();
+    expect(renderResult.getByText('Filter Out')).toBeVisible();
+  });
+
+  it('should show the row element but not the pop up filter button outside mouse hover', async () => {
+    render();
+    expect(renderResult.getByText(TEST_NAME)).toBeVisible();
+    expect(renderResult.queryByText('Filter In')).toBeFalsy();
+    expect(renderResult.queryByText('Filter Out')).toBeFalsy();
   });
 });

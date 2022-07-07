@@ -21,3 +21,17 @@ export const SEARCH_GROUP_GROUP_BY = i18n.translate(
 export const SEARCH_GROUP_SORT_BY = i18n.translate('xpack.kubernetesSecurity.searchGroup.sortBy', {
   defaultMessage: 'Sort by',
 });
+
+export const CONTAINER_NAME_SESSION = i18n.translate(
+  'xpack.kubernetesSecurity.containerNameWidget.ContainerImage',
+  {
+    defaultMessage: 'Container Images Session',
+  }
+);
+
+export const CONTAINER_NAME_SESSION_COUNT_COLUMN = i18n.translate(
+  'xpack.kubernetesSecurity.containerNameWidget.ContainerImage',
+  {
+    defaultMessage: 'Count',
+  }
+);
