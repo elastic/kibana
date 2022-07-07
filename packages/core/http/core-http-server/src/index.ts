@@ -102,3 +102,5 @@ export { validBodyOutput, RouteValidationError } from './router';
 export type { ICspConfig } from './csp';
 
 export type { IExternalUrlPolicy, IExternalUrlConfig } from './external_url';
+
+export type { IBasePath } from './base_path';

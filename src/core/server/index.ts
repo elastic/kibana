@@ -148,8 +148,6 @@ export type {
 } from './elasticsearch';
 
 export type {
-  BasePath,
-  IBasePath,
   GetAuthHeaders,
   GetAuthState,
   HttpAuth,
@@ -231,6 +229,7 @@ export type {
   ICspConfig,
   IExternalUrlConfig,
   IExternalUrlPolicy,
+  IBasePath,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';

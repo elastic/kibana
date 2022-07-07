@@ -16,6 +16,7 @@ import type {
   OnPostAuthHandler,
   OnPreResponseHandler,
   IContextProvider,
+  IBasePath,
 } from '@kbn/core-http-server';
 import type { ICspConfig } from '@kbn/core-http-server';
 import { IContextContainer } from '../context';
@@ -24,7 +25,6 @@ import { IAuthHeadersStorage } from './auth_headers_storage';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
-import { IBasePath } from './base_path_service';
 import { ExternalUrlConfig } from './external_url';
 
 /**
