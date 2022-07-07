@@ -31,6 +31,10 @@ export interface GetOneAgentPolicyResponse {
 
 export interface CreateAgentPolicyRequest {
   body: NewAgentPolicy;
+  params: {
+    sys_monitoring?: boolean;
+    force_install?: boolean;
+  };
 }
 
 export interface CreateAgentPolicyResponse {

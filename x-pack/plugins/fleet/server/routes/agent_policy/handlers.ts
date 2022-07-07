@@ -116,6 +116,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
+  const forceInstall = request.query.force_install ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
@@ -127,6 +128,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         newPolicy,
         hasFleetServer,
         withSysMonitoring,
+        forceInstall,
         monitoringEnabled,
         spaceId,
         user,

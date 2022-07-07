@@ -79,6 +79,7 @@ interface CreateAgentPolicyParams {
   newPolicy: NewAgentPolicy;
   hasFleetServer?: boolean;
   withSysMonitoring: boolean;
+  forceInstall?: boolean;
   monitoringEnabled?: string[];
   spaceId: string;
   user?: AuthenticatedUser;
@@ -90,6 +91,7 @@ export async function createAgentPolicyWithPackages({
   newPolicy,
   hasFleetServer,
   withSysMonitoring,
+  forceInstall = false,
   monitoringEnabled,
   spaceId,
   user,
@@ -116,6 +118,7 @@ export async function createAgentPolicyWithPackages({
       savedObjectsClient: soClient,
       esClient,
       packagesToInstall,
+      force: forceInstall,
       spaceId,
     });
   }

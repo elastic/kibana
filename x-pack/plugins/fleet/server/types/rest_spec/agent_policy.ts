@@ -27,6 +27,7 @@ export const CreateAgentPolicyRequestSchema = {
   body: NewAgentPolicySchema,
   query: schema.object({
     sys_monitoring: schema.maybe(schema.boolean()),
+    force_install: schema.maybe(schema.boolean()),
   }),
 };
 

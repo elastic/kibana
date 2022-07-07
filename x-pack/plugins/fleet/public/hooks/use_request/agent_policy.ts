@@ -76,13 +76,25 @@ export const sendGetOneAgentPolicy = (agentPolicyId: string) => {
 
 export const sendCreateAgentPolicy = (
   body: CreateAgentPolicyRequest['body'],
-  { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
+  { withSysMonitoring, forceInstall }: { withSysMonitoring?: boolean; forceInstall?: boolean } = {
+    withSysMonitoring: false,
+    forceInstall: false,
+  }
 ) => {
+  const query: CreateAgentPolicyRequest['params'] = {};
+
+  if (withSysMonitoring) {
+    query.sys_monitoring = true;
+  }
+  if (forceInstall) {
+    query.force_install = true;
+  }
+
   return sendRequest<CreateAgentPolicyResponse>({
     path: agentPolicyRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
-    query: withSysMonitoring ? { sys_monitoring: true } : {},
+    query,
   });
 };
 
