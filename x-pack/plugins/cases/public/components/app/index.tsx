@@ -35,7 +35,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         persistableStateAttachmentTypeRegistry,
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
-        userCanCrud: userCapabilities.generalCases.crud,
+        permissions: userCapabilities.generalCases,
         basePath: '/',
         features: { alerts: { enabled: false } },
         releasePhase: 'experimental',

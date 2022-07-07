@@ -51,11 +51,11 @@ import {
   updatedCases,
   comment,
   attachments,
-  externalReferenceAttachmentSO,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
+  externalReferenceAttachmentSO,
   getPersistableStateAttachmentTypeRegistry,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';

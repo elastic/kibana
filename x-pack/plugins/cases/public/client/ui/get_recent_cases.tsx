@@ -23,7 +23,7 @@ export const getRecentCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   maxCasesToShow,
 }: GetRecentCasesPropsInternal) => (
   <CasesProvider
@@ -31,7 +31,7 @@ export const getRecentCasesLazy = ({
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       owner,
-      userCanCrud,
+      permissions,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

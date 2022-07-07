@@ -10,7 +10,7 @@ import { extractPersistableStateReferencesFromSO } from '../../../attachment_fra
 import { ActionTypes, Actions, CommentUserAction } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import { UserActionParameters, BuilderReturnValue } from '../types';
-import { getAttachmentSOExtractor } from '../../so_reference_extractor';
+import { getAttachmentSOExtractor } from '../../so_references';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): BuilderReturnValue {

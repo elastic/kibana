@@ -70,7 +70,6 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     caseServices,
     index: 0,
     alertData,
-    userCanCrud: true,
     commentRefs,
     manageMarkdownEditIds: [],
     selectedOutlineCommentId: '',

@@ -27,7 +27,7 @@ import {
   ExternalReferenceStorageType,
   ExternalReferenceSORt,
   CommentRequestExternalReferenceType,
-  ExternalReferenceWithoutSORefsRt,
+  ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
@@ -113,7 +113,7 @@ const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalRef
     pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
   } else {
     pipe(
-      excess(ExternalReferenceWithoutSORefsRt).decode(attachment),
+      excess(ExternalReferenceNoSORt).decode(attachment),
       fold(throwErrors(badRequest), identity)
     );
   }

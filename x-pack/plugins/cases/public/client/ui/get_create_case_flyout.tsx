@@ -23,7 +23,7 @@ export const getCreateCaseFlyoutLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   afterCaseCreated,
   onClose,
@@ -33,9 +33,8 @@ export const getCreateCaseFlyoutLazy = ({
   <CasesProvider
     value={{
       externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
-      owner,
-      userCanCrud,
+      persistableStateAttachmentTypeRegistryowner,
+      permissions,
       features,
     }}
   >

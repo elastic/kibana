@@ -23,7 +23,7 @@ export const getAllCasesSelectorModalLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   hiddenStatuses,
   onRowClick,
   onClose,
@@ -33,7 +33,7 @@ export const getAllCasesSelectorModalLazy = ({
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       owner,
-      userCanCrud,
+      permissions,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

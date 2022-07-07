@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { CommentType } from '../../common';
+import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
 import {
+  AttributesTypeExternalReferenceNoSO,
+  AttributesTypeExternalReferenceSO,
   AttributesTypePersistableState,
   CommentRequestPersistableStateType,
+  ExternalReferenceStorageType,
 } from '../../common/api';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 import { PersistableStateAttachmentTypeSetup, PersistableStateAttachmentState } from './types';
@@ -37,6 +40,57 @@ export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup 
     }),
   }),
 });
+
+export const externalReferenceAttachmentSO = {
+  type: CommentType.externalReference as const,
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject as const,
+    soType: 'test-so',
+  },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const externalReferenceAttachmentES = {
+  type: CommentType.externalReference as const,
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.elasticSearchDoc as const,
+  },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const externalReferenceAttachmentSOAttributes: AttributesTypeExternalReferenceSO = {
+  ...externalReferenceAttachmentSO,
+  created_at: '2019-11-25T22:32:30.608Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  updated_at: null,
+  updated_by: null,
+  pushed_at: null,
+  pushed_by: null,
+};
+
+export const externalReferenceAttachmentESAttributes: AttributesTypeExternalReferenceNoSO = {
+  ...externalReferenceAttachmentES,
+  created_at: '2019-11-25T22:32:30.608Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  updated_at: null,
+  updated_by: null,
+  pushed_at: null,
+  pushed_by: null,
+};
 
 export const persistableStateAttachmentStateOnly: PersistableStateAttachmentState = {
   persistableStateAttachmentTypeId: '.test',

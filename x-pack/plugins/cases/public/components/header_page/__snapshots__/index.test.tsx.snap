@@ -46,7 +46,10 @@ exports[`HeaderPage it renders 1`] = `
                 "collection": Map {},
                 "name": "PersistableStateAttachmentTypeRegistry",
               },
-              "userCanCrud": true,
+              "permissions": Object {
+                "all": true,
+                "read": true,
+              },
             }
           }
         >

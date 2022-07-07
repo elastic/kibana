@@ -44,7 +44,6 @@ const getCreateCommentUserAction = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   comment,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -70,7 +69,6 @@ const getCreateCommentUserAction = ({
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
         comment,
-        userCanCrud,
         outlined: comment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(comment.id),
         commentRefs,
@@ -134,7 +132,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   userAction,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -171,7 +168,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
         comment,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

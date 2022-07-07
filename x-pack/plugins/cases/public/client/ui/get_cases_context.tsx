@@ -23,7 +23,7 @@ const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   children,
   releasePhase,
@@ -35,7 +35,7 @@ const CasesProviderLazyWrapper = ({
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
           owner,
-          userCanCrud,
+          permissions,
           features,
           releasePhase,
         }}

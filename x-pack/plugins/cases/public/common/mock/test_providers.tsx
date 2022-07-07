@@ -23,12 +23,13 @@ import {
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
+import { CasesPermissions } from '../../client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
-  userCanCrud?: boolean;
+  permissions?: CasesPermissions;
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
@@ -45,7 +46,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
@@ -69,7 +70,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
                 persistableStateAttachmentTypeRegistry,
                 features,
                 owner,
-                userCanCrud,
+                permissions,
               }}
             >
               {children}
@@ -100,10 +101,24 @@ export const testQueryClient = new QueryClient({
   },
 });
 
+export const buildCasesPermissions = (overrides: Partial<CasesPermissions> = {}) => {
+  const read = overrides.read ?? true;
+  const all = overrides.all ?? true;
+
+  return {
+    all,
+    read,
+  };
+};
+
+export const allCasesPermissions = () => buildCasesPermissions();
+export const noCasesPermissions = () => buildCasesPermissions({ read: false, all: false });
+export const readCasesPermissions = () => buildCasesPermissions({ all: false });
+
 export const createAppMockRenderer = ({
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
@@ -128,7 +143,7 @@ export const createAppMockRenderer = ({
                 persistableStateAttachmentTypeRegistry,
                 features,
                 owner,
-                userCanCrud,
+                permissions,
                 releasePhase,
               }}
             >
