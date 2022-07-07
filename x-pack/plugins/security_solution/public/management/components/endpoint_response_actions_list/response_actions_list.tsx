@@ -19,8 +19,8 @@ import {
   EuiScreenReaderOnly,
   EuiI18nNumber,
   EuiText,
-  EuiToolTip,
   EuiCodeBlock,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
