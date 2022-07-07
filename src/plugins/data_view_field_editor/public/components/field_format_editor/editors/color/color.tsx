@@ -38,7 +38,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({
-      fieldType: props.fieldType,
+      zzzFieldType: props.fieldType,
     });
   }
 
