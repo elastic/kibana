@@ -86,7 +86,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           additionalControls: {
             left: {
               prepend: (
-                <EuiText size="xs">
+                <EuiText style={{ display: 'inline' }} size="xs">
                   Showing {start + 1}-{end > indicatorCount ? indicatorCount : end} of{' '}
                   {indicatorCount} indicators
                 </EuiText>
