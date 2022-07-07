@@ -4,56 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck // remove
-import React, { FC, useState, useEffect, useCallback } from 'react'; // useMemo useCallback
-import { lastValueFrom } from 'rxjs';
-import { useAiOpsKibana } from '../../../kibana_context';
+import React, { FC } from 'react';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
-import {
-  DocumentCountStats,
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-  OverallStatsSearchStrategyParams,
-} from '../../../get_document_stats';
+import { DocumentCountStats } from '../../../get_document_stats';
 
-export const DocumentCountContent: FC<{
-  searchParams: OverallStatsSearchStrategyParams;
-}> = ({ searchParams }) => {
-  const [documentCountStats, setDocumentCountStats] = useState<DocumentCountStats>();
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const {
-    services: {
-      data,
-      // notifications: { toasts },
-    },
-  } = useAiOpsKibana();
+export interface Props {
+  documentCountStats?: DocumentCountStats;
+  totalCount: number;
+}
 
-  const fetchDocumentCountData = useCallback(async () => {
-    const params = getDocumentCountStatsRequest(searchParams);
-    try {
-      const resp: any = await lastValueFrom(
-        data.search.search({
-          params: getDocumentCountStatsRequest(searchParams).body,
-        })
-      );
-      const stats = processDocumentCountStats(resp?.rawResponse, searchParams);
-
-      setDocumentCountStats(stats);
-      setTotalCount(stats?.totalCount ?? 0);
-    } catch (e) {
-      // eslint-disable-next-line
-      console.log('---- ERROR FETCHING COUNT DATA ------', e); // remove
-    }
-  }, [data?.search, searchParams]);
-
-  useEffect(
-    function getDocumentCountData() {
-      fetchDocumentCountData();
-    },
-    [fetchDocumentCountData]
-  );
-
+export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount }) => {
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }

@@ -15,6 +15,6 @@
     "licensing"
   ],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"],
+  "requiredBundles": ["kibanaReact", "fieldFormats"],
   "extraPublicDirs": ["common"]
 }

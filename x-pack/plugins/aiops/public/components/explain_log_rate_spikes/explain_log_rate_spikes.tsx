@@ -21,7 +21,8 @@ import { SpikeAnalysisTable } from '../spike_analysis_table';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import { useData } from '../../hooks/use_data';
+import { AppStateKey, usePageUrlState, useUrlState } from '../../hooks/url_state';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -39,10 +40,20 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
 }) => {
   const { services } = useAiOpsKibana();
   const basePath = services.http?.basePath.get() ?? '';
-  const timefilter = useTimefilter({
-    timeRangeSelector: dataView?.timeFieldName !== undefined,
-    autoRefreshSelector: true,
+
+  const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(AppStateKey, {
+    pageIndex: 0,
+    pageSize: 25,
+    sortField: 'fieldName',
+    sortDirection: 'asc',
+    // searchString: '',
+    searchQuery: { match_all: {} },
+    // searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
   });
+  const [globalState, setGlobalState] = useUrlState('_g');
+
+  const { overallStats, timefilter } = useData(dataView, setGlobalState);
 
   const { cancel, start, data, isRunning } = useFetchStream<
     ApiExplainLogRateSpikes,
@@ -66,51 +77,68 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   );
 
   useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
+
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
+
+  // TODO: improve
+  useEffect(() => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+    });
+  }, [setDataVisualizerListState, dataVisualizerListState]);
+
+  useEffect(() => {
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!dataView || !timefilter) return null;
 
-  // GET these values from timepicker
-  // move timefilter logic (currently in DatePickerWrapper) in here so we can fetch both the log rate spike and histogram data
-  const searchParams = {
-    earliest: 1655337859000,
-    latest: 1658015136000,
-    intervalMs: 43200000,
-    index: dataView.id,
-    timeFieldName: dataView.timeFieldName,
-    runtimeFieldMap: {},
-    searchQuery: { match_all: {} },
-  }; // here for histogram
-
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>
-            <h2>{dataView.title}</h2>
-          </EuiText>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
+              <EuiText>
+                <h2>{dataView.title}</h2>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
               <FullTimeRangeSelector
-                timefilter={timefilter}
                 dataView={dataView}
-                query={{ match_all: {} }}
+                query={undefined}
                 disabled={false}
-                callback={() => {}}
+                timefilter={timefilter}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <DatePickerWrapper />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {overallStats?.totalCount !== undefined && (
+          <EuiFlexItem grow={true}>
+            <DocumentCountContent
+              documentCountStats={overallStats.documentCountStats}
+              totalCount={overallStats.totalCount}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      {/* @ts-ignore */}
-      <DocumentCountContent searchParams={searchParams} />
       <EuiSpacer size="xs" />
       <EuiHorizontalRule />
       <ProgressControls

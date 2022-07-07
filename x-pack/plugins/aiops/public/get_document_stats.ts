@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck // remove
+
 import { each, get } from 'lodash';
-import { Query } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-// import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
+import { buildBaseFilterCriteria } from './query_utils';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -22,15 +21,10 @@ export interface DocumentCountStats {
 export interface OverallStatsSearchStrategyParams {
   earliest?: number;
   latest?: number;
-  //   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
-  searchQuery: Query['query'];
-  //   samplerShardSize: number;
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
-  //   aggregatableFields: string[];
-  //   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
 }
 
@@ -41,13 +35,15 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     earliest: earliestMs,
     latest: latestMs,
     runtimeFieldMap,
-    searchQuery,
+    // searchQuery,
     intervalMs,
     fieldsToFetch,
   } = params;
 
   const size = 0;
-  const filterCriteria = {}; // buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, {
+    match_all: {},
+  });
 
   // Don't use the sampler aggregation as this can lead to some potentially
   // confusing date histogram results depending on the date range of data amongst shards.
@@ -64,7 +60,7 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
   const searchBody = {
     query: {
       bool: {
-        // filter: filterCriteria,
+        filter: filterCriteria,
       },
     },
     ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0

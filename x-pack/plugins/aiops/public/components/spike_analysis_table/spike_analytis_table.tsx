@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck // TODO: remove
+
 import React, { FC, memo, useCallback, useMemo, useState } from 'react'; // useEffect, FC
 import { isEqual } from 'lodash';
 

@@ -30,7 +30,6 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     intervalMs,
     fieldsToFetch,
   } = params;
-  console.log('---- PARAMS ------', params); // remove
 
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
@@ -60,7 +59,7 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     track_total_hits: true,
     size,
   };
-  console.log('---- SEARCH BODY ------', JSON.stringify(searchBody, null, 2)); // remove
+
   return {
     index,
     body: searchBody,
@@ -71,7 +70,6 @@ export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
   params: OverallStatsSearchStrategyParams
 ): DocumentCountStats | undefined => {
-  console.log('----- BODY ----', body); // remove
   if (!body) return undefined;
 
   const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;

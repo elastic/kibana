@@ -11,8 +11,8 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { AiopsPluginSetup, AiopsPluginStart } from './types';
+import { setStartServices } from './kibana_services';
 
-// move to ./types like above // remove
 export interface AiOpsStartDependencies {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
@@ -21,6 +21,8 @@ export interface AiOpsStartDependencies {
 
 export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
   public setup(core: CoreSetup) {}
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    setStartServices(core);
+  }
   public stop() {}
 }
