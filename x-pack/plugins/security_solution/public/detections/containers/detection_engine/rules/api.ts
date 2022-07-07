@@ -208,6 +208,7 @@ export const pureFetchRuleById = async ({
  * @param ids string[] rule ids to select rules to perform bulk action with
  * @param edit BulkEditActionPayload edit action payload
  * @param action bulk action to perform
+ * @param isDryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
