@@ -44,7 +44,7 @@ journey('Exploratory view', async ({ page, params }) => {
   });
 
   step('renders as expected', async () => {
-    await page.waitForTimeout(60 * 1000);
+    await Promise.all([page.waitForNavigation(TIMEOUT_60_SEC), page.click('text=Explore data')]);
     await page.click('text=User experience (RUM)');
     await page.click('[aria-label="Toggle series information"] >> text=Page views', TIMEOUT_60_SEC);
     await page.click('[aria-label="Edit series"]', TIMEOUT_60_SEC);
