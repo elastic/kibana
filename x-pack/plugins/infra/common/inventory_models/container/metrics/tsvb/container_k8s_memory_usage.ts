@@ -24,7 +24,7 @@ export const containerK8sMemoryUsage: TSVBMetricModelCreator = (
       split_mode: 'everything',
       metrics: [
         {
-          field: 'kubernetes.container.memory.usage.node.pct',
+          field: 'kubernetes.container.memory.usage.limit.pct',
           id: 'avg-memory',
           type: 'avg',
         },

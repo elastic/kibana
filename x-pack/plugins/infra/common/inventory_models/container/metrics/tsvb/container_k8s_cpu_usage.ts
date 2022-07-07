@@ -24,7 +24,7 @@ export const containerK8sCpuUsage: TSVBMetricModelCreator = (
       split_mode: 'everything',
       metrics: [
         {
-          field: 'kubernetes.container.cpu.usage.node.pct',
+          field: 'kubernetes.container.cpu.usage.limit.pct',
           id: 'avg-cpu',
           type: 'avg',
         },
