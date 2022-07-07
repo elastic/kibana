@@ -6,7 +6,6 @@
  */
 import { uniq, map } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-
 import type {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
@@ -18,10 +17,9 @@ import type {
   AgentPolicy,
   ListResult,
 } from '@kbn/fleet-plugin/common';
-
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
-  BenchmarksQuerySchema,
+  BenchmarksQueryParams,
 } from '../../common/schemas/benchmark';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
@@ -63,7 +61,7 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
-  queryParams: Partial<BenchmarksQuerySchema>
+  queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
   const sortField = queryParams.sort_field?.startsWith(BENCHMARK_PACKAGE_POLICY_PREFIX)
     ? queryParams.sort_field.substring(BENCHMARK_PACKAGE_POLICY_PREFIX.length)

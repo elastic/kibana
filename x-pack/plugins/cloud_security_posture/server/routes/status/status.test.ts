@@ -6,9 +6,8 @@
  */
 
 import { CspAppContext } from '../../plugin';
-import { defineGetCspSetupStatusRoute, INDEX_TIMEOUT_IN_HOURS } from './status';
+import { defineGetCspSetupStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-
 import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
@@ -18,7 +17,6 @@ import {
   createPackagePolicyServiceMock,
   xpackMocks,
 } from '@kbn/fleet-plugin/server/mocks';
-
 import {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -35,36 +33,34 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
-const getMockCspPackageInfo = (): Installation => {
-  return {
-    installed_kibana: [],
-    installed_kibana_space_id: 'default',
-    installed_es: [],
-    package_assets: [],
-    es_index_patterns: { findings: 'logs-cloud_security_posture.findings-*' },
-    name: 'cloud_security_posture',
-    version: '0.0.14',
-    install_version: '0.0.14',
-    install_status: 'installed',
-    install_started_at: '2022-06-16T15:24:58.281Z',
-    install_source: 'registry',
-  };
+const mockCspPackageInfo: Installation = {
+  verification_status: 'verified',
+  installed_kibana: [],
+  installed_kibana_space_id: 'default',
+  installed_es: [],
+  package_assets: [],
+  es_index_patterns: { findings: 'logs-cloud_security_posture.findings-*' },
+  name: 'cloud_security_posture',
+  version: '0.0.14',
+  install_version: '0.0.14',
+  install_status: 'installed',
+  install_started_at: '2022-06-16T15:24:58.281Z',
+  install_source: 'registry',
 };
 
-const getLatestCspPackageInfo = (): RegistryPackage => {
-  return {
-    name: 'cloud_security_posture',
-    title: 'CIS Kubernetes Benchmark',
-    version: '0.0.14',
-    release: 'experimental',
-    description: 'Check Kubernetes cluster compliance with the Kubernetes CIS benchmark.',
-    type: 'integration',
-    download: '/epr/cloud_security_posture/cloud_security_posture-0.0.14.zip',
-    path: '/package/cloud_security_posture/0.0.14',
-    policy_templates: [],
-    owner: { github: 'elastic/cloud-security-posture' },
-    categories: ['containers', 'kubernetes'],
-  } as unknown as RegistryPackage;
+const mockLatestCspPackageInfo: RegistryPackage = {
+  format_version: 'mock',
+  name: 'cloud_security_posture',
+  title: 'CIS Kubernetes Benchmark',
+  version: '0.0.14',
+  release: 'experimental',
+  description: 'Check Kubernetes cluster compliance with the Kubernetes CIS benchmark.',
+  type: 'integration',
+  download: '/epr/cloud_security_posture/cloud_security_posture-0.0.14.zip',
+  path: '/package/cloud_security_posture/0.0.14',
+  policy_templates: [],
+  owner: { github: 'elastic/cloud-security-posture' },
+  categories: ['containers', 'kubernetes'],
 };
 
 describe('CspSetupStatus route', () => {
@@ -119,7 +115,7 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -138,18 +134,18 @@ describe('CspSetupStatus route', () => {
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
 
     await handler(context, req, res);
-
+    console.log(mockResponse.ok);
     // Assert
     const [call] = mockResponse.ok.mock.calls;
-    const body = call[0]!.body;
+    const body = call[0]?.body;
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toEqual({
       status: 'indexed',
-      latest_pkg_ver: '0.0.14',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 0,
-      healthy_agents: 0,
-      installed_pkg_ver: undefined,
+      healthyAgents: 0,
+      installedPackageVersion: undefined,
     });
   });
 
@@ -160,9 +156,9 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = getMockCspPackageInfo();
+    const mockPackageInfo = mockCspPackageInfo;
     mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
@@ -185,16 +181,16 @@ describe('CspSetupStatus route', () => {
 
     // Assert
     const [call] = mockResponse.ok.mock.calls;
-    const body = call[0]!.body;
+    const body = call[0]?.body;
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toEqual({
       status: 'indexed',
-      latest_pkg_ver: '0.0.14',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 3,
-      healthy_agents: 0,
-      installed_pkg_ver: '0.0.14',
+      healthyAgents: 0,
+      installedPackageVersion: '0.0.14',
     });
   });
 
@@ -205,9 +201,9 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = getMockCspPackageInfo();
+    const mockPackageInfo = mockCspPackageInfo;
     mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
@@ -248,10 +244,10 @@ describe('CspSetupStatus route', () => {
 
     await expect(body).toEqual({
       status: 'indexed',
-      latest_pkg_ver: '0.0.14',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 3,
-      healthy_agents: 1,
-      installed_pkg_ver: '0.0.14',
+      healthyAgents: 1,
+      installedPackageVersion: '0.0.14',
     });
   });
 
@@ -262,7 +258,7 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -289,11 +285,11 @@ describe('CspSetupStatus route', () => {
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toMatchObject({
-      status: 'not installed',
-      latest_pkg_ver: '0.0.14',
+      status: 'not-installed',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 0,
-      healthy_agents: 0,
-      installed_pkg_ver: undefined,
+      healthyAgents: 0,
+      installedPackageVersion: undefined,
     });
   });
 
@@ -304,9 +300,9 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = getMockCspPackageInfo();
+    const mockPackageInfo = mockCspPackageInfo;
     mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
@@ -345,11 +341,11 @@ describe('CspSetupStatus route', () => {
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toMatchObject({
-      status: 'not deployed',
-      latest_pkg_ver: '0.0.14',
+      status: 'not-deployed',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 1,
-      healthy_agents: 0,
-      installed_pkg_ver: '0.0.14',
+      healthyAgents: 0,
+      installedPackageVersion: '0.0.14',
     });
   });
 
@@ -360,13 +356,13 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = getMockCspPackageInfo();
+    const mockPackageInfo = mockCspPackageInfo;
 
     const currentTime = new Date();
     mockPackageInfo.install_started_at = new Date(
-      currentTime.setHours(currentTime.getHours() - INDEX_TIMEOUT_IN_HOURS + 1)
+      currentTime.setMinutes(currentTime.getMinutes() - INDEX_TIMEOUT_IN_MINUTES + 1)
     ).toUTCString();
 
     mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
@@ -408,10 +404,10 @@ describe('CspSetupStatus route', () => {
 
     await expect(body).toMatchObject({
       status: 'indexing',
-      latest_pkg_ver: '0.0.14',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 1,
-      healthy_agents: 1,
-      installed_pkg_ver: '0.0.14',
+      healthyAgents: 1,
+      installedPackageVersion: '0.0.14',
     });
   });
 
@@ -422,13 +418,13 @@ describe('CspSetupStatus route', () => {
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(getLatestCspPackageInfo());
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = getMockCspPackageInfo();
+    const mockPackageInfo = mockCspPackageInfo;
 
     const currentTime = new Date();
     mockPackageInfo.install_started_at = new Date(
-      currentTime.setHours(currentTime.getHours() - INDEX_TIMEOUT_IN_HOURS - 1)
+      currentTime.setMinutes(currentTime.getMinutes() - INDEX_TIMEOUT_IN_MINUTES - 1)
     ).toUTCString();
 
     mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
@@ -470,11 +466,11 @@ describe('CspSetupStatus route', () => {
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toMatchObject({
-      status: 'index timeout',
-      latest_pkg_ver: '0.0.14',
+      status: 'index-timeout',
+      latestPackageVersion: '0.0.14',
       installedIntegrations: 1,
-      healthy_agents: 1,
-      installed_pkg_ver: '0.0.14',
+      healthyAgents: 1,
+      installedPackageVersion: '0.0.14',
     });
   });
 });
