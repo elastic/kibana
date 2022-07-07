@@ -7,30 +7,19 @@
 
 import './field_select.scss';
 import { partition } from 'lodash';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
-} from '@elastic/eui';
-import classNames from 'classnames';
-import { LensFieldIcon } from '../lens_field_icon';
+import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
-import { TruncatedLabel } from './truncated_label';
 import type { OperationType } from '../indexpattern';
-import type { DataType } from '../../types';
 import type { OperationSupportMatrix } from './operation_support';
 import type { IndexPattern, IndexPatternPrivateState } from '../types';
-export interface FieldChoice {
-  type: 'field';
-  field: string;
+import { FieldOption, FieldOptionValue, FieldPicker } from '../../shared_components/field_picker';
+
+export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
-}
+};
 
 export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOption['value']> {
   currentIndexPattern: IndexPattern;
@@ -38,17 +27,13 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   selectedField?: string;
   incompleteOperation?: OperationType;
   operationByField: OperationSupportMatrix['operationByField'];
-  onChoose: (choice: FieldChoice) => void;
+  onChoose: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn?: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
 }
-
-const DEFAULT_COMBOBOX_WIDTH = 305;
-const COMBOBOX_PADDINGS = 90;
-const DEFAULT_FONT = '14px Inter';
 
 export function FieldSelect({
   currentIndexPattern,
@@ -104,10 +89,6 @@ export function FieldSelect({
             },
             exists,
             compatible,
-            className: classNames({
-              'lnFieldSelect__option--incompatible': !compatible,
-              'lnFieldSelect__option--nonExistant': !exists,
-            }),
             'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${field}`,
           };
         })
@@ -161,92 +142,33 @@ export function FieldSelect({
     existingFields,
     markAllFieldsCompatible,
   ]);
-  const comboBoxRef = useRef<HTMLInputElement>(null);
-  const [labelProps, setLabelProps] = React.useState<{
-    width: number;
-    font: string;
-  }>({
-    width: DEFAULT_COMBOBOX_WIDTH - COMBOBOX_PADDINGS,
-    font: DEFAULT_FONT,
-  });
-
-  const computeStyles = (_e: UIEvent | undefined, shouldRecomputeAll = false) => {
-    if (comboBoxRef.current) {
-      const current = {
-        ...labelProps,
-        width: comboBoxRef.current?.clientWidth - COMBOBOX_PADDINGS,
-      };
-      if (shouldRecomputeAll) {
-        current.font = window.getComputedStyle(comboBoxRef.current).font;
-      }
-      setLabelProps(current);
-    }
-  };
-
-  useEffectOnce(() => {
-    if (comboBoxRef.current) {
-      computeStyles(undefined, true);
-    }
-    window.addEventListener('resize', computeStyles);
-  });
 
   return (
-    <div ref={comboBoxRef}>
-      <EuiComboBox
-        fullWidth
-        compressed
-        isClearable={false}
-        data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
-        placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
-          defaultMessage: 'Field',
-        })}
-        options={memoizedFieldOptions as unknown as EuiComboBoxOptionOption[]}
-        isInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
-        selectedOptions={
-          (selectedOperationType && selectedField
-            ? [
-                {
-                  label:
-                    (selectedOperationType &&
-                      selectedField &&
-                      currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
-                    selectedField,
-                  value: { type: 'field', field: selectedField },
-                },
-              ]
-            : []) as unknown as EuiComboBoxOptionOption[]
+    <FieldPicker<FieldChoiceWithOperationType>
+      selectedOptions={
+        (selectedOperationType && selectedField
+          ? [
+              {
+                label:
+                  (selectedOperationType &&
+                    selectedField &&
+                    currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
+                  selectedField,
+                value: { type: 'field', field: selectedField },
+              },
+            ]
+          : []) as unknown as Array<FieldOption<FieldChoiceWithOperationType>>
+      }
+      options={memoizedFieldOptions as Array<FieldOption<FieldChoiceWithOperationType>>}
+      onChoose={(choice) => {
+        if (choice && choice.field !== selectedField) {
+          trackUiEvent('indexpattern_dimension_field_changed');
+          onChoose(choice);
         }
-        singleSelection={{ asPlainText: true }}
-        onChange={(choices) => {
-          if (choices.length === 0) {
-            onDeleteColumn?.();
-            return;
-          }
-
-          const choice = choices[0].value as unknown as FieldChoice;
-
-          if (choice.field !== selectedField) {
-            trackUiEvent('indexpattern_dimension_field_changed');
-            onChoose(choice);
-          }
-        }}
-        renderOption={(option, searchValue) => {
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={null}>
-                <LensFieldIcon
-                  type={(option.value as unknown as { dataType: DataType }).dataType}
-                  fill="none"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <TruncatedLabel {...labelProps} label={option.label} search={searchValue} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }}
-        {...rest}
-      />
-    </div>
+      }}
+      onDelete={onDeleteColumn}
+      fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
+      data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+    />
   );
 }

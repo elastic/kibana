@@ -61,8 +61,8 @@ import { FieldInput } from './field_input';
 import { NameInput } from '../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
-import { FieldChoice } from './field_select';
 import { isColumn } from '../operations/definitions/helpers';
+import { FieldChoiceWithOperationType } from './field_select';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;
@@ -606,7 +606,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       })
                     );
                   }}
-                  onChooseField={(choice: FieldChoice) => {
+                  onChooseField={(choice: FieldChoiceWithOperationType) => {
                     trackUiEvent('indexpattern_dimension_field_changed');
                     updateLayer(
                       insertOrReplaceColumn({
