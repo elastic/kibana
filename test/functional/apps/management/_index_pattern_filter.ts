@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/128558
   // Failing: See https://github.com/elastic/kibana/issues/130190
-  describe.skip('data view filter', function describeIndexTests() {
+  describe('data view filter', function describeIndexTests() {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
       await kibanaServer.uiSettings.replace({});

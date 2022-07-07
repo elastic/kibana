@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/133973
-  describe.skip('Changing field formatter to Url', () => {
+  describe('Changing field formatter to Url', () => {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
