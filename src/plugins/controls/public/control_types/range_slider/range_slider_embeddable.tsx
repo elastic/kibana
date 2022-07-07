@@ -29,6 +29,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { ControlsDataViewsService } from '../../services/data_views';
 import { ControlsDataService } from '../../services/data';
@@ -394,16 +395,18 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     }
     this.node = node;
     ReactDOM.render(
-      <RangeSliderReduxWrapper embeddable={this} reducers={rangeSliderReducers}>
-        <RangeSliderComponent
-          componentStateSubject={this.componentStateSubject$}
-          ignoreValidation={
-            this.getInput().ignoreParentSettings !== undefined &&
-            this.getInput().ignoreParentSettings?.ignoreValidations !== undefined &&
-            this.getInput().ignoreParentSettings?.ignoreValidations!
-          }
-        />
-      </RangeSliderReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <RangeSliderReduxWrapper embeddable={this} reducers={rangeSliderReducers}>
+          <RangeSliderComponent
+            componentStateSubject={this.componentStateSubject$}
+            ignoreValidation={
+              this.getInput().ignoreParentSettings !== undefined &&
+              this.getInput().ignoreParentSettings?.ignoreValidations !== undefined &&
+              this.getInput().ignoreParentSettings?.ignoreValidations!
+            }
+          />
+        </RangeSliderReduxWrapper>
+      </KibanaThemeProvider>,
       node
     );
   };
