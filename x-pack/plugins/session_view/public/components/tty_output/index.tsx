@@ -28,7 +28,7 @@ import {
 } from './hooks';
 import { IOLine } from '../../../common/types/process_tree';
 
-const PLAYHEAD_SPEED = 40;
+const PLAYHEAD_SPEED = 30;
 
 export interface TTYOutputDeps {
   sessionEntityId: string;
@@ -121,16 +121,6 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
       fitAddon.fit();
     }
   }, [terminal]);
-
-  fitAddon.fit();
-
-  fitAddon.fit();
-
-  fitAddon.fit();
-
-  fitAddon.fit();
-
-  fitAddon.fit();
 
   fitAddon.fit();
 
