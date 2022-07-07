@@ -29,6 +29,20 @@ import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/use_search_strategy', () => ({
+  useSearchStrategy: jest.fn().mockReturnValue({
+    loading: true,
+    result: {
+      hostDetails: {
+        host: {},
+      },
+    },
+    error: undefined,
+    search: jest.fn(),
+    refetch: jest.fn(),
+    inspect: {},
+  }),
+}));
 
 describe('Details Panel Component', () => {
   const state: State = {
