@@ -97,6 +97,7 @@ interface ConvertRulesToTableItemsOpts {
 }
 
 export interface RulesListTableProps {
+  rulesListKey?: string;
   rulesState: RuleState;
   ruleTypesState: RuleTypeState;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -159,6 +160,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
 
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
+    rulesListKey,
     rulesState,
     ruleTypesState,
     ruleTypeRegistry,
@@ -333,7 +335,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         ),
         sortable: true,
         truncateText: true,
-        width: '30%',
+        width: '25%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
@@ -418,7 +420,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           </EuiToolTip>
         ),
         sortable: true,
-        width: '15%',
+        width: '20%',
         'data-test-subj': 'rulesTableCell-lastExecutionDate',
         render: (date: Date) => {
           if (date) {
@@ -781,6 +783,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [rulesListColumns, ColumnSelector] = useRulesListColumnSelector({
     allRuleColumns,
+    rulesListKey,
     visibleColumns,
   });
 

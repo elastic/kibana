@@ -356,6 +356,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
               );
 
+              if (isRuleSnoozed()) {
+
+              }
               if (completeRule.ruleConfig.throttle != null) {
                 // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
                 await scheduleThrottledNotificationActions({

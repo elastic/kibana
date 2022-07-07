@@ -13,6 +13,7 @@ import {
   useDataGridColumnSelector,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTableItem } from '../../../../types';
 
 type RulesListTableColumns =
@@ -52,16 +53,24 @@ const OriginalRulesListVisibleColumns: RulesListVisibleColumns[] = [
 
 interface RulesListColumnSelector {
   allRuleColumns: RulesListColumns[];
+  rulesListKey?: string;
   visibleColumns?: RulesListVisibleColumns[];
 }
 
 type UseRulesListColumnSelector = [RulesListTableColumns[], React.ReactNode];
 
+const RULES_LIST_COLUMNS_KEY = 'triggersActionsUi_rulesListColumns';
+
 export const useRulesListColumnSelector = ({
   allRuleColumns,
+  rulesListKey = RULES_LIST_COLUMNS_KEY,
   visibleColumns = OriginalRulesListVisibleColumns,
 }: RulesListColumnSelector): UseRulesListColumnSelector => {
-  const [localVisibleColumns, setLocalVisibleColumns] = useState<string[]>(visibleColumns);
+  const { storage } = useKibana().services;
+  const storageVisibleColumns = storage?.get(rulesListKey);
+  const [localVisibleColumns, setLocalVisibleColumns] = useState<string[]>(
+    storageVisibleColumns ?? visibleColumns
+  );
 
   const rulesColumns = useMemo(() => {
     const columnsToAddAtTheEnd = allRuleColumns.filter((col) => col.id === undefined);
@@ -88,10 +97,13 @@ export const useRulesListColumnSelector = ({
     () => ({
       visibleColumns: localVisibleColumns,
       setVisibleColumns: (col: string[]) => {
+        if (rulesListKey) {
+          storage?.set(rulesListKey, col);
+        }
         setLocalVisibleColumns(col);
       },
     }),
-    [localVisibleColumns]
+    [localVisibleColumns, rulesListKey, storage]
   );
 
   const rulesListColumnsSelectorDisplayValues = useMemo(
