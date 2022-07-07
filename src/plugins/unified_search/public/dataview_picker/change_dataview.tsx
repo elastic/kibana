@@ -100,10 +100,8 @@ export function ChangeDataView({
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
   );
-  const updateIsTextQueryLangSelected = useCallback((isTextLangSelected: boolean) => {
-    setIsTextBasedLangSelected(isTextLangSelected);
-  }, []);
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
+  const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
@@ -151,9 +149,9 @@ export function ChangeDataView({
 
   useEffect(() => {
     if (Boolean(textBasedLanguage) !== isTextBasedLangSelected) {
-      updateIsTextQueryLangSelected(Boolean(textBasedLanguage));
+      setIsTextBasedLangSelected(Boolean(textBasedLanguage));
     }
-  }, [updateIsTextQueryLangSelected, isTextBasedLangSelected, textBasedLanguage]);
+  }, [setIsTextBasedLangSelected, isTextBasedLangSelected, textBasedLanguage]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
@@ -256,10 +254,12 @@ export function ChangeDataView({
         <DataViewsList
           dataViewsList={dataViewsList}
           onChangeDataView={(newId) => {
-            onChangeDataView(newId);
+            setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
               setIsTextLangTransitionModalVisible(true);
+            } else {
+              onChangeDataView(newId);
             }
           }}
           currentDataViewId={currentDataViewId}
@@ -302,7 +302,7 @@ export function ChangeDataView({
           onChange={(lang) => {
             setTriggerLabel(lang);
             setPopoverIsOpen(false);
-            updateIsTextQueryLangSelected(true);
+            setIsTextBasedLangSelected(true);
             // also update the query with the sql query
             onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
           }}
@@ -323,15 +323,24 @@ export function ChangeDataView({
   const cleanup = useCallback(
     (shouldDismissModal: boolean) => {
       setIsTextLangTransitionModalVisible(false);
-      updateIsTextQueryLangSelected(true);
+      setIsTextBasedLangSelected(false);
       // clean up the Text based language jQuery
       onTextLangQuerySubmit?.();
+      if (selectedDataViewId) {
+        onChangeDataView(selectedDataViewId);
+      }
       setTriggerLabel(trigger.label);
       if (shouldDismissModal) {
         onTransitionModalDismiss();
       }
     },
-    [updateIsTextQueryLangSelected, onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
+    [
+      onChangeDataView,
+      onTextLangQuerySubmit,
+      onTransitionModalDismiss,
+      selectedDataViewId,
+      trigger.label,
+    ]
   );
 
   const onModalClose = useCallback(

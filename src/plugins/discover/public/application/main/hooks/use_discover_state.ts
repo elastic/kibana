@@ -202,13 +202,23 @@ export function useDiscoverState({
           state.columns || [],
           (state.sort || []) as SortPairArr[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING)
+          config.get(SORT_DEFAULT_ORDER_SETTING),
+          state.query
         );
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
-    [config, indexPattern, indexPatterns, setExpandedDoc, state.columns, state.sort, stateContainer]
+    [
+      config,
+      indexPattern,
+      indexPatterns,
+      setExpandedDoc,
+      state.columns,
+      state.query,
+      state.sort,
+      stateContainer,
+    ]
   );
   /**
    * Function triggered when the user changes the query in the search bar
