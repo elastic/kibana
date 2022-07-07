@@ -13,7 +13,6 @@ import {
   createSnapModifier,
 } from '@dnd-kit/modifiers';
 
-import { Droppable } from '../components/container_components/droppable';
 import { Panel } from '../components/presentation_components/panel';
 import { Draggable } from '../components/container_components/draggable';
 

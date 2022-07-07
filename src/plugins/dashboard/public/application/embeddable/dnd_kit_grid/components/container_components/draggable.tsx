@@ -7,7 +7,6 @@
  */
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { Panel } from '../presentation_components/panel';
 
 export const Draggable = ({ ...props }) => {
   const Element = props.element || 'div';
