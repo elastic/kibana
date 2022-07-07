@@ -44,7 +44,6 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
 
         const rulesClient = ctx.alerting.getRulesClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
-        const siemClient = ctx.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -66,7 +65,6 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
           rule: existingRule,
         });
         const rule = await updateRules({
-          defaultOutputIndex: siemClient.getSignalsIndex(),
           rulesClient,
           existingRule: migratedRule,
           ruleUpdate: request.body,

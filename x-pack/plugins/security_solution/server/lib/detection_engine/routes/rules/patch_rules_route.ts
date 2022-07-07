@@ -6,13 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  PatchRulesSchemaDecoded,
-  patchRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import { buildRouteValidationNonExact } from '../../../../utils/build_validation/route_validation';
+import { patchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -25,16 +21,16 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
-import { PartialFilter } from '../../types';
 
 export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<typeof patchRulesSchema, PatchRulesSchemaDecoded>(
-          patchRulesSchema
-        ),
+        // Use non-exact validation because everything is optional in patch - since everything is optional,
+        // io-ts can't find the right schema from the type specific union and the exact check breaks.
+        // We do type specific validation after fetching the existing rule so we know the rule type.
+        body: buildRouteValidationNonExact<typeof patchRulesSchema>(patchRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -46,65 +42,8 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
-      const {
-        actions: actionsRest,
-        author,
-        building_block_type: buildingBlockType,
-        description,
-        enabled,
-        timestamp_field: timestampField,
-        event_category_override: eventCategoryOverride,
-        tiebreaker_field: tiebreakerField,
-        false_positives: falsePositives,
-        from,
-        query,
-        language,
-        license,
-        output_index: outputIndex,
-        saved_id: savedId,
-        timeline_id: timelineId,
-        timeline_title: timelineTitle,
-        meta,
-        filters: filtersRest,
-        rule_id: ruleId,
-        id,
-        index,
-        data_view_id: dataViewId,
-        interval,
-        max_signals: maxSignals,
-        risk_score: riskScore,
-        risk_score_mapping: riskScoreMapping,
-        rule_name_override: ruleNameOverride,
-        name,
-        severity,
-        severity_mapping: severityMapping,
-        tags,
-        to,
-        type,
-        threat,
-        threshold,
-        threat_filters: threatFilters,
-        threat_index: threatIndex,
-        threat_indicator_path: threatIndicatorPath,
-        threat_query: threatQuery,
-        threat_mapping: threatMapping,
-        threat_language: threatLanguage,
-        concurrent_searches: concurrentSearches,
-        items_per_search: itemsPerSearch,
-        timestamp_override: timestampOverride,
-        throttle,
-        references,
-        note,
-        version,
-        anomaly_threshold: anomalyThreshold,
-        machine_learning_job_id: machineLearningJobId,
-        exceptions_list: exceptionsList,
-      } = request.body;
       try {
-        // TODO: Fix these either with an is conversion or by better typing them within io-ts
-        const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
+        const params = request.body;
         const rulesClient = (await context.alerting).getRulesClient();
         const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
         const savedObjectsClient = (await context.core).savedObjects.client;
@@ -115,15 +54,15 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           request,
           savedObjectsClient,
         });
-        if (type) {
+        if (params.type) {
           // reject an unauthorized "promotion" to ML
-          throwAuthzError(await mlAuthz.validateRuleType(type));
+          throwAuthzError(await mlAuthz.validateRuleType(params.type));
         }
 
         const existingRule = await readRules({
           rulesClient,
-          ruleId,
-          id,
+          ruleId: params.rule_id,
+          id: params.id,
         });
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
@@ -138,57 +77,8 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
 
         const rule = await patchRules({
           rulesClient,
-          author,
-          buildingBlockType,
-          description,
-          enabled,
-          timestampField,
-          eventCategoryOverride,
-          tiebreakerField,
-          falsePositives,
-          from,
-          query,
-          language,
-          license,
-          outputIndex,
-          savedId,
-          timelineId,
-          timelineTitle,
-          meta,
-          filters,
           rule: migratedRule,
-          index,
-          dataViewId,
-          interval,
-          maxSignals,
-          riskScore,
-          riskScoreMapping,
-          ruleNameOverride,
-          name,
-          severity,
-          severityMapping,
-          tags,
-          to,
-          type,
-          threat,
-          threshold,
-          threatFilters,
-          threatIndex,
-          threatIndicatorPath,
-          threatQuery,
-          threatMapping,
-          threatLanguage,
-          throttle,
-          concurrentSearches,
-          itemsPerSearch,
-          timestampOverride,
-          references,
-          note,
-          version,
-          anomalyThreshold,
-          machineLearningJobId,
-          actions,
-          exceptionsList,
+          params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
@@ -200,7 +90,7 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
             return response.ok({ body: validated ?? {} });
           }
         } else {
-          const error = getIdError({ id, ruleId });
+          const error = getIdError({ id: params.id, ruleId: params.rule_id });
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

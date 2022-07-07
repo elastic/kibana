@@ -15,6 +15,7 @@ import {
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
+  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
@@ -122,6 +123,27 @@ export const getQueryRuleParams = (): QueryRuleParams => {
       },
     ],
     savedId: undefined,
+  };
+};
+
+export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'saved_query',
+    language: 'kuery',
+    query: 'user.name: root or user.name: admin',
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
+    savedId: 'some-id',
   };
 };
 

@@ -7,12 +7,8 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { Logger } from '@kbn/core/server';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import {
-  patchRulesBulkSchema,
-  PatchRulesBulkSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { patchRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
+import { buildRouteValidationNonExact } from '../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../common/constants';
@@ -24,7 +20,6 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
-import { PartialFilter } from '../../types';
 import { legacyMigrate } from '../../rules/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
@@ -40,9 +35,7 @@ export const patchRulesBulkRoute = (
     {
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
       validate: {
-        body: buildRouteValidation<typeof patchRulesBulkSchema, PatchRulesBulkSchemaDecoded>(
-          patchRulesBulkSchema
-        ),
+        body: buildRouteValidationNonExact<typeof patchRulesBulkSchema>(patchRulesBulkSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -67,75 +60,18 @@ export const patchRulesBulkRoute = (
       });
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
-          const {
-            actions: actionsRest,
-            author,
-            building_block_type: buildingBlockType,
-            description,
-            enabled,
-            timestamp_field: timestampField,
-            event_category_override: eventCategoryOverride,
-            tiebreaker_field: tiebreakerField,
-            false_positives: falsePositives,
-            from,
-            query,
-            language,
-            license,
-            output_index: outputIndex,
-            saved_id: savedId,
-            timeline_id: timelineId,
-            timeline_title: timelineTitle,
-            meta,
-            filters: filtersRest,
-            rule_id: ruleId,
-            id,
-            index,
-            data_view_id: dataViewId,
-            interval,
-            max_signals: maxSignals,
-            risk_score: riskScore,
-            risk_score_mapping: riskScoreMapping,
-            rule_name_override: ruleNameOverride,
-            name,
-            severity,
-            severity_mapping: severityMapping,
-            tags,
-            to,
-            type,
-            threat,
-            threshold,
-            threat_filters: threatFilters,
-            threat_index: threatIndex,
-            threat_indicator_path: threatIndicatorPath,
-            threat_query: threatQuery,
-            threat_mapping: threatMapping,
-            threat_language: threatLanguage,
-            concurrent_searches: concurrentSearches,
-            items_per_search: itemsPerSearch,
-            timestamp_override: timestampOverride,
-            throttle,
-            references,
-            note,
-            version,
-            anomaly_threshold: anomalyThreshold,
-            machine_learning_job_id: machineLearningJobId,
-            exceptions_list: exceptionsList,
-          } = payloadRule;
-          const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
-          // TODO: Fix these either with an is conversion or by better typing them within io-ts
-          const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-          const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
+          const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
 
           try {
-            if (type) {
+            if (payloadRule.type) {
               // reject an unauthorized "promotion" to ML
-              throwAuthzError(await mlAuthz.validateRuleType(type));
+              throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
             }
 
             const existingRule = await readRules({
               rulesClient,
-              ruleId,
-              id,
+              ruleId: payloadRule.rule_id,
+              id: payloadRule.id,
             });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
@@ -151,62 +87,13 @@ export const patchRulesBulkRoute = (
             const rule = await patchRules({
               rule: migratedRule,
               rulesClient,
-              author,
-              buildingBlockType,
-              description,
-              enabled,
-              timestampField,
-              eventCategoryOverride,
-              tiebreakerField,
-              falsePositives,
-              from,
-              query,
-              language,
-              license,
-              outputIndex,
-              savedId,
-              timelineId,
-              timelineTitle,
-              meta,
-              filters,
-              index,
-              dataViewId,
-              interval,
-              maxSignals,
-              riskScore,
-              riskScoreMapping,
-              ruleNameOverride,
-              name,
-              severity,
-              severityMapping,
-              tags,
-              to,
-              type,
-              threat,
-              threshold,
-              threatFilters,
-              threatIndex,
-              threatIndicatorPath,
-              threatQuery,
-              threatMapping,
-              threatLanguage,
-              throttle,
-              concurrentSearches,
-              itemsPerSearch,
-              timestampOverride,
-              references,
-              note,
-              version,
-              anomalyThreshold,
-              machineLearningJobId,
-              actions,
-              exceptionsList,
+              params: payloadRule,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
               return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
             } else {
-              return getIdBulkError({ id, ruleId });
+              return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }
           } catch (err) {
             return transformBulkError(idOrRuleIdOrUnknown, err);

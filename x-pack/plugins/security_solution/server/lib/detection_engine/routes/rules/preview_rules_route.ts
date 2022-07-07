@@ -105,7 +105,7 @@ export const previewRulesRoute = async (
           });
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(request.body);
         const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({

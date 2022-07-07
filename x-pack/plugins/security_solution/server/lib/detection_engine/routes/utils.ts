@@ -97,7 +97,7 @@ export const isImportRegular = (
 };
 
 export const transformBulkError = (
-  ruleId: string,
+  ruleId: string | undefined,
   err: Error & { statusCode?: number }
 ): BulkError => {
   if (err instanceof CustomHttpRequestError) {

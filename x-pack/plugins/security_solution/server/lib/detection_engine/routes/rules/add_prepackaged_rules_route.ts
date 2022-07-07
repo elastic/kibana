@@ -118,9 +118,8 @@ export const createPrepackagedRules = async (
   });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
-  const signalsIndex = siemClient.getSignalsIndex();
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, signalsIndex));
+  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall));
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -134,7 +133,6 @@ export const createPrepackagedRules = async (
     rulesClient,
     savedObjectsClient,
     rulesToUpdate,
-    signalsIndex,
     context.getRuleExecutionLog()
   );
 

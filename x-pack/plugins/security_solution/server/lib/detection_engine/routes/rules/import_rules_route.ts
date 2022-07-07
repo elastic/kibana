@@ -45,7 +45,7 @@ import {
 } from './utils/import_rules_utils';
 import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
 import { importRuleExceptions } from './utils/import_rule_exceptions';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
+import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -140,10 +140,10 @@ export const importRulesRoute = (
         let parsedRules;
         let actionErrors: BulkError[] = [];
         const actualRules = rules.filter(
-          (rule): rule is ImportRulesSchemaDecoded => !(rule instanceof Error)
+          (rule): rule is ImportRulesSchema => !(rule instanceof Error)
         );
 
-        if (actualRules.some((rule) => rule.actions.length > 0)) {
+        if (actualRules.some((rule) => rule.actions && rule.actions.length > 0)) {
           const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
             migratedParsedObjectsWithoutDuplicateErrors,
             actionsClient

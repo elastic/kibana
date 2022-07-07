@@ -28,7 +28,7 @@ import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialRule } from '@kbn/alerting-plugin/server';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
@@ -46,7 +46,7 @@ import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
 import { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
 import { partition } from 'lodash/fp';
 
-type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
+type PromiseFromStreams = ImportRulesSchema | Error;
 
 const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchemaMock>) => {
   const ndJsonStream = new Readable({
