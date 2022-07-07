@@ -14,6 +14,7 @@ export enum SchemaType {
   Number = 'number',
   Geolocation = 'geolocation',
   Date = 'date',
+  Nested = 'nested',
 }
 // Certain API endpoints will use these internal type names, which map to the external names above
 export enum InternalSchemaType {
@@ -21,6 +22,7 @@ export enum InternalSchemaType {
   Float = 'float',
   Location = 'location',
   Date = 'date',
+  Nested = 'nested',
 }
 
 export type Schema = Record<string, SchemaType>;
