@@ -10,13 +10,7 @@ import {
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
   DEFAULT_EMS_ROADMAP_ID,
 } from '@kbn/maps-ems-plugin/common';
-import {
-  GRID_RESOLUTION,
-  LAYER_TYPE,
-  RENDER_AS,
-  SCALING_TYPES,
-  SOURCE_TYPES,
-} from '../../constants';
+import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../constants';
 import {
   EMSTMSSourceDescriptor,
   EMSFileSourceDescriptor,
@@ -24,8 +18,8 @@ import {
   ESSearchSourceDescriptor,
   LayerDescriptor,
   VectorLayerDescriptor,
-} from '../../descriptor_types';
-import { MapSavedObjectAttributes } from '../../map_saved_object_type';
+} from '../descriptor_types';
+import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {

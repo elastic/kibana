@@ -13,7 +13,7 @@ import {
   RESOLUTION_KEYS,
   SCALING_KEYS,
   LayerStatsCollector,
-} from '../../../common/telemetry/layer_stats';
+} from '../../../common/telemetry';
 
 import { ClusterCountStats, MapStats } from './types';
 

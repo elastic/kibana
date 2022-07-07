@@ -11,7 +11,7 @@ import type {
   JOIN_KEYS,
   EMS_BASEMAP_KEYS,
   RESOLUTION_KEYS,
-} from '../../../common/telemetry/layer_stats';
+} from '../../../common/telemetry';
 
 export interface ClusterCountStats {
   min: number;
