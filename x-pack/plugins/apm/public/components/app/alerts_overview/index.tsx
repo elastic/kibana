@@ -26,11 +26,12 @@ export function AlertsOverview() {
     query: { environment },
   } = useApmParams('/services/{serviceName}/alerts');
   const { services } = useKibana<ApmPluginStartDeps>();
-  const [alertStatusFilter, setAlertStatusFilter] = useState(ALL_ALERTS_FILTER);
+  const [alertStatusFilter, setAlertStatusFilter] =
+    useState<AlertStatusFilterButton>(ALL_ALERTS_FILTER);
 
   const {
     triggersActionsUi: {
-      getAlertsStateTable,
+      getAlertsStateTable: AlertsStateTable,
       alertsTableConfigurationRegistry,
     },
   } = services;
@@ -88,14 +89,15 @@ export function AlertsOverview() {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <AlertsTableStatusFilter
-                status={alertStatusFilter as AlertStatusFilterButton}
+                status={alertStatusFilter}
                 onChange={setAlertStatusFilter}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-
-        <EuiFlexItem>{getAlertsStateTable(alertStateProps)}</EuiFlexItem>
+        <EuiFlexItem>
+          <AlertsStateTable {...alertStateProps} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

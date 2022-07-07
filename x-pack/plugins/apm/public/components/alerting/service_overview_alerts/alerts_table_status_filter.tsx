@@ -28,7 +28,7 @@ export interface AlertStatusFilter {
 
 export interface AlertStatusFilterProps {
   status: AlertStatusFilterButton;
-  onChange: (id: string, value: string) => void;
+  onChange: (id: AlertStatusFilterButton) => void;
 }
 
 export const allAlerts: AlertStatusFilter = {
@@ -79,14 +79,19 @@ const options: EuiButtonGroupOptionProps[] = [
 export function AlertsTableStatusFilter({
   status,
   onChange,
-}: AlertTableStatusFilterProps) {
+}: AlertStatusFilterProps) {
   return (
     <EuiButtonGroup
-      legend="Filter by"
+      legend={i18n.translate(
+        'xpack.apm.alerts.alertStatusFilter.button.legend',
+        {
+          defaultMessage: 'Filter by',
+        }
+      )}
       color="primary"
       options={options}
       idSelected={status}
-      onChange={onChange}
+      onChange={(id: string) => onChange(id as AlertStatusFilterButton)}
     />
   );
 }
