@@ -15,6 +15,13 @@ import {
 
 import { Panel } from '../components/presentation_components/panel';
 import { Draggable } from '../components/container_components/draggable';
+import { Grid } from '../components/grid';
+import {
+  largeGridData,
+  mediumGridData,
+  smallGridData,
+} from '../../gridstack_grid/__stories__/fixtures';
+import { logsDashboardGridData } from '../../gridstack_grid/constants';
 
 export default {
   title: 'POC - dnd-kit',
@@ -50,3 +57,8 @@ export const BasicExample = () => {
     </DndContext>
   );
 };
+
+export const Columns48Example = () => <Grid gridData={largeGridData} />;
+export const Columns24Example = () => <Grid columns={24} gridData={mediumGridData} />;
+export const Columns12Example = () => <Grid columns={12} gridData={smallGridData} />;
+export const LogsDashboardExample = () => <Grid gridData={logsDashboardGridData} />;

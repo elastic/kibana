@@ -11,20 +11,8 @@ import { EuiPanel } from '@elastic/eui';
 import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
 
-import {
-  MarkdownGridPanel,
-  ControlsPanel,
-  MetricsPanel,
-  UniqueVisitorsPanel,
-  ResponseCodesPanel,
-  GraphPanel,
-  LogsTable,
-} from '../constants';
+import { logsDashboardGridData } from '../constants';
 
-import SANKEY_CHART_GRAPH from '../images/sankey_chart.png';
-import DESTINATION_HEATMAP from '../images/destination_heatmap.png';
-import REQUEST_MAP from '../images/total_requests_map.png';
-import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
 import { ControlledStack } from '../components/basic_react_demos/test_react_grid_demo';
 import { StyledSubgridDemo } from '../components/styled_subgrid_demo';
 import { SubgridDemo } from '../components/basic_react_demos/test_subgrid_demo';
@@ -45,113 +33,7 @@ export const NestedReactExample = () => {
 };
 
 export const LogsDashboardExample = () => {
-  const gridData = [
-    {
-      x: 0,
-      y: 0,
-      w: 17,
-      h: 6,
-      id: '343f0bef-0b19-452e-b1c8-59beb18b6f0c',
-      render: () => <MarkdownGridPanel />,
-    },
-    {
-      x: 17,
-      y: 0,
-      w: 31,
-      h: 6,
-      id: '30326cdb-4ddd-49eb-a4f1-b555caa21d7c',
-      render: () => <ControlsPanel />,
-    },
-    {
-      x: 0,
-      y: 6,
-      w: 12,
-      h: 8,
-      id: 'bb94016e-f4a6-49ca-87a9-296a2869d570',
-      render: () => <MetricsPanel value="2,777" label="Visits" fontSize="22px" />,
-    },
-    {
-      x: 12,
-      y: 6,
-      w: 12,
-      h: 8,
-      id: '11',
-      render: () => <UniqueVisitorsPanel />,
-    },
-    {
-      x: 24,
-      y: 6,
-      w: 24,
-      h: 13,
-      id: '15',
-      title: '[Logs] Response Codes Over Time + Annotations',
-      render: () => <ResponseCodesPanel title="[Logs] Response Codes Over Time + Annotations" />,
-    },
-    {
-      x: 0,
-      y: 14,
-      w: 12,
-      h: 5,
-      id: '01d8e435-91c0-484f-a11e-856747050b0a',
-      render: () => <MetricsPanel value="4.4%" label="HTTP 4xx" fontSize="12px" />,
-    },
-    {
-      x: 12,
-      y: 14,
-      w: 12,
-      h: 5,
-      id: '8c1456d4-1993-4ba2-b701-04aca02c9fef',
-      render: () => <MetricsPanel value="3.4%" label="HTTP 5xx" fontSize="12px" />,
-    },
-    {
-      x: 0,
-      y: 19,
-      w: 24,
-      h: 18,
-      id: '20',
-      title: '[Logs] Total Requests and Bytes',
-      render: () => <GraphPanel graph={REQUEST_MAP} />,
-    },
-    {
-      x: 24,
-      y: 19,
-      w: 24,
-      h: 33,
-      id: '14',
-      title: '[Logs] Machine OS and Destination Sankey Chart',
-      render: () => <GraphPanel graph={SANKEY_CHART_GRAPH} />,
-    },
-    {
-      x: 0,
-      y: 37,
-      w: 24,
-      h: 15,
-      id: '8e59c7cf-6e42-4343-a113-c4a255fcf2ce',
-      title: '[Logs] Unique Destination Heatmap',
-      render: () => <GraphPanel graph={DESTINATION_HEATMAP} height="94%" />,
-    },
-    {
-      x: 0,
-      y: 52,
-      w: 24,
-      h: 13,
-      id: '9',
-      title: '[Logs] Host, Visits and Bytes Table',
-      render: () => <LogsTable />,
-    },
-
-    {
-      x: 24,
-      y: 52,
-      w: 24,
-      h: 13,
-      id: '10',
-      title: '[Logs] Bytes distribution',
-      render: () => <GraphPanel graph={BYTES_BAR_GRAPH} height="93%" />,
-    },
-  ];
-
-  return <Grid columns={48} gridData={gridData} />;
+  return <Grid columns={48} gridData={logsDashboardGridData} />;
 };
 
 export const Columns48GridExample = () => {
