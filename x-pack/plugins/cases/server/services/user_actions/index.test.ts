@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import {
   Actions,
@@ -29,6 +34,7 @@ import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
+  EXTERNAL_REFERENCE_REF_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 
@@ -47,6 +53,12 @@ import {
   attachments,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import {
+  externalReferenceAttachmentSO,
+  getPersistableStateAttachmentTypeRegistry,
+  persistableStateAttachment,
+} from '../../attachment_framework/mocks';
 
 const createConnectorUserAction = (
   overrides?: Partial<CaseUserActionAttributes>
@@ -133,6 +145,7 @@ const createUserActionSO = ({
   pushedConnectorId,
   payload,
   type,
+  references = [],
 }: {
   action: UserAction;
   type?: string;
@@ -141,6 +154,7 @@ const createUserActionSO = ({
   commentId?: string;
   connectorId?: string;
   pushedConnectorId?: string;
+  references?: SavedObjectReference[];
 }): SavedObject<CaseUserActionAttributes> => {
   const defaultParams = {
     action,
@@ -163,6 +177,7 @@ const createUserActionSO = ({
       ...(attributesOverrides && { ...attributesOverrides }),
     },
     references: [
+      ...references,
       {
         type: CASE_SAVED_OBJECT,
         name: CASE_REF_NAME,
@@ -199,7 +214,39 @@ const createUserActionSO = ({
   } as SavedObject<CaseUserActionAttributes>;
 };
 
+const createPersistableStateUserAction = () => {
+  return {
+    ...createUserActionSO({
+      action: Actions.create,
+      commentId: 'persistable-state-test-id',
+      payload: {
+        comment: {
+          ...persistableStateAttachment,
+          persistableStateAttachmentState: { foo: 'foo' },
+        },
+      },
+      type: 'comment',
+      references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
+    }),
+  };
+};
+
+const createExternalReferenceUserAction = () => {
+  return {
+    ...createUserActionSO({
+      action: Actions.create,
+      commentId: 'external-reference-test-id',
+      payload: {
+        comment: omit(externalReferenceAttachmentSO, 'externalReferenceId'),
+      },
+      type: 'comment',
+      references: [{ id: 'my-id', name: EXTERNAL_REFERENCE_REF_NAME, type: 'test-so' }],
+    }),
+  };
+};
+
 const testConnectorId = (
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry,
   userAction: SavedObject<CaseUserActionAttributes>,
   path: string,
   expectedConnectorId = '1'
@@ -207,7 +254,8 @@ const testConnectorId = (
   it('does set payload.connector.id to none when it cannot find the reference', () => {
     const userActionWithEmptyRef = { ...userAction, references: [] };
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)])
+      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
+      persistableStateAttachmentTypeRegistry
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
@@ -221,7 +269,8 @@ const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-      ])
+      ]),
+      persistableStateAttachmentTypeRegistry
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -235,7 +284,8 @@ const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-      ])
+      ]),
+      persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -243,7 +293,8 @@ const testConnectorId = (
 
   it('populates the payload.connector.id', () => {
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userAction)])
+      createSOFindResponse([createUserActionFindSO(userAction)]),
+      persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);
@@ -251,6 +302,8 @@ const testConnectorId = (
 };
 
 describe('CaseUserActionService', () => {
+  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+
   beforeAll(() => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
@@ -262,7 +315,12 @@ describe('CaseUserActionService', () => {
 
   describe('transformFindResponseToExternalModel', () => {
     it('does not populate the ids when the response is an empty array', () => {
-      expect(transformFindResponseToExternalModel(createSOFindResponse([]))).toMatchInlineSnapshot(`
+      expect(
+        transformFindResponseToExternalModel(
+          createSOFindResponse([]),
+          persistableStateAttachmentTypeRegistry
+        )
+      ).toMatchInlineSnapshot(`
         Object {
           "page": 1,
           "per_page": 0,
@@ -274,7 +332,8 @@ describe('CaseUserActionService', () => {
 
     it('preserves the saved object fields and attributes when inject the ids', () => {
       const transformed = transformFindResponseToExternalModel(
-        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())])
+        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())]),
+        persistableStateAttachmentTypeRegistry
       );
 
       expect(transformed).toMatchInlineSnapshot(`
@@ -336,7 +395,8 @@ describe('CaseUserActionService', () => {
         createSOFindResponse([
           createUserActionFindSO(createConnectorUserAction()),
           createUserActionFindSO(createConnectorUserAction()),
-        ])
+        ]),
+        persistableStateAttachmentTypeRegistry
       ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
       expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
@@ -350,7 +410,8 @@ describe('CaseUserActionService', () => {
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.case_id).toEqual('');
@@ -362,7 +423,8 @@ describe('CaseUserActionService', () => {
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
@@ -372,7 +434,8 @@ describe('CaseUserActionService', () => {
         const userAction = createConnectorUserAction();
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.case_id).toEqual('1');
@@ -385,7 +448,8 @@ describe('CaseUserActionService', () => {
         });
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
@@ -397,7 +461,8 @@ describe('CaseUserActionService', () => {
         };
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.action_id).toEqual('100');
@@ -406,22 +471,161 @@ describe('CaseUserActionService', () => {
 
     describe('create connector', () => {
       const userAction = createConnectorUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('update connector', () => {
       const userAction = updateConnectorUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('push connector', () => {
       const userAction = pushConnectorUserAction();
-      testConnectorId(userAction, 'externalService.connector_id', '100');
+      testConnectorId(
+        persistableStateAttachmentTypeRegistry,
+        userAction,
+        'externalService.connector_id',
+        '100'
+      );
     });
 
     describe('create case', () => {
       const userAction = createCaseUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
+    });
+
+    describe('persistable state attachments', () => {
+      it('populates the persistable state', () => {
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        expect(transformed).toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 1,
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "action": "create",
+                  "action_id": "100",
+                  "case_id": "1",
+                  "comment_id": "persistable-state-test-id",
+                  "created_at": "abc",
+                  "created_by": Object {
+                    "email": "a",
+                    "full_name": "abc",
+                    "username": "b",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "comment": Object {
+                      "owner": "securitySolutionFixture",
+                      "persistableStateAttachmentState": Object {
+                        "foo": "foo",
+                        "injectedId": "testRef",
+                      },
+                      "persistableStateAttachmentTypeId": ".test",
+                      "type": "persistableState",
+                    },
+                  },
+                  "type": "comment",
+                },
+                "id": "100",
+                "references": Array [
+                  Object {
+                    "id": "testRef",
+                    "name": "myTestReference",
+                    "type": "test-so",
+                  },
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                  Object {
+                    "id": "persistable-state-test-id",
+                    "name": "associated-cases-comments",
+                    "type": "cases-comments",
+                  },
+                ],
+                "score": 0,
+                "type": "cases-user-actions",
+              },
+            ],
+            "total": 1,
+          }
+        `);
+      });
+    });
+
+    describe('external references', () => {
+      it('populates the external references attributes', () => {
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        expect(transformed).toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 1,
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "action": "create",
+                  "action_id": "100",
+                  "case_id": "1",
+                  "comment_id": "external-reference-test-id",
+                  "created_at": "abc",
+                  "created_by": Object {
+                    "email": "a",
+                    "full_name": "abc",
+                    "username": "b",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "comment": Object {
+                      "externalReferenceAttachmentTypeId": ".test",
+                      "externalReferenceId": "my-id",
+                      "externalReferenceMetadata": null,
+                      "externalReferenceStorage": Object {
+                        "soType": "test-so",
+                        "type": "savedObject",
+                      },
+                      "owner": "securitySolution",
+                      "type": "externalReference",
+                    },
+                  },
+                  "type": "comment",
+                },
+                "id": "100",
+                "references": Array [
+                  Object {
+                    "id": "my-id",
+                    "name": "externalReferenceId",
+                    "type": "test-so",
+                  },
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                  Object {
+                    "id": "external-reference-test-id",
+                    "name": "associated-cases-comments",
+                    "type": "cases-comments",
+                  },
+                ],
+                "score": 0,
+                "type": "cases-user-actions",
+              },
+            ],
+            "total": 1,
+          }
+        `);
+      });
     });
   });
 
@@ -438,7 +642,7 @@ describe('CaseUserActionService', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      service = new CaseUserActionService(mockLogger);
+      service = new CaseUserActionService(mockLogger, persistableStateAttachmentTypeRegistry);
     });
 
     describe('createUserAction', () => {

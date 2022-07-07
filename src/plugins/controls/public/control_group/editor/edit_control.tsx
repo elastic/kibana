@@ -34,9 +34,10 @@ interface EditControlResult {
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Controls Services Context
-  const { overlays, controls } = pluginServices.getHooks();
+  const { overlays, controls, theme } = pluginServices.getHooks();
   const { getControlFactory } = controls.useService();
   const { openFlyout, openConfirm } = overlays.useService();
+  const themeService = theme.useService();
 
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
@@ -61,7 +62,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   }, [panels, embeddableId]);
 
   const editControl = async () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     const embeddable = (await untilEmbeddableLoaded(
       embeddableId
     )) as ControlEmbeddable<DataControlInput>;
@@ -126,7 +127,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
       const flyoutInstance = openFlyout(
         toMountPoint(
-          <PresentationUtilProvider>
+          <ControlsServicesProvider>
             <ControlEditor
               isCreate={false}
               width={panel.width}
@@ -159,7 +160,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
                 });
               }}
             />
-          </PresentationUtilProvider>
+          </ControlsServicesProvider>,
+          { theme$: themeService.theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),

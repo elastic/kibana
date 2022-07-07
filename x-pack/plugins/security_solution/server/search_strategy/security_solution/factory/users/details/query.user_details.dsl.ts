@@ -35,16 +35,6 @@ export const buildUserDetailsQuery = ({
     track_total_hits: false,
     body: {
       aggregations: {
-        first_seen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
-        last_seen: {
-          max: {
-            field: '@timestamp',
-          },
-        },
         ...buildFieldsTermAggregation(USER_FIELDS),
       },
       query: { bool: { filter } },
