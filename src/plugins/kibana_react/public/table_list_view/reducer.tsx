@@ -60,7 +60,6 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         isFetchingItems: true,
       };
     }
-
     case 'onFetchItemsSuccess': {
       const items = action.data.response.hits;
       const isFirstFetch = state.tableColumns === null && state.items.length === 0;

@@ -150,7 +150,7 @@ function TableListView<T>({
     tableSort,
   } = state;
   const hasNoItems = !isFetchingItems && items.length === 0 && !filter;
-  const pageDTS = `${entityName}LandingPage`;
+  const pageDataTestSubject = `${entityName}LandingPage`;
 
   const tableColumns = useMemo(() => {
     let columns = tableColumnsProps.slice();
@@ -556,7 +556,7 @@ function TableListView<T>({
   if (!fetchError && hasNoItems) {
     return (
       <KibanaPageTemplate
-        data-test-subj={pageDTS}
+        data-test-subj={pageDataTestSubject}
         pageBodyProps={{
           'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
         }}
@@ -569,7 +569,7 @@ function TableListView<T>({
 
   return (
     <KibanaPageTemplate
-      data-test-subj={pageDTS}
+      data-test-subj={pageDataTestSubject}
       pageHeader={{
         pageTitle: <span id={headingId}>{tableListTitle}</span>,
         rightSideItems: [renderCreateButton()],

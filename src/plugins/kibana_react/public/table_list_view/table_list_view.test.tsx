@@ -7,13 +7,15 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { shallowWithIntl, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { ToastsStart } from '@kbn/core/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { TableListView, Props as TableListViewProps } from './table_list_view';
+
+const mockUseEffect = useEffect;
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -21,6 +23,14 @@ jest.mock('lodash', () => {
   return {
     ...original,
     debounce: (handler: () => void) => handler,
+  };
+});
+
+jest.mock('react-use/lib/useDebounce', () => {
+  return (cb: () => void, ms: number, deps: any[]) => {
+    mockUseEffect(() => {
+      cb();
+    }, deps);
   };
 });
 
@@ -49,60 +59,64 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  test('render default empty prompt', async () => {
-    const component = shallowWithIntl(<TableListView {...requiredProps} />);
+  type Props = TableListViewProps<Record<string, unknown>>;
 
-    // Using setState to check the final render while sidestepping the debounced promise management
-    component.setState({
-      hasInitialFetchReturned: true,
-      isFetchingItems: false,
+  let testBed: TestBed;
+
+  const defaultProps: Props = {
+    ...requiredProps,
+    tableColumns: [],
+    findItems: () => Promise.resolve({ total: 0, hits: [] }),
+  };
+
+  const setup = registerTestBed<string, Props>(TableListView, {
+    defaultProps,
+    memoryRouter: { wrapComponent: false },
+  });
+
+  test('render default empty prompt', async () => {
+    await act(async () => {
+      testBed = await setup();
     });
 
-    expect(component).toMatchSnapshot();
+    const { component, exists } = testBed;
+    component.update();
+
+    expect(component.find(EuiEmptyPrompt).length).toBe(1);
+    expect(exists('newItemButton')).toBe(false);
   });
 
   // avoid trapping users in empty prompt that can not create new items
   test('render default empty prompt with create action when createItem supplied', async () => {
-    const component = shallowWithIntl(<TableListView {...requiredProps} createItem={() => {}} />);
-
-    // Using setState to check the final render while sidestepping the debounced promise management
-    component.setState({
-      hasInitialFetchReturned: true,
-      isFetchingItems: false,
+    await act(async () => {
+      testBed = await setup({ createItem: () => undefined });
     });
 
-    expect(component).toMatchSnapshot();
+    const { component, exists } = testBed;
+    component.update();
+
+    expect(component.find(EuiEmptyPrompt).length).toBe(1);
+    expect(exists('newItemButton')).toBe(true);
   });
 
-  test('render custom empty prompt', () => {
-    const component = shallowWithIntl(
-      <TableListView {...requiredProps} emptyPrompt={<EuiEmptyPrompt />} />
-    );
+  test('render custom empty prompt', async () => {
+    const CustomEmptyPrompt = () => {
+      return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
+    };
 
-    // Using setState to check the final render while sidestepping the debounced promise management
-    component.setState({
-      hasInitialFetchReturned: true,
-      isFetchingItems: false,
+    await act(async () => {
+      testBed = await setup({ emptyPrompt: <CustomEmptyPrompt /> });
     });
 
-    expect(component).toMatchSnapshot();
-  });
+    const { component, exists } = testBed;
+    component.update();
 
-  test('render list view', () => {
-    const component = shallowWithIntl(<TableListView {...requiredProps} />);
-
-    // Using setState to check the final render while sidestepping the debounced promise management
-    component.setState({
-      hasInitialFetchReturned: true,
-      isFetchingItems: false,
-      items: [{}],
-    });
-
-    expect(component).toMatchSnapshot();
+    expect(exists('custom-empty-prompt')).toBe(true);
   });
 
   describe('default columns', () => {
-    let testBed: TestBed;
+    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
+    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 
     const tableColumns = [
       {
@@ -116,9 +130,6 @@ describe('TableListView', () => {
         sortable: true,
       },
     ];
-
-    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 
     const hits = [
       {
@@ -134,20 +145,17 @@ describe('TableListView', () => {
       },
     ];
 
-    const findItems = jest.fn(() => Promise.resolve({ total: hits.length, hits }));
+    const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
 
-    const defaultProps: TableListViewProps<Record<string, unknown>> = {
-      ...requiredProps,
+    const props = {
+      // initialPageSize,
       tableColumns,
       findItems,
-      createItem: () => undefined,
     };
-
-    const setup = registerTestBed(TableListView, { defaultProps });
 
     test('should add a "Last updated" column if "updatedAt" is provided', async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(props);
       });
 
       const { component, table } = testBed!;
@@ -177,12 +185,11 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn(() =>
-            Promise.resolve({
-              total: updatedHits.length,
-              hits: updatedHits,
-            })
-          ),
+          ...props,
+          findItems: jest.fn().mockResolvedValue({
+            total: updatedHits.length,
+            hits: updatedHits,
+          }),
         });
       });
 
@@ -201,12 +208,12 @@ describe('TableListView', () => {
     test('should not add a "Last updated" column if no "updatedAt" is provided', async () => {
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn(() =>
-            Promise.resolve({
-              total: hits.length,
-              hits: hits.map(({ title, description }) => ({ title, description })),
-            })
-          ),
+          ...props,
+          findItems: jest.fn().mockResolvedValue({
+            total: hits.length,
+            // Only "title" and "description"
+            hits: hits.map(({ title, description }) => ({ title, description })),
+          }),
         });
       });
 
@@ -224,12 +231,11 @@ describe('TableListView', () => {
     test('should not display anything if there is no updatedAt metadata for an item', async () => {
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn(() =>
-            Promise.resolve({
-              total: hits.length + 1,
-              hits: [...hits, { title: 'Item 3', description: 'Item 3 description' }],
-            })
-          ),
+          ...props,
+          findItems: jest.fn().mockResolvedValue({
+            total: hits.length + 1,
+            hits: [...hits, { title: 'Item 3', description: 'Item 3 description' }],
+          }),
         });
       });
 
@@ -247,8 +253,6 @@ describe('TableListView', () => {
   });
 
   describe('pagination', () => {
-    let testBed: TestBed;
-
     const tableColumns = [
       {
         field: 'title',
@@ -266,19 +270,16 @@ describe('TableListView', () => {
 
     const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
 
-    const defaultProps: TableListViewProps<Record<string, unknown>> = {
+    const props = {
       ...requiredProps,
       initialPageSize,
       tableColumns,
       findItems,
-      createItem: () => undefined,
     };
-
-    const setup = registerTestBed(TableListView, { defaultProps });
 
     test('should limit the number of row to the `initialPageSize` provided', async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(props);
       });
 
       const { component, table } = testBed!;
@@ -296,7 +297,7 @@ describe('TableListView', () => {
 
     test('should navigate to page 2', async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(props);
       });
 
       const { component, table } = testBed!;
