@@ -96,7 +96,7 @@ import type {
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from './users/authentications';
-import {
+import type {
   FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
