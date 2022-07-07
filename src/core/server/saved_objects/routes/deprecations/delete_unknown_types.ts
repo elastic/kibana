@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../../http';
 import { catchAndReturnBoomErrors } from '../utils';
+import type { InternalSavedObjectRouter } from '../../internal_types';
 import { deleteUnknownTypeObjects } from '../../deprecations';
 
 interface RouteDependencies {
@@ -16,7 +16,7 @@ interface RouteDependencies {
 }
 
 export const registerDeleteUnknownTypesRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   { kibanaIndex, kibanaVersion }: RouteDependencies
 ) => {
   router.post(

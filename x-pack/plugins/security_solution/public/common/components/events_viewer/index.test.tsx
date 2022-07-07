@@ -24,8 +24,16 @@ import { getDefaultControlColumn } from '../../../timelines/components/timeline/
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
+
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),

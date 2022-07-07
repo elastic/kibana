@@ -31,7 +31,7 @@ describe(`Console's send request`, () => {
 
   it('correctly implements timeout and abort mechanism', async () => {
     fakeRequest = {
-      abort: sinon.stub(),
+      destroy: sinon.stub(),
       on() {},
       once() {},
     } as any;
@@ -47,7 +47,7 @@ describe(`Console's send request`, () => {
       fail('Should not reach here!');
     } catch (e) {
       expect(e.message).toEqual('Client request timeout');
-      expect((fakeRequest.abort as sinon.SinonStub).calledOnce).toBe(true);
+      expect((fakeRequest.destroy as sinon.SinonStub).calledOnce).toBe(true);
     }
   });
 

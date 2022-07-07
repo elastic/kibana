@@ -1091,7 +1091,7 @@
           "Theme",
           "; paletteService: ",
           "PaletteRegistry",
-          "; uiState: ",
+          "; renderComplete: () => void; uiState: ",
           {
             "pluginId": "visualizations",
             "scope": "public",

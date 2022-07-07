@@ -11,36 +11,40 @@ import { lastValueFrom } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
-import {
-  ForLastExpression,
-  IErrorObject,
-  ThresholdExpression,
-  ValueExpression,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
-import { totalHitsToNumber } from './use_test_query';
-import { TestQueryRow } from './test_query_row';
+import { RuleCommonExpressions } from '../rule_common_expressions';
+import { totalHitsToNumber } from '../test_query_row';
+import { hasExpressionValidationErrors } from '../validation';
+
+const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
+  'pinFilter',
+  'disableFilter',
+];
 
 interface LocalState {
   index: DataView;
   filter: Filter[];
   query: Query;
-  threshold: number[];
-  timeWindowSize: number;
-  size: number;
+  thresholdComparator: CommonAlertParams['thresholdComparator'];
+  threshold: CommonAlertParams['threshold'];
+  timeWindowSize: CommonAlertParams['timeWindowSize'];
+  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
+  size: CommonAlertParams['size'];
 }
 
 interface LocalStateAction {
-  type: SearchSourceParamsAction['type'] | ('threshold' | 'timeWindowSize' | 'size');
-  payload: SearchSourceParamsAction['payload'] | (number[] | number);
+  type:
+    | SearchSourceParamsAction['type']
+    | ('threshold' | 'thresholdComparator' | 'timeWindowSize' | 'timeWindowUnit' | 'size');
+  payload: SearchSourceParamsAction['payload'] | (number[] | number | string);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -64,8 +68,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data } = useTriggersAndActionsUiDeps();
-  const { searchSource, ruleParams, errors, initialSavedQuery, setParam } = props;
-  const { thresholdComparator, timeWindowUnit } = ruleParams;
+  const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
@@ -86,20 +89,15 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       index: searchSource.getField('index')!,
       query: searchSource.getField('query')!,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
-      threshold: ruleParams.threshold,
-      timeWindowSize: ruleParams.timeWindowSize,
-      size: ruleParams.size,
+      threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
+      thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: ruleParams.timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
     }
   );
-  const {
-    index: dataView,
-    query,
-    filter: filters,
-    threshold,
-    timeWindowSize,
-    size,
-  } = ruleConfiguration;
-  const dataViews = useMemo(() => [dataView], [dataView]);
+  const { index: dataView, query, filter: filters } = ruleConfiguration;
+  const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const onSelectDataView = useCallback(
     (newDataViewId) =>
@@ -145,8 +143,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   // window size
   const onChangeWindowUnit = useCallback(
-    (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
-    [setParam]
+    (selectedWindowUnit: string) =>
+      dispatch({ type: 'timeWindowUnit', payload: selectedWindowUnit }),
+    []
   );
 
   const onChangeWindowSize = useCallback(
@@ -158,8 +157,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   // threshold
   const onChangeSelectedThresholdComparator = useCallback(
     (selectedThresholdComparator?: string) =>
-      setParam('thresholdComparator', selectedThresholdComparator),
-    [setParam]
+      selectedThresholdComparator &&
+      dispatch({ type: 'thresholdComparator', payload: selectedThresholdComparator }),
+    []
   );
 
   const onChangeSelectedThreshold = useCallback(
@@ -172,8 +172,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
     []
   );
-  const onTestFetch = useCallback(async () => {
-    const timeWindow = `${timeWindowSize}${timeWindowUnit}`;
+
+  const timeWindow = `${ruleConfiguration.timeWindowSize}${ruleConfiguration.timeWindowUnit}`;
+
+  const createTestSearchSource = useCallback(() => {
     const testSearchSource = searchSource.createCopy();
     const timeFilter = getTime(searchSource.getField('index')!, {
       from: `now-${timeWindow}`,
@@ -183,17 +185,27 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       'filter',
       timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
     );
+    return testSearchSource;
+  }, [searchSource, timeWindow, ruleConfiguration]);
+
+  const onCopyQuery = useCallback(() => {
+    const testSearchSource = createTestSearchSource();
+    return JSON.stringify(testSearchSource.getSearchRequestBody(), null, 2);
+  }, [createTestSearchSource]);
+
+  const onTestFetch = useCallback(async () => {
+    const testSearchSource = createTestSearchSource();
     const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [searchSource, timeWindowSize, timeWindowUnit, ruleConfiguration]);
+  }, [timeWindow, createTestSearchSource]);
 
   return (
     <Fragment>
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
-            defaultMessage="When the number of documents match"
+            id="xpack.stackAlerts.esQuery.ui.selectDataViewPrompt"
+            defaultMessage="Select a data view"
           />
         </h5>
       </EuiTitle>
@@ -201,95 +213,70 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiSpacer size="s" />
 
       <DataViewSelectPopover
-        initialDataViewTitle={dataView.title}
-        initialDataViewId={dataView.id}
+        dataViewName={dataView?.getName?.() ?? dataView?.title}
+        dataViewId={dataView?.id}
         onSelectDataView={onSelectDataView}
       />
 
-      <EuiSpacer size="s" />
-
-      <SearchBar
-        onQuerySubmit={onQueryBarSubmit}
-        onQueryChange={onChangeQuery}
-        suggestionsSize="s"
-        displayStyle="inPage"
-        placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
-          defaultMessage: 'Search query',
-        })}
-        query={query}
-        indexPatterns={dataViews}
-        savedQuery={savedQuery}
-        filters={filters}
-        onFiltersUpdated={onUpdateFilters}
-        onClearSavedQuery={onClearSavedQuery}
-        onSavedQueryUpdated={onSavedQuery}
-        onSaved={onSavedQuery}
-        showSaveQuery={true}
-        showQueryBar={true}
-        showQueryInput={true}
-        showFilterBar={true}
-        showDatePicker={false}
-        showAutoRefreshOnly={false}
-        showSubmitButton={false}
-        dateRangeFrom={undefined}
-        dateRangeTo={undefined}
-        timeHistory={timeHistory}
-        hiddenFilterPanelOptions={['pinFilter', 'disableFilter']}
-      />
-
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.conditionPrompt"
-            defaultMessage="When the number of matches"
+      {Boolean(dataView?.id) && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.defineTextQueryPrompt"
+                defaultMessage="Define your query"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <SearchBar
+            onQuerySubmit={onQueryBarSubmit}
+            onQueryChange={onChangeQuery}
+            suggestionsSize="s"
+            displayStyle="inPage"
+            query={query}
+            indexPatterns={dataViews}
+            savedQuery={savedQuery}
+            filters={filters}
+            onFiltersUpdated={onUpdateFilters}
+            onClearSavedQuery={onClearSavedQuery}
+            onSavedQueryUpdated={onSavedQuery}
+            onSaved={onSavedQuery}
+            showSaveQuery
+            showQueryBar
+            showQueryInput
+            showFilterBar
+            showDatePicker={false}
+            showAutoRefreshOnly={false}
+            showSubmitButton={false}
+            dateRangeFrom={undefined}
+            dateRangeTo={undefined}
+            timeHistory={timeHistory}
+            hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ThresholdExpression
-        data-test-subj="thresholdExpression"
-        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
-        errors={errors}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedThreshold={onChangeSelectedThreshold}
-        onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
-      />
-      <ForLastExpression
-        data-test-subj="forLastExpression"
-        popupPosition={'upLeft'}
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
-        display="fullWidth"
-        errors={errors}
+        </>
+      )}
+
+      <EuiSpacer size="m" />
+
+      <RuleCommonExpressions
+        threshold={ruleConfiguration.threshold}
+        thresholdComparator={ruleConfiguration.thresholdComparator}
+        timeWindowSize={ruleConfiguration.timeWindowSize}
+        timeWindowUnit={ruleConfiguration.timeWindowUnit}
+        size={ruleConfiguration.size}
+        onChangeThreshold={onChangeSelectedThreshold}
+        onChangeThresholdComparator={onChangeSelectedThresholdComparator}
         onChangeWindowSize={onChangeWindowSize}
         onChangeWindowUnit={onChangeWindowUnit}
+        onChangeSizeValue={onChangeSizeValue}
+        errors={errors}
+        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
+        onTestFetch={onTestFetch}
+        onCopyQuery={onCopyQuery}
       />
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.selectSizePrompt"
-            defaultMessage="Select a size"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ValueExpression
-        description={i18n.translate('xpack.stackAlerts.searchSource.ui.sizeExpression', {
-          defaultMessage: 'Size',
-        })}
-        data-test-subj="sizeValueExpression"
-        value={size}
-        errors={errors.size}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedValue={onChangeSizeValue}
-      />
-      <EuiSpacer size="s" />
-      <TestQueryRow fetch={onTestFetch} hasValidationErrors={false} />
+
       <EuiSpacer />
     </Fragment>
   );
