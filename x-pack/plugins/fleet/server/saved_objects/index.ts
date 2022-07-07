@@ -231,6 +231,8 @@ const getSavedObjectTypes = (
           enabled: false,
           type: 'object',
         },
+        verification_status: { type: 'keyword' },
+        verification_key_id: { type: 'keyword' },
         installed_es: {
           type: 'nested',
           properties: {
