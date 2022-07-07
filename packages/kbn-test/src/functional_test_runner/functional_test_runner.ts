@@ -24,6 +24,7 @@ import {
   Config,
   SuiteTracker,
   EsVersion,
+  DedicatedTaskRunner,
 } from './lib';
 import { createEsClientForFtrConfig } from '../es';
 
@@ -242,6 +243,7 @@ export class FunctionalTestRunner {
         config: () => config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,
+        dedicatedTaskRunner: () => new DedicatedTaskRunner(config, this.log),
       });
 
       return await handler(config, lifecycle, coreProviders);
