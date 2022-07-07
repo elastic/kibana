@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-interface languageDataEntry{
-  name: string,
-  stemmer: string,
-  stop_words: string,
-  custom_filter_definitions?: object,
-  prepended_filters?: string[],
-  postpended_filters?: string[],
+interface languageDataEntry {
+  name: string;
+  stemmer: string;
+  stop_words: string;
+  custom_filter_definitions?: object;
+  prepended_filters?: string[];
+  postpended_filters?: string[];
 }
 
-const LanguageData:Record<string, languageDataEntry> = {
+const LanguageData: Record<string, languageDataEntry> = {
   da: {
     name: 'Danish',
     stemmer: 'danish',
-    stop_words: '_danish_'
+    stop_words: '_danish_',
   },
   de: {
     name: 'German',
     stemmer: 'light_german',
-    stop_words: '_german_'
+    stop_words: '_german_',
   },
   en: {
     name: 'English',
     stemmer: 'light_english',
-    stop_words: '_english_'
+    stop_words: '_english_',
   },
   es: {
     name: 'Spanish',
     stemmer: 'light_spanish',
-    stop_words: '_spanish_'
+    stop_words: '_spanish_',
   },
   fr: {
     name: 'French',
@@ -42,13 +42,25 @@ const LanguageData:Record<string, languageDataEntry> = {
     custom_filter_definitions: {
       'fr-elision': {
         type: 'elision',
-        articles: ['l', 'm', 't', 'qu', 'n', 's', 'j', 'd', 'c', 'jusqu', 'quoiqu', 'lorsqu', 'puisqu'],
-        articles_case: true
-      }
+        articles: [
+          'l',
+          'm',
+          't',
+          'qu',
+          'n',
+          's',
+          'j',
+          'd',
+          'c',
+          'jusqu',
+          'quoiqu',
+          'lorsqu',
+          'puisqu',
+        ],
+        articles_case: true,
+      },
     },
-    prepended_filters: [
-      'fr-elision'
-    ]
+    prepended_filters: ['fr-elision'],
   },
   it: {
     name: 'Italian',
@@ -56,65 +68,79 @@ const LanguageData:Record<string, languageDataEntry> = {
     stop_words: '_italian_',
     custom_filter_definitions: {
       'it-elision': {
-        'type': 'elision',
-        'articles': ['c', 'l', 'all', 'dall', 'dell', 'nell', 'sull', 'coll', 'pell', 'gl', 'agl', 'dagl', 'degl', 'negl', 'sugl', 'un', 'm', 't', 's', 'v', 'd'],
-        'articles_case': true
-      }
+        type: 'elision',
+        articles: [
+          'c',
+          'l',
+          'all',
+          'dall',
+          'dell',
+          'nell',
+          'sull',
+          'coll',
+          'pell',
+          'gl',
+          'agl',
+          'dagl',
+          'degl',
+          'negl',
+          'sugl',
+          'un',
+          'm',
+          't',
+          's',
+          'v',
+          'd',
+        ],
+        articles_case: true,
+      },
     },
-    prepended_filters: [
-      'it-elision'
-    ]
+    prepended_filters: ['it-elision'],
   },
   ja: {
     name: 'Japanese',
     stemmer: 'light_english',
     stop_words: '_english_',
-    postpended_filters: [
-      'cjk_bigram'
-    ]
+    postpended_filters: ['cjk_bigram'],
   },
   ko: {
     name: 'Korean',
     stemmer: 'light_english',
     stop_words: '_english_',
-    postpended_filters: [
-      'cjk_bigram'
-    ]
+    postpended_filters: ['cjk_bigram'],
   },
   nl: {
     name: 'Dutch',
     stemmer: 'dutch',
-    stop_words: '_dutch_'
+    stop_words: '_dutch_',
   },
   pt: {
     name: 'Portuguese',
     stemmer: 'light_portuguese',
-    stop_words: '_portuguese_'
+    stop_words: '_portuguese_',
   },
   'pt-br': {
     name: 'Portuguese (Brazil)',
     stemmer: 'brazilian',
-    stop_words: '_brazilian_'
+    stop_words: '_brazilian_',
   },
   ru: {
     name: 'Russian',
     stemmer: 'russian',
-    stop_words: '_russian_'
+    stop_words: '_russian_',
   },
   th: {
     name: 'Thai',
     stemmer: 'light_english',
-    stop_words: '_thai_'
+    stop_words: '_thai_',
   },
   zh: {
     name: 'Chinese',
     stemmer: 'light_english',
     stop_words: '_english_',
-    postpended_filters: [
-      'cjk_bigram'
-    ]
-  }
-}
+    postpended_filters: ['cjk_bigram'],
+  },
+};
 
 const FRONT_NGRAM_MAX_GRAM = 12;
 
@@ -124,10 +150,10 @@ const shingleType = 'shingle' as 'shingle';
 const lengthType = 'length' as 'length';
 
 const GenericFilters = {
-   front_ngram: {
+  front_ngram: {
     type: edgeEndgramType,
     min_gram: 1,
-    max_gram: FRONT_NGRAM_MAX_GRAM
+    max_gram: FRONT_NGRAM_MAX_GRAM,
   },
   delimiter: {
     type: wordDelimiterGraphType,
@@ -139,137 +165,123 @@ const GenericFilters = {
     preserve_original: false,
     split_on_case_change: true,
     split_on_numerics: true,
-    stem_english_possessive: true
+    stem_english_possessive: true,
   },
   bigram_joiner: {
     type: shingleType,
     token_separator: '',
     max_shingle_size: 2,
-    output_unigrams: false
+    output_unigrams: false,
   },
   bigram_joiner_unigrams: {
     type: shingleType,
     token_separator: '',
     max_shingle_size: 2,
-    output_unigrams: true
+    output_unigrams: true,
   },
   bigram_max_size: {
     type: lengthType,
     min: 0,
-    max: 16
-  }
-}
+    max: 16,
+  },
+};
 
-export const textAnalysisSettings = (language: string='en') => {
+export const textAnalysisSettings = (language: string = 'en') => {
   return {
     analysis: {
       analyzer: analyzerDefinitions(language),
       filter: filterDefinitions(language),
-    }
-  }
+    },
+  };
 };
 
 const stemFilterName = (languageCode: string) => {
   return `${languageCode}-stem-filter`;
-}
+};
 
 const stopWordsFilterName = (languageCode: string) => {
   return `${languageCode}-stop-words-filter`;
-}
+};
 
 const analyzerDefinitions = (language: string) => {
-  const prependedFilters = LanguageData[language]["prepended_filters"] || [];
-  const postpendedFilters = LanguageData[language]["postpended_filters"] || [];
-  const customType = "custom" as "custom";
+  const prependedFilters = LanguageData[language].prepended_filters || [];
+  const postpendedFilters = LanguageData[language].postpended_filters || [];
+  const customType = 'custom' as 'custom';
 
   return {
-    "i_prefix": {
+    i_prefix: {
       type: customType,
-      tokenizer: "standard",
-      filter: [
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
-        "front_ngram",
-      ]
+      tokenizer: 'standard',
+      filter: ['cjk_width', 'lowercase', 'asciifolding', 'front_ngram'],
     },
     q_prefix: {
       type: customType,
-      tokenizer: "standard",
-      filter: [
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
-      ]
+      tokenizer: 'standard',
+      filter: ['cjk_width', 'lowercase', 'asciifolding'],
     },
     iq_text_base: {
       type: customType,
-      tokenizer: "standard",
-      filter: [
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
-        stopWordsFilterName(language),
-      ]
+      tokenizer: 'standard',
+      filter: ['cjk_width', 'lowercase', 'asciifolding', stopWordsFilterName(language)],
     },
     iq_text_stem: {
       type: customType,
-      tokenizer: "standard",
+      tokenizer: 'standard',
       filter: [
         ...prependedFilters,
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
+        'cjk_width',
+        'lowercase',
+        'asciifolding',
         stopWordsFilterName(language),
         stemFilterName(language),
         ...postpendedFilters,
-      ]
+      ],
     },
     iq_text_delimiter: {
       type: customType,
-      tokenizer: "whitespace",
+      tokenizer: 'whitespace',
       filter: [
         ...prependedFilters,
-        "delimiter",
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
+        'delimiter',
+        'cjk_width',
+        'lowercase',
+        'asciifolding',
         stopWordsFilterName(language),
         stemFilterName(language),
         ...postpendedFilters,
-      ]
+      ],
     },
     i_text_bigram: {
       type: customType,
-      tokenizer: "standard",
+      tokenizer: 'standard',
       filter: [
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
+        'cjk_width',
+        'lowercase',
+        'asciifolding',
         stemFilterName(language),
-        "bigram_joiner",
-        "bigram_max_size",
-      ]
+        'bigram_joiner',
+        'bigram_max_size',
+      ],
     },
     q_text_bigram: {
       type: customType,
-      tokenizer: "standard",
+      tokenizer: 'standard',
       filter: [
-        "cjk_width",
-        "lowercase",
-        "asciifolding",
+        'cjk_width',
+        'lowercase',
+        'asciifolding',
         stemFilterName(language),
-        "bigram_joiner_unigrams",
-        "bigram_max_size",
-      ]
-    }
-  }
+        'bigram_joiner_unigrams',
+        'bigram_max_size',
+      ],
+    },
+  };
 };
 
 const filterDefinitions = (language: string) => {
-  const stemmerName = LanguageData[language]['stemmer'];
-  const stopWordsName = LanguageData[language]['stop_words'];
-  const customFilterDefinitions = LanguageData[language]['custom_filter_definitions'] || {};
+  const stemmerName = LanguageData[language].stemmer;
+  const stopWordsName = LanguageData[language].stop_words;
+  const customFilterDefinitions = LanguageData[language].custom_filter_definitions || {};
 
   return {
     ...GenericFilters,
@@ -282,5 +294,5 @@ const filterDefinitions = (language: string) => {
       stopwords: stopWordsName,
     },
     ...customFilterDefinitions,
-  }
+  };
 };

@@ -136,7 +136,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         }),
       },
     },
-    async(context, request, response) => {
+    async (context, request, response) => {
       const { indexName, language } = request.body;
       const { client } = (await context.core).elasticsearch;
       try {
