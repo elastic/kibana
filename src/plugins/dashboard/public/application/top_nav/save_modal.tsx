@@ -24,6 +24,7 @@ interface Props {
     newTimeRestore,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
+    saveFilters,
   }: DashboardSaveOptions) => void;
   onClose: () => void;
   title: string;
@@ -56,11 +57,13 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     newCopyOnSave,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
+    saveFilters,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
+    saveFilters: boolean;
   }) => {
     this.props.onSave({
       newTitle,
@@ -70,6 +73,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       newTags: this.state.tags,
+      saveFilters,
     });
   };
 
@@ -154,6 +158,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         })}
         options={this.renderDashboardSaveOptions()}
         showDescription={false}
+        showSaveFilters={true}
       />
     );
   }

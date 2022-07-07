@@ -37,6 +37,7 @@ export interface OnSaveProps {
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
   newDescription: string;
+  saveFilters?: boolean;
 }
 
 interface Props {
@@ -53,6 +54,7 @@ interface Props {
   description?: string;
   showDescription: boolean;
   isValid?: boolean;
+  showSaveFilters?: boolean;
 }
 
 export interface SaveModalState {
@@ -62,6 +64,7 @@ export interface SaveModalState {
   hasTitleDuplicate: boolean;
   isLoading: boolean;
   visualizationDescription: string;
+  saveFilters: boolean;
 }
 
 const generateId = htmlIdGenerator();
@@ -79,6 +82,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     hasTitleDuplicate: false,
     isLoading: false,
     visualizationDescription: this.props.description ? this.props.description : '',
+    saveFilters: Boolean(this.props.showSaveFilters),
   };
 
   public render() {
@@ -153,6 +157,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               )}
               {formBody}
               {this.renderCopyOnSave()}
+              {this.renderSaveFilters()}
             </EuiForm>
           </EuiModalBody>
 
@@ -229,6 +234,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
       onTitleDuplicate: this.onTitleDuplicate,
       newDescription: this.state.visualizationDescription,
+      saveFilters: this.state.saveFilters,
     });
   };
 
@@ -253,6 +259,12 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   private onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     this.saveSavedObject();
+  };
+
+  private onSaveFiltersChange = () => {
+    this.setState({
+      saveFilters: !this.state.saveFilters,
+    });
   };
 
   private renderConfirmButton = () => {
@@ -337,6 +349,29 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               id="savedObjects.saveModal.saveAsNewLabel"
               defaultMessage="Save as new {objectType}"
               values={{ objectType: this.props.objectType }}
+            />
+          }
+        />
+      </>
+    );
+  };
+
+  private renderSaveFilters = () => {
+    if (!this.props.showSaveFilters) {
+      return;
+    }
+
+    return (
+      <>
+        <EuiSpacer />
+        <EuiSwitch
+          data-test-subj="saveFiltersCheckbox"
+          checked={this.state.saveFilters}
+          onChange={this.onSaveFiltersChange}
+          label={
+            <FormattedMessage
+              id="savedObjects.saveModal.saveFiltersLabel"
+              defaultMessage="Save Filters"
             />
           }
         />

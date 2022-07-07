@@ -103,12 +103,14 @@ export async function onSaveSearch({
     newDescription,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
+    saveFilters,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
     newDescription: string;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
+    saveFilters: boolean;
   }) => {
     const currentTitle = savedSearch.title;
     savedSearch.title = newTitle;
@@ -117,6 +119,7 @@ export async function onSaveSearch({
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
       isTitleDuplicateConfirmed,
+      saveFilters,
     };
     const response = await saveDataSource({
       indexPattern,
@@ -146,6 +149,7 @@ export async function onSaveSearch({
         defaultMessage: 'search',
       })}
       showDescription={true}
+      showSaveFilters={true}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);

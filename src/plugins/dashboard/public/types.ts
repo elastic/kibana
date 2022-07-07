@@ -179,6 +179,7 @@ export interface DashboardSaveOptions {
   newTimeRestore: boolean;
   onTitleDuplicate: () => void;
   isTitleDuplicateConfirmed: boolean;
+  saveFilters: boolean;
 }
 
 export interface DashboardAppCapabilities {

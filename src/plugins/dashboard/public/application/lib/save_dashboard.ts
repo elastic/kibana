@@ -22,7 +22,10 @@ import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddab
 import { DashboardSessionStorage } from './dashboard_session_storage';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
 
-export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
+export type SavedDashboardSaveOpts = SavedObjectSaveOpts & {
+  stayInEditMode?: boolean;
+  saveFilters: boolean;
+};
 
 interface SaveDashboardProps {
   version: string;
@@ -49,7 +52,6 @@ export const saveDashboard = async ({
 }: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
   const lastDashboardId = savedDashboard.id;
   const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
-
   const { panels, title, tags, description, timeRestore, options } = currentState;
 
   const savedDashboardPanels = Object.values(panels).map((panel) =>
@@ -81,9 +83,14 @@ export const saveDashboard = async ({
   ]) as RefreshInterval;
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
 
-  // only save unpinned filters
-  const unpinnedFilters = savedDashboard.getFilters().filter((filter) => !isFilterPinned(filter));
-  savedDashboard.searchSource.setField('filter', unpinnedFilters);
+  const { saveFilters } = saveOptions;
+  if (!saveFilters) {
+    savedDashboard.searchSource.setField('filter', []);
+  } else {
+    // only save unpinned filters
+    const unpinnedFilters = savedDashboard.getFilters().filter((filter) => !isFilterPinned(filter));
+    savedDashboard.searchSource.setField('filter', unpinnedFilters);
+  }
 
   try {
     const newId = await savedDashboard.save(saveOptions);

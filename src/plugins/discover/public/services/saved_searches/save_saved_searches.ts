@@ -15,6 +15,7 @@ export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
   isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
+  saveFilters: boolean;
 }
 
 const hasDuplicatedTitle = async (
@@ -58,7 +59,11 @@ export const saveSavedSearch = async (
     }
   }
 
-  const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
+  const searchSourceCopy = savedSearch.searchSource.createCopy();
+  if (!options.saveFilters) {
+    searchSourceCopy.setField('filter', []);
+  }
+  const { searchSourceJSON, references } = searchSourceCopy.serialize();
   const resp = isNew
     ? await savedObjectsClient.create<SavedSearchAttributes>(
         SAVED_SEARCH_TYPE,

@@ -247,11 +247,13 @@ export function DashboardTopNav({
       newTimeRestore,
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
+      saveFilters,
     }: DashboardSaveOptions): Promise<SaveResult> => {
       const saveOptions = {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
+        saveFilters,
       };
       const stateFromSaveModal = {
         title: newTitle,
@@ -265,6 +267,7 @@ export function DashboardTopNav({
 
       dashboardAppState.savedDashboard.copyOnSave = newCopyOnSave;
       const saveResult = await saveDashboard({
+        saveFilters,
         toasts,
         timefilter,
         redirectTo,
