@@ -34,7 +34,7 @@ describe('<UseMultiFields />', () => {
     const changeStateFields = () => {
       // We'll make sure that if other fields are passed down after the initial
       // rendering of <UseMultiField /> the change does not create new FieldHook as that
-      // would breal the **order** of hooks declared inside <UseMultiFields />
+      // would break the **order** of hooks declared inside <UseMultiFields />
 
       setStateFields({
         aaa: { path: 'aaa' }, // we add this field that will come first when sorting() A-Z

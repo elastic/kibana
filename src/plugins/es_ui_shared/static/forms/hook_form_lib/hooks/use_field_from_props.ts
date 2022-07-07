@@ -12,11 +12,7 @@ import { useFormContext } from '../form_context';
 import { useField, InternalFieldConfig } from './use_field';
 
 /**
- * Initially the code in this hook was inside the <UseField /> component.
- * It serves to initialize a FieldHook (useField() from "hooks/use_field.ts") based on the props
- * passsed to the component.
- * When refactoring the <UseMultiFields /> component I realized that it would be much simpler
- * to extract the code into a separate hook and consume it from there too.
+ * Hook to initialize a FieldHook based on Props passed to <UseField /> or <UseMultiFields />
  *
  * @param props The props passed to <UseField /> or <UseMultiFields />
  * @returns The field hook and props to forward to component to render for the field
