@@ -84,6 +84,8 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Hide mini distribution/preview charts when in Field Statistics mode
    */
   hideAggregatedPreview?: boolean;
+
+  preserveFilters?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -113,6 +115,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       interval,
       viewMode,
       hideAggregatedPreview,
+      preserveFilters,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -125,6 +128,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       savedQuery?: string;
       viewMode?: string;
       hideAggregatedPreview?: boolean;
+      preserveFilters?: boolean;
     } = {};
     const queryState: GlobalQueryStateFromUrl = {};
     const { isFilterPinned } = await import('@kbn/es-query');
@@ -142,6 +146,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
+    if (preserveFilters) appState.preserveFilters = preserveFilters;
 
     let path = `#/${savedSearchPath}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);

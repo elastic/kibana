@@ -508,6 +508,7 @@ export const LensTopNavMenu = ({
             filters: newFilters,
             query: newQuery,
             columns: meta.columns,
+            preserveFilters: true,
           });
         },
         openSettings: (anchorElement: HTMLElement) =>

@@ -91,6 +91,8 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+
+  preserveFilters?: boolean;
 }
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
@@ -203,19 +205,22 @@ export function getState({
     history,
     ...(toasts && withNotifyOnErrors(toasts)),
   });
+  let defaultFilters = defaultAppState.filters;
   if (embeddableStateTransfer) {
     const embeddableState = embeddableStateTransfer.getIncomingEditorState('discover');
     if (embeddableState?.filters) {
-      defaultAppState.filters = embeddableState?.filters;
+      defaultFilters = embeddableState?.filters;
     }
   }
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
-
+  if (appStateFromUrl.preserveFilters) {
+    defaultFilters = appStateFromUrl.filters;
+  }
   let initialAppState = handleSourceColumnState(
     {
       ...defaultAppState,
       ...appStateFromUrl,
-      filters: defaultAppState.filters,
+      filters: defaultFilters,
     },
     uiSettings
   );
