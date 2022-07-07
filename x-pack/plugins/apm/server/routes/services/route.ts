@@ -33,7 +33,6 @@ import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getThroughput } from './get_throughput';
 import { getServiceProfilingStatistics } from './profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from './profiling/get_service_profiling_timeline';
-import { getServiceInfrastructure } from './get_service_infrastructure';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
@@ -1130,43 +1129,6 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
-// TODO: remove this endpoint in favour of
-const serviceInfrastructureRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    serviceInfrastructure: { containerIds: string[]; hostNames: string[] };
-  }> => {
-    const setup = await setupRequest(resources);
-
-    const { params } = resources;
-
-    const {
-      path: { serviceName },
-      query: { environment, kuery, start, end },
-    } = params;
-
-    const serviceInfrastructure = await getServiceInfrastructure({
-      setup,
-      serviceName,
-      environment,
-      kuery,
-      start,
-      end,
-    });
-    return { serviceInfrastructure };
-  },
-});
-
 const serviceAnomalyChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
   params: t.type({
@@ -1298,7 +1260,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceProfilingTimelineRoute,
   ...serviceProfilingStatisticsRoute,
-  ...serviceInfrastructureRoute,
   ...serviceAnomalyChartsRoute,
   ...sortedAndFilteredServicesRoute,
 };
