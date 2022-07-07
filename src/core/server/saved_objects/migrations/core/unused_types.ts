@@ -35,6 +35,8 @@ export const REMOVED_TYPES: string[] = [
   'timelion-sheet',
   // Removed in 8.3 https://github.com/elastic/kibana/issues/127745
   'ui-counter',
+  // Deprecated, no longer used since 7.13 https://github.com/elastic/kibana/pull/94923/files
+  'application_usage_transactional',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes

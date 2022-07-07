@@ -67,6 +67,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "application_usage_transactional",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "background-session",
                 },
               },

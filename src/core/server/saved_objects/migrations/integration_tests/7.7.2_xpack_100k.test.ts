@@ -24,6 +24,9 @@ async function removeLogFile() {
   await unlink(logFilePath).catch(() => void 0);
 }
 
+/** Number of SO documents dropped during the migration because they belong to an unused type */
+const UNUSED_SO_COUNT = 4;
+
 describe('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -122,6 +125,8 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
     // Use a >= comparison since once Kibana has started it might create new
     // documents like telemetry tasks
-    expect(migratedIndexResponse.count).toBeGreaterThanOrEqual(oldIndexResponse.count);
+    expect(migratedIndexResponse.count).toBeGreaterThanOrEqual(
+      oldIndexResponse.count - UNUSED_SO_COUNT
+    );
   });
 });
