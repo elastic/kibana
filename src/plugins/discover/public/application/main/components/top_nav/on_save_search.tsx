@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
@@ -166,40 +164,11 @@ const SaveSearchObjectModal: React.FC<{
 }> = ({ services, title, description, showCopyOnSave, rowsPerPageState, onSave, onClose }) => {
   const { uiSettings } = services;
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const [newRowsPerPage, setNewRowsPerPage] = useState(rowsPerPageState);
-
-  const renderAdditionalSearchForm = () => {
-    if (isLegacy) {
-      // skip setting a custom rowsPerPage for the legacy view as it does not support pagination
-      return undefined;
-    }
-    return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="discover.topNav.saveModal.rowsPerPageFormRowLabel"
-            defaultMessage="Rows per page"
-          />
-        }
-      >
-        <EuiFieldNumber
-          value={newRowsPerPage}
-          min={1}
-          onChange={(event) => {
-            const value = parseInt(event.target.value, 10);
-            if (value) {
-              setNewRowsPerPage(value);
-            }
-          }}
-        />
-      </EuiFormRow>
-    );
-  };
 
   const onModalSave = (params: OnSaveProps) => {
     onSave({
       ...params,
-      newRowsPerPage: isLegacy ? undefined : newRowsPerPage,
+      newRowsPerPage: isLegacy ? undefined : rowsPerPageState,
     });
   };
 
@@ -212,7 +181,6 @@ const SaveSearchObjectModal: React.FC<{
         defaultMessage: 'search',
       })}
       showDescription={true}
-      options={renderAdditionalSearchForm}
       onSave={onModalSave}
       onClose={onClose}
     />
