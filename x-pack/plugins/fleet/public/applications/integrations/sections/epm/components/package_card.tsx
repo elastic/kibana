@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiCard, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
@@ -56,8 +56,10 @@ export function PackageCard({
     );
   }
 
+  let verifiedBadge: React.ReactNode | null = null;
+
   if (isUnverified && showLabels) {
-    releaseBadge = (
+    verifiedBadge = (
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
@@ -105,7 +107,10 @@ export function PackageCard({
         }
         onClick={onCardClick}
       >
-        {releaseBadge}
+        <EuiFlexGroup gutterSize="xs">
+          {verifiedBadge}
+          {releaseBadge}
+        </EuiFlexGroup>
       </Card>
     </TrackApplicationView>
   );
