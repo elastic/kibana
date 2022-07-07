@@ -17,6 +17,7 @@ import {
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
+import * as entities from './entities';
 export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 export type {
   ObservabilityPublicSetup,
@@ -115,9 +116,4 @@ export {
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
 
-export {
-  getService,
-  getInfrastructureForService,
-  EntityService,
-  EntityServiceInfrastructure,
-} from './entities/get_service';
+export { entities };
