@@ -57,6 +57,7 @@ export async function getServiceAnnotations({
     }
     // When another error was thrown, save it and wait for Stored annotations before re-throwing it
     derivedAnnotationError = error;
+    return [];
   });
 
   const storedAnnotations = annotationsClient
