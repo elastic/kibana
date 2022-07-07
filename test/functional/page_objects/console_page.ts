@@ -206,4 +206,19 @@ export class ConsolePageObject extends FtrService {
       return false;
     }
   }
+
+  public async clickFoldWidget() {
+    const widget = await this.find.byCssSelector('.ace_fold-widget');
+    await widget.click();
+  }
+
+  public async hasFolds() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      const folds = await requestEditor.findAllByCssSelector('.ace_fold');
+      return folds.length > 0;
+    } catch (e) {
+      return false;
+    }
+  }
 }
