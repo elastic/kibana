@@ -41,14 +41,7 @@ export function AlertsOverview() {
       bool: {
         filter: [
           {
-            bool: {
-              should: [
-                {
-                  term: { [SERVICE_NAME]: serviceName },
-                },
-              ],
-              minimum_should_match: 1,
-            },
+            term: { [SERVICE_NAME]: serviceName },
           },
           ...(alertStatusFilter !== ALL_ALERTS_FILTER
             ? [
