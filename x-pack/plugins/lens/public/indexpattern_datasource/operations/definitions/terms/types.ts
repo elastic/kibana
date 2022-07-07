@@ -18,7 +18,9 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     orderBy:
       | { type: 'alphabetical'; fallback?: boolean }
       | { type: 'rare'; maxDocCount: number }
-      | { type: 'column'; columnId: string };
+      | { type: 'column'; columnId: string }
+      | { type: 'custom' };
+    orderAgg?: FieldBasedIndexPatternColumn;
     orderDirection: 'asc' | 'desc';
     otherBucket?: boolean;
     missingBucket?: boolean;

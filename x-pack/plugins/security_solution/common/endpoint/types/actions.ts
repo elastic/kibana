@@ -10,6 +10,7 @@ import {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
+  KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
@@ -216,6 +217,8 @@ export interface ActivityLog {
 export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
+
+export type KillOrSuspendProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
 
 export interface HostIsolationResponse {
   action: string;

@@ -25,7 +25,7 @@ import {
 } from './router';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
-import { RequestHandlerContext } from '..';
+import { RequestHandlerContextBase } from '..';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import { of } from 'rxjs';
@@ -466,7 +466,7 @@ test('not inline handler - KibanaRequest', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
   const handler = (
-    context: RequestHandlerContext,
+    context: RequestHandlerContextBase,
     req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
     res: KibanaResponseFactory
   ) => {
