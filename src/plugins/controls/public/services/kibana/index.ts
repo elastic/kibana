@@ -23,6 +23,7 @@ import { httpServiceFactory } from './http';
 import { optionsListServiceFactory } from './options_list';
 import { settingsServiceFactory } from './settings';
 import { unifiedSearchServiceFactory } from './unified_search';
+import { themeServiceFactory } from './theme';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
@@ -34,6 +35,7 @@ export const providers: PluginServiceProviders<
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
+  theme: new PluginServiceProvider(themeServiceFactory),
 
   optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
   controls: new PluginServiceProvider(controlsServiceFactory),

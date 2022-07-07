@@ -21,6 +21,7 @@ import { dataViewsServiceFactory } from '../storybook/data_views';
 import { optionsListServiceFactory } from '../storybook/options_list';
 import { settingsServiceFactory } from '../storybook/settings';
 import { unifiedSearchServiceFactory } from '../storybook/unified_search';
+import { themeServiceFactory } from '../storybook/theme';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   http: new PluginServiceProvider(httpServiceFactory),
@@ -29,6 +30,8 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
+  theme: new PluginServiceProvider(themeServiceFactory),
+
   controls: new PluginServiceProvider(controlsServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };

@@ -33,6 +33,7 @@ import { OverlayRef } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -104,25 +105,35 @@ export class ControlGroupContainer extends Container<
     buttonType: CreateControlButtonTypes,
     closePopover?: () => void
   ) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <CreateControlButton
-        buttonType={buttonType}
-        defaultControlWidth={this.getInput().defaultControlWidth}
-        defaultControlGrow={this.getInput().defaultControlGrow}
-        updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-        updateDefaultGrow={(defaultControlGrow: boolean) =>
-          this.updateInput({ defaultControlGrow })
-        }
-        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
-        closePopover={closePopover}
-        getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
-        setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-      />
+      <ControlsServicesProvider>
+        <CreateControlButton
+          buttonType={buttonType}
+          defaultControlWidth={this.getInput().defaultControlWidth}
+          defaultControlGrow={this.getInput().defaultControlGrow}
+          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+          updateDefaultGrow={(defaultControlGrow: boolean) =>
+            this.updateInput({ defaultControlGrow })
+          }
+          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+          closePopover={closePopover}
+          getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
+          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+        />
+      </ControlsServicesProvider>
     );
   };
 
   private getEditControlGroupButton = (closePopover: () => void) => {
-    return <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />;
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
+    return (
+      <ControlsServicesProvider>
+        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
+      </ControlsServicesProvider>
+    );
   };
 
   /**
@@ -342,13 +353,15 @@ export class ControlGroupContainer extends Container<
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <PresentationUtilProvider>
-        <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
-          <ControlGroup />
-        </ControlGroupReduxWrapper>
-      </PresentationUtilProvider>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <ControlsServicesProvider>
+          <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
+            <ControlGroup />
+          </ControlGroupReduxWrapper>
+        </ControlsServicesProvider>
+      </KibanaThemeProvider>,
       dom
     );
   }

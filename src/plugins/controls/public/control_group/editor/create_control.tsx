@@ -51,12 +51,13 @@ export const CreateControlButton = ({
   updateDefaultGrow,
 }: CreateControlButtonProps) => {
   // Controls Services Context
-  const { overlays, controls } = pluginServices.getServices();
-  const { getControlTypes, getControlFactory } = controls;
-  const { openFlyout, openConfirm } = overlays;
+  const { overlays, controls, theme } = pluginServices.getHooks();
+  const { getControlTypes, getControlFactory } = controls.useService();
+  const { openFlyout, openConfirm } = overlays.useService();
+  const themeService = theme.useService();
 
   const createNewControl = async () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
 
     const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
       let inputToReturn: Partial<DataControlInput> = {};
@@ -97,7 +98,7 @@ export const CreateControlButton = ({
 
       const flyoutInstance = openFlyout(
         toMountPoint(
-          <PresentationUtilProvider>
+          <ControlsServicesProvider>
             <ControlEditor
               setLastUsedDataViewId={setLastUsedDataViewId}
               getRelevantDataViewId={getRelevantDataViewId}
@@ -113,7 +114,8 @@ export const CreateControlButton = ({
                 (inputToReturn = { ...inputToReturn, ...partialInput })
               }
             />
-          </PresentationUtilProvider>
+          </ControlsServicesProvider>,
+          { theme$: themeService.theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
