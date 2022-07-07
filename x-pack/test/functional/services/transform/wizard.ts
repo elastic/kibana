@@ -807,7 +807,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
-    async assertTransformNumFailureRetriesValue(expectedValue: string) {
+    async assertNumFailureRetriesValue(expectedValue: string) {
       await this.assertTransformNumFailureRetriesInputExists();
       const actualValue = await testSubjects.getAttribute(
         'transformNumFailureRetriesInput',
@@ -841,7 +841,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await testSubjects.setValue('transformNumFailureRetriesInput', value);
         if (expectedResult !== 'error') {
           await this.assertTransformNumFailureRetriesErrorMessageExists(false);
-          await this.assertTransformNumFailureRetriesValue(expectedResult);
+          await this.assertNumFailureRetriesValue(expectedResult);
         } else {
           await this.assertTransformNumFailureRetriesErrorMessageExists(true);
         }

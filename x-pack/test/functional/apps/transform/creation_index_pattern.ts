@@ -619,7 +619,7 @@ export default function ({ getService }: FtrProviderContext) {
             testData.numFailureRetries !== undefined &&
             testData.expected.numFailureRetries !== undefined
           ) {
-            await transform.wizard.assertTransformNumFailureRetriesValue('');
+            await transform.wizard.assertNumFailureRetriesValue('');
             await transform.wizard.setTransformNumFailureRetriesValue(
               testData.numFailureRetries.toString(),
               testData.expected.numFailureRetries
