@@ -11,14 +11,9 @@ export type { HttpConfigType } from './http_config';
 export { HttpService } from './http_service';
 export { isKibanaRequest, isRealRequest, CoreKibanaRequest, kibanaResponseFactory } from './router';
 export type {
-  HttpAuth,
-  HttpServicePreboot,
   InternalHttpServicePreboot,
-  HttpServiceSetup,
   InternalHttpServiceSetup,
-  HttpServiceStart,
   InternalHttpServiceStart,
-  HttpServerInfo,
 } from './types';
 export { BasePath } from './base_path_service';
 

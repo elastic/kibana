@@ -47,6 +47,9 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
   RouteMethod,
+  HttpServicePreboot,
+  HttpServiceSetup,
+  HttpServiceStart,
 } from '@kbn/core-http-server';
 import {
   ElasticsearchServiceSetup,
@@ -54,7 +57,6 @@ import {
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
 } from './elasticsearch';
-import type { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -147,8 +149,6 @@ export type {
   ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 
-export type { HttpAuth, HttpServerInfo, HttpServicePreboot, HttpServiceStart } from './http';
-
 export { kibanaResponseFactory, CoreKibanaRequest, CspConfig } from './http';
 
 export type {
@@ -224,6 +224,10 @@ export type {
   AuthStatus,
   GetAuthHeaders,
   IContextContainer,
+  HttpAuth,
+  HttpServerInfo,
+  HttpServicePreboot,
+  HttpServiceStart,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';

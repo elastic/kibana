@@ -36,6 +36,10 @@ import type {
   OnPreRoutingHandler,
   OnPreResponseHandler,
   SessionStorageCookieOptions,
+  HttpServiceSetup,
+  HttpServerInfo,
+  HttpAuth,
+  IAuthHeadersStorage,
 } from '@kbn/core-http-server';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
@@ -46,10 +50,9 @@ import { adoptToHapiOnPreResponseFormat } from './lifecycle/on_pre_response';
 import { isSafeMethod } from './router';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
 
 /** @internal */
 export interface HttpServerSetup {
