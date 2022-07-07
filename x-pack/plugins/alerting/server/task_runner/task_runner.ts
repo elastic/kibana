@@ -456,7 +456,7 @@ export class TaskRunner<
       });
     }
 
-    rulesClient.clearExpiredSnoozes({ id: rule.id });
+    await rulesClient.clearExpiredSnoozes({ id: rule.id });
 
     const ruleIsSnoozed = isRuleSnoozed(rule);
     if (ruleIsSnoozed) {
