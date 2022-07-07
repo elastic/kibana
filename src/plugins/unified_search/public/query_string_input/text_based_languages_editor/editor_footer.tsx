@@ -105,7 +105,7 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              <EuiFlexGroup gutterSize="s" alignItems="center">
+                              <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
                                 <EuiFlexItem grow={false}>
                                   <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
                                 </EuiFlexItem>
@@ -113,7 +113,7 @@ export const EditorFooter = memo(function EditorFooter({
                                   {i18n.translate(
                                     'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
                                     {
-                                      defaultMessage: 'Line{lineNumber}',
+                                      defaultMessage: 'Line {lineNumber}',
                                       values: { lineNumber: error.startLineNumber },
                                     }
                                   )}
