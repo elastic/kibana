@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiLink,
@@ -17,17 +17,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { AddDomainLogic } from './add_domain/add_domain_logic';
+import { AddDomainForm } from './add_domain/add_domain_form';
+import { AddDomainFormErrors } from './add_domain/add_domain_form_errors';
+import { AddDomainFormSubmitButton } from './add_domain/add_domain_form_submit_button';
+import { CrawlerLogic } from '../crawler_logic';
 
 export const EmptyStatePanel: React.FC = () => {
   const { openFlyout } = useActions(AddDomainLogic);
-
+  const { events } = useValues(CrawlerLogic);
   return (
-    <>
+    <EuiPanel hasBorder>
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
@@ -35,31 +40,42 @@ export const EmptyStatePanel: React.FC = () => {
           })}
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText color="subdued" size="s">
-        <p>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRequestsDescription', {
-            defaultMessage:
-              'You don’t have any domains on this index. Add your first domain to start crawling and indexing documents.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={openFlyout} fill>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.openButtonLabel',
-              {
-                defaultMessage: 'Add your first domain',
-              }
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink target="_blank">Learn more</EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+      <EuiSpacer size="l" />
+      {events.length > 0 ? (
+        <>
+          <EuiText color="subdued" size="s">
+            <p>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRequestsDescription', {
+                defaultMessage:
+                  'You don’t have any domains on this index. Add your first domain to start crawling and indexing documents.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer />
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={openFlyout} fill>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.openButtonLabel',
+                  {
+                    defaultMessage: 'Add your first domain',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank">Learn more</EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : (
+        <>
+          <AddDomainFormErrors />
+          <AddDomainForm />
+          <EuiSpacer />
+          <AddDomainFormSubmitButton />
+        </>
+      )}
+    </EuiPanel>
   );
 };

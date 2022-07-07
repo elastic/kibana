@@ -28,53 +28,31 @@ export const CrawlerStatusIndicator: React.FC = () => {
 
   const crawlerLogic = CrawlerLogic({ indexName });
 
-  const { domains, mostRecentCrawlRequestStatus } = useValues(crawlerLogic);
-  const { stopCrawl } = useActions(crawlerLogic);
+  const { dataLoading, domains, mostRecentCrawlRequestStatus } = useValues(crawlerLogic);
 
-  const disabledButton = (
-    <EuiButton disabled iconType="arrowDown" iconSide="right">
-      {i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
-        {
-          defaultMessage: 'Start a crawl',
-        }
-      )}
-    </EuiButton>
-  );
-
-  if (domains.length === 0) {
-    return disabledButton;
+  console.log({
+    dataLoading,
+    domains,
+    mostRecentCrawlRequestStatus,
+  });
+  if (dataLoading || domains.length === 0) {
+    return (
+      <EuiButton disabled iconType="arrowDown" iconSide="right">
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
+          {
+            defaultMessage: 'Crawl',
+          }
+        )}
+      </EuiButton>
+    );
   }
 
   switch (mostRecentCrawlRequestStatus) {
-    case CrawlerStatus.Success:
-      return (
-        <StartCrawlContextMenu
-          menuButtonLabel={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.startACrawlButtonLabel',
-            {
-              defaultMessage: 'Start a crawl',
-            }
-          )}
-        />
-      );
-    case CrawlerStatus.Failed:
-    case CrawlerStatus.Canceled:
-      return (
-        <StartCrawlContextMenu
-          fill
-          menuButtonLabel={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.retryCrawlButtonLabel',
-            {
-              defaultMessage: 'Retry crawl',
-            }
-          )}
-        />
-      );
     case CrawlerStatus.Pending:
     case CrawlerStatus.Suspended:
       return (
-        <EuiButton disabled isLoading>
+        <EuiButton isLoading>
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.pendingButtonLabel',
             {
@@ -95,11 +73,11 @@ export const CrawlerStatusIndicator: React.FC = () => {
         </EuiButton>
       );
     case CrawlerStatus.Running:
-      return <StopCrawlPopoverContextMenu stopCrawl={stopCrawl} />;
+      return <StopCrawlPopoverContextMenu />;
     case CrawlerStatus.Canceling:
     case CrawlerStatus.Suspending:
       return (
-        <EuiButton isLoading fill>
+        <EuiButton isLoading>
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.stoppingButtonLabel',
             {
@@ -108,9 +86,10 @@ export const CrawlerStatusIndicator: React.FC = () => {
           )}
         </EuiButton>
       );
+    case CrawlerStatus.Success:
+    case CrawlerStatus.Failed:
+    case CrawlerStatus.Canceled:
     default:
-      // We should never get here, you would have to pass a CrawlerStatus option not covered
-      // in the switch cases above
-      return disabledButton;
+      return <StartCrawlContextMenu />;
   }
 };

@@ -28,7 +28,7 @@ export const DomainsPanel: React.FC = () => {
   const { openFlyout } = useActions(AddDomainLogic);
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiIcon size="m" type="globe" />

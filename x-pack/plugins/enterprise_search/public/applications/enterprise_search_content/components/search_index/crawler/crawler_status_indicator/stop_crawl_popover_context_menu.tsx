@@ -17,24 +17,27 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CrawlerLogic } from '../crawler_logic';
+import { useActions } from 'kea';
+import { useParams } from 'react-router';
 
-interface StopCrawlPopoverContextMenuProps {
-  stopCrawl(): void;
-}
+export const StopCrawlPopoverContextMenu: React.FC = () => {
+  const { indexName } = useParams<{
+    indexName: string;
+  }>();
 
-export const StopCrawlPopoverContextMenu: React.FC<StopCrawlPopoverContextMenuProps> = ({
-  stopCrawl,
-  ...rest
-}) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);
 
   const closePopover = () => setPopover(false);
 
+  const crawlerLogic = CrawlerLogic({ indexName });
+
+  const { stopCrawl } = useActions(crawlerLogic);
+
   return (
     <EuiPopover
-      {...rest}
       button={
         <EuiButton
           iconType="arrowDown"

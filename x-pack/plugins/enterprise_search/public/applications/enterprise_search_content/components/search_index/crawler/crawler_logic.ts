@@ -83,7 +83,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
     dataLoading: [
       true,
       {
-        onReceiveCrawlerData: () => false,
+        fetchCrawlerData: () => true,
+        apiError: () => false,
+        apiSuccess: () => false,
       },
     ],
     domains: [
@@ -120,7 +122,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
         if (crawlRequest) {
           return crawlRequest.status;
         }
-        return CrawlerStatus.Success;
       },
     ],
   }),

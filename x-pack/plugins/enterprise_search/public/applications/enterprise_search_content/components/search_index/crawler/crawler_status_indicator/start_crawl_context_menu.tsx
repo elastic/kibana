@@ -16,12 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { CrawlCustomSettingsFlyoutLogic } from '../crawl_custom_settings_flyout/crawl_custom_settings_flyout_logic';
 import { CrawlerLogic } from '../crawler_logic';
 
-interface Props {
-  fill?: boolean;
-  menuButtonLabel?: string;
-}
-
-export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }) => {
+export const StartCrawlContextMenu: React.FC = () => {
   const { indexName } = useParams<{
     indexName: string;
   }>();
@@ -37,8 +32,13 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
   return (
     <EuiPopover
       button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover} fill={fill}>
-          {menuButtonLabel}
+        <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover} fill>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.retryCrawlButtonLabel',
+            {
+              defaultMessage: 'Crawl',
+            }
+          )}
         </EuiButton>
       }
       isOpen={isPopoverOpen}

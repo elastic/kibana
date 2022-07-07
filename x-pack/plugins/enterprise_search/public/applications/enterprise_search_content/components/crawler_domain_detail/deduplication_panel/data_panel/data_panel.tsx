@@ -62,7 +62,7 @@ export const DataPanel: React.FC<Props> = ({
       aria-busy={isLoading}
       {...props}
     >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={responsive}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={responsive}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {iconType && (
@@ -75,9 +75,12 @@ export const DataPanel: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {subtitle && (
-            <EuiText size="s" color="subdued">
-              <p>{subtitle}</p>
-            </EuiText>
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p>{subtitle}</p>
+              </EuiText>
+            </>
           )}
         </EuiFlexItem>
         {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}

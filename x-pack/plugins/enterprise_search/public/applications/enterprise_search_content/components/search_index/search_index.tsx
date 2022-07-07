@@ -32,6 +32,7 @@ import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexScheduling } from './scheduling';
+import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler';
 
 export enum SearchIndexTabId {
   // all indices
@@ -108,7 +109,7 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
-      content: <></>,
+      content: <AutomaticCrawlScheduler />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',

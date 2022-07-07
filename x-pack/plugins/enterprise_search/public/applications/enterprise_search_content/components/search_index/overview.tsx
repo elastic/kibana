@@ -15,7 +15,7 @@ import { Status } from '../../../../../common/types/api';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
-import { CrawlRequestsTable } from './crawler/crawl_requests_table/crawl_requests_table';
+import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { TotalStats } from './total_stats';
 
@@ -41,7 +41,7 @@ export const SearchIndexOverview: React.FC = () => {
       {isApi && <GenerateApiKeyPanel />}
       {isCrawler && (
         <>
-          <CrawlRequestsTable />
+          <CrawlRequestsPanel />
           <CrawlDetailsFlyout />
         </>
       )}

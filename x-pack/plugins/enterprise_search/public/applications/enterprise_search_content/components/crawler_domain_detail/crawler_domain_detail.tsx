@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useParams } from 'react-router-dom';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
 
@@ -28,6 +28,7 @@ import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 import { DeduplicationPanel } from './deduplication_panel/deduplication_panel';
 import { EntryPointsTable } from './entry_points_table';
 import { SitemapsTable } from './sitemaps_table';
+import { getDeleteDomainConfirmationMessage } from '../../../app_search/components/crawler/utils';
 
 export const CrawlerDomainDetail: React.FC = () => {
   const { domainId, indexName } = useParams<{
@@ -37,6 +38,8 @@ export const CrawlerDomainDetail: React.FC = () => {
 
   const crawlerDomainDetailLogic = CrawlerDomainDetailLogic({ indexName, domainId });
   const { domain, dataLoading } = useValues(crawlerDomainDetailLogic);
+  const { deleteDomain } = useActions(crawlerDomainDetailLogic);
+
   const domainUrl = domain?.url ?? '...';
 
   return (
@@ -47,7 +50,17 @@ export const CrawlerDomainDetail: React.FC = () => {
         pageTitle: domainUrl,
         rightSideItems: [
           <CrawlerStatusIndicator />,
-          <EuiButton color="danger">Delete domain</EuiButton>,
+          <EuiButton
+            isLoading={dataLoading}
+            color="danger"
+            onClick={() => {
+              if (window.confirm(getDeleteDomainConfirmationMessage(domainUrl))) {
+                deleteDomain();
+              }
+            }}
+          >
+            Delete domain
+          </EuiButton>,
         ],
       }}
     >
@@ -73,7 +86,6 @@ export const CrawlerDomainDetail: React.FC = () => {
           <EuiPanel paddingSize="l" hasBorder>
             <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
           </EuiPanel>
-
           <EuiSpacer size="xl" />
           <EuiPanel paddingSize="l" hasBorder>
             <CrawlRulesTable
