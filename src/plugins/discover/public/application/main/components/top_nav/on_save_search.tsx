@@ -146,6 +146,7 @@ export async function onSaveSearch({
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
       rowsPerPageState={state.appStateContainer.getState().rowsPerPage}
+      rowsPerPageAlreadySaved={savedSearch.rowsPerPage}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
@@ -159,16 +160,26 @@ const SaveSearchObjectModal: React.FC<{
   showCopyOnSave: boolean;
   description?: string;
   rowsPerPageState?: number;
+  rowsPerPageAlreadySaved?: number;
   onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
   onClose: () => void;
-}> = ({ services, title, description, showCopyOnSave, rowsPerPageState, onSave, onClose }) => {
+}> = ({
+  services,
+  title,
+  description,
+  showCopyOnSave,
+  rowsPerPageState,
+  rowsPerPageAlreadySaved,
+  onSave,
+  onClose,
+}) => {
   const { uiSettings } = services;
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
 
   const onModalSave = (params: OnSaveProps) => {
     onSave({
       ...params,
-      newRowsPerPage: isLegacy ? undefined : rowsPerPageState,
+      newRowsPerPage: isLegacy ? rowsPerPageAlreadySaved : rowsPerPageState,
     });
   };
 
