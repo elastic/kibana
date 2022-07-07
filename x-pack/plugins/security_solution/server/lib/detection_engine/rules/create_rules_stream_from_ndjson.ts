@@ -24,9 +24,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { has } from 'lodash/fp';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import type {
-  ImportRulesSchema,
-} from '../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { importRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   parseNdjsonStrings,
