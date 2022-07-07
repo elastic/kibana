@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { FieldTableProps, FieldTable } from './field_table';
+export { FieldTable } from './field_table';
+export type { FieldTableProps } from './field_table';
