@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { APP_ID, FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
+
+type Capability = 'create' | 'read' | 'update' | 'delete' | 'push';
 
 /**
  *
@@ -16,16 +19,33 @@ import { useKibana } from '../../common/lib/kibana';
  * both solutions use `crud_cases` and `read_cases` capability names
  **/
 
-export const useAvailableCasesOwners = (level: 'crud' | 'read' = 'crud'): string[] => {
-  const { capabilities } = useKibana().services.application;
-  const capabilityName = `${level}_cases`;
-  return Object.entries(capabilities).reduce(
-    (availableOwners: string[], [featureId, capability]) => {
-      if (featureId.endsWith('Cases') && !!capability[capabilityName]) {
-        availableOwners.push(featureId.replace('Cases', ''));
+export const useAvailableCasesOwners = (
+  capabilities: Capability[] = ['create', 'read', 'update', 'delete', 'push']
+): string[] => {
+  const { capabilities: kibanaCapabilities } = useKibana().services.application;
+
+  return Object.entries(kibanaCapabilities).reduce(
+    (availableOwners: string[], [featureId, kibananCapability]) => {
+      if (!featureId.endsWith('Cases')) {
+        return availableOwners;
       }
+      for (const cap of capabilities) {
+        const hasCapability = !!kibananCapability[`${cap}_cases`];
+        if (!hasCapability) {
+          return availableOwners;
+        }
+      }
+      availableOwners.push(getOwnerFromFeatureID(featureId));
       return availableOwners;
     },
     []
   );
+};
+
+const getOwnerFromFeatureID = (featureID: string) => {
+  if (featureID === FEATURE_ID) {
+    return APP_ID;
+  }
+
+  return featureID.replace('Cases', '');
 };

@@ -25,6 +25,7 @@ import {
   readCasesCapabilities,
   readCasesPermissions,
 } from '../../../../cases_test_utils';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
@@ -92,8 +93,12 @@ describe('useSecuritySolutionNavigation', () => {
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
 
+    const cases = mockCasesContract();
+    cases.helpers.getUICapabilities.mockReturnValue(readCasesPermissions());
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        cases,
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>

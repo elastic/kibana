@@ -13,7 +13,7 @@ import { useLensOpenVisualization } from '../markdown_editor/plugins/lens/use_le
 import { CANCEL_BUTTON, CONFIRM_BUTTON } from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
-interface UserActionPropertyActionsProps {
+export interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
   deleteLabel?: string;
