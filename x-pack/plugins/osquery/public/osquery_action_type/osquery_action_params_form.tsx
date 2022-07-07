@@ -11,10 +11,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { QueryClientProvider } from 'react-query';
 import { isEmpty, pickBy } from 'lodash';
-import { EuiAccordionProps, EuiSpacer } from '@elastic/eui';
+import { EuiAccordionProps, EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { isDeepEqual } from 'react-use/lib/util';
 import uuid from 'uuid';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { createGlobalStyle } from 'styled-components';
+import {
+  MISSING_KIBANA_PRIVILLEGES,
+  NOT_AVAILABLE,
+  PERMISSION_DENIED,
+  SHORT_EMPTY_TITLE,
+} from '../shared_components/osquery_action/translations';
+import { useFetchStatus } from '../fleet_integration/use_fetch_status';
 import { StyledEuiAccordion } from '../components/accordion';
 import { ECSMappingEditorField } from '../packs/queries/lazy_ecs_mapping_editor_field';
 import {
@@ -36,6 +44,14 @@ export interface OsqueryActionParams {
   id?: string;
 }
 
+const OverwriteGlobalStyle = createGlobalStyle`
+  .euiAccordion {
+    label, .euiFormRow {
+      display: ${(props: { hidden: boolean }) => (props.hidden ? 'none' : 'inherit')}
+    }
+  }
+`;
+
 const OsqueryActionParamsForm: React.FunctionComponent<ActionParamsProps<OsqueryActionParams>> = ({
   actionParams,
   editAction,
@@ -48,6 +64,7 @@ const OsqueryActionParamsForm: React.FunctionComponent<ActionParamsProps<Osquery
   );
 
   const uniqueId = useMemo(() => uuid.v4(), []);
+  const { loading, disabled, permissionDenied } = useFetchStatus();
 
   const permissions = useKibana().services.application.capabilities.osquery;
   const [advancedContentState, setAdvancedContentState] =
@@ -143,6 +160,33 @@ const OsqueryActionParamsForm: React.FunctionComponent<ActionParamsProps<Osquery
   });
 
   const componentProps = useMemo(() => ({ onChange: handleUpdate }), [handleUpdate]);
+
+  if (loading) {
+    return <EuiLoadingContent lines={5} />;
+  }
+
+  if (permissionDenied) {
+    return (
+      <>
+        <OverwriteGlobalStyle hidden={disabled || permissionDenied} />
+        <EuiEmptyPrompt
+          title={<h2>{PERMISSION_DENIED}</h2>}
+          titleSize="xs"
+          body={MISSING_KIBANA_PRIVILLEGES}
+        />
+      </>
+    );
+  }
+
+  if (disabled) {
+    return (
+      <EuiEmptyPrompt
+        title={<h2>{SHORT_EMPTY_TITLE}</h2>}
+        titleSize="xs"
+        body={<p>{NOT_AVAILABLE}</p>}
+      />
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

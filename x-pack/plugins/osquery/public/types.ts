@@ -25,6 +25,7 @@ export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
+  fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
 }
 
 export interface AppPluginStartDependencies {

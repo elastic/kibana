@@ -14,6 +14,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { ConfigType } from '../common/config';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import { getActionType } from './osquery_action_type';
@@ -114,6 +115,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      fetchInstallationStatus: useFetchStatus,
       isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }

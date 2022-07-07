@@ -19,7 +19,7 @@ import {
 // Osquery connector has an additional validation, but no real Settings
 // thus we hide all the fields besides the Osquery validation message
 const OverwriteGlobalStyle = createGlobalStyle`
-  .actConnectorModal {
+  .actConnectorModal, .euiFlyoutBody {
     h4.euiTitle, .euiSpacer {
       display: none
     }

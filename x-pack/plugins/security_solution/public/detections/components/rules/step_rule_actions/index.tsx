@@ -75,6 +75,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: {
       application,
+      osquery,
       triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
@@ -85,6 +86,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }),
     [application]
   );
+  const osqueryStatus = osquery?.fetchInstallationStatus();
+
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
@@ -162,6 +165,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             componentProps={{
               messageVariables: actionMessageParams,
               hasErrorOnCreationCaseAction,
+              isOsqueryDisabled: osqueryStatus?.disabled || osqueryStatus?.permissionDenied,
             }}
           />
         </>

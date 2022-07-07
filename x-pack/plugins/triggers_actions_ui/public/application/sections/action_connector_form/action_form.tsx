@@ -132,7 +132,7 @@ export const ActionForm = ({
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [actionTypes]);
 
   // load connectors
   useEffect(() => {
