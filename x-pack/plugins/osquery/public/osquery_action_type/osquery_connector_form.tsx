@@ -30,7 +30,7 @@ const OverwriteGlobalStyle = createGlobalStyle`
   }
 `;
 
-const OsqueryConnectorForm: React.FunctionComponent<{}> = () => {
+const OsqueryConnectorForm = () => {
   const { loading, disabled, permissionDenied } = useFetchStatus();
 
   const renderError = useMemo(() => {
