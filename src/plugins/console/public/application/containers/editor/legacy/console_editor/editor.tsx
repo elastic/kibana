@@ -33,6 +33,7 @@ import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -71,6 +72,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       esHostService,
       http,
       autocompleteInfo,
+      storage,
     },
     docLinkVersion,
   } = useServicesContext();
@@ -198,6 +200,26 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       }
     }
 
+    function restoreFolds() {
+      if (editor) {
+        const foldRanges = storage.get(StorageKeys.FOLDS, []);
+        editor.getCoreEditor().addFoldsAtRanges(foldRanges);
+      }
+    }
+
+    restoreFolds();
+
+    function saveFoldsOnChange() {
+      if (editor) {
+        editor.getCoreEditor().on('changeFold', () => {
+          const foldRanges = editor.getCoreEditor().getAllFoldRanges();
+          storage.set(StorageKeys.FOLDS, foldRanges);
+        });
+      }
+    }
+
+    saveFoldsOnChange();
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
@@ -223,6 +245,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     settingsService,
     http,
     autocompleteInfo,
+    storage,
   ]);
 
   useEffect(() => {
