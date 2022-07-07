@@ -52,12 +52,34 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
 
   const handleRename = (newName: string) => {
     const kuery = TAGS_QUERY.replace('{name}', tagName);
-    bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
+    bulkUpdateTags(
+      kuery,
+      [newName],
+      [tagName],
+      () => onTagsUpdated(),
+      i18n.translate('xpack.fleet.renameAgentTags.successNotificationTitle', {
+        defaultMessage: 'Tag renamed',
+      }),
+      i18n.translate('xpack.fleet.renameAgentTags.errorNotificationTitle', {
+        defaultMessage: 'Tag rename failed',
+      })
+    );
   };
 
   const handleDelete = () => {
     const kuery = TAGS_QUERY.replace('{name}', tagName);
-    updateTagsHook.bulkUpdateTags(kuery, [], [tagName], () => onTagsUpdated());
+    updateTagsHook.bulkUpdateTags(
+      kuery,
+      [],
+      [tagName],
+      () => onTagsUpdated(),
+      i18n.translate('xpack.fleet.deleteAgentTags.successNotificationTitle', {
+        defaultMessage: 'Tag deleted',
+      }),
+      i18n.translate('xpack.fleet.deleteAgentTags.errorNotificationTitle', {
+        defaultMessage: 'Tag delete failed',
+      })
+    );
   };
 
   return (
