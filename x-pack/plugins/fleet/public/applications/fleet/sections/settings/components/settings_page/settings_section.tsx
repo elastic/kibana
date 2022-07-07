@@ -52,7 +52,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
         content={
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostsPreconfiguredTooltipContent"
-            defaultMessage="Fleet Server hosts are configured outside of Fleet. Refer to your kibana config for more detail"
+            defaultMessage="Fleet Server hosts are configured outside of Fleet. Refer to your kibana config for more details."
           />
         }
       >
