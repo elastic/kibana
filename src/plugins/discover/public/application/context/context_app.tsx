@@ -199,9 +199,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                onFieldEdited={() => {
-                  fetchAllRows();
-                }}
+                onFieldEdited={fetchAllRows}
               />
             </EuiPageContent>
           </EuiPage>
