@@ -17,16 +17,17 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
       await PageObjects.maps.loadSavedMap('document example');
+      await PageObjects.common.setTime({ from, to });
     });
 
     after(async () => {
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
     describe('categorical styling', () => {
       before(async () => {
-        await PageObjects.common.setTime({ from, to });
         await PageObjects.maps.openLayerPanel('logstash');
       });
 
@@ -35,10 +36,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.maps.selectCustomColorRamp('fillColor');
         const suggestions = await PageObjects.maps.getCategorySuggestions();
         expect(suggestions.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
-      });
-
-      after(async () => {
-        await PageObjects.common.unsetTime();
       });
     });
   });
