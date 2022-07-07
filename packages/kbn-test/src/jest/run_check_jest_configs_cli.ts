@@ -41,6 +41,7 @@ const roots: string[] = [
   'x-pack/plugins/security_solution/server',
   'x-pack/plugins/security_solution',
   'x-pack/plugins',
+  'src/plugins/chart_expressions',
   'src/plugins',
   'test',
   'src/core',
