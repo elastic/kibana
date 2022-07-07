@@ -132,7 +132,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       validate: {
         body: schema.object({
           indexName: schema.string(),
-          language: schema.string(),
+          language: schema.maybe(schema.string()),
         }),
       },
     },
