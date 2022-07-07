@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { merge } from 'lodash';
+import { numberValidator } from '@kbn/ml-agg-utils';
 
 import { useReducer } from 'react';
 
@@ -121,28 +122,13 @@ const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
   }
 );
 
-export const integerGreaterThanOrEqualToValidatorFactory =
-  (threshold: number, message: string): Validator =>
-  (value) => {
-    return !isNaN(value) &&
-      Number.isInteger(+value) &&
-      +value >= threshold &&
-      !(value + '').includes('.')
-      ? []
-      : [message];
-  };
-
-export const integerAboveZeroValidator: Validator = integerGreaterThanOrEqualToValidatorFactory(
-  1,
-  numberAboveZeroNotValidErrorMessage
-);
+export const integerAboveZeroValidator: Validator = (value) =>
+  numberValidator({ min: 0, integerOnly: true })(value) === null
+    ? []
+    : [numberAboveZeroNotValidErrorMessage];
 
 export const integerRangeMinus1To100Validator: Validator = (value) =>
-  !isNaN(value) &&
-  Number.isInteger(+value) &&
-  !(value + '').includes('.') &&
-  +value >= -1 &&
-  +value <= 100
+  numberValidator({ min: -1, max: 100, integerOnly: true })(value) === null
     ? []
     : [numberRangeMinus1To100NotValidErrorMessage];
 
@@ -153,7 +139,7 @@ const numberRange10To10000NotValidErrorMessage = i18n.translate(
   }
 );
 export const integerRange10To10000Validator: Validator = (value) =>
-  integerAboveZeroValidator(value).length === 0 && +value >= 10 && +value <= 10000
+  numberValidator({ min: 10, max: 100001, integerOnly: true })(value) === null
     ? []
     : [numberRange10To10000NotValidErrorMessage];
 
