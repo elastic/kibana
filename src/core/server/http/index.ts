@@ -35,4 +35,3 @@ export type { IBasePath } from './base_path_service';
 export { cspConfig, CspConfig } from './csp';
 
 export { externalUrlConfig, ExternalUrlConfig } from './external_url';
-export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';

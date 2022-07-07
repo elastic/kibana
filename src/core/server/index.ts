@@ -163,8 +163,6 @@ export type {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
-  IExternalUrlConfig,
-  IExternalUrlPolicy,
   AuthStatus,
 } from './http';
 
@@ -231,6 +229,8 @@ export type {
   OnPreResponseExtensions,
   OnPreResponseInfo,
   ICspConfig,
+  IExternalUrlConfig,
+  IExternalUrlPolicy,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';
