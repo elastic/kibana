@@ -81,14 +81,14 @@ describe('When entering data into the Console input', () => {
     render();
     enterCommand('cmd2 ', { inputOnly: true });
 
-    expect(getFooterText()).toEqual('Hint: cmd2 --file [--ext --bad]');
+    expect(getFooterText()).toEqual('cmd2 --file [--ext --bad]');
   });
 
   it('should display hint when an unknown command is typed', () => {
     render();
     enterCommand('abc ', { inputOnly: true });
 
-    expect(getFooterText()).toEqual('Hint: unknown command abc');
+    expect(getFooterText()).toEqual('Unknown command abc');
   });
 
   it('should display the input history popover when UP key is pressed', async () => {
@@ -233,7 +233,7 @@ describe('When entering data into the Console input', () => {
       expect(getUserInputText()).toEqual('c');
       expect(getRightOfCursorText()).toEqual('md1 ');
 
-      expect(getFooterText()).toEqual('Hint: cmd1 ');
+      expect(getFooterText()).toEqual('cmd1 ');
     });
 
     it('should return original cursor position if input history is closed with no selection', async () => {
