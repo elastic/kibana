@@ -15,8 +15,6 @@ import {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { ALERT_THRESHOLD_RESULT } from '../../../../../common/field_maps/field_names';
 import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
@@ -145,7 +143,7 @@ const getTransformedHits = (
         }
         return termAcc;
       }, {}),
-      ...flattenWithPrefix(ALERT_THRESHOLD_RESULT, {
+      threshold_result: {
         terms: bucket.terms,
         cardinality: bucket.cardinality,
         count: bucket.docCount,
@@ -154,7 +152,7 @@ const getTransformedHits = (
         // the `original_time` of the signal (the timestamp of the latest event
         // in the set).
         from: new Date(bucket.minTimestamp) ?? from,
-      }),
+      },
     };
 
     acc.push({

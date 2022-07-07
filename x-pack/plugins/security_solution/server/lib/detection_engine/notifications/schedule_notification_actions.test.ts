@@ -6,10 +6,13 @@
  */
 
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import { ALERT_THRESHOLD_RESULT_COUNT } from '../../../../common/field_maps/field_names';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
 import {
   NotificationRuleTypeParams,
   formatAlertsForNotificationActions,
+  normalizeAlertForNotificationActions,
   scheduleNotificationActions,
 } from './schedule_notification_actions';
 
@@ -104,6 +107,15 @@ describe('schedule_notification_actions', () => {
             }),
           }),
         ],
+      })
+    );
+  });
+
+  it('should properly generate normalized alert', () => {
+    const signal = sampleThresholdAlert._source;
+    expect(normalizeAlertForNotificationActions(signal as unknown as DetectionAlert)).toEqual(
+      expect.objectContaining({
+        [ALERT_THRESHOLD_RESULT_COUNT]: 3,
       })
     );
   });

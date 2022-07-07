@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import {
-  ALERT_THRESHOLD_RESULT_CARDINALITY,
-  ALERT_THRESHOLD_RESULT_COUNT,
-  ALERT_THRESHOLD_RESULT_FROM,
-  ALERT_THRESHOLD_RESULT_TERMS,
-} from '../../../../../common/field_maps/field_names';
 import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { calculateThresholdSignalUuid } from '../utils';
@@ -98,24 +92,26 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
               '@timestamp': '2020-12-17T16:30:03.000Z',
               'host.name': 'garden-gnomes',
               'source.ip': '127.0.0.1',
-              [ALERT_THRESHOLD_RESULT_FROM]: new Date('2020-12-17T16:28:03.000Z'), // from min_timestamp
-              [ALERT_THRESHOLD_RESULT_TERMS]: [
-                {
-                  field: 'source.ip',
-                  value: '127.0.0.1',
-                },
-                {
-                  field: 'host.name',
-                  value: 'garden-gnomes',
-                },
-              ],
-              [ALERT_THRESHOLD_RESULT_CARDINALITY]: [
-                {
-                  field: 'destination.ip',
-                  value: 7,
-                },
-              ],
-              [ALERT_THRESHOLD_RESULT_COUNT]: 12,
+              threshold_result: {
+                from: new Date('2020-12-17T16:28:03.000Z'), // from min_timestamp
+                terms: [
+                  {
+                    field: 'source.ip',
+                    value: '127.0.0.1',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'garden-gnomes',
+                  },
+                ],
+                cardinality: [
+                  {
+                    field: 'destination.ip',
+                    value: 7,
+                  },
+                ],
+                count: 12,
+              },
             },
           },
         ],
@@ -247,15 +243,17 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _index: 'test',
             _source: {
               '@timestamp': '2020-12-17T16:30:03.000Z',
-              [ALERT_THRESHOLD_RESULT_FROM]: new Date('2020-12-17T16:28:03.000Z'),
-              [ALERT_THRESHOLD_RESULT_TERMS]: [],
-              [ALERT_THRESHOLD_RESULT_CARDINALITY]: [
-                {
-                  field: 'destination.ip',
-                  value: 7,
-                },
-              ],
-              [ALERT_THRESHOLD_RESULT_COUNT]: 15,
+              threshold_result: {
+                from: new Date('2020-12-17T16:28:03.000Z'),
+                terms: [],
+                cardinality: [
+                  {
+                    field: 'destination.ip',
+                    value: 7,
+                  },
+                ],
+                count: 15,
+              },
             },
           },
         ],

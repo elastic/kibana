@@ -7,6 +7,10 @@
 
 import { mapKeys, snakeCase } from 'lodash/fp';
 import { Alert } from '@kbn/alerting-plugin/server';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
+import { isThresholdRule } from '../../../../common/detection_engine/utils';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RuleParams } from '../schemas/rule_schemas';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
@@ -30,19 +34,33 @@ const convertToLegacyAlert = (alert: DetectionAlert) =>
     return acc;
   }, {});
 
+export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
+  if (isThresholdRule(alert[ALERT_RULE_TYPE])) {
+    const { 'kibana.alert.threshold_result': thresholdResult, ...alertWithoutThresholdResult } =
+      alert;
+    return {
+      ...alertWithoutThresholdResult,
+      ...flattenWithPrefix(ALERT_THRESHOLD_RESULT, thresholdResult),
+    };
+  }
+  return alert;
+};
+
 /*
  * Formats alerts before sending to `scheduleActions`. We augment the context with
  * the equivalent "legacy" alert context so that pre-8.0 actions will continue to work.
  */
 export const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
-  return alerts.map((alert) =>
-    isDetectionAlert(alert)
-      ? {
-          ...expandDottedObject(convertToLegacyAlert(alert)),
-          ...expandDottedObject(alert),
-        }
-      : alert
-  );
+  return alerts.map((alert) => {
+    if (isDetectionAlert(alert)) {
+      const normalizedAlert = normalizeAlertForNotificationActions(alert);
+      return {
+        ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
+        ...expandDottedObject(normalizedAlert),
+      };
+    }
+    return alert;
+  });
 };
 
 interface ScheduleNotificationActions {
