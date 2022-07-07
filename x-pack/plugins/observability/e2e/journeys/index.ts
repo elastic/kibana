@@ -6,3 +6,4 @@
  */
 
 export * from './exploratory_view';
+export * from './step_duration.journey';
