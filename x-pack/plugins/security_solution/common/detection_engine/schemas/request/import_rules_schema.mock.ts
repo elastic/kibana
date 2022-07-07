@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ImportRulesSchema, ImportRulesSchemaDecoded } from './import_rules_schema';
-import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import { ImportRulesSchema } from './import_rules_schema';
 
 export const getImportRulesSchemaMock = (ruleId = 'rule-1'): ImportRulesSchema => ({
   description: 'some description',
@@ -29,34 +28,6 @@ export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): ImportRulesSc
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
-});
-
-export const getImportRulesSchemaDecodedMock = (): ImportRulesSchemaDecoded => ({
-  author: [],
-  description: 'some description',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  severity_mapping: [],
-  type: 'query',
-  risk_score: 55,
-  risk_score_mapping: [],
-  language: 'kuery',
-  references: [],
-  actions: [],
-  enabled: true,
-  false_positives: [],
-  from: 'now-6m',
-  interval: '5m',
-  max_signals: DEFAULT_MAX_SIGNALS,
-  tags: [],
-  to: 'now',
-  threat: [],
-  throttle: null,
-  version: 1,
-  exceptions_list: [],
-  rule_id: 'rule-1',
-  immutable: false,
 });
 
 /**
@@ -90,65 +61,6 @@ export const getImportThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): ImportRu
   threat_index: ['index-123'],
   threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
   threat_query: '*:*',
-  threat_filters: [
-    {
-      bool: {
-        must: [
-          {
-            query_string: {
-              query: 'host.name: linux',
-              analyze_wildcard: true,
-              time_zone: 'Zulu',
-            },
-          },
-        ],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-  ],
-});
-
-export const getImportThreatMatchRulesSchemaDecodedMock = (): ImportRulesSchemaDecoded => ({
-  author: [],
-  description: 'some description',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  severity_mapping: [],
-  type: 'threat_match',
-  risk_score: 55,
-  risk_score_mapping: [],
-  language: 'kuery',
-  references: [],
-  actions: [],
-  enabled: true,
-  false_positives: [],
-  from: 'now-6m',
-  interval: '5m',
-  max_signals: DEFAULT_MAX_SIGNALS,
-  tags: [],
-  to: 'now',
-  threat: [],
-  throttle: null,
-  version: 1,
-  exceptions_list: [],
-  rule_id: 'rule-1',
-  immutable: false,
-  threat_query: '*:*',
-  threat_index: ['index-123'],
-  threat_mapping: [
-    {
-      entries: [
-        {
-          field: 'host.name',
-          value: 'host.name',
-          type: 'mapping',
-        },
-      ],
-    },
-  ],
   threat_filters: [
     {
       bool: {
