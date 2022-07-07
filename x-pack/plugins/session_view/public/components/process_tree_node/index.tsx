@@ -12,8 +12,6 @@
  * 2.0.
  */
 import React, {
-  useRef,
-  useLayoutEffect,
   useState,
   useEffect,
   MouseEvent,
@@ -35,6 +33,7 @@ import { useStyles } from './styles';
 import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
+import { TextHighlight } from './text_highlight';
 
 export interface ProcessDeps {
   process: Process;
@@ -74,13 +73,15 @@ export function ProcessTreeNode({
   loadPreviousButton,
   loadNextButton,
 }: ProcessDeps) {
-  const textRef = useRef<HTMLSpanElement>(null);
-
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
 
   const dateFormat = useDateFormat();
+
+  useEffect(() => {
+    setChildrenExpanded(process.autoExpand);
+  }, [process.autoExpand]);
 
   // forces nodes to expand if the selected process is a descendant
   useEffect(() => {
@@ -90,10 +91,6 @@ export function ProcessTreeNode({
       }
     }
   }, [selectedProcess, process, childrenExpanded]);
-
-  useEffect(() => {
-    setChildrenExpanded(process.autoExpand);
-  }, [process.autoExpand]);
 
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
@@ -134,22 +131,6 @@ export function ProcessTreeNode({
       setAlertsExpanded(true);
     }
   }, [hasInvestigatedAlert]);
-
-  useLayoutEffect(() => {
-    if (searchMatched !== null && textRef.current) {
-      const regex = new RegExp(searchMatched);
-      const text = textRef.current.textContent;
-
-      if (text) {
-        const html = text.replace(regex, (match) => {
-          return `<span data-test-subj="sessionView:processNodeSearchHighlight" style="${styles.searchHighlight}">${match}</span>`;
-        });
-
-        // eslint-disable-next-line no-unsanitized/property
-        textRef.current.innerHTML = '<span>' + html + '</span>';
-      }
-    }
-  }, [searchMatched, styles.searchHighlight]);
 
   const onChildrenToggle = useCallback(() => {
     setChildrenExpanded(!childrenExpanded);
@@ -272,12 +253,20 @@ export function ProcessTreeNode({
               <EuiToolTip position="top" content={iconTooltip}>
                 <EuiIcon data-test-subj={iconTestSubj} type={processIcon} css={styles.icon} />
               </EuiToolTip>
-              <span ref={textRef} css={styles.textSection}>
-                <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>
-                <Nbsp />
-                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>
-                <Nbsp />
-                <SplitText>{args?.slice(1).join(' ') || ''}</SplitText>
+              <span css={styles.textSection}>
+                <TextHighlight
+                  text={`${workingDirectory ?? ''} ${args?.join(' ')}`}
+                  match={process.searchMatched}
+                  highlightStyle={styles.searchHighlight}
+                >
+                  <SplitText css={styles.workingDir}>
+                    {dataOrDash(workingDirectory) + ' '}
+                  </SplitText>
+                  <SplitText css={styles.darkText}>{`${dataOrDash(args?.[0])}`}</SplitText>
+                  <SplitText>
+                    {args && args.length > 1 ? ' ' + args?.slice(1).join(' ') : ''}
+                  </SplitText>
+                </TextHighlight>
               </span>
             </>
           )}
