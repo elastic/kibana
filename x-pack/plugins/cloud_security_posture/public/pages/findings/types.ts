@@ -6,7 +6,7 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query, AggregateQuery } from '@kbn/es-query';
-import type { CspRuleMetadataType } from '../../../common/schemas';
+import type { CspRuleMetadata } from '../../../common/schemas';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
@@ -31,7 +31,7 @@ export interface CspFinding {
   cycle_id: string;
   result: CspFindingResult;
   resource: CspFindingResource;
-  rule: CspRuleMetadataType;
+  rule: CspRuleMetadata;
   host: CspFindingHost;
   agent: CspFindingAgent;
   ecs: {

@@ -198,8 +198,13 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi && !textBasedLanguageMode ? [alerts] : []),
     ...(!textBasedLanguageMode ? [shareSearch] : []),
+    ...(services.triggersActionsUi &&
+    !textBasedLanguageMode &&
+    services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+    !textBasedLanguageMode
+      ? [alerts]
+      : []),
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];
