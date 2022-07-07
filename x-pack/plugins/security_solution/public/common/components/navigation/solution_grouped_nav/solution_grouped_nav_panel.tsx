@@ -138,6 +138,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
           return acc;
         }, []);
 
+        if (!links.length) {
+          return null;
+        }
+
         return (
           <Fragment key={label}>
             <EuiTitle size="xxxs">
