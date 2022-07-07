@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConsoleCodeBlock } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
@@ -20,11 +20,12 @@ const additionalProps = {
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
-    return getArgumentsForCommand(commandDef).map((usage) => {
+    return getArgumentsForCommand(commandDef).map((usage, index) => {
       return (
-        <EuiText size="s">
+        <>
+          {index > 0 && <EuiSpacer size="xs" />}
           <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
-        </EuiText>
+        </>
       );
     });
   }, [commandDef]);
@@ -129,7 +130,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   }, [commandDef.args, hasArgs]);
 
   const parametersDescriptionList = (title: string, parameters: CommandDetails) => {
-    const description = parameters.map((item) => (
+    const description = parameters.map((item, index) => (
       <div>
         <ConsoleCodeBlock bold inline>
           {item.title}
@@ -139,7 +140,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     ));
     return (
       <>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         {commandDef.args && (
           <EuiDescriptionList
             compressed
