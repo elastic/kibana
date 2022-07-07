@@ -5,12 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateData } from './generate_data';
-
-type InfrastructureAttributes =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -77,17 +73,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        // TODO, fix how data is generated or generate new one for each
-        // as seems that is something wrong on how the defaults are set for each service
-        // describe('when service NOT runs in container', () => {
-        //   it('returns array of host names', async () => {
-        //     const response = await callApi(javaServiceName);
-        //     expect(response.status).to.be(200);
-        //     expect(response.body.containerIds.length).to.be(0);
-        //     expect(response.body.hostNames.length).to.be(1);
-        //     expect(response.body.podNames.length).to.be(0);
-        //   });
-        // });
+        describe('when service NOT runs in container', () => {
+          it('returns array of host names', async () => {
+            const response = await callApi(javaServiceName);
+            expect(response.status).to.be(200);
+            expect(response.body.containerIds.length).to.be(0);
+            expect(response.body.hostNames.length).to.be(1);
+            expect(response.body.podNames.length).to.be(0);
+          });
+        });
       });
     }
   );
