@@ -123,12 +123,13 @@ const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
 );
 
 export const integerAboveZeroValidator: Validator = (value) =>
-  numberValidator({ min: 0, integerOnly: true })(value) === null
+  !(value + '').includes('.') && numberValidator({ min: 1, integerOnly: true })(+value) === null
     ? []
     : [numberAboveZeroNotValidErrorMessage];
 
 export const integerRangeMinus1To100Validator: Validator = (value) =>
-  numberValidator({ min: -1, max: 100, integerOnly: true })(value) === null
+  !(value + '').includes('.') &&
+  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
     ? []
     : [numberRangeMinus1To100NotValidErrorMessage];
 
@@ -139,7 +140,8 @@ const numberRange10To10000NotValidErrorMessage = i18n.translate(
   }
 );
 export const integerRange10To10000Validator: Validator = (value) =>
-  numberValidator({ min: 10, max: 100001, integerOnly: true })(value) === null
+  !(value + '').includes('.') &&
+  numberValidator({ min: 10, max: 100001, integerOnly: true })(+value) === null
     ? []
     : [numberRange10To10000NotValidErrorMessage];
 

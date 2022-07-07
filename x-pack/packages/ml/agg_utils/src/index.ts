@@ -8,4 +8,5 @@
 export { buildSamplerAggregation } from './build_sampler_aggregation';
 export { getAggIntervals } from './get_agg_intervals';
 export { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-export { numberValidator, NumberValidationResult } from './validate_number';
+export type { NumberValidationResult } from './validate_number';
+export { numberValidator } from './validate_number';
