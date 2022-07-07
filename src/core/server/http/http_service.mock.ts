@@ -17,6 +17,7 @@ import type {
   OnPreAuthToolkit,
   OnPreResponseToolkit,
 } from '@kbn/core-http-server';
+import { AuthStatus } from '@kbn/core-http-server';
 
 import { CspConfig } from './csp';
 import { mockRouter, RouterMock } from './router/router.mock';
@@ -29,7 +30,6 @@ import {
   InternalHttpServiceStart,
 } from './types';
 import { HttpService } from './http_service';
-import { AuthStatus } from './auth_state_storage';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { ExternalUrlConfig } from './external_url';
 import type { IAuthHeadersStorage } from './auth_headers_storage';

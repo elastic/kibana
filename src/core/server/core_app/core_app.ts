@@ -18,8 +18,8 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   KibanaRequest,
+  IBasePath,
 } from '@kbn/core-http-server';
-import { IBasePath } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { registerBundleRoutes } from './bundle_routes';
