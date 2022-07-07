@@ -325,7 +325,10 @@ export function ChangeDataView({
       setIsTextLangTransitionModalVisible(false);
       setIsTextBasedLangSelected(false);
       // clean up the Text based language query
-      onTextLangQuerySubmit?.();
+      onTextLangQuerySubmit?.({
+        language: 'kql',
+        query: '',
+      });
       if (selectedDataViewId) {
         onChangeDataView(selectedDataViewId);
       }
