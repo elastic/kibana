@@ -17,7 +17,7 @@ export interface UrlComboBoxActions {
 
 export const UrlComboBoxLogic = kea<MakeLogicType<UrlComboBoxValues, UrlComboBoxActions>>({
   key: (props) => props.id,
-  path: (key: string) => ['enterprise_search', 'app_search', 'url_combo_box', key],
+  path: (key: string) => ['enterprise_search', 'url_combo_box', key],
   actions: () => ({
     setIsInvalid: (isInvalid) => ({ isInvalid }),
   }),

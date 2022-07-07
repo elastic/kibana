@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { generateEncodedPath } from '../../../../../../app_search/utils/encode_path_params';
+import { generateEncodedPath } from '../../../../../../shared/encode_path_params';
 import { flashSuccessToast } from '../../../../../../shared/flash_messages';
 import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../../shared/http';
@@ -94,7 +94,7 @@ const DEFAULT_SELECTOR_VALUES = {
 };
 
 export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainLogicActions>>({
-  path: ['enterprise_search', 'app_search', 'crawler', 'add_domain'],
+  path: ['enterprise_search', 'crawler', 'add_domain'],
   actions: () => ({
     clearDomainFormInputValue: true,
     closeFlyout: true,
@@ -255,7 +255,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const { http } = HttpLogic.values;
       const failureResultChange = domainValidationFailureResultChange(stepName);
 
-      const route = '/internal/app_search/crawler/validate_url';
+      const route = '/internal/enterprise_search/crawler/validate_url';
 
       try {
         const data = await http.post<CrawlerDomainValidationResultFromServer>(route, {

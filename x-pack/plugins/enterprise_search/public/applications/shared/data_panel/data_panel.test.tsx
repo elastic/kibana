@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiIcon, EuiButton, EuiTitle, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
-import { LoadingOverlay } from '../../../shared/loading';
+import { LoadingOverlay } from '../loading';
 
 import { DataPanel } from './data_panel';
 

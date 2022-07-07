@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../__mocks__/kea_logic';
 
 jest.mock('@elastic/eui', () => ({
   ...(jest.requireActual('@elastic/eui') as object),
@@ -18,7 +18,7 @@ import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
-import { rerender } from '../../../../../test_helpers';
+import { rerender } from '../../test_helpers';
 
 import { UrlComboBox } from './url_combo_box';
 

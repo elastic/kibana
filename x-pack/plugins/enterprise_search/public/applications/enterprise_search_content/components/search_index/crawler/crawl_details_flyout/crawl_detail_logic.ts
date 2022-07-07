@@ -37,7 +37,7 @@ export interface CrawlDetailActions {
 }
 
 export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetailActions>>({
-  path: ['enterprise_search', 'app_search', 'crawler', 'crawl_detail_logic'],
+  path: ['enterprise_search', 'crawler', 'crawl_detail_logic'],
   actions: {
     closeFlyout: true,
     fetchCrawlRequest: (requestId) => ({ requestId }),

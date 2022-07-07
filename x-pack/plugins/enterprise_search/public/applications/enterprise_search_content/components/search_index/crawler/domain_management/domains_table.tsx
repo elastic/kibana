@@ -15,30 +15,20 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedNumber } from '@kbn/i18n-react';
 
-import { generateEncodedPath } from '../../../../../app_search/utils/encode_path_params';
-
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { generateEncodedPath } from '../../../../../shared/encode_path_params';
+
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../../../shared/table_pagination';
 import { CrawlerDomain } from '../../../../api/crawler/types';
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
+import { IndexNameLogic } from '../../index_name_logic';
 import { CustomFormattedTimestamp } from '../custom_formatted_timestamp';
 
-import { DomainManagementLogic } from './domain_management_logic';
+import { getDeleteDomainConfirmationMessage } from '../utils';
 
-const getDeleteDomainConfirmationMessage = (domainUrl: string) => {
-  return i18n.translate(
-    'xpack.enterpriseSearch.crawler.action.deleteDomain.confirmationPopupMessage',
-    {
-      defaultMessage:
-        'Are you sure you want to remove the domain "{domainUrl}" and all of its settings?',
-      values: {
-        domainUrl,
-      },
-    }
-  );
-};
+import { DomainManagementLogic } from './domain_management_logic';
 
 export const DomainsTable: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);

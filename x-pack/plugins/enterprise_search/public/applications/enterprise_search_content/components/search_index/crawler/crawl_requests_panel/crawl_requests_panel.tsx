@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DataPanel } from '../../../crawler_domain_detail/deduplication_panel/data_panel/data_panel';
+import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 

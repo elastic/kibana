@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { generateEncodedPath } from '../../../app_search/utils/encode_path_params';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
@@ -53,7 +53,7 @@ interface CrawlerDomainDetailActions {
 export const CrawlerDomainDetailLogic = kea<
   MakeLogicType<CrawlerDomainDetailValues, CrawlerDomainDetailActions>
 >({
-  path: ['enterprise_search', 'app_search', 'crawler', 'crawler_single_domain'],
+  path: ['enterprise_search', 'crawler', 'crawler_domain_detail'],
   actions: {
     deleteDomain: () => true,
     fetchDomainData: (domainId) => ({ domainId }),

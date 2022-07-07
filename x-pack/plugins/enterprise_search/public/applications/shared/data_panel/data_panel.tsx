@@ -23,7 +23,7 @@ import {
 import { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
 
 import './data_panel.scss';
-import { LoadingOverlay } from '../../../../../shared/loading';
+import { LoadingOverlay } from '../loading';
 
 type Props = Omit<_EuiPanelDivlike, 'title'> & {
   title: React.ReactElement; // e.g., h2 tag

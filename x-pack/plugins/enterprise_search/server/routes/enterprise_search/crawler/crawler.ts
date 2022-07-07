@@ -31,6 +31,21 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     })
   );
 
+  router.post(
+    {
+      path: '/internal/enterprise_search/crawler/validate_url',
+      validate: {
+        body: schema.object({
+          url: schema.string(),
+          checks: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/crawler/validate_url',
+    })
+  );
+
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler',

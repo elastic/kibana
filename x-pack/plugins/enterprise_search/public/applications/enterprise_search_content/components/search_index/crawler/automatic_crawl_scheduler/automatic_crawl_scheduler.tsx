@@ -28,8 +28,6 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CrawlUnits } from '../../../../../app_search/components/crawler/types';
-import { WEB_CRAWLER_DOCS_URL } from '../../../../../app_search/routes';
 import {
   HOURS_UNIT_LABEL,
   DAYS_UNIT_LABEL,
@@ -37,10 +35,9 @@ import {
   MONTHS_UNIT_LABEL,
   SAVE_BUTTON_LABEL,
 } from '../../../../../shared/constants';
+import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 
-import { DataPanel } from '../../../crawler_domain_detail/deduplication_panel/data_panel/data_panel';
-
-import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
+import { AutomaticCrawlSchedulerLogic, CrawlUnits } from './automatic_crawl_scheduler_logic';
 
 export const AutomaticCrawlScheduler: React.FC = () => {
   const { setCrawlFrequency, setCrawlUnit, saveChanges, toggleCrawlAutomatically } = useActions(
@@ -72,7 +69,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
             defaultMessage="Setup automated crawling. {readMoreMessage}."
             values={{
               readMoreMessage: (
-                <EuiLink href={WEB_CRAWLER_DOCS_URL} target="_blank">
+                <EuiLink href={/* TODO Add docs url */} target="_blank">
                   {i18n.translate(
                     'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.readMoreLink',
                     {

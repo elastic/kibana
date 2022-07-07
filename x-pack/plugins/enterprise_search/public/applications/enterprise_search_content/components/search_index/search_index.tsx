@@ -16,7 +16,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../common/types/api';
-import { generateEncodedPath } from '../../../app_search/utils/encode_path_params';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';

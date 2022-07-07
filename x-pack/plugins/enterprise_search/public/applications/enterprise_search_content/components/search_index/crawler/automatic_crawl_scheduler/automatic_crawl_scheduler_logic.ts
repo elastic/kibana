@@ -9,10 +9,23 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlSchedule, CrawlUnits } from '../../../../../app_search/components/crawler/types';
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { IndexNameLogic } from '../../index_name_logic';
+
+export interface CrawlSchedule {
+  frequency: number;
+  unit: CrawlUnits;
+}
+
+// The BE uses a singular form of each unit
+// See shared_togo/app/models/shared_togo/crawler/crawl_schedule.rb
+export enum CrawlUnits {
+  hours = 'hour',
+  days = 'day',
+  weeks = 'week',
+  months = 'month',
+}
 
 export interface AutomaticCrawlSchedulerLogicValues {
   crawlAutomatically: boolean;
@@ -46,7 +59,7 @@ export interface AutomaticCrawlSchedulerLogicActions {
 export const AutomaticCrawlSchedulerLogic = kea<
   MakeLogicType<AutomaticCrawlSchedulerLogicValues, AutomaticCrawlSchedulerLogicActions>
 >({
-  path: ['enterprise_search', 'app_search', 'crawler', 'automatic_crawl_scheduler'],
+  path: ['enterprise_search', 'crawler', 'automatic_crawl_scheduler'],
   actions: () => ({
     clearCrawlSchedule: true,
     deleteCrawlSchedule: true,
