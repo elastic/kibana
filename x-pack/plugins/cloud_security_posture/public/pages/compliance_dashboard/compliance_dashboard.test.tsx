@@ -198,7 +198,7 @@ describe('<ComplianceDashboard />', () => {
 
   it('shows noDataConfig when status is not deployed', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      data: { status: 'not deployed' },
+      data: { status: 'not-deployed' },
     }));
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       data: undefined,

@@ -61,7 +61,7 @@ const getStatus = (
   if (findingsIndexExists) return 'indexed';
   if (installedIntegrations === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
-  if (minutesPassedSinceInstallation < INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
+  if (minutesPassedSinceInstallation <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (minutesPassedSinceInstallation > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
   throw new Error('could not determine csp setup status');
