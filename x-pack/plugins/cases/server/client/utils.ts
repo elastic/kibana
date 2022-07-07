@@ -13,6 +13,10 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../common/utils/attachments';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
 import {
   OWNER_FIELD,
@@ -36,9 +40,7 @@ import {
   isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
-  isCommentRequestTypeExternalReference,
   assertUnreachable,
-  isCommentRequestTypePersistableState,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
 

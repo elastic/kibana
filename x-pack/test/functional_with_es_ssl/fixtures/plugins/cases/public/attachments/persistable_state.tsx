@@ -31,7 +31,7 @@ const getLazyComponent = (
   React.lazy(() => {
     return Promise.resolve().then(() => {
       return {
-        default: (props: PersistableStateAttachmentViewProps) => {
+        default: React.memo((props: PersistableStateAttachmentViewProps) => {
           const { persistableStateAttachmentState } = props;
           const attributes =
             persistableStateAttachmentState as unknown as TypedLensByValueInput['attributes'];
@@ -44,9 +44,10 @@ const getLazyComponent = (
               attributes={attributes}
               renderMode="view"
               disableTriggers
+              data-test-subj="lens-test"
             />
           );
-        },
+        }),
       };
     });
   });

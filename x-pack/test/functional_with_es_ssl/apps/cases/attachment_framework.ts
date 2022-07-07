@@ -11,15 +11,19 @@ import {
   CaseResponse,
   CommentRequest,
 } from '@kbn/cases-plugin/common/api';
+import { expect } from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const find = getService('find');
 
   const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
-    const caseData = await cases.api.createCase({ title: 'External references' });
+    const caseData = await cases.api.createCase({
+      title: `Registered attachment of type ${attachment.type}`,
+    });
     const caseWithAttachment = await cases.api.createAttachment({
       caseId: caseData.id,
       params: attachment,
@@ -37,14 +41,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await testSubjects.existOrFail(`comment-${type}-.test`);
     await testSubjects.existOrFail(`copy-link-${attachmentId}`);
     await testSubjects.existOrFail('test-attachment-action');
-    await testSubjects.existOrFail('test-attachment-content');
   };
 
   /**
    * Attachment types are being registered in
    * x-pack/test/functional_with_es_ssl/fixtures/plugins/cases/public/plugin.ts
    */
-  describe.only('Attachment framework', () => {
+  describe('Attachment framework', () => {
     describe('External reference attachments', () => {
       let caseWithAttachment: CaseResponse;
 
@@ -66,10 +69,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
         await validateAttachment(CommentType.externalReference, attachmentId);
+        await testSubjects.existOrFail('test-attachment-content');
       });
     });
 
-    describe.only('Persistable state attachments', () => {
+    describe('Persistable state attachments', () => {
       const lensState = {
         title: '',
         visualizationType: 'lnsXY',
@@ -162,13 +166,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // after(async () => {
-      //   await cases.api.deleteAllCases();
-      // });
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
 
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
         await validateAttachment(CommentType.persistableState, attachmentId);
+        expect(await find.existsByCssSelector('.lnsExpressionRenderer')).toBe(true);
       });
     });
   });
