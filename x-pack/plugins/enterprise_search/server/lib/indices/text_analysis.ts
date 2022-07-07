@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface languageDataEntry {
+interface LanguageDataEntry {
   name: string;
   stemmer: string;
   stop_words: string;
@@ -14,7 +14,7 @@ interface languageDataEntry {
   postpended_filters?: string[];
 }
 
-const LanguageData: Record<string, languageDataEntry> = {
+const LanguageData: Record<string, LanguageDataEntry> = {
   da: {
     name: 'Danish',
     stemmer: 'danish',
