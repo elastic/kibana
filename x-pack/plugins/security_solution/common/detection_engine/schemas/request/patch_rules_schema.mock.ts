@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
+import type { PatchRulesSchema, ThresholdPatchSchema } from './patch_rules_schema';
 
 export const getPatchRulesSchemaMock = (): PatchRulesSchema => ({
   description: 'some description',
@@ -18,5 +18,17 @@ export const getPatchRulesSchemaMock = (): PatchRulesSchema => ({
   rule_id: 'rule-1',
 });
 
-export const getPatchRulesSchemaDecodedMock = (): PatchRulesSchemaDecoded =>
-  getPatchRulesSchemaMock();
+export const getPatchThresholdRulesSchemaMock = (): ThresholdPatchSchema => ({
+  description: 'some description',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'threshold',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: 'rule-1',
+  threshold: {
+    field: 'host.name',
+    value: 10,
+  },
+});

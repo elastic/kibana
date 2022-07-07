@@ -9,14 +9,14 @@ import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { ImportRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   getOutputDetailsSample,
   getSampleDetailsAsNdjson,
 } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 import type { RuleExceptionsPromiseFromStreams } from '../routes/rules/utils/import_rules_utils';
 
-export const getOutputSample = (): Partial<ImportRulesSchemaDecoded> => ({
+export const getOutputSample = (): Partial<ImportRulesSchema> => ({
   rule_id: 'rule-1',
   output_index: '.siem-signals',
   risk_score: 50,
@@ -30,7 +30,7 @@ export const getOutputSample = (): Partial<ImportRulesSchemaDecoded> => ({
   type: 'query',
 });
 
-export const getSampleAsNdjson = (sample: Partial<ImportRulesSchemaDecoded>): string => {
+export const getSampleAsNdjson = (sample: Partial<ImportRulesSchema>): string => {
   return `${JSON.stringify(sample)}\n`;
 };
 
@@ -53,58 +53,32 @@ describe('create_rules_stream_from_ndjson', () => {
       >([ndJsonStream, ...rulesObjectsStream]);
       expect(result).toEqual([
         {
-          author: [],
-          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
-          risk_score_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
-          severity_mapping: [],
           interval: '5m',
           type: 'query',
-          enabled: true,
-          false_positives: [],
           immutable: false,
-          exceptions_list: [],
-          max_signals: 100,
-          tags: [],
-          threat: [],
-          throttle: null,
-          references: [],
-          version: 1,
         },
         {
-          author: [],
-          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
-          risk_score_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
-          severity_mapping: [],
           interval: '5m',
           type: 'query',
-          enabled: true,
-          false_positives: [],
           immutable: false,
-          exceptions_list: [],
-          max_signals: 100,
-          tags: [],
-          threat: [],
-          throttle: null,
-          references: [],
-          version: 1,
         },
       ]);
     });
@@ -148,58 +122,32 @@ describe('create_rules_stream_from_ndjson', () => {
       >([ndJsonStream, ...rulesObjectsStream]);
       expect(result).toEqual([
         {
-          author: [],
-          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
-          risk_score_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
-          severity_mapping: [],
           interval: '5m',
           type: 'query',
-          enabled: true,
-          false_positives: [],
           immutable: false,
-          max_signals: 100,
-          tags: [],
-          exceptions_list: [],
-          threat: [],
-          throttle: null,
-          references: [],
-          version: 1,
         },
         {
-          author: [],
-          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
-          risk_score_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
-          severity_mapping: [],
           interval: '5m',
           type: 'query',
-          enabled: true,
-          false_positives: [],
           immutable: false,
-          max_signals: 100,
-          exceptions_list: [],
-          tags: [],
-          threat: [],
-          throttle: null,
-          references: [],
-          version: 1,
         },
       ]);
     });
@@ -223,58 +171,32 @@ describe('create_rules_stream_from_ndjson', () => {
       >([ndJsonStream, ...rulesObjectsStream]);
       expect(result).toEqual([
         {
-          author: [],
-          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
-          risk_score_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
-          severity_mapping: [],
           interval: '5m',
           type: 'query',
-          enabled: true,
-          false_positives: [],
           immutable: false,
-          max_signals: 100,
-          exceptions_list: [],
-          tags: [],
-          threat: [],
-          throttle: null,
-          references: [],
-          version: 1,
         },
         {
-          author: [],
-          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
-          risk_score_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
-          severity_mapping: [],
           interval: '5m',
           type: 'query',
-          enabled: true,
-          false_positives: [],
           immutable: false,
-          max_signals: 100,
-          exceptions_list: [],
-          tags: [],
-          threat: [],
-          throttle: null,
-          references: [],
-          version: 1,
         },
       ]);
     });
@@ -297,59 +219,33 @@ describe('create_rules_stream_from_ndjson', () => {
       >([ndJsonStream, ...rulesObjectsStream]);
       const resultOrError = result as Error[];
       expect(resultOrError[0]).toEqual({
-        author: [],
-        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
-        risk_score_mapping: [],
         description: 'some description',
         from: 'now-5m',
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
-        severity_mapping: [],
         interval: '5m',
         type: 'query',
-        enabled: true,
-        false_positives: [],
         immutable: false,
-        max_signals: 100,
-        exceptions_list: [],
-        tags: [],
-        threat: [],
-        throttle: null,
-        references: [],
-        version: 1,
       });
       expect(resultOrError[1].message).toEqual('Unexpected token , in JSON at position 1');
       expect(resultOrError[2]).toEqual({
-        author: [],
-        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
-        risk_score_mapping: [],
         description: 'some description',
         from: 'now-5m',
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
-        severity_mapping: [],
         interval: '5m',
         type: 'query',
-        enabled: true,
-        false_positives: [],
         immutable: false,
-        max_signals: 100,
-        exceptions_list: [],
-        tags: [],
-        threat: [],
-        throttle: null,
-        references: [],
-        version: 1,
       });
     });
 
@@ -371,61 +267,35 @@ describe('create_rules_stream_from_ndjson', () => {
       >([ndJsonStream, ...rulesObjectsStream]);
       const resultOrError = result as BadRequestError[];
       expect(resultOrError[0]).toEqual({
-        author: [],
-        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
-        risk_score_mapping: [],
         description: 'some description',
         from: 'now-5m',
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
-        severity_mapping: [],
         interval: '5m',
         type: 'query',
-        enabled: true,
-        false_positives: [],
         immutable: false,
-        max_signals: 100,
-        exceptions_list: [],
-        tags: [],
-        threat: [],
-        throttle: null,
-        references: [],
-        version: 1,
       });
-      expect(resultOrError[1].message).toEqual(
-        'Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "name",Invalid value "undefined" supplied to "severity",Invalid value "undefined" supplied to "type",Invalid value "undefined" supplied to "rule_id"'
+      expect(resultOrError[1].message).toContain(
+        'Invalid value "undefined" supplied to "name",Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "severity"'
       );
       expect(resultOrError[2]).toEqual({
-        author: [],
-        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
-        risk_score_mapping: [],
         description: 'some description',
         from: 'now-5m',
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
-        severity_mapping: [],
         interval: '5m',
         type: 'query',
-        enabled: true,
-        false_positives: [],
         immutable: false,
-        max_signals: 100,
-        exceptions_list: [],
-        tags: [],
-        threat: [],
-        throttle: null,
-        references: [],
-        version: 1,
       });
     });
 

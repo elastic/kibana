@@ -5,69 +5,7 @@
  * 2.0.
  */
 
-import { isMlRule } from '../../../machine_learning/helpers';
-import { isThresholdRule } from '../../utils';
 import type { AddPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
-
-export const validateAnomalyThreshold = (rule: AddPrepackagedRulesSchema): string[] => {
-  if (isMlRule(rule.type)) {
-    if (rule.anomaly_threshold == null) {
-      return ['when "type" is "machine_learning" anomaly_threshold is required'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateQuery = (rule: AddPrepackagedRulesSchema): string[] => {
-  if (isMlRule(rule.type)) {
-    if (rule.query != null) {
-      return ['when "type" is "machine_learning", "query" cannot be set'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateLanguage = (rule: AddPrepackagedRulesSchema): string[] => {
-  if (isMlRule(rule.type)) {
-    if (rule.language != null) {
-      return ['when "type" is "machine_learning", "language" cannot be set'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateSavedId = (rule: AddPrepackagedRulesSchema): string[] => {
-  if (rule.type === 'saved_query') {
-    if (rule.saved_id == null) {
-      return ['when "type" is "saved_query", "saved_id" is required'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateMachineLearningJobId = (rule: AddPrepackagedRulesSchema): string[] => {
-  if (isMlRule(rule.type)) {
-    if (rule.machine_learning_job_id == null) {
-      return ['when "type" is "machine_learning", "machine_learning_job_id" is required'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
 
 export const validateTimelineId = (rule: AddPrepackagedRulesSchema): string[] => {
   if (rule.timeline_id != null) {
@@ -97,7 +35,7 @@ export const validateTimelineTitle = (rule: AddPrepackagedRulesSchema): string[]
 
 export const validateThreshold = (rule: AddPrepackagedRulesSchema): string[] => {
   const errors: string[] = [];
-  if (isThresholdRule(rule.type)) {
+  if (rule.type === 'threshold') {
     if (!rule.threshold) {
       errors.push('when "type" is "threshold", "threshold" is required');
     } else {
@@ -121,14 +59,5 @@ export const validateThreshold = (rule: AddPrepackagedRulesSchema): string[] => 
 export const addPrepackagedRuleValidateTypeDependents = (
   rule: AddPrepackagedRulesSchema
 ): string[] => {
-  return [
-    ...validateAnomalyThreshold(rule),
-    ...validateQuery(rule),
-    ...validateLanguage(rule),
-    ...validateSavedId(rule),
-    ...validateMachineLearningJobId(rule),
-    ...validateTimelineId(rule),
-    ...validateTimelineTitle(rule),
-    ...validateThreshold(rule),
-  ];
+  return [...validateTimelineId(rule), ...validateTimelineTitle(rule), ...validateThreshold(rule)];
 };

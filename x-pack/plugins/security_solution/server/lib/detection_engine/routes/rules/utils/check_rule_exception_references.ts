@@ -6,7 +6,7 @@
  */
 import type { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import type { BulkError } from '../../utils';
 import { createBulkErrorObject } from '../../utils';
 
@@ -25,12 +25,13 @@ export const checkRuleExceptionReferences = ({
   rule,
   existingLists,
 }: {
-  rule: ImportRulesSchemaDecoded;
+  rule: ImportRulesSchema;
   existingLists: Record<string, ExceptionListSchema>;
 }): [BulkError[], ListArray] => {
   let ruleExceptions: ListArray = [];
   let errors: BulkError[] = [];
-  const { exceptions_list: exceptionLists, rule_id: ruleId } = rule;
+  const { rule_id: ruleId } = rule;
+  const exceptionLists = rule.exceptions_list ?? [];
 
   if (!exceptionLists.length) {
     return [[], []];

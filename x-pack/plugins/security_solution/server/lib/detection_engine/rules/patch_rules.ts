@@ -5,245 +5,47 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { defaults } from 'lodash/fp';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import {
-  normalizeMachineLearningJobIds,
-  normalizeThresholdObject,
-} from '../../../../common/detection_engine/utils';
 import type { RuleParams } from '../schemas/rule_schemas';
-import { internalRuleUpdate } from '../schemas/rule_schemas';
 import type { PatchRulesOptions } from './types';
-import {
-  calculateInterval,
-  calculateName,
-  calculateVersion,
-  maybeMute,
-  removeUndefined,
-  transformToAlertThrottle,
-  transformToNotifyWhen,
-} from './utils';
-
-class PatchError extends Error {
-  public readonly statusCode: number;
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
+import { maybeMute } from './utils';
+import { convertPatchAPIToInternalSchema } from '../schemas/rule_converters';
 
 export const patchRules = async ({
   rulesClient,
-  author,
-  buildingBlockType,
-  description,
-  timestampField,
-  eventCategoryOverride,
-  tiebreakerField,
-  falsePositives,
-  enabled,
-  query,
-  language,
-  license,
-  outputIndex,
-  savedId,
-  timelineId,
-  timelineTitle,
-  meta,
-  filters,
-  from,
-  index,
-  dataViewId,
-  interval,
-  maxSignals,
-  relatedIntegrations,
-  requiredFields,
-  riskScore,
-  riskScoreMapping,
-  ruleNameOverride,
   rule,
-  name,
-  setup,
-  severity,
-  severityMapping,
-  tags,
-  threat,
-  threshold,
-  threatFilters,
-  threatIndex,
-  threatIndicatorPath,
-  threatQuery,
-  threatMapping,
-  threatLanguage,
-  concurrentSearches,
-  itemsPerSearch,
-  timestampOverride,
-  throttle,
-  to,
-  type,
-  references,
-  namespace,
-  note,
-  version,
-  exceptionsList,
-  anomalyThreshold,
-  machineLearningJobId,
-  actions,
+  params,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (rule == null) {
     return null;
   }
 
-  const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    author,
-    buildingBlockType,
-    description,
-    timestampField,
-    eventCategoryOverride,
-    tiebreakerField,
-    falsePositives,
-    query,
-    language,
-    license,
-    outputIndex,
-    savedId,
-    timelineId,
-    timelineTitle,
-    meta,
-    filters,
-    from,
-    index,
-    dataViewId,
-    interval,
-    maxSignals,
-    relatedIntegrations,
-    requiredFields,
-    riskScore,
-    riskScoreMapping,
-    ruleNameOverride,
-    name,
-    setup,
-    severity,
-    severityMapping,
-    tags,
-    threat,
-    threshold,
-    threatFilters,
-    threatIndex,
-    threatIndicatorPath,
-    threatQuery,
-    threatMapping,
-    threatLanguage,
-    concurrentSearches,
-    itemsPerSearch,
-    timestampOverride,
-    to,
-    type,
-    references,
-    version,
-    namespace,
-    note,
-    exceptionsList,
-    anomalyThreshold,
-    machineLearningJobId,
-  });
-
-  const nextParams = defaults(
-    {
-      ...rule.params,
-    },
-    {
-      author,
-      buildingBlockType,
-      description,
-      timestampField,
-      eventCategoryOverride,
-      tiebreakerField,
-      falsePositives,
-      from,
-      query,
-      language,
-      license,
-      outputIndex,
-      savedId,
-      timelineId,
-      timelineTitle,
-      meta,
-      filters,
-      index,
-      dataViewId,
-      maxSignals,
-      relatedIntegrations,
-      requiredFields,
-      riskScore,
-      riskScoreMapping,
-      ruleNameOverride,
-      setup,
-      severity,
-      severityMapping,
-      threat,
-      threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
-      threatFilters,
-      threatIndex,
-      threatIndicatorPath,
-      threatQuery,
-      threatMapping,
-      threatLanguage,
-      concurrentSearches,
-      itemsPerSearch,
-      timestampOverride,
-      to,
-      type,
-      references,
-      namespace,
-      note,
-      version: calculatedVersion,
-      exceptionsList,
-      anomalyThreshold,
-      machineLearningJobId: machineLearningJobId
-        ? normalizeMachineLearningJobIds(machineLearningJobId)
-        : undefined,
-    }
-  );
-
-  const newRule = {
-    tags: tags ?? rule.tags,
-    name: calculateName({ updatedName: name, originalName: rule.name }),
-    schedule: {
-      interval: calculateInterval(interval, rule.schedule.interval),
-    },
-    params: removeUndefined(nextParams),
-    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
-    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
-    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
-  };
-
-  const [validated, errors] = validate(newRule, internalRuleUpdate);
-  if (errors != null || validated === null) {
-    throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
-  }
+  const patchedRule = convertPatchAPIToInternalSchema(params, rule);
 
   const update = await rulesClient.update({
     id: rule.id,
-    data: validated,
+    data: patchedRule,
   });
 
-  if (throttle !== undefined) {
-    await maybeMute({ rulesClient, muteAll: rule.muteAll, throttle, id: update.id });
+  if (params.throttle !== undefined) {
+    await maybeMute({
+      rulesClient,
+      muteAll: rule.muteAll,
+      throttle: params.throttle,
+      id: update.id,
+    });
   }
 
-  if (rule.enabled && enabled === false) {
+  if (rule.enabled && params.enabled === false) {
     await rulesClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled === true) {
+  } else if (!rule.enabled && params.enabled === true) {
     await rulesClient.enable({ id: rule.id });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
 
-  if (enabled != null) {
-    return { ...update, enabled };
+  if (params.enabled != null) {
+    return { ...update, enabled: params.enabled };
   } else {
     return update;
   }

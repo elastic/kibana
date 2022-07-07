@@ -5,28 +5,15 @@
  * 2.0.
  */
 
-import type { PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
+import type { PatchRulesSchema } from './patch_rules_schema';
 import { patchRulesSchema } from './patch_rules_schema';
-import { getPatchRulesSchemaMock, getPatchRulesSchemaDecodedMock } from './patch_rules_schema.mock';
+import { getPatchRulesSchemaMock } from './patch_rules_schema.mock';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getListArrayMock } from '../types/lists.mock';
 
 describe('patch_rules_schema', () => {
-  test('made up values do not validate', () => {
-    const payload: PatchRulesSchema & { madeUp: string } = {
-      ...getPatchRulesSchemaMock(),
-      madeUp: 'hi',
-    };
-
-    const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
-    expect(message.schema).toEqual({});
-  });
-
   test('[id] does validate', () => {
     const payload: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
@@ -36,7 +23,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
     };
     expect(message.schema).toEqual(expected);
@@ -51,7 +38,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
     };
     expect(message.schema).toEqual(expected);
@@ -67,7 +54,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
     };
@@ -84,7 +71,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
     };
@@ -101,7 +88,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       risk_score: 10,
     };
@@ -119,7 +106,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -139,7 +126,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -160,7 +147,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -182,7 +169,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -205,7 +192,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -229,7 +216,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -254,7 +241,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -280,7 +267,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -307,7 +294,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -335,7 +322,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -364,7 +351,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -395,7 +382,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -428,7 +415,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -456,7 +443,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -483,7 +470,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -514,7 +501,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -548,7 +535,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       description: 'some description',
       from: 'now-5m',
@@ -574,7 +561,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as PatchRulesSchemaDecoded).references).toEqual(undefined);
+    expect((message.schema as PatchRulesSchema).references).toEqual(undefined);
   });
 
   test('does not default interval', () => {
@@ -586,7 +573,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as PatchRulesSchemaDecoded).interval).toEqual(undefined);
+    expect((message.schema as PatchRulesSchema).interval).toEqual(undefined);
   });
 
   test('does not default max_signals', () => {
@@ -598,7 +585,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as PatchRulesSchemaDecoded).max_signals).toEqual(undefined);
+    expect((message.schema as PatchRulesSchema).max_signals).toEqual(undefined);
   });
 
   test('references cannot be numbers', () => {
@@ -617,13 +604,17 @@ describe('patch_rules_schema', () => {
   test('indexes cannot be numbers', () => {
     const payload: Omit<PatchRulesSchema, 'index'> & { index: number[] } = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
+      type: 'query',
       index: [5],
     };
 
     const decoded = patchRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "query" supplied to "type"',
+      'Invalid value "5" supplied to "index"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -637,7 +628,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
+    const expected: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
       type: 'saved_query',
     };
@@ -645,7 +636,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('saved_id validates with type:saved_query', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       type: 'saved_query',
       saved_id: 'some id',
@@ -655,8 +646,8 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected = {
+      ...getPatchRulesSchemaMock(),
       type: 'saved_query',
       saved_id: 'some id',
     };
@@ -664,7 +655,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('saved_query type can have filters with it', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       saved_id: 'some id',
       filters: [],
@@ -674,8 +665,8 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected = {
+      ...getPatchRulesSchemaMock(),
       saved_id: 'some id',
       filters: [],
     };
@@ -683,7 +674,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('language validates with kuery', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       query: 'some query',
       language: 'kuery',
@@ -693,8 +684,8 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected = {
+      ...getPatchRulesSchemaMock(),
       query: 'some query',
       language: 'kuery',
     };
@@ -702,7 +693,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('language validates with lucene', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       query: 'some query',
       language: 'lucene',
@@ -713,8 +704,8 @@ describe('patch_rules_schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected = {
+      ...getPatchRulesSchemaMock(),
       query: 'some query',
       language: 'lucene',
     };
@@ -722,7 +713,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('language does not validate with something made up', () => {
-    const payload: Omit<PatchRulesSchema, 'language'> & { language: string } = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       query: 'some query',
       language: 'something-made-up',
@@ -731,14 +722,14 @@ describe('patch_rules_schema', () => {
     const decoded = patchRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "something-made-up" supplied to "language"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "something-made-up" supplied to "language"'
+    );
     expect(message.schema).toEqual({});
   });
 
   test('max_signals cannot be negative', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       query: 'some query',
       max_signals: -1,
@@ -754,7 +745,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('max_signals cannot be zero', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       query: 'some query',
       max_signals: 0,
@@ -768,7 +759,7 @@ describe('patch_rules_schema', () => {
   });
 
   test('max_signals can be 1', () => {
-    const payload: PatchRulesSchema = {
+    const payload = {
       ...getPatchRulesSchemaMock(),
       query: 'some query',
       max_signals: 1,
@@ -778,8 +769,8 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected = {
+      ...getPatchRulesSchemaMock(),
       query: 'some query',
       max_signals: 1,
     };
@@ -796,8 +787,8 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
       meta: { whateverYouWant: 'anything_at_all' },
     };
     expect(message.schema).toEqual(expected);
@@ -827,9 +818,9 @@ describe('patch_rules_schema', () => {
     const decoded = patchRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "should not work" supplied to "filters"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "should not work" supplied to "filters"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -868,7 +859,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as PatchRulesSchemaDecoded).threat).toEqual(undefined);
+    expect((message.schema as PatchRulesSchema).threat).toEqual(undefined);
   });
 
   test('threat is not defaulted to undefined on patch with empty array', () => {
@@ -881,7 +872,7 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as PatchRulesSchemaDecoded).threat).toEqual([]);
+    expect((message.schema as PatchRulesSchema).threat).toEqual([]);
   });
 
   test('threat is valid when updated with all sub-objects', () => {
@@ -1008,8 +999,8 @@ describe('patch_rules_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: PatchRulesSchemaDecoded = {
-      ...getPatchRulesSchemaDecodedMock(),
+    const expected: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
       timeline_id: 'some-id',
       timeline_title: 'some-title',
     };
@@ -1048,7 +1039,7 @@ describe('patch_rules_schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: PatchRulesSchemaDecoded = {
+      const expected: PatchRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1073,7 +1064,7 @@ describe('patch_rules_schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: PatchRulesSchemaDecoded = {
+      const expected: PatchRulesSchema = {
         rule_id: 'rule-1',
         note: '# new documentation markdown',
       };
@@ -1186,7 +1177,7 @@ describe('patch_rules_schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: PatchRulesSchemaDecoded = {
+      const expected: PatchRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1237,7 +1228,7 @@ describe('patch_rules_schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: PatchRulesSchemaDecoded = {
+      const expected: PatchRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1256,9 +1247,7 @@ describe('patch_rules_schema', () => {
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
-      const payload: Omit<PatchRulesSchema, 'exceptions_list'> & {
-        exceptions_list: Array<{ id: string; namespace_type: string }>;
-      } = {
+      const payload = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1281,7 +1270,6 @@ describe('patch_rules_schema', () => {
         'Invalid value "undefined" supplied to "exceptions_list,list_id"',
         'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
-        'Invalid value "[{"id":"uuid_here","namespace_type":"not a namespace type"}]" supplied to "exceptions_list"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -1306,7 +1294,7 @@ describe('patch_rules_schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: PatchRulesSchemaDecoded = {
+      const expected: PatchRulesSchema = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',

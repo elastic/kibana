@@ -39,6 +39,17 @@ export const buildRouteValidation =
       )
     );
 
+export const buildRouteValidationNonExact =
+  <T extends rt.Mixed, A = rt.TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
+  (inputValue: unknown, validationResult: RouteValidationResultFactory) =>
+    pipe(
+      schema.decode(inputValue),
+      fold<rt.Errors, A, RequestValidationResult<A>>(
+        (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
+        (validatedInput: A) => validationResult.ok(validatedInput)
+      )
+    );
+
 export const buildRouteValidationWithExcess =
   <
     T extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,

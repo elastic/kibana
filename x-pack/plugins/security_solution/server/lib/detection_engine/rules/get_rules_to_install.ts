@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import type { RuleAlertType } from './types';
 
 export const getRulesToInstall = (
-  rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
+  rulesFromFileSystem: AddPrepackagedRulesSchema[],
   installedRules: RuleAlertType[]
 ) => {
   return rulesFromFileSystem.filter(

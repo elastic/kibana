@@ -11,10 +11,7 @@ import { createRuleValidateTypeDependents } from '../../../../../common/detectio
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import {
-  DETECTION_ENGINE_RULES_BULK_CREATE,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../common/constants';
 import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
@@ -24,8 +21,8 @@ import { transformValidateBulkError } from './validate';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
-import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
+import { createRules } from '../../rules/create_rules';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -54,7 +51,6 @@ export const createRulesBulkRoute = (
 
       const rulesClient = ctx.alerting.getRulesClient();
       const savedObjectsClient = ctx.core.savedObjects.client;
-      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
         license: ctx.licensing.license,
@@ -84,32 +80,28 @@ export const createRulesBulkRoute = (
                 });
               }
             }
-            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
+
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
                 return createBulkErrorObject({
-                  ruleId: internalRule.params.ruleId,
+                  ruleId: payloadRule.rule_id,
                   statusCode: 400,
                   message: validationErrors.join(),
                 });
               }
 
-              throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
+              throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
-              const createdRule = await rulesClient.create({
-                data: internalRule,
+              const createdRule = await createRules({
+                rulesClient,
+                params: payloadRule,
               });
 
-              // mutes if we are creating the rule with the explicit "no_actions"
-              if (payloadRule.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
-                await rulesClient.muteAll({ id: createdRule.id });
-              }
-
-              return transformValidateBulkError(internalRule.params.ruleId, createdRule, null);
+              return transformValidateBulkError(createdRule.params.ruleId, createdRule, null);
             } catch (err) {
               return transformBulkError(
-                internalRule.params.ruleId,
+                payloadRule.rule_id,
                 err as Error & { statusCode?: number }
               );
             }

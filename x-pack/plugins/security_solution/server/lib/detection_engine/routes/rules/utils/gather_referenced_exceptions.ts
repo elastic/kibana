@@ -8,9 +8,11 @@ import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
-import type { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request';
+import {
+  getAllListTypes,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
+import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
 /**
  * Helper that takes rules, goes through their referenced exception lists and
@@ -23,7 +25,7 @@ export const getReferencedExceptionLists = async ({
   rules,
   savedObjectsClient,
 }: {
-  rules: Array<ImportRulesSchemaDecoded | Error>;
+  rules: Array<ImportRulesSchema | Error>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Record<string, ExceptionListSchema>> => {
   const [lists] = rules.reduce<ListArray[]>((acc, rule) => {

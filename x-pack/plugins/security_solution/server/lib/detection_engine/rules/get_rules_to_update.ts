@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import type { RuleAlertType } from './types';
 
 /**
@@ -16,7 +16,7 @@ import type { RuleAlertType } from './types';
  * @param installedRules The installed rules
  */
 export const getRulesToUpdate = (
-  rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
+  rulesFromFileSystem: AddPrepackagedRulesSchema[],
   installedRules: RuleAlertType[]
 ) => {
   return rulesFromFileSystem
@@ -31,7 +31,7 @@ export const getRulesToUpdate = (
  * @param installedRules The installed rules to compare against for updates
  */
 export const filterInstalledRules = (
-  ruleFromFileSystem: AddPrepackagedRulesSchemaDecoded,
+  ruleFromFileSystem: AddPrepackagedRulesSchema,
   installedRules: RuleAlertType[]
 ): boolean => {
   return installedRules.some((installedRule) => {
@@ -49,9 +49,9 @@ export const filterInstalledRules = (
  * @param installedRules The installed rules which might have user driven exceptions_lists
  */
 export const mergeExceptionLists = (
-  ruleFromFileSystem: AddPrepackagedRulesSchemaDecoded,
+  ruleFromFileSystem: AddPrepackagedRulesSchema,
   installedRules: RuleAlertType[]
-): AddPrepackagedRulesSchemaDecoded => {
+): AddPrepackagedRulesSchema => {
   if (ruleFromFileSystem.exceptions_list != null) {
     const installedRule = installedRules.find(
       (ruleToFind) => ruleToFind.params.ruleId === ruleFromFileSystem.rule_id

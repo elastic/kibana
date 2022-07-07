@@ -19,6 +19,7 @@ import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/publi
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -125,6 +126,7 @@ interface PluginsSetup {
 interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -217,6 +219,7 @@ export class Plugin
           actions: plugins.actions,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
+          dataViewEditor: pluginsStart.dataViewEditor,
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,

@@ -7,10 +7,7 @@
 
 import * as t from 'io-ts';
 
-import type { PatchRulesSchemaDecoded } from './patch_rules_schema';
 import { patchRulesSchema } from './patch_rules_schema';
 
 export const patchRulesBulkSchema = t.array(patchRulesSchema);
 export type PatchRulesBulkSchema = t.TypeOf<typeof patchRulesBulkSchema>;
-
-export type PatchRulesBulkSchemaDecoded = PatchRulesSchemaDecoded[];
