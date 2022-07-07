@@ -192,7 +192,6 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
       },
     }
   }
-  docValueFields={Array []}
   endDate="2019-06-18T06:00:00.000Z"
   hostName="testHostName"
   id="hostOverview"
@@ -397,7 +396,6 @@ exports[`Host Summary Component rendering it renders the panel view Host Summary
       },
     }
   }
-  docValueFields={Array []}
   endDate="2019-06-18T06:00:00.000Z"
   hostName="testHostName"
   id="hostOverview"

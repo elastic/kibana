@@ -7,11 +7,11 @@
 
 import {
   Direction,
-  HostFirstLastSeenRequestOptions,
-  HostsQueries,
-} from '../../../../../../../common/search_strategy';
+  FirstLastSeenRequestOptions,
+  FirstLastSeenQuery,
+} from '../../../../../../common/search_strategy';
 
-export const mockOptions: HostFirstLastSeenRequestOptions = {
+export const mockOptions: FirstLastSeenRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -22,8 +22,9 @@ export const mockOptions: HostFirstLastSeenRequestOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  factoryQueryType: HostsQueries.firstOrLastSeen,
-  hostName: 'siem-kibana',
+  factoryQueryType: FirstLastSeenQuery,
+  field: 'host.name',
+  value: 'siem-kibana',
   order: Direction.asc,
 };
 

@@ -138,6 +138,7 @@ export const ExpandableNetworkDetails = ({
       startDate={from}
       endDate={to}
       narrowDateRange={narrowDateRange}
+      indexPatterns={selectedPatterns}
     />
   ) : (
     <LandingCards />

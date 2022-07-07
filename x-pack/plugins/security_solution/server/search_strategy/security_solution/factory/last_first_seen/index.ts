@@ -9,21 +9,22 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
-  HostFirstLastSeenStrategyResponse,
-  HostsQueries,
-  HostFirstLastSeenRequestOptions,
-} from '../../../../../../common/search_strategy/security_solution/hosts';
+  FactoryQueryTypes,
+  FirstLastSeenStrategyResponse,
+  FirstLastSeenQuery,
+  FirstLastSeenRequestOptions,
+} from '../../../../../common/search_strategy/security_solution';
 
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
-import { buildFirstOrLastSeenHostQuery } from './query.first_or_last_seen_host.dsl';
+import { inspectStringifyObject } from '../../../../utils/build_query';
+import { SecuritySolutionFactory } from '../types';
+import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen.dsl';
 
-export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLastSeen> = {
-  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
+export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery> = {
+  buildDsl: (options: FirstLastSeenRequestOptions) => buildFirstOrLastSeenQuery(options),
   parse: async (
-    options: HostFirstLastSeenRequestOptions,
+    options: FirstLastSeenRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<HostFirstLastSeenStrategyResponse> => {
+  ): Promise<FirstLastSeenStrategyResponse> => {
     // First try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
       null,
@@ -32,7 +33,7 @@ export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLa
     );
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildFirstOrLastSeenHostQuery(options))],
+      dsl: [inspectStringifyObject(buildFirstOrLastSeenQuery(options))],
     };
 
     if (options.order === 'asc') {
@@ -49,4 +50,11 @@ export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLa
       };
     }
   },
+};
+
+export const firstLastSeenFactory: Record<
+  typeof FirstLastSeenQuery,
+  SecuritySolutionFactory<FactoryQueryTypes>
+> = {
+  [FirstLastSeenQuery]: firstOrLastSeen,
 };
