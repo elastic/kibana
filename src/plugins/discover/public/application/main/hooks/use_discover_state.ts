@@ -275,7 +275,8 @@ export function useDiscoverState({
       }
     }
     fetchDataview();
-  }, [fetchResults, indexPatterns, state.query, stateContainer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, documentState, indexPatterns]);
 
   return {
     data$,
