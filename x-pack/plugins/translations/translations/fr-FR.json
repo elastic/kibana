@@ -22408,8 +22408,6 @@
     "xpack.observability.resources.quick_start": "Vidéos de démarrage rapide",
     "xpack.observability.resources.title": "Ressources",
     "xpack.observability.resources.training": "Cours gratuit Observability",
-    "xpack.observability.ruleDetails.actions": "Actions",
-    "xpack.observability.ruleDetails.alerts": "Alertes",
     "xpack.observability.ruleDetails.byWord": "par",
     "xpack.observability.ruleDetails.createdWord": "Créé",
     "xpack.observability.ruleDetails.deleteRule": "Supprimer la règle",

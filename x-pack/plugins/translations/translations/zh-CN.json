@@ -22419,8 +22419,6 @@
     "xpack.observability.resources.quick_start": "快速入门视频",
     "xpack.observability.resources.title": "资源",
     "xpack.observability.resources.training": "免费的可观测性课程",
-    "xpack.observability.ruleDetails.actions": "操作",
-    "xpack.observability.ruleDetails.alerts": "告警",
     "xpack.observability.ruleDetails.byWord": "依据",
     "xpack.observability.ruleDetails.createdWord": "创建时间",
     "xpack.observability.ruleDetails.deleteRule": "删除规则",

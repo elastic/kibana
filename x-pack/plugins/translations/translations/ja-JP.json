@@ -22394,8 +22394,6 @@
     "xpack.observability.resources.quick_start": "クイックスタートビデオ",
     "xpack.observability.resources.title": "リソース",
     "xpack.observability.resources.training": "無料のObservabilityコース",
-    "xpack.observability.ruleDetails.actions": "アクション",
-    "xpack.observability.ruleDetails.alerts": "アラート",
     "xpack.observability.ruleDetails.byWord": "グループ基準",
     "xpack.observability.ruleDetails.createdWord": "作成済み",
     "xpack.observability.ruleDetails.deleteRule": "ルールの削除",
