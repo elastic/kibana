@@ -46,7 +46,7 @@ describe(`Console's send request`, () => {
       method: 'get',
       payload: null as any,
       uri,
-      timeout, // immediately timeout
+      timeout,
       requestPath,
     });
   };
@@ -58,7 +58,7 @@ describe(`Console's send request`, () => {
       once() {},
     } as any;
     try {
-      await sendProxyRequest({ timeout: 0 });
+      await sendProxyRequest({ timeout: 0 }); // immediately timeout
       fail('Should not reach here!');
     } catch (e) {
       expect(e.message).toEqual('Client request timeout');

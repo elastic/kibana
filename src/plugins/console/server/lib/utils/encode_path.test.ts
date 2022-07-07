@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { encodePath } from '.';
+import { encodePath } from './encode_path';
 
 describe('encodePath', () => {
   const tests = [
