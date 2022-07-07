@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import {
@@ -15,6 +15,13 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
+
+const OS_LABELS = Object.freeze({
+  linux: i18n.OS_LINUX,
+  mac: i18n.OS_MAC,
+  macos: i18n.OS_MAC,
+  windows: i18n.OS_WINDOWS,
+});
 
 const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
   [ListOperatorTypeEnum.NESTED]: i18n.CONDITION_OPERATOR_TYPE_NESTED,
@@ -39,13 +46,28 @@ const EuiFlexItemNested = styled(EuiFlexItem)`
   margin-top: 6px !important;
 `;
 
+const StyledCondition = styled('span')`
+  margin-right: 6px;
+`;
+
 export interface CriteriaConditionsProps {
   entries: ExceptionListItemSchema['entries'];
   dataTestSubj: string;
+  os?: ExceptionListItemSchema['os_types'];
 }
 
 export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
-  ({ entries, dataTestSubj }) => {
+  ({ os, entries, dataTestSubj }) => {
+    const osLabel = useMemo(() => {
+      if (os != null && os.length > 0) {
+        return os
+          .map((osValue) => OS_LABELS[osValue as keyof typeof OS_LABELS] ?? osValue)
+          .join(', ');
+      }
+      
+      return null;
+    }, [os]);
+
     const getEntryValue = (type: string, value: string | string[] | undefined) => {
       if (type === 'match_any' && Array.isArray(value)) {
         return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
@@ -98,6 +120,14 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
 
     return (
       <div data-test-subj={dataTestSubj}>
+        {osLabel != null && (
+          <div data-test-subj={`${dataTestSubj}-os`}>
+            <strong>
+              <EuiExpression description={''} value={i18n.CONDITION_OS} />
+              <EuiExpression description={i18n.CONDITION_OPERATOR_TYPE_MATCH} value={osLabel} />
+            </strong>
+          </div>
+        )}
         {entries.map((entry, index) => {
           const { field, type } = entry;
           const value = 'value' in entry ? entry.value : '';
@@ -108,7 +138,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
             <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
               <div className="eui-xScroll">
                 <EuiExpression
-                  description={index === 0 ? i18n.DESCRIPTOR_WHEN : i18n.CONDITION_AND}
+                  description={index === 0 ? '' : <StyledCondition>{i18n.CONDITION_AND}</StyledCondition>}
                   value={field}
                   color={index === 0 ? 'primary' : 'subdued'}
                 />

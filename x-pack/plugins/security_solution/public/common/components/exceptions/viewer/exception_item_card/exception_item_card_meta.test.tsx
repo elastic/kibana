@@ -25,7 +25,7 @@ describe('ExceptionItemCardMetaInfo', () => {
 
     expect(
       wrapper.find('[data-test-subj="exceptionItemMeta-createdBy-value1"]').at(0).text()
-    ).toEqual('04/20/20');
+    ).toEqual('Apr 20, 2020 @ 15:25:31.830');
     expect(
       wrapper.find('[data-test-subj="exceptionItemMeta-createdBy-value2"]').at(0).text()
     ).toEqual('some user');

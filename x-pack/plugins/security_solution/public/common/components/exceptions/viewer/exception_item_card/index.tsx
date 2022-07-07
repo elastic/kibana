@@ -60,8 +60,8 @@ const ExceptionItemCardComponent = ({
   }, [exceptionItem.comments]);
 
   const disableItemActions = useMemo((): boolean => {
-    const foundItems = loadingItemIds.filter(({ id }) => id === exceptionItem.id);
-    return disableActions || foundItems.length > 0;
+    const foundItems = loadingItemIds.some(({ id }) => id === exceptionItem.id);
+    return disableActions || foundItems;
   }, [loadingItemIds, exceptionItem.id, disableActions]);
 
   return (
@@ -96,6 +96,7 @@ const ExceptionItemCardComponent = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <ExceptionItemCardConditions
+            os={exceptionItem.os_types}
             entries={exceptionItem.entries}
             dataTestSubj="exceptionItemCardConditions"
           />

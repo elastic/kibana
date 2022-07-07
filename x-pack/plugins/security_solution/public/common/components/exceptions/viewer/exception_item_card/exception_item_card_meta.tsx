@@ -6,11 +6,16 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar, EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { FormattedDate, FormattedRelativePreferenceDate } from '../../../formatted_date';
+
+const EuiFlexItemStyled = styled(EuiFlexItem)`
+  padding-top: 4px !important;
+`;
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
@@ -31,7 +36,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             fieldName="created_by"
             label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
             value1={
-              <FormattedDate fieldName="created_by" value={item.created_at} dateFormat="MM/DD/YY" />
+              <FormattedDate fieldName="created_by" value={item.created_at} />
             }
             value2={item.created_by}
             dataTestSubj={`${dataTestSubj}-createdBy`}
@@ -70,13 +75,15 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiBetaBadge color="subdued" size="s" style={{ fontFamily: 'Inter' }} label={label} />
+        <EuiBadge color="default" style={{ fontFamily: 'Inter' }}>
+          {label}
+        </EuiBadge>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
+      <EuiFlexItemStyled grow={false} data-test-subj={`${dataTestSubj}-value1`}>
         <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
           {value1}
         </EuiText>
-      </EuiFlexItem>
+      </EuiFlexItemStyled>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" style={{ fontStyle: 'italic', fontFamily: 'Inter' }}>
           {i18n.EXCEPTION_ITEM_META_BY}
