@@ -9,6 +9,7 @@
 import { shareReplay } from 'rxjs/operators';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { NodeInfo } from '@kbn/core-node-server';
 import type { RequestHandlerContext } from '..';
 import { PluginWrapper } from './plugin';
 import {
@@ -21,6 +22,7 @@ import { IRouter, RequestHandlerContextProvider } from '../http';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
+/** @internal */
 export interface InstanceInfo {
   uuid: string;
 }
@@ -35,15 +37,26 @@ export interface InstanceInfo {
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
- * @param pluginManifest The manifest of the plugin we're building these values for.
+ * @param opaqueId The opaque id created for this particular plugin.
+ * @param manifest The manifest of the plugin we're building these values for.
+ * @param instanceInfo Info about the instance Kibana is running on.
+ * @param nodeInfo Info about how the Kibana process has been configured.
+ *
  * @internal
  */
-export function createPluginInitializerContext(
-  coreContext: CoreContext,
-  opaqueId: PluginOpaqueId,
-  pluginManifest: PluginManifest,
-  instanceInfo: InstanceInfo
-): PluginInitializerContext {
+export function createPluginInitializerContext({
+  coreContext,
+  opaqueId,
+  manifest,
+  instanceInfo,
+  nodeInfo,
+}: {
+  coreContext: CoreContext;
+  opaqueId: PluginOpaqueId;
+  manifest: PluginManifest;
+  instanceInfo: InstanceInfo;
+  nodeInfo: NodeInfo;
+}): PluginInitializerContext {
   return {
     opaqueId,
 
@@ -58,11 +71,22 @@ export function createPluginInitializerContext(
     },
 
     /**
+     * Access the configuration for this particular Kibana node.
+     * Can be used to determine which `roles` the current process was started with.
+     */
+    node: {
+      roles: {
+        backgroundTasks: nodeInfo.roles.backgroundTasks,
+        ui: nodeInfo.roles.ui,
+      },
+    },
+
+    /**
      * Plugin-scoped logger
      */
     logger: {
       get(...contextParts) {
-        return coreContext.logger.get('plugins', pluginManifest.id, ...contextParts);
+        return coreContext.logger.get('plugins', manifest.id, ...contextParts);
       },
     },
 
@@ -80,10 +104,10 @@ export function createPluginInitializerContext(
        * manifest.
        */
       create<T>() {
-        return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
+        return coreContext.configService.atPath<T>(manifest.configPath).pipe(shareReplay(1));
       },
       get<T>() {
-        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
+        return coreContext.configService.atPathSync<T>(manifest.configPath);
       },
     },
   };
@@ -169,9 +193,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     capabilities: {
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
-    },
-    context: {
-      createContextContainer: deps.context.createContextContainer,
     },
     docLinks: deps.docLinks,
     elasticsearch: {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { History } from 'history';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
@@ -19,9 +20,35 @@ import {
   Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
+import type { WizardSection } from '../component_template_form';
+import { useRedirectPath } from '../../../../hooks/redirect_path';
 
 interface MatchParams {
   name: string;
+}
+
+export function useStepFromQueryString(history: History) {
+  const activeStep = useMemo(() => {
+    const params = new URLSearchParams(history.location.search);
+    if (params.has('step')) {
+      return params.get('step') as WizardSection;
+    }
+  }, [history.location.search]);
+
+  const updateStep = useCallback(
+    (stepId: string) => {
+      const params = new URLSearchParams(history.location.search);
+      if (params.has('step')) {
+        params.set('step', stepId);
+        history.push({
+          search: params.toString(),
+        });
+      }
+    },
+    [history]
+  );
+
+  return { activeStep, updateStep };
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -31,6 +58,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   history,
 }) => {
   const { api, breadcrumbs } = useComponentTemplatesContext();
+  const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
+  const redirectTo = useRedirectPath(history);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -56,7 +85,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    history.push({
+    redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
       ),
@@ -112,6 +141,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
+        defaultActiveWizardSection={defaultActiveStep}
+        onStepChange={updateStep}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
