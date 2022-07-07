@@ -54,47 +54,44 @@ const outdatedRawEventLoopDelaysDaily = [
   createRawObject(moment().subtract(7, 'days')),
 ];
 
-describe.each(new Array(100).fill(0).map((v, idx) => idx + 1))(
-  `daily rollups integration test #%i`,
-  () => {
-    let esServer: TestElasticsearchUtils;
-    let root: TestKibanaUtils['root'];
-    let internalRepository: ISavedObjectsRepository;
-    let logger: Logger;
+describe(`daily rollups integration test`, () => {
+  let esServer: TestElasticsearchUtils;
+  let root: TestKibanaUtils['root'];
+  let internalRepository: ISavedObjectsRepository;
+  let logger: Logger;
 
-    beforeAll(async () => {
-      const { startES } = createTestServers({
-        adjustTimeout: (t: number) => jest.setTimeout(t),
-      });
-
-      esServer = await startES();
-      root = createRootWithCorePlugins();
-
-      await root.preboot();
-      await root.setup();
-      const start = await root.start();
-      logger = root.logger.get('test daily rollups');
-      internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
-
-      await internalRepository.bulkCreate<EventLoopDelaysDaily>(
-        [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
-        { refresh: true }
-      );
+  beforeAll(async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
     });
 
-    afterAll(async () => {
-      await esServer.stop();
-      await root.shutdown();
-    });
+    esServer = await startES();
+    root = createRootWithCorePlugins();
 
-    it('deletes documents older that 3 days from the saved objects repository', async () => {
-      await rollDailyData(logger, internalRepository);
-      const { total, saved_objects: savedObjects } =
-        await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
-      expect(total).toBe(rawEventLoopDelaysDaily.length);
-      expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
-        rawEventLoopDelaysDaily
-      );
-    });
-  }
-);
+    await root.preboot();
+    await root.setup();
+    const start = await root.start();
+    logger = root.logger.get('test daily rollups');
+    internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
+
+    await internalRepository.bulkCreate<EventLoopDelaysDaily>(
+      [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
+      { refresh: true }
+    );
+  });
+
+  afterAll(async () => {
+    await esServer.stop();
+    await root.shutdown();
+  });
+
+  it('deletes documents older that 3 days from the saved objects repository', async () => {
+    await rollDailyData(logger, internalRepository);
+    const { total, saved_objects: savedObjects } =
+      await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
+    expect(total).toBe(rawEventLoopDelaysDaily.length);
+    expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
+      rawEventLoopDelaysDaily
+    );
+  });
+});
