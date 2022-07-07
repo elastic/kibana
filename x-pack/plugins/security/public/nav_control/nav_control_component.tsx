@@ -79,7 +79,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
   const items: EuiContextMenuPanelItemDescriptor[] = [];
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
@@ -93,17 +92,21 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  if (!isAnonymous) {
+  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
+  const isCloudUser = currentUser.value?.elastic_cloud_user;
+
+  if (!isAnonymous && !isCloudUser) {
     const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+
     const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
       name: (
         <FormattedMessage
           id="xpack.security.navControlComponent.editProfileLinkText"
-          defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
+          defaultMessage="Edit Profile"
           values={{ profileOverridden: hasCustomProfileLinks }}
         />
       ),
-      icon: <EuiIcon type={hasCustomProfileLinks ? 'controlsHorizontal' : 'user'} size="m" />,
+      icon: <EuiIcon type="user" size="m" />,
       href: editProfileUrl,
       'data-test-subj': 'profileLink',
     };
