@@ -76,7 +76,6 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const { filters, query } = request.query;
     const monitorsPromise = getMonitors(request.query, server, savedObjectsClient);
 
-
     if (filters || query) {
       const totalMonitorsPromise = savedObjectsClient.find({
         type: syntheticsMonitorType,
