@@ -118,14 +118,19 @@ const LanguageData:Record<string, languageDataEntry> = {
 
 const FRONT_NGRAM_MAX_GRAM = 12;
 
+const edgeEndgramType = 'edge_ngram' as 'edge_ngram';
+const wordDelimiterGraphType = 'word_delimiter_graph' as 'word_delimiter_graph';
+const shingleType = 'shingle' as 'shingle';
+const lengthType = 'length' as 'length';
+
 const GenericFilters = {
    front_ngram: {
-    type: 'edge_ngram',
+    type: edgeEndgramType,
     min_gram: 1,
     max_gram: FRONT_NGRAM_MAX_GRAM
   },
   delimiter: {
-    type: 'word_delimiter_graph',
+    type: wordDelimiterGraphType,
     generate_word_parts: true,
     generate_number_parts: true,
     catenate_words: true,
@@ -137,36 +142,29 @@ const GenericFilters = {
     stem_english_possessive: true
   },
   bigram_joiner: {
-    type: 'shingle',
+    type: shingleType,
     token_separator: '',
     max_shingle_size: 2,
     output_unigrams: false
   },
   bigram_joiner_unigrams: {
-    type: 'shingle',
+    type: shingleType,
     token_separator: '',
     max_shingle_size: 2,
     output_unigrams: true
   },
   bigram_max_size: {
-    type: 'length',
+    type: lengthType,
     min: 0,
     max: 16
   }
 }
 
-export const textAnalysisSettings = async (language: string) => {
+export const textAnalysisSettings = (language: string='en') => {
   return {
     analysis: {
       analyzer: analyzerDefinitions(language),
       filter: filterDefinitions(language),
-    },
-    index: {
-      similarity: {
-        default: {
-          type: 'BM25'
-        }
-      }
     }
   }
 };
@@ -180,75 +178,91 @@ const stopWordsFilterName = (languageCode: string) => {
 }
 
 const analyzerDefinitions = (language: string) => {
+  const prependedFilters = LanguageData[language]["prepended_filters"] || [];
+  const postpendedFilters = LanguageData[language]["postpended_filters"] || [];
+  const customType = "custom" as "custom";
+
   return {
-    /*
-
-    definitions['i_prefix'] = {
-      :tokenizer => smart_tokenizer_name,
-      :filter => [
-        *folding_filters,
-        'front_ngram'
+    "i_prefix": {
+      type: customType,
+      tokenizer: "standard",
+      filter: [
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+        "front_ngram",
+      ]
+    },
+    q_prefix: {
+      type: customType,
+      tokenizer: "standard",
+      filter: [
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+      ]
+    },
+    iq_text_base: {
+      type: customType,
+      tokenizer: "standard",
+      filter: [
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+        stopWordsFilterName(language),
+      ]
+    },
+    iq_text_stem: {
+      type: customType,
+      tokenizer: "standard",
+      filter: [
+        ...prependedFilters,
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+        stopWordsFilterName(language),
+        stemFilterName(language),
+        ...postpendedFilters,
+      ]
+    },
+    iq_text_delimiter: {
+      type: customType,
+      tokenizer: "whitespace",
+      filter: [
+        ...prependedFilters,
+        "delimiter",
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+        stopWordsFilterName(language),
+        stemFilterName(language),
+        ...postpendedFilters,
+      ]
+    },
+    i_text_bigram: {
+      type: customType,
+      tokenizer: "standard",
+      filter: [
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+        stemFilterName(language),
+        "bigram_joiner",
+        "bigram_max_size",
+      ]
+    },
+    q_text_bigram: {
+      type: customType,
+      tokenizer: "standard",
+      filter: [
+        "cjk_width",
+        "lowercase",
+        "asciifolding",
+        stemFilterName(language),
+        "bigram_joiner_unigrams",
+        "bigram_max_size",
       ]
     }
-
-    definitions['q_prefix'] = {
-      :tokenizer => smart_tokenizer_name,
-      :filter => [
-        *folding_filters
-      ]
-    }
-
-    definitions['iq_text_base'] = {
-      :tokenizer => smart_tokenizer_name,
-      :filter => [
-        *folding_filters,
-        stop_words_filter_name
-      ]
-    }
-
-    definitions['iq_text_stem'] = {
-      :tokenizer => smart_tokenizer_name,
-      :filter => [
-        *prepended_filters,
-        *folding_filters,
-        stop_words_filter_name,
-        stem_filter_name,
-        *postpended_filters
-      ]
-    }
-
-    definitions['iq_text_delimiter'] = {
-      :tokenizer => 'whitespace',
-      :filter => [
-        *prepended_filters,
-        'delimiter',
-        *folding_filters,
-        stop_words_filter_name,
-        stem_filter_name,
-        *postpended_filters
-      ]
-    }
-
-    definitions['i_text_bigram'] = {
-      :tokenizer => smart_tokenizer_name,
-      :filter => [
-        *folding_filters,
-        stem_filter_name,
-        'bigram_joiner',
-        'bigram_max_size'
-      ]
-    }
-
-    definitions['q_text_bigram'] = {
-      :tokenizer => smart_tokenizer_name,
-      :filter => [
-        *folding_filters,
-        stem_filter_name,
-        'bigram_joiner_unigrams',
-        'bigram_max_size'
-      ]
-    }
-    */
   }
 };
 

@@ -8,6 +8,8 @@
 import { MappingKeywordProperty, MappingTextProperty } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { textAnalysisSettings } from './text_analysis';
+
 const prefixMapping: MappingTextProperty = {
   "search_analyzer": "q_prefix",
   "analyzer": "i_prefix",
@@ -64,7 +66,7 @@ export const createApiIndex = async (client: IScopedClusterClient, indexName: st
     index: indexName,
     body: {
       mappings: defaultMappings,
-      settings: {},
+      settings: textAnalysisSettings(language),
     }
   });
 };
