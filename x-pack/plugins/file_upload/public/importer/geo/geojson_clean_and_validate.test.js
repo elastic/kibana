@@ -6,10 +6,10 @@
  */
 
 import { cleanGeometry, geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader';
+import * as jsts from 'jsts';
 
 describe('geo_json_clean_and_validate', () => {
-  const reader = new GeoJSONReader();
+  const reader = new jsts.io.GeoJSONReader();
 
   it('should not modify valid features', () => {
     const goodFeatureGeoJson = {

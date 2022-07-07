@@ -11,7 +11,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
-import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader';
+import * as jsts from 'jsts';
 import type { Map as MbMap, MapMouseEvent, PointLike } from '@kbn/mapbox-gl';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../draw_control';
@@ -19,7 +19,7 @@ import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
 import { ILayer } from '../../../../classes/layers/layer';
 import { EXCLUDE_CENTROID_FEATURES } from '../../../../classes/util/mb_filter_expressions';
 
-const geoJSONReader = new GeoJSONReader();
+const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface ReduxStateProps {
   drawShape?: DRAW_SHAPE;

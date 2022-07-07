@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import * as jsts from 'jsts';
 import rewind from '@mapbox/geojson-rewind';
-import PrecisionModel from 'jsts/org/locationtech/jts/geom/PrecisionModel';
-import GeometryPrecisionReducer from 'jsts/org/locationtech/jts/precision/GeometryPrecisionReducer';
-import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader';
-import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter';
 
 // The GeoJSON specification suggests limiting coordinate precision to six decimal places
 // See https://datatracker.ietf.org/doc/html/rfc7946#section-11.2
 // We can enforce rounding to six decimal places by setting the PrecisionModel scale
 // scale = 10^n where n = maximum number of decimal places
-const precisionModel = new PrecisionModel(Math.pow(10, 6));
-const geometryPrecisionReducer = new GeometryPrecisionReducer(precisionModel);
+const precisionModel = new jsts.geom.PrecisionModel(Math.pow(10, 6));
+const geometryPrecisionReducer = new jsts.precision.GeometryPrecisionReducer(precisionModel);
 geometryPrecisionReducer.setChangePrecisionModel(true);
-const geoJSONReader = new GeoJSONReader();
-const geoJSONWriter = new GeoJSONWriter();
+const geoJSONReader = new jsts.io.GeoJSONReader();
+const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
 export function geoJsonCleanAndValidate(feature) {
   let cleanedGeometry;
