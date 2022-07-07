@@ -35,7 +35,8 @@ exports[`HeaderPage it renders 1`] = `
           value={
             Object {
               "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
-                "attachmentTypes": Map {},
+                "collection": Map {},
+                "name": "ExternalReferenceAttachmentTypeRegistry",
               },
               "features": undefined,
               "owner": Array [

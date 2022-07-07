@@ -13,9 +13,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
-import { TransportResult } from '@elastic/elasticsearch';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SavedObjectsRawDocSource } from '@kbn/core/server/saved_objects/serialization';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -33,6 +30,7 @@ import {
   bulkCreateAttachments,
   updateComment,
   getSOFromKibanaIndex,
+  getReferenceFromEsResponse,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -144,7 +142,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
@@ -182,7 +183,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
       expect(ref).to.eql({
@@ -210,7 +214,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
@@ -242,7 +249,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       expect(ref).to.be(undefined);
       expect(commentOnES).to.eql(postExternalReferenceESReq);
@@ -268,7 +278,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
 
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
@@ -308,7 +321,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceESReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceESReq.externalReferenceId
+      );
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
@@ -347,7 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, 'my-new-id');
+      const ref = getReferenceFromEsResponse(esResponse, 'my-new-id');
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
 
       expect(ref).to.eql({
@@ -441,8 +457,3 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   });
 };
-
-const getReference = (
-  esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
-  id: string
-) => esResponse.body._source?.references?.find((r) => r.id === id);
