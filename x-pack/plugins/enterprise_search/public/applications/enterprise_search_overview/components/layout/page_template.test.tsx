@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-jest.mock('./nav', () => ({
-  useEnterpriseSearchOverviewNav: () => [],
+jest.mock('../../../shared/layout', () => ({
+  useEnterpriseSearchNav: () => [],
 }));
 
 import React from 'react';

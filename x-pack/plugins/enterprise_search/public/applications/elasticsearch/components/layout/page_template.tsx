@@ -12,7 +12,7 @@ import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-import { useEnterpriseSearchElasticsearchNav } from './nav';
+import { useEnterpriseSearchNav } from '../../../shared/layout';
 
 export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplateProps> = ({
   children,
@@ -25,7 +25,7 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
       {...pageTemplateProps}
       solutionNav={{
         name: ELASTICSEARCH_PLUGIN.NAME,
-        items: useEnterpriseSearchElasticsearchNav(),
+        items: useEnterpriseSearchNav(),
       }}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >

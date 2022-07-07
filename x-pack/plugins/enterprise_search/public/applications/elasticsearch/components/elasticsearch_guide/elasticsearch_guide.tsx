@@ -30,6 +30,8 @@ import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_
 import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
 
+import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
+
 // Replace FormattedMessage with i18n strings
 
 export const ElasticsearchGuide: React.FC = () => {
@@ -61,7 +63,7 @@ export const ElasticsearchGuide: React.FC = () => {
   }, []);
 
   return (
-    <EuiPageTemplate>
+    <EnterpriseSearchElasticsearchPageTemplate>
       <SetPageChrome />
       <EuiFlexGroup alignItems="flexStart">
         {/* maxWidth is needed to prevent code blocks with long unbreakable strings (Kibana PR Cloud ID) from stretching the column */}
@@ -193,6 +195,6 @@ export const ElasticsearchGuide: React.FC = () => {
           <ElasticsearchResources />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate>
+    </EnterpriseSearchElasticsearchPageTemplate>
   );
 };

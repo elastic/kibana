@@ -38,6 +38,7 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
 import { ElasticsearchCard } from '../elasticsearch_card';
+import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -152,7 +153,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     />
   );
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
+    <EnterpriseSearchOverviewPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
@@ -186,6 +187,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EuiSpacer size="xxl" />
       {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
       <Chat />
-    </KibanaPageTemplate>
+    </EnterpriseSearchOverviewPageTemplate>
   );
 };

@@ -11,6 +11,7 @@ import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
 import { generateReactRouterProps, ReactRouterProps } from '../react_router_helpers';
+import { ROOT_PATH } from '../routes';
 
 interface Params {
   to: string;
@@ -34,15 +35,18 @@ export const getNavLinkActive = ({
   items = [],
 }: Params): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
+  const basePath = KibanaLogic.values.history.basePath;
   const currentPath = stripTrailingSlash(pathname);
 
-  if (currentPath === to) return true;
+  if (isRoot && basePath === to) return true;
 
-  if (isRoot && currentPath === '') return true;
+  if (basePath === to) return true;
+
+  //if (to.endsWith(currentPath)) return true;
 
   if (shouldShowActiveForSubroutes) {
     if (items.length) return false; // If a nav link has sub-nav items open, never show it as active
-    if (currentPath.startsWith(to)) return true;
+    if (currentPath !== '' && to.includes(currentPath.split('/')[0])) return true;
   }
 
   return false;
