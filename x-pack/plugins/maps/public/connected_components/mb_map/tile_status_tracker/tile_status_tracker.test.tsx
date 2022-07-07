@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-// eslint-disable-next-line max-classes-per-file
-import { TileStatusTracker } from './tile_status_tracker';
+import React from 'react';
+import { mount } from 'enzyme';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { ILayer } from '../../classes/layers/layer';
+import { TileStatusTracker } from './tile_status_tracker';
+import { ILayer } from '../../../classes/layers/layer';
 
+// eslint-disable-next-line max-classes-per-file
 class MockMbMap {
   public listeners: Array<{ type: string; callback: (e: unknown) => void }> = [];
 
@@ -49,6 +51,18 @@ class MockLayer {
   ownsMbSourceId(mbSourceId: string) {
     return this._mbSourceId === mbSourceId;
   }
+
+  isVisible() {
+    return true;
+  }
+
+  getSource() {
+    return {
+      isESSource() {
+        return false;
+      },
+    };
+  }
 }
 
 function createMockLayer(id: string, mbSourceId: string): ILayer {
@@ -83,23 +97,35 @@ async function sleep(timeout: number) {
   });
 }
 
+const mockMbMap = new MockMbMap();
+const defaultProps = {
+  mbMap: mockMbMap as unknown as MbMap,
+  layerList: [],
+  setAreTilesLoaded: () => {},
+  updateMetaFromTiles: () => {},
+  clearTileLoadError: () => {},
+  setTileLoadError: () => {},
+};
+
 describe('TileStatusTracker', () => {
-  test('should add and remove tiles', async () => {
-    const mockMbMap = new MockMbMap();
+  test('should set tile load status', async () => {
+    const layerList = [
+      createMockLayer('foo', 'foosource'),
+      createMockLayer('bar', 'barsource'),
+      createMockLayer('foobar', 'foobarsource'),
+    ];
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
-    new TileStatusTracker({
-      mbMap: mockMbMap as unknown as MbMap,
-      updateTileStatus: (layer, areTilesLoaded) => {
-        loadedMap.set(layer.getId(), areTilesLoaded);
-      },
-      getCurrentLayerList: () => {
-        return [
-          createMockLayer('foo', 'foosource'),
-          createMockLayer('bar', 'barsource'),
-          createMockLayer('foobar', 'foobarsource'),
-        ];
-      },
-    });
+    const setAreTilesLoaded = (layerId: string, areTilesLoaded: boolean) => {
+      loadedMap.set(layerId, areTilesLoaded);
+    };
+
+    const component = mount(
+      <TileStatusTracker
+        {...defaultProps}
+        layerList={layerList}
+        setAreTilesLoaded={setAreTilesLoaded}
+      />
+    );
 
     mockMbMap.emit('sourcedataloading', createMockMbDataEvent('foosource', 'aa11'));
 
@@ -126,20 +152,9 @@ describe('TileStatusTracker', () => {
     expect(loadedMap.get('foo')).toBe(false); // still outstanding tile requests
     expect(loadedMap.get('bar')).toBe(true); // tiles were aborted or errored
     expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
-  });
 
-  test('should cleanup listeners on destroy', async () => {
-    const mockMbMap = new MockMbMap();
-    const tileStatusTracker = new TileStatusTracker({
-      mbMap: mockMbMap as unknown as MbMap,
-      updateTileStatus: () => {},
-      getCurrentLayerList: () => {
-        return [];
-      },
-    });
+    component.unmount();
 
-    expect(mockMbMap.listeners.length).toBe(4);
-    tileStatusTracker.destroy();
     expect(mockMbMap.listeners.length).toBe(0);
   });
 });
