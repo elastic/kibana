@@ -45,7 +45,7 @@ module.exports = {
     '^(!!)?file-loader!': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
     ...Object.fromEntries(
       Array.from(pkgMap.entries()).map(([pkgId, repoRelativeDir]) => [
-        `^${pkgId}(/?.*)$`,
+        `^${pkgId}(/.*)?$`,
         `<rootDir>/${repoRelativeDir}$1`,
       ])
     ),

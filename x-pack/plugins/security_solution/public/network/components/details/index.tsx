@@ -11,7 +11,10 @@ import React from 'react';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
-import { FlowTarget, NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
+import {
+  FlowTargetSourceDest,
+  NetworkDetailsStrategyResponse,
+} from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 
@@ -39,7 +42,7 @@ export interface IpOverviewProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
   data: NetworkDetailsStrategyResponse['networkDetails'];
   endDate: string;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   id: string;
   ip: string;
   isDraggable?: boolean;

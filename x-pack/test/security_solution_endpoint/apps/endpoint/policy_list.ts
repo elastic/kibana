@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await fleetButton.click();
         await testSubjects.existOrFail('createPackagePolicy_pageTitle');
         expect(await testSubjects.getVisibleText('createPackagePolicy_pageTitle')).to.equal(
-          'Add Endpoint Security integration'
+          'Add Endpoint and Cloud Security integration'
         );
       });
       it('navigates back to the policy list page', async () => {
@@ -50,7 +50,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.ensureIsOnListPage();
       });
     });
-    describe('with policies', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135558
+    describe.skip('with policies', () => {
       let indexedData: IndexedHostsAndAlertsResponse;
       let policyInfo: PolicyTestResourceInfo;
       before(async () => {
@@ -78,8 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await backButton.click();
         await pageObjects.policy.ensureIsOnListPage();
       });
-      // FLAKY: https://github.com/elastic/kibana/issues/131602
-      describe.skip('when the endpoint count link is clicked', () => {
+      describe('when the endpoint count link is clicked', () => {
         it('navigates to the endpoint list page filtered by policy', async () => {
           const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
           await endpointCount.click();

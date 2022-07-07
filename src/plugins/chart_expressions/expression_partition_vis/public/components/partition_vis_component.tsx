@@ -14,10 +14,10 @@ import {
   Partition,
   Position,
   Settings,
-  RenderChangeListener,
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
+  PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -134,8 +134,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     setShowLegend(legendShow);
   }, [showLegendDefault]);
 
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
+  const onRenderChange = useCallback(
+    (isRendered: boolean = true) => {
       if (isRendered) {
         props.renderComplete();
       }
@@ -359,7 +359,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   return (
     <div css={chartContainerStyle} data-test-subj="partitionVisChart">
       {!canShowPieChart ? (
-        <VisualizationNoResults hasNegativeValues={hasNegative} chartType={visType} />
+        <VisualizationNoResults
+          hasNegativeValues={hasNegative}
+          chartType={visType}
+          renderComplete={onRenderChange}
+        />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
           <LegendColorPickerWrapperContext.Provider
@@ -397,9 +401,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 flatLegend={flatLegend}
                 tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
-                onElementClick={(args) => {
+                onElementClick={([elementEvent]) => {
+                  // this cast is safe because we are rendering a partition chart
+                  const [layerValues] = elementEvent as PartitionElementEvent;
                   handleSliceClick(
-                    args[0][0] as LayerValue[],
+                    layerValues,
                     bucketColumns,
                     visData,
                     splitChartDimension,

@@ -110,12 +110,12 @@ function getSelectOptions({
 export function getComparisonOptions({
   start,
   end,
-  canGetJobs,
+  showSelectedBoundsOption,
   anomalyDetectionJobsStatus,
   anomalyDetectionJobsData,
   preferredEnvironment,
 }: {
-  canGetJobs?: boolean;
+  showSelectedBoundsOption?: boolean;
   anomalyDetectionJobsStatus?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
   anomalyDetectionJobsData?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'];
   preferredEnvironment?: Environment;
@@ -144,7 +144,6 @@ export function getComparisonOptions({
   }
 
   const hasMLJobsMatchingEnv =
-    canGetJobs &&
     Array.isArray(anomalyDetectionJobsData?.jobs) &&
     anomalyDetectionJobsData?.jobs.some(
       (j) => j.environment === preferredEnvironment
@@ -157,7 +156,7 @@ export function getComparisonOptions({
     msDiff,
   });
 
-  if (canGetJobs) {
+  if (showSelectedBoundsOption) {
     const disabled =
       anomalyDetectionJobsStatus === 'success' && !hasMLJobsMatchingEnv;
     comparisonOptions.push({

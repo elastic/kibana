@@ -5,30 +5,79 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { HistoryOutput } from './components/history_output';
+import { ConsoleFooter } from './components/console_footer';
+import { ConsoleHeader } from './components/console_header';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
-
-// FIXME:PT implement dark mode for the console or light mode switch
+import { HistoryOutput } from './components/history_output';
+import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item';
 
 const ConsoleWindow = styled.div`
   height: 100%;
+  background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
 
-  // FIXME: IMPORTANT - this should NOT be used in production
-  // dark mode on light theme / light mode on dark theme
-  filter: invert(100%);
-
-  .ui-panel {
-    min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
+  .layout {
     height: 100%;
     min-height: 300px;
-    overflow-y: auto;
+
+    &-hideOverflow {
+      overflow: hidden;
+    }
+
+    &-bottomBorder {
+      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
+        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+    }
+
+    &-container {
+      padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
+        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeL};
+    }
+
+    &-header {
+      border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
+    }
+
+    &-footer,
+    &-commandInput {
+      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
+    }
+
+    &-rightPanel {
+      width: 35%;
+      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
+      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
+    }
+
+    &-historyOutput {
+      overflow: auto;
+    }
+
+    &-historyViewport {
+      height: 100%;
+      overflow-x: hidden;
+    }
+  }
+
+  //-----------------------------------------------------------
+  // 👇 Utility classnames for use anywhere inside of Console
+  //-----------------------------------------------------------
+
+  .font-family-code {
+    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
+  }
+
+  .font-style-italic {
+    font-style: italic;
   }
 
   .descriptionList-20_80 {
@@ -45,8 +94,8 @@ const ConsoleWindow = styled.div`
 `;
 
 export const Console = memo<ConsoleProps>(
-  ({ prompt, commands, HelpComponent, managedKey, ...commonProps }) => {
-    const consoleWindowRef = useRef<HTMLDivElement | null>(null);
+  ({ prompt, commands, HelpComponent, TitleComponent, managedKey, ...commonProps }) => {
+    const scrollingViewport = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const managedConsole = useWithManagedConsole(managedKey);
@@ -55,8 +104,8 @@ export const Console = memo<ConsoleProps>(
       // We need the `setTimeout` here because in some cases, the command output
       // will take a bit of time to populate its content due to the use of Promises
       setTimeout(() => {
-        if (consoleWindowRef.current) {
-          consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+        if (scrollingViewport.current) {
+          scrollingViewport.current.scrollTop = scrollingViewport.current.scrollHeight;
         }
       }, 1);
 
@@ -64,46 +113,73 @@ export const Console = memo<ConsoleProps>(
       // it is stored in State and currently not updated if it changes
     }, []);
 
-    const handleConsoleClick = useCallback(() => {
+    const setFocusOnInput = useCallback(() => {
       if (inputFocusRef.current) {
-        inputFocusRef.current();
+        inputFocusRef.current.focus();
       }
     }, []);
+
+    // When the console is shown, set focus to it so that user can just start typing
+    useEffect(() => {
+      if (!managedConsole || managedConsole.isOpen) {
+        setTimeout(setFocusOnInput, 2);
+      }
+    }, [setFocusOnInput, managedConsole]);
 
     return (
       <ConsoleStateProvider
         commands={commands}
         scrollToBottom={scrollToBottom}
+        keyCapture={inputFocusRef}
+        managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        {/*
-          If this is a managed console, then we only show its content if it is open.
-          The state provider, however, continues to be rendered so that as updates to pending
-          commands are received, those will still make it to the console's state and be
-          shown when the console is eventually opened again.
-        */}
-        {!managedConsole || managedConsole.isOpen ? (
-          <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
-            <EuiPanel
-              className="ui-panel"
-              panelRef={consoleWindowRef}
-              data-test-subj={getTestId('mainPanel')}
-            >
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={true}>
-                  <HistoryOutput />
+        <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
+          <EuiFlexGroup
+            direction="column"
+            className="layout"
+            gutterSize="none"
+            responsive={false}
+            data-test-subj={getTestId('mainPanel')}
+          >
+            <EuiFlexItem grow={false} className="layout-container layout-header">
+              <ConsoleHeader TitleComponent={TitleComponent} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow className="layout-hideOverflow">
+              <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
+                <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="none"
+                    responsive={false}
+                    className="layout-hideOverflow"
+                  >
+                    <EuiFlexItem grow className="layout-historyOutput">
+                      <div
+                        className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
+                        ref={scrollingViewport}
+                      >
+                        <HistoryOutput />
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                      <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-footer">
+                      <ConsoleFooter />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <CommandInput prompt={prompt} focusRef={inputFocusRef} />
-                </EuiFlexItem>
+
+                {<SidePanelFlexItem />}
               </EuiFlexGroup>
-            </EuiPanel>
-          </ConsoleWindow>
-        ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ConsoleWindow>
       </ConsoleStateProvider>
     );
   }
 );
-
 Console.displayName = 'Console';

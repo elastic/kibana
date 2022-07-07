@@ -21,7 +21,7 @@ import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
-import { getMaxVersion } from '../../../common/services/get_max_version';
+import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
 
@@ -57,7 +57,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  if (!force && !isAgentUpgradeable(agent, kibanaVersion)) {
+  if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
     return response.customError({
       statusCode: 400,
       body: {
@@ -97,6 +97,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     force,
     rollout_duration_seconds: upgradeDurationSeconds,
     start_time: startTime,
+    batchSize,
   } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
@@ -122,6 +123,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       force,
       upgradeDurationSeconds,
       startTime,
+      batchSize,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
@@ -180,6 +182,10 @@ const checkFleetServerVersion = (versionToUpgradeNumber: string, fleetServerAgen
   ) as string[];
 
   const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
+
+  if (!maxFleetServerVersion) {
+    return;
+  }
 
   if (semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
     throw new Error(

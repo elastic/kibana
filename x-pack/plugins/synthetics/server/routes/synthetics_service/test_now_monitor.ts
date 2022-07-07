@@ -18,6 +18,7 @@ import {
   syntheticsMonitor,
   syntheticsMonitorType,
 } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
 export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
@@ -51,14 +52,15 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
     const testRunId = uuidv4();
 
     const errors = await syntheticsService.triggerConfigs(request, [
-      {
-        ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          monitorId,
-        fields_under_root: true,
-        fields: { config_id: monitorId, test_run_id: testRunId },
-      },
+      formatHeartbeatRequest({
+        // making it enabled, even if it's disabled in the UI
+        monitor: { ...normalizedMonitor.attributes, enabled: true },
+        monitorId,
+        customHeartbeatId: (normalizedMonitor.attributes as MonitorFields)[
+          ConfigKey.CUSTOM_HEARTBEAT_ID
+        ],
+        testRunId,
+      }),
     ]);
 
     if (errors && errors?.length > 0) {

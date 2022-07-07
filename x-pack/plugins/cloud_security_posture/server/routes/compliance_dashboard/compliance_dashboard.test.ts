@@ -13,6 +13,7 @@ import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 describe('compliance dashboard permissions API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -29,6 +30,7 @@ describe('compliance dashboard permissions API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetComplianceDashboardRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];
@@ -53,6 +55,7 @@ describe('compliance dashboard permissions API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetComplianceDashboardRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];

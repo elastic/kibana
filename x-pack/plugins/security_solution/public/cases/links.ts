@@ -15,7 +15,7 @@ export const getCasesLinkItems = (): LinkItem => {
     extend: {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
-        globalNavOrder: 9006,
+        globalNavOrder: 5,
         capabilities: [`${CASES_FEATURE_ID}.read_cases`],
       },
       [SecurityPageName.caseConfigure]: {

@@ -15,7 +15,7 @@ import { ListPageRouteState } from '../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
   .euiIcon {
     width: ${({ theme }) => theme.eui.euiIconSizes.small};
@@ -24,7 +24,7 @@ const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
 
   .text {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-    margin-inline-start: ${({ theme }) => theme.eui.paddingSizes.xs};
+    margin-inline-start: ${({ theme }) => theme.eui.euiSizeXS};
   }
 `;
 

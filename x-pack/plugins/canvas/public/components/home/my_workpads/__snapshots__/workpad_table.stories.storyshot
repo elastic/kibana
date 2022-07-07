@@ -2,7 +2,7 @@
 
 exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
 >
   <div>
     <div
@@ -90,7 +90,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
     />
     <div
       className="euiBasicTable"
@@ -379,7 +379,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 >
                   <a
                     aria-label="Load workpad 'Workpad 2'"
-                    className="euiLink euiLink--primary"
+                    className="euiLink emotion-euiLink-primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-2"
                     onClick={[Function]}
@@ -556,7 +556,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 >
                   <a
                     aria-label="Load workpad 'Workpad 1'"
-                    className="euiLink euiLink--primary"
+                    className="euiLink emotion-euiLink-primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-1"
                     onClick={[Function]}
@@ -733,7 +733,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 >
                   <a
                     aria-label="Load workpad 'Workpad 0'"
-                    className="euiLink euiLink--primary"
+                    className="euiLink emotion-euiLink-primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-0"
                     onClick={[Function]}
@@ -868,7 +868,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
       </div>
       <div>
         <div
-          className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+          className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"

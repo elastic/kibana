@@ -29,7 +29,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import { getFieldTypeName } from './lib/get_field_type_name';
+import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 
 function wrapOnDot(str?: string) {
@@ -246,13 +246,13 @@ export interface DiscoverFieldProps {
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
 
   /**
-   * Callback to edit a runtime field from index pattern
+   * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
   onEditField?: (fieldName: string) => void;
 
   /**
-   * Callback to delete a runtime field from index pattern
+   * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;

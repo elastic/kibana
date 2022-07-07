@@ -6,24 +6,55 @@ exports[`EditableTitle renders 1`] = `
     <ThemeProvider
       theme={[Function]}
     >
-      <CasesProvider
-        value={
-          Object {
-            "features": undefined,
-            "owner": Array [
-              "securitySolution",
-            ],
-            "userCanCrud": true,
+      <QueryClientProvider
+        client={
+          QueryClient {
+            "defaultOptions": Object {
+              "queries": Object {
+                "retry": false,
+              },
+            },
+            "mutationCache": MutationCache {
+              "config": Object {},
+              "listeners": Array [],
+              "mutationId": 0,
+              "mutations": Array [],
+            },
+            "mutationDefaults": Array [],
+            "queryCache": QueryCache {
+              "config": Object {},
+              "listeners": Array [],
+              "queries": Array [],
+              "queriesMap": Object {},
+            },
+            "queryDefaults": Array [],
           }
         }
       >
-        <Memo(EditableTitle)
-          isLoading={false}
-          onSubmit={[MockFunction]}
-          title="Test title"
-          userCanCrud={true}
-        />
-      </CasesProvider>
+        <CasesProvider
+          value={
+            Object {
+              "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
+                "attachmentTypes": Map {},
+              },
+              "features": undefined,
+              "owner": Array [
+                "securitySolution",
+              ],
+              "permissions": Object {
+                "all": true,
+                "read": true,
+              },
+            }
+          }
+        >
+          <Memo(EditableTitle)
+            isLoading={false}
+            onSubmit={[MockFunction]}
+            title="Test title"
+          />
+        </CasesProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   </Component>
 </I18nProvider>

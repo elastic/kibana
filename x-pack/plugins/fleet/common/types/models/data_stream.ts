@@ -19,4 +19,8 @@ export interface DataStream {
     id: string;
     title: string;
   }>;
+  serviceDetails: {
+    environment: string;
+    serviceName: string;
+  } | null;
 }

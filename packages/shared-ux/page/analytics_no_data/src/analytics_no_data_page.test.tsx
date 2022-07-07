@@ -7,30 +7,18 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { mockServicesFactory } from '@kbn/shared-ux-services';
 
-import { Services, AnalyticsNoDataPageProvider } from './services';
+import { AnalyticsNoDataPageProvider } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPage } from './analytics_no_data_page';
+import { getMockServices } from './mocks';
 
 describe('AnalyticsNoDataPage', () => {
   const onDataViewCreated = jest.fn();
 
-  // Workaround to leverage the services package.
-  const { application, data, docLinks, editors, http, permissions, platform } =
-    mockServicesFactory();
-
-  const services: Services = {
-    ...application,
-    ...data,
-    ...docLinks,
-    ...editors,
-    ...http,
-    ...permissions,
-    ...platform,
-    kibanaGuideDocLink: 'Kibana guide',
-  };
+  const services = getMockServices();
 
   afterAll(() => {
     jest.resetAllMocks();
@@ -42,6 +30,8 @@ describe('AnalyticsNoDataPage', () => {
         <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
       </AnalyticsNoDataPageProvider>
     );
+
+    await act(() => new Promise(setImmediate));
 
     expect(component.find(Component).length).toBe(1);
     expect(component.find(Component).props().kibanaGuideDocLink).toBe(services.kibanaGuideDocLink);

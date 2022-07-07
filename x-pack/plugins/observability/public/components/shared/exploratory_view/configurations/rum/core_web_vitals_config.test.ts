@@ -11,12 +11,13 @@ import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { sampleAttributeCoreWebVital } from '../test_data/sample_attribute_cwv';
 import { LCP_FIELD, SERVICE_NAME, USER_AGENT_OS } from '../constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
+import { ReportTypes } from '../../../../..';
 
 describe('Core web vital config test', function () {
   mockAppDataView();
 
   const seriesConfig = getDefaultConfigs({
-    reportType: 'core-web-vitals',
+    reportType: ReportTypes.CORE_WEB_VITAL,
     dataType: 'ux',
     dataView: mockDataView,
     reportConfigMap: obsvReportConfigMap,
@@ -36,7 +37,7 @@ describe('Core web vital config test', function () {
   };
 
   beforeEach(() => {
-    lnsAttr = new LensAttributes([layerConfig]);
+    lnsAttr = new LensAttributes([layerConfig], ReportTypes.CORE_WEB_VITAL);
   });
   it('should return expected json', function () {
     expect(lnsAttr.getJSON()).toEqual(sampleAttributeCoreWebVital);

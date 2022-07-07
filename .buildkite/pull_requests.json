@@ -18,6 +18,7 @@
       "skip_ci_labels": ["skip-ci", "jenkins-ci"],
       "skip_target_branches": ["6.8", "7.11", "7.12"],
       "skip_ci_on_only_changed": [
+        "^dev_docs/",
         "^docs/",
         "^rfcs/",
         "^.ci/.+\\.yml$",
@@ -26,15 +27,17 @@
         "^.ci/Jenkinsfile_[^/]+$",
         "^\\.github/",
         "\\.md$",
+        "\\.mdx$",
+        "^api_docs/.+\\.devdocs\\.json$",
         "^\\.backportrc\\.json$",
         "^nav-kibana-dev\\.docnav\\.json$",
         "^src/dev/prs/kibana_qa_pr_list\\.json$",
         "^\\.buildkite/pull_requests\\.json$"
       ],
       "always_require_ci_on_changed": [
-        "^docs/developer/plugin-list.asciidoc$",
-        "/plugins/[^/]+/readme\\.(md|asciidoc)$"
-      ]
+        "^docs/developer/plugin-list.asciidoc$"
+      ],
+      "kibana_versions_check": true
     }
   ]
 }

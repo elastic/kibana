@@ -39,14 +39,13 @@ export type {
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
+  RuleDefinitionProps,
 } from './types';
-
-export { AlertsTableFlyoutState } from './types';
 
 export {
   ActionForm,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
+  CreateConnectorFlyout,
+  EditConnectorFlyout,
 } from './application/sections/action_connector_form';
 
 export type { ActionGroupWithCondition } from './application/sections';

@@ -1,21 +1,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:newline-test",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-        "fields": "[]",
-        "title": "newline-test"
-      },
-      "type": "index-pattern"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "1",
     "index": "newline-test",
     "source": {

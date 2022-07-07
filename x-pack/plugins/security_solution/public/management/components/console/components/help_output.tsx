@@ -6,7 +6,7 @@
  */
 
 import React, { memo, PropsWithChildren, ReactNode } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { Command } from '..';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -17,18 +17,20 @@ type HelpOutputProps = PropsWithChildren<{
   title?: ReactNode;
 }>;
 export const HelpOutput = memo<HelpOutputProps>(({ title, children }) => {
+  // FIXME:PT Delete this component and add panel below to the Help Command component
+  //          This is left over from the original implementation.
+
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
   return (
-    <EuiCallOut
-      title={title}
-      color="primary"
-      size="s"
-      iconType="help"
+    <EuiPanel
+      hasShadow={false}
+      color="transparent"
+      paddingSize="none"
       data-test-subj={getTestId('helpOutput')}
     >
       {children}
-    </EuiCallOut>
+    </EuiPanel>
   );
 });
 HelpOutput.displayName = 'HelpOutput';

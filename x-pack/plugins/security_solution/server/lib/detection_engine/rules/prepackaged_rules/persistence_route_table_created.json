@@ -19,7 +19,7 @@
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:(CreateRoute or CreateRouteTable) and \nevent.outcome:success\n",
   "references": [
-    "https://docs.datadoghq.com/security_platform/default_rules/cloudtrail-aws-route-table-modified/",
+    "https://docs.datadoghq.com/security_platform/default_rules/aws-ec2-route-table-modified/",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRoute.html",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable"
   ],
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

@@ -38,6 +38,10 @@ export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
   defaultMessage: 'Users',
 });
 
+export const KUBERNETES = i18n.translate('xpack.securitySolution.navigation.kubernetes', {
+  defaultMessage: 'Kubernetes',
+});
+
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
@@ -105,6 +109,13 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
   defaultMessage: 'Blocklist',
 });
+
+export const RESPONSE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.navigation.responseActions',
+  {
+    defaultMessage: 'Response Actions',
+  }
+);
 
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',

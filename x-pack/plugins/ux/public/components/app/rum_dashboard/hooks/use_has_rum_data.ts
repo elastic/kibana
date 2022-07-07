@@ -5,10 +5,28 @@
  * 2.0.
  */
 
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useEsSearch } from '@kbn/observability-plugin/public';
+import {
+  formatHasRumResult,
+  hasRumDataQuery,
+} from '../../../../services/data/has_rum_data_query';
+import { useDataView } from '../local_uifilters/use_data_view';
 
 export function useHasRumData() {
-  return useFetcher((callApmApi) => {
-    return callApmApi('GET /api/apm/observability_overview/has_rum_data', {});
-  }, []);
+  const { dataViewTitle } = useDataView();
+  const { data: response, loading } = useEsSearch(
+    {
+      index: dataViewTitle,
+      ...hasRumDataQuery({}),
+    },
+    [dataViewTitle],
+    {
+      name: 'UXHasRumData',
+    }
+  );
+
+  return {
+    data: formatHasRumResult(response, dataViewTitle),
+    loading,
+  };
 }

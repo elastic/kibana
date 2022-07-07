@@ -291,6 +291,10 @@ In general this plugin provides:
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
+|{kib-repo}blob/{branch}/src/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
+|Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
+
+
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
 |Contains all the components of Kibana's unified search experience. Specifically:
 
@@ -495,8 +499,12 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|(under construction)
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
-|Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
+|Lens is a visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]
@@ -643,10 +651,6 @@ For adding localizations and instrument a ui to support translated content, see 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
 |The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
-|Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]

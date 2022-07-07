@@ -84,8 +84,8 @@ export class DataPublicPlugin
       bfetch,
       usageCollection,
       expressions,
-      nowProvider: this.nowProvider,
       management,
+      nowProvider: this.nowProvider,
     });
 
     const queryService = this.queryService.setup({
@@ -137,6 +137,7 @@ export class DataPublicPlugin
       fieldFormats,
       indexPatterns: dataViews,
       screenshotMode,
+      nowProvider: this.nowProvider,
     });
     setSearchService(search);
 

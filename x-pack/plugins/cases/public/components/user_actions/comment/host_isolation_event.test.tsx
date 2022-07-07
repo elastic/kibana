@@ -36,7 +36,7 @@ describe('UserActionHostIsolationCommentEvent', () => {
       <HostIsolationCommentEvent {...defaultProps()} onClick={onActionsLinkClick} />
     );
 
-    wrapper.find(`[data-test-subj="actions-link-e1"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="actions-link-e1"]`).last().simulate('click');
     expect(onActionsLinkClick).toHaveBeenCalled();
   });
 });

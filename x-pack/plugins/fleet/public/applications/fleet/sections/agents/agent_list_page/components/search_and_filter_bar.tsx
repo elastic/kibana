@@ -16,7 +16,6 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
-  EuiPortal,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
+import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
@@ -66,7 +65,7 @@ const statusFilters = [
 ];
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
@@ -88,7 +87,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  refreshAgents: () => void;
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
+  onClickAddAgent: () => void;
+  onClickAddFleetServer: () => void;
+  visibleAgents: Agent[];
 }> = ({
   agentPolicies,
   draftKuery,
@@ -109,9 +111,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   currentQuery,
   selectedAgents,
   refreshAgents,
+  onClickAddAgent,
+  onClickAddFleetServer,
+  visibleAgents,
 }) => {
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
-
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -142,12 +145,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
 
   return (
     <>
-      {isEnrollmentFlyoutOpen ? (
-        <EuiPortal>
-          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
-        </EuiPortal>
-      ) : null}
-
       {/* Search and filter bar */}
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={4}>
@@ -214,7 +211,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
                       isSelected={isTagsFilterOpen}
                       hasActiveFilters={selectedTags.length > 0}
-                      numFilters={selectedTags.length}
+                      numActiveFilters={selectedTags.length}
+                      numFilters={tags.length}
                       disabled={tags.length === 0}
                       data-test-subj="agentList.tagsFilter"
                     >
@@ -325,16 +323,47 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                fill
-                iconType="plusInCircle"
-                onClick={() => setIsEnrollmentFlyoutOpen(true)}
-                data-test-subj="addAgentButton"
-              >
-                <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
-              </EuiButton>
-            </EuiFlexItem>
+            {selectedAgents.length === 0 && (
+              <>
+                <EuiFlexItem>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                        defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                      />
+                    }
+                  >
+                    <EuiButton
+                      onClick={onClickAddFleetServer}
+                      data-test-subj="addFleetServerButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.addFleetServerButton"
+                        defaultMessage="Add Fleet Server"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.addAgentButton.tooltip"
+                        defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
+                      />
+                    }
+                  >
+                    <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.addButton"
+                        defaultMessage="Add agent"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </>
+            )}
             <EuiFlexItem grow={false}>
               <AgentBulkActions
                 totalAgents={totalAgents}
@@ -342,7 +371,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 selectionMode={selectionMode}
                 currentQuery={currentQuery}
                 selectedAgents={selectedAgents}
+                visibleAgents={visibleAgents}
                 refreshAgents={refreshAgents}
+                allTags={tags}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

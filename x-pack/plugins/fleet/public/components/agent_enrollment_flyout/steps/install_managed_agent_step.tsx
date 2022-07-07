@@ -23,19 +23,32 @@ export const InstallManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
   isK8s,
+  isComplete,
+  fullCopyButton,
+  onCopy,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   isK8s?: K8sMode;
   installCommand: CommandsByPlatform;
+  isComplete?: boolean;
+  fullCopyButton?: boolean;
+  onCopy?: () => void;
 }): EuiContainedStepProps => {
+  const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
+  const status = isComplete ? 'complete' : nonCompleteStatus;
   return {
-    status: selectedApiKeyId ? undefined : 'disabled',
+    status,
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
     children: selectedApiKeyId && apiKeyData && (
-      <InstallSection installCommand={installCommand} isK8s={isK8s} />
+      <InstallSection
+        installCommand={installCommand}
+        isK8s={isK8s}
+        onCopy={onCopy}
+        fullCopyButton={fullCopyButton}
+      />
     ),
   };
 };

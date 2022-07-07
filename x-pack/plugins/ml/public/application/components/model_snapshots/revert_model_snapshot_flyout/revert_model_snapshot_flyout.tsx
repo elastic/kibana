@@ -204,7 +204,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                         <>
                           <strong>{s.snapshot_id}</strong>
                           <EuiText size="s" color="subdued">
-                            <p className="euiTextColor--subdued">{s.description}</p>
+                            <p>{s.description}</p>
                           </EuiText>
                         </>
                       ),

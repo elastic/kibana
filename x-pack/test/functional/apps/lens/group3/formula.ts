@@ -205,10 +205,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsDatatable_metrics > lns-dimensionTrigger',
-        'lnsDatatable_metrics > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsDatatable_metrics > lns-dimensionTrigger',
+        to: 'lnsDatatable_metrics > lns-empty-dimension',
+      });
       expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222,420');
       expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222,420');
     });
@@ -249,15 +249,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.createLayer('referenceLine');
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
-          operation: 'formula',
-          formula: `count()`,
-          keepOpen: true,
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
+        operation: 'formula',
+        formula: `count()`,
+        keepOpen: true,
+      });
 
       await PageObjects.lens.switchToStaticValue();
       await PageObjects.lens.closeDimensionEditor();
@@ -280,10 +277,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `0`,
       });
 
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsDatatable_metrics > lns-dimensionTrigger',
-        'lnsDatatable_metrics > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsDatatable_metrics > lns-dimensionTrigger',
+        to: 'lnsDatatable_metrics > lns-empty-dimension',
+      });
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
     });

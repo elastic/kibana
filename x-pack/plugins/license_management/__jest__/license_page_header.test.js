@@ -16,7 +16,7 @@ describe('LicenseStatus component', () => {
       },
       LicensePageHeader
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display display warning is expired', () => {
     const rendered = getComponent(
@@ -25,6 +25,6 @@ describe('LicenseStatus component', () => {
       },
       LicensePageHeader
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });

@@ -30,6 +30,12 @@ export interface FormulaPublicApi {
     column: {
       formula: string;
       label?: string;
+      format?: {
+        id: string;
+        params?: {
+          decimals: number;
+        };
+      };
     },
     layer: PersistedIndexPatternLayer,
     dataView: DataView
@@ -51,7 +57,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
   };
 
   return {
-    insertOrReplaceFormulaColumn: (id, { formula, label }, layer, dataView) => {
+    insertOrReplaceFormulaColumn: (id, { formula, label, format }, layer, dataView) => {
       const indexPattern = getCachedLensIndexPattern(dataView);
 
       return insertOrReplaceFormulaColumn(
@@ -65,6 +71,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
           isBucketed: false,
           params: {
             formula,
+            format,
           },
         },
         { ...layer, indexPatternId: indexPattern.id },

@@ -66,7 +66,7 @@ export const fetchIndexPattern = async (
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
       if (options.fetchKibanaIndexForStringIndexes) {
-        indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
+        indexPattern = (await indexPatternsService.find(indexPatternValue, 1)).find(
           (index) => index.title === indexPatternValue
         );
       }

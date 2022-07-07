@@ -17,7 +17,7 @@ interface LegendProps {
 }
 
 const StyledFlexItem = euiStyled(EuiFlexItem)`
-  margin-right: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
   max-width: 7%;
   min-width: 160px;
 `;

@@ -16,8 +16,8 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { CoreService } from '../../types';
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 
 /** @public */
 export interface LoadingCountSetup {

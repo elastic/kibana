@@ -126,7 +126,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
 
 export const mockGetModuleResponse: Module[] = [
   {
-    id: 'siem_auditbeat',
+    id: 'security_linux_v3',
     title: 'SIEM Auditbeat',
     description:
       'Detect suspicious network activity and unusual processes in Auditbeat data (beta)',
@@ -136,7 +136,7 @@ export const mockGetModuleResponse: Module[] = [
     query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
     jobs: [
       {
-        id: 'rare_process_by_host_linux_ecs',
+        id: 'rare_process_by_host_linux',
         config: {
           job_type: 'anomaly_detector',
           description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
@@ -203,7 +203,7 @@ export const mockGetModuleResponse: Module[] = [
     kibana: {},
   },
   {
-    id: 'siem_winlogbeat',
+    id: 'security_windows_v3',
     title: 'SIEM Winlogbeat',
     description: 'Detect unusual processes and network activity in Winlogbeat data (beta)',
     type: 'Winlogbeat data',
@@ -356,7 +356,7 @@ export const mockGetModuleResponse: Module[] = [
 
 export const checkRecognizerSuccess: RecognizerModule[] = [
   {
-    id: 'siem_auditbeat',
+    id: 'security_linux_v3',
     title: 'SIEM Auditbeat',
     query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
     description:
@@ -512,7 +512,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     earliestTimestampMs: 1569812391387,
     latestResultsTimestampMs: 1571022900000,
     isSingleMetricViewerJob: true,
-    moduleId: 'siem_auditbeat',
+    moduleId: 'security_linux_v3',
     defaultIndexPattern: 'auditbeat-*',
     isCompatible: true,
     isInstalled: true,
@@ -533,7 +533,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     datafeedIndices: ['auditbeat-*'],
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
-    moduleId: 'siem_auditbeat',
+    moduleId: 'security_linux_v3',
     defaultIndexPattern: 'auditbeat-*',
     isCompatible: true,
     isInstalled: true,
@@ -555,7 +555,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     description: 'SIEM Winlogbeat: Detect unusually rare processes on Windows (beta)',
     groups: ['process', 'siem', 'winlogbeat'],
     defaultIndexPattern: 'winlogbeat-*',
-    moduleId: 'siem_winlogbeat',
+    moduleId: 'security_windows_v3',
     isCompatible: false,
     isInstalled: false,
     isElasticJob: true,

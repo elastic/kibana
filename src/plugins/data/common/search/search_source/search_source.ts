@@ -75,14 +75,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import { normalizeSortRequest } from './normalize_sort_request';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  AggConfigSerialized,
-  IIndexPattern,
-  IndexPattern,
-  IndexPatternField,
-  SerializedSearchSourceFields,
-} from '../..';
+  ExpressionAstExpression,
+  buildExpression,
+  buildExpressionFunction,
+} from '@kbn/expressions-plugin/common';
+import { normalizeSortRequest } from './normalize_sort_request';
+
+import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -107,7 +109,14 @@ import {
   isPartialResponse,
   UI_SETTINGS,
 } from '../..';
+import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
+import {
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
+  filtersToAst,
+  queryToAst,
+} from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -125,7 +134,17 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
+  aggs: AggsStart;
   search: ISearchGeneric;
+}
+
+interface ExpressionAstOptions {
+  /**
+   * When truthy, it will include either `esaggs` or `esdsl` function to the expression chain.
+   * In this case, the expression will perform a search and return the `datatable` structure.
+   * @default true
+   */
+  asDatatable?: boolean;
 }
 
 /** @public **/
@@ -625,7 +644,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: IIndexPattern) {
+  private getIndexType(index?: DataView) {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
@@ -633,7 +652,7 @@ export class SearchSource {
     typeof fld === 'string' ? fld : fld.field;
 
   private getFieldsWithoutSourceFilters(
-    index: IndexPattern | undefined,
+    index: DataView | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
@@ -661,14 +680,14 @@ export class SearchSource {
     }
     // we need to get the list of fields from an index pattern
     return fields
-      .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({ field: fld.name }));
+      .filter((fld: DataViewField) => filterSourceFields(fld.name))
+      .map((fld: DataViewField) => ({ field: fld.name }));
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
     docvaluesIndex: Record<string, object>,
     fld: SearchFieldValue,
-    index?: IndexPattern
+    index?: DataView
   ) {
     if (typeof fld === 'string') {
       return fld;
@@ -866,7 +885,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.id;
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
@@ -924,5 +943,55 @@ export class SearchSource {
     }
 
     return [filterField];
+  }
+
+  /**
+   * Generates an expression abstract syntax tree using the fields set in the current search source and its ancestors.
+   * The produced expression from the returned AST will return the `datatable` structure.
+   * If the `asDatatable` option is truthy or omitted, the generator will use the `esdsl` function to perform the search.
+   * When the `aggs` field is present, it will use the `esaggs` function instead.
+   * @returns The expression AST.
+   */
+  toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
+    const searchRequest = this.mergeProps();
+    const { body, index, query } = searchRequest;
+
+    const filters = (
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
+    ) as Filter[] | Filter | undefined;
+    const ast = buildExpression([
+      buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
+        q: query?.map(queryToAst),
+        filters: filters && filtersToAst(filters),
+      }),
+    ]).toAst();
+
+    if (!asDatatable) {
+      return ast;
+    }
+
+    const aggsField = this.getField('aggs');
+    const aggs = (typeof aggsField === 'function' ? aggsField() : aggsField) as
+      | AggConfigs
+      | AggConfigSerialized[]
+      | undefined;
+    const aggConfigs =
+      aggs instanceof AggConfigs
+        ? aggs
+        : index && aggs && this.dependencies.aggs.createAggConfigs(index, aggs);
+
+    if (aggConfigs) {
+      ast.chain.push(...aggConfigs.toExpressionAst().chain);
+    } else {
+      ast.chain.push(
+        buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
+          size: body?.size,
+          dsl: JSON.stringify({}),
+          index: index?.id,
+        }).toAst()
+      );
+    }
+
+    return ast;
   }
 }

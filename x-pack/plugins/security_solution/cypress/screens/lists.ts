@@ -14,5 +14,5 @@ export const VALUE_LIST_TYPE_SELECTOR = '[data-test-subj="value-lists-form-selec
 export const VALUE_LIST_DELETE_BUTTON = (name: string) =>
   `[data-test-subj="action-delete-value-list-${name}"]`;
 export const VALUE_LIST_FILES = '[data-test-subj*="action-delete-value-list-"]';
-export const VALUE_LIST_CLOSE_BUTTON = '[data-test-subj="value-lists-modal-close-action"]';
+export const VALUE_LIST_CLOSE_BUTTON = '[data-test-subj="value-lists-flyout-close-action"]';
 export const VALUE_LIST_EXPORT_BUTTON = '[data-test-subj="action-export-value-list"]';

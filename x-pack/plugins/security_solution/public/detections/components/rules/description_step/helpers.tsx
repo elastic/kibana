@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -165,7 +167,7 @@ const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 const TechniqueLinkItem = styled(EuiButtonEmpty)`
@@ -556,7 +558,7 @@ export const buildRequiredFieldsDescription = (
   label: string,
   requiredFields: RequiredFieldArray
 ): ListItems[] => {
-  if (requiredFields == null) {
+  if (isEmpty(requiredFields)) {
     return [];
   }
 
@@ -569,7 +571,11 @@ export const buildRequiredFieldsDescription = (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
                 <EuiFlexItem grow={false}>
-                  <FieldIcon data-test-subj="field-type-icon" type={rF.type} />
+                  <FieldIcon
+                    data-test-subj="field-type-icon"
+                    type={castEsToKbnFieldTypeName(rF.type)}
+                    label={rF.type}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FieldTypeText grow={false} size={'s'}>

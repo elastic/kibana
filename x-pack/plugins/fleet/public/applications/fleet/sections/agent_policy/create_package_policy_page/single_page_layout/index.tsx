@@ -54,16 +54,21 @@ import type {
 
 import { IntegrationBreadcrumb } from '../components';
 
+import type { PackagePolicyValidationResults } from '../services';
+import { validatePackagePolicy, validationHasErrors } from '../services';
+
+import {
+  StepConfigurePackagePolicy,
+  StepDefinePackagePolicy,
+  SelectedPolicyTab,
+  StepSelectHosts,
+} from '../components';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import type { PackagePolicyValidationResults } from './services';
-import { validatePackagePolicy, validationHasErrors } from './services';
-import { StepConfigurePackagePolicy } from './step_configure_package';
-import { StepDefinePackagePolicy } from './step_define_package_policy';
-import { SelectedPolicyTab, StepSelectHosts } from './step_select_hosts';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
-    padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+    padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
   // compensating for EuiBottomBar hiding the content
@@ -134,7 +139,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '', // TODO: Blank for now as we only support default output
+    output_id: '',
     inputs: [],
   });
 
@@ -535,7 +540,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
-
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>

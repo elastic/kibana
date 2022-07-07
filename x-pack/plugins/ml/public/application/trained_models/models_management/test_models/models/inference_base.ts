@@ -74,17 +74,17 @@ export abstract class InferenceBase<TInferResponse> {
 
   protected abstract infer(): Promise<TInferResponse>;
 
-  protected getInferenceConfig(): estypes.AggregationsClassificationInferenceOptions | undefined {
+  protected getInferenceConfig(): estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] {
     return this.model.inference_config[
-      this.inferenceType as keyof estypes.AggregationsInferenceConfigContainer
+      this.inferenceType as keyof estypes.MlInferenceConfigCreateContainer
     ];
   }
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
-    const options: estypes.AggregationsClassificationInferenceOptions | undefined =
+    const options: estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] =
       this.getInferenceConfig();
 
-    if (options?.num_top_classes !== undefined && options?.num_top_classes > 0) {
+    if (options && 'num_top_classes' in options && (options?.num_top_classes ?? 0 > 0)) {
       return {};
     }
 

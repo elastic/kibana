@@ -13,6 +13,7 @@ import { useServices, NoDataViewsPromptServices } from './services';
 
 // TODO: https://github.com/elastic/kibana/issues/127695
 export interface Props {
+  /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
 }
 
@@ -22,10 +23,7 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
  * A service-enabled component that provides Kibana-specific functionality to the `NoDataViewsPrompt`
  * component.
  *
- * Use of this component requires both the `EuiTheme` context as well as either a configured Shared UX
- * `ServicesProvider` or the `ServicesContext` provided by the Shared UX public plugin contract.
- *
- * See shared-ux/public/services for information.
+ * Use of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider.
  */
 export const NoDataViewsPrompt = ({ onDataViewCreated }: Props) => {
   const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
@@ -57,7 +55,6 @@ export const NoDataViewsPrompt = ({ onDataViewCreated }: Props) => {
       onSave: (dataView) => {
         onDataViewCreated(dataView);
       },
-      showEmptyPrompt: false,
     });
 
     if (setDataViewEditorRef) {

@@ -114,6 +114,7 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
         [tableType]: {
           ...state.page.queries[tableType],
           sort,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },

@@ -164,7 +164,7 @@ describe('IndexParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
 
-    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').simulate('click');
+    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').find('button').simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

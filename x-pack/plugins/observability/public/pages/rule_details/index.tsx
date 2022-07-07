@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutSize,
   EuiButtonIcon,
   EuiPanel,
   EuiTitle,
@@ -36,12 +37,12 @@ import {
   RuleType,
   getNotifyWhenOptions,
   RuleEventLogListProps,
-  AlertsTableFlyoutState,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
@@ -50,11 +51,10 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
-import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
+import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
 import { useFetchLast24hRuleExecutionLog } from '../../hooks/use_fetch_last24h_rule_execution_log';
-import { formatInterval } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
@@ -67,9 +67,9 @@ export function RuleDetailsPage() {
       ruleTypeRegistry,
       getRuleStatusDropdown,
       getEditAlertFlyout,
-      actionTypeRegistry,
       getRuleEventLogList,
       getAlertsStateTable,
+      getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
@@ -79,7 +79,7 @@ export function RuleDetailsPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { isLoadingExecutionLog, executionLog } = useFetchLast24hRuleExecutionLog({ http, ruleId });
-  const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
+  const { ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
 
@@ -160,24 +160,11 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const getRuleConditionsWording = () => {
-    const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
-    return (
-      <>
-        {numberOfConditions}&nbsp;
-        {i18n.translate('xpack.observability.ruleDetails.conditions', {
-          defaultMessage: 'condition{s}',
-          values: { s: numberOfConditions > 1 ? 's' : '' },
-        })}
-      </>
-    );
-  };
-
   const alertStateProps = {
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
     id: `case-details-alerts-o11y`,
-    flyoutState: AlertsTableFlyoutState.external,
+    flyoutSize: 's' as EuiFlyoutSize,
     featureIds: [features] as AlertConsumers[],
     query: {
       bool: {
@@ -200,13 +187,9 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: rule ? (
-        getRuleEventLogList({
-          rule,
-        } as RuleEventLogListProps)
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      ),
+      content: getRuleEventLogList({
+        rule,
+      } as RuleEventLogListProps),
     },
     {
       id: ALERT_LIST_TAB,
@@ -255,17 +238,15 @@ export function RuleDetailsPage() {
       disableRule: async () => await disableRule({ http, id: rule.id }),
       onRuleChanged: () => reloadRule(),
       isEditable: hasEditButton,
-      snoozeRule: async (snoozeEndTime: string | -1) => {
-        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+      snoozeRule: async (snoozeSchedule) => {
+        await snoozeRule({ http, id: rule.id, snoozeSchedule });
       },
-      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+      unsnoozeRule: async (scheduleIds) => await unsnoozeRule({ http, id: rule.id, scheduleIds }),
     });
 
-  const getNotifyText = () =>
-    NOTIFY_WHEN_OPTIONS.current.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
-    rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
+      data-test-subj="ruleDetails"
       pageHeader={{
         pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
@@ -284,11 +265,17 @@ export function RuleDetailsPage() {
                         iconType="boxesHorizontal"
                         aria-label="More"
                         onClick={handleOpenPopover}
+                        data-test-subj="moreButton"
                       />
                     }
                   >
                     <EuiFlexGroup direction="column" alignItems="flexStart">
-                      <EuiButtonEmpty size="s" iconType="pencil" onClick={handleEditRule}>
+                      <EuiButtonEmpty
+                        data-test-subj="editRuleButton"
+                        size="s"
+                        iconType="pencil"
+                        onClick={handleEditRule}
+                      >
                         <EuiSpacer size="s" />
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.editRule', {
@@ -302,6 +289,7 @@ export function RuleDetailsPage() {
                         iconType="trash"
                         color="danger"
                         onClick={handleRemoveRule}
+                        data-test-subj="deleteRuleButton"
                       >
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
@@ -332,7 +320,7 @@ export function RuleDetailsPage() {
     >
       <EuiFlexGroup wrap={true} gutterSize="m">
         {/* Left side of Rule Summary */}
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem data-test-subj="ruleSummaryRuleStatus" grow={1}>
           <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexGroup>
@@ -408,112 +396,7 @@ export function RuleDetailsPage() {
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-
-        {/* Right side of Rule Summary */}
-
-        <EuiFlexItem grow={3}>
-          <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiTitle size="s">
-                <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.observability.ruleDetails.definition', {
-                    defaultMessage: 'Definition',
-                  })}
-                </EuiFlexItem>
-              </EuiTitle>
-              {hasEditButton && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType={'pencil'} onClick={() => setEditFlyoutVisible(true)} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup alignItems="baseline">
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.ruleType', {
-                      defaultMessage: 'Rule type',
-                    })}
-                  </ItemTitleRuleSummary>
-                  <ItemValueRuleSummary
-                    itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
-                  />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup alignItems="flexStart" responsive={false}>
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.description', {
-                      defaultMessage: 'Description',
-                    })}
-                  </ItemTitleRuleSummary>
-                  <ItemValueRuleSummary
-                    itemValue={ruleTypeRegistry.get(rule.ruleTypeId).description}
-                  />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.conditionsTitle', {
-                      defaultMessage: 'Conditions',
-                    })}
-                  </ItemTitleRuleSummary>
-                  <EuiFlexItem grow={3}>
-                    <EuiFlexGroup alignItems="center">
-                      {hasEditButton ? (
-                        <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
-                          <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                        </EuiButtonEmpty>
-                      ) : (
-                        <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                      )}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.runsEvery', {
-                      defaultMessage: 'Runs every',
-                    })}
-                  </ItemTitleRuleSummary>
-
-                  <ItemValueRuleSummary itemValue={formatInterval(rule.schedule.interval)} />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.notifyWhen', {
-                      defaultMessage: 'Notify',
-                    })}
-                  </ItemTitleRuleSummary>
-                  <ItemValueRuleSummary itemValue={String(getNotifyText())} />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
-                <EuiFlexGroup alignItems="baseline">
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.actions', {
-                      defaultMessage: 'Actions',
-                    })}
-                  </ItemTitleRuleSummary>
-                  <EuiFlexItem grow={3}>
-                    <Actions ruleActions={rule.actions} actionTypeRegistry={actionTypeRegistry} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
+        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
@@ -527,22 +410,20 @@ export function RuleDetailsPage() {
           onSave: reloadRule,
         })}
       <DeleteModalConfirmation
-        onDeleted={async () => {
+        onDeleted={() => {
           setRuleToDelete([]);
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
-        onErrors={async () => {
+        onErrors={() => {
           setRuleToDelete([]);
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
-        onCancel={() => {}}
+        onCancel={() => setRuleToDelete([])}
         apiDeleteCall={deleteRules}
         idsToDelete={ruleToDelete}
         singleTitle={rule.name}
         multipleTitle={rule.name}
-        setIsLoadingState={(isLoading: boolean) => {
-          setIsPageLoading(isLoading);
-        }}
+        setIsLoadingState={() => setIsPageLoading(true)}
       />
       {errorRule && toasts.addDanger({ title: errorRule })}
     </ObservabilityPageTemplate>

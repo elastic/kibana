@@ -69,7 +69,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   );
 
   useEffect(() => {
-    if (isMLAvailable) {
+    if (isMLAvailable && hasMLJob) {
       const anomalyParams = {
         listOfMonitorIds: [monitorId],
         dateStart: absoluteDateRangeStart,
@@ -80,7 +80,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId, isMLAvailable]);
+  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId, isMLAvailable, hasMLJob]);
 
   useEffect(() => {
     const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };

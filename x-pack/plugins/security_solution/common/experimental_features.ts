@@ -15,12 +15,13 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  usersEnabled: true,
+  kubernetesEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
+  policyResponseInFleetEnabled: false,
   groupedNavigation: true,
 
   /**
@@ -37,6 +38,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Endpoint response actions console in various areas of the app
    */
   responseActionsConsoleEnabled: false,
+  /**
+   * Enables the cloud security posture navigation inside the security solution
+   */
+  cloudSecurityPostureNavigation: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

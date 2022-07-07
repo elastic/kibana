@@ -18,7 +18,6 @@ import { generateTablePaginationOptions } from '../../../common/components/pagin
 import { createFilter } from '../../../common/containers/helpers';
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  DocValueFields,
   SortField,
   PageInfoPaginated,
   HostsUncommonProcessesEdges,
@@ -48,7 +47,6 @@ export interface UncommonProcessesArgs {
 }
 
 interface UseUncommonProcesses {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
   indexNames: string[];
@@ -58,7 +56,6 @@ interface UseUncommonProcesses {
 }
 
 export const useUncommonProcesses = ({
-  docValueFields,
   filterQuery,
   endDate,
   indexNames,
@@ -176,7 +173,6 @@ export const useUncommonProcesses = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -192,7 +188,7 @@ export const useUncommonProcesses = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, startDate]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate]);
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);

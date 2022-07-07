@@ -899,4 +899,81 @@ describe('bulkEdit()', () => {
       );
     });
   });
+
+  describe('task manager', () => {
+    test('should call task manager method bulkUpdateSchedules if operation set new schedules', async () => {
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(['task-123'], {
+        interval: '10m',
+      });
+    });
+
+    test('should not call task manager method bulkUpdateSchedules if operation is not set schedule', async () => {
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'tags',
+            operation: 'set',
+            value: ['test-tag'],
+          },
+        ],
+      });
+
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+  });
 });

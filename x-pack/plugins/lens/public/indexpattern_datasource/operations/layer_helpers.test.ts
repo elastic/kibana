@@ -41,6 +41,9 @@ import { CoreStart } from '@kbn/core/public';
 
 jest.mock('.');
 jest.mock('../../id_generator');
+jest.mock('../dimension_panel/reference_editor', () => ({
+  ReferenceEditor: () => null,
+}));
 
 const indexPatternFields = [
   {
@@ -159,24 +162,38 @@ describe('state_helpers', () => {
         params: { window: 5 },
         references: ['formulaX0'],
       };
+
       expect(
         copyColumn({
-          layer: {
-            indexPatternId: '',
-            columnOrder: [],
-            columns: {
-              source,
-              formulaX0: sum,
-              formulaX1: movingAvg,
-              formulaX2: math,
+          layers: {
+            layer: {
+              indexPatternId: '',
+              columnOrder: [],
+              columns: {
+                source,
+                formulaX0: sum,
+                formulaX1: movingAvg,
+                formulaX2: math,
+              },
             },
           },
-          targetId: 'copy',
-          sourceColumn: source,
+          source: {
+            column: source,
+            groupId: 'one',
+            columnId: 'source',
+            layerId: 'layer',
+            dataView: indexPattern,
+            filterOperations: () => true,
+          },
+          target: {
+            columnId: 'copy',
+            groupId: 'one',
+            dataView: indexPattern,
+            layerId: 'layer',
+            filterOperations: () => true,
+          },
           shouldDeleteSource: false,
-          indexPattern,
-          sourceColumnId: 'source',
-        })
+        }).layer
       ).toEqual({
         indexPatternId: '',
         columnOrder: [
@@ -1355,8 +1372,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
@@ -1422,8 +1438,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         }),
-        'col1',
-        'willBeReference'
+        'col1'
       );
     });
 
@@ -2374,8 +2389,7 @@ describe('state_helpers', () => {
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
         { indexPatternId: '1', columnOrder: ['col1', 'col2'], columns: { col1: termsColumn } },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 

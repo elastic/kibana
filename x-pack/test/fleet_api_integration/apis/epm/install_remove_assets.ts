@@ -4,13 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common';
+import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+
+function checkErrorWithResponseDataOrThrow(err: any) {
+  if (!err?.response?.data) {
+    throw err;
+  }
+}
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -57,15 +65,18 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/132333
-    describe.skip('uninstalls all assets when uninstalling a package', async () => {
-      before(async () => {
+    describe('uninstalls all assets when uninstalling a package', async () => {
+      // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
+      // and then we'll test that not artifacts are left behind.
+      before(() => {
         if (!server.enabled) return;
-        // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
-        // and then we'll test that not artifacts are left behind.
-        await installPackage(pkgName, pkgVersion);
-        await uninstallPackage(pkgName, pkgVersion);
+        return installPackage(pkgName, pkgVersion);
       });
+      before(() => {
+        if (!server.enabled) return;
+        return uninstallPackage(pkgName, pkgVersion);
+      });
+
       it('should have uninstalled the index templates', async function () {
         const resLogsTemplate = await es.transport.request(
           {
@@ -199,6 +210,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_dashboard',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resDashboard = err;
         }
         expect(resDashboard.response.data.statusCode).equal(404);
@@ -209,6 +221,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_dashboard2',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resDashboard2 = err;
         }
         expect(resDashboard2.response.data.statusCode).equal(404);
@@ -219,6 +232,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_visualization',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resVis = err;
         }
         expect(resVis.response.data.statusCode).equal(404);
@@ -229,6 +243,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_search',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
@@ -239,6 +254,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'test-*',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resIndexPattern = err;
         }
         expect(resIndexPattern.response.data.statusCode).equal(404);
@@ -249,6 +265,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_osquery_pack_asset',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resOsqueryPackAsset = err;
         }
         expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
@@ -259,6 +276,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_osquery_saved_query',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resOsquerySavedQuery = err;
         }
         expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
@@ -271,6 +289,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'all_assets',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           res = err;
         }
         expect(res.response.data.statusCode).equal(404);
@@ -482,6 +501,7 @@ const expectAssetsInstalled = ({
         id: 'invalid',
       });
     } catch (err) {
+      checkErrorWithResponseDataOrThrow(err);
       resInvalidTypeIndexPattern = err;
     }
     expect(resInvalidTypeIndexPattern.response.data.statusCode).equal(404);
@@ -614,6 +634,10 @@ const expectAssetsInstalled = ({
           type: 'ingest_pipeline',
         },
         {
+          id: 'metrics-all_assets.test_metrics-0.1.0',
+          type: 'ingest_pipeline',
+        },
+        {
           id: 'default',
           type: 'ml_model',
         },
@@ -742,6 +766,7 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     });
   });
 };

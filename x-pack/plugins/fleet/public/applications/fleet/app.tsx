@@ -58,6 +58,7 @@ import { MissingESRequirementsPage } from './sections/agents/agent_requirements_
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -324,6 +325,10 @@ export const AppRoutes = memo(
 
           <Route path={FLEET_ROUTING_PATHS.settings}>
             <SettingsApp />
+          </Route>
+
+          <Route path={FLEET_ROUTING_PATHS.debug}>
+            <DebugPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}
