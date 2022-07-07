@@ -26399,7 +26399,6 @@
     "xpack.securitySolution.endpointManagemnet.noPermissionsText": "您没有所需的 Kibana 权限，无法使用 Elastic Security 管理",
     "xpack.securitySolution.endpointPolicyStatus.revisionNumber": "修订版 {revNumber}",
     "xpack.securitySolution.endpointPolicyStatus.tooltipTitleLabel": "已应用策略",
-    "xpack.securitySolution.endpointResponseActions.isolate.errorMessage": "隔离操作失败，出现：{errors}",
     "xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle": "失败",
     "xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle": "成功",
     "xpack.securitySolution.endpointResponseActions.status.agentStatus": "代理状态",

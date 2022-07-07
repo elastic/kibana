@@ -14,6 +14,10 @@ import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
+const additionalProps = {
+  className: 'euiTruncateText',
+};
+
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
     return getArgumentsForCommand(commandDef).map((usage) => {
@@ -24,10 +28,6 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
       );
     });
   }, [commandDef]);
-
-  const additionalProps = () => ({
-    className: 'euiTruncateText',
-  });
 
   return (
     <>
@@ -84,13 +84,6 @@ export interface CommandUsageProps {
 export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
-
-  const additionalProps = useMemo(
-    () => ({
-      className: 'euiTruncateText',
-    }),
-    []
-  );
 
   type CommandDetails = Array<{
     title: string;
