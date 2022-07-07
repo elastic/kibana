@@ -46,29 +46,26 @@ import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
-  IScopedClusterClient,
   ElasticsearchServicePreboot,
 } from './elasticsearch';
-import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
+import type {
+  HttpServicePreboot,
+  HttpServiceSetup,
+  HttpServiceStart,
+  IRouter,
+  RequestHandler,
+} from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { SavedObjectsClientContract } from './saved_objects/types';
-import {
-  ISavedObjectTypeRegistry,
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
-  SavedObjectsClientProviderOptions,
-} from './saved_objects';
+import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
+import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -80,6 +77,9 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
+import type { CoreRequestHandlerContext } from './core_route_handler_context';
+import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
+import { KibanaResponseFactory, RouteMethod } from './http';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -122,9 +122,6 @@ export type {
 } from './context';
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { CspConfig } from './csp';
-export type { ICspConfig } from './csp';
-
 export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
 export type {
   ElasticsearchServicePreboot,
@@ -148,9 +145,9 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
+  ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 
-export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export type {
   AuthenticationHandler,
   AuthHeaders,
@@ -174,7 +171,6 @@ export type {
   HttpResponsePayload,
   HttpServerInfo,
   HttpServicePreboot,
-  HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
@@ -197,7 +193,6 @@ export type {
   OnPreResponseExtensions,
   OnPreResponseInfo,
   RedirectResponseOptions,
-  RequestHandler,
   RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
@@ -206,7 +201,6 @@ export type {
   ResponseHeaders,
   KibanaResponseFactory,
   RouteConfig,
-  IRouter,
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
@@ -225,10 +219,13 @@ export type {
   SessionStorageFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  KibanaRequest,
+  ICspConfig,
+  IExternalUrlConfig,
+  IExternalUrlPolicy,
 } from './http';
 
-export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest } from './http';
-export type { KibanaRequest } from './http';
+export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest, CspConfig } from './http';
 
 export type {
   HttpResourcesRenderOptions,
@@ -382,6 +379,7 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
+  SavedObjectsRequestHandlerContext,
 } from './saved_objects';
 
 export type {
@@ -393,6 +391,7 @@ export type {
   UiSettingsServiceStart,
   UserProvidedValues,
   DeprecationSettings,
+  UiSettingsRequestHandlerContext,
 } from './ui_settings';
 
 export type {
@@ -416,6 +415,7 @@ export type {
   GetDeprecationsContext,
   DeprecationsServiceSetup,
   DeprecationsClient,
+  DeprecationsRequestHandlerContext,
 } from './deprecations';
 
 export type { AppCategory } from '../types';
@@ -460,15 +460,20 @@ export type {
   OptInConfig,
   ShipperClassConstructor,
   TelemetryCounter,
+  TelemetryCounterType,
 } from '@kbn/analytics-client';
-export { TelemetryCounterType } from '@kbn/analytics-client';
 export type {
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
 
-/** @public **/
+export type { CoreRequestHandlerContext } from './core_route_handler_context';
+
+/**
+ * Base, abstract type for request handler contexts.
+ * @public
+ **/
 export interface RequestHandlerContextBase {
   /**
    * Await all the specified context parts and return them.
@@ -486,7 +491,7 @@ export interface RequestHandlerContextBase {
 }
 
 /**
- * Base context passed to a route handler.
+ * Base context passed to a route handler, containing the `core` context part.
  *
  * @public
  */
@@ -494,43 +499,21 @@ export interface RequestHandlerContext extends RequestHandlerContextBase {
   core: Promise<CoreRequestHandlerContext>;
 }
 
-/** @public */
+/**
+ * @internal
+ */
+export interface PrebootRequestHandlerContext extends RequestHandlerContextBase {
+  core: Promise<PrebootCoreRequestHandlerContext>;
+}
+
+/**
+ * Mixin allowing plugins to define their own request handler contexts.
+ *
+ * @public
+ */
 export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
-
-/**
- * The `core` context provided to route handler.
- *
- * Provides the following clients and services:
- *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
- *      which uses the credentials of the incoming request
- *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
- *      all the registered types.
- *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
- *      data client which uses the credentials of the incoming request
- *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
- *      which uses the credentials of the incoming request
- * @public
- */
-export interface CoreRequestHandlerContext {
-  savedObjects: {
-    client: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
-    getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-    getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-    getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-  };
-  elasticsearch: {
-    client: IScopedClusterClient;
-  };
-  uiSettings: {
-    client: IUiSettingsClient;
-  };
-  deprecations: {
-    client: DeprecationsClient;
-  };
-}
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.
@@ -542,7 +525,7 @@ export interface CorePreboot {
   /** {@link ElasticsearchServicePreboot} */
   elasticsearch: ElasticsearchServicePreboot;
   /** {@link HttpServicePreboot} */
-  http: HttpServicePreboot;
+  http: HttpServicePreboot<RequestHandlerContext>;
   /** {@link PrebootServicePreboot} */
   preboot: PrebootServicePreboot;
 }
@@ -568,7 +551,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup & {
+  http: HttpServiceSetup<RequestHandlerContext> & {
     /** {@link HttpResources} */
     resources: HttpResources;
   };
@@ -656,4 +639,43 @@ export const config = {
   logging: {
     appenders: appendersSchema as Type<AppenderConfigType>,
   },
+};
+
+/**
+ * Public version of RequestHandler, default-scoped to {@link RequestHandlerContext}
+ * See [@link RequestHandler}
+ * @public
+ */
+type PublicRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Context extends RequestHandlerContext = RequestHandlerContext,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
+
+export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };
+
+/**
+ * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
+ * See [@link IRouter}
+ * @public
+ */
+type PublicRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  IRouter<ContextType>;
+
+export type { PublicRouter as IRouter, IRouter as IBaseRouter };
+
+/**
+ * Public version of RequestHandlerContext, default-scoped to {@link RequestHandlerContext}
+ * See [@link RequestHandlerContext}
+ * @public
+ */
+type PublicHttpServiceSetup<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  HttpServiceSetup<ContextType>;
+
+export type {
+  PublicHttpServiceSetup as HttpServiceSetup,
+  HttpServiceSetup as BaseHttpServiceSetup,
 };
