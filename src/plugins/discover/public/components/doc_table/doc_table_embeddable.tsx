@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
+import { SAMPLE_ROWS_PER_PAGE_SETTING, SAMPLE_SIZE_SETTING } from '../../../common';
 import { usePager } from '../../hooks/use_pager';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
@@ -19,12 +19,19 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
+  rowsPerPageState?: number;
+  onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const services = useDiscoverServices();
+  const onUpdateRowsPerPage = props.onUpdateRowsPerPage;
+  const initialPageSize = useMemo(
+    () => parseInt(services.uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || 50,
+    [services.uiSettings]
+  );
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
     curPageIndex,
@@ -35,7 +42,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     changePageIndex,
     changePageSize,
   } = usePager({
-    initialPageSize: 50,
+    initialPageSize: props.rowsPerPageState ?? initialPageSize,
     totalItems: props.rows.length,
   });
   const showPagination = totalPages !== 0;
@@ -63,8 +70,9 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     (size: number) => {
       scrollTop();
       changePageSize(size);
+      onUpdateRowsPerPage?.(size); // to update `rowsPerPage` input param for the embeddable
     },
-    [changePageSize, scrollTop]
+    [changePageSize, scrollTop, onUpdateRowsPerPage]
   );
 
   const shouldShowLimitedResultsWarning = useMemo(
