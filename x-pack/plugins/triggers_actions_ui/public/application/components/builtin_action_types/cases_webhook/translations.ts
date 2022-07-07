@@ -458,3 +458,45 @@ export const AUTH_TITLE = i18n.translate(
     defaultMessage: 'Authentication',
   }
 );
+
+export const STEP_1 = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step1',
+  {
+    defaultMessage: 'Set up connector',
+  }
+);
+
+export const STEP_2 = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step2',
+  {
+    defaultMessage: 'Create incident in external system',
+  }
+);
+
+export const STEP_3 = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step3',
+  {
+    defaultMessage: 'Get incident information from external system',
+  }
+);
+
+export const STEP_4 = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4',
+  {
+    defaultMessage: 'Add comments and updates in external system',
+  }
+);
+
+export const NEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.next',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+export const PREVIOUS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.previous',
+  {
+    defaultMessage: 'Previous',
+  }
+);

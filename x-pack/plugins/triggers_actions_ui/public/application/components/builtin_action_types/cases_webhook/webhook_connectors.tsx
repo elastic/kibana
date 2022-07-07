@@ -5,568 +5,187 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTitle,
+  EuiStepsHorizontal,
+  EuiStepStatus,
 } from '@elastic/eui';
-import {
-  FIELD_TYPES,
-  UseArray,
-  UseField,
-  useFormContext,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import {
-  containsCommentsOrEmpty,
-  containsExternalId,
-  containsExternalIdOrTitle,
-  containsIdOrEmpty,
-  containsTitleAndDesc,
-  isUrlButCanBeEmpty,
-} from './validator';
-import { MustacheTextFieldWrapper } from '../../mustache_text_field_wrapper';
-import { JsonFieldWrapper } from '../../json_field_wrapper';
-import { PasswordField } from '../../password_field';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
-import { casesVars, commentVars, urlVars, urlVarsExt } from './action_variables';
-const { emptyField, urlField } = fieldValidators;
+import { AuthStep, CreateStep, GetStep, UpdateStep } from './steps';
 
-const HTTP_VERBS = ['post', 'put', 'patch'];
-
+export const HTTP_VERBS = ['post', 'put', 'patch'];
+const fields = {
+  step1: [
+    'config.hasAuth',
+    'secrets.user',
+    'secrets.password',
+    '__internal__.hasHeaders',
+    'config.headers',
+  ],
+  step2: [
+    'config.createIncidentMethod',
+    'config.createIncidentUrl',
+    'config.createIncidentJson',
+    'config.createIncidentResponseKey',
+  ],
+  step3: [
+    'config.getIncidentUrl',
+    'config.getIncidentResponseExternalTitleKey',
+    'config.getIncidentResponseCreatedDateKey',
+    'config.getIncidentResponseUpdatedDateKey',
+    'config.incidentViewUrl',
+  ],
+  step4: [
+    'config.updateIncidentMethod',
+    'config.updateIncidentUrl',
+    'config.updateIncidentJson',
+    'config.createCommentMethod',
+    'config.createCommentUrl',
+    'config.createCommentJson',
+  ],
+};
+type PossibleStepNumbers = 1 | 2 | 3 | 4;
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const { getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
-    watch: ['config.hasAuth', '__internal__.hasHeaders'],
+  const context = useFormContext();
+  const { isValid, validateFields } = context;
+  const [currentStep, setCurrentStep] = useState<PossibleStepNumbers>(1);
+  const [stati, setStati] = useState<Record<string, EuiStepStatus>>({
+    step1: 'incomplete',
+    step2: 'incomplete',
+    step3: 'incomplete',
+    step4: 'incomplete',
   });
+  const updateStatus = useCallback(async () => {
+    const steps: PossibleStepNumbers[] = [1, 2, 3, 4];
+    const statuses = await Promise.all(
+      steps.map(async (index) => {
+        if (typeof isValid !== 'undefined' && !isValid) {
+          const { areFieldsValid } = await validateFields(fields[`step${index}`]);
+          return {
+            [`step${index}`]: areFieldsValid ? 'complete' : ('danger' as EuiStepStatus),
+          };
+        }
+        return {
+          [`step${index}`]:
+            currentStep === index
+              ? 'current'
+              : currentStep > index
+              ? 'complete'
+              : ('incomplete' as EuiStepStatus),
+        };
+      })
+    );
+    setStati(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
+  }, [currentStep, isValid, validateFields]);
 
-  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+  useEffect(() => {
+    updateStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isValid, currentStep]);
 
-  const hasAuth = config == null ? true : config.hasAuth;
-  const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
+  const [hasConfigurationErrors, setHasConfigurationError] = useState(false);
+
+  const onNextStep = useCallback(
+    async (selectedStep?: PossibleStepNumbers) => {
+      const nextStep =
+        selectedStep != null
+          ? selectedStep
+          : currentStep === 4
+          ? currentStep
+          : ((currentStep + 1) as PossibleStepNumbers);
+      setHasConfigurationError(false);
+      const fieldsToValidate: string[] =
+        nextStep === 2
+          ? fields.step1
+          : nextStep === 3
+          ? [...fields.step1, ...fields.step2]
+          : nextStep === 4
+          ? [...fields.step1, ...fields.step2, ...fields.step3]
+          : [];
+      const { areFieldsValid } = await validateFields(fieldsToValidate);
+
+      if (!areFieldsValid) {
+        setHasConfigurationError(true);
+        return;
+      }
+      if (nextStep < 5) {
+        setCurrentStep(nextStep);
+      }
+    },
+    [currentStep, validateFields]
+  );
+
+  const horizontalSteps = useMemo(() => {
+    return [
+      {
+        title: i18n.STEP_1,
+        status: stati.step1,
+        onClick: () => setCurrentStep(1),
+      },
+      {
+        title: i18n.STEP_2,
+        status: stati.step2,
+        onClick: () => onNextStep(2),
+      },
+      {
+        title: i18n.STEP_3,
+        status: stati.step3,
+        onClick: () => onNextStep(3),
+      },
+      {
+        title: i18n.STEP_4,
+        status: stati.step4,
+        onClick: () => onNextStep(4),
+      },
+    ];
+  }, [onNextStep, stati]);
 
   return (
     <>
-      {/* start CREATE INCIDENT INPUTS */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <UseField
-            path="config.createIncidentMethod"
-            component={Field}
-            config={{
-              label: i18n.CREATE_INCIDENT_METHOD,
-              defaultValue: 'post',
-              type: FIELD_TYPES.SELECT,
-              validations: [
-                {
-                  validator: emptyField(i18n.CREATE_METHOD_REQUIRED),
-                },
-              ],
-            }}
-            componentProps={{
-              euiFieldProps: {
-                'data-test-subj': 'webhookCreateMethodSelect',
-                options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
-                readOnly,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.createIncidentUrl"
-            config={{
-              label: i18n.CREATE_INCIDENT_URL,
-              validations: [
-                {
-                  validator: urlField(i18n.CREATE_URL_REQUIRED),
-                },
-              ],
-            }}
-            component={Field}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'webhookCreateUrlText',
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            path="config.createIncidentJson"
-            config={{
-              helpText: i18n.CREATE_INCIDENT_JSON_HELP,
-              label: i18n.CREATE_INCIDENT_JSON,
-              validations: [
-                {
-                  validator: emptyField(i18n.CREATE_INCIDENT_REQUIRED),
-                },
-                {
-                  validator: containsTitleAndDesc(),
-                },
-              ],
-            }}
-            component={JsonFieldWrapper}
-            componentProps={{
-              euiCodeEditorProps: {
-                isReadOnly: readOnly,
-                'data-test-subj': 'webhookCreateIncidentJson',
-                ['aria-label']: i18n.CODE_EDITOR,
-              },
-              messageVariables: casesVars,
-              paramsProperty: 'createIncidentJson',
-              buttonTitle: i18n.ADD_CASES_VARIABLE,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            path="config.createIncidentResponseKey"
-            config={{
-              helpText: i18n.CREATE_INCIDENT_RESPONSE_KEY_HELP,
-              label: i18n.CREATE_INCIDENT_RESPONSE_KEY,
-              validations: [
-                {
-                  validator: emptyField(i18n.CREATE_RESPONSE_KEY_REQUIRED),
-                },
-              ],
-            }}
-            component={Field}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'createIncidentResponseKeyText',
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* end CREATE INCIDENT INPUTS */}
-      {/* start GET INCIDENT INPUTS */}
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <UseField
-            path="config.getIncidentUrl"
-            config={{
-              label: i18n.GET_INCIDENT_URL,
-              validations: [
-                {
-                  validator: urlField(i18n.GET_INCIDENT_URL_REQUIRED),
-                },
-                { validator: containsExternalId() },
-              ],
-              helpText: i18n.GET_INCIDENT_URL_HELP,
-            }}
-            component={MustacheTextFieldWrapper}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'webhookGetUrlText',
-                messageVariables: urlVars,
-                paramsProperty: 'getIncidentUrl',
-                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.getIncidentResponseExternalTitleKey"
-            config={{
-              label: i18n.GET_INCIDENT_TITLE_KEY,
-              validations: [
-                {
-                  validator: emptyField(i18n.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED),
-                },
-              ],
-              helpText: i18n.GET_INCIDENT_TITLE_KEY_HELP,
-            }}
-            component={Field}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'getIncidentResponseExternalTitleKeyText',
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.getIncidentResponseCreatedDateKey"
-            config={{
-              label: i18n.GET_INCIDENT_CREATED_KEY,
-              validations: [
-                {
-                  validator: emptyField(i18n.GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED),
-                },
-              ],
-              helpText: i18n.GET_INCIDENT_CREATED_KEY_HELP,
-            }}
-            component={Field}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'getIncidentResponseCreatedDateKeyText',
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.getIncidentResponseUpdatedDateKey"
-            config={{
-              label: i18n.GET_INCIDENT_UPDATED_KEY,
-              validations: [
-                {
-                  validator: emptyField(i18n.GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED),
-                },
-              ],
-              helpText: i18n.GET_INCIDENT_UPDATED_KEY_HELP,
-            }}
-            component={Field}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'getIncidentResponseUpdatedDateKeyText',
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.incidentViewUrl"
-            config={{
-              label: i18n.EXTERNAL_INCIDENT_VIEW_URL,
-              validations: [
-                {
-                  validator: urlField(i18n.GET_INCIDENT_VIEW_URL_REQUIRED),
-                },
-                { validator: containsExternalIdOrTitle() },
-              ],
-              helpText: i18n.EXTERNAL_INCIDENT_VIEW_URL_HELP,
-            }}
-            component={MustacheTextFieldWrapper}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'incidentViewUrlText',
-                messageVariables: urlVarsExt,
-                paramsProperty: 'incidentViewUrl',
-                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* end GET INCIDENT INPUTS */}
-      {/* start UPDATE INCIDENT INPUTS */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <UseField
-            path="config.updateIncidentMethod"
-            component={Field}
-            config={{
-              label: i18n.UPDATE_INCIDENT_METHOD,
-              defaultValue: 'put',
-              type: FIELD_TYPES.SELECT,
-              validations: [
-                {
-                  validator: emptyField(i18n.UPDATE_METHOD_REQUIRED),
-                },
-              ],
-            }}
-            componentProps={{
-              euiFieldProps: {
-                'data-test-subj': 'webhookUpdateMethodSelect',
-                options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
-                readOnly,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.updateIncidentUrl"
-            config={{
-              label: i18n.UPDATE_INCIDENT_URL,
-              validations: [
-                {
-                  validator: urlField(i18n.UPDATE_URL_REQUIRED),
-                },
-                { validator: containsExternalId() },
-              ],
-              helpText: i18n.UPDATE_INCIDENT_URL_HELP,
-            }}
-            component={MustacheTextFieldWrapper}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'webhookUpdateUrlText',
-                messageVariables: urlVars,
-                paramsProperty: 'updateIncidentUrl',
-                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            path="config.updateIncidentJson"
-            config={{
-              helpText: i18n.UPDATE_INCIDENT_JSON_HELP,
-              label: i18n.UPDATE_INCIDENT_JSON,
-              validations: [
-                {
-                  validator: emptyField(i18n.UPDATE_INCIDENT_REQUIRED),
-                },
-                {
-                  validator: containsTitleAndDesc(),
-                },
-              ],
-            }}
-            component={JsonFieldWrapper}
-            componentProps={{
-              euiCodeEditorProps: {
-                height: '200px',
-                isReadOnly: readOnly,
-                'data-test-subj': 'webhookUpdateIncidentJson',
-                ['aria-label']: i18n.CODE_EDITOR,
-              },
-              messageVariables: casesVars,
-              paramsProperty: 'updateIncidentJson',
-              buttonTitle: i18n.ADD_CASES_VARIABLE,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* end UPDATE INCIDENT INPUTS */}
-      {/* start CREATE COMMENT INCIDENT INPUTS */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <UseField
-            path="config.createCommentMethod"
-            component={Field}
-            config={{
-              label: i18n.CREATE_COMMENT_METHOD,
-              defaultValue: 'put',
-              type: FIELD_TYPES.SELECT,
-              validations: [
-                {
-                  validator: emptyField(i18n.CREATE_COMMENT_METHOD_REQUIRED),
-                },
-              ],
-            }}
-            componentProps={{
-              euiFieldProps: {
-                'data-test-subj': 'webhookCreateCommentMethodSelect',
-                options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
-                readOnly,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="config.createCommentUrl"
-            config={{
-              label: i18n.CREATE_COMMENT_URL,
-              validations: [
-                {
-                  validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_REQUIRED),
-                },
-                { validator: containsIdOrEmpty(i18n.CREATE_COMMENT_URL_REQUIRED) },
-              ],
-              helpText: i18n.CREATE_COMMENT_URL_HELP,
-            }}
-            component={MustacheTextFieldWrapper}
-            componentProps={{
-              euiFieldProps: {
-                readOnly,
-                'data-test-subj': 'webhookCreateCommentUrlText',
-                messageVariables: urlVars,
-                paramsProperty: 'createCommentUrl',
-                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            path="config.createCommentJson"
-            config={{
-              helpText: i18n.CREATE_COMMENT_JSON_HELP,
-              label: i18n.CREATE_COMMENT_JSON,
-              validations: [
-                {
-                  validator: containsCommentsOrEmpty(i18n.CREATE_COMMENT_MESSAGE),
-                },
-              ],
-            }}
-            component={JsonFieldWrapper}
-            componentProps={{
-              euiCodeEditorProps: {
-                height: '200px',
-                isReadOnly: readOnly,
-                'data-test-subj': 'webhookCreateCommentJson',
-                ['aria-label']: i18n.CODE_EDITOR,
-              },
-              messageVariables: commentVars,
-              paramsProperty: 'createCommentJson',
-              buttonTitle: i18n.ADD_CASES_VARIABLE,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* end CREATE COMMENT INCIDENT INPUTS */}
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{i18n.AUTH_TITLE}</h4>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <UseField
-            path="config.hasAuth"
-            component={Field}
-            config={{ defaultValue: true, type: FIELD_TYPES.TOGGLE }}
-            componentProps={{
-              euiFieldProps: {
-                label: i18n.HAS_AUTH,
-                disabled: readOnly,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {hasAuth ? (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <UseField
-              path="secrets.user"
-              config={{
-                label: i18n.USERNAME,
-                validations: [
-                  {
-                    validator: emptyField(i18n.USERNAME_REQUIRED),
-                  },
-                ],
-              }}
-              component={Field}
-              componentProps={{
-                euiFieldProps: { readOnly, 'data-test-subj': 'webhookUserInput', fullWidth: true },
-              }}
-            />
+      <EuiStepsHorizontal steps={horizontalSteps} />
+      {hasConfigurationErrors && <p>{'hasConfigurationErrors!!!!!'}</p>}
+      <EuiSpacer size="l" />
+      <AuthStep readOnly={readOnly} display={currentStep === 1} />
+      <CreateStep readOnly={readOnly} display={currentStep === 2} />
+      <GetStep readOnly={readOnly} display={currentStep === 3} />
+      <UpdateStep readOnly={readOnly} display={currentStep === 4} />
+
+      <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart" direction="rowReverse">
+        {currentStep < 4 && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="casesWebhookNext"
+              fill
+              iconSide="right"
+              iconType="arrowRight"
+              onClick={() => onNextStep()}
+            >
+              {i18n.NEXT}
+            </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <PasswordField
-              path="secrets.password"
-              label={i18n.PASSWORD}
-              readOnly={readOnly}
-              data-test-subj="webhookPasswordInput"
-            />
+        )}
+        {currentStep > 1 && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="casesWebhookBack"
+              iconSide="left"
+              iconType="arrowLeft"
+              onClick={() => onNextStep((currentStep - 1) as PossibleStepNumbers)}
+            >
+              {i18n.PREVIOUS}
+            </EuiButton>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
-      <EuiSpacer size="m" />
-      <UseField
-        path="__internal__.hasHeaders"
-        component={Field}
-        config={{
-          defaultValue: hasHeadersDefaultValue,
-          label: i18n.HEADERS_SWITCH,
-          type: FIELD_TYPES.TOGGLE,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            disabled: readOnly,
-            'data-test-subj': 'webhookViewHeadersSwitch',
-          },
-        }}
-      />
-      <EuiSpacer size="m" />
-      {hasHeaders ? (
-        <UseArray path="config.headers" initialNumberOfItems={1}>
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
-                  <h5>{i18n.HEADERS_TITLE}</h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                {items.map((item) => (
-                  <EuiFlexGroup key={item.id} data-test-subj="gobblegobble">
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.key`}
-                        config={{
-                          label: i18n.KEY_LABEL,
-                        }}
-                        component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'webhookHeadersKeyInput' },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.value`}
-                        config={{ label: i18n.VALUE_LABEL }}
-                        component={TextField}
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: {
-                            readOnly,
-                            ['data-test-subj']: 'webhookHeadersValueInput',
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18n.DELETE_BUTTON}
-                        style={{ marginTop: '28px' }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty
-                  iconType="plusInCircle"
-                  onClick={addItem}
-                  data-test-subj="webhookAddHeaderButton"
-                >
-                  {i18n.ADD_BUTTON}
-                </EuiButtonEmpty>
-                <EuiSpacer />
-              </>
-            );
-          }}
-        </UseArray>
-      ) : null}
+        )}
+      </EuiFlexGroup>
     </>
   );
 };
