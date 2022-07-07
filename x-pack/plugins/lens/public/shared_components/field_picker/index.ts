@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { CrawlerSettings } from './crawler_settings';
+export { LensFieldIcon } from './lens_field_icon';
+export { FieldPicker } from './field_picker';
+export { TruncatedLabel } from './truncated_label';
+export type { FieldOptionValue, FieldOption } from './types';
