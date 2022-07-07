@@ -31,6 +31,11 @@ export class RegistryResponseError extends RegistryError {
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
+export class PackageFailedVerificationError extends IngestManagerError {
+  constructor(pkgKey: string) {
+    super(`${pkgKey} failed signature verification.`);
+  }
+}
 export class AgentPolicyError extends IngestManagerError {}
 export class AgentPolicyNotFoundError extends IngestManagerError {}
 export class AgentNotFoundError extends IngestManagerError {}

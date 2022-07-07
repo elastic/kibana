@@ -19,9 +19,16 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common';
-import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
-import type { AssetReference, Installation, InstallType } from '../../../types';
+import type {
+  AssetReference,
+  Installation,
+  InstallType,
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+  PackageVerificationResult,
+} from '../../../types';
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
@@ -39,7 +46,7 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { packagePolicyService } from '../..';
 
-import { createInstallation, updateEsAssetReferences } from './install';
+import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -56,6 +63,7 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  verificationResult,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -67,6 +75,7 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  verificationResult?: PackageVerificationResult;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion } = packageInfo;
 
@@ -88,11 +97,12 @@ export async function _installPackage({
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
-        await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-          install_version: pkgVersion,
-          install_status: 'installing',
-          install_started_at: new Date().toISOString(),
-          install_source: installSource,
+        await restartInstallation({
+          savedObjectsClient,
+          pkgName,
+          pkgVersion,
+          installSource,
+          verificationResult,
         });
       }
     } else {
@@ -101,6 +111,7 @@ export async function _installPackage({
         packageInfo,
         installSource,
         spaceId,
+        verificationResult,
       });
     }
 
