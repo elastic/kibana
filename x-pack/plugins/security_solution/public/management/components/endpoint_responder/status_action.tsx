@@ -147,7 +147,7 @@ export const EndpointStatusActionResult = memo<
         );
       } else if (endpointDetails.metadata.Endpoint.state?.isolation) {
         isolateStatus = i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.status.releasing',
+          'xpack.securitySolution.endpointResponseActions.status.isolated',
           {
             defaultMessage: 'Isolated',
           }
