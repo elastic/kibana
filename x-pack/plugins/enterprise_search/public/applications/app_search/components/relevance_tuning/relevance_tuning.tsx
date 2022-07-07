@@ -28,7 +28,8 @@ import { RelevanceTuningPreview } from './relevance_tuning_preview';
 import { RelevanceTuningLogic } from '.';
 
 export const RelevanceTuning: React.FC = () => {
-  const { dataLoading, engineHasSchemaFields, unsavedChanges, isPrecisionTuningEnabled } = useValues(RelevanceTuningLogic);
+  const { dataLoading, engineHasSchemaFields, unsavedChanges, isPrecisionTuningEnabled } =
+    useValues(RelevanceTuningLogic);
   const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } =
     useActions(RelevanceTuningLogic);
   const { isElasticsearchEngine } = useValues(EngineLogic);
