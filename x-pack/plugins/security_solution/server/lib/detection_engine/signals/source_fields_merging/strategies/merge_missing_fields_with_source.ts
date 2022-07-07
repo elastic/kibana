@@ -76,7 +76,6 @@ const hasEarlyReturnConditions = ({
   merged: SignalSource;
 }) => {
   const valueInMergedDocument = get(fieldsKey, merged);
-
   return (
     fieldsValue.length === 0 ||
     valueInMergedDocument !== undefined ||
