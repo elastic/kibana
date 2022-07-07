@@ -47,12 +47,9 @@ export const UrlComboBox: React.FC<Props> = ({ label, selectedUrls, onChange }) 
       isInvalid={isInvalid}
       error={
         isInvalid
-          ? i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.urlComboBox.invalidUrlErrorMessage',
-              {
-                defaultMessage: 'Please enter a valid URL',
-              }
-            )
+          ? i18n.translate('xpack.enterpriseSearch.crawler.urlComboBox.invalidUrlErrorMessage', {
+              defaultMessage: 'Please enter a valid URL',
+            })
           : undefined
       }
     >

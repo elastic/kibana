@@ -23,7 +23,7 @@ import { CrawlerDomain, Sitemap } from '../../api/crawler/types';
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 
 const ADD_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.addButtonLabel',
+  'xpack.enterpriseSearch.crawler.sitemapsTable.addButtonLabel',
   { defaultMessage: 'Add sitemap' }
 );
 
@@ -49,7 +49,7 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
         />
       ),
       render: (sitemap) => <EuiText size="s">{(sitemap as Sitemap)[field]}</EuiText>,
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.urlTableHead', {
+      name: i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.urlTableHead', {
         defaultMessage: 'URL',
       }),
       field,
@@ -66,7 +66,7 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
       columns={columns}
       description={
         <p>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.description', {
+          {i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.description', {
             defaultMessage: 'Specify sitemap URLs for the crawler on this domain.',
           })}
         </p>
@@ -79,12 +79,9 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
           <EuiEmptyPrompt
             title={
               <h4>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.emptyMessageTitle',
-                  {
-                    defaultMessage: 'There are no existing sitemaps.',
-                  }
-                )}
+                {i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.emptyMessageTitle', {
+                  defaultMessage: 'There are no existing sitemaps.',
+                })}
               </h4>
             }
             titleSize="s"
@@ -105,19 +102,16 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
         updateSitemaps(newSitemaps as Sitemap[]);
         clearFlashMessages();
         flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.deleteSuccessToastMessage',
-            {
-              defaultMessage: 'The sitemap has been deleted.',
-            }
-          )
+          i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.deleteSuccessToastMessage', {
+            defaultMessage: 'The sitemap has been deleted.',
+          })
         );
       }}
       onUpdate={(_, newSitemaps) => {
         updateSitemaps(newSitemaps as Sitemap[]);
         clearFlashMessages();
       }}
-      title={i18n.translate('xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.title', {
+      title={i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.title', {
         defaultMessage: 'Sitemaps',
       })}
       disableReordering

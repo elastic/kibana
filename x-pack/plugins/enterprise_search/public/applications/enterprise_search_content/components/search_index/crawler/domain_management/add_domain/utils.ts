@@ -79,7 +79,7 @@ export const domainValidationStateToPanelColor = (
 const allFailureResultChanges: CrawlerDomainValidationResultChange = {
   contentVerification: {
     message: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationFailureMessage',
+      'xpack.enterpriseSearch.crawler.addDomainForm.contentVerificationFailureMessage',
       {
         defaultMessage:
           'Unable to verify content because the "Indexing restrictions" check failed.',
@@ -89,7 +89,7 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
   },
   indexingRestrictions: {
     message: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.indexingRestrictionsFailureMessage',
+      'xpack.enterpriseSearch.crawler.addDomainForm.indexingRestrictionsFailureMessage',
       {
         defaultMessage:
           'Unable to determine indexing restrictions because the "Network connectivity" check failed.',
@@ -99,7 +99,7 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
   },
   networkConnectivity: {
     message: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.networkConnectivityFailureMessage',
+      'xpack.enterpriseSearch.crawler.addDomainForm.networkConnectivityFailureMessage',
       {
         defaultMessage:
           'Unable to establish a network connection because the "Initial validation" check failed.',

@@ -194,7 +194,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
 
         flashSuccessToast(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.reApplyCrawlRules.successMessage',
+            'xpack.enterpriseSearch.crawler.manageCrawlsPopover.reApplyCrawlRules.successMessage',
             {
               defaultMessage: 'Crawl rules are being re-applied in the background',
             }

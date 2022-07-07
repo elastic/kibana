@@ -19,12 +19,9 @@ export const CrawlEventTypeBadge: React.FC<{ event: CrawlEvent }> = ({ event }) 
   if (event.stage === 'process') {
     return (
       <EuiBadge color="hollow">
-        {i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.reAppliedCrawlRules',
-          {
-            defaultMessage: 'Re-applied crawl rules',
-          }
-        )}
+        {i18n.translate('xpack.enterpriseSearch.crawler.crawlTypeOptions.reAppliedCrawlRules', {
+          defaultMessage: 'Re-applied crawl rules',
+        })}
       </EuiBadge>
     );
   }

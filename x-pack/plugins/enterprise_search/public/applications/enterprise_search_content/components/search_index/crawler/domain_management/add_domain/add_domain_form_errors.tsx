@@ -22,12 +22,9 @@ export const AddDomainFormErrors: React.FC = () => {
       <EuiCallOut
         color="danger"
         iconType="alert"
-        title={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.errorsTitle',
-          {
-            defaultMessage: 'Something went wrong. Please address the errors and try again.',
-          }
-        )}
+        title={i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.errorsTitle', {
+          defaultMessage: 'Something went wrong. Please address the errors and try again.',
+        })}
       >
         {errors.map((message, index) => (
           <p key={index}>{message}</p>

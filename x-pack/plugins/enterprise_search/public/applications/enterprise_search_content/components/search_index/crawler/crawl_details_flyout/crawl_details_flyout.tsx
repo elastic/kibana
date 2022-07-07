@@ -52,27 +52,21 @@ export const CrawlDetailsFlyout: React.FC = () => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="CrawlDetailsFlyoutTitle">
-            {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlDetailsFlyout.title', {
+            {i18n.translate('xpack.enterpriseSearch.crawler.crawlDetailsFlyout.title', {
               defaultMessage: 'Crawl request details',
             })}
           </h2>
         </EuiTitle>
         <EuiTabs style={{ marginBottom: '-25px' }}>
           <EuiTab isSelected={selectedTab === 'preview'} onClick={() => setSelectedTab('preview')}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsFlyout.previewTabLabel',
-              {
-                defaultMessage: 'Preview',
-              }
-            )}
+            {i18n.translate('xpack.enterpriseSearch.crawler.crawlDetailsFlyout.previewTabLabel', {
+              defaultMessage: 'Preview',
+            })}
           </EuiTab>
           <EuiTab isSelected={selectedTab === 'json'} onClick={() => setSelectedTab('json')}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsFlyout.rawJSONTabLabel',
-              {
-                defaultMessage: 'Raw JSON',
-              }
-            )}
+            {i18n.translate('xpack.enterpriseSearch.crawler.crawlDetailsFlyout.rawJSONTabLabel', {
+              defaultMessage: 'Raw JSON',
+            })}
           </EuiTab>
         </EuiTabs>
       </EuiFlyoutHeader>

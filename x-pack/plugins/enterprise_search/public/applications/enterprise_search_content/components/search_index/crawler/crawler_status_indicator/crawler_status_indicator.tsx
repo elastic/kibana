@@ -26,7 +26,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
     return (
       <EuiButton disabled iconType="arrowDown" iconSide="right">
         {i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
+          'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
           {
             defaultMessage: 'Crawl',
           }
@@ -41,7 +41,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
       return (
         <EuiButton isLoading>
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.pendingButtonLabel',
+            'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.pendingButtonLabel',
             {
               defaultMessage: 'Pending...',
             }
@@ -52,7 +52,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
       return (
         <EuiButton isLoading>
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.startingButtonLabel',
+            'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.startingButtonLabel',
             {
               defaultMessage: 'Starting...',
             }
@@ -66,7 +66,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
       return (
         <EuiButton isLoading>
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.stoppingButtonLabel',
+            'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.stoppingButtonLabel',
             {
               defaultMessage: 'Stopping...',
             }

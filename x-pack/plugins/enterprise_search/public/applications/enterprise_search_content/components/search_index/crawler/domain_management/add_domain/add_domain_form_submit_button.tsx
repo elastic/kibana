@@ -22,7 +22,7 @@ export const AddDomainFormSubmitButton: React.FC = () => {
 
   return (
     <EuiButton fill type="button" disabled={!allowSubmit} onClick={submitNewDomain}>
-      {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainForm.submitButtonLabel', {
+      {i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.submitButtonLabel', {
         defaultMessage: 'Add domain',
       })}
     </EuiButton>

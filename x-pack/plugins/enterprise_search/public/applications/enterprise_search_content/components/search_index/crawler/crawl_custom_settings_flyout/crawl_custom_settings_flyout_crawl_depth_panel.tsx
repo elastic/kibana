@@ -32,7 +32,7 @@ export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.maxCrawlDepthFieldLabel',
+              'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.maxCrawlDepthFieldLabel',
               {
                 defaultMessage: 'Max crawl depth',
               }
@@ -50,7 +50,7 @@ export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = () => {
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.maxCrawlDepthFieldDescription',
+              'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.maxCrawlDepthFieldDescription',
               {
                 defaultMessage:
                   'Set a max crawl depth to specify how many pages deep the crawler should traverse. Set the value to one (1) to limit the crawl to only the entry points.',

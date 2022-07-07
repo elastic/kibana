@@ -60,7 +60,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
         hasBorder
         title={
           <h2>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
+            {i18n.translate('xpack.enterpriseSearch.automaticCrawlSchedule.title', {
               defaultMessage: 'Automated Crawl Scheduling',
             })}
           </h2>
@@ -68,13 +68,13 @@ export const AutomaticCrawlScheduler: React.FC = () => {
         titleSize="s"
         subtitle={
           <FormattedMessage
-            id="xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.formDescription"
+            id="xpack.enterpriseSearch.crawler.automaticCrawlSchedule.formDescription"
             defaultMessage="Setup automated crawling. {readMoreMessage}."
             values={{
               readMoreMessage: (
                 <EuiLink href={WEB_CRAWLER_DOCS_URL} target="_blank">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.readMoreLink',
+                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.readMoreLink',
                     {
                       defaultMessage: 'Read more.',
                     }
@@ -101,7 +101,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               label={
                 <EuiText>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.crawlAutomaticallySwitchLabel',
+                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.crawlAutomaticallySwitchLabel',
                     {
                       defaultMessage: 'Crawl automatically',
                     }
@@ -117,7 +117,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiText>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.crawlUnitsPrefix',
+                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.crawlUnitsPrefix',
                     {
                       defaultMessage: 'Every',
                     }
@@ -127,7 +127,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiFieldNumber
                   aria-label={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.scheduleFrequencyLabel',
+                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleFrequencyLabel',
                     {
                       defaultMessage: 'Schedule frequency',
                     }
@@ -144,7 +144,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   aria-label={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.scheduleUnitsLabel',
+                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleUnitsLabel',
                     {
                       defaultMessage: 'Schedule units of time',
                     }
@@ -179,7 +179,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           <EuiSpacer />
           <EuiText size="xs" color="subdued">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.scheduleDescription',
+              'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleDescription',
               {
                 defaultMessage:
                   'The crawl schedule will perform a full crawl on every domain on this index.',

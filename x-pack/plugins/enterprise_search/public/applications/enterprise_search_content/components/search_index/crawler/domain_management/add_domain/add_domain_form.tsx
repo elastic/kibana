@@ -43,17 +43,14 @@ export const AddDomainForm: React.FC = () => {
       >
         <EuiFormRow
           fullWidth
-          label={i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainForm.urlLabel', {
+          label={i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.urlLabel', {
             defaultMessage: 'Domain URL',
           })}
           helpText={
             <EuiText size="s">
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.urlHelpText',
-                {
-                  defaultMessage: 'Domain URLs require a protocol and cannot contain any paths.',
-                }
-              )}
+              {i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.urlHelpText', {
+                defaultMessage: 'Domain URLs require a protocol and cannot contain any paths.',
+              })}
             </EuiText>
           }
         >
@@ -70,7 +67,7 @@ export const AddDomainForm: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton type="submit" fill disabled={addDomainFormInputValue.length === 0}>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.validateButtonLabel',
+                  'xpack.enterpriseSearch.crawler.addDomainForm.validateButtonLabel',
                   {
                     defaultMessage: 'Validate Domain',
                   }
@@ -87,7 +84,7 @@ export const AddDomainForm: React.FC = () => {
               <p>
                 <strong>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.appSearch.crawler.addDomainForm.entryPointLabel"
+                    id="xpack.enterpriseSearch.crawler.addDomainForm.entryPointLabel"
                     defaultMessage="Web Crawler entry point has been set as {entryPointValue}"
                     values={{
                       entryPointValue: <EuiCode>{entryPointValue}</EuiCode>,

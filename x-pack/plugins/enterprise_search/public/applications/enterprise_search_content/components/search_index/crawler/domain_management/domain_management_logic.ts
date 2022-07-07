@@ -92,15 +92,12 @@ export const DomainManagementLogic = kea<
     deleteApiSuccess: ({ domain }) => {
       actions.getDomains();
       flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.add.successMessage',
-          {
-            defaultMessage: "Successfully deleted domain '{domainUrl}'",
-            values: {
-              domainUrl: domain.url,
-            },
-          }
-        )
+        i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.delete.successMessage', {
+          defaultMessage: "Successfully deleted domain '{domainUrl}'",
+          values: {
+            domainUrl: domain.url,
+          },
+        })
       );
       CrawlerLogic.actions.fetchCrawlerData();
     },

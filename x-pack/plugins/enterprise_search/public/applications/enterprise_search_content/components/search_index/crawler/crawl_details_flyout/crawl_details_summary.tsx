@@ -76,7 +76,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             data-test-subjet="crawlType"
             titleSize="s"
             title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlCountOnDomains',
+              'xpack.enterpriseSearch.crawler.components.crawlDetailsSummary.crawlCountOnDomains',
               {
                 defaultMessage:
                   '{crawlType} crawl on {domainCount, plural, one {# domain} other {# domains}}',
@@ -87,7 +87,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               }
             )}
             description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlTypeLabel',
+              'xpack.enterpriseSearch.crawler.components.crawlDetailsSummary.crawlTypeLabel',
               {
                 defaultMessage: 'Crawl type',
               }
@@ -100,7 +100,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             titleSize="s"
             title={crawlDepth}
             description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlDepthLabel',
+              'xpack.enterpriseSearch.crawler.components.crawlDetailsSummary.crawlDepthLabel',
               {
                 defaultMessage: 'Max crawl depth',
               }
@@ -114,7 +114,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               titleSize="s"
               title={duration()}
               description={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
+                'xpack.enterpriseSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
                 {
                   defaultMessage: 'Duration',
                 }
@@ -139,13 +139,13 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
                     color="primary"
                     size="m"
                     title={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.urlsTooltipTitle',
+                      'xpack.enterpriseSearch.crawler.crawlDetailsSummary.urlsTooltipTitle',
                       {
                         defaultMessage: 'URLs Seen',
                       }
                     )}
                     content={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.urlsTooltip',
+                      'xpack.enterpriseSearch.crawler.crawlDetailsSummary.urlsTooltip',
                       {
                         defaultMessage:
                           'URLs found by the crawler during the crawl, including those not followed due to the crawl configuration.',
@@ -168,7 +168,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               description={
                 <EuiText size="s">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle',
+                    'xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle',
                     {
                       defaultMessage: 'Pages',
                     }
@@ -178,13 +178,13 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
                     color="primary"
                     size="m"
                     title={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesTooltipTitle',
+                      'xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltipTitle',
                       {
                         defaultMessage: 'Pages visited',
                       }
                     )}
                     content={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesTooltip',
+                      'xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltip',
                       {
                         defaultMessage: 'URLs visited and extracted during the crawl.',
                       }
@@ -204,7 +204,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
                   : '--'
               }
               description={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeLabel',
+                'xpack.enterpriseSearch.crawler.crawlDetailsSummary.avgResponseTimeLabel',
                 {
                   defaultMessage: 'Avg. response',
                 }
@@ -217,7 +217,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               titleSize="s"
               title={statusCounts.clientErrorCount}
               description={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.clientErrorsLabel',
+                'xpack.enterpriseSearch.crawler.crawlDetailsSummary.clientErrorsLabel',
                 {
                   defaultMessage: '4xx Errors',
                 }
@@ -230,7 +230,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               titleSize="s"
               title={statusCounts.serverErrorCount}
               description={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrorsLabel',
+                'xpack.enterpriseSearch.crawler.crawlDetailsSummary.serverErrorsLabel',
                 {
                   defaultMessage: '5xx Errors',
                 }
@@ -243,7 +243,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
           <EuiSpacer size="m" />
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.logsDisabledMessage',
+              'xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage',
               {
                 defaultMessage:
                   'Enable Web Crawler logs in settings for more detailed crawl statistics.',

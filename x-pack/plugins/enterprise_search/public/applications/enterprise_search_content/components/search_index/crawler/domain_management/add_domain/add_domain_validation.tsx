@@ -41,7 +41,7 @@ export const AddDomainValidation: React.FC = () => {
           <ValidationStepPanel
             step={domainValidationResult.steps.initialValidation}
             label={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.initialVaidationLabel',
+              'xpack.enterpriseSearch.crawler.addDomainForm.initialVaidationLabel',
               {
                 defaultMessage: 'Initial validation',
               }
@@ -52,19 +52,16 @@ export const AddDomainValidation: React.FC = () => {
           <ValidationStepPanel
             step={domainValidationResult.steps.networkConnectivity}
             label={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.networkConnectivityLabel',
+              'xpack.enterpriseSearch.crawler.addDomainForm.networkConnectivityLabel',
               {
                 defaultMessage: 'Network connectivity',
               }
             )}
             action={
               <EuiButton size="s" href={addDomainFormInputValue} target="_blank">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.testUrlButtonLabel',
-                  {
-                    defaultMessage: 'Test URL in the browser',
-                  }
-                )}
+                {i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.testUrlButtonLabel', {
+                  defaultMessage: 'Test URL in the browser',
+                })}
               </EuiButton>
             }
           />
@@ -73,7 +70,7 @@ export const AddDomainValidation: React.FC = () => {
           <ValidationStepPanel
             step={domainValidationResult.steps.indexingRestrictions}
             label={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.indexingRestrictionsLabel',
+              'xpack.enterpriseSearch.crawler.addDomainForm.indexingRestrictionsLabel',
               {
                 defaultMessage: 'Indexing restrictions',
               }
@@ -84,7 +81,7 @@ export const AddDomainValidation: React.FC = () => {
           <ValidationStepPanel
             step={domainValidationResult.steps.contentVerification}
             label={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationLabel',
+              'xpack.enterpriseSearch.crawler.addDomainForm.contentVerificationLabel',
               {
                 defaultMessage: 'Content verification',
               }
@@ -100,7 +97,7 @@ export const AddDomainValidation: React.FC = () => {
                   <>
                     <EuiText size="s">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.ignoreValidationTitle',
+                        'xpack.enterpriseSearch.crawler.addDomainForm.ignoreValidationTitle',
                         {
                           defaultMessage: 'Ignore validation failures and continue',
                         }
@@ -109,7 +106,7 @@ export const AddDomainValidation: React.FC = () => {
                     <EuiSpacer size="s" />
                     <EuiText color="subdued" size="xs">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.ignoreValidationDescription',
+                        'xpack.enterpriseSearch.crawler.addDomainForm.ignoreValidationDescription',
                         {
                           defaultMessage:
                             'The web crawler will be unable to index any content on this domain until the errors above are addressed.',

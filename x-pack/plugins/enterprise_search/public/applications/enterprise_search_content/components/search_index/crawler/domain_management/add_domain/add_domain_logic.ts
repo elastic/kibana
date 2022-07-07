@@ -236,15 +236,12 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     onSubmitNewDomainSuccess: ({ domain }) => {
       const { indexName } = DomainManagementLogic.props;
       flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.add.successMessage',
-          {
-            defaultMessage: "Successfully added domain '{domainUrl}'",
-            values: {
-              domainUrl: domain.url,
-            },
-          }
-        )
+        i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.add.successMessage', {
+          defaultMessage: "Successfully added domain '{domainUrl}'",
+          values: {
+            domainUrl: domain.url,
+          },
+        })
       );
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
@@ -289,7 +286,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
           [stepName]: {
             blockingFailure: true,
             message: i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.unexpectedValidationErrorMessage',
+              'xpack.enterpriseSearch.crawler.addDomainForm.unexpectedValidationErrorMessage',
               { defaultMessage: 'Unexpected error' }
             ),
             state: 'invalid',

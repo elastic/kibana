@@ -46,7 +46,7 @@ export const StopCrawlPopoverContextMenu: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.crawlingButtonLabel',
+                'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.crawlingButtonLabel',
                 {
                   defaultMessage: 'Crawling...',
                 }
@@ -71,7 +71,7 @@ export const StopCrawlPopoverContextMenu: React.FC = () => {
             }}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
+              'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
               {
                 defaultMessage: 'Cancel Crawl',
               }

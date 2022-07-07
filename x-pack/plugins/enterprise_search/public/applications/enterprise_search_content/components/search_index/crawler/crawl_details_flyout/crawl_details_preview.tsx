@@ -35,12 +35,9 @@ export const CrawlDetailsPreview: React.FC = () => {
       <AccordionList
         hasBorder
         initialIsOpen={crawlRequest.crawlConfig.domainAllowlist.length > 0}
-        title={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.domainsTitle',
-          {
-            defaultMessage: 'Domains',
-          }
-        )}
+        title={i18n.translate('xpack.enterpriseSearch.crawler.crawlDetailsPreview.domainsTitle', {
+          defaultMessage: 'Domains',
+        })}
         iconType="globe"
         items={crawlRequest.crawlConfig.domainAllowlist}
       />
@@ -48,12 +45,9 @@ export const CrawlDetailsPreview: React.FC = () => {
       <AccordionList
         hasBorder
         initialIsOpen={crawlRequest.crawlConfig.seedUrls.length > 0}
-        title={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.seedUrlsTitle',
-          {
-            defaultMessage: 'Seed URLs',
-          }
-        )}
+        title={i18n.translate('xpack.enterpriseSearch.crawler.crawlDetailsPreview.seedUrlsTitle', {
+          defaultMessage: 'Seed URLs',
+        })}
         iconType="crosshairs"
         items={crawlRequest.crawlConfig.seedUrls}
       />
@@ -62,7 +56,7 @@ export const CrawlDetailsPreview: React.FC = () => {
         hasBorder
         initialIsOpen={crawlRequest.crawlConfig.sitemapUrls.length > 0}
         title={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.sitemapUrlsTitle',
+          'xpack.enterpriseSearch.crawler.crawlDetailsPreview.sitemapUrlsTitle',
           {
             defaultMessage: 'Sitemap URLs',
           }

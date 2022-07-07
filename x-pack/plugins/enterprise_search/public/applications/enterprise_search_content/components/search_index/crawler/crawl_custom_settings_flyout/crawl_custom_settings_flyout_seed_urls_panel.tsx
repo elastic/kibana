@@ -70,7 +70,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
               <EuiTitle size="xs">
                 <h3>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.seedUrlsAccordionButtonLabel',
+                    'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.seedUrlsAccordionButtonLabel',
                     {
                       defaultMessage: 'Seed URLs',
                     }
@@ -87,7 +87,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
             </EuiNotificationBadge>
             <EuiFlexItem grow={false}>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.selectedDescriptor',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.selectedDescriptor',
                 {
                   defaultMessage: 'selected',
                 }
@@ -102,7 +102,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
             {
               id: useGeneratedHtmlId({ prefix: 'sitemapsTab' }),
               name: i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.sitemapsTabLabel',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.sitemapsTabLabel',
                 {
                   defaultMessage: 'Sitemaps',
                 }
@@ -115,7 +115,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                       id={useGeneratedHtmlId({ prefix: 'includeRobotsCheckbox' })}
                       label={
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.includeSitemapsCheckboxLabel"
+                          id="xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.includeSitemapsCheckboxLabel"
                           defaultMessage="Include sitemaps discovered in {robotsDotTxt}"
                           values={{
                             robotsDotTxt: <strong>robots.txt</strong>, // this is a technical term and shouldn't be translated
@@ -133,7 +133,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                     emptyMessage={
                       selectedDomainUrls.length === 0
                         ? i18n.translate(
-                            'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                            'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
                             {
                               defaultMessage: 'Please select a domain.',
                             }
@@ -144,7 +144,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                   <EuiHorizontalRule />
                   <UrlComboBox
                     label={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.customSitemapUrlsTextboxLabel',
+                      'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.customSitemapUrlsTextboxLabel',
                       {
                         defaultMessage: 'Custom sitemap URLs',
                       }
@@ -158,7 +158,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
             {
               id: useGeneratedHtmlId({ prefix: 'entryPointsTab' }),
               name: i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.entryPointsTabLabel',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.entryPointsTabLabel',
                 {
                   defaultMessage: 'Entry points',
                 }
@@ -173,7 +173,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                     emptyMessage={
                       selectedDomainUrls.length === 0
                         ? i18n.translate(
-                            'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                            'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
                             {
                               defaultMessage: 'Please select a domain.',
                             }
@@ -184,7 +184,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                   <EuiHorizontalRule />
                   <UrlComboBox
                     label={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.customEntryPointUrlsTextboxLabel',
+                      'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.customEntryPointUrlsTextboxLabel',
                       {
                         defaultMessage: 'Custom entry point URLs',
                       }

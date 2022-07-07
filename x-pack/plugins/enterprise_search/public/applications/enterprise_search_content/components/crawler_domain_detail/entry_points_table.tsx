@@ -51,10 +51,9 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
           {(entryPoint as EntryPoint)[field]}
         </EuiText>
       ),
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.urlTableHead',
-        { defaultMessage: 'URL' }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.urlTableHead', {
+        defaultMessage: 'URL',
+      }),
       field,
     },
   ];
@@ -67,28 +66,27 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
   return (
     <GenericEndpointInlineEditableTable
       addButtonText={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.addButtonLabel',
+        'xpack.enterpriseSearch.crawler.entryPointsTable.addButtonLabel',
         { defaultMessage: 'Add entry point' }
       )}
       columns={columns}
       description={
         <p>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.description', {
+          {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.description', {
             defaultMessage:
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
           })}{' '}
           <EuiLink href={ENTRY_POINTS_DOCS_URL} target="_blank" external>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.learnMoreLinkText',
-              { defaultMessage: 'Learn more about entry points.' }
-            )}
+            {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.learnMoreLinkText', {
+              defaultMessage: 'Learn more about entry points.',
+            })}
           </EuiLink>
         </p>
       }
       instanceId="EntryPointsTable"
       items={items}
       lastItemWarning={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.lastItemMessage',
+        'xpack.enterpriseSearch.crawler.entryPointsTable.lastItemMessage',
         { defaultMessage: 'The crawler requires at least one entry point.' }
       )}
       // Since canRemoveLastItem is false, the only time noItemsMessage would be displayed is if the last entry point was deleted via the API.
@@ -97,25 +95,22 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
           <EuiSpacer />
           <EuiTitle size="m">
             <h4>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageTitle',
-                {
-                  defaultMessage: 'There are no existing entry points.',
-                }
-              )}
+              {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.emptyMessageTitle', {
+                defaultMessage: 'There are no existing entry points.',
+              })}
             </h4>
           </EuiTitle>
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageDescription"
+              id="xpack.enterpriseSearch.crawler.entryPointsTable.emptyMessageDescription"
               defaultMessage="{link} to specify an entry point
               for the crawler"
               values={{
                 link: (
                   <EuiLink onClick={editNewItem}>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageLinkText',
+                      'xpack.enterpriseSearch.crawler.entryPointsTable.emptyMessageLinkText',
                       { defaultMessage: 'Add an entry point' }
                     )}
                   </EuiLink>
@@ -134,7 +129,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
       onAdd={onAdd}
       onDelete={onDelete}
       onUpdate={onUpdate}
-      title={i18n.translate('xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.title', {
+      title={i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
         defaultMessage: 'Entry points',
       })}
       disableReordering

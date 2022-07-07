@@ -28,7 +28,7 @@ export const CrawlerStatusBanner: React.FC = () => {
         <EuiCallOut
           iconType="iInCircle"
           title={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusBanner.changesCalloutTitle',
+            'xpack.enterpriseSearch.crawler.crawlerStatusBanner.changesCalloutTitle',
             {
               defaultMessage:
                 "Changes you make now won't take effect until the start of your next crawl.",

@@ -43,7 +43,7 @@ export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
               <EuiTitle size="xs">
                 <h3>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.domainsAccordionButtonLabel',
+                    'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.domainsAccordionButtonLabel',
                     {
                       defaultMessage: 'Add domains to your crawl',
                     }
@@ -63,7 +63,7 @@ export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
             </EuiNotificationBadge>
             <EuiFlexItem grow={false}>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.selectedDescriptor',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.selectedDescriptor',
                 {
                   defaultMessage: 'selected',
                 }

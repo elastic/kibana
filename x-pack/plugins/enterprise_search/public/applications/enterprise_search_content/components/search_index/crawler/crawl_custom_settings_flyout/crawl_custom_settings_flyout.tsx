@@ -49,7 +49,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
         <EuiTitle size="m">
           <h2>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.flyoutHeadTitle',
+              'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.flyoutHeadTitle',
               {
                 defaultMessage: 'Custom crawl configuration',
               }
@@ -60,7 +60,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
         <EuiText size="s">
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.flyoutHeaderDescription',
+              'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.flyoutHeaderDescription',
               {
                 defaultMessage: 'Set up a one-time crawl with custom settings.',
               }
@@ -94,7 +94,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
               isLoading={isFormSubmitting}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.startCrawlButtonLabel',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.startCrawlButtonLabel',
                 {
                   defaultMessage: 'Apply and crawl now',
                 }

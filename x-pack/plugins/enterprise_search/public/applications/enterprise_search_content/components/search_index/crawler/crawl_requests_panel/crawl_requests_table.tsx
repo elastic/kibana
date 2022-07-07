@@ -37,12 +37,9 @@ export const CrawlRequestsTable: React.FC = () => {
   > = [
     {
       field: 'id',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domainURL',
-        {
-          defaultMessage: 'Request ID',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsTable.column.domainURL', {
+        defaultMessage: 'Request ID',
+      }),
       render: (id: string, event: CrawlEvent) => {
         if (event.stage === 'crawl') {
           return (
@@ -60,45 +57,33 @@ export const CrawlRequestsTable: React.FC = () => {
     },
     {
       field: 'createdAt',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.created',
-        {
-          defaultMessage: 'Created',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsTable.column.created', {
+        defaultMessage: 'Created',
+      }),
       render: (createdAt: CrawlEvent['createdAt']) => (
         <CustomFormattedTimestamp timestamp={createdAt} />
       ),
     },
     {
       field: 'type',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.crawlType',
-        {
-          defaultMessage: 'Crawl type',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsTable.column.crawlType', {
+        defaultMessage: 'Crawl type',
+      }),
       render: (_, event: CrawlEvent) => <CrawlEventTypeBadge event={event} />,
     },
     {
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domains',
-        {
-          defaultMessage: 'Domains',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsTable.column.domains', {
+        defaultMessage: 'Domains',
+      }),
       render: (event: CrawlEvent) => (
         <EuiBadge>{event.crawlConfig.domainAllowlist.length}</EuiBadge>
       ),
     },
     {
       field: 'status',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.status',
-        {
-          defaultMessage: 'Status',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsTable.column.status', {
+        defaultMessage: 'Status',
+      }),
       render: (status: CrawlEvent['status']) => readableCrawlerStatuses[status],
     },
   ];
@@ -113,7 +98,7 @@ export const CrawlRequestsTable: React.FC = () => {
           title={
             <h3>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.title',
+                'xpack.enterpriseSearch.crawler.crawlRequestsTable.emptyPrompt.title',
                 {
                   defaultMessage: 'No recent crawl requests',
                 }
@@ -123,7 +108,7 @@ export const CrawlRequestsTable: React.FC = () => {
           body={
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.body',
+                'xpack.enterpriseSearch.crawler.crawlRequestsTable.emptyPrompt.body',
                 {
                   defaultMessage: "You haven't started any crawls yet.",
                 }

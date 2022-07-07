@@ -43,7 +43,7 @@ export const AddDomainFlyout: React.FC = () => {
           <EuiFlyoutHeader>
             <EuiTitle size="m">
               <h2>
-                {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.title', {
+                {i18n.translate('xpack.enterpriseSearch.crawler.addDomainFlyout.title', {
                   defaultMessage: 'Add a new domain',
                 })}
               </h2>
@@ -58,13 +58,10 @@ export const AddDomainFlyout: React.FC = () => {
             }
           >
             <EuiText>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.description',
-                {
-                  defaultMessage:
-                    'You can add multiple domains to this engine\'s web crawler. Add another domain here and modify the entry points and crawl rules from the "Manage" page.',
-                }
-              )}
+              {i18n.translate('xpack.enterpriseSearch.crawler.addDomainFlyout.description', {
+                defaultMessage:
+                  'You can add multiple domains to this index\'s web crawler. Add another domain here and modify the entry points and crawl rules from the "Manage" page.',
+              })}
               <p />
             </EuiText>
             <EuiSpacer size="l" />

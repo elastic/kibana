@@ -94,15 +94,12 @@ export const CrawlerDomainDetailLogic = kea<
           `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}`
         );
         flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.successMessage',
-            {
-              defaultMessage: "Domain '{domainUrl}' was deleted",
-              values: {
-                domainUrl: domain?.url,
-              },
-            }
-          )
+          i18n.translate('xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage', {
+            defaultMessage: "Domain '{domainUrl}' was deleted",
+            values: {
+              domainUrl: domain?.url,
+            },
+          })
         );
         KibanaLogic.values.navigateToUrl(
           generateEncodedPath(SEARCH_INDEX_TAB_PATH, {

@@ -22,11 +22,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { AddDomainLogic } from './add_domain/add_domain_logic';
+import { CrawlerLogic } from '../crawler_logic';
+
 import { AddDomainForm } from './add_domain/add_domain_form';
 import { AddDomainFormErrors } from './add_domain/add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './add_domain/add_domain_form_submit_button';
-import { CrawlerLogic } from '../crawler_logic';
+import { AddDomainLogic } from './add_domain/add_domain_logic';
 
 export const EmptyStatePanel: React.FC = () => {
   const { openFlyout } = useActions(AddDomainLogic);
@@ -35,7 +36,7 @@ export const EmptyStatePanel: React.FC = () => {
     <EuiPanel hasBorder>
       <EuiTitle size="s">
         <h2>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
+          {i18n.translate('xpack.enterpriseSearch.crawler.domainManagement.emptyState.title', {
             defaultMessage: 'Add a domain to your index',
           })}
         </h2>
@@ -45,7 +46,7 @@ export const EmptyStatePanel: React.FC = () => {
         <>
           <EuiText color="subdued" size="s">
             <p>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRequestsDescription', {
+              {i18n.translate('xpack.enterpriseSearch.crawler.domainManagement.emptyState', {
                 defaultMessage:
                   'You don’t have any domains on this index. Add your first domain to start crawling and indexing documents.',
               })}
@@ -56,7 +57,7 @@ export const EmptyStatePanel: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton onClick={openFlyout} fill>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.openButtonLabel',
+                  'xpack.enterpriseSearch.crawler.domainManagement.emptyState.addDomainButtonLabel',
                   {
                     defaultMessage: 'Add your first domain',
                   }

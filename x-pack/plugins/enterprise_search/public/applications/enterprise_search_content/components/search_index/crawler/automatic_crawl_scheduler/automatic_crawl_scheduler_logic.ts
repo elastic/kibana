@@ -107,7 +107,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.clearCrawlSchedule();
         flashSuccessToast(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlScheduler.disableCrawlSchedule.successMessage',
+            'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.disableCrawlSchedule.successMessage',
             {
               defaultMessage: 'Automatic crawling has been disabled.',
             }
@@ -136,7 +136,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.setCrawlSchedule(crawlSchedule);
       } catch (e) {
         // A 404 is expected and means the user does not have crawl schedule
-        // for this engine. We continue to use the defaults.
+        // for this index. We continue to use the defaults.
         if (e.response.status === 404) {
           actions.clearCrawlSchedule();
         } else {
@@ -168,7 +168,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.setCrawlSchedule(crawlSchedule);
         flashSuccessToast(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlScheduler.submitCrawlSchedule.successMessage',
+            'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.submitCrawlSchedule.successMessage',
             {
               defaultMessage: 'Your automatic crawling schedule has been updated.',
             }

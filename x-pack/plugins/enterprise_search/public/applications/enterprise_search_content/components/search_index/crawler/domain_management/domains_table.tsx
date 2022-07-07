@@ -29,7 +29,7 @@ import { DomainManagementLogic } from './domain_management_logic';
 
 const getDeleteDomainConfirmationMessage = (domainUrl: string) => {
   return i18n.translate(
-    'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.confirmationPopupMessage',
+    'xpack.enterpriseSearch.crawler.action.deleteDomain.confirmationPopupMessage',
     {
       defaultMessage:
         'Are you sure you want to remove the domain "{domainUrl}" and all of its settings?',
@@ -48,12 +48,9 @@ export const DomainsTable: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<CrawlerDomain>> = [
     {
       field: 'url',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.domainsTable.column.domainURL',
-        {
-          defaultMessage: 'Domain URL',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.column.domainURL', {
+        defaultMessage: 'Domain URL',
+      }),
       render: (_, domain: CrawlerDomain) => (
         <EuiLinkTo
           data-test-subj="CrawlerDomainURL"
@@ -68,36 +65,30 @@ export const DomainsTable: React.FC = () => {
     },
     {
       field: 'lastCrawl',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.domainsTable.column.lastActivity',
-        {
-          defaultMessage: 'Last activity',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.column.lastActivity', {
+        defaultMessage: 'Last activity',
+      }),
       render: (lastCrawl: CrawlerDomain['lastCrawl']) =>
         lastCrawl ? <CustomFormattedTimestamp timestamp={lastCrawl} /> : '',
     },
     {
       field: 'documentCount',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.domainsTable.column.documents',
-        {
-          defaultMessage: 'Documents',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.column.documents', {
+        defaultMessage: 'Documents',
+      }),
       render: (documentCount: CrawlerDomain['documentCount']) => (
         <FormattedNumber value={documentCount} />
       ),
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTable.column.actions', {
+      name: i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.column.actions', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
           name: MANAGE_BUTTON_LABEL,
           description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.manage.buttonLabel',
+            'xpack.enterpriseSearch.crawler.domainsTable.action.manage.buttonLabel',
             {
               defaultMessage: 'Manage this domain',
             }
@@ -116,7 +107,7 @@ export const DomainsTable: React.FC = () => {
         {
           name: DELETE_BUTTON_LABEL,
           description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.delete.buttonLabel',
+            'xpack.enterpriseSearch.crawler.domainsTable.action.delete.buttonLabel',
             {
               defaultMessage: 'Delete this domain',
             }

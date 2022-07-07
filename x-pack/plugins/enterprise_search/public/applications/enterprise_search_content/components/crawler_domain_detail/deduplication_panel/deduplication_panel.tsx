@@ -56,7 +56,7 @@ export const DeduplicationPanel: React.FC = () => {
       hasBorder
       title={
         <h2>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.title', {
+          {i18n.translate('xpack.enterpriseSearch.crawler.deduplicationPanel.title', {
             defaultMessage: 'Duplicate document handling',
           })}
         </h2>
@@ -70,7 +70,7 @@ export const DeduplicationPanel: React.FC = () => {
           disabled={deduplicationFields.length === 0}
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.resetToDefaultsButtonLabel',
+            'xpack.enterpriseSearch.crawler.deduplicationPanel.resetToDefaultsButtonLabel',
             {
               defaultMessage: 'Reset to defaults',
             }
@@ -79,7 +79,7 @@ export const DeduplicationPanel: React.FC = () => {
       }
       subtitle={
         <FormattedMessage
-          id="xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.description"
+          id="xpack.enterpriseSearch.crawler.deduplicationPanel.description"
           defaultMessage="The web crawler only indexes unique pages. Choose which fields the crawler should use when
           considering which pages are duplicates. Deselect all schema fields to allow duplicate
           documents on this domain. {documentationLink}."
@@ -87,7 +87,7 @@ export const DeduplicationPanel: React.FC = () => {
             documentationLink: (
               <EuiLink href={DUPLICATE_DOCS_URL} target="_blank" external>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.learnMoreMessage',
+                  'xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage',
                   {
                     defaultMessage: 'Learn more about content hashing',
                   }
@@ -134,13 +134,13 @@ export const DeduplicationPanel: React.FC = () => {
                       >
                         {showAllFields
                           ? i18n.translate(
-                              'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.allFieldsLabel',
+                              'xpack.enterpriseSearch.crawler.deduplicationPanel.allFieldsLabel',
                               {
                                 defaultMessage: 'All fields',
                               }
                             )
                           : i18n.translate(
-                              'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.selectedFieldsLabel',
+                              'xpack.enterpriseSearch.crawler.deduplicationPanel.selectedFieldsLabel',
                               {
                                 defaultMessage: 'Selected fields',
                               }
@@ -163,7 +163,7 @@ export const DeduplicationPanel: React.FC = () => {
                           }}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.showAllFieldsButtonLabel',
+                            'xpack.enterpriseSearch.crawler.deduplicationPanel.showAllFieldsButtonLabel',
                             {
                               defaultMessage: 'Show all fields',
                             }
@@ -178,7 +178,7 @@ export const DeduplicationPanel: React.FC = () => {
                           }}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.showSelectedFieldsButtonLabel',
+                            'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.showSelectedFieldsButtonLabel',
                             {
                               defaultMessage: 'Show only selected fields',
                             }

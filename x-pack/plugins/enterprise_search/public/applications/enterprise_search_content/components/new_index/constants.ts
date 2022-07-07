@@ -64,7 +64,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'Universal',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.universalDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.universalDropDownOptionLabel',
       {
         defaultMessage: 'Universal',
       }
@@ -77,7 +77,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'zh',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.chineseDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.chineseDropDownOptionLabel',
       {
         defaultMessage: 'Chinese',
       }
@@ -86,7 +86,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'da',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.danishDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.danishDropDownOptionLabel',
       {
         defaultMessage: 'Danish',
       }
@@ -95,7 +95,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'nl',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.dutchDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.dutchDropDownOptionLabel',
       {
         defaultMessage: 'Dutch',
       }
@@ -104,7 +104,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'en',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.englishDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.englishDropDownOptionLabel',
       {
         defaultMessage: 'English',
       }
@@ -113,7 +113,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'fr',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.frenchDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.frenchDropDownOptionLabel',
       {
         defaultMessage: 'French',
       }
@@ -122,7 +122,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'de',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.germanDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.germanDropDownOptionLabel',
       {
         defaultMessage: 'German',
       }
@@ -131,7 +131,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'it',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.italianDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.italianDropDownOptionLabel',
       {
         defaultMessage: 'Italian',
       }
@@ -140,7 +140,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'ja',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.japaneseDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.japaneseDropDownOptionLabel',
       {
         defaultMessage: 'Japanese',
       }
@@ -149,7 +149,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'ko',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.koreanDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.koreanDropDownOptionLabel',
       {
         defaultMessage: 'Korean',
       }
@@ -158,7 +158,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'pt',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.portugueseDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.portugueseDropDownOptionLabel',
       {
         defaultMessage: 'Portuguese',
       }
@@ -167,7 +167,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'pt-br',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.portugueseBrazilDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.portugueseBrazilDropDownOptionLabel',
       {
         defaultMessage: 'Portuguese (Brazil)',
       }
@@ -176,7 +176,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'ru',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.russianDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.russianDropDownOptionLabel',
       {
         defaultMessage: 'Russian',
       }
@@ -185,7 +185,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'es',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.spanishDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.spanishDropDownOptionLabel',
       {
         defaultMessage: 'Spanish',
       }
@@ -194,7 +194,7 @@ export const SUPPORTED_LANGUAGES = [
   {
     value: 'th',
     text: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engineCreation.supportedLanguages.thaiDropDownOptionLabel',
+      'xpack.enterpriseSearch.engineCreation.supportedLanguages.thaiDropDownOptionLabel',
       {
         defaultMessage: 'Thai',
       }

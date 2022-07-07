@@ -27,7 +27,7 @@ export const StartCrawlContextMenu: React.FC = () => {
       button={
         <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover} fill>
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.retryCrawlButtonLabel',
+            'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.retryCrawlButtonLabel',
             {
               defaultMessage: 'Crawl',
             }
@@ -50,9 +50,9 @@ export const StartCrawlContextMenu: React.FC = () => {
             icon="play"
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlAllDomainsMenuLabel',
+              'xpack.enterpriseSearch.crawler.startCrawlContextMenu.crawlAllDomainsMenuLabel',
               {
-                defaultMessage: 'Crawl all domains on this engine',
+                defaultMessage: 'Crawl all domains on this index',
               }
             )}
           </EuiContextMenuItem>,
@@ -65,7 +65,7 @@ export const StartCrawlContextMenu: React.FC = () => {
             icon="gear"
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlCustomSettingsMenuLabel',
+              'xpack.enterpriseSearch.crawler.startCrawlContextMenu.crawlCustomSettingsMenuLabel',
               {
                 defaultMessage: 'Crawl with custom settings',
               }
@@ -80,7 +80,7 @@ export const StartCrawlContextMenu: React.FC = () => {
             icon="refresh"
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.reapplyCrawlRulesMenuLabel',
+              'xpack.enterpriseSearch.crawler.startCrawlContextMenu.reapplyCrawlRulesMenuLabel',
               {
                 defaultMessage: 'Reapply crawl rules',
               }

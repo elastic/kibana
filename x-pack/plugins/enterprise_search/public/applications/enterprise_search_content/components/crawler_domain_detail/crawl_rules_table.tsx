@@ -45,58 +45,43 @@ export const getReadableCrawlerRule = (rule: CrawlerRules) => {
   switch (rule) {
     case CrawlerRules.beginsWith:
       return i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.beginsWithLabel',
+        'xpack.enterpriseSearch.crawler.crawlRulesCrawlerRules.beginsWithLabel',
         {
           defaultMessage: 'Begins with',
         }
       );
     case CrawlerRules.endsWith:
-      return i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.endsWithLabel',
-        {
-          defaultMessage: 'Ends with',
-        }
-      );
+      return i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesCrawlerRules.endsWithLabel', {
+        defaultMessage: 'Ends with',
+      });
     case CrawlerRules.contains:
-      return i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.containsLabel',
-        {
-          defaultMessage: 'Contains',
-        }
-      );
+      return i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesCrawlerRules.containsLabel', {
+        defaultMessage: 'Contains',
+      });
     case CrawlerRules.regex:
-      return i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.regexLabel',
-        {
-          defaultMessage: 'Regex',
-        }
-      );
+      return i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesCrawlerRules.regexLabel', {
+        defaultMessage: 'Regex',
+      });
   }
 };
 
 export const getReadableCrawlerPolicy = (policy: CrawlerPolicies) => {
   switch (policy) {
     case CrawlerPolicies.allow:
-      return i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesPolicies.allowLabel',
-        {
-          defaultMessage: 'Allow',
-        }
-      );
+      return i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesPolicies.allowLabel', {
+        defaultMessage: 'Allow',
+      });
     case CrawlerPolicies.deny:
-      return i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesPolicies.disallowLabel',
-        {
-          defaultMessage: 'Disallow',
-        }
-      );
+      return i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesPolicies.disallowLabel', {
+        defaultMessage: 'Disallow',
+      });
   }
 };
 
 export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
   if (crawlRule.rule === CrawlerRules.regex) {
     return i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.regexPathPatternTooltip',
+      'xpack.enterpriseSearch.crawler.crawlRulesTable.regexPathPatternTooltip',
       {
         defaultMessage:
           'The path pattern is a regular expression compatible with the Ruby language regular expression engine.',
@@ -104,27 +89,23 @@ export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
     );
   }
 
-  return i18n.translate(
-    'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.pathPatternTooltip',
-    {
-      defaultMessage:
-        'The path pattern is a literal string except for the asterisk (*) character, which is a meta character that will match anything.',
-    }
-  );
+  return i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.pathPatternTooltip', {
+    defaultMessage:
+      'The path pattern is a literal string except for the asterisk (*) character, which is a meta character that will match anything.',
+  });
 };
 
 const DEFAULT_DESCRIPTION = (
   <p>
     <FormattedMessage
-      id="xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.description"
+      id="xpack.enterpriseSearch.crawler.crawlRulesTable.description"
       defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match. {link}"
       values={{
         link: (
           <EuiLink href={CRAWL_RULES_DOCS_URL} target="_blank" external>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.descriptionLinkText',
-              { defaultMessage: 'Learn more about crawl rules' }
-            )}
+            {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.descriptionLinkText', {
+              defaultMessage: 'Learn more about crawl rules',
+            })}
           </EuiLink>
         ),
       }}
@@ -162,12 +143,9 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
       render: (crawlRule) => (
         <EuiText size="s">{getReadableCrawlerPolicy((crawlRule as CrawlRule).policy)}</EuiText>
       ),
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.policyTableHead',
-        {
-          defaultMessage: 'Policy',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.policyTableHead', {
+        defaultMessage: 'Policy',
+      }),
       field: 'policy',
     },
     {
@@ -193,12 +171,9 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
       render: (crawlRule) => (
         <EuiText size="s">{getReadableCrawlerRule((crawlRule as CrawlRule).rule)}</EuiText>
       ),
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.ruleTableHead',
-        {
-          defaultMessage: 'Rule',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.ruleTableHead', {
+        defaultMessage: 'Rule',
+      }),
       field: 'rule',
     },
     {
@@ -223,12 +198,9 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         </EuiFlexGroup>
       ),
       render: (crawlRule) => <EuiCode>{(crawlRule as CrawlRule).pattern}</EuiCode>,
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.pathPatternTableHead',
-        {
-          defaultMessage: 'Path pattern',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.pathPatternTableHead', {
+        defaultMessage: 'Path pattern',
+      }),
       field: 'pattern',
     },
   ];
@@ -241,7 +213,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
   return (
     <GenericEndpointInlineEditableTable
       addButtonText={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.addButtonLabel',
+        'xpack.enterpriseSearch.crawler.crawlRulesTable.addButtonLabel',
         { defaultMessage: 'Add crawl rule' }
       )}
       columns={columns}
@@ -262,7 +234,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         clearFlashMessages();
         flashSuccessToast(
           i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.deleteSuccessToastMessage',
+            'xpack.enterpriseSearch.crawler.crawlRulesTable.deleteSuccessToastMessage',
             {
               defaultMessage: 'The crawl rule has been deleted.',
             }
@@ -277,7 +249,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         updateCrawlRules(newCrawlRules as CrawlRule[]);
         clearFlashMessages();
       }}
-      title={i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.title', {
+      title={i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.title', {
         defaultMessage: 'Crawl rules',
       })}
       uneditableItems={defaultCrawlRule ? [defaultCrawlRule] : undefined}

@@ -36,7 +36,7 @@ export const DomainsPanel: React.FC = () => {
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
+              {i18n.translate('xpack.enterpriseSearch.crawler.domainsTitle', {
                 defaultMessage: 'Domains',
               })}
             </h2>
@@ -44,12 +44,9 @@ export const DomainsPanel: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={openFlyout} size="s" color="success" iconType="plusInCircle">
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.openButtonLabel',
-              {
-                defaultMessage: 'Add domain',
-              }
-            )}
+            {i18n.translate('xpack.enterpriseSearch.crawler.addDomainFlyout.openButtonLabel', {
+              defaultMessage: 'Add domain',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
