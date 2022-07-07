@@ -246,6 +246,7 @@ export function RuleDetailsPage() {
       enableRule: async () => await enableRule({ http, id: rule.id }),
       disableRule: async () => await disableRule({ http, id: rule.id }),
       onRuleChanged: () => reloadRule(),
+      hideSnoozeOption: true,
       isEditable: hasEditButton,
       snoozeRule: async (snoozeSchedule) => {
         await snoozeRule({ http, id: rule.id, snoozeSchedule });
