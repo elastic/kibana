@@ -44,6 +44,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      const { body } = await supertest
+        .get(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+      await Promise.all([
+        (body.monitors as Array<SimpleSavedObject<MonitorFields>>).map((monitor) => {
+          return deleteMonitor(monitor.id);
+        }),
+      ]);
 
       _monitors = [getFixtureJson('http_monitor')];
     });
