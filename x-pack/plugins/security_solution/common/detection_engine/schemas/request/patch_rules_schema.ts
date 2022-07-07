@@ -43,5 +43,5 @@ export type ThresholdPatchSchema = t.TypeOf<typeof thresholdPatchSchema>;
 const machineLearningPatchSchema = t.intersection([machineLearningPatchParams, sharedPatchSchema]);
 export type MachineLearningPatchSchema = t.TypeOf<typeof machineLearningPatchSchema>;
 
-export const newTermsFullPatchSchema = t.intersection([newTermsPatchParams, sharedPatchSchema]);
+const newTermsFullPatchSchema = t.intersection([newTermsPatchParams, sharedPatchSchema]);
 export type NewTermsFullPatchSchema = t.TypeOf<typeof newTermsFullPatchSchema>;

@@ -225,6 +225,7 @@ const newTermsSpecificRuleParams = t.type({
   dataViewId: dataViewIdOrUndefined,
 });
 export const newTermsRuleParams = t.intersection([baseRuleParams, newTermsSpecificRuleParams]);
+export type NewTermsSpecificRuleParams = t.TypeOf<typeof newTermsSpecificRuleParams>;
 export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;
 
 export const typeSpecificRuleParams = t.union([
