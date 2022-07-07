@@ -40,7 +40,7 @@ import {
   ENDPOINT_ACTIONS_INDEX,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  GET_RUNNING_PROCESSES_ROUTE,
+  GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -131,6 +131,7 @@ describe('Response actions', () => {
           },
         ],
         keep_policies_up_to_date: false,
+        verification_status: 'unknown',
       });
 
       licenseEmitter = new Subject();
@@ -401,7 +402,7 @@ describe('Response actions', () => {
     });
 
     it('sends the running-processes command payload from the running processes route', async () => {
-      const ctx = await callRoute(GET_RUNNING_PROCESSES_ROUTE, {
+      const ctx = await callRoute(GET_PROCESSES_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
@@ -527,7 +528,7 @@ describe('Response actions', () => {
 
       it('handles running-processes', async () => {
         const ctx = await callRoute(
-          GET_RUNNING_PROCESSES_ROUTE,
+          GET_PROCESSES_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'] },
           },

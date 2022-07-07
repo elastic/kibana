@@ -10,11 +10,12 @@ import { extname } from 'path';
 import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { chain } from 'lodash';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
+
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
@@ -27,7 +28,7 @@ interface FileStream extends Readable {
 }
 
 export const registerResolveImportErrorsRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
   const { maxImportPayloadBytes } = config;
