@@ -8,7 +8,10 @@
 import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EntityService, getService } from '@kbn/observability-plugin/public';
+import {
+  entities,
+  EntityServiceInfrastructure,
+} from '@kbn/observability-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -19,20 +22,22 @@ export function InfraTabs() {
   const { serviceName } = useApmServiceContext();
   const kibana = useKibana<ApmPluginStartDeps>();
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/infrastructure');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [service, updateService] = useState<EntityService | null>(null);
+  const [service, updateService] = useState<EntityServiceInfrastructure | null>(
+    null
+  );
 
   useEffect(() => {
     async function get() {
       const startTime = new Date(start).getTime();
       const endTime = new Date(end).getTime();
 
-      const retrievedService = await getService({
+      const retrievedService = await entities.getInfrastructureForService({
+        client: kibana.services.data,
         name: serviceName,
         environment,
-        client: kibana.services.data,
         start: startTime,
         end: endTime,
       });
@@ -49,17 +54,17 @@ export function InfraTabs() {
     );
   }
 
-  return <Tabs service={service} start={start} end={end} />;
+  return <Tabs serviceInfrastructure={service} start={start} end={end} />;
 }
 
 interface TabsProps {
-  service: EntityService;
+  serviceInfrastructure: EntityServiceInfrastructure;
   start: string;
   end: string;
 }
 
-const Tabs: React.FC<TabsProps> = ({ service, start, end }) => {
-  const { containerIds, podNames, hostNames } = service.infrastructure;
+function Tabs({ serviceInfrastructure, start, end }: TabsProps) {
+  const { containerIds, podNames, hostNames } = serviceInfrastructure;
 
   const tabs = useTabs({
     containerIds,
@@ -78,4 +83,4 @@ const Tabs: React.FC<TabsProps> = ({ service, start, end }) => {
       />
     </>
   );
-};
+}

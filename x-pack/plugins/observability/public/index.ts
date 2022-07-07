@@ -116,4 +116,5 @@ export {
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
 
+export * from './entities/types';
 export { entities };

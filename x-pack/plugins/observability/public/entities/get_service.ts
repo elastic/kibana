@@ -53,7 +53,7 @@ export async function getService({
     },
   };
 
-  console.log('getService', request);
+  // console.log('getService', request);
 
   // TODO: use typed ES response
   const { rawResponse } = await lastValueFrom(client.search.search(request));

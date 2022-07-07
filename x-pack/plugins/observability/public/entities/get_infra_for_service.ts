@@ -80,7 +80,7 @@ export async function getInfrastructureForService({
     },
   };
 
-  console.log('getInfrastructureForService', request);
+  // console.log('getInfrastructureForService', request);
 
   // TODO: use typed ES response
   const { rawResponse } = await lastValueFrom(client.search.search(request));
