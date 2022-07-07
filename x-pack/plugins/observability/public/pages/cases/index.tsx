@@ -38,13 +38,13 @@ export const CasesPage = React.memo(() => {
     docsLink: docLinks.links.observability.guide,
   });
 
-  return userPermissions == null || userPermissions?.read ? (
+  return userPermissions.read ? (
     <ObservabilityPageTemplate
       isPageDataLoaded={Boolean(hasAnyData || isAllRequestsComplete)}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
     >
-      <Cases userCanCrud={userPermissions?.crud ?? false} />
+      <Cases permissions={userPermissions} />
     </ObservabilityPageTemplate>
   ) : (
     <CaseFeatureNoPermissions />
