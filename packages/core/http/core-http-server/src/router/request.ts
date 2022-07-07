@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { URL } from 'url';
+import type { URL } from 'url';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
@@ -15,14 +15,14 @@ import type { RouteMethod, RouteConfigOptions } from './route';
 import type { Headers } from './headers';
 
 /**
- * @internal
+ * @public
  */
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
 }
 
 /**
- * @internal
+ * @public
  */
 export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;

@@ -87,7 +87,7 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
   getRoutes: () => RouterRoute[];
 }
 
-/** @internal */
+/** @public */
 export interface RouterRoute {
   method: RouteMethod;
   path: string;

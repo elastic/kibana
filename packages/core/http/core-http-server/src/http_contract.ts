@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IContextContainer, IContextProvider, IRouter, RequestHandlerContextBase } from './router';
+import type {
+  IContextContainer,
+  IContextProvider,
+  IRouter,
+  RequestHandlerContextBase,
+} from './router';
 import type {
   AuthenticationHandler,
   OnPostAuthHandler,

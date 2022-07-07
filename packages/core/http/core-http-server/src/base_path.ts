@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from './router';
+import type { KibanaRequest } from './router';
 
 /**
  * Access or manipulate the Kibana base path

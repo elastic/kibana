@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
+import type { AwaitedProperties } from '@kbn/utility-types';
 
 /**
  * Base, abstract type for request handler contexts.

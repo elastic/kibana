@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Stream } from 'stream';
+import type { Stream } from 'stream';
 import type { ResponseHeaders } from './headers';
 
 /**
