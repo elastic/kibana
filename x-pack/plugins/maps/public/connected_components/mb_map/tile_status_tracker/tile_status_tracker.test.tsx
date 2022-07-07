@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import React from 'react';
 import { mount } from 'enzyme';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { TileStatusTracker } from './tile_status_tracker';
 import { ILayer } from '../../../classes/layers/layer';
 
-// eslint-disable-next-line max-classes-per-file
 class MockMbMap {
   public listeners: Array<{ type: string; callback: (e: unknown) => void }> = [];
 
