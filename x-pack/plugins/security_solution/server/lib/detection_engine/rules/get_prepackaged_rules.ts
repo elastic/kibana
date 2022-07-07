@@ -11,9 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { SavedObjectAttributes } from '@kbn/core/types';
-import type {
-  AddPrepackagedRulesSchema,
-} from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { addPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 // TODO: convert rules files to TS and add explicit type definitions
