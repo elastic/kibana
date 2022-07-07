@@ -114,3 +114,5 @@ export type {
 
 export type { GetAuthState, IsAuthenticated } from './auth_state';
 export { AuthStatus } from './auth_state';
+
+export type { IAuthHeadersStorage, SetAuthHeaders, GetAuthHeaders } from './auth_headers';

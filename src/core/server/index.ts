@@ -148,7 +148,6 @@ export type {
 } from './elasticsearch';
 
 export type {
-  GetAuthHeaders,
   HttpAuth,
   HttpServerInfo,
   HttpServicePreboot,
@@ -230,6 +229,7 @@ export type {
   GetAuthState,
   IsAuthenticated,
   AuthStatus,
+  GetAuthHeaders,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';
