@@ -53,7 +53,7 @@ export const injectAttachmentSOAttributesFromRefs = (
 
 export const injectAttachmentSOAttributesFromRefsForPatch = (
   updatedAttributes: CommentPatchAttributes,
-  savedObject: SavedObjectsUpdateResponse<CommentAttributes>,
+  savedObject: SavedObjectsUpdateResponse<CommentAttributesWithoutRefs>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);

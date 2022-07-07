@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
 import {
   AttributesTypeExternalReferenceNoSO,
@@ -118,6 +119,16 @@ export const persistableStateAttachmentAttributes: AttributesTypePersistableStat
   pushed_at: null,
   pushed_by: null,
 };
+
+export const persistableStateAttachmentAttributesWithoutInjectedId = omit(
+  persistableStateAttachmentAttributes,
+  'persistableStateAttachmentState.injectedId'
+);
+
+export const externalReferenceAttachmentSOAttributesWithoutRefs = omit(
+  externalReferenceAttachmentSOAttributes,
+  'externalReferenceId'
+);
 
 export const getPersistableStateAttachmentTypeRegistry =
   (): PersistableStateAttachmentTypeRegistry => {
