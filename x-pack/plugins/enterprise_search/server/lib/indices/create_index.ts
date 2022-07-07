@@ -64,7 +64,7 @@ const defaultMappings = {
 export const createApiIndex = async (
   client: IScopedClusterClient,
   indexName: string,
-  language: string | undefined,
+  language: string | undefined
 ) => {
   return await client.asCurrentUser.indices.create({
     index: indexName,
