@@ -485,7 +485,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     description,
     risk_score: riskScore,
     severity,
-    output_index: '.siem-signals-default',
+    output_index: '',
     author: [],
     false_positives: [],
     from: 'now-50000h',

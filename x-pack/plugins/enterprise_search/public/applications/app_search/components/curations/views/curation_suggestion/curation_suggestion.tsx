@@ -19,6 +19,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import type { SearchResult } from '@elastic/search-ui';
+
 import { i18n } from '@kbn/i18n';
 
 import { LeafIcon } from '../../../../../shared/icons';
@@ -26,7 +28,6 @@ import { useDecodedParams } from '../../../../utils/encode_path_params';
 import { EngineLogic } from '../../../engine';
 import { AppSearchPageTemplate } from '../../../layout';
 import { Result } from '../../../result';
-import { Result as ResultType } from '../../../result/types';
 import { convertToResultFormat } from '../../curation/results';
 import { getCurationsBreadcrumbs } from '../../utils';
 
@@ -149,7 +150,7 @@ export const CurationSuggestion: React.FC = () => {
                       gutterSize="s"
                       data-test-subj="currentOrganicResults"
                     >
-                      {currentOrganicResults.map((result: ResultType, index) => (
+                      {currentOrganicResults.map((result: SearchResult, index) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result
                             result={result}
@@ -169,7 +170,7 @@ export const CurationSuggestion: React.FC = () => {
                       gutterSize="s"
                       data-test-subj="proposedOrganicResults"
                     >
-                      {proposedOrganicResults.map((result: ResultType, index) => (
+                      {proposedOrganicResults.map((result: SearchResult, index) => (
                         <EuiFlexItem grow={false} key={result.id.raw}>
                           <Result
                             result={result}

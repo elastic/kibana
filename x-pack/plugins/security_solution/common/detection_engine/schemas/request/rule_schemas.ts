@@ -103,9 +103,9 @@ const patchSchema = <
   defaultableFields: Defaultable
 ) => {
   return t.intersection([
-    t.exact(t.partial(requiredFields)),
-    t.exact(t.partial(optionalFields)),
-    t.exact(t.partial(defaultableFields)),
+    t.partial(requiredFields),
+    t.partial(optionalFields),
+    t.partial(defaultableFields),
   ]);
 };
 
@@ -192,6 +192,7 @@ const {
   patch: basePatchParams,
   response: baseResponseParams,
 } = buildAPISchemas(baseParams);
+export { baseCreateParams };
 
 // "shared" types are the same across all rule types, and built from "baseParams" above
 // with some variations for each route. These intersect with type specific schemas below
@@ -209,6 +210,13 @@ export const sharedUpdateSchema = t.intersection([
 ]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
+export const sharedPatchSchema = t.intersection([
+  basePatchParams,
+  t.exact(t.partial({ rule_id, id })),
+]);
+
+// START type specific parameter definitions
+// -----------------------------------------
 const eqlRuleParams = {
   required: {
     type: t.literal('eql'),
@@ -374,8 +382,10 @@ const {
 } = buildAPISchemas(newTermsRuleParams);
 
 export { newTermsCreateParams };
+// ---------------------------------------
+// END type specific parameter definitions
 
-const createTypeSpecific = t.union([
+export const createTypeSpecific = t.union([
   eqlCreateParams,
   threatMatchCreateParams,
   queryCreateParams,
@@ -418,7 +428,7 @@ export type MachineLearningUpdateSchema = UpdateSchema<
 >;
 export type NewTermsUpdateSchema = UpdateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
-const patchTypeSpecific = t.union([
+export const patchTypeSpecific = t.union([
   eqlPatchParams,
   threatMatchPatchParams,
   queryPatchParams,
@@ -427,6 +437,24 @@ const patchTypeSpecific = t.union([
   machineLearningPatchParams,
   newTermsPatchParams,
 ]);
+export {
+  eqlPatchParams,
+  threatMatchPatchParams,
+  queryPatchParams,
+  savedQueryPatchParams,
+  thresholdPatchParams,
+  machineLearningPatchParams,
+  newTermsPatchParams,
+};
+export type PatchTypeSpecific = t.TypeOf<typeof patchTypeSpecific>;
+
+export type EqlPatchParams = t.TypeOf<typeof eqlPatchParams>;
+export type ThreatMatchPatchParams = t.TypeOf<typeof threatMatchPatchParams>;
+export type QueryPatchParams = t.TypeOf<typeof queryPatchParams>;
+export type SavedQueryPatchParams = t.TypeOf<typeof savedQueryPatchParams>;
+export type ThresholdPatchParams = t.TypeOf<typeof thresholdPatchParams>;
+export type MachineLearningPatchParams = t.TypeOf<typeof machineLearningPatchParams>;
+export type NewTermsPatchParams = t.TypeOf<typeof newTermsPatchParams>;
 
 const responseTypeSpecific = t.union([
   eqlResponseParams,
@@ -442,11 +470,26 @@ export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
-export const fullPatchSchema = t.intersection([
-  basePatchParams,
-  patchTypeSpecific,
-  t.exact(t.partial({ id })),
+export const eqlFullPatchSchema = t.intersection([eqlPatchParams, sharedPatchSchema]);
+export type EqlFullPatchSchema = t.TypeOf<typeof eqlFullPatchSchema>;
+export const threatMatchFullPatchSchema = t.intersection([
+  threatMatchPatchParams,
+  sharedPatchSchema,
 ]);
+export type ThreatMatchFullPatchSchema = t.TypeOf<typeof threatMatchFullPatchSchema>;
+export const queryFullPatchSchema = t.intersection([queryPatchParams, sharedPatchSchema]);
+export type QueryFullPatchSchema = t.TypeOf<typeof queryFullPatchSchema>;
+export const savedQueryFullPatchSchema = t.intersection([savedQueryPatchParams, sharedPatchSchema]);
+export type SavedQueryFullPatchSchema = t.TypeOf<typeof savedQueryFullPatchSchema>;
+export const thresholdFullPatchSchema = t.intersection([thresholdPatchParams, sharedPatchSchema]);
+export type ThresholdFullPatchSchema = t.TypeOf<typeof thresholdFullPatchSchema>;
+export const machineLearningFullPatchSchema = t.intersection([
+  machineLearningPatchParams,
+  sharedPatchSchema,
+]);
+export type MachineLearningFullPatchSchema = t.TypeOf<typeof machineLearningFullPatchSchema>;
+export const newTermsFullPatchSchema = t.intersection([newTermsPatchParams, sharedPatchSchema]);
+export type NewTermsFullPatchSchema = t.TypeOf<typeof newTermsFullPatchSchema>;
 
 const responseRequiredFields = {
   id,
