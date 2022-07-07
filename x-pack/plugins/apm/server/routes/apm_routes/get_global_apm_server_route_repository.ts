@@ -41,13 +41,7 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { historicalDataRouteRepository } from '../historical_data/route';
-import { eventMetadataRouteRepository } from '../event_metadata/route';
-import { suggestionsRouteRepository } from '../suggestions/route';
-import { agentKeysRouteRepository } from '../agent_keys/route';
 import { storageExplorerRouteRepository } from '../settings/storage_explorer/route';
-import { spanLinksRouteRepository } from '../span_links/route';
-import { debugTelemetryRoute } from '../debug_telemetry/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
