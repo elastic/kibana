@@ -72,7 +72,7 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
         selection: colors.warning,
       },
       fontFamily: font.familyCode,
-      fontSize: 12,
+      fontSize: 10,
       allowTransparency: true,
     });
 
@@ -121,6 +121,16 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
       fitAddon.fit();
     }
   }, [terminal]);
+
+  fitAddon.fit();
+
+  fitAddon.fit();
+
+  fitAddon.fit();
+
+  fitAddon.fit();
+
+  fitAddon.fit();
 
   fitAddon.fit();
 
