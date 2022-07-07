@@ -11,20 +11,17 @@ import type {
   FieldFormatEditor as InnerFieldFormatEditor,
   FieldFormatEditorFactory,
 } from '@kbn/data-view-field-editor-plugin/public';
+import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { memoize } from 'lodash';
 import React, { LazyExoticComponent, PureComponent } from 'react';
-import { IndexPatternManagmentContext } from '../../../../types';
-
-type Context = KibanaReactContextValue<IndexPatternManagmentContext>['services'];
 
 export interface FieldFormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: FieldFormatParams<{ type?: string }>;
-  fieldFormatEditors: Context['fieldFormatEditors'];
+  fieldFormatEditors: FormatEditorServiceStart;
   onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }

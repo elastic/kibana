@@ -7,4 +7,3 @@
  */
 
 export { FieldFormatEditors } from './field_format_editors';
-export type { FieldFormatEditorStart } from './field_format_editors';

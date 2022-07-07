@@ -25,6 +25,8 @@ export type {
   PluginStart as IndexPatternFieldEditorStart,
 } from './types';
 export { DefaultFormatEditor } from './components/field_format_editor/editors/default/default';
+
+/** internal **/
 export type {
   FieldFormatEditorFactory,
   FieldFormatEditor,
@@ -37,5 +39,6 @@ export function plugin() {
 }
 
 // Expose types
+export type { FormatEditorServiceStart } from './service';
 export type { OpenFieldEditorOptions } from './open_editor';
 export type { OpenFieldDeleteModalOptions } from './open_delete_modal';

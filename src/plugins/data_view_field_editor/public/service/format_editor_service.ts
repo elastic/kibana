@@ -75,5 +75,12 @@ export class FormatEditorService {
 }
 
 /** @internal */
-export type FormatEditorServiceSetup = ReturnType<FormatEditorService['setup']>;
-export type FormatEditorServiceStart = ReturnType<FormatEditorService['start']>;
+export interface FormatEditorServiceSetup {
+  register: <P>(editor: FieldFormatEditorFactory<P>) => void;
+}
+
+/** @internal */
+export interface FormatEditorServiceStart {
+  getAll: () => FieldFormatEditorFactory[];
+  getById: <P>(id: string) => FieldFormatEditorFactory<P> | undefined;
+}

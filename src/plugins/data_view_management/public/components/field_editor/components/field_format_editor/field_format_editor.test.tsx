@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
-import { shallow } from 'enzyme';
-
-import { FieldFormatEditor } from './field_format_editor';
+import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { IndexPatternManagmentContext } from '../../../../types';
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { shallow } from 'enzyme';
+import React, { PureComponent } from 'react';
+import { FieldFormatEditor } from './field_format_editor';
 
 class TestEditor extends PureComponent {
   render() {
@@ -23,12 +21,10 @@ class TestEditor extends PureComponent {
   }
 }
 
-type Context = KibanaReactContextValue<IndexPatternManagmentContext>['services'];
-
-const formatEditors: Context['fieldFormatEditors'] = {
+const formatEditors: FormatEditorServiceStart = {
   getById: jest.fn(
     () => () => Promise.resolve(TestEditor)
-  ) as unknown as Context['fieldFormatEditors']['getById'],
+  ) as unknown as FormatEditorServiceStart['getById'],
   getAll: jest.fn(),
 };
 

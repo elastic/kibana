@@ -7,16 +7,12 @@
  */
 
 import { FieldFormatEditorFactory } from '../../components/field_format_editor';
-
-export interface FieldFormatEditorStart {
-  getAll: () => FieldFormatEditorFactory[];
-  getById: <P>(id: string) => FieldFormatEditorFactory<P> | undefined;
-}
+import { FormatEditorServiceSetup, FormatEditorServiceStart } from '../format_editor_service';
 
 export class FieldFormatEditors {
   private editors: FieldFormatEditorFactory[] = [];
 
-  public setup(defaultFieldEditors: FieldFormatEditorFactory[] = []) {
+  public setup(defaultFieldEditors: FieldFormatEditorFactory[] = []): FormatEditorServiceSetup {
     this.editors = defaultFieldEditors;
 
     return {
@@ -26,7 +22,7 @@ export class FieldFormatEditors {
     };
   }
 
-  public start(): FieldFormatEditorStart {
+  public start(): FormatEditorServiceStart {
     return {
       getAll: () => [...this.editors],
       getById: <P>(id: string) => {

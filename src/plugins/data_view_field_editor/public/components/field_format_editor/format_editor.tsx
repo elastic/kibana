@@ -10,7 +10,7 @@ import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
 import React, { LazyExoticComponent, PureComponent } from 'react';
-import { FieldFormatEditorStart } from '../../service/field_format_editors';
+import { FormatEditorServiceStart } from '../../service';
 import { FieldFormatEditor, FieldFormatEditorFactory } from './editors';
 
 export interface FormatEditorProps {
@@ -18,7 +18,7 @@ export interface FormatEditorProps {
   fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: FieldFormatParams;
-  fieldFormatEditors: FieldFormatEditorStart;
+  fieldFormatEditors: FormatEditorServiceStart;
   onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }
