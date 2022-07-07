@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import {
   HapiResponseAdapter,
   KibanaRequest,
+  CoreKibanaRequest,
   KibanaResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
@@ -72,7 +73,7 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
       if (result instanceof KibanaResponse) {
         return hapiResponseAdapter.handle(result);
       }

@@ -67,18 +67,13 @@ export async function validateJob(
         const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
         const timeField = job.data_description.time_field!;
-        const timeRange = await fs.getTimeFieldRange(
+        duration = await fs.getTimeFieldRange(
           index,
           timeField,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
           job.datafeed_config.indices_options
         );
-
-        duration = {
-          start: timeRange.start.epoch,
-          end: timeRange.end.epoch,
-        };
       }
 
       validationMessages = filteredBasicValidationMessages;

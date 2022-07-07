@@ -460,7 +460,7 @@ export class TaskRunner<
 
     const ruleIsSnoozed = isRuleSnoozed(rule);
     if (ruleIsSnoozed) {
-      this.markRuleAsSnoozed(rule.id, rulesClient);
+      await this.markRuleAsSnoozed(rule.id, rulesClient);
     }
 
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {

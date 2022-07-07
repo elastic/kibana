@@ -7,7 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
-import { EuiButton, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
@@ -32,7 +40,7 @@ export const UNSNOOZE_SUCCESS_MESSAGE = i18n.translate(
 export const SNOOZE_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeFailed',
   {
-    defaultMessage: 'Unabled to change rule snooze settings',
+    defaultMessage: 'Unable to change rule snooze settings',
   }
 );
 
@@ -47,6 +55,7 @@ export interface RulesListNotifyBadgeProps {
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
+  showTooltipInline?: boolean;
 }
 
 const openSnoozePanelAriaLabel = i18n.translate(
@@ -84,6 +93,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     onRuleChanged,
     snoozeRule,
     unsnoozeRule,
+    showTooltipInline = false,
   } = props;
 
   const { isSnoozedUntil, muteAll, isEditable } = rule;
@@ -135,15 +145,30 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       return i18n.translate(
         'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
         {
-          defaultMessage: 'Notifications snoozed for {snoozeTime}',
+          defaultMessage: 'Notifications snoozing for {snoozeTime}',
           values: {
             snoozeTime: moment(isSnoozedUntil).fromNow(true),
           },
         }
       );
     }
+    if (showTooltipInline) {
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.noSnoozeAppliedTooltip',
+        {
+          defaultMessage: 'Notify when alerts generated',
+        }
+      );
+    }
     return '';
-  }, [isSnoozedIndefinitely, isScheduled, isSnoozed, isSnoozedUntil, nextScheduledSnooze]);
+  }, [
+    isSnoozedIndefinitely,
+    isScheduled,
+    isSnoozed,
+    isSnoozedUntil,
+    nextScheduledSnooze,
+    showTooltipInline,
+  ]);
 
   const snoozedButton = useMemo(() => {
     return (
@@ -236,11 +261,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   ]);
 
   const buttonWithToolTip = useMemo(() => {
-    if (isOpen) {
+    if (isOpen || showTooltipInline) {
       return button;
     }
     return <EuiToolTip content={snoozeTooltipText}>{button}</EuiToolTip>;
-  }, [isOpen, button, snoozeTooltipText]);
+  }, [isOpen, button, snoozeTooltipText, showTooltipInline]);
 
   const onClosePopover = useCallback(() => {
     onClose();
@@ -252,6 +277,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     async (schedule: SnoozeSchedule) => {
       try {
         onLoading(true);
+        onClosePopover();
         await snoozeRule(schedule);
         onRuleChanged();
         toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
@@ -259,7 +285,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
         onLoading(false);
-        onClosePopover();
       }
     },
     [onLoading, snoozeRule, onRuleChanged, toasts, onClosePopover]
@@ -269,6 +294,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     async (scheduleIds?: string[]) => {
       try {
         onLoading(true);
+        onClosePopover();
         await unsnoozeRule(scheduleIds);
         onRuleChanged();
         toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
@@ -276,13 +302,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
         onLoading(false);
-        onClosePopover();
       }
     },
     [onLoading, unsnoozeRule, onRuleChanged, toasts, onClosePopover]
   );
 
-  return (
+  const popover = (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
       isOpen={isOpen}
@@ -299,6 +324,19 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       />
     </EuiPopover>
   );
+  if (showTooltipInline) {
+    return (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>{popover}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued" size="xs">
+            {snoozeTooltipText}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  return popover;
 };
 
 // eslint-disable-next-line import/no-default-export

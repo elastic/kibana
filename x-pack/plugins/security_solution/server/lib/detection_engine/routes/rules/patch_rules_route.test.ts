@@ -20,7 +20,7 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getMlRuleParams, getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { legacyMigrate } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
@@ -108,6 +108,12 @@ describe('patch_rules', () => {
     });
 
     test('allows ML Params to be patched', async () => {
+      clients.rulesClient.get.mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
+      clients.rulesClient.find.mockResolvedValueOnce({
+        ...getFindResultWithSingleHit(),
+        data: [getRuleMock(getMlRuleParams())],
+      });
+      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -208,7 +214,7 @@ describe('patch_rules', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type"'
+        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
       );
     });
 

@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '../../context';
 import { createHttpServer, createCoreContext } from '../../http/test_utils';
 import { contextServiceMock, coreMock } from '../../mocks';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { SavedObjectsType } from '../types';
+import { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 
 const defaultCoreId = Symbol('core');
 
@@ -26,9 +27,13 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   });
   const handlerContext = coreMock.createRequestHandlerContext();
 
-  httpSetup.registerRouteHandlerContext(coreId, 'core', async (ctx, req, res) => {
-    return handlerContext;
-  });
+  httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
+    coreId,
+    'core',
+    (ctx, req, res) => {
+      return handlerContext;
+    }
+  );
 
   return {
     server,
