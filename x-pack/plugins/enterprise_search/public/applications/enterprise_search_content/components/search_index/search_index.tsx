@@ -25,14 +25,15 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorConfiguration } from './connector/connector_configuration';
+import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerStatusIndicator } from './crawler/crawler_status_indicator/crawler_status_indicator';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
+import { IndexNameLogic } from './index_name_logic';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexScheduling } from './scheduling';
-import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler';
 
 export enum SearchIndexTabId {
   // all indices
@@ -49,8 +50,8 @@ export enum SearchIndexTabId {
 export const SearchIndex: React.FC = () => {
   const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { indexName, tabId = SearchIndexTabId.OVERVIEW } = useParams<{
-    indexName: string;
+  const { indexName } = useValues(IndexNameLogic);
+  const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
@@ -136,7 +137,6 @@ export const SearchIndex: React.FC = () => {
       )
     );
   };
-
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}

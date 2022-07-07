@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
-
 import { useValues, useActions } from 'kea';
 
 import {
@@ -36,15 +34,10 @@ import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_l
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyout: React.FC = () => {
-  const { indexName } = useParams<{
-    indexName: string;
-  }>();
-
-  const crawlCustomSettingsFlyoutLogic = CrawlCustomSettingsFlyoutLogic({ indexName });
   const { isDataLoading, isFormSubmitting, isFlyoutVisible, selectedDomainUrls } = useValues(
-    crawlCustomSettingsFlyoutLogic
+    CrawlCustomSettingsFlyoutLogic
   );
-  const { hideFlyout, startCustomCrawl } = useActions(crawlCustomSettingsFlyoutLogic);
+  const { hideFlyout, startCustomCrawl } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   if (!isFlyoutVisible) {
     return null;

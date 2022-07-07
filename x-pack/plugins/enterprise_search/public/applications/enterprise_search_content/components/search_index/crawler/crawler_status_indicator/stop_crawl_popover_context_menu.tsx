@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { useActions } from 'kea';
+
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -17,24 +19,17 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { CrawlerLogic } from '../crawler_logic';
-import { useActions } from 'kea';
-import { useParams } from 'react-router';
 
 export const StopCrawlPopoverContextMenu: React.FC = () => {
-  const { indexName } = useParams<{
-    indexName: string;
-  }>();
-
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);
 
   const closePopover = () => setPopover(false);
 
-  const crawlerLogic = CrawlerLogic({ indexName });
-
-  const { stopCrawl } = useActions(crawlerLogic);
+  const { stopCrawl } = useActions(CrawlerLogic);
 
   return (
     <EuiPopover

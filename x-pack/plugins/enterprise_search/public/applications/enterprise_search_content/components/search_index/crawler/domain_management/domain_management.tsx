@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -24,14 +23,9 @@ import { DomainsPanel } from './domains_panel';
 import { EmptyStatePanel } from './empty_state_panel';
 
 export const SearchIndexDomainManagement: React.FC = () => {
-  const { indexName } = useParams<{
-    indexName: string;
-  }>();
-
   DeleteCrawlerDomainApiLogic.mount();
   GetCrawlerDomainsApiLogic.mount();
-  const domainManagementLogic = DomainManagementLogic({ indexName });
-  const { domains, isLoading } = useValues(domainManagementLogic);
+  const { domains, isLoading } = useValues(DomainManagementLogic);
 
   if (isLoading) {
     return <Loading />;

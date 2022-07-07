@@ -5,76 +5,51 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiPopoverFooter,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   htmlIdGenerator,
-  EuiPanel,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CrawlUnits } from '@kbn/enterprise-search-plugin/public/applications/app_search/components/crawler/types';
-import { WEB_CRAWLER_DOCS_URL } from '@kbn/enterprise-search-plugin/public/applications/app_search/routes';
+
+import { CrawlUnits } from '../../../../../app_search/components/crawler/types';
+import { WEB_CRAWLER_DOCS_URL } from '../../../../../app_search/routes';
 import {
   HOURS_UNIT_LABEL,
   DAYS_UNIT_LABEL,
   WEEKS_UNIT_LABEL,
   MONTHS_UNIT_LABEL,
-  CANCEL_BUTTON_LABEL,
   SAVE_BUTTON_LABEL,
-} from '@kbn/enterprise-search-plugin/public/applications/shared/constants';
-import { DataPanel } from '../../crawler_domain_detail/deduplication_panel/data_panel/data_panel';
+} from '../../../../../shared/constants';
 
-// import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
-// import {
-//   DAYS_UNIT_LABEL,
-//   HOURS_UNIT_LABEL,
-//   MONTHS_UNIT_LABEL,
-//   WEEKS_UNIT_LABEL,
-// } from '../../../../../shared/constants/units';
+import { DataPanel } from '../../../crawler_domain_detail/deduplication_panel/data_panel/data_panel';
 
-// import { WEB_CRAWLER_DOCS_URL } from '../../../../routes';
-// import { CrawlUnits } from '../../types';
-
-// import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
-
-// import { ManageCrawlsPopoverLogic } from './manage_crawls_popover_logic';
+import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
 
 export const AutomaticCrawlScheduler: React.FC = () => {
-  // const {
-  //   fetchCrawlSchedule,
-  //   setCrawlFrequency,
-  //   setCrawlUnit,
-  //   saveChanges,
-  //   toggleCrawlAutomatically,
-  // } = useActions(AutomaticCrawlSchedulerLogic);
+  const { setCrawlFrequency, setCrawlUnit, saveChanges, toggleCrawlAutomatically } = useActions(
+    AutomaticCrawlSchedulerLogic
+  );
 
-  // const { closePopover } = useActions(ManageCrawlsPopoverLogic);
-
-  // const { crawlAutomatically, crawlFrequency, crawlUnit, isSubmitting } = useValues(
-  //   AutomaticCrawlSchedulerLogic
-  // );
-
-  // useEffect(() => {
-  //   fetchCrawlSchedule();
-  // }, []);
+  const { crawlAutomatically, crawlFrequency, crawlUnit, isSubmitting } = useValues(
+    AutomaticCrawlSchedulerLogic
+  );
 
   const formId = htmlIdGenerator('AutomaticCrawlScheduler')();
 
@@ -114,7 +89,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
         <EuiForm
           onSubmit={(event) => {
             event.preventDefault();
-            // saveChanges();
+            saveChanges();
           }}
           component="form"
           id={formId}
@@ -122,7 +97,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           <EuiFormRow display="rowCompressed">
             <EuiSwitch
               autoFocus
-              // checked={crawlAutomatically}
+              checked={crawlAutomatically}
               label={
                 <EuiText>
                   {i18n.translate(
@@ -133,7 +108,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                   )}
                 </EuiText>
               }
-              // onChange={toggleCrawlAutomatically}
+              onChange={toggleCrawlAutomatically}
               compressed
             />
           </EuiFormRow>
@@ -157,13 +132,13 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       defaultMessage: 'Schedule frequency',
                     }
                   )}
-                  // disabled={!crawlAutomatically}
+                  disabled={!crawlAutomatically}
                   fullWidth={false}
                   min={0}
                   max={99}
                   compressed
-                  // value={crawlFrequency}
-                  // onChange={(e) => setCrawlFrequency(parseInt(e.target.value, 10))}
+                  value={crawlFrequency}
+                  onChange={(e) => setCrawlFrequency(parseInt(e.target.value, 10))}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -174,7 +149,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       defaultMessage: 'Schedule units of time',
                     }
                   )}
-                  // disabled={!crawlAutomatically}
+                  disabled={!crawlAutomatically}
                   compressed
                   options={[
                     {
@@ -194,8 +169,8 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       value: CrawlUnits.months,
                     },
                   ]}
-                  // value={crawlUnit}
-                  // onChange={(e) => setCrawlUnit(e.target.value as CrawlUnits)}
+                  value={crawlUnit}
+                  onChange={(e) => setCrawlUnit(e.target.value as CrawlUnits)}
                 />
               </EuiFlexItem>
               <EuiFlexItem />
@@ -213,12 +188,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           </EuiText>
           <EuiSpacer />
           <EuiFormRow display="rowCompressed">
-            <EuiButton
-              form={formId}
-              type="submit"
-              // isLoading={isSubmitting}
-              fill
-            >
+            <EuiButton form={formId} type="submit" isLoading={isSubmitting} fill>
               {SAVE_BUTTON_LABEL}
             </EuiButton>
           </EuiFormRow>

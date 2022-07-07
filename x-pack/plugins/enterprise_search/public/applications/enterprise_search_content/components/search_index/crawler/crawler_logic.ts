@@ -20,6 +20,7 @@ import {
   CrawlEvent,
   CrawlRequest,
 } from '../../../api/crawler/types';
+import { IndexNameLogic } from '../index_name_logic';
 
 const POLLING_DURATION = 1000;
 const POLLING_DURATION_ON_FAILURE = 5000;
@@ -47,10 +48,6 @@ export interface CrawlerValues {
   timeoutId: NodeJS.Timeout | null;
 }
 
-export interface CrawlerProps {
-  indexName: string;
-}
-
 export type CrawlerActions = Pick<
   Actions<GetCrawlerArgs, CrawlerData>,
   'apiError' | 'apiSuccess'
@@ -64,7 +61,7 @@ export type CrawlerActions = Pick<
   stopCrawl(): void;
 };
 
-export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, CrawlerProps>>({
+export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   path: ['enterprise_search', 'app_search', 'crawler_logic'],
   connect: {
     actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
@@ -125,7 +122,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
       },
     ],
   }),
-  listeners: ({ actions, values, props }) => ({
+  listeners: ({ actions, values }) => ({
     apiError: (error) => {
       flashAPIErrors(error);
       actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
@@ -139,16 +136,19 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
       }
     },
     fetchCrawlerData: () => {
+      const { indexName } = IndexNameLogic.values;
+
       if (values.timeoutId) {
         clearTimeout(values.timeoutId);
       }
-      GetCrawlerApiLogic.actions.makeRequest({ indexName: props.indexName });
+      GetCrawlerApiLogic.actions.makeRequest({ indexName });
     },
     startCrawl: async ({ overrides = {} }) => {
+      const { indexName } = IndexNameLogic.values;
       const { http } = HttpLogic.values;
 
       try {
-        await http.post(`/internal/ent_search/indices/${props.indexName}/crawler/crawl_requests`, {
+        await http.post(`/internal/ent_search/indices/${indexName}/crawler/crawl_requests`, {
           body: JSON.stringify({ overrides }),
         });
         actions.fetchCrawlerData();
@@ -157,12 +157,11 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
       }
     },
     stopCrawl: async () => {
+      const { indexName } = IndexNameLogic.values;
       const { http } = HttpLogic.values;
 
       try {
-        await http.post(
-          `/internal/ent_search/indices/${props.indexName}/crawler/crawl_requests/cancel`
-        );
+        await http.post(`/internal/ent_search/indices/${indexName}/crawler/crawl_requests/cancel`);
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
@@ -180,7 +179,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
       actions.onCreateNewTimeout(timeoutIdId);
     },
     reApplyCrawlRules: async ({ domain }) => {
-      const { indexName } = props;
+      const { indexName } = IndexNameLogic.values;
       const { http } = HttpLogic.values;
       const requestBody: { domains?: string[] } = {};
 

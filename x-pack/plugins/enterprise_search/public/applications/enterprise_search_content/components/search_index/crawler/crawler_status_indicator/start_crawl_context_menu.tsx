@@ -6,8 +6,6 @@
  */
 import React, { useState } from 'react';
 
-import { useParams } from 'react-router-dom';
-
 import { useActions } from 'kea';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
@@ -17,13 +15,8 @@ import { CrawlCustomSettingsFlyoutLogic } from '../crawl_custom_settings_flyout/
 import { CrawlerLogic } from '../crawler_logic';
 
 export const StartCrawlContextMenu: React.FC = () => {
-  const { indexName } = useParams<{
-    indexName: string;
-  }>();
-
-  const crawlCustomSettingsFlyoutLogic = CrawlCustomSettingsFlyoutLogic({ indexName });
   const { reApplyCrawlRules, startCrawl } = useActions(CrawlerLogic);
-  const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(crawlCustomSettingsFlyoutLogic);
+  const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);

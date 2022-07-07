@@ -12,12 +12,9 @@ import { HttpLogic } from '../../../../../shared/http';
 import { GetCrawlerApiLogic } from '../../../../api/crawler/get_crawler_api_logic';
 import { DomainConfig, DomainConfigFromServer } from '../../../../api/crawler/types';
 import { domainConfigServerToClient } from '../../../../api/crawler/utils';
+import { IndexNameLogic } from '../../index_name_logic';
 import { CrawlerLogic, CrawlRequestOverrides } from '../crawler_logic';
 import { extractDomainAndEntryPointFromUrl } from '../domain_management/add_domain/utils';
-
-export interface CrawlCustomSettingsFlyoutProps {
-  indexName: string;
-}
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
   customEntryPointUrls: string[];
@@ -67,11 +64,7 @@ const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): s
 };
 
 export const CrawlCustomSettingsFlyoutLogic = kea<
-  MakeLogicType<
-    CrawlCustomSettingsFlyoutLogicValues,
-    CrawlCustomSettingsFlyoutLogicActions,
-    CrawlCustomSettingsFlyoutProps
-  >
+  MakeLogicType<CrawlCustomSettingsFlyoutLogicValues, CrawlCustomSettingsFlyoutLogicActions>
 >({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawl_custom_settings_flyout'],
   connect: {
@@ -206,10 +199,10 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         ),
     ],
   }),
-  listeners: ({ actions, values, props }) => ({
+  listeners: ({ actions, values }) => ({
     fetchDomainConfigData: async () => {
       const { http } = HttpLogic.values;
-      const { indexName } = props;
+      const { indexName } = IndexNameLogic.values;
       try {
         const { results } = await http.get<{
           results: DomainConfigFromServer[];

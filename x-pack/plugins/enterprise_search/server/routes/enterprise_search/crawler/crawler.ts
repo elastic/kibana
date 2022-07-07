@@ -223,6 +223,52 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     })
   );
 
+  router.get(
+    {
+      path: '/internal/enterprise_search/engines/{indexName}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/engines/{indexName}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        body: schema.object({
+          unit: schema.string(),
+          frequency: schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/engines/{indexName}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
+    })
+  );
+
   registerCrawlerCrawlRulesRoutes(routeDependencies);
   registerCrawlerEntryPointRoutes(routeDependencies);
   registerCrawlerSitemapRoutes(routeDependencies);

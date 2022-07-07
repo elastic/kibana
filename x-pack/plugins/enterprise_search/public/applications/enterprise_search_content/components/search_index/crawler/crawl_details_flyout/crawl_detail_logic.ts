@@ -15,12 +15,9 @@ import {
   CrawlRequestWithDetailsFromServer,
 } from '../../../../api/crawler/types';
 import { crawlRequestWithDetailsServerToClient } from '../../../../api/crawler/utils';
+import { IndexNameLogic } from '../../index_name_logic';
 
 type CrawlDetailFlyoutTabs = 'preview' | 'json';
-
-export interface CrawlDetailProps {
-  indexName: string;
-}
 
 export interface CrawlDetailValues {
   crawlRequest: CrawlRequestWithDetails | null;
@@ -39,9 +36,7 @@ export interface CrawlDetailActions {
   setSelectedTab(selectedTab: CrawlDetailFlyoutTabs): { selectedTab: CrawlDetailFlyoutTabs };
 }
 
-export const CrawlDetailLogic = kea<
-  MakeLogicType<CrawlDetailValues, CrawlDetailActions, CrawlDetailProps>
->({
+export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetailActions>>({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawl_detail_logic'],
   actions: {
     closeFlyout: true,
@@ -85,10 +80,11 @@ export const CrawlDetailLogic = kea<
       },
     ],
   },
-  listeners: ({ actions, props }) => ({
+  listeners: ({ actions }) => ({
     fetchCrawlRequest: async ({ requestId }) => {
       const { http } = HttpLogic.values;
-      const { indexName } = props;
+      const { indexName } = IndexNameLogic.values;
+
       try {
         const response = await http.get<CrawlRequestWithDetailsFromServer>(
           `/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests/${requestId}`

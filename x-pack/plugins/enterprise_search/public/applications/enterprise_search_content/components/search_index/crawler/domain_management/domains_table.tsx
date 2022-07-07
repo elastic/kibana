@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
-
 import { useActions, useValues } from 'kea';
 
 import { EuiBasicTableColumn, EuiBasicTable } from '@elastic/eui';
@@ -43,13 +41,9 @@ const getDeleteDomainConfirmationMessage = (domainUrl: string) => {
 };
 
 export const DomainsTable: React.FC = () => {
-  const { indexName } = useParams<{
-    indexName: string;
-  }>();
-
-  const domainManagementLogic = DomainManagementLogic({ indexName });
-  const { domains, meta, isLoading } = useValues(domainManagementLogic);
-  const { deleteDomain, onPaginate } = useActions(domainManagementLogic);
+  const { indexName } = useValues(IndexNameLogic);
+  const { domains, meta, isLoading } = useValues(DomainManagementLogic);
+  const { deleteDomain, onPaginate } = useActions(DomainManagementLogic);
 
   const columns: Array<EuiBasicTableColumn<CrawlerDomain>> = [
     {

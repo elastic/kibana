@@ -8,17 +8,10 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import {
-  SEARCH_INDICES_PATH,
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_TAB_PATH,
-  NEW_INDEX_PATH,
-  SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
-} from '../../routes';
-import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
+import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
 import { NewIndex } from '../new_index';
-import { SearchIndex } from '../search_index/search_index';
+import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
 
@@ -31,14 +24,8 @@ export const SearchIndicesRouter: React.FC = () => {
       <Route exact path={SEARCH_INDICES_PATH}>
         <SearchIndices />
       </Route>
-      <Route path={SEARCH_INDEX_PATH} exact>
-        <SearchIndex />
-      </Route>
-      <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH}>
-        <CrawlerDomainDetail />
-      </Route>
-      <Route path={SEARCH_INDEX_TAB_PATH}>
-        <SearchIndex />
+      <Route path={SEARCH_INDEX_PATH}>
+        <SearchIndexRouter />
       </Route>
     </Switch>
   );

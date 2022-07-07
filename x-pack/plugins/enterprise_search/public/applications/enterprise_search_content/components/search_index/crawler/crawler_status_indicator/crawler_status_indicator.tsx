@@ -7,9 +7,7 @@
 
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
-
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { EuiButton } from '@elastic/eui';
 
@@ -22,19 +20,8 @@ import { StartCrawlContextMenu } from './start_crawl_context_menu';
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
 export const CrawlerStatusIndicator: React.FC = () => {
-  const { indexName } = useParams<{
-    indexName: string;
-  }>();
+  const { dataLoading, domains, mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
 
-  const crawlerLogic = CrawlerLogic({ indexName });
-
-  const { dataLoading, domains, mostRecentCrawlRequestStatus } = useValues(crawlerLogic);
-
-  console.log({
-    dataLoading,
-    domains,
-    mostRecentCrawlRequestStatus,
-  });
   if (dataLoading || domains.length === 0) {
     return (
       <EuiButton disabled iconType="arrowDown" iconSide="right">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useParams } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { getDeleteDomainConfirmationMessage } from '../../../app_search/components/crawler/utils';
 import { generateEncodedPath } from '../../../app_search/utils/encode_path_params';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_TAB_PATH } from '../../routes';
@@ -20,6 +21,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { CrawlCustomSettingsFlyout } from '../search_index/crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerStatusIndicator } from '../search_index/crawler/crawler_status_indicator/crawler_status_indicator';
 import { CrawlerStatusBanner } from '../search_index/crawler/domain_management/crawler_status_banner';
+import { IndexNameLogic } from '../search_index/index_name_logic';
 import { SearchIndexTabId } from '../search_index/search_index';
 import { baseBreadcrumbs } from '../search_indices';
 
@@ -28,17 +30,20 @@ import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 import { DeduplicationPanel } from './deduplication_panel/deduplication_panel';
 import { EntryPointsTable } from './entry_points_table';
 import { SitemapsTable } from './sitemaps_table';
-import { getDeleteDomainConfirmationMessage } from '../../../app_search/components/crawler/utils';
 
 export const CrawlerDomainDetail: React.FC = () => {
-  const { domainId, indexName } = useParams<{
+  const { domainId } = useParams<{
     domainId: string;
-    indexName: string;
   }>();
 
-  const crawlerDomainDetailLogic = CrawlerDomainDetailLogic({ indexName, domainId });
+  const { indexName } = useValues(IndexNameLogic);
+  const crawlerDomainDetailLogic = CrawlerDomainDetailLogic({ domainId });
   const { domain, dataLoading } = useValues(crawlerDomainDetailLogic);
-  const { deleteDomain } = useActions(crawlerDomainDetailLogic);
+  const { fetchDomainData, deleteDomain } = useActions(crawlerDomainDetailLogic);
+
+  useEffect(() => {
+    fetchDomainData(domainId);
+  }, [domainId]);
 
   const domainUrl = domain?.url ?? '...';
 

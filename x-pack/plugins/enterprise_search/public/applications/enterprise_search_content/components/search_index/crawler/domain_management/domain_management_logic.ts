@@ -23,11 +23,8 @@ import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
 import { CrawlerDomain, CrawlerDomains } from '../../../../api/crawler/types';
+import { IndexNameLogic } from '../../index_name_logic';
 import { CrawlerLogic } from '../crawler_logic';
-
-interface DomainManagementProps {
-  indexName: string;
-}
 
 interface DomainManagementValues {
   domains: CrawlerDomain[];
@@ -48,7 +45,7 @@ interface DomainManagementActions {
 }
 
 export const DomainManagementLogic = kea<
-  MakeLogicType<DomainManagementValues, DomainManagementActions, DomainManagementProps>
+  MakeLogicType<DomainManagementValues, DomainManagementActions>
 >({
   connect: {
     actions: [
@@ -88,7 +85,7 @@ export const DomainManagementLogic = kea<
       },
     ],
   },
-  listeners: ({ props, values, actions }) => ({
+  listeners: ({ values, actions }) => ({
     deleteApiError: (error) => {
       flashAPIErrors(error);
     },
@@ -108,14 +105,14 @@ export const DomainManagementLogic = kea<
       CrawlerLogic.actions.fetchCrawlerData();
     },
     deleteDomain: ({ domain }) => {
-      const { indexName } = props;
+      const { indexName } = IndexNameLogic.values;
       DeleteCrawlerDomainApiLogic.actions.makeRequest({ domain, indexName });
     },
     getApiError: (error) => {
       flashAPIErrors(error);
     },
     getDomains: () => {
-      const { indexName } = props;
+      const { indexName } = IndexNameLogic.values;
       const { meta } = values;
       GetCrawlerDomainsApiLogic.actions.makeRequest({ indexName, meta });
     },
