@@ -121,6 +121,7 @@ export enum SecurityPageName {
   kubernetes = 'kubernetes',
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
+  threatIntelligence = 'threat-intelligence',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -148,6 +149,7 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -173,6 +175,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_THREAT_INTELLIGENCE_PATH = `${APP_PATH}${THREAT_INTELLIGENCE_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];

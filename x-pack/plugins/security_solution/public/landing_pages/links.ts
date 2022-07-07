@@ -19,6 +19,7 @@ import { links as hostsLinks } from '../hosts/links';
 import { links as networkLinks } from '../network/links';
 import { links as usersLinks } from '../users/links';
 import { links as kubernetesLinks } from '../kubernetes/links';
+import { links as threatIntelligenceLinks } from '../threat_intelligence/links';
 
 export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
@@ -47,7 +48,7 @@ export const threatHuntingLandingLinks: LinkItem = {
       defaultMessage: 'Explore',
     }),
   ],
-  links: [hostsLinks, networkLinks, usersLinks],
+  links: [hostsLinks, networkLinks, usersLinks, threatIntelligenceLinks],
   skipUrlState: true,
   hideTimeline: true,
 };

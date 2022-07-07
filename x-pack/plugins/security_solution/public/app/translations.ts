@@ -131,3 +131,10 @@ export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
 export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
   defaultMessage: 'Privileges required',
 });
+
+export const THREAT_INTELLIGENCE = i18n.translate(
+  'xpack.securitySolution.navigation.threatIntelligence',
+  {
+    defaultMessage: 'Threat Intelligence',
+  }
+);

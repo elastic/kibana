@@ -5,7 +5,16 @@
  * 2.0.
  */
 
+import { VFC } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { AppProps } from './app';
 
 export type Services = { data: DataPublicPluginStart } & CoreStart;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ThreatIntelligencePluginSetup {}
+
+export interface ThreatIntelligencePluginStart {
+  getComponent: () => VFC<AppProps>;
+}

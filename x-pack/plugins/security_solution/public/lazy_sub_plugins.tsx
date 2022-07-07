@@ -13,17 +13,16 @@
 import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
-
 import { Hosts } from './hosts';
 import { Users } from './users';
 import { Network } from './network';
 import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';
 import { Rules } from './rules';
-
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LandingPages } from './landing_pages';
+import { ThreatIntelligence } from './threat_intelligence';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -36,11 +35,11 @@ const subPluginClasses = {
   Users,
   Network,
   Kubernetes,
-
   Overview,
   Rules,
   Timelines,
   Management,
   LandingPages,
+  ThreatIntelligence,
 };
 export { subPluginClasses };

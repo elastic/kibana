@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { ThreatIntelligencePlugin } from './plugin';
+import { SecuritySubPlugin } from '../app/types';
+import { routes } from './routes';
 
-export function plugin() {
-  return new ThreatIntelligencePlugin();
+export class ThreatIntelligence {
+  public setup() {}
+
+  public start(): SecuritySubPlugin {
+    return {
+      routes,
+    };
+  }
 }
-
-export type { ThreatIntelligencePluginSetup, ThreatIntelligencePluginStart } from './types';

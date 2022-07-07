@@ -32,6 +32,7 @@ import {
   APP_USERS_PATH,
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
+  APP_THREAT_INTELLIGENCE_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -167,6 +168,13 @@ export const navTabs: SecurityNav = {
     href: APP_BLOCKLIST_PATH,
     disabled: false,
     urlKey: 'administration',
+  },
+  [SecurityPageName.threatIntelligence]: {
+    id: SecurityPageName.threatIntelligence,
+    name: i18n.THREAT_INTELLIGENCE,
+    href: APP_THREAT_INTELLIGENCE_PATH,
+    disabled: false,
+    urlKey: 'threat_intelligence',
   },
 };
 

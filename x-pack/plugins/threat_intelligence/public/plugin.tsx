@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/public';
-import { Services } from './types';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { App } from './app';
+import { ThreatIntelligencePluginSetup, ThreatIntelligencePluginStart } from './types';
+
+const getComponent = () => App;
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup) {
-    core.application.register({
-      id: 'threatIntelligence',
-      category: DEFAULT_APP_CATEGORIES.security,
-      title: 'Threat Intelligence',
-      async mount(params) {
-        const { renderApp } = await import('./app');
-        const [coreStart, startPlugins] = await core.getStartServices();
-
-        return renderApp({ ...coreStart, ...startPlugins } as Services, params);
-      },
-    });
-  }
-  public start(_core: CoreStart) {
+  public setup(core: CoreSetup): ThreatIntelligencePluginSetup {
     return {};
+  }
+  public start(_core: CoreStart): ThreatIntelligencePluginStart {
+    return { getComponent };
   }
   public stop() {}
 }
