@@ -55,7 +55,6 @@ export class InspectPanelAction implements Action<ActionContext> {
           i18n.translate('embeddableApi.panel.inspectPanel.untitledEmbeddableFilename', {
             defaultMessage: 'untitled',
           }),
-        inspectExtraInfo: embeddable.getInput()?.inspectExtraInfo,
       },
     });
     // Overwrite the embeddables.destroy() function to close the inspector

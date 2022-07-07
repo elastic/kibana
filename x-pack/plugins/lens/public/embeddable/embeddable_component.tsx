@@ -8,10 +8,7 @@
 import React, { FC, useEffect } from 'react';
 import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type {
-  RequestStatistics,
-  Start as InspectorStartContract,
-} from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableFactory,
@@ -63,7 +60,6 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
   withDefaultActions?: boolean;
   extraActions?: Action[];
-  inspectExtraInfo?: RequestStatistics | undefined;
 };
 
 interface PluginsStartDependencies {

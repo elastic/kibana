@@ -205,6 +205,7 @@ export class SearchSource {
       return this.removeField(field);
     }
     this.fields[field] = value;
+    console.log('setfield', field, value);
     return this;
   }
 
@@ -254,30 +255,55 @@ export class SearchSource {
   }
 
   getActiveIndexFilter() {
-    const { filter: originalFilters } = this.getFields();
+    const { filter: originalFilters, query } = this.getFields();
+    // console.log('filters', originalFilters);
+    // console.log(`query`, query);
+
     let filters: Filter[] = [];
     if (originalFilters) {
       filters = this.getFilters(originalFilters);
     }
-    console.log('---filters', filters);
-    const indexFilters = filters?.reduce((acc, f) => {
+
+    const indexFilters: string[] = filters?.reduce<string[]>((acc, f) => {
       if (f.meta.key === '_index' && f.meta.disabled === false) {
         if (f.meta.negate === false) {
-          return _.concat(acc, f.meta.params);
+          return _.concat(acc, f.meta.params.query ?? f.meta.params);
         } else {
           if (Array.isArray(f.meta.params)) {
             return _.difference(acc, f.meta.params);
           } else {
-            const temp = _.difference(acc, [f.meta.params.query]);
-            return temp;
+            return _.difference(acc, [f.meta.params.query]);
           }
         }
       } else {
         return acc;
       }
     }, []);
+    const regex = /\s?(_index)\s?:\s?(\w+\-?\*?)\s?(\w+)?/gi;
+    const str = query[0]?.query;
+    let m;
 
-    return [...new Set(indexFilters)];
+    const activeIndexPattern = new Set(indexFilters);
+
+    while ((m = regex.exec(str)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      m.forEach((match, groupIndex) => {
+        // group 1 = field
+        // group 2 = value
+        // group 3 = operator
+        // console.log(`group ${groupIndex}: ${match}`);
+
+        if (groupIndex === 2) {
+          activeIndexPattern.add(match);
+        }
+      });
+    }
+
+    return [...activeIndexPattern];
   }
 
   /**
@@ -891,7 +917,6 @@ export class SearchSource {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
-
     return searchRequest;
   }
 

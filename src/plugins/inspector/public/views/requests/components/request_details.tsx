@@ -113,10 +113,7 @@ export class RequestDetails extends Component<RequestDetailsProps, RequestDetail
     return (
       <>
         <EuiTabs size="s">{this.state.availableDetails.map(this.renderDetailTab)}</EuiTabs>
-        <DetailComponent
-          request={this.props.request}
-          inspectExtraInfo={this.props.inspectExtraInfo}
-        />
+        <DetailComponent request={this.props.request} />
       </>
     );
   }

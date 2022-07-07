@@ -29,10 +29,10 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
     if (indexFilters.length > 0) {
       stats.indexFilter = {
         label: i18n.translate('data.search.searchSource.indexFilterLabel', {
-          defaultMessage: 'Index Pattern From Inspector stats',
+          defaultMessage: 'Index Pattern',
         }),
         value: indexFilters.join(', '),
-        description: i18n.translate('data.search.searchSource.dataViewDescription', {
+        description: i18n.translate('data.search.searchSource.indexFilterDescription', {
           defaultMessage: 'The active index pattern.',
         }),
       };

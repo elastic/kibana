@@ -88,7 +88,6 @@ const LensEmbeddableComponent = ({
         }
         withDefaultActions={true}
         extraActions={actions}
-        inspectExtraInfo={inspectExtraInfo}
       />
     </LensComponentWrapper>
   ) : null;

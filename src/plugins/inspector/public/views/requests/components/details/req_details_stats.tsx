@@ -64,22 +64,14 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
   render() {
     const { stats } = this.props.request;
-    const { inspectExtraInfo } = this.props;
 
     if (!stats) {
       return null;
     }
 
-    const mergedStats: RequestStatistics = inspectExtraInfo
-      ? {
-          ...stats,
-          ...inspectExtraInfo,
-        }
-      : stats;
-
-    const sortedStats = Object.keys(mergedStats)
+    const sortedStats = Object.keys(stats)
       .sort()
-      .map((id) => ({ id, ...mergedStats[id] } as RequestDetailsStatRow));
+      .map((id) => ({ id, ...stats[id] } as RequestDetailsStatRow));
 
     return (
       <EuiTable responsive={false}>
