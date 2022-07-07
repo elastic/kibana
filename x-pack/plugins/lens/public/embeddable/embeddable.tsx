@@ -53,7 +53,11 @@ import type {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IndexPatternLayer } from '..';
-import { trackLensOperationsEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
+import {
+  trackLensOperationsEvents,
+  trackUiCounterEvents,
+  trackExecutionContextEvents,
+} from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
@@ -264,6 +268,7 @@ export class Embeddable
       },
       parent
     );
+
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
@@ -485,6 +490,8 @@ export class Embeddable
       };
       trackLensOperationsEvents(layers);
     }
+    trackExecutionContextEvents(this.parent);
+
     this.renderComplete.dispatchComplete();
   };
 
@@ -507,7 +514,8 @@ export class Embeddable
 
     this.renderComplete.dispatchInProgress();
 
-    const parentContext = this.input.executionContext;
+    const parentContext = this.parent?.getInput().executionContext || this.input.executionContext;
+
     const child: KibanaExecutionContext = {
       type: 'lens',
       name: this.savedVis.visualizationType ?? '',

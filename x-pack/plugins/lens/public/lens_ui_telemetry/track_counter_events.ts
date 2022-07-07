@@ -9,6 +9,7 @@ import { flatten, uniq } from 'lodash';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { IContainer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternLayer } from '..';
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
@@ -62,4 +63,15 @@ export const trackLensOperationsEvents = (layers?: Record<string, IndexPatternLa
       ].map((item) => `dimension_${item}`)
     );
   }
+};
+
+export const trackExecutionContextEvents = (parent?: IContainer) => {
+  const input = parent?.getInput();
+  const events = [];
+
+  if (parent && input) {
+    events.push(`vis_${parent.type}_${input.viewMode}`);
+  }
+
+  trackUiCounterEvents(events);
 };

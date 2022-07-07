@@ -612,6 +612,7 @@ export const VisualizationWrapper = ({
           };
           trackLensOperationsEvents(layers);
         }
+        trackUiCounterEvents('vis_editor');
       }
     },
     [activeDatasourceId, datasourceStates, defaultLayerId, dispatchLens]
