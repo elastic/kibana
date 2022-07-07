@@ -164,7 +164,7 @@ export function DiscoverLayout({
   });
 
   const onAddFilter = useCallback(
-    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: string | undefined, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
