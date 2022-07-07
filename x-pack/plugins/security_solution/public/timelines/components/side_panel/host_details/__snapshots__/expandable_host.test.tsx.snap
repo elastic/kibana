@@ -117,7 +117,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
@@ -132,7 +132,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
           />

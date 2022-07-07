@@ -349,7 +349,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
@@ -364,7 +364,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
@@ -710,7 +710,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
@@ -725,7 +725,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
