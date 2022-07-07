@@ -190,6 +190,7 @@ export function TableDimensionEditor(
       </EuiFormRow>
       {!column.isTransposed && (
         <EuiFormRow
+          fullWidth
           label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
             defaultMessage: 'Hide column',
           })}
@@ -266,6 +267,7 @@ export function TableDimensionEditor(
               })}
             >
               <EuiFieldText
+                fullWidth
                 compressed
                 data-test-subj="lnsDatatable_summaryrow_label"
                 value={summaryLabel ?? fallbackSummaryLabel}
