@@ -7,7 +7,7 @@
  */
 
 import { updateSearchSource } from './context';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 describe('context api', function () {

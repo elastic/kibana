@@ -78,7 +78,7 @@ export interface DiscoverGridProps {
    */
   expandedDoc?: DataTableRecord;
   /**
-   * The used index pattern
+   * The used data view
    */
   dataView: DataView;
   /**
@@ -294,8 +294,8 @@ export const DiscoverGrid = ({
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
   const fieldsToShow = useMemo(() => {
-    const indexPatternFields = dataView.fields.getAll().map((fld) => fld.name);
-    return getFieldsToShow(indexPatternFields, dataView, showMultiFields);
+    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+    return getFieldsToShow(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
   /**

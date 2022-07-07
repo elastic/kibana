@@ -17,7 +17,7 @@ import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
-import { dataViewMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';

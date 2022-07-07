@@ -9,9 +9,9 @@
 import { getStateDefaults } from './get_state_defaults';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('getStateDefaults', () => {

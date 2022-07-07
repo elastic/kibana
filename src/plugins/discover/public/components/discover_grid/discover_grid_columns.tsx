@@ -72,17 +72,17 @@ export function buildEuiGridColumn({
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
 }) {
-  const indexPatternField = dataView.getFieldByName(columnName);
+  const dataViewField = dataView.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: isSortEnabled && indexPatternField?.sortable === true,
+    schema: getSchemaByKbnType(dataViewField?.type),
+    isSortable: isSortEnabled && dataViewField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {
             defaultMessage: 'Document',
           })
-        : indexPatternField?.displayName,
+        : dataViewField?.displayName,
     actions: {
       showHide:
         defaultColumns || columnName === dataView.timeFieldName
@@ -107,11 +107,11 @@ export function buildEuiGridColumn({
         }),
       ],
     },
-    cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
+    cellActions: dataViewField ? buildCellActions(dataViewField) : [],
   };
 
   if (column.id === dataView.timeFieldName) {
-    const timeFieldName = indexPatternField?.customLabel ?? dataView.timeFieldName;
+    const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
       {

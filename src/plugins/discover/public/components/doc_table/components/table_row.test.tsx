@@ -11,7 +11,7 @@ import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
 import { setDocViewsRegistry } from '../../../kibana_services';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';

@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';

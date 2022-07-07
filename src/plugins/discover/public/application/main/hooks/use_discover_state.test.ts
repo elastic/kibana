@@ -11,7 +11,7 @@ import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { SearchSource } from '@kbn/data-plugin/public';
 
 describe('test useDiscoverState', () => {

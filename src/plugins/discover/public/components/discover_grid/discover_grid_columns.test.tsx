@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { getEuiGridColumns } from './discover_grid_columns';
-import { dataViewWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { discoverServiceMock } from '../../__mocks__/services';
 

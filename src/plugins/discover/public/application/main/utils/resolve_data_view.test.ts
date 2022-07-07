@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { loadDataView, getFallbackDataViewId, DataViewSavedObject } from './resolve_index_pattern';
-import { dataViewsMock } from '../../../__mocks__/index_patterns';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { loadDataView, getFallbackDataViewId, DataViewSavedObject } from './resolve_data_view';
+import { dataViewsMock } from '../../../__mocks__/data_views';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { configMock } from '../../../__mocks__/config';
 
 describe('Resolve data view tests', () => {

@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from './index_pattern';
+import { dataViewMock } from './data_view';
 import { dataViewComplexMock } from './data_view_complex';
 import { esHits } from './es_hits';
 import { esHitsComplex } from './es_hits_complex';

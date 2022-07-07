@@ -8,8 +8,8 @@
 
 import { SavedSearch } from '../services/saved_searches';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewMock } from './index_pattern';
-import { dataViewWithTimefieldMock } from './index_pattern_with_timefield';
+import { dataViewMock } from './data_view';
+import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',

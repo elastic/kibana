@@ -42,7 +42,7 @@ describe('context predecessors', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
   const dataView = {
-    id: 'INDEX_PATTERN_ID',
+    id: 'DATA_VIEW_ID',
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},

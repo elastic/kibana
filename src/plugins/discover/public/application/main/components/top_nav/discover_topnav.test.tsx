@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';

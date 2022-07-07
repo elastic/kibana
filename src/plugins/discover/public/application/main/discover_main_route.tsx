@@ -25,7 +25,7 @@ import {
   getSavedSearchFullPathUrl,
 } from '../../services/saved_searches';
 import { getState } from './services/discover_state';
-import { loadDataView, resolveDataView } from './utils/resolve_index_pattern';
+import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -71,7 +71,7 @@ export function DiscoverMainRoute(props: Props) {
     id: id || 'new',
   });
 
-  const loadDefaultOrCurrentIndexPattern = useCallback(
+  const loadDefaultOrCurrentDataView = useCallback(
     async (searchSource: ISearchSource) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
@@ -119,9 +119,7 @@ export function DiscoverMainRoute(props: Props) {
         spaces: services.spaces,
       });
 
-      const currentDataView = await loadDefaultOrCurrentIndexPattern(
-        currentSavedSearch.searchSource
-      );
+      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
 
       if (!currentDataView) {
         return;
@@ -170,7 +168,7 @@ export function DiscoverMainRoute(props: Props) {
     core.savedObjects.client,
     core.application.navigateToApp,
     core.theme,
-    loadDefaultOrCurrentIndexPattern,
+    loadDefaultOrCurrentDataView,
     chrome.recentlyAccessed,
     history,
     basePath,

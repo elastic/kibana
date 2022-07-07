@@ -14,7 +14,7 @@ import { GetStateReturn } from './services/context_state';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { dataViewMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';

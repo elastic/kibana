@@ -7,7 +7,7 @@
  */
 
 import { calcFieldCounts } from './calc_field_counts';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 describe('calcFieldCounts', () => {

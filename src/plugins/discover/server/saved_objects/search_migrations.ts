@@ -110,7 +110,7 @@ const migrateDataView: SavedObjectMigrationFn<any, any> = (doc) => {
 
 const setNewReferences: SavedObjectMigrationFn<any, any> = (doc, context) => {
   doc.references = doc.references || [];
-  // Migrate index pattern
+  // Migrate data view
   return migrateDataView(doc, context);
 };
 

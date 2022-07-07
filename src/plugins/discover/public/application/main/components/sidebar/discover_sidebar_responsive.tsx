@@ -48,7 +48,7 @@ export interface DiscoverSidebarResponsiveProps {
    */
   documents$: DataDocuments$;
   /**
-   * List of available index patterns
+   * List of available data views
    */
   dataViewList: Array<SavedObject<DataViewAttributes>>;
   /**
@@ -64,7 +64,7 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
-   * Callback function when changing an index pattern
+   * Callback function when changing an data view
    */
   onChangeDataView: (id: string) => void;
   /**
@@ -73,7 +73,7 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Currently selected index pattern
+   * Currently selected data view
    */
   selectedDataView?: DataView;
   /**
@@ -111,7 +111,7 @@ export interface DiscoverSidebarResponsiveProps {
 /**
  * Component providing 2 different renderings for the sidebar depending on available screen space
  * Desktop: Sidebar view, all elements are visible
- * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
+ * Mobile: Data view selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
@@ -140,8 +140,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [props.documents$, selectedDataView, documentState, setDocumentState]);
 
   useEffect(() => {
-    // when index pattern changes fieldCounts needs to be cleaned up to prevent displaying
-    // fields of the previous index pattern
+    // when data view changes fieldCounts needs to be cleaned up to prevent displaying
+    // fields of the previous data view
     fieldCounts.current = {};
   }, [selectedDataView]);
 

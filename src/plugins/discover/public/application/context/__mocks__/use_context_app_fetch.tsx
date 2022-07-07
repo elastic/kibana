@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export const mockAnchorHit = buildDataTableRecord(

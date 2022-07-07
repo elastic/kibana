@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataViewMock } from './index_pattern';
+import { buildDataViewMock } from './data_view';
 
 const fields = [
   {

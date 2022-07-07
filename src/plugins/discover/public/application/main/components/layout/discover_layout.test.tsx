@@ -12,12 +12,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
@@ -169,12 +169,12 @@ function mountComponent(
 }
 
 describe('Discover component', () => {
-  test('selected index pattern without time field displays no chart toggle', () => {
+  test('selected data view without time field displays no chart toggle', () => {
     const component = mountComponent(dataViewMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
-  test('selected index pattern with time field displays chart toggle', () => {
+  test('selected data view with time field displays chart toggle', () => {
     const component = mountComponent(dataViewWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });

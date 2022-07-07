@@ -26,10 +26,10 @@ import { SavedSearch } from '../../../../..';
 import { GetStateReturn } from '../../../services/discover_state';
 import { DiscoverLayoutProps } from '../types';
 
-export function getLayoutProps(indexPattern: DataView) {
+export function getLayoutProps(dataView: DataView) {
   const searchSourceMock = {} as unknown as SearchSource;
 
-  const indexPatternList = [indexPattern].map((ip) => {
+  const dataViewList = [dataView].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
   }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
@@ -111,8 +111,8 @@ export function getLayoutProps(indexPattern: DataView) {
   };
   const savedSearchMock = {} as unknown as SavedSearch;
   return {
-    indexPattern,
-    indexPatternList,
+    dataView,
+    dataViewList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: action('navigate to somewhere nice'),
     onChangeDataView: action('change the data view'),

@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from '../../hooks/use_index_pattern';
+import { useDataView } from '../../hooks/use_data_view';
 import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 

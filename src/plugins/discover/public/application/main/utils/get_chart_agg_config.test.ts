@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { dataViewWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getChartAggConfigs } from './get_chart_agg_configs';

@@ -8,7 +8,7 @@
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getDimensions } from './get_dimensions';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { ISearchSource, calculateBounds } from '@kbn/data-plugin/public';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 

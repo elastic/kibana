@@ -10,7 +10,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getIndexPatternMock } from './get_index_pattern_mock';
+import { getDataViewMock } from './get_data_view_mock';
 import { getServices } from './get_services';
 import { getLayoutProps } from './get_layout_props';
 import { DiscoverLayout } from '../discover_layout';
@@ -21,7 +21,7 @@ setHeaderActionMenuMounter(() => void 0);
 storiesOf('components/layout/DiscoverLayout', module).add('Data view with timestamp', () => (
   <IntlProvider locale="en">
     <KibanaContextProvider services={getServices()}>
-      <DiscoverLayout {...getLayoutProps(getIndexPatternMock(true))} />
+      <DiscoverLayout {...getLayoutProps(getDataViewMock(true))} />
     </KibanaContextProvider>
   </IntlProvider>
 ));
@@ -29,7 +29,7 @@ storiesOf('components/layout/DiscoverLayout', module).add('Data view with timest
 storiesOf('components/layout/DiscoverLayout', module).add('Data view without timestamp', () => (
   <IntlProvider locale="en">
     <KibanaContextProvider services={getServices()}>
-      <DiscoverLayout {...getLayoutProps(getIndexPatternMock(false))} />
+      <DiscoverLayout {...getLayoutProps(getDataViewMock(false))} />
     </KibanaContextProvider>
   </IntlProvider>
 ));

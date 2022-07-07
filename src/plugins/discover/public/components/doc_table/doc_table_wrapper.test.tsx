@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DocTableWrapper } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

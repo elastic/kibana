@@ -7,7 +7,7 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from './index_pattern';
+import { dataViewMock } from './data_view';
 
 export const dataViewsMock = {
   getCache: async () => {

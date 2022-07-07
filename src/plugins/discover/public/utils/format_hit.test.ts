@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock as dataViewMock } from '../__mocks__/index_pattern';
+import { dataViewMock as dataViewMock } from '../__mocks__/data_view';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
 import { DataTableRecord, EsHitRecord } from '../types';

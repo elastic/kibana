@@ -8,8 +8,8 @@
 
 import { getStateColumnActions } from './columns';
 import { configMock } from '../../../__mocks__/config';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
-import { dataViewsMock } from '../../../__mocks__/index_patterns';
+import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewsMock } from '../../../__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
 import { AppState } from '../../../application/main/services/discover_state';
 

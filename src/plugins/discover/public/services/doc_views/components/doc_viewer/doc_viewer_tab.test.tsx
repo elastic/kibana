@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
-import { dataViewMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 describe('DocViewerTab', () => {

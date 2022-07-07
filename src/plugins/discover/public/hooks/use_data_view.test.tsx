@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useDataView } from './use_index_pattern';
-import { dataViewMock } from '../__mocks__/index_pattern';
-import { dataViewsMock } from '../__mocks__/index_patterns';
+import { useDataView } from './use_data_view';
+import { dataViewMock } from '../__mocks__/data_view';
+import { dataViewsMock } from '../__mocks__/data_views';
 import { renderHook } from '@testing-library/react-hooks';
 
 describe('Use data view', () => {

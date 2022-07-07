@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from '../../hooks/use_index_pattern';
+import { useDataView } from '../../hooks/use_data_view';
 import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { Doc } from './components/doc';

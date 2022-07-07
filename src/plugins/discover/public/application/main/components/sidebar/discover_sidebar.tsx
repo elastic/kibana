@@ -36,7 +36,7 @@ import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
-import { getDataViewFieldList } from './lib/get_index_pattern_field_list';
+import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';

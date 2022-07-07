@@ -10,7 +10,7 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 jest.mock('@kbn/saved-objects-plugin/public');
 
 import { onSaveSearch } from './on_save_search';
-import { dataViewMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';

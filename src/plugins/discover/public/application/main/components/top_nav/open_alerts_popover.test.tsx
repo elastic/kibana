@@ -13,8 +13,8 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AlertsPopover } from './open_alerts_popover';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
-import { dataViewMock } from '../../../../__mocks__/index_pattern';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 
 const mount = (dataView = dataViewMock) =>
   mountWithIntl(

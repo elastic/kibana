@@ -12,7 +12,7 @@ import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
-import { loadDataView } from '../utils/resolve_index_pattern';
+import { loadDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
@@ -22,7 +22,7 @@ import {
 } from '../../../../common';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
-import { getDataViewAppState } from '../utils/get_switch_index_pattern_app_state';
+import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
 
@@ -125,17 +125,17 @@ export function useDiscoverState({
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
-      const indexPatternChanged = !isEqual(nextState.index, index);
+      const dataViewChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && indexPatternChanged) {
+      if (nextState.index && dataViewChanged) {
         /**
          *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a index pattern without to a index pattern with time filter for a brief moment
+         *  from a data view without to a data view with time filter for a brief moment
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await loadDataView(nextState.index, dataViews, config);
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+        const nextDataView = await loadDataView(nextState.index, dataViews, config);
+        savedSearch.searchSource.setField('index', nextDataView.loaded);
 
         reset();
       }
@@ -169,8 +169,8 @@ export function useDiscoverState({
         spaces: services.spaces,
       });
 
-      const newIndexPattern = newSavedSearch.searchSource.getField('index') || dataView;
-      newSavedSearch.searchSource.setField('index', newIndexPattern);
+      const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
+      newSavedSearch.searchSource.setField('index', newDataView);
       const newAppState = getStateDefaults({
         config,
         data,
@@ -188,11 +188,11 @@ export function useDiscoverState({
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
-      const nextIndexPattern = await dataViews.get(id);
-      if (nextIndexPattern && dataView) {
+      const nextDataView = await dataViews.get(id);
+      if (nextDataView && dataView) {
         const nextAppState = getDataViewAppState(
           dataView,
-          nextIndexPattern,
+          nextDataView,
           state.columns || [],
           (state.sort || []) as SortPairArr[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),

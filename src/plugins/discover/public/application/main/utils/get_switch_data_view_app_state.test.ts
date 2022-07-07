@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getDataViewAppState } from './get_switch_index_pattern_app_state';
+import { getDataViewAppState } from './get_switch_data_view_app_state';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 /**

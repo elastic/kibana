@@ -12,11 +12,11 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
 import { esHits } from '../../__mocks__/es_hits';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { dataViewMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverServices } from '../../build_services';
 import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../kibana_services';
-import { dataViewWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '../../types';
@@ -71,7 +71,7 @@ describe('Discover flyout', function () {
     return { component, props };
   };
 
-  it('should be rendered correctly using an index pattern without timefield', async () => {
+  it('should be rendered correctly using an data view without timefield', async () => {
     const { component, props } = mountComponent({});
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
@@ -80,7 +80,7 @@ describe('Discover flyout', function () {
     expect(props.onClose).toHaveBeenCalled();
   });
 
-  it('should be rendered correctly using an index pattern with timefield', async () => {
+  it('should be rendered correctly using an data view with timefield', async () => {
     const { component, props } = mountComponent({ dataView: dataViewWithTimefieldMock });
 
     const actions = findTestSubject(component, 'docTableRowAction');

@@ -9,14 +9,14 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
-import { dataViewMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let searchSourceStub: any;
   const dataView = {
-    id: 'INDEX_PATTERN_ID',
+    id: 'DATA_VIEW_ID',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
   } as unknown as DataView;
@@ -52,7 +52,7 @@ describe('context app', function () {
         { _doc: SortDirection.desc },
       ]).then(() => {
         const setFieldSpy = searchSourceStub.setField;
-        expect(setFieldSpy.firstCall.args[1].id).toEqual('INDEX_PATTERN_ID');
+        expect(setFieldSpy.firstCall.args[1].id).toEqual('DATA_VIEW_ID');
       });
     });
 
