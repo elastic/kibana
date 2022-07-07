@@ -12,11 +12,24 @@ import classNames from 'classnames';
 import { FieldType, Raw, Snippet } from './types';
 
 import './result_field_value.scss';
+import { SchemaType } from '../../../shared/schema/types';
 
 const isNotNumeric = (raw: string | number): boolean => {
   if (typeof raw === 'number') return false;
   return isNaN(parseFloat(raw));
 };
+
+const getRawDisplay = (raw: Raw, type?: FieldType) => {
+  if (type == SchemaType.Nested) {
+    return JSON.stringify(raw);
+  }
+
+  if (Array.isArray(raw)) {
+    return getRawArrayDisplay(raw);
+  }
+
+  return raw.toString();
+}
 
 const getRawArrayDisplay = (rawArray: Array<string | number>): string => {
   return `[${rawArray.map((raw) => (isNotNumeric(raw) ? `"${raw}"` : raw)).join(', ')}]`;
@@ -56,7 +69,7 @@ export const ResultFieldValue: React.FC<Props> = ({ snippet, raw, type, classNam
        */
       dangerouslySetInnerHTML={snippet ? { __html: parseHighlights(snippet) } : undefined} // eslint-disable-line react/no-danger
     >
-      {!!snippet ? null : Array.isArray(raw) ? getRawArrayDisplay(raw) : raw}
+      {!!raw && (!!snippet ? null : getRawDisplay(raw, type))}
     </div>
   );
 };

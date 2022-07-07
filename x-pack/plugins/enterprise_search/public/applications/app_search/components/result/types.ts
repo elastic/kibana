@@ -11,7 +11,7 @@ import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
 
 export type FieldType = InternalSchemaType | SchemaType;
 
-export type Raw = string | string[] | number | number[];
+export type Raw = string | string[] | number | number[] | object;
 export type Snippet = string;
 export interface FieldValue {
   raw?: Raw;

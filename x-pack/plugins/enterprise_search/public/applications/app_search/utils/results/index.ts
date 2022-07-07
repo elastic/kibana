@@ -40,6 +40,25 @@ export const flattenDocumentField = (
   return flattened;
 };
 
+export const cleanNestedValue = (value: { raw?: object }): any => {
+  if (Array.isArray(value)) {
+    return value.map(cleanNestedValue);
+  }
+
+  if (!!value.raw) {
+    return value.raw
+  }
+
+  if (typeof(value) == 'string' || typeof(value) == 'number') {
+    return value;
+  }
+
+  return Object.entries(value).reduce((acc: { [key: string] : any } , [key, value]) => {
+    acc[key] = cleanNestedValue(value);
+    return acc;
+  }, {});
+}
+
 /* This method flattens documents returned from the ent-search backend.
  * Example document:
  * {
@@ -64,11 +83,14 @@ export const flattenDocument = (result: object): object => {
     if (key === 'id' || key === '_meta') {
       flattened[key] = value;
     } else {
-      for (const [flatName, flatValue] of flattenDocumentField(key, value)) {
-        flattened[flatName] = flatValue;
+      if (!!value.raw || !!value.snippet) {
+        flattened[key] = value;
+      } else {
+        flattened[key] = { raw: cleanNestedValue(value) }
       }
     }
   }
+  console.log(flattened)
 
   return flattened;
 };
