@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CrawlerSettings } from './crawler_settings';
+export { Settings } from './settings';
