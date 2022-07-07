@@ -98,3 +98,5 @@ export type {
   LifecycleResponseFactory,
 } from './router';
 export { validBodyOutput, RouteValidationError } from './router';
+
+export type { ICspConfig } from './csp';

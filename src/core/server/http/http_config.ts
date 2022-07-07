@@ -10,12 +10,13 @@ import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
+import type { ICspConfig } from '@kbn/core-http-server';
 
 import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
-import { CspConfigType, CspConfig, ICspConfig } from './csp';
+import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig, IExternalUrlConfig } from './external_url';
 import {
   securityResponseHeadersSchema,
