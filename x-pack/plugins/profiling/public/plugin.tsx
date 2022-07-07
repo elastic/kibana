@@ -16,10 +16,10 @@ import { i18n } from '@kbn/i18n';
 import { from, map } from 'rxjs';
 import type { NavigationSection } from '@kbn/observability-plugin/public';
 import { getServices } from './services';
-import type { ProfilingPluginPublicSetupDeps } from './types';
+import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 
 export class ProfilingPlugin implements Plugin {
-  public setup(core: CoreSetup, deps: ProfilingPluginPublicSetupDeps) {
+  public setup(coreSetup: CoreSetup, pluginsSetup: ProfilingPluginPublicSetupDeps) {
     // Register an application into the side navigation menu
 
     const links = [
@@ -32,8 +32,8 @@ export class ProfilingPlugin implements Plugin {
       },
     ];
 
-    const section$ = from(core.getStartServices()).pipe(
-      map(([coreStart, pluginsStart]) => {
+    const section$ = from(coreSetup.getStartServices()).pipe(
+      map(() => {
         const sections: NavigationSection[] = [
           {
             label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
@@ -53,21 +53,36 @@ export class ProfilingPlugin implements Plugin {
       })
     );
 
-    deps.observability.navigation.registerSections(section$);
+    pluginsSetup.observability.navigation.registerSections(section$);
 
-    core.application.register({
+    coreSetup.application.register({
       id: 'profiling',
       title: 'Profiling',
       euiIconType: 'logoObservability',
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
-      async mount({ element }: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+      async mount({ element, history, theme$ }: AppMountParameters) {
+        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
+          CoreStart,
+          ProfilingPluginPublicStartDeps,
+          unknown
+        ];
 
-        const startServices = getServices(coreStart);
+        const profilingFetchServices = getServices(coreStart);
         const { renderApp } = await import('./app');
-        return renderApp(startServices, element);
+        return renderApp(
+          {
+            profilingFetchServices,
+            coreStart,
+            coreSetup,
+            pluginsStart,
+            pluginsSetup,
+            history,
+            theme$,
+          },
+          element
+        );
       },
     });
   }

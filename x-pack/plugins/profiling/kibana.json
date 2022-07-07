@@ -15,7 +15,8 @@
     "kibanaUtils",
     "share",
     "observability",
-    "features"
+    "features",
+    "kibanaReact"
   ],
   "optionalPlugins": []
 }
