@@ -35,10 +35,10 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
   defaultMessage:
-    'Select an option below to get a quick tour of the most valuable features based on your preferences.',
+    'Select a starting point for a quick tour of how Elastic can help you do even more with your data.',
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `I'd like to do something else (Skip)`,
+  defaultMessage: `No thanks, I’ll explore on my own.`,
 });
 
 export const GettingStarted = () => {
