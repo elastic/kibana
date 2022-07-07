@@ -28,7 +28,7 @@ import { RelevanceTuningPreview } from './relevance_tuning_preview';
 import { RelevanceTuningLogic } from '.';
 
 export const RelevanceTuning: React.FC = () => {
-  const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const { dataLoading, engineHasSchemaFields, unsavedChanges, isPrecisionTuningEnabled } = useValues(RelevanceTuningLogic);
   const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } =
     useActions(RelevanceTuningLogic);
   const { isElasticsearchEngine } = useValues(EngineLogic);
@@ -85,7 +85,7 @@ export const RelevanceTuning: React.FC = () => {
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
           <EuiSpacer size="m" />
-          {!isElasticsearchEngine && (
+          {isPrecisionTuningEnabled && (
             <>
               <PrecisionSlider />
               <EuiSpacer />

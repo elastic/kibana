@@ -33,6 +33,7 @@ describe('RelevanceTuning', () => {
     schemaFieldsWithConflicts: [],
     unsavedChanges: false,
     dataLoading: false,
+    isPrecisionTuningEnabled: true,
   };
 
   const actions = {
@@ -97,12 +98,15 @@ describe('RelevanceTuning', () => {
     });
   });
 
-  it('will not render the PrecisionSlider for elasticsearch engines', () => {
-    setMockValues({
-      ...values,
-      isElasticsearchEngine: true,
-    });
+  describe('precision tuning', () => {
+    it('will not render the PrecisionSlider when precision tuning is disabled', () => {
+      setMockValues({
+        ...values,
+        isPrecisionTuningEnabled: false
+      });
 
-    expect(subject().find(PrecisionSlider).exists()).toBe(false);
+      expect(subject().find(PrecisionSlider).exists()).toBe(false);
+    });
   });
+
 });
