@@ -81,7 +81,9 @@ export async function verifyPackageArchiveSignature({
   });
 
   if (!pkgArchiveSignature) {
-    logger.warn(`Not performing package verification as package has no signature`);
+    logger.warn(
+      `Package ${pkgName}-${pkgVersion} has no corresponding signature. Skipping verification.`
+    );
     return result;
   }
 

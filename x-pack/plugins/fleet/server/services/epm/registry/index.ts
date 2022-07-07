@@ -252,7 +252,7 @@ export async function getRegistryPackage(
       fetchArchiveBuffer({
         pkgName: name,
         pkgVersion: version,
-        verify: verifyPackage,
+        shouldVerify: verifyPackage,
         ignoreUnverified: options?.ignoreUnverified,
       })
     );
@@ -285,12 +285,12 @@ function ensureContentType(archivePath: string) {
 export async function fetchArchiveBuffer({
   pkgName,
   pkgVersion,
-  verify,
+  shouldVerify,
   ignoreUnverified = false,
 }: {
   pkgName: string;
   pkgVersion: string;
-  verify: boolean;
+  shouldVerify: boolean;
   ignoreUnverified?: boolean;
 }): Promise<{
   archiveBuffer: Buffer;
@@ -301,7 +301,7 @@ export async function fetchArchiveBuffer({
   const { download: archivePath } = await getInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
-  if (verify) {
+  if (shouldVerify) {
     const verificationResult = await verifyPackageArchiveSignature({
       pkgName,
       pkgVersion,
