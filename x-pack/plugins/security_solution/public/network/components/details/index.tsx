@@ -17,13 +17,16 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 import {
   autonomousSystemRenderer,
-  dateRenderer,
   hostIdRenderer,
   hostNameRenderer,
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
 } from '../../../timelines/components/field_renderers/field_renderers';
+import {
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
 import * as i18n from './translations';
 import { OverviewWrapper } from '../../../common/components/page';
 import { Loader } from '../../../common/components/loader';
@@ -49,6 +52,7 @@ export interface IpOverviewProps {
   narrowDateRange: NarrowDateRange;
   startDate: string;
   type: networkModel.NetworkType;
+  indexPatterns: string[];
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -66,6 +70,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
+    indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -112,11 +117,25 @@ export const IpOverview = React.memo<IpOverviewProps>(
       [
         {
           title: i18n.FIRST_SEEN,
-          description: typeData ? dateRenderer(typeData.firstSeen) : getEmptyTagValue(),
+          description: (
+            <FirstLastSeen
+              indexPatterns={indexPatterns}
+              field={`${flowTarget}.ip`}
+              value={ip}
+              type={FirstLastSeenType.FIRST_SEEN}
+            />
+          ),
         },
         {
           title: i18n.LAST_SEEN,
-          description: typeData ? dateRenderer(typeData.lastSeen) : getEmptyTagValue(),
+          description: (
+            <FirstLastSeen
+              indexPatterns={indexPatterns}
+              field={`${flowTarget}.ip`}
+              value={ip}
+              type={FirstLastSeenType.LAST_SEEN}
+            />
+          ),
         },
       ],
       [

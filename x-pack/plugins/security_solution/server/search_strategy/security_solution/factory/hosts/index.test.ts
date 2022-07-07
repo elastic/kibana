@@ -11,7 +11,6 @@ import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
 
-import { firstOrLastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
 import { hostsKpiAuthentications } from './kpi/authentications';
 import { hostsKpiHosts } from './kpi/hosts';
@@ -20,7 +19,6 @@ import { hostsKpiUniqueIps } from './kpi/unique_ips';
 jest.mock('./all');
 jest.mock('./details');
 jest.mock('./overview');
-jest.mock('./last_first_seen');
 jest.mock('./uncommon_processes');
 jest.mock('./kpi/authentications');
 jest.mock('./kpi/hosts');
@@ -32,7 +30,6 @@ describe('hostsFactory', () => {
       [HostsQueries.details]: hostDetails,
       [HostsQueries.hosts]: allHosts,
       [HostsQueries.overview]: hostOverview,
-      [HostsQueries.firstOrLastSeen]: firstOrLastSeenHost,
       [HostsQueries.uncommonProcesses]: uncommonProcesses,
       [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,

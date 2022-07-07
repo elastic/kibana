@@ -53,6 +53,7 @@ describe('IP Overview Component', () => {
       updateFlowTargetAction: jest.fn() as unknown as ActionCreator<{
         flowTarget: FlowTarget;
       }>,
+      indexPatterns: [],
     };
 
     test('it renders the default IP Overview', () => {

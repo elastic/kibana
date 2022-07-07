@@ -16,8 +16,6 @@ import {
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
-  const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);
-  const lastSeen = getOr(null, `lastSeen.value_as_string`, networkHit);
   const autonomousSystem: AutonomousSystem | null = getOr(
     null,
     `as.results.hits.hits[0]._source.${type}.as`,
@@ -31,8 +29,6 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
 
   return {
     [type]: {
-      firstSeen,
-      lastSeen,
       autonomousSystem: {
         ...autonomousSystem,
       },
