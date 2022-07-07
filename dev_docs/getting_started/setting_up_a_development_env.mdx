@@ -3,22 +3,15 @@ id: kibDevTutorialSetupDevEnv
 slug: /kibana-dev-docs/getting-started/setup-dev-env
 title: Set up a Development Environment
 summary: Learn how to setup a development environment for contributing to the Kibana repository
-date: 2021-04-26
+date: 2022-07-07
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup']
 ---
 
 Setting up a development environment is pretty easy.
 
 <DocCallOut title="A note about Windows">
-  In order to support Windows development we currently require you to use one of the following:
-
-- [Git Bash](https://git-scm.com/download/win)
-- [Windows Subsystem for Linux (recommended)](https://docs.microsoft.com/en-us/windows/wsl/about)
-
-  If you want to know more about how to setup and use WSL for development on Windows, which will become our only supported way in the upcoming future, please check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" text="tutorial"/>.
-
-  Before running the steps below, please make sure you have installed [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) and that you are running all commands in either Git Bash or WSL.
-
+  We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
+  Please check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" text="tutorial"/> to know how to setup the environment and then follow the rest of this guide inside the *WSL* environment.
 </DocCallOut>
 
 ## Get the code
@@ -34,7 +27,7 @@ cd kibana
 
 ## Install dependencies
 
-Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm) or [nvm-windows](https://github.com/coreybutler/nvm-windows). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
+Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
 
 ```sh
 nvm use
