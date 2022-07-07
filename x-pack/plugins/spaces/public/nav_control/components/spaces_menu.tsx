@@ -7,24 +7,25 @@
 
 import './spaces_menu.scss';
 
-import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
+import { EuiPopoverFooter, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import React, { Component } from 'react';
+// import type { EuiSelectableSearchProps } from '@elastic/eui/src/components/selectable/selectable_search';
+import React, { Component, lazy } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
-// import { getSpaceAvatarComponent } from '../../space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
 
-// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
-// const LazySpaceAvatar = lazy(() =>
-//   getSpaceAvatarComponent().then((component) => ({ default: component }))
-// );
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   id: string;
@@ -56,10 +57,10 @@ class SpacesMenuUI extends Component<Props, State> {
 
     const spaceMenuOptions: EuiSelectableOption[] = this.getSpaceOptions();
 
-    const noMatchesMessage = (
+    const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
         <FormattedMessage
-          id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
+          id="xpack.spaces.navControl.spacesMenu.noSpacesFound"
           defaultMessage=" no spaces found "
         />
       </EuiText>
@@ -79,54 +80,39 @@ class SpacesMenuUI extends Component<Props, State> {
         {...panelProps}
         isLoading={this.props.isLoading}
         searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
-        // ToDo: find a way to do this more robustly, i.e. not use 'any'
         searchProps={
           this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
             ? ({
-                placeholder: 'Find a space',
+                placeholder: i18n.translate(
+                  'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
+                  {
+                    defaultMessage: 'Find a space',
+                  }
+                ),
                 compressed: true,
               } as any)
             : undefined
         }
-        noMatchesMessage={noMatchesMessage}
-        emptyMessage={noMatchesMessage}
+        noMatchesMessage={noSpacesMessage}
+        emptyMessage={noSpacesMessage}
         options={spaceMenuOptions}
         singleSelection={true}
         style={{ width: 300 }}
         onChange={this.spaceSelectionChange}
-        listProps={{ showIcons: false }}
-        // onChange={(newOptions, event) => {
-        //   const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
-
-        //   if (!!selectedSpaceItem) {
-        //     const urlToSelectedSpace = addSpaceIdToPath(
-        //       this.props.serverBasePath,
-        //       selectedSpaceItem.key, // selectedSpace.id
-        //       ENTER_SPACE_PATH
-        //     );
-
-        //     console.log(event);
-        //     console.log(`**** Event Class: ${event.constructor.name}`);
-        //     // console.log(`**** Event Type: ${event.type}`);
-
-        //     if (event.shiftKey) {
-        //       console.log(`**** SHIFT CLICK`);
-        //     } else if (event.ctrlKey || event.metaKey) {
-        //       // (event instanceof MouseEvent && (event.button === 1 || event.ctrlKey))
-        //       console.log(`**** CTRL/CMD CLICK`);
-        //     } else {
-        //       console.log(`**** NORMAL CLICK`);
-        //     }
-        //   }
-        // }}
-        // listProps={{
-        //   rowHeight: 40,
-        //   showIcons: false,
-        // }}
+        listProps={{
+          rowHeight: 40,
+          showIcons: false,
+          onFocusBadge: false,
+        }}
       >
         {(list, search) => (
           <>
-            <EuiPopoverTitle paddingSize="s">{search || 'Your spaces'}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">
+              {search ||
+                i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
+                  defaultMessage: 'Your spaces',
+                })}
+            </EuiPopoverTitle>
             {list}
             <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
           </>
@@ -138,18 +124,11 @@ class SpacesMenuUI extends Component<Props, State> {
   private getSpaceOptions = (): EuiSelectableOption[] => {
     return this.props.spaces.map((space) => {
       return {
+        'aria-label': space.name,
         label: space.name,
         key: space.id,
-        prepend: (
-          <EuiAvatar
-            type="space"
-            name={space.name}
-            size="s"
-            color={space.color}
-            imageUrl={space.imageUrl ?? ''}
-          />
-        ),
-        checked: undefined, // ToDo: set 'on' if this space ID matches the one we're in?
+        prepend: <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />,
+        checked: undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',
       };
@@ -165,27 +144,27 @@ class SpacesMenuUI extends Component<Props, State> {
     if (!!selectedSpaceItem) {
       const urlToSelectedSpace = addSpaceIdToPath(
         this.props.serverBasePath,
-        selectedSpaceItem.key, // selectedSpace.id
+        selectedSpaceItem.key,
         ENTER_SPACE_PATH
       );
 
       // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
-      console.log(`**** Event Class: ${event.constructor.name}`);
-      console.log(`**** Native Event: ${event.nativeEvent}`);
+      // console.log(`**** Event Class: ${event.constructor.name}`);
+      // console.log(`**** Native Event: ${event.nativeEvent}`);
 
       if (event.shiftKey) {
         // Open in new window, shift is given priority over other modifiers
-        console.log(`**** SHIFT CLICK`);
+        // console.log(`**** SHIFT CLICK`);
         window.open(urlToSelectedSpace);
       } else if (event.ctrlKey || event.metaKey) {
         // Open in new tab - either a ctrl click or middle mouse button
-        console.log(`**** CTRL/CMD CLICK`);
+        // console.log(`**** CTRL/CMD CLICK`);
         // window.open(urlToSelectedSpace); // ToDo: replace with new tab
       } else {
         // Force full page reload (usually not a good idea, but we need to in order to change spaces)
         // console.log(`**** URL: ${urlToSelectedSpace}`);
-        console.log(`**** NORMAL CLICK`);
-        // this.props.navigateToUrl(urlToSelectedSpace);
+        // console.log(`**** NORMAL CLICK`);
+        this.props.navigateToUrl(urlToSelectedSpace);
       }
     }
   };

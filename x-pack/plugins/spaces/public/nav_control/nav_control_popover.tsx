@@ -6,11 +6,17 @@
  */
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
-import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import {
+  EuiFocusTrap,
+  EuiHeaderSectionItemButton,
+  EuiLoadingSpinner,
+  EuiPopover,
+} from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -107,9 +113,8 @@ export class NavControlPopover extends Component<Props, State> {
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
         repositionOnScroll
-        ownFocus
       >
-        {element}
+        <EuiFocusTrap>{element}</EuiFocusTrap>
       </EuiPopover>
     );
   }
@@ -137,7 +142,7 @@ export class NavControlPopover extends Component<Props, State> {
     const { activeSpace } = this.state;
 
     if (!activeSpace) {
-      return this.getButton(<EuiLoadingSpinner size="m" />, 'loading');
+      return this.getButton(<EuiLoadingSpinner size="m" />, 'loading spaces navigation');
     }
 
     return this.getButton(
@@ -154,12 +159,24 @@ export class NavControlPopover extends Component<Props, State> {
         aria-controls={popoutContentId}
         aria-expanded={this.state.showSpaceSelector}
         aria-haspopup="true"
-        aria-label={linkTitle}
+        aria-label={i18n.translate('pack.spaces.navControl.popover.spacesNavigationLabel', {
+          defaultMessage: 'Spaces navigation',
+        })}
+        aria-describedby="spacesNavDetails"
         data-test-subj="spacesNavSelector"
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
       >
         {linkIcon}
+        <p id="spacesNavDetails" hidden>
+          {i18n.translate('pack.spaces.navControl.popover.spaceNavigationDetails', {
+            defaultMessage:
+              '{space} is the currently selected space. Click this button to open a popover that allows you to select the active space.',
+            values: {
+              space: linkTitle,
+            },
+          })}
+        </p>
       </EuiHeaderSectionItemButton>
     );
   };
