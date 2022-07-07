@@ -328,7 +328,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const showEmpty: boolean =
-    !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
+    !isInitLoading && !loadingList && exceptions.length === 0;
 
   const showNoResults: boolean =
     exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);

@@ -13,10 +13,9 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { FormattedDate, FormattedRelativePreferenceDate } from '../../../formatted_date';
 
-const EuiFlexItemStyled = styled(EuiFlexItem)`
+const StyledCondition = styled('div')`
   padding-top: 4px !important;
 `;
-
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
   dataTestSubj: string;
@@ -47,11 +46,13 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             fieldName="updated_by"
             label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
             value1={
-              <FormattedRelativePreferenceDate
-                value={item.updated_at}
-                tooltipFieldName="updated_by"
-                tooltipAnchorClassName="eui-textTruncate"
-              />
+              <StyledCondition>
+                <FormattedRelativePreferenceDate
+                  value={item.updated_at}
+                  tooltipFieldName="updated_by"
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              </StyledCondition>
             }
             value2={item.updated_by}
             dataTestSubj={`${dataTestSubj}-updatedBy`}
@@ -79,11 +80,11 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
           {label}
         </EuiBadge>
       </EuiFlexItem>
-      <EuiFlexItemStyled grow={false} data-test-subj={`${dataTestSubj}-value1`}>
+      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
         <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
           {value1}
         </EuiText>
-      </EuiFlexItemStyled>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" style={{ fontStyle: 'italic', fontFamily: 'Inter' }}>
           {i18n.EXCEPTION_ITEM_META_BY}
