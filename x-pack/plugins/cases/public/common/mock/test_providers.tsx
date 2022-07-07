@@ -23,17 +23,16 @@ import {
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
-import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
+import { CasesPermissions } from '../../client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
-  userCanCrud?: boolean;
+  permissions?: CasesPermissions;
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
-  externalReferenceAttachmentTypeRegistry?: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -45,7 +44,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
 }) => {
@@ -63,7 +62,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
             <CasesProvider
-              value={{ externalReferenceAttachmentTypeRegistry, features, owner, userCanCrud }}
+              value={{ externalReferenceAttachmentTypeRegistry, features, owner, permissions }}
             >
               {children}
             </CasesProvider>
@@ -92,10 +91,24 @@ export const testQueryClient = new QueryClient({
   },
 });
 
+export const buildCasesPermissions = (overrides: Partial<CasesPermissions> = {}) => {
+  const read = overrides.read ?? true;
+  const all = overrides.all ?? true;
+
+  return {
+    all,
+    read,
+  };
+};
+
+export const allCasesPermissions = () => buildCasesPermissions();
+export const noCasesPermissions = () => buildCasesPermissions({ read: false, all: false });
+export const readCasesPermissions = () => buildCasesPermissions({ all: false });
+
 export const createAppMockRenderer = ({
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
@@ -118,7 +131,7 @@ export const createAppMockRenderer = ({
                 externalReferenceAttachmentTypeRegistry,
                 features,
                 owner,
-                userCanCrud,
+                permissions,
                 releasePhase,
               }}
             >

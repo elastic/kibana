@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Result } from '../../components/result/types';
+import type { SearchResult } from '@elastic/search-ui';
 
 import { flattenDocument, flattenDocumentField } from '.';
 
@@ -42,13 +42,13 @@ describe('flattenDocumentField', () => {
 
 describe('flattenDocument', () => {
   it('flattens all fields without raw key', () => {
-    const result: Result = {
+    const result: SearchResult = {
       id: { raw: '123' },
       _meta: { engine: 'Test', id: '1' },
       title: { raw: 'Getty Museum' },
       address: { city: { raw: 'Los Angeles' }, state: { raw: 'California' } },
     };
-    const expected: Result = {
+    const expected: SearchResult = {
       id: { raw: '123' },
       _meta: { engine: 'Test', id: '1' },
       title: { raw: 'Getty Museum' },
