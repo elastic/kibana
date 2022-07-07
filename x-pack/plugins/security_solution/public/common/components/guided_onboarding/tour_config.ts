@@ -7,11 +7,18 @@
 
 import { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
+import rulesGif from '../../images/onboarding_tour_step_rules.gif';
+import casesGif from '../../images/onboarding_tour_step_cases.gif';
 
 type TourConfig = Array<
-  Pick<EuiTourStepProps, 'step' | 'content' | 'anchor' | 'anchorPosition' | 'title'>
+  Pick<EuiTourStepProps, 'step' | 'content' | 'anchor' | 'anchorPosition' | 'title'> & {
+    imageConfig?: {
+      altText: string;
+      src: string;
+    };
+  }
 >;
-
 export const tourConfig: TourConfig = [
   {
     step: 1,
@@ -39,6 +46,15 @@ export const tourConfig: TourConfig = [
     }),
     anchor: `[data-test-subj="navigation-rules"]`,
     anchorPosition: 'rightUp',
+    imageConfig: {
+      src: rulesGif,
+      altText: i18n.translate(
+        'xpack.securitySolution.guided_onboarding.tour.rulesStep.imageAltText',
+        {
+          defaultMessage: 'Rules demonstration',
+        }
+      ),
+    },
   },
   {
     step: 3,
@@ -54,6 +70,15 @@ export const tourConfig: TourConfig = [
     ),
     anchor: `[data-test-subj="navigation-alerts"]`,
     anchorPosition: 'rightUp',
+    imageConfig: {
+      src: alertsGif,
+      altText: i18n.translate(
+        'xpack.securitySolution.guided_onboarding.tour.alertsStep.imageAltText',
+        {
+          defaultMessage: 'Alerts demonstration',
+        }
+      ),
+    },
   },
   {
     step: 4,
@@ -66,6 +91,15 @@ export const tourConfig: TourConfig = [
     }),
     anchor: `[data-test-subj="navigation-cases"]`,
     anchorPosition: 'rightUp',
+    imageConfig: {
+      src: casesGif,
+      altText: i18n.translate(
+        'xpack.securitySolution.guided_onboarding.tour.casesStep.imageAltText',
+        {
+          defaultMessage: 'Cases demonstration',
+        }
+      ),
+    },
   },
   {
     step: 5,

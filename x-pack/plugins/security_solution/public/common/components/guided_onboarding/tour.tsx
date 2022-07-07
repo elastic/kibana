@@ -15,6 +15,8 @@ import {
   EuiTourStep,
   EuiTourStepProps,
   EuiText,
+  EuiSpacer,
+  EuiImage,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -93,7 +95,7 @@ const getSteps = (
     </EuiButtonEmpty>
   );
   return tourConfig.map((stepConfig) => {
-    const { content, ...rest } = stepConfig;
+    const { content, imageConfig, ...rest } = stepConfig;
     return (
       // @ts-expect-error
       <EuiTourStep
@@ -105,9 +107,17 @@ const getSteps = (
         stepsTotal={tourConfig.length}
         isStepOpen={stepConfig.step === activeStep}
         content={
-          <EuiText size="xs">
-            <p>{content}</p>
-          </EuiText>
+          <>
+            <EuiText size="xs">
+              <p>{content}</p>
+            </EuiText>
+            {imageConfig && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
+              </>
+            )}
+          </>
         }
         footerAction={activeStep === tourConfig.length ? lastStepFooter : footerAction}
       />
