@@ -203,11 +203,7 @@ describe('SecurityNavControl', () => {
               "name": <FormattedMessage
                 defaultMessage="Profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
-                values={
-                  Object {
-                    "profileOverridden": false,
-                  }
-                }
+                values={Object {}}
               />,
             },
             Object {
@@ -320,11 +316,7 @@ describe('SecurityNavControl', () => {
               "name": <FormattedMessage
                 defaultMessage="Profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
-                values={
-                  Object {
-                    "profileOverridden": true,
-                  }
-                }
+                values={Object {}}
               />,
             },
             Object {
@@ -454,11 +446,7 @@ describe('SecurityNavControl', () => {
               "name": <FormattedMessage
                 defaultMessage="Profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
-                values={
-                  Object {
-                    "profileOverridden": false,
-                  }
-                }
+                values={Object {}}
               />,
             },
             Object {
