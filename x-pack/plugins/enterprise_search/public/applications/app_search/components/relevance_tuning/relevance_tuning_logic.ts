@@ -107,6 +107,7 @@ interface RelevanceTuningValues {
   dataLoading: boolean;
   searchResults: SearchResult[] | null;
   resultsLoading: boolean;
+  isPrecisionTuningEnabled: boolean;
 }
 
 export const RelevanceTuningLogic = kea<
@@ -152,6 +153,7 @@ export const RelevanceTuningLogic = kea<
         search_fields: {},
         boosts: {},
         precision: 2,
+        precision_enabled: false
       },
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
@@ -238,6 +240,10 @@ export const RelevanceTuningLogic = kea<
       () => [selectors.schema],
       (schema: Schema): boolean => Object.keys(schema).length >= 2,
     ],
+    isPrecisionTuningEnabled: [
+      () => [selectors.searchSettings],
+      (searchSettings: SearchSettings): boolean => searchSettings.precision_enabled,
+    ]
   }),
   listeners: ({ actions, values }) => ({
     initializeRelevanceTuning: async () => {

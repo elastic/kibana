@@ -35,6 +35,7 @@ describe('RelevanceTuningLogic', () => {
     },
     search_fields: {},
     precision: 10,
+    precision_enabled: true,
   };
   const schema = {};
   const schemaConflicts = {};
@@ -64,6 +65,7 @@ describe('RelevanceTuningLogic', () => {
       boosts: {},
       search_fields: {},
       precision: 2,
+      precision_enabled: false,
     },
     unsavedChanges: false,
     filterInputValue: '',
@@ -75,7 +77,17 @@ describe('RelevanceTuningLogic', () => {
     schemaFieldsWithConflicts: [],
     filteredSchemaFields: [],
     filteredSchemaFieldsWithConflicts: [],
+    isPrecisionTuningEnabled: false,
   };
+
+  const DEFAULT_VALUES_WITH_PRECISION_TUNING = {
+    ...DEFAULT_VALUES,
+    searchSettings: {
+      ...DEFAULT_VALUES.searchSettings,
+      precision_enabled: true,
+    },
+    isPrecisionTuningEnabled: true,
+  }
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -98,7 +110,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.onInitializeRelevanceTuning(relevanceTuningProps);
 
         expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_PRECISION_TUNING,
           searchSettings,
           schema,
           dataLoading: false,
@@ -127,7 +139,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.setSearchSettings(searchSettings);
 
         expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_PRECISION_TUNING,
           searchSettings,
           unsavedChanges: true,
         });
@@ -223,7 +235,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.setSearchSettingsResponse(searchSettings);
 
         expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_PRECISION_TUNING,
           searchSettings,
           unsavedChanges: false,
         });
@@ -1005,7 +1017,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setSearchQuery', () => {
-      it('shoulds update search results', () => {
+      it('should update search results', () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
@@ -1016,7 +1028,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setPrecision', () => {
-      it('shoulds update search results', () => {
+      it('should update search results', () => {
         mount();
         jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
@@ -1110,6 +1122,18 @@ describe('RelevanceTuningLogic', () => {
           },
         });
         expect(RelevanceTuningLogic.values.filteredSchemaFieldsWithConflicts).toEqual(['bar']);
+      });
+    });
+
+    describe('isPrecisionTuningEnabled', () => {
+      it('should be set based on precision enabled', () => {
+        mount({
+          searchSettings: {
+            precision_enabled: true
+          }
+        });
+
+        expect(RelevanceTuningLogic.values.isPrecisionTuningEnabled).toEqual(true);
       });
     });
   });
