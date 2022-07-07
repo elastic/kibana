@@ -14,9 +14,9 @@ import type {
 } from '@kbn/analytics-client';
 import type { FullStoryApi } from './types';
 import type { FullStorySnippetConfig } from './load_snippet';
-import { getParsedVersion } from './get_parsed_version';
 import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
+import { getParsedVersion } from './get_parsed_version';
 
 /**
  * FullStory shipper configuration.
@@ -62,7 +62,7 @@ export class FullStoryShipper implements IShipper {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
     // FullStory requires different APIs for different type of contexts.
-    const { userId, version, cloudId, ...nonUserContext } = newContext;
+    const { userId, isElasticCloudUser, ...nonUserContext } = newContext;
 
     // Call it only when the userId changes
     if (userId && userId !== this.lastUserId) {
@@ -73,14 +73,15 @@ export class FullStoryShipper implements IShipper {
     }
 
     // User-level context
-    if (version || cloudId) {
+    if (typeof isElasticCloudUser === 'boolean') {
       this.initContext.logger.debug(
-        `Calling FS.setUserVars with version ${version} and cloudId ${cloudId}`
+        `Calling FS.setUserVars with isElasticCloudUser ${isElasticCloudUser}`
       );
-      this.fullStoryApi.setUserVars({
-        ...(version ? getParsedVersion(version) : {}),
-        ...(cloudId ? { org_id_str: cloudId } : {}),
-      });
+      this.fullStoryApi.setUserVars(
+        formatPayload({
+          isElasticCloudUser,
+        })
+      );
     }
 
     // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
@@ -88,11 +89,15 @@ export class FullStoryShipper implements IShipper {
       // Keeping these fields for backwards compatibility.
       if (nonUserContext.applicationId) nonUserContext.app_id = nonUserContext.applicationId;
       if (nonUserContext.entityId) nonUserContext.ent_id = nonUserContext.entityId;
+      if (nonUserContext.cloudId) nonUserContext.org_id = nonUserContext.cloudId;
 
       this.initContext.logger.debug(
         `Calling FS.setVars with context ${JSON.stringify(nonUserContext)}`
       );
-      this.fullStoryApi.setVars('page', formatPayload(nonUserContext));
+      this.fullStoryApi.setVars('page', {
+        ...formatPayload(nonUserContext),
+        ...(nonUserContext.version ? getParsedVersion(nonUserContext.version) : {}),
+      });
     }
   }
 

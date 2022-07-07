@@ -21,7 +21,13 @@ describe('parseEventEnrichmentResponse', () => {
       allow_no_indices: true,
       body: {
         _source: false,
-        fields: ['*'],
+        fields: [
+          '*',
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [

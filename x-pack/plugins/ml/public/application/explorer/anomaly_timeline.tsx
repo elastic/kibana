@@ -37,7 +37,7 @@ import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
-import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
+import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
@@ -199,7 +199,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
           <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="baseline">
             <EuiFlexItem grow={false}>
-              <EuiTitle className="panel-title">
+              <EuiTitle size={'xs'}>
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.explorer.anomalyTimelineTitle"
@@ -239,7 +239,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             )}
           </EuiFlexGroup>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="baseline">
             {viewBySwimlaneOptions.length > 0 && (
@@ -275,7 +275,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <div className="panel-sub-title">
+              <EuiText size={'xs'} color={'subdued'}>
                 {viewByLoadedForTimeFormatted && (
                   <FormattedMessage
                     id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
@@ -295,7 +295,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     defaultMessage="(Job score across all influencers)"
                   />
                 )}
-              </div>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
               <EuiButtonEmpty
@@ -348,6 +348,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }
             showTimeline={false}
             showLegend={false}
+            yAxisWidth={Y_AXIS_LABEL_WIDTH}
           />
 
           <EuiSpacer size="m" />
@@ -379,6 +380,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 }
               }}
               isLoading={loading || viewBySwimlaneDataLoading}
+              yAxisWidth={Y_AXIS_LABEL_WIDTH}
               noDataWarning={
                 <EuiText textAlign={'center'}>
                   <h5>

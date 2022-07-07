@@ -74,8 +74,6 @@ By default, columns are sorted in the order they are added.
 image::images/document-explorer-multi-field.png[Multi field sort in the document table, width="75%"]
 
 . To change the sort order, select a field in the pop-up, and then drag it to the new location.
-+
-For example, to sort by `geo.country_iso_code` then `order_date`, make sure `geo.country_iso_code` appears first.
 
 
 [float]

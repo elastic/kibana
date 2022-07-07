@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/core-environment-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-environment-server-internal",
+        "id": "def-server.PidConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "PidConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly file?: string | undefined; readonly exclusive: boolean; }"
+        ],
+        "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-environment-server-internal",
+        "id": "def-server.pidConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "pidConfig",
+        "description": [],
+        "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-environment-server-internal",
+            "id": "def-server.pidConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-environment-server-internal",
+            "id": "def-server.pidConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ObjectType",
+              "<{ file: ",
+              "Type",
+              "<string | undefined>; exclusive: ",
+              "Type",
+              "<boolean>; }>"
+            ],
+            "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

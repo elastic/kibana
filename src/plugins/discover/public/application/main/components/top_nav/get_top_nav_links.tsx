@@ -103,7 +103,17 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
+    run: (anchorElement: HTMLElement) =>
+      onSaveSearch({
+        savedSearch,
+        services,
+        indexPattern,
+        navigateTo,
+        state,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      }),
   };
 
   const openSearch = {
@@ -161,6 +171,9 @@ export const getTopNavLinks = ({
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
         showPublicUrlSwitch,
+        onClose: () => {
+          anchorElement?.focus();
+        },
       });
     },
   };
@@ -183,7 +196,10 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi ? [alerts] : []),
+    ...(services.triggersActionsUi &&
+    services.capabilities.management?.insightsAndAlerting?.triggersActions
+      ? [alerts]
+      : []),
     shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),

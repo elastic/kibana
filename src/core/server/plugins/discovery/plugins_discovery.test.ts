@@ -11,16 +11,17 @@ import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { CoreContext } from '../../core_context';
 import { PluginType } from '../types';
 
 const KIBANA_ROOT = process.cwd();
@@ -128,6 +129,7 @@ const manifestPath = (...pluginPath: string[]) =>
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let instanceInfo: InstanceInfo;
+  let nodeInfo: NodeInfo;
   let env: Env;
   let configService: ConfigService;
   let pluginConfig: PluginsConfigType;
@@ -140,6 +142,13 @@ describe('plugins discovery system', () => {
 
     instanceInfo = {
       uuid: 'instance-uuid',
+    };
+
+    nodeInfo = {
+      roles: {
+        backgroundTasks: true,
+        ui: true,
+      },
     };
 
     env = Env.createDefault(
@@ -180,7 +189,12 @@ describe('plugins discovery system', () => {
   });
 
   it('discovers plugins in the search locations', async () => {
-    const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -202,11 +216,12 @@ describe('plugins discovery system', () => {
   });
 
   it('return errors when the manifest is invalid or incompatible', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
-      instanceInfo
-    );
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -268,11 +283,12 @@ describe('plugins discovery system', () => {
   });
 
   it('return errors when the plugin search path is not accessible', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
-      instanceInfo
-    );
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -307,11 +323,12 @@ describe('plugins discovery system', () => {
   });
 
   it('return an error when the manifest file is not accessible', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
-      instanceInfo
-    );
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -342,11 +359,12 @@ describe('plugins discovery system', () => {
   });
 
   it('discovers plugins in nested directories', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
-      instanceInfo
-    );
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -386,7 +404,12 @@ describe('plugins discovery system', () => {
   });
 
   it('does not discover plugins nested inside another plugin', async () => {
-    const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -405,7 +428,12 @@ describe('plugins discovery system', () => {
   });
 
   it('stops scanning when reaching `maxDepth`', async () => {
-    const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo,
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -430,7 +458,12 @@ describe('plugins discovery system', () => {
   });
 
   it('works with symlinks', async () => {
-    const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo,
+      nodeInfo,
+    });
 
     const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
 
@@ -465,16 +498,17 @@ describe('plugins discovery system', () => {
       })
     );
 
-    discover(
-      new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
-      {
+    discover({
+      config: new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
+      coreContext: {
         coreId: Symbol(),
         configService,
         env,
         logger,
       },
-      instanceInfo
-    );
+      instanceInfo,
+      nodeInfo,
+    });
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([
       [
@@ -493,16 +527,17 @@ describe('plugins discovery system', () => {
       })
     );
 
-    discover(
-      new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
-      {
+    discover({
+      config: new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
+      coreContext: {
         coreId: Symbol(),
         configService,
         env,
         logger,
       },
-      instanceInfo
-    );
+      instanceInfo,
+      nodeInfo,
+    });
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
@@ -530,7 +565,12 @@ describe('plugins discovery system', () => {
         ])
       );
 
-      let { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+      let { plugin$ } = discover({
+        config: new PluginsConfig(pluginConfig, env),
+        coreContext,
+        instanceInfo,
+        nodeInfo,
+      });
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(1);
       let plugins = await firstValueFrom(plugin$.pipe(toArray()));
@@ -549,7 +589,12 @@ describe('plugins discovery system', () => {
         ])
       );
 
-      plugin$ = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo).plugin$;
+      plugin$ = discover({
+        config: new PluginsConfig(pluginConfig, env),
+        coreContext,
+        instanceInfo,
+        nodeInfo,
+      }).plugin$;
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(2);
       plugins = await firstValueFrom(plugin$.pipe(toArray()));

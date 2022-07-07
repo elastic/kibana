@@ -13,11 +13,17 @@ import type {
   FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
-  ExtendedYConfig,
+  YConfig,
+  MetricState,
 } from '@kbn/lens-plugin/public';
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  FieldFormatParams as BaseFieldFormatParams,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
+import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -48,12 +54,21 @@ export interface MetricOption {
   field?: string;
   label: string;
   description?: string;
-  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnType?:
+    | 'range'
+    | 'operation'
+    | 'FILTER_RECORDS'
+    | 'TERMS_COLUMN'
+    | 'unique_count'
+    | typeof FORMULA_COLUMN;
   columnFilters?: ColumnFilter[];
   columnFilter?: ColumnFilter;
   paramFilters?: ParamFilter[];
   timeScale?: string;
   showPercentileAnnotations?: boolean;
+  formula?: string;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette'>;
+  palette?: PaletteOutput;
 }
 
 export interface SeriesConfig {
@@ -80,7 +95,7 @@ export interface SeriesConfig {
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
-  yConfig?: ExtendedYConfig[];
+  yConfig?: YConfig[];
   query?: { query: string; language: 'kuery' };
 }
 
@@ -119,13 +134,16 @@ export interface ConfigProps {
   series?: SeriesUrl;
 }
 
+interface FormatType extends SerializedFieldFormat<FieldFormatParams> {
+  id: 'duration' | 'number' | 'bytes' | 'percent';
+}
+
 export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
-export interface FieldFormatParams {
+export interface FieldFormatParams extends BaseFieldFormatParams {
   inputFormat?: InputFormat;
   outputFormat?: OutputFormat;
   outputPrecision?: number;
@@ -135,10 +153,7 @@ export interface FieldFormatParams {
 
 export interface FieldFormat {
   field: string;
-  format: {
-    id: FormatType;
-    params: FieldFormatParams;
-  };
+  format: FormatType;
 }
 
 export interface BuilderItem {

@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../../../..';
+import Path from 'path';
+import * as Either from 'fp-ts/lib/Either';
+import * as Option from 'fp-ts/lib/Option';
+import { errors } from '@elastic/elasticsearch';
+import type { TaskEither } from 'fp-ts/lib/TaskEither';
+import type { ElasticsearchClient } from '../../../..';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { SavedObjectsRawDoc } from '../../../serialization';
+import type { SavedObjectsRawDoc } from '../../../serialization';
 import {
   bulkOverwriteTransformedDocuments,
   cloneIndex,
   closePit,
   createIndex,
   openPit,
-  OpenPitResponse,
+  type OpenPitResponse,
   reindex,
   readWithPit,
-  ReadWithPit,
+  type ReadWithPit,
   searchForOutdatedDocuments,
   SearchResponse,
   setWriteBlock,
   updateAliases,
   waitForReindexTask,
-  ReindexResponse,
+  type ReindexResponse,
   waitForPickupUpdatedMappingsTask,
   pickupUpdatedMappings,
-  UpdateByQueryResponse,
+  type UpdateByQueryResponse,
   updateAndPickupMappings,
-  UpdateAndPickupMappingsResponse,
+  type UpdateAndPickupMappingsResponse,
   verifyReindex,
   removeWriteBlock,
   transformDocs,
   waitForIndexStatusYellow,
   initAction,
 } from '..';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
-import { errors } from '@elastic/elasticsearch';
-import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../core';
-import { TaskEither } from 'fp-ts/lib/TaskEither';
-import Path from 'path';
+import type { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../core';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -610,7 +610,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -637,14 +637,14 @@ describe('migration actions', () => {
         ]
       `);
     });
-    it('resolves right and excludes all documents not matching the unusedTypesQuery', async () => {
+    it('resolves right and excludes all documents not matching the excludeOnUpgradeQuery', async () => {
       const res = (await reindex({
         client,
         sourceIndex: 'existing_index_with_docs',
         targetIndex: 'reindex_target_excluded_docs',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: {
+        excludeOnUpgradeQuery: {
           bool: {
             must_not: ['f_agent_event', 'another_unused_type'].map((type) => ({
               term: { type },
@@ -683,7 +683,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_2',
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -718,7 +718,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_3',
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -735,7 +735,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_3',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -794,7 +794,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_4',
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -850,7 +850,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_5',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -889,7 +889,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_6',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -910,7 +910,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: {
+        excludeOnUpgradeQuery: {
           match_all: {},
         },
       })()) as Either.Right<ReindexResponse>;
@@ -933,7 +933,7 @@ describe('migration actions', () => {
         targetIndex: 'existing_index_with_write_block',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -955,7 +955,7 @@ describe('migration actions', () => {
         targetIndex: 'existing_index_with_write_block',
         reindexScript: Option.none,
         requireAlias: true,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -983,7 +983,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '0s' });
@@ -1010,7 +1010,7 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_7',
         reindexScript: Option.none,
         requireAlias: false,
-        unusedTypesQuery: { match_all: {} },
+        excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
       await waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' })();
 

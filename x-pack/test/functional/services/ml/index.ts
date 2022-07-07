@@ -36,6 +36,7 @@ import { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
 import { MachineLearningJobWizardCategorizationProvider } from './job_wizard_categorization';
 import { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 import { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
+import { MachineLearningLensVisualizationsProvider } from './lens_visualizations';
 import { MachineLearningNavigationProvider } from './navigation';
 import { MachineLearningOverviewPageProvider } from './overview_page';
 import { MachineLearningSecurityCommonProvider } from './security_common';
@@ -109,6 +110,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
+  const lensVisualizations = MachineLearningLensVisualizationsProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
@@ -117,11 +119,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
-  const stackManagementJobs = MachineLearningStackManagementJobsProvider(
-    context,
-    jobTable,
-    dataFrameAnalyticsTable
-  );
+  const stackManagementJobs = MachineLearningStackManagementJobsProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context, api);
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
@@ -165,6 +163,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,
+    lensVisualizations,
     navigation,
     overviewPage,
     securityCommon,

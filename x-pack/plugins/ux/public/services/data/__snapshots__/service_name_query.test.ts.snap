@@ -29,6 +29,13 @@ Object {
             },
           },
           Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
             "exists": Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },

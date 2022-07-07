@@ -18,6 +18,7 @@ import { NavTab, SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useGlobalQueryString } from '../../../utils/global_query_string';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -25,11 +26,13 @@ export const usePrimaryNavigationItems = ({
   ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
   const { navigateTo, getAppUrl } = useNavigation();
+  const globalQueryString = useGlobalQueryString();
+
   const getSideNav = useCallback(
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, urlStateProps);
+      const urlSearch = getSearch(tab, urlStateProps, globalQueryString);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
@@ -49,7 +52,7 @@ export const usePrimaryNavigationItems = ({
         onClick: handleClick,
       };
     },
-    [getAppUrl, navigateTo, selectedTabId, urlStateProps]
+    [getAppUrl, navigateTo, selectedTabId, urlStateProps, globalQueryString]
   );
 
   const navItemsToDisplay = usePrimaryNavigationItemsToDisplay(navTabs);
@@ -65,7 +68,7 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
-  const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
+  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   const uiCapabilities = useKibana().services.application.capabilities;
@@ -76,10 +79,16 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               id: 'main',
               name: '',
+              items: [navTabs[SecurityPageName.landing]],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.dashboards],
               items: [
-                navTabs[SecurityPageName.landing],
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
+                ...(navTabs[SecurityPageName.kubernetes] != null
+                  ? [navTabs[SecurityPageName.kubernetes]]
+                  : []),
               ],
             },
             {
@@ -97,9 +106,6 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.network],
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
-                  : []),
-                ...(navTabs[SecurityPageName.kubernetes] != null
-                  ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
               ],
             },

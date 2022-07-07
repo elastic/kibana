@@ -23,4 +23,4 @@ export const FALLBACK_VERSIONS = [
   '7.17.0',
 ];
 
-export const MAINTAINANCE_VALUES = [1, 2, 4, 8, 12, 24, 48];
+export const MAINTAINANCE_VALUES = [0, 1, 2, 4, 8, 12, 24, 48];

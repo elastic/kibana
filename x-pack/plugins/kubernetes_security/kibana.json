@@ -9,9 +9,12 @@
   "requiredPlugins": [
     "data",
     "timelines",
-    "ruleRegistry"
+    "ruleRegistry",
+    "sessionView"
   ],
-  "requiredBundles": [],
+  "requiredBundles": [
+    "kibanaReact"
+  ],
   "server": true,
   "ui": true
 }

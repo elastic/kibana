@@ -82,15 +82,18 @@ export const formatHeartbeatRequest = ({
   customHeartbeatId?: string;
   runOnce?: boolean;
   testRunId?: string;
-}): SyntheticsConfig => ({
-  ...monitor,
-  id: customHeartbeatId || monitorId,
-  fields: {
-    config_id: monitorId,
-    'monitor.project.name': (monitor as BrowserFields)[ConfigKey.PROJECT_ID],
-    'monitor.project.id': (monitor as BrowserFields)[ConfigKey.PROJECT_ID],
-    run_once: runOnce,
-    test_run_id: testRunId,
-  },
-  fields_under_root: true,
-});
+}): SyntheticsConfig => {
+  const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
+  return {
+    ...monitor,
+    id: customHeartbeatId || monitorId,
+    fields: {
+      config_id: monitorId,
+      'monitor.project.name': projectId || undefined,
+      'monitor.project.id': projectId || undefined,
+      run_once: runOnce,
+      test_run_id: testRunId,
+    },
+    fields_under_root: true,
+  };
+};

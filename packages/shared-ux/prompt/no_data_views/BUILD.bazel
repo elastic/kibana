@@ -10,9 +10,11 @@ SOURCE_FILES = glob(
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.mdx",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -41,7 +43,6 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//enzyme",
   "@npm//react",
   "//packages/kbn-i18n-react",
@@ -63,7 +64,6 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
@@ -86,6 +86,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
@@ -103,6 +107,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

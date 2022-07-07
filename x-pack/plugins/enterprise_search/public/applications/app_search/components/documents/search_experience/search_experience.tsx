@@ -10,9 +10,8 @@ import React, { useState } from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-// @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
-// @ts-expect-error types are not available for this package yet
+import type { SortDirection } from '@elastic/search-ui';
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 import { i18n } from '@kbn/i18n';
 
@@ -80,23 +79,23 @@ export const SearchExperience: React.FC = () => {
       sortFields: [],
     }
   );
-  const sortOptions =
-    engine.type === 'elasticsearch' ? RELEVANCE_SORT_OPTIONS : DEFAULT_SORT_OPTIONS;
+  const useRelevance = engine.type === 'elasticsearch' || engine.type === 'meta';
+  const sortOptions = useRelevance ? RELEVANCE_SORT_OPTIONS : DEFAULT_SORT_OPTIONS;
 
   const sortingOptions = buildSortOptions(fields, sortOptions);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
     endpointBase,
-    engineName: engine.name,
+    engineName: engine.name as string,
     additionalHeaders: {
       'kbn-xsrf': true,
     },
-  });
+  } as ConstructorParameters<typeof AppSearchAPIConnector>[0]);
 
   const initialState = {
-    sortField: engine.type === 'elasticsearch' ? '_score' : 'id',
-    sortDirection: 'desc',
+    sortField: sortOptions[0].value,
+    sortDirection: 'desc' as SortDirection,
   };
 
   const searchProviderConfig = buildSearchUIConfig(

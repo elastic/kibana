@@ -290,6 +290,21 @@ export const buildOverviewHostQuery = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [
+        'host.os.*',
+        'event.dataset',
+        'event.module',
+        'event.category',
+        'agent.type',
+        'winlog.channel',
+        'endgame.event_type_full',
+        'network.protocol',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   } as const;
 

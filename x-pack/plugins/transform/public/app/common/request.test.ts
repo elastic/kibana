@@ -29,7 +29,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
-import { RuntimeField } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 

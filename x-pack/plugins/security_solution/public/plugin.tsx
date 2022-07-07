@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { pluck } from 'rxjs/operators';
+import { combineLatestWith, pluck } from 'rxjs/operators';
 import { AnyAction, Reducer } from 'redux';
 import {
   AppMountParameters,
@@ -49,7 +49,7 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import { AppLinkItems, subscribeAppLinks, updateAppLinks } from './common/links';
+import { LinksPermissions, updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -81,7 +81,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
-  private licensingSubscription: Subscription | null = null;
 
   /**
    * Lazily instantiated subPlugins.
@@ -124,10 +123,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
+      const { apm } = await import('@elastic/apm-rum');
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        apm,
         storage: this.storage,
         security: plugins.security,
       };
@@ -139,7 +140,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      // Initializing app as visible to make sure it appears on the Kibana home page, it is hidden when deepLinks update
+      navLinkStatus: AppNavLinkStatus.visible,
       searchable: true,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
@@ -174,12 +176,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
-        const subscription = subscribeAppLinks((links: AppLinkItems) => {
-          // It has to be called once after deep links are initialized
-          if (links.length > 0) {
-            manageOldSiemRoutes(coreStart);
-            subscription.unsubscribe();
-          }
+        const subscription = this.appUpdater$.subscribe(() => {
+          // wait for app initialization to set the links
+          manageOldSiemRoutes(coreStart);
+          subscription.unsubscribe();
         });
 
         return () => true;
@@ -203,6 +203,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+    licenseService.start(plugins.licensing.license$);
+
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -239,72 +241,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    licenseService.start(plugins.licensing.license$);
-    const licensing = licenseService.getLicenseInformation$();
-
-    const newNavEnabled = core.uiSettings.get(ENABLE_GROUPED_NAVIGATION, false);
-
-    /**
-     * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
-     */
-
-    if (newNavEnabled) {
-      registerDeepLinksUpdater(this.appUpdater$);
-    }
-
     // Not using await to prevent blocking start execution
-    this.lazyApplicationLinks().then(({ getAppLinks }) => {
-      getAppLinks(core, plugins).then((appLinks) => {
-        if (licensing !== null) {
-          this.licensingSubscription = licensing.subscribe((currentLicense) => {
-            if (currentLicense.type !== undefined) {
-              updateAppLinks(appLinks, {
-                experimentalFeatures: this.experimentalFeatures,
-                license: currentLicense,
-                capabilities: core.application.capabilities,
-              });
-
-              if (!newNavEnabled) {
-                // TODO: remove block when nav flag no longer needed
-                this.appUpdater$.next(() => ({
-                  navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-                  deepLinks: getDeepLinks(
-                    this.experimentalFeatures,
-                    currentLicense.type,
-                    core.application.capabilities
-                  ),
-                }));
-              }
-            }
-          });
-        } else {
-          updateAppLinks(appLinks, {
-            experimentalFeatures: this.experimentalFeatures,
-            capabilities: core.application.capabilities,
-          });
-
-          if (!newNavEnabled) {
-            // TODO: remove block when nav flag no longer needed
-            this.appUpdater$.next(() => ({
-              navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-              deepLinks: getDeepLinks(
-                this.experimentalFeatures,
-                undefined,
-                core.application.capabilities
-              ),
-            }));
-          }
-        }
-      });
-    });
+    this.registerAppLinks(core, plugins);
 
     return {};
   }
 
   public stop() {
-    if (this.licensingSubscription !== null) {
-      this.licensingSubscription.unsubscribe();
-    }
+    licenseService.stop();
     return {};
   }
 
@@ -379,6 +323,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
+        cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
       };
     }
     return this._subPlugins;
@@ -406,6 +351,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
+      cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
     };
   }
   /**
@@ -513,5 +459,53 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  /**
+   * Register deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes.
+   */
+  async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
+    const { links, getFilteredLinks } = await this.lazyApplicationLinks();
+
+    const { license$ } = plugins.licensing;
+    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, false);
+
+    let appLinksSubscription: Subscription | null = null;
+    license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
+      const linksPermissions: LinksPermissions = {
+        experimentalFeatures: this.experimentalFeatures,
+        capabilities: core.application.capabilities,
+      };
+
+      if (license.type !== undefined) {
+        linksPermissions.license = license;
+      }
+
+      if (appLinksSubscription) {
+        appLinksSubscription.unsubscribe();
+        appLinksSubscription = null;
+      }
+
+      if (newNavEnabled) {
+        appLinksSubscription = registerDeepLinksUpdater(this.appUpdater$);
+      } else {
+        // old nav links update
+        this.appUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden,
+          deepLinks: getDeepLinks(
+            this.experimentalFeatures,
+            license.type,
+            core.application.capabilities
+          ),
+        }));
+      }
+
+      // set initial links to not block rendering
+      updateAppLinks(links, linksPermissions);
+
+      // set filtered links asynchronously
+      const filteredLinks = await getFilteredLinks(core, plugins);
+      updateAppLinks(filteredLinks, linksPermissions);
+    });
   }
 }

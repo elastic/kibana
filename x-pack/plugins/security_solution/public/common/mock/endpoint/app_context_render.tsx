@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactPortal } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
@@ -20,6 +20,7 @@ import {
 } from '@testing-library/react-hooks';
 import { ReactHooksRenderer, WrapperComponent } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from 'react-query/types/react/types';
+import ReactDOM from 'react-dom';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -35,6 +36,41 @@ import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/mocks';
+
+const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
+
+/**
+ * Resets the mock that is applied to `createPortal()` by default.
+ * **IMPORTANT** : Make sure you call this function from a `before*()` or `after*()` callback
+ *
+ * @example
+ *
+ * // Turn off for test using Enzyme
+ * beforeAll(() => resetReactDomCreatePortalMock());
+ */
+export const resetReactDomCreatePortalMock = () => {
+  ReactDOM.createPortal = REAL_REACT_DOM_CREATE_PORTAL;
+};
+
+beforeAll(() => {
+  // Mocks the React DOM module to ensure compatibility with react-testing-library and avoid
+  // error like:
+  // ```
+  // TypeError: parentInstance.children.indexOf is not a function
+  //       at appendChild (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7183:39)
+  // ```
+  // @see https://github.com/facebook/react/issues/11565
+  ReactDOM.createPortal = jest.fn((...args) => {
+    REAL_REACT_DOM_CREATE_PORTAL(...args);
+    // Needed for react-Test-library. See:
+    // https://github.com/facebook/react/issues/11565
+    return args[0] as ReactPortal;
+  });
+});
+
+afterAll(() => {
+  resetReactDomCreatePortalMock();
+});
 
 export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 

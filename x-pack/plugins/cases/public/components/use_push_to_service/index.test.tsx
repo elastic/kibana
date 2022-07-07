@@ -11,18 +11,24 @@ import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
-import { TestProviders } from '../../common/mock';
+import { readCasesPermissions, TestProviders } from '../../common/mock';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import * as i18n from './translations';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
 
-jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_action_license', () => {
+  return {
+    useGetActionLicense: jest.fn(),
+  };
+});
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
 jest.mock('../../common/navigation/hooks');
+
+const useFetchActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('usePushToService', () => {
   const caseId = '12345';
@@ -64,15 +70,14 @@ describe('usePushToService', () => {
     hasDataToPush: true,
     onEditClick,
     isValidConnector: true,
-    userCanCrud: true,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     (usePostPushToService as jest.Mock).mockImplementation(() => mockPostPush);
-    (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+    useFetchActionLicenseMock.mockImplementation(() => ({
       isLoading: false,
-      actionLicense,
+      data: actionLicense,
     }));
   });
 
@@ -100,9 +105,9 @@ describe('usePushToService', () => {
   });
 
   it('Displays message when user does not have premium license', async () => {
-    (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+    useFetchActionLicenseMock.mockImplementation(() => ({
       isLoading: false,
-      actionLicense: {
+      data: {
         ...actionLicense,
         enabledInLicense: false,
       },
@@ -122,9 +127,9 @@ describe('usePushToService', () => {
   });
 
   it('Displays message when user does not have case enabled in config', async () => {
-    (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+    useFetchActionLicenseMock.mockImplementation(() => ({
       isLoading: false,
-      actionLicense: {
+      data: {
         ...actionLicense,
         enabledInConfig: false,
       },
@@ -275,21 +280,21 @@ describe('usePushToService', () => {
   });
 
   describe('user does not have write permissions', () => {
-    const noWriteProps = { ...defaultArgs, userCanCrud: false };
-
     it('does not display a message when user does not have a premium license', async () => {
-      (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+      useFetchActionLicenseMock.mockImplementation(() => ({
         isLoading: false,
-        actionLicense: {
+        data: {
           ...actionLicense,
           enabledInLicense: false,
         },
       }));
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(noWriteProps),
+          () => usePushToService(defaultArgs),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -298,18 +303,20 @@ describe('usePushToService', () => {
     });
 
     it('does not display a message when user does not have case enabled in config', async () => {
-      (useGetActionLicense as jest.Mock).mockImplementation(() => ({
+      useFetchActionLicenseMock.mockImplementation(() => ({
         isLoading: false,
-        actionLicense: {
+        data: {
           ...actionLicense,
           enabledInConfig: false,
         },
       }));
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(noWriteProps),
+          () => usePushToService(defaultArgs),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -322,7 +329,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connectors: [],
               connector: {
                 id: 'none',
@@ -332,7 +339,9 @@ describe('usePushToService', () => {
               },
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -345,7 +354,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connector: {
                 id: 'none',
                 name: 'none',
@@ -354,7 +363,9 @@ describe('usePushToService', () => {
               },
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -367,7 +378,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connector: {
                 id: 'not-exist',
                 name: 'not-exist',
@@ -377,7 +388,9 @@ describe('usePushToService', () => {
               isValidConnector: false,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -390,7 +403,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connectors: [],
               connector: {
                 id: 'not-exist',
@@ -401,7 +414,9 @@ describe('usePushToService', () => {
               isValidConnector: false,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -414,11 +429,13 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               caseStatus: CaseStatuses.closed,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();

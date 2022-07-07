@@ -8,7 +8,7 @@
 import React, { createContext, useContext } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { useHasData } from '../components/overview/empty_state/use_has_data';
+import { useHasData } from '../components/monitors_page/overview/empty_state/use_has_data';
 
 export const SyntheticsDataViewContext = createContext({} as DataView);
 

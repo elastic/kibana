@@ -38,9 +38,9 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={dataViewsList?.map(({ title, id }) => ({
+      options={dataViewsList?.map(({ title, id, name }) => ({
         key: id,
-        label: title,
+        label: name ? name : title,
         value: id,
         checked: id === currentDataViewId ? 'on' : undefined,
       }))}

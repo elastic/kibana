@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
+import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
+import { ConnectorServices } from '../types';
 
-export const getRulesListLazy = () => {
-  return <RulesList />;
+export const getRulesListLazy = (props: { connectorServices: ConnectorServices }) => {
+  return (
+    <ConnectorProvider value={{ services: props.connectorServices }}>
+      <RulesList />
+    </ConnectorProvider>
+  );
 };

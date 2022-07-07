@@ -8,6 +8,7 @@
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Metric } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
+import { getSeriesAgg } from './get_series_agg';
 import {
   getPercentilesSeries,
   getPercentileRankSeries,
@@ -23,9 +24,10 @@ import {
 } from './metrics_helpers';
 
 export const getSeries = (
-  metrics: Metric[],
+  initialMetrics: Metric[],
   totalSeriesNum: number
-): VisualizeEditorLayersContext['metrics'] | null => {
+): { metrics: VisualizeEditorLayersContext['metrics']; seriesAgg?: string } | null => {
+  const { metrics, seriesAgg } = getSeriesAgg(initialMetrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
   const fieldName = metrics[metricIdx].field;
@@ -231,5 +233,5 @@ export const getSeries = (
       ];
     }
   }
-  return metricsArray;
+  return { metrics: metricsArray, seriesAgg };
 };

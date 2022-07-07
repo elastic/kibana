@@ -16,7 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 import { I18nService } from './i18n_service';
 
 import { configServiceMock } from '@kbn/config-mocks';
-import { mockCoreContext } from '../core_context.mock';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '../mocks';
 
 const getConfigService = (locale = 'en') => {

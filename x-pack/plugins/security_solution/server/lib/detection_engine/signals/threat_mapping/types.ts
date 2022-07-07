@@ -67,6 +67,7 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface CreateThreatSignalOptions {
@@ -93,6 +94,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface CreateEventSignalOptions {
@@ -127,6 +129,7 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 type EntryKey = 'field' | 'value';
@@ -190,6 +193,8 @@ export interface GetThreatListOptions {
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  listClient: ListClient;
 }
 
 export interface ThreatListCountOptions {
@@ -242,6 +247,7 @@ export interface BuildThreatEnrichmentOptions {
   threatQuery: ThreatQuery;
   pitId: string;
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  listClient: ListClient;
 }
 
 export interface EventsOptions {
@@ -257,6 +263,7 @@ export interface EventsOptions {
   filters: unknown[];
   timestampOverride?: string;
   tuple: RuleRangeTuple;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface EventDoc {
@@ -287,3 +294,8 @@ export type GetDocumentListInterface = (params: {
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
+
+export interface GetSortForThreatList {
+  index: string[];
+  listItemIndex: string;
+}

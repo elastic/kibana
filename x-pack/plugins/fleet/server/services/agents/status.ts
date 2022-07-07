@@ -19,7 +19,7 @@ import { FleetUnauthorizedError } from '../../errors';
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
-
+const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
@@ -97,7 +97,8 @@ export async function getAgentStatusForAgentPolicy(
 }
 export async function getIncomingDataByAgentsId(
   esClient: ElasticsearchClient,
-  agentsIds: string[]
+  agentsIds: string[],
+  returnDataPreview: boolean = false
 ) {
   try {
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
@@ -117,9 +118,9 @@ export async function getIncomingDataByAgentsId(
     const searchResult = await esClient.search({
       index: DATA_STREAM_INDEX_PATTERN,
       allow_partial_search_results: true,
-      _source: false,
+      _source: returnDataPreview,
       timeout: '5s',
-      size: 0,
+      size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
       body: {
         query: {
           bool: {
@@ -152,9 +153,12 @@ export async function getIncomingDataByAgentsId(
     });
 
     if (!searchResult.aggregations?.agent_ids) {
-      return agentsIds.map((id) => {
-        return { [id]: { data: false } };
-      });
+      return {
+        items: agentsIds.map((id) => {
+          return { items: { [id]: { data: false } } };
+        }),
+        data: [],
+      };
     }
 
     // @ts-expect-error aggregation type is not specified
@@ -162,9 +166,13 @@ export async function getIncomingDataByAgentsId(
       (bucket: any) => bucket.key as string
     );
 
-    return agentsIds.map((id) =>
+    const dataPreview = searchResult.hits?.hits || [];
+
+    const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
     );
+
+    return { items, dataPreview };
   } catch (e) {
     throw new Error(e);
   }

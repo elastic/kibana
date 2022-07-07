@@ -11,9 +11,9 @@ import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { EmptyStateLoading } from '../../overview/empty_state/empty_state_loading';
-import { EmptyStateError } from '../../overview/empty_state/empty_state_error';
-import { useHasData } from '../../overview/empty_state/use_has_data';
+import { EmptyStateLoading } from '../../monitors_page/overview/empty_state/empty_state_loading';
+import { EmptyStateError } from '../../monitors_page/overview/empty_state/empty_state_error';
+import { useHasData } from '../../monitors_page/overview/empty_state/use_has_data';
 import { useBreakpoints } from '../../../hooks';
 
 interface Props {
@@ -69,6 +69,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
         isMobile={isMobile}
         pageHeader={pageHeader}
         data-test-subj={'synthetics-page-template'}
+        isPageDataLoaded={Boolean(loading === false && data)}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}

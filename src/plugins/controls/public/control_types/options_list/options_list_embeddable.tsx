@@ -27,6 +27,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { OptionsListEmbeddableInput, OptionsListField, OPTIONS_LIST_CONTROL } from './types';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
@@ -176,27 +177,28 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: OptionsListField;
+    dataView?: DataView;
+    field?: OptionsListField;
   }> => {
     const { dataViewId, fieldName, parentFieldName, childFieldName } = this.getInput();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId));
+      } catch (e) {
+        this.onFatalError(e);
       }
-      this.updateOutput({ dataViews: [this.dataView] });
+      this.updateOutput({ dataViews: this.dataView && [this.dataView] });
     }
 
-    if (!this.field || this.field.name !== fieldName) {
-      const originalField = this.dataView.getFieldByName(fieldName);
+    if (this.dataView && (!this.field || this.field.name !== fieldName)) {
+      const originalField = this.dataView?.getFieldByName(fieldName);
       const childField =
-        (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
+        (childFieldName && this.dataView?.getFieldByName(childFieldName)) || undefined;
       const parentField =
-        (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
+        (parentFieldName && this.dataView?.getFieldByName(parentFieldName)) || undefined;
 
       const textFieldName = childField?.esTypes?.includes('text')
         ? childField.name
@@ -225,6 +227,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private runOptionsListQuery = async () => {
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
     this.updateComponentState({ loading: true });
     this.updateOutput({ loading: true, dataViews: [dataView] });
     const { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout } =
@@ -282,6 +286,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
 
     let newFilter: Filter;
     if (validSelections.length === 1) {
@@ -310,12 +315,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
     this.node = node;
     ReactDOM.render(
-      <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
-        <OptionsListComponent
-          componentStateSubject={this.componentStateSubject$}
-          typeaheadSubject={this.typeaheadSubject}
-        />
-      </OptionsListReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
+          <OptionsListComponent
+            componentStateSubject={this.componentStateSubject$}
+            typeaheadSubject={this.typeaheadSubject}
+          />
+        </OptionsListReduxWrapper>
+      </KibanaThemeProvider>,
       node
     );
   };

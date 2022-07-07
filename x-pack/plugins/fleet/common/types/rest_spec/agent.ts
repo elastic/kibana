@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
+
 import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -130,6 +132,14 @@ export type PostBulkAgentReassignResponse = Record<
   }
 >;
 
+export type PostBulkUpdateAgentTagsResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
+
 export interface DeleteAgentRequest {
   params: {
     agentId: string;
@@ -141,7 +151,16 @@ export interface UpdateAgentRequest {
     agentId: string;
   };
   body: {
-    user_provided_metadata: Record<string, any>;
+    user_provided_metadata?: Record<string, any>;
+    tags?: string[];
+  };
+}
+
+export interface PostBulkUpdateAgentTagsRequest {
+  body: {
+    agents: string[] | string;
+    tagsToAdd?: string[];
+    tagsToRemove?: string[];
   };
 }
 
@@ -167,6 +186,7 @@ export interface GetAgentStatusResponse {
 export interface GetAgentIncomingDataRequest {
   query: {
     agentsIds: string[];
+    previewData?: boolean;
   };
 }
 
@@ -175,6 +195,7 @@ export interface IncomingDataList {
 }
 export interface GetAgentIncomingDataResponse {
   items: IncomingDataList[];
+  dataPreview: SearchHit[];
 }
 
 export interface GetCurrentUpgradesResponse {

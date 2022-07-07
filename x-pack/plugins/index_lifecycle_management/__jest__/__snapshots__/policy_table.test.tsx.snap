@@ -38,11 +38,11 @@ Array [
 
 exports[`policy table shows empty state when there are no policies 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
-    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
   >
     <div
       class="euiEmptyPrompt__main"
@@ -62,26 +62,22 @@ exports[`policy table shows empty state when there are no policies 1`] = `
           class="euiEmptyPrompt__contentInner"
         >
           <h1
-            class="euiTitle euiTitle--medium"
+            class="euiTitle emotion-euiTitle-m"
           >
             Create your first index lifecycle policy
           </h1>
-          <span
-            class="euiTextColor euiTextColor--subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
-            />
-            <div
-              class="euiText euiText--medium"
-            >
-              <p>
-                 An index lifecycle policy helps you manage your indices as they age.
-              </p>
-            </div>
-          </span>
           <div
-            class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p>
+               An index lifecycle policy helps you manage your indices as they age.
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
             class="euiButton euiButton--primary euiButton--fill"

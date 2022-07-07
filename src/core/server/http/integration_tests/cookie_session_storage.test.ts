@@ -14,13 +14,13 @@ import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
-import { CoreContext } from '../../core_context';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { httpServerMock } from '../http_server.mocks';
 
 import { createCookieSessionStorageFactory } from '../cookie_session_storage';

@@ -21,6 +21,7 @@ import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import { getTraceItems } from './get_trace_items';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -42,9 +43,19 @@ const tracesRoute = createApmServerRoute({
       agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
     const { environment, kuery, start, end, probability } = params.query;
+
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
@@ -55,11 +66,11 @@ const tracesRoute = createApmServerRoute({
     return await getTopTracesPrimaryStats({
       environment,
       kuery,
-      probability,
       setup,
       searchAggregatedTransactions,
       start,
       end,
+      randomSampler,
     });
   },
 });

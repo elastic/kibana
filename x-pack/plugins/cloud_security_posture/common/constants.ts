@@ -23,6 +23,8 @@ export const LATEST_FINDINGS_INDEX_DEFAULT_NS = 'logs-' + LATEST_FINDINGS_INDEX_
 export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
 
+export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
+
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
 
@@ -34,4 +36,5 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingsGroupBy: true,
 } as const;
 
-export const cspRuleAssetSavedObjectType = 'csp_rule';
+export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp_rule';
+export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';

@@ -26,10 +26,8 @@ import { useUrlStateHooks } from './use_url_state';
 import { waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { updateAppLinks } from '../../links';
-import { getAppLinks } from '../../links/app_links';
-import { StartPlugins } from '../../../types';
+import { links } from '../../links/app_links';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { coreMock } from '@kbn/core/public/mocks';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -89,11 +87,9 @@ jest.mock('../navigation/helpers', () => ({
 }));
 
 describe('UrlStateContainer', () => {
-  beforeAll(async () => {
+  beforeAll(() => {
     mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
-
-    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
-    updateAppLinks(appLinks, {
+    updateAppLinks(links, {
       experimentalFeatures: allowedExperimentalValues,
       capabilities: {
         navLinks: {},
@@ -129,6 +125,7 @@ describe('UrlStateContainer', () => {
 
             (useLocation as jest.Mock).mockReturnValue({
               pathname: mockProps.pathName,
+              search: mockProps.search,
             });
 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -163,6 +160,7 @@ describe('UrlStateContainer', () => {
 
             (useLocation as jest.Mock).mockReturnValue({
               pathname: mockProps.pathName,
+              search: mockProps.search,
             });
 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -193,6 +191,7 @@ describe('UrlStateContainer', () => {
 
             (useLocation as jest.Mock).mockReturnValue({
               pathname: mockProps.pathName,
+              search: mockProps.search,
             });
 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -222,6 +221,7 @@ describe('UrlStateContainer', () => {
 
             (useLocation as jest.Mock).mockReturnValue({
               pathname: mockProps.pathName,
+              search: mockProps.search,
             });
 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -231,7 +231,7 @@ describe('UrlStateContainer', () => {
             ).toEqual({
               hash: '',
               pathname: examplePath,
-              search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+              search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
               state: '',
             });
           }
@@ -250,6 +250,7 @@ describe('UrlStateContainer', () => {
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: 'out of sync path',
+        search: mockProps.search,
       });
 
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -269,6 +270,7 @@ describe('UrlStateContainer', () => {
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -288,6 +290,7 @@ describe('UrlStateContainer', () => {
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -313,6 +316,7 @@ describe('UrlStateContainer', () => {
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -338,6 +342,7 @@ describe('UrlStateContainer', () => {
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -360,6 +365,7 @@ describe('UrlStateContainer', () => {
 
         (useLocation as jest.Mock).mockReturnValue({
           pathname: mockProps.pathName,
+          search: mockProps.search,
         });
 
         const wrapper = mount(

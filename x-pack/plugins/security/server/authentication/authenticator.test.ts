@@ -20,13 +20,14 @@ import {
 } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { SecurityLicenseFeatures } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
-import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { userProfileMock } from '../../common/model/user_profile.mock';
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
@@ -34,6 +35,8 @@ import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import type { SessionValue } from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
+import type { UserProfileGrant } from '../user_profile';
+import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 import { AuthenticationResult } from './authentication_result';
 import type { AuthenticatorOptions } from './authenticator';
 import { Authenticator } from './authenticator';
@@ -68,6 +71,8 @@ function getMockOptions({
     ),
     session: sessionMock.create(),
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
+    userProfileService: userProfileServiceMock.createStart(),
+    isElasticCloudDeployment: jest.fn().mockReturnValue(false),
   };
 }
 
@@ -430,6 +435,39 @@ describe('Authenticator', () => {
         state: { authorization },
       });
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
+      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
+    });
+
+    it('activates profile whenever authentication provider returns user profile grant', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+      const userProfileGrant: UserProfileGrant = {
+        type: 'password',
+        username: 'some-user',
+        password: 'some-password',
+      };
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+      );
+
+      await expect(
+        authenticator.login(request, { provider: { type: 'basic' }, value: {} })
+      ).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+      );
+
+      expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+        username: user.username,
+        userProfileId: 'some-profile-uid',
+        provider: mockSessVal.provider,
+        state: { authorization },
+      });
+      expectAuditEvents({ action: 'user_login', outcome: 'success' });
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
     it('returns `notHandled` if login attempt is targeted to not configured provider.', async () => {
@@ -1252,6 +1290,7 @@ describe('Authenticator', () => {
         state: { authorization },
       });
       expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
 
     it('creates session whenever authentication provider returns state for non-system API requests', async () => {
@@ -1276,6 +1315,39 @@ describe('Authenticator', () => {
         state: { authorization },
       });
       expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
+    });
+
+    it('activates user profile whenever authentication provider returns user profile grant for non-system API requests', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+      const userProfileGrant: UserProfileGrant = {
+        type: 'password',
+        username: 'some-user',
+        password: 'some-password',
+      };
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+      );
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+      );
+
+      expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+        username: user.username,
+        userProfileId: 'some-profile-uid',
+        provider: mockSessVal.provider,
+        state: { authorization },
+      });
+      expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
     it('does not extend session for system API calls.', async () => {
@@ -1392,6 +1464,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
 
     it('replaces existing session with the one returned by authentication provider for non-system API requests', async () => {
@@ -1419,6 +1492,46 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
+    });
+
+    it('re-activates user profile if authentication provider returns a user profile grant for non-system API requests', async () => {
+      const user = mockAuthenticatedUser();
+      const newState = { authorization: 'Basic yyy' };
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-system-request': 'false' },
+      });
+      const userProfileGrant: UserProfileGrant = {
+        type: 'password',
+        username: 'some-user',
+        password: 'some-password',
+      };
+      mockOptions.userProfileService.activate.mockResolvedValue({
+        ...userProfileMock.create(),
+        uid: 'new-profile-uid',
+      });
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: newState })
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: newState })
+      );
+
+      expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
+        ...mockSessVal,
+        userProfileId: 'new-profile-uid',
+        state: newState,
+      });
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {

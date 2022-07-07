@@ -27,7 +27,7 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  fleet: 95000
+  fleet: 126917
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -52,7 +52,7 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 95864
+  security: 65433
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957

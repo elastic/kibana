@@ -6,7 +6,10 @@
  */
 import { IRouter } from '@kbn/core/server';
 import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import { registerAggregateRoute } from './aggregate';
+import { registerCountRoute } from './count';
 
 export const registerRoutes = (router: IRouter, ruleRegistry: RuleRegistryPluginStartContract) => {
-  // register new routes here
+  registerAggregateRoute(router);
+  registerCountRoute(router);
 };

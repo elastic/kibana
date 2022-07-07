@@ -11,6 +11,7 @@ WARNING: Use the data views APIs for managing data views instead of lower-level 
 The following data views APIs are available: 
 
 * Data views
+    ** <<data-views-api-get-all, Get all data views API>> to retrieve a list of data views
     ** <<data-views-api-get, Get data view API>> to retrieve a single data view
     ** <<data-views-api-create, Create data view API>> to create data view
     ** <<data-views-api-update, Update data view API>> to partially updated data view
@@ -27,6 +28,7 @@ The following data views APIs are available:
     ** <<data-views-runtime-field-api-update, Update runtime field API>> to partially update an existing runtime field
     ** <<data-views-runtime-field-api-delete, Delete runtime field API>> to delete a runtime field
 
+include::data-views/get-all.asciidoc[]
 include::data-views/get.asciidoc[]
 include::data-views/create.asciidoc[]
 include::data-views/update.asciidoc[]
