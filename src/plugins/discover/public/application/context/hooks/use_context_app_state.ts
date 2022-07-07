@@ -12,7 +12,7 @@ import { DiscoverServices } from '../../../build_services';
 import { AppState, getState, GlobalState } from '../services/context_state';
 
 export function useContextAppState({ services }: { services: DiscoverServices }) {
-  const { uiSettings: config, history, core, filterManager } = services;
+  const { uiSettings: config, history, core } = services;
 
   const stateContainer = useMemo(() => {
     return getState({
@@ -54,7 +54,7 @@ export function useContextAppState({ services }: { services: DiscoverServices })
       unsubscribeAppState();
       unsubscribeGlobalState();
     };
-  }, [stateContainer, setAppState, filterManager]);
+  }, [stateContainer, setAppState]);
 
   return {
     appState,
