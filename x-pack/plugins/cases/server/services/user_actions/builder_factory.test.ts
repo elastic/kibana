@@ -15,16 +15,13 @@ import {
   ConnectorTypes,
 } from '../../../common/api';
 import {
+  externalReferenceAttachmentES,
+  externalReferenceAttachmentSO,
   getPersistableStateAttachmentTypeRegistry,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
-import {
-  casePayload,
-  externalReferenceAttachmentES,
-  externalReferenceAttachmentSO,
-  externalService,
-} from './mocks';
+import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
   const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();

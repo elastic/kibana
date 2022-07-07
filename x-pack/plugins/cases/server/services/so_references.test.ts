@@ -7,20 +7,18 @@
 
 import { omit } from 'lodash';
 import {
+  externalReferenceAttachmentESAttributes,
+  externalReferenceAttachmentSOAttributes,
   getPersistableStateAttachmentTypeRegistry,
   persistableStateAttachmentAttributes,
 } from '../attachment_framework/mocks';
 import {
-  extractAttachmentSOReferences,
+  extractAttachmentSORefsFromAttributes,
   getUniqueReferences,
-  injectAttachmentSOReferences,
+  injectAttachmentSOAttributesFromRefs,
 } from './so_references';
-import { SOReferenceExtractor } from './so_reference_extractor';
 
 describe('so_references', () => {
-  const soExtractor = new SOReferenceExtractor([
-    { path: 'anIdToBeInjected', type: 'test-type', name: 'anIdToBeInjected' },
-  ]);
   const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
   const references = [
     {
@@ -28,7 +26,11 @@ describe('so_references', () => {
       name: 'myTestReference',
       type: 'test-so',
     },
-    { id: '1', name: 'anIdToBeInjected', type: 'test-type' },
+    {
+      id: 'my-id',
+      name: 'externalReferenceId',
+      type: 'test-so',
+    },
   ];
 
   const persistableStateAttachmentAttributesWithoutInjectedId = omit(
@@ -36,7 +38,14 @@ describe('so_references', () => {
     'persistableStateAttachmentState.injectedId'
   );
 
+  const externalReferenceAttachmentSOAttributesWithoutRefs = omit(
+    externalReferenceAttachmentSOAttributes,
+    'externalReferenceId'
+  );
+
   describe('getUniqueReferences', () => {
+    const dupObj = { id: 'dup', name: 'test', type: 'testType' };
+
     const refs = [
       // Same name and type. Different id
       { id: '1', name: 'test', type: 'testType' },
@@ -48,11 +57,10 @@ describe('so_references', () => {
       { id: '1', name: 'test', type: 'testType1' },
       { id: '1', name: 'test', type: 'testType2' },
       // Same id, name, and type with an item in the duplicates array
-      { id: 'dup', name: 'test', type: 'testType' },
+      dupObj,
     ];
 
-    const duplicates = [{ id: 'dup', name: 'test', type: 'testType' }];
-
+    const duplicates = [dupObj];
     const refsWithDuplicates = [...refs, ...duplicates];
 
     it('should return the correct unique references', () => {
@@ -60,8 +68,8 @@ describe('so_references', () => {
     });
   });
 
-  describe('injectAttachmentSOReferences', () => {
-    it('should inject the references to the attributes correctly', () => {
+  describe('injectAttachmentSOAttributesFromRefs', () => {
+    it('should inject the references to the attributes correctly (persistable state)', () => {
       const savedObject = {
         id: 'so-id',
         attributes: persistableStateAttachmentAttributesWithoutInjectedId,
@@ -70,28 +78,62 @@ describe('so_references', () => {
         type: 'cases-comments',
       };
 
-      const res = injectAttachmentSOReferences(
-        soExtractor,
+      const res = injectAttachmentSOAttributesFromRefs(
         savedObject,
         persistableStateAttachmentTypeRegistry
       );
 
       expect(res).toEqual({
         ...savedObject,
-        attributes: {
-          ...persistableStateAttachmentAttributes,
-          anIdToBeInjected: '1',
-        },
+        attributes: persistableStateAttachmentAttributes,
+      });
+    });
+
+    it('should inject the references to the attributes correctly (external reference savedObject)', () => {
+      const savedObject = {
+        id: 'so-id',
+        attributes: externalReferenceAttachmentSOAttributesWithoutRefs,
+        references,
+        version: 'so-version',
+        type: 'cases-comments',
+      };
+
+      const res = injectAttachmentSOAttributesFromRefs(
+        savedObject,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        ...savedObject,
+        attributes: externalReferenceAttachmentSOAttributes,
+      });
+    });
+
+    it('should inject the references to the attributes correctly (external reference elasticSearchDoc)', () => {
+      const savedObject = {
+        id: 'so-id',
+        attributes: externalReferenceAttachmentESAttributes,
+        references,
+        version: 'so-version',
+        type: 'cases-comments',
+      };
+
+      const res = injectAttachmentSOAttributesFromRefs(
+        savedObject,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        ...savedObject,
+        attributes: externalReferenceAttachmentESAttributes,
       });
     });
   });
 
-  describe('extractAttachmentSOReferences', () => {
-    it('should extract the references from the attributes correctly', () => {
-      const res = extractAttachmentSOReferences(
-        soExtractor,
-        // @ts-expect-error
-        { anIdToBeInjected: '1', ...persistableStateAttachmentAttributes },
+  describe('extractAttachmentSORefsFromAttributes', () => {
+    it('should extract the references from the attributes correctly (persistable state)', () => {
+      const res = extractAttachmentSORefsFromAttributes(
+        persistableStateAttachmentAttributes,
         [],
         persistableStateAttachmentTypeRegistry
       );
@@ -101,13 +143,48 @@ describe('so_references', () => {
           ...persistableStateAttachmentAttributesWithoutInjectedId,
         },
         references: [
-          { id: '1', name: 'anIdToBeInjected', type: 'test-type' },
           {
             id: 'testRef',
             name: 'myTestReference',
             type: 'test-so',
           },
         ],
+        didDeleteOperation: false,
+      });
+    });
+
+    it('should extract the references from the attributes correctly (external reference savedObject)', () => {
+      const res = extractAttachmentSORefsFromAttributes(
+        externalReferenceAttachmentSOAttributes,
+        [],
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        attributes: {
+          ...externalReferenceAttachmentSOAttributesWithoutRefs,
+        },
+        references: [
+          {
+            id: 'my-id',
+            name: 'externalReferenceId',
+            type: 'test-so',
+          },
+        ],
+        didDeleteOperation: false,
+      });
+    });
+
+    it('should extract the references from the attributes correctly (external reference elasticSearchDoc)', () => {
+      const res = extractAttachmentSORefsFromAttributes(
+        externalReferenceAttachmentESAttributes,
+        [],
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        attributes: externalReferenceAttachmentESAttributes,
+        references: [],
         didDeleteOperation: false,
       });
     });

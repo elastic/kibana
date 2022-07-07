@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { isEqual, uniqWith } from 'lodash';
 import {
-  CommentAttributesWithoutSORefs,
+  CommentAttributesNoSO,
   CommentRequest,
   CommentAttributes,
   CommentPatchAttributes,
+  CommentAttributesWithoutRefs,
 } from '../../common/api';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
@@ -36,11 +38,11 @@ export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) =>
   return new SOReferenceExtractor(fieldsToExtract);
 };
 
-export const injectAttachmentSOReferences = (
-  soExtractor: SOReferenceExtractor,
-  savedObject: SavedObject<CommentAttributesWithoutSORefs>,
+export const injectAttachmentSOAttributesFromRefs = (
+  savedObject: SavedObject<CommentAttributesWithoutRefs>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
+  const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
   const so = soExtractor.populateFieldsFromReferences<CommentAttributes>(savedObject);
   const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
     persistableStateAttachmentTypeRegistry,
@@ -49,17 +51,43 @@ export const injectAttachmentSOReferences = (
   return { ...so, attributes: { ...so.attributes, ...injectedAttributes } };
 };
 
-export const extractAttachmentSOReferences = (
-  soExtractor: SOReferenceExtractor,
+export const injectAttachmentSOAttributesFromRefsForPatch = (
+  updatedAttributes: CommentPatchAttributes,
+  savedObject: SavedObjectsUpdateResponse<CommentAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+) => {
+  const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
+  const so = soExtractor.populateFieldsFromReferencesForPatch<CommentAttributes>({
+    dataBeforeRequest: updatedAttributes,
+    dataReturnedFromRequest: savedObject,
+  });
+
+  /**
+   *  We don't allow partial updates of attachments attributes.
+   * Consumers will always get state of the attachment.
+   */
+  const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references ?? [], {
+    persistableStateAttachmentTypeRegistry,
+  });
+
+  return {
+    ...so,
+    attributes: { ...so.attributes, ...injectedAttributes },
+  } as SavedObjectsUpdateResponse<CommentAttributes>;
+};
+
+export const extractAttachmentSORefsFromAttributes = (
   attributes: CommentAttributes | CommentPatchAttributes,
   references: SavedObjectReference[],
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
+  const soExtractor = getAttachmentSOExtractor(attributes);
+
   const {
     transformedFields,
     references: refsWithExternalRefId,
     didDeleteOperation,
-  } = soExtractor.extractFieldsToReferences<CommentAttributesWithoutSORefs>({
+  } = soExtractor.extractFieldsToReferences<CommentAttributesNoSO>({
     data: attributes,
     existingReferences: references,
   });

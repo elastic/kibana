@@ -85,22 +85,36 @@ const ExternalReferenceStorageSORt = rt.type({
   soType: rt.string,
 });
 
-export const ExternalReferenceNoSORt = rt.type({
-  externalReferenceId: rt.string,
-  externalReferenceStorage: ExternalReferenceStorageNoSORt,
+export const ExternalReferenceBaseRt = rt.type({
   externalReferenceAttachmentTypeId: rt.string,
   externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   type: rt.literal(CommentType.externalReference),
   owner: rt.string,
 });
 
+export const ExternalReferenceNoSORt = rt.type({
+  ...ExternalReferenceBaseRt.props,
+  externalReferenceId: rt.string,
+  externalReferenceStorage: ExternalReferenceStorageNoSORt,
+});
+
 export const ExternalReferenceSORt = rt.type({
-  ...ExternalReferenceNoSORt.props,
+  ...ExternalReferenceBaseRt.props,
+  externalReferenceId: rt.string,
+  externalReferenceStorage: ExternalReferenceStorageSORt,
+});
+
+// externalReferenceId is missing.
+export const ExternalReferenceSOWithoutRefsRt = rt.type({
+  ...ExternalReferenceBaseRt.props,
   externalReferenceStorage: ExternalReferenceStorageSORt,
 });
 
 export const ExternalReferenceRt = rt.union([ExternalReferenceNoSORt, ExternalReferenceSORt]);
-export const ExternalReferenceWithoutSORefsRt = ExternalReferenceNoSORt;
+export const ExternalReferenceWithoutRefsRt = rt.union([
+  ExternalReferenceNoSORt,
+  ExternalReferenceSOWithoutRefsRt,
+]);
 
 export const PersistableStateAttachmentRt = rt.type({
   type: rt.literal(CommentType.persistableState),
@@ -121,8 +135,13 @@ const AttributesTypeExternalReferenceRt = rt.intersection([
   CommentAttributesBasicRt,
 ]);
 
-const AttributesTypeExternalReferenceWithoutSORefsRt = rt.intersection([
-  ExternalReferenceWithoutSORefsRt,
+const AttributesTypeExternalReferenceNoSORt = rt.intersection([
+  ExternalReferenceNoSORt,
+  CommentAttributesBasicRt,
+]);
+
+const AttributesTypeExternalReferenceSORt = rt.intersection([
+  ExternalReferenceSORt,
   CommentAttributesBasicRt,
 ]);
 
@@ -139,11 +158,19 @@ const CommentAttributesRt = rt.union([
   AttributesTypePersistableStateRt,
 ]);
 
-const CommentAttributesWithoutSORefsRt = rt.union([
+const CommentAttributesNoSORt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
-  AttributesTypeExternalReferenceWithoutSORefsRt,
+  AttributesTypeExternalReferenceNoSORt,
+  AttributesTypePersistableStateRt,
+]);
+
+const CommentAttributesWithoutRefsRt = rt.union([
+  AttributesTypeUserRt,
+  AttributesTypeAlertsRt,
+  AttributesTypeActionsRt,
+  ExternalReferenceWithoutRefsRt,
   AttributesTypePersistableStateRt,
 ]);
 
@@ -210,6 +237,10 @@ export const CommentPatchRequestRt = rt.intersection([
   /**
    * Partial updates are not allowed.
    * We want to prevent the user for changing the type without removing invalid fields.
+   *
+   * injectAttachmentSOAttributesFromRefsForPatch is dependent on this assumption.
+   * The consumers of the persistable attachment service should always get the
+   * persistableStateAttachmentState on a patch.
    */
   CommentRequestRt,
   rt.type({ id: rt.string, version: rt.string }),
@@ -252,9 +283,17 @@ export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
+export type AttributesTypeExternalReference = rt.TypeOf<typeof AttributesTypeExternalReferenceRt>;
+export type AttributesTypeExternalReferenceSO = rt.TypeOf<
+  typeof AttributesTypeExternalReferenceSORt
+>;
+export type AttributesTypeExternalReferenceNoSO = rt.TypeOf<
+  typeof AttributesTypeExternalReferenceNoSORt
+>;
 export type AttributesTypePersistableState = rt.TypeOf<typeof AttributesTypePersistableStateRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
-export type CommentAttributesWithoutSORefs = rt.TypeOf<typeof CommentAttributesWithoutSORefsRt>;
+export type CommentAttributesNoSO = rt.TypeOf<typeof CommentAttributesNoSORt>;
+export type CommentAttributesWithoutRefs = rt.TypeOf<typeof CommentAttributesWithoutRefsRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;

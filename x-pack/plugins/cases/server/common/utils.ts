@@ -262,7 +262,7 @@ export const isCommentRequestTypeExternalReferenceSO = (
  * A type narrowing function for persistable state attachments.
  */
 export const isCommentRequestTypePersistableState = (
-  context: CommentRequest
+  context: Partial<CommentRequest>
 ): context is CommentRequestPersistableStateType => {
   return context.type === CommentType.persistableState;
 };
