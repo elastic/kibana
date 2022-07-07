@@ -37,9 +37,6 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   static formatId = formatId;
   constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
-    this.onChange({
-      zzzFieldType: props.fieldType,
-    });
   }
 
   onColorChange = (newColorParams: Partial<Color>, index: number) => {
