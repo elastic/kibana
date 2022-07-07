@@ -131,6 +131,7 @@ describe('Response actions', () => {
           },
         ],
         keep_policies_up_to_date: false,
+        verification_status: 'unknown',
       });
 
       licenseEmitter = new Subject();

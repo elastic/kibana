@@ -1768,6 +1768,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           install_started_at: '2020-06-24T14:41:23.098Z',
           install_source: 'registry',
           keep_policies_up_to_date: false,
+          verification_status: 'unknown',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

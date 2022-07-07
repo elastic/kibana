@@ -43,8 +43,6 @@ describe('User Summary Component', () => {
             name: ['Debian GNU/Linux'],
           },
         },
-        lastSeen: undefined,
-        firstSeen: undefined,
       },
       endDate: '2019-06-18T06:00:00.000Z',
       id: 'userOverview',
@@ -54,6 +52,7 @@ describe('User Summary Component', () => {
       narrowDateRange: jest.fn(),
       startDate: '2019-06-15T06:00:00.000Z',
       userName: 'testUserName',
+      indexPatterns: [],
     };
 
     test('it renders the default User Summary', () => {

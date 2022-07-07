@@ -129,8 +129,6 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             },
           },
         },
-        lastSeen: { value: 1599703212208, value_as_string: '2020-09-10T02:00:12.208Z' },
-        firstSeen: { value: 1598802015355, value_as_string: '2020-08-30T15:40:15.355Z' },
       },
       source: {
         meta: {},
@@ -187,8 +185,6 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             },
           },
         },
-        lastSeen: { value: 1599703214494, value_as_string: '2020-09-10T02:00:14.494Z' },
-        firstSeen: { value: 1598802015107, value_as_string: '2020-08-30T15:40:15.107Z' },
       },
     },
   },
@@ -220,8 +216,6 @@ export const formattedSearchStrategyResponse = {
               source: {
                 filter: { term: { 'source.ip': '35.196.65.164' } },
                 aggs: {
-                  firstSeen: { min: { field: '@timestamp' } },
-                  lastSeen: { max: { field: '@timestamp' } },
                   as: {
                     filter: { exists: { field: 'source.as' } },
                     aggs: {
@@ -265,8 +259,6 @@ export const formattedSearchStrategyResponse = {
               destination: {
                 filter: { term: { 'destination.ip': '35.196.65.164' } },
                 aggs: {
-                  firstSeen: { min: { field: '@timestamp' } },
-                  lastSeen: { max: { field: '@timestamp' } },
                   as: {
                     filter: { exists: { field: 'destination.as' } },
                     aggs: {
@@ -339,8 +331,6 @@ export const formattedSearchStrategyResponse = {
   },
   networkDetails: {
     source: {
-      firstSeen: '2020-08-30T15:40:15.107Z',
-      lastSeen: '2020-09-10T02:00:14.494Z',
       autonomousSystem: { number: [15169], organization: { name: ['Google LLC'] } },
       geo: {
         continent_name: ['North America'],
@@ -351,8 +341,6 @@ export const formattedSearchStrategyResponse = {
       },
     },
     destination: {
-      firstSeen: '2020-08-30T15:40:15.355Z',
-      lastSeen: '2020-09-10T02:00:12.208Z',
       autonomousSystem: { number: [15169], organization: { name: ['Google LLC'] } },
       geo: {
         continent_name: ['North America'],
@@ -401,8 +389,6 @@ export const expectedDsl = {
       source: {
         filter: { term: { 'source.ip': '35.196.65.164' } },
         aggs: {
-          firstSeen: { min: { field: '@timestamp' } },
-          lastSeen: { max: { field: '@timestamp' } },
           as: {
             filter: { exists: { field: 'source.as' } },
             aggs: {
@@ -446,8 +432,6 @@ export const expectedDsl = {
       destination: {
         filter: { term: { 'destination.ip': '35.196.65.164' } },
         aggs: {
-          firstSeen: { min: { field: '@timestamp' } },
-          lastSeen: { max: { field: '@timestamp' } },
           as: {
             filter: { exists: { field: 'destination.as' } },
             aggs: {

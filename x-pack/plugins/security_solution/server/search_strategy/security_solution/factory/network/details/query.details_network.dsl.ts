@@ -16,16 +16,6 @@ const getAggs = (type: string, ip: string) => {
         },
       },
       aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
-        lastSeen: {
-          max: {
-            field: '@timestamp',
-          },
-        },
         as: {
           filter: {
             exists: {

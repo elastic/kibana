@@ -17,9 +17,6 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
-  const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);
-  const lastSeen = getOr(null, `lastSeen.value_as_string`, networkHit);
-
   const autonomousSystem: AutonomousSystem | {} = getOr(
     {},
     `${type}.as`,
@@ -36,8 +33,6 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
 
   return {
     [type]: {
-      firstSeen,
-      lastSeen,
       autonomousSystem: {
         ...autonomousSystem,
       },

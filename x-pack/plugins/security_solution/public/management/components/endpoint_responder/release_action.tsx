@@ -7,12 +7,12 @@
 
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
+import { ActionError } from './action_error';
 
 export const ReleaseActionResult = memo<
   CommandExecutionComponentProps<
@@ -80,20 +80,15 @@ export const ReleaseActionResult = memo<
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
           { defaultMessage: 'Error. Release action failed.' }
         )}
-        data-test-subj="releaseErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.release.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'releaseErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 

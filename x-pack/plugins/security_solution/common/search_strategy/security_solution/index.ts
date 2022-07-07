@@ -12,7 +12,6 @@ import type {
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
   HostOverviewRequestOptions,
-  HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -23,7 +22,6 @@ import type {
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
-  HostFirstLastSeenRequestOptions,
 } from './hosts';
 import type {
   NetworkQueries,
@@ -98,6 +96,11 @@ import type {
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from './users/authentications';
+import {
+  FirstLastSeenQuery,
+  FirstLastSeenRequestOptions,
+  FirstLastSeenStrategyResponse,
+} from './first_last_seen';
 
 export * from './cti';
 export * from './hosts';
@@ -105,6 +108,7 @@ export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
 export * from './users';
+export * from './first_last_seen';
 
 export type FactoryQueryTypes =
   | HostsQueries
@@ -114,7 +118,8 @@ export type FactoryQueryTypes =
   | NetworkKpiQueries
   | RiskQueries
   | CtiQueries
-  | typeof MatrixHistogramQuery;
+  | typeof MatrixHistogramQuery
+  | typeof FirstLastSeenQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -142,8 +147,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenStrategyResponse
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
@@ -204,8 +209,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenRequestOptions
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
   : T extends HostsKpiQueries.kpiHosts

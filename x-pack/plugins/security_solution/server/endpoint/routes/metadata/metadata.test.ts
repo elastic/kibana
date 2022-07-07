@@ -147,6 +147,7 @@ describe('test endpoint routes', () => {
         },
       ],
       keep_policies_up_to_date: false,
+      verification_status: 'unknown',
     });
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
