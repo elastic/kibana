@@ -8,6 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry/track_counter_events';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -17,7 +18,6 @@ import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
 import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
   useLensSelector,
   useLensDispatch,
@@ -78,7 +78,7 @@ export function EditorFrame(props: EditorFrameProps) {
     (field) => {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
-        trackUiEvent('drop_onto_workspace');
+        trackUiCounterEvents('drop_onto_workspace');
         switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
       }
     },

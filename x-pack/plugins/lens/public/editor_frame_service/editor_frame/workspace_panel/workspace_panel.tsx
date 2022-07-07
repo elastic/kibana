@@ -34,6 +34,8 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { trackLensOperationsEvents, trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { IndexPatternLayer } from '../../..';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -358,7 +360,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
-      trackUiEvent('drop_onto_workspace');
+      trackUiCounterEvents('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
@@ -481,7 +483,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const dragDropContext = useContext(DragContext);
-
   const renderWorkspace = () => {
     const customWorkspaceRenderer =
       activeDatasourceId &&
@@ -586,6 +587,7 @@ export const VisualizationWrapper = ({
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
+  const datasourceStates = useLensSelector(selectDatasourceStates);
   const dispatchLens = useLensDispatch();
   const [defaultLayerId] = Object.keys(datasourceLayers);
 
@@ -603,9 +605,16 @@ export const VisualizationWrapper = ({
             )
           )
         );
+
+        if (activeDatasourceId) {
+          const { layers } = datasourceStates[activeDatasourceId].state as {
+            layers?: Record<string, IndexPatternLayer>;
+          };
+          trackLensOperationsEvents(layers);
+        }
       }
     },
-    [defaultLayerId, dispatchLens]
+    [activeDatasourceId, datasourceStates, defaultLayerId, dispatchLens]
   );
 
   function renderFixAction(

@@ -6,3 +6,9 @@
  */
 
 export * from './factory';
+export {
+  setUsageCollectionStart,
+  getUsageCollectionStart,
+  trackUiCounterEvents,
+  trackLensOperationsEvents,
+} from './track_counter_events';
