@@ -201,7 +201,7 @@ describe('SecurityNavControl', () => {
                 type="user"
               />,
               "name": <FormattedMessage
-                defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
+                defaultMessage="Profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
                 values={
                   Object {
@@ -315,10 +315,10 @@ describe('SecurityNavControl', () => {
               "href": "",
               "icon": <EuiIcon
                 size="m"
-                type="controlsHorizontal"
+                type="user"
               />,
               "name": <FormattedMessage
-                defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
+                defaultMessage="Profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
                 values={
                   Object {
@@ -380,6 +380,97 @@ describe('SecurityNavControl', () => {
               "name": <FormattedMessage
                 defaultMessage="Log in"
                 id="xpack.security.navControlComponent.loginLinkText"
+                values={Object {}}
+              />,
+            },
+          ],
+          "title": "full name",
+        },
+      ]
+    `);
+  });
+
+  it('should not render Profile for cloud user', async () => {
+    useCurrentUserMock.mockReturnValue({
+      loading: false,
+      value: mockAuthenticatedUser({
+        elastic_cloud_user: true,
+      }),
+    });
+
+    const wrapper = shallow(
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
+    );
+
+    expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "data-test-subj": "logoutLink",
+              "href": "",
+              "icon": <EuiIcon
+                size="m"
+                type="exit"
+              />,
+              "name": <FormattedMessage
+                defaultMessage="Log out"
+                id="xpack.security.navControlComponent.logoutLinkText"
+                values={Object {}}
+              />,
+            },
+          ],
+          "title": "full name",
+        },
+      ]
+    `);
+  });
+
+  it('should render Profile for non-cloud user', () => {
+    useCurrentUserMock.mockReturnValue({
+      loading: false,
+      value: mockAuthenticatedUser({
+        elastic_cloud_user: false,
+      }),
+    });
+
+    const wrapper = shallow(
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
+    );
+
+    expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "data-test-subj": "profileLink",
+              "href": "",
+              "icon": <EuiIcon
+                size="m"
+                type="user"
+              />,
+              "name": <FormattedMessage
+                defaultMessage="Profile"
+                id="xpack.security.navControlComponent.editProfileLinkText"
+                values={
+                  Object {
+                    "profileOverridden": false,
+                  }
+                }
+              />,
+            },
+            Object {
+              "data-test-subj": "logoutLink",
+              "href": "",
+              "icon": <EuiIcon
+                size="m"
+                type="exit"
+              />,
+              "name": <FormattedMessage
+                defaultMessage="Log out"
+                id="xpack.security.navControlComponent.logoutLinkText"
                 values={Object {}}
               />,
             },

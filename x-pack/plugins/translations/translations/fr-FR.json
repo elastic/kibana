@@ -24103,7 +24103,7 @@
     "xpack.security.management.users.usersTitle": "Utilisateurs",
     "xpack.security.management.usersTitle": "Utilisateurs",
     "xpack.security.navControlComponent.accountMenuAriaLabel": "Menu Compte",
-    "xpack.security.navControlComponent.editProfileLinkText": "{profileOverridden, select, true{Préférences} other{Profil}}",
+    "xpack.security.navControlComponent.editProfileLinkText": "Profil",
     "xpack.security.navControlComponent.loginLinkText": "Connexion",
     "xpack.security.navControlComponent.logoutLinkText": "Déconnexion",
     "xpack.security.overwrittenSession.continueAsUserText": "Continuer en tant que {username}",

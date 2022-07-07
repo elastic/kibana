@@ -24087,7 +24087,7 @@
     "xpack.security.management.users.usersTitle": "ユーザー",
     "xpack.security.management.usersTitle": "ユーザー",
     "xpack.security.navControlComponent.accountMenuAriaLabel": "アカウントメニュー",
-    "xpack.security.navControlComponent.editProfileLinkText": "{profileOverridden, select, true{設定} other{プロファイル}}",
+    "xpack.security.navControlComponent.editProfileLinkText": "プロファイル",
     "xpack.security.navControlComponent.loginLinkText": "ログイン",
     "xpack.security.navControlComponent.logoutLinkText": "ログアウト",
     "xpack.security.overwrittenSession.continueAsUserText": "{username} として続行",
