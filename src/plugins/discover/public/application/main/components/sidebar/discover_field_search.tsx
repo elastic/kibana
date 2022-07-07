@@ -363,7 +363,7 @@ export function DiscoverFieldSearch({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      {isPlainRecord && (
+      {!isPlainRecord && (
         <EuiFlexItem>
           <EuiFilterGroup fullWidth>
             <EuiPopover

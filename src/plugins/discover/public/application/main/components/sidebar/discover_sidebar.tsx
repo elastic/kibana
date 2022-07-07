@@ -125,7 +125,7 @@ export function DiscoverSidebarComponent({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
-  const isPlainRecord = !!onAddFilter;
+  const isPlainRecord = !onAddFilter;
 
   useEffect(() => {
     if (documents) {
@@ -435,7 +435,7 @@ export function DiscoverSidebarComponent({
                   }
                 >
                   <EuiSpacer size="s" />
-                  {isPlainRecord && popularFields.length > 0 && (
+                  {!isPlainRecord && popularFields.length > 0 && (
                     <>
                       <EuiTitle size="xxxs" className="dscFieldListHeader">
                         <h4 id="available_fields_popular">

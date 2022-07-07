@@ -86,8 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const [rows] = await dataGrid.getBodyRows();
-        expect(await rows[1].getVisibleText()).to.be('@tagssuccessgeo.destCNoccurred2269');
+        const cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be('2269');
       });
     });
   });
