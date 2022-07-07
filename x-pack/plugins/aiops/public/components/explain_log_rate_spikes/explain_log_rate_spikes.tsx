@@ -10,7 +10,8 @@ import React, { useEffect, FC } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useFetchStream, ProgressControls } from '@kbn/aiops-utils';
+import { ProgressControls } from '@kbn/aiops-components';
+import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 

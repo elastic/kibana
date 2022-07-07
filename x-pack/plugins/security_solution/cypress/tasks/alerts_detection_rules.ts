@@ -46,6 +46,7 @@ import {
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   RULES_TAGS_POPOVER_WRAPPER,
+  INTEGRATIONS_POPOVER,
   SELECTED_RULES_NUMBER_LABEL,
   REFRESH_SETTINGS_POPOVER,
   REFRESH_SETTINGS_SWITCH,
@@ -165,6 +166,10 @@ export const loadPrebuiltDetectionRules = () => {
     .should('exist')
     .pipe(($el) => $el.trigger('click'))
     .should('be.disabled');
+};
+
+export const openIntegrationsPopover = () => {
+  cy.get(INTEGRATIONS_POPOVER).click();
 };
 
 export const reloadDeletedRules = () => {
