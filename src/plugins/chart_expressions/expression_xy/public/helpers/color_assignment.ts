@@ -7,18 +7,14 @@
  */
 
 import { mapValues } from 'lodash';
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableRow } from '@kbn/expressions-plugin';
 import { euiLightVars } from '@kbn/ui-theme';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
-import { getFormat } from './format';
-import { LayerAccessorsTitles } from './layers';
+import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
+import { DatatablesWithFormatInfo, DatatableWithFormatInfo } from './data_layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
@@ -32,16 +28,16 @@ export type ColorAssignments = Record<
 
 function getSplitName(
   splitAccessors: Array<ExpressionValueVisDimension | string> = [],
-  table: Datatable,
+  formattedDatatable: DatatableWithFormatInfo,
   row: DatatableRow,
-  formatFactory: FormatFactory
+  fieldFormats: LayerFieldFormats
 ) {
   return splitAccessors.reduce<string>((splitName, accessor) => {
-    const splitColumn = getColumnByAccessor(accessor, table.columns);
-    if (!splitColumn) return;
-    const splitAccessor = getAccessorByDimension(accessor, table.columns);
-    const columnFormatter = splitAccessor && formatFactory(getFormat(table.columns, splitAccessor));
-    const name = columnFormatter ? columnFormatter.convert(row[splitAccessor]) : row[splitAccessor];
+    const splitAccessor = getAccessorByDimension(accessor, formattedDatatable.table.columns);
+    const splitFormatterObj = fieldFormats.splitSeriesAccessors[splitAccessor];
+    const name = formattedDatatable.formattedColumns[splitAccessor]
+      ? row[splitAccessor]
+      : splitFormatterObj.formatter.convert(row[splitAccessor]);
     if (splitName) {
       return `${splitName} - ${name}`;
     } else {
@@ -51,30 +47,31 @@ function getSplitName(
 }
 
 export const getAllSeries = (
-  table: Datatable,
+  formattedDatatable: DatatableWithFormatInfo,
   splitAccessors: CommonXYDataLayerConfig['splitAccessors'] = [],
   accessors: Array<ExpressionValueVisDimension | string>,
   columnToLabel: CommonXYDataLayerConfig['columnToLabel'],
   titles: LayerAccessorsTitles,
-  formatFactory: FormatFactory
+  fieldFormats: LayerFieldFormats
 ) => {
-  if (!table) {
+  if (!formattedDatatable.table) {
     return [];
   }
 
   const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
 
-  return table.rows.reduce<string[]>((acc, row) => {
-    const splitName = getSplitName(splitAccessors, table, row, formatFactory);
+  return formattedDatatable.table.rows.reduce<string[]>((acc, row) => {
+    const splitName = getSplitName(splitAccessors, formattedDatatable, row, fieldFormats);
 
     const allRowSeries = accessors.reduce<string[]>((names, accessor) => {
-      const yAccessor = getAccessorByDimension(accessor, table.columns);
+      const yAccessor = getAccessorByDimension(accessor, formattedDatatable.table.columns);
       const yTitle = columnToLabelMap[yAccessor] ?? titles?.yTitles?.[yAccessor] ?? null;
+      let name = yTitle;
       if (splitName) {
-        return [...names, accessors.length > 1 ? `${splitName} - ${yTitle}` : splitName];
-      } else {
-        return [...names, yTitle];
+        name = accessors.length > 1 ? `${splitName} - ${yTitle}` : splitName;
       }
+
+      return names.includes(name) ? names : [...names, name];
     }, []);
 
     // need only uniq values
@@ -84,8 +81,9 @@ export const getAllSeries = (
 
 export function getColorAssignments(
   layers: CommonXYLayerConfig[],
-  formatFactory: FormatFactory,
-  titles: LayerAccessorsTitles
+  titles: LayerAccessorsTitles,
+  fieldFormats: LayersFieldFormats,
+  formattedDatatables: DatatablesWithFormatInfo
 ): ColorAssignments {
   const layersPerPalette: Record<string, CommonXYDataLayerConfig[]> = {};
 
@@ -105,12 +103,12 @@ export function getColorAssignments(
     const seriesPerLayer = paletteLayers.map((layer) => {
       const allSeries =
         getAllSeries(
-          layer.table,
+          formattedDatatables[layer.layerId],
           layer.splitAccessors,
           layer.accessors,
           layer.columnToLabel,
           titles,
-          formatFactory
+          fieldFormats[layer.layerId]
         ) || [];
 
       return { numberOfSeries: allSeries.length, allSeries };

@@ -221,8 +221,8 @@ export function XYChart({
   );
 
   const fieldFormats = useMemo(
-    () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }),
-    [dataLayers, splitColumnAccessor, splitRowAccessor]
+    () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }, formatFactory),
+    [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
   if (dataLayers.length === 0) {
@@ -709,7 +709,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables, titles)
+            ? getLegendAction(dataLayers, onClickValue, fieldFormats, formattedDatatables, titles)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -823,6 +823,7 @@ export function XYChart({
           formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
           defaultXScaleType={defaultXScaleType}
+          fieldFormats={fieldFormats}
         />
       )}
       {referenceLineLayers.length ? (

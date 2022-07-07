@@ -17,7 +17,8 @@ import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
 import { LegendActionPopover } from './legend_action_popover';
 import { mockPaletteOutput } from '../../common/__mocks__';
-import { FormatFactory } from '../types';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { LayerFieldFormats } from '../helpers';
 
 const table: Datatable = {
   type: 'datatable',
@@ -172,19 +173,25 @@ const sampleLayer: DataLayerConfig = {
   table,
 };
 
-const formatFactory = (() =>
-  ({
-    convert(x: unknown) {
-      return x;
-    },
-  } as unknown)) as FormatFactory;
-
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
-    formatFactory,
+    {
+      first: {
+        splitSeriesAccessors: {
+          splitAccessorId: {
+            format: { id: 'string' },
+            formatter: {
+              convert(x: unknown) {
+                return x;
+              },
+            } as FieldFormat,
+          },
+        },
+      } as unknown as LayerFieldFormats,
+    },
     {
       first: {
         table,

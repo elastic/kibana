@@ -11,14 +11,18 @@ import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
-import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
-import { DatatablesWithFormatInfo, getSeriesName, LayersAccessorsTitles } from '../helpers';
+import {
+  DatatablesWithFormatInfo,
+  getSeriesName,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+} from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
   onFilter: (data: FilterEvent['data']) => void,
-  formatFactory: FormatFactory,
+  fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   titles: LayersAccessorsTitles
 ): LegendAction =>
@@ -82,7 +86,7 @@ export const getLegendAction = (
               splitAccessors: layer.splitAccessors,
               accessorsCount: layer.accessors.length,
               columns: table.columns,
-              formatFactory,
+              splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
               alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
               columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
             },

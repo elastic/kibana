@@ -29,7 +29,7 @@ import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
-import { LayerAccessorsTitles } from './layers';
+import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
@@ -50,6 +50,7 @@ type GetSeriesPropsFn = (config: {
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
   defaultXScaleType: XScaleType;
+  fieldFormats: LayersFieldFormats;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -58,7 +59,7 @@ type GetSeriesNameFn = (
     splitAccessors: Array<string | ExpressionValueVisDimension>;
     accessorsCount: number;
     columns: Datatable['columns'];
-    formatFactory: FormatFactory;
+    splitAccessorsFormats: LayerFieldFormats['splitSeriesAccessors'];
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
   },
@@ -203,7 +204,7 @@ function getSplitValues(
   splitAccessors: Array<string | ExpressionValueVisDimension>,
   alreadyFormattedColumns: Record<string, boolean>,
   columns: Datatable['columns'],
-  formatFactory: FormatFactory
+  splitAccessorsFormats: LayerFieldFormats['splitSeriesAccessors']
 ) {
   if (splitAccessorsMap.size < 0) {
     return [];
@@ -215,8 +216,7 @@ function getSplitValues(
     );
     if (split) {
       const splitColumnId = getAccessorByDimension(split, columns);
-      const splitFormatByAccessor = getFormat(columns, split);
-      const splitFormatter = formatFactory(splitFormatByAccessor);
+      const splitFormatter = splitAccessorsFormats[splitColumnId].formatter;
       return [
         ...acc,
         alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convert(value),
@@ -233,7 +233,7 @@ export const getSeriesName: GetSeriesNameFn = (
     splitAccessors,
     accessorsCount,
     columns,
-    formatFactory,
+    splitAccessorsFormats,
     alreadyFormattedColumns,
     columnToLabelMap,
   },
@@ -248,7 +248,7 @@ export const getSeriesName: GetSeriesNameFn = (
     splitAccessors,
     alreadyFormattedColumns,
     columns,
-    formatFactory
+    splitAccessorsFormats
   );
 
   const key = data.seriesKeys[data.seriesKeys.length - 1];
@@ -357,6 +357,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   fillOpacity,
   formattedDatatableInfo,
   defaultXScaleType,
+  fieldFormats,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -419,7 +420,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         accessorsCount: layer.accessors.length,
         alreadyFormattedColumns: formattedColumns,
         columns: formattedTable.columns,
-        formatFactory,
+        splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
         columnToLabelMap,
       },
       titles

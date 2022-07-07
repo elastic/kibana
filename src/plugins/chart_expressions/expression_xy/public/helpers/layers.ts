@@ -7,7 +7,11 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  FieldFormat,
+  FormatFactory,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   getAccessorByDimension,
@@ -34,11 +38,15 @@ interface SplitAccessors {
 }
 
 export type AccessorsFieldFormats = Record<string, SerializedFieldFormat | undefined>;
+export type SplitAccessorsFieldFormats = Record<
+  string,
+  { format: SerializedFieldFormat | undefined; formatter: FieldFormat }
+>;
 
 export interface LayerFieldFormats {
   xAccessors: AccessorsFieldFormats;
   yAccessors: AccessorsFieldFormats;
-  splitSeriesAccessors: AccessorsFieldFormats;
+  splitSeriesAccessors: SplitAccessorsFieldFormats;
   splitColumnAccessors: AccessorsFieldFormats;
   splitRowAccessors: AccessorsFieldFormats;
 }
@@ -128,7 +136,8 @@ const getYAccessorWithFieldFormat = (
 
 export const getLayerFormats = (
   { xAccessor, accessors, splitAccessors = [], table, isPercentage }: CommonXYDataLayerConfig,
-  { splitColumnAccessor, splitRowAccessor }: SplitAccessors
+  { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
+  formatFactory: FormatFactory
 ): LayerFieldFormats => {
   const yAccessors: Array<string | ExpressionValueVisDimension> = accessors;
   const splitColumnAccessors: Array<string | ExpressionValueVisDimension> = splitAccessors;
@@ -141,13 +150,17 @@ export const getLayerFormats = (
       }),
       {}
     ),
-    splitSeriesAccessors: splitColumnAccessors?.reduce(
-      (formatters, splitAccessor) => ({
+    splitSeriesAccessors: splitColumnAccessors?.reduce((formatters, splitAccessor) => {
+      const formatObj = getAccessorWithFieldFormat(splitAccessor, table.columns);
+      const accessor = Object.keys(formatObj)[0];
+      return {
         ...formatters,
-        ...getAccessorWithFieldFormat(splitAccessor, table.columns),
-      }),
-      {}
-    ),
+        [accessor]: {
+          format: formatObj[accessor],
+          formatter: formatFactory(formatObj[accessor]),
+        },
+      };
+    }, {}),
     splitColumnAccessors: getAccessorWithFieldFormat(splitColumnAccessor, table.columns),
     splitRowAccessors: getAccessorWithFieldFormat(splitRowAccessor, table.columns),
   };
@@ -155,12 +168,13 @@ export const getLayerFormats = (
 
 export const getLayersFormats = (
   layers: CommonXYDataLayerConfig[],
-  splitAccessors: SplitAccessors
+  splitAccessors: SplitAccessors,
+  formatFactory: FormatFactory
 ): LayersFieldFormats =>
   layers.reduce<LayersFieldFormats>(
     (formatters, layer) => ({
       ...formatters,
-      [layer.layerId]: getLayerFormats(layer, splitAccessors),
+      [layer.layerId]: getLayerFormats(layer, splitAccessors, formatFactory),
     }),
     {}
   );

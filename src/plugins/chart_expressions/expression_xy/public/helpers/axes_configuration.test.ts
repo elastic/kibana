@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataLayerConfig, YAxisConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin/public';
@@ -256,7 +257,9 @@ describe('axes_configuration', () => {
         yAccessorId3: { id: 'currency', params: {} },
         yAccessorId4: { id: 'currency', params: {} },
       },
-      splitSeriesAccessors: { d: { id: 'number', params: {} } },
+      splitSeriesAccessors: {
+        d: { format: { id: 'number', params: {} }, formatter: {} as FieldFormat },
+      },
       splitColumnAccessors: {},
       splitRowAccessors: {},
     },

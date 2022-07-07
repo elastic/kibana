@@ -86,7 +86,12 @@ describe('Tooltip', () => {
     [layerId]: {
       xAccessors: { [xAccessor as string]: { id: 'number' } },
       yAccessors: { [accessor]: { id: 'string' } },
-      splitSeriesAccessors: { [splitAccessors[0] as string]: { id: 'date' } },
+      splitSeriesAccessors: {
+        [splitAccessors[0] as string]: {
+          format: { id: 'date' },
+          formatter: {} as FieldFormat,
+        },
+      },
       splitRowAccessors: { [splitRowAccessor]: { id: 'number' } },
       splitColumnAccessors: { [splitColumnAccessor]: { id: 'number' } },
     },
