@@ -14,6 +14,7 @@ import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendSuspendProcessRequest } from '../../hooks/endpoint/use_send_suspend_process_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
+import { ActionError } from './action_error';
 
 export const SuspendProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -90,20 +91,15 @@ export const SuspendProcessActionResult = memo<
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.suspendProcess.errorMessageTitle',
           { defaultMessage: 'Suspend process action failure' }
         )}
-        data-test-subj="suspendProcessErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.suspendProcess.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'suspendProcessErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 

@@ -132,7 +132,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 argument is not support by this command: --foo'
+        'The following cmd2 argument is not supported by this command: --foo'
       );
     });
   });
@@ -143,7 +143,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 arguments are not support by this command: --foo, --bar'
+        'The following cmd2 arguments are not supported by this command: --foo, --bar'
       );
     });
   });

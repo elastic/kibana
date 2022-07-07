@@ -7,12 +7,12 @@
 
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
 import { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
 import { CommandExecutionComponentProps } from '../console/types';
+import { ActionError } from './action_error';
 
 export const IsolateActionResult = memo<
   CommandExecutionComponentProps<
@@ -80,20 +80,15 @@ export const IsolateActionResult = memo<
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle',
           { defaultMessage: 'Error. Isolate action failed.' }
         )}
-        data-test-subj="isolateErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.isolate.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'isolateErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 

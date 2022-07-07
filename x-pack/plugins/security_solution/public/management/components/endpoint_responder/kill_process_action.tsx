@@ -14,6 +14,7 @@ import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
+import { ActionError } from './action_error';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -96,20 +97,15 @@ export const KillProcessActionResult = memo<
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
           { defaultMessage: 'Kill process action failure' }
         )}
-        data-test-subj="killProcessErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'killProcessErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 

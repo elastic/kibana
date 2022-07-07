@@ -16,6 +16,7 @@ import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details
 import { EndpointCommandDefinitionMeta } from './types';
 import { CommandExecutionComponentProps } from '../console/types';
 import { useSendGetEndpointProcessesRequest } from '../../hooks/endpoint/use_send_get_endpoint_processes_request';
+import { ActionError } from './action_error';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -191,20 +192,15 @@ export const GetProcessesActionResult = memo<
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.getProcesses.errorMessageTitle',
           { defaultMessage: 'Get processes action failed' }
         )}
-        data-test-subj="getProcessesErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.getProcesses.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'getProcessesErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 
