@@ -63,7 +63,7 @@ export interface Teletype {
 }
 
 export interface IOLine {
-  time?: string;
+  time?: number;
   value?: string;
 
   // the following is only set client side for caching purposes

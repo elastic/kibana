@@ -38,3 +38,5 @@ export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 
 export const DEBOUNCE_TIMEOUT = 500;
+
+export const DEFAULT_TTY_PLAYSPEED_MS = 40; // milli seconds per line of tty output.

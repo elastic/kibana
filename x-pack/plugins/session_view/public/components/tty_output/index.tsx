@@ -13,22 +13,15 @@ import React, {
   ChangeEvent,
   MouseEvent,
 } from 'react';
-import { Terminal } from 'xterm';
-import 'xterm/css/xterm.css';
-import { FitAddon } from 'xterm-addon-fit';
-import { throttle } from 'lodash';
 import { EuiPanel, EuiRange, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { SearchAddon } from './search';
 import { SessionViewSearchBar } from '../session_view_search_bar';
-import { useEuiTheme } from '../../hooks';
 import { useStyles } from './styles';
 import {
   useFetchIOEvents,
   useIOLines,
+  useXtermPlayer,
 } from './hooks';
 import { IOLine } from '../../../common/types/process_tree';
-
-const PLAYHEAD_SPEED = 30;
 
 export interface TTYOutputDeps {
   sessionEntityId: string;
@@ -43,8 +36,6 @@ interface SearchResult {
 export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
   const styles = useStyles();
   const ref = useRef(null);
-  const { euiTheme } = useEuiTheme();
-  const { font, colors } = euiTheme;
 
   const {
     data,
@@ -55,98 +46,32 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
   } = useFetchIOEvents(sessionEntityId);
 
   const lines = useIOLines(data?.pages);
-
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentLine, setCurrentLine] = useState(0);
-  const [lastLinePrinted, setLastLinePrinted] = useState(0);
+  const {
+    searchAddon,
+    currentLine,
+    setCurrentLine,
+  } = useXtermPlayer(ref, isPlaying, lines);
+
   const [currentMatch, setCurrentMatch] = useState<{ match: SearchResult; index: number } | null>(
     null
   );
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [terminal, fitAddon, searchAddon] = useMemo(() => {
-    const term = new Terminal({
-      theme: {
-        // foreground: '#ffffff',
-        background: 'rgba(0,0,0,0)',
-        selection: colors.warning,
-      },
-      fontFamily: font.familyCode,
-      fontSize: 10,
-      allowTransparency: true,
-    });
-
-    const fitInstance = new FitAddon();
-    const searchInstance = new SearchAddon();
-
-    term.loadAddon(fitInstance);
-    term.loadAddon(searchInstance);
-
-    return [term, fitInstance, searchInstance];
-  }, []);
-
-  useEffect(() => {
-    if (isPlaying) {
-      const timer = setInterval(() => {
-        if (!isPlaying) {
-          return;
-        }
-
-        if (currentLine < lines.length) {
-          setCurrentLine(currentLine + 1);
-        } else if (!hasNextPage) {
-          setIsPlaying(false);
-        }
-      }, PLAYHEAD_SPEED);
-
-      return () => {
-        clearInterval(timer);
-      }
-    }
-  }, [lines, currentLine, isPlaying]);
-
   const onLineChange = useCallback(
     (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
       const value = parseInt((event?.target as HTMLInputElement).value || '0', 10);
       setCurrentMatch(null);
-      setCurrentLine(value);
-      setLastLinePrinted(0);
+      setIsPlaying(false);
     },
     [lines, hasNextPage, fetchNextPage]
   );
 
   useEffect(() => {
-    if (ref.current) {
-      terminal.open(ref.current);
-      fitAddon.fit();
-    }
-  }, [terminal]);
-
-  fitAddon.fit();
-
-  const renderLines = useCallback(throttle((curLine) => {
-    const linesToPrint = lines.slice(lastLinePrinted, curLine);
-
-    if (lastLinePrinted === 0) {
-      terminal.clear();
-    }
-
-    linesToPrint.forEach((line) => {
-      if (line.value !== undefined) {
-        terminal.writeln(line.value);
-      }
-    });
-
-    setLastLinePrinted(curLine);
-  }, 100), [terminal, lines, lastLinePrinted]);
-
-  useEffect(() => {
-    renderLines(currentLine);
-
-    if (hasNextPage && currentLine === lines.length - 1) {
+    if (!isFetching && hasNextPage && currentLine === lines.length - 1) {
       fetchNextPage();
     }
-  }, [currentLine]);
+  }, [currentLine, lines]);
 
   const onSearch = useCallback((query) => {
     setSearchQuery(query);
