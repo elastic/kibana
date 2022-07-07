@@ -68,6 +68,7 @@ export interface MetricOption {
   showPercentileAnnotations?: boolean;
   formula?: string;
   metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  palette?: PaletteOutput;
 }
 
 export interface SeriesConfig {
