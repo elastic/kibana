@@ -46,16 +46,7 @@ export function AlertsOverview() {
           ...(alertStatusFilter !== ALL_ALERTS_FILTER
             ? [
                 {
-                  bool: {
-                    should: [
-                      {
-                        match_phrase: {
-                          [ALERT_STATUS]: alertStatusFilter,
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                  term: { [ALERT_STATUS]: alertStatusFilter },
                 },
               ]
             : []),
