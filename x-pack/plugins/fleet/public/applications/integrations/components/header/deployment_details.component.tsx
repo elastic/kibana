@@ -70,7 +70,8 @@ export const DeploymentDetails = ({ cloudId, learnMoreUrl, managementUrl }: Prop
       <div style={{ width: 450 }}>
         <Description>
           {i18n.translate('xpack.fleet.integrations.deploymentDescription', {
-            defaultMessage: 'Send data to Elastic from your applications by referencing your deployment.',
+            defaultMessage:
+              'Send data to Elastic from your applications by referencing your deployment.',
           })}
         </Description>
         <EuiForm component="div">
