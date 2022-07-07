@@ -49,7 +49,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
       title={
         <FormattedMessage
           id="xpack.idxMgmt.componentTemplateEdit.mappingRolloverModalTitle"
-          defaultMessage="Mappings will be applied on next rollover"
+          defaultMessage="Apply mappings now and rollover?"
         />
       }
       onCancel={onClose}
