@@ -29,8 +29,8 @@ export const FlameGraphNavigation = ({ index, projectID, n, timeRange, getter, s
     getter(
       index,
       projectID,
-      new Date(timeRange.start).getTime(),
-      new Date(timeRange.end).getTime(),
+      new Date(timeRange.start).getTime() / 1000,
+      new Date(timeRange.end).getTime() / 1000,
       n
     ).then((response) => {
       setter(response);

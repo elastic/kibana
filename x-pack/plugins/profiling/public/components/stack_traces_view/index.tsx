@@ -92,8 +92,8 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
       topNType,
       index,
       projectID,
-      new Date(timeRange.start).getTime(),
-      new Date(timeRange.end).getTime(),
+      new Date(timeRange.start).getTime() / 1000,
+      new Date(timeRange.end).getTime() / 1000,
       n
     ).then((response: TopNSamples) => {
       const samples = response.TopN;

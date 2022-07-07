@@ -230,7 +230,7 @@ export async function searchEventsGroupByStackTrace(
     getAggs(resEvents) as
       | { group_by: { buckets: Array<{ key: string; count: { value: number } }> } }
       | undefined
-  )?.group_by.buckets.forEach((item: any) => {
+  )?.group_by?.buckets.forEach((item: any) => {
     const traceid: StackTraceID = item.key;
     stackTraceEvents.set(traceid, item.count.value);
   });

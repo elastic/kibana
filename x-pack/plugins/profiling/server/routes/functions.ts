@@ -105,6 +105,7 @@ export function registerTopNFunctionsSearchRoute(
       try {
         const { index, projectID, timeFrom, timeTo, startIndex, endIndex }: QuerySchemaType =
           request.query;
+
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
         const filter = createProjectTimeQuery(projectID, timeFrom, timeTo);
