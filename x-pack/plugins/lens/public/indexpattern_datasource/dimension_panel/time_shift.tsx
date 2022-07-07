@@ -163,7 +163,7 @@ export function TimeShift({
         }
         isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiComboBox
               fullWidth

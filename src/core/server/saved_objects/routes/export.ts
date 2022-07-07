@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
-import { IRouter, KibanaRequest } from '../../http';
+import { KibanaRequest } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import {
@@ -18,6 +18,7 @@ import {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportError,
 } from '../export';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
@@ -129,7 +130,7 @@ const validateOptions = (
 };
 
 export const registerExportRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
   const { maxImportExportSize } = config;
