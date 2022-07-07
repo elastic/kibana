@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { DefaultPageLayout } from '../../components/layout';
-import { IndicatorsTable } from './components/indicators_table';
+import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
 
 export const IndicatorsPage: VFC<RouteComponentProps> = () => {

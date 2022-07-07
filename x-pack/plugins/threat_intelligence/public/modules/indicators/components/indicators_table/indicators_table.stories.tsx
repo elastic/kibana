@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { generateMockIndicator, Indicator } from '../../../../../common/types/Indicator';
-import { IndicatorsTable } from '.';
+import { IndicatorsTable } from './indicators_table';
 
 export default {
   component: IndicatorsTable,

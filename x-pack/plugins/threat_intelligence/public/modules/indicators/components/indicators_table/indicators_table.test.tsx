@@ -7,7 +7,7 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsTable, IndicatorsTableProps } from '.';
+import { IndicatorsTable, IndicatorsTableProps } from './indicators_table';
 
 const stub = () => {};
 
