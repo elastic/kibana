@@ -73,6 +73,7 @@ export function useDiscoverState({
   const { appStateContainer } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
+  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
 
   /**
    * Search session logic
@@ -242,6 +243,18 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
+  const fetchResults = useCallback(() => {
+    if (documentState.result?.length) {
+      const firstRow = documentState.result[0];
+      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      if (!isEqual(columns, documentStateCols)) {
+        return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      }
+      return [];
+    }
+    return [];
+  }, [documentState.result, documentStateCols]);
+
   useEffect(() => {
     async function fetchDataview() {
       if (state.query && isOfAggregateQueryType(state.query)) {
@@ -249,17 +262,20 @@ export function useDiscoverState({
         const idsTitles = await indexPatterns.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
         if (dataViewObj) {
-          let columns: string[] = [];
-          if (documentState.result?.length) {
-            const firstRow = documentState.result[0];
-            columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+          const columns = fetchResults();
+          if (columns.length) {
+            setDocumentStateCols(columns);
           }
-          stateContainer.setAppState({ index: dataViewObj.id, columns });
+          const nextState = {
+            index: dataViewObj.id,
+            ...(columns.length && { columns }),
+          };
+          stateContainer.setAppState(nextState);
         }
       }
     }
     fetchDataview();
-  }, [config, documentState, indexPatterns, savedSearch.searchSource, state.query, stateContainer]);
+  }, [fetchResults, indexPatterns, state.query, stateContainer]);
 
   return {
     data$,
