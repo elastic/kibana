@@ -5,39 +5,37 @@
  * 2.0.
  */
 
+import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TimeRange } from '../../../common/types';
+import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { SettingsFlyout } from '../settings_flyout';
 import { ProfilingDatePicker } from './profiling_date_picker';
 
 export function ProfilingAppPageTemplate({
   children,
-  timeRange,
-  onTimeRangeChange,
-  index,
-  onIndexChange,
-  projectID,
-  onProjectIDChange,
-  n,
-  onNChange,
+  tabs,
 }: {
   children: React.ReactElement;
-  timeRange: TimeRange;
-  onTimeRangeChange: (nextTimeRange: TimeRange) => void;
-  index: string;
-  onIndexChange: (nextIndex: string) => void;
-  projectID: number;
-  onProjectIDChange: (nextProjectID: number) => void;
-  n: number;
-  onNChange: (nextN: number) => void;
+  tabs: EuiPageHeaderContentProps['tabs'];
 }) {
+  const {
+    path,
+    query,
+    query: { rangeFrom, rangeTo, n, projectID, index },
+  } = useProfilingParams('/*');
+
   const {
     start: { observability },
   } = useProfilingDependencies();
 
   const { PageTemplate: ObservabilityPageTemplate } = observability.navigation;
+
+  const profilingRouter = useProfilingRouter();
+  const routePath = useProfilingRoutePath();
 
   return (
     <ObservabilityPageTemplate
@@ -46,18 +44,41 @@ export function ProfilingAppPageTemplate({
         pageTitle: i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
           defaultMessage: 'Profiling',
         }),
+        tabs,
         rightSideItems: [
-          <ProfilingDatePicker timeRange={timeRange} onTimeRangeChange={onTimeRangeChange} />,
+          <ProfilingDatePicker
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            onTimeRangeChange={(nextTimeRange) => {
+              profilingRouter.push(routePath, {
+                path,
+                query: {
+                  ...query,
+                  ...nextTimeRange,
+                },
+              });
+            }}
+          />,
           <SettingsFlyout
             title={i18n.translate('xpack.profiling.appPageTemplate.settingsTitle', {
               defaultMessage: 'Settings',
             })}
-            defaultIndex={index}
-            updateIndex={onIndexChange}
-            defaultProjectID={projectID}
-            updateProjectID={onProjectIDChange}
-            defaultN={n}
-            updateN={onNChange}
+            values={{
+              index,
+              projectID,
+              n,
+            }}
+            onChange={(values) => {
+              profilingRouter.push(routePath, {
+                path,
+                query: {
+                  ...query,
+                  index: values.index,
+                  projectID: values.projectID,
+                  n: values.n,
+                },
+              });
+            }}
           />,
         ],
       }}

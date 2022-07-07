@@ -20,8 +20,4 @@ export interface IMyStrategyResponse extends IEsSearchResponse {
 export interface TimeRange {
   start: string;
   end: string;
-  isoStart: string;
-  isoEnd: string;
-  unixStart: number;
-  unixEnd: number;
 }
