@@ -153,7 +153,7 @@ export const RelevanceTuningLogic = kea<
         search_fields: {},
         boosts: {},
         precision: 2,
-        precision_enabled: false
+        precision_enabled: false,
       },
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
@@ -243,7 +243,7 @@ export const RelevanceTuningLogic = kea<
     isPrecisionTuningEnabled: [
       () => [selectors.searchSettings],
       (searchSettings: SearchSettings): boolean => searchSettings.precision_enabled,
-    ]
+    ],
   }),
   listeners: ({ actions, values }) => ({
     initializeRelevanceTuning: async () => {

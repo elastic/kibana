@@ -87,7 +87,7 @@ describe('RelevanceTuningLogic', () => {
       precision_enabled: true,
     },
     isPrecisionTuningEnabled: true,
-  }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1129,8 +1129,8 @@ describe('RelevanceTuningLogic', () => {
       it('should be set based on precision enabled', () => {
         mount({
           searchSettings: {
-            precision_enabled: true
-          }
+            precision_enabled: true,
+          },
         });
 
         expect(RelevanceTuningLogic.values.isPrecisionTuningEnabled).toEqual(true);
