@@ -220,7 +220,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               <ConsoleCodeBlock>
                 <FormattedMessage
                   id="xpack.securitySolution.console.commandValidation.unknownArgument"
-                  defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
+                  defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not supported by this command: {unknownArgs}"
                   values={{
                     countOfInvalidArgs: unknownInputArgs.length,
                     command: (

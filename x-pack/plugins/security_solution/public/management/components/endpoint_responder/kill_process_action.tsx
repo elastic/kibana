@@ -8,13 +8,13 @@
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
+import { ActionError } from './action_error';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -97,29 +97,15 @@ export const KillProcessActionResult = memo<
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
           { defaultMessage: 'Kill process action failure' }
         )}
-        data-test-subj="killProcessErrorCallout"
-      >
-        <div>
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.killProcess.errorMessage"
-            defaultMessage="The following errors were encountered:"
-          />
-        </div>
-        <EuiSpacer size="s" />
-        <div>
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.killProcess.errorList"
-            defaultMessage="{errors}"
-            values={{ errors: completedActionDetails.errors.join(' | ') }}
-          />
-        </div>
-      </ResultComponent>
+        dataTestSubj={'killProcessErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 

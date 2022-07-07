@@ -25,12 +25,9 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
     });
   }, [commandDef]);
 
-  const additionalProps = useMemo(
-    () => ({
-      className: 'euiTruncateText',
-    }),
-    []
-  );
+  const additionalProps = () => ({
+    className: 'euiTruncateText',
+  });
 
   return (
     <>
