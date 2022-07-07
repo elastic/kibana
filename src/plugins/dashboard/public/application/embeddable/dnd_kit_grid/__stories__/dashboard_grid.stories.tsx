@@ -5,11 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
-import { DndContext } from '@dnd-kit/core';
+import React, { useState } from 'react';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
+import {
+  restrictToVerticalAxis,
+  restrictToWindowEdges,
+  createSnapModifier,
+} from '@dnd-kit/modifiers';
 
-import { Draggable } from '../components/draggable';
-import { Droppable } from '../components/droppable';
+import { Droppable } from '../components/container_components/droppable';
+import { Panel } from '../components/presentation_components/panel';
+import { Draggable } from '../components/container_components/draggable';
 
 export default {
   title: 'POC - dnd-kit',
@@ -18,10 +24,30 @@ export default {
 };
 
 export const BasicExample = () => {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const gridSize = 20; // pixels
+  const snapToGridModifier = createSnapModifier(gridSize);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
-    <DndContext>
-      <Draggable />
-      <Droppable />
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      modifiers={[restrictToVerticalAxis, snapToGridModifier]}
+    >
+      <Draggable id="my-draggable-element">
+        <Panel />
+      </Draggable>
+      {/* <Droppable /> */}
+      <DragOverlay modifiers={[restrictToWindowEdges]}>{isDragging ? <Panel /> : null}</DragOverlay>
     </DndContext>
   );
 };

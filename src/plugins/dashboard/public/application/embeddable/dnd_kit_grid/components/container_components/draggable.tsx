@@ -7,20 +7,21 @@
  */
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { Panel } from '../presentation_components/panel';
 
-export const Draggable = () => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: 'draggable',
+export const Draggable = ({ ...props }) => {
+  const Element = props.element || 'div';
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: props.id,
   });
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
+
+  const style = {
+    opacity: isDragging ? '0.5' : '',
+  };
 
   return (
-    <button ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      Draggable
-    </button>
+    <Element ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      {props.children}
+    </Element>
   );
 };
