@@ -12,7 +12,7 @@ import type { ProcRunner } from '@kbn/dev-proc-runner';
 
 import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_SCRIPT_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';
-import { getCliArgs } from './kibana_cli_args';
+import { parseRawFlags } from './kibana_cli_args';
 
 function extendNodeOptions(installDir?: string) {
   if (!installDir) {
@@ -46,8 +46,21 @@ export async function runKibanaServer({
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const extraArgs = options.extraKbnOpts ?? [];
 
+  const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
+  const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
+  const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
   const cmd = getKibanaCmd(installDir);
-  const mainArgs = getCliArgs(config, installDir, extraArgs);
+
+  const mainArgs = parseRawFlags([
+    // When installDir is passed, we run from a built version of Kibana which uses different command line
+    // arguments. If installDir is not passed, we run from source code.
+    ...(installDir
+      ? [...buildArgs, ...serverArgs.filter((a: string) => a !== '--oss')]
+      : [...sourceArgs, ...serverArgs]),
+
+    // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
+    ...extraArgs,
+  ]);
 
   const env = {
     FORCE_COLOR: 1,

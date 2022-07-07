@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Config } from '../../functional_test_runner';
-
 /**
  * These aliases are used to ensure the values for different flags are collected in a single set.
  */
@@ -86,7 +84,7 @@ export function getArgValue(args: KibanaCliArg[], name: string): ArgValue | ArgV
   }
 }
 
-function parseRawFlags(rawFlags: string[]) {
+export function parseRawFlags(rawFlags: string[]) {
   // map of CliArg values by their name, this allows us to deduplicate flags and ensure
   // that the last flag wins
   const cliArgs = new Map<string, KibanaCliArg | KibanaCliArg[]>();
@@ -122,29 +120,6 @@ function parseRawFlags(rawFlags: string[]) {
     })
     .map((a) => a[1])
     .flat();
-}
-
-/**
- * When installDir is passed, we run from a built version of Kibana,
- * which uses different command line arguments. If installDir is not
- * passed, we run from source code. We also allow passing in extra
- * Kibana server options, so we tack those on here.
- */
-export function getCliArgs(
-  config: Config,
-  installDir?: string,
-  extraKbnOpts: string[] = []
-): KibanaCliArg[] {
-  const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
-  const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
-  const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
-
-  return parseRawFlags([
-    ...(installDir
-      ? [...buildArgs, ...serverArgs.filter((a: string) => a !== '--oss')]
-      : [...sourceArgs, ...serverArgs]),
-    ...extraKbnOpts,
-  ]);
 }
 
 /**
