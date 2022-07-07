@@ -7,21 +7,33 @@
  */
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { Panel } from '../presentation_components/panel';
+import { PanelState } from '../../types';
+interface Props {
+  state: PanelState;
+  element?: React.ElementType | string;
+  children?: JSX.Element | JSX.Element[];
+}
 
-export const Draggable = ({ ...props }) => {
-  const Element = props.element || 'div';
+export const Draggable = ({ state, element, children }: Props) => {
+  const Element = element || 'div';
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: props.id,
+    id: state.id,
   });
+
+  const transform = {
+    transform: isDragging
+      ? `translate3d(${state.deltaPos.x}px, ${state.deltaPos.y}px, 0)`
+      : `translate3d(${state.initPos.x}px, ${state.initPos.y}px, 0)`,
+  };
 
   const style = {
     opacity: isDragging ? '0.5' : '',
+    ...transform,
   };
 
   return (
     <Element ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      {props.children}
+      {children}
     </Element>
   );
 };
