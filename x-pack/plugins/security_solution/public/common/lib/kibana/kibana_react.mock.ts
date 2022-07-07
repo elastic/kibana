@@ -42,6 +42,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -101,6 +102,7 @@ export const createStartServicesMock = (
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cases = mockCasesContract();
   cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
+  const triggersActionsUi = triggersActionsUiMock.createStart();
 
   return {
     ...core,
@@ -159,6 +161,7 @@ export const createStartServicesMock = (
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
     },
+    triggersActionsUi,
   } as unknown as StartServices;
 };
 
