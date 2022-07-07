@@ -20,7 +20,7 @@
 import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
-import { buildArgv } from 'jest-cli/build/cli';
+import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
@@ -44,7 +44,7 @@ declare global {
 /* eslint-enable */
 
 export function runJest(configName = 'jest.config.js') {
-  const argv = buildArgv(process.argv);
+  const argv = getopts(process.argv.slice(2));
   const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({
