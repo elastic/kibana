@@ -64,7 +64,10 @@ export function PackageCard({
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="warning">
-            <FormattedMessage id="packageCard.unverifiedLabel" defaultMessage="Unverified" />
+            <FormattedMessage
+              id="xpack.fleet.packageCard.unverifiedLabel"
+              defaultMessage="Unverified"
+            />
           </EuiBadge>
         </span>
       </EuiFlexItem>
