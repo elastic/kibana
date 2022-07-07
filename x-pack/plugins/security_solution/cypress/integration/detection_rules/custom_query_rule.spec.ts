@@ -83,7 +83,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRule,
@@ -208,6 +208,7 @@ describe('Custom query rules', () => {
 
   // adding these tests as "skipped" as they are a work-in-progress
   // don't want these tests to hold up pushing in bug fixes as part of this PR.
+  // cannot reliably select the
   describe.skip('Custom detection rules creation with data view', () => {
     const expectedNumberOfRules = 1;
 
