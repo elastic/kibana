@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../services';
 
@@ -26,15 +27,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Loaded Dashboard', () => {
     let fromTimestamp: string | undefined;
 
-    const getEvents = async (count: number) =>
+    const getEvents = async (count: number, options?: GetEventsOptions) =>
       ebtUIHelper.getEvents(count, {
         eventTypes: ['dashboard-data-loaded'],
         fromTimestamp,
         withTimeoutMs: 1000,
+        ...options,
       });
 
-    const checkEmitsOnce = async () => {
-      const events = await getEvents(Number.MAX_SAFE_INTEGER);
+    const checkEmitsOnce = async (options?: GetEventsOptions) => {
+      const events = await getEvents(Number.MAX_SAFE_INTEGER, options);
       expect(events.length).to.be(1);
       const event = events[0];
       expect(event.event_type).to.eql('dashboard-data-loaded');
@@ -138,7 +140,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        */
       it('emits when map is added', async () => {
         await dashboardAddPanel.addEmbeddable(MAP_PANEL_TITLE, 'map');
-        await checkEmitsOnce();
+        await checkEmitsOnce({
+          withTimeoutMs: 2500,
+        });
       });
 
       it('doesnt emit when removing map panel', async () => {
