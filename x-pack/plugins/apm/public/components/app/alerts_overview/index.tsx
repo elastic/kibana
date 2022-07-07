@@ -86,14 +86,12 @@ export function AlertsOverview() {
     <EuiPanel borderRadius="none" hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <AlertsTableStatusFilter
-                status={alertStatusFilter}
-                onChange={setAlertStatusFilter}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <AlertsTableStatusFilter
+              status={alertStatusFilter}
+              onChange={setAlertStatusFilter}
+            />
+          </EuiFlexItem>
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsStateTable {...alertStateProps} />

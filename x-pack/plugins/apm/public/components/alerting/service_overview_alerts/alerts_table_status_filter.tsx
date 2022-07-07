@@ -20,58 +20,34 @@ export type AlertStatusFilterButton =
   | typeof ALERT_STATUS_RECOVERED
   | typeof ALL_ALERTS_FILTER;
 
-export interface AlertStatusFilter {
-  status: AlertStatusFilterButton;
-  query: string;
-  label: string;
-}
-
 export interface AlertStatusFilterProps {
   status: AlertStatusFilterButton;
   onChange: (id: AlertStatusFilterButton) => void;
 }
 
-export const allAlerts: AlertStatusFilter = {
-  status: ALL_ALERTS_FILTER,
-  query: '',
-  label: i18n.translate('xpack.apm.alerts.alertStatusFilter.showAll', {
-    defaultMessage: 'Show all',
-  }),
-};
-
-export const activeAlerts: AlertStatusFilter = {
-  status: ALERT_STATUS_ACTIVE,
-  query: `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
-  label: i18n.translate('xpack.apm.alerts.alertStatusFilter.active', {
-    defaultMessage: 'Active',
-  }),
-};
-
-export const recoveredAlerts: AlertStatusFilter = {
-  status: ALERT_STATUS_RECOVERED,
-  query: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
-  label: i18n.translate('xpack.apm.alerts.alertStatusFilter.recovered', {
-    defaultMessage: 'Recovered',
-  }),
-};
-
 const options: EuiButtonGroupOptionProps[] = [
   {
-    id: allAlerts.status,
-    label: allAlerts.label,
-    value: allAlerts.query,
+    id: ALL_ALERTS_FILTER,
+    value: '',
+    label: i18n.translate('xpack.apm.alerts.alertStatusFilter.showAll', {
+      defaultMessage: 'Show all',
+    }),
     'data-test-subj': 'alert-status-filter-show-all-button',
   },
   {
-    id: activeAlerts.status,
-    label: activeAlerts.label,
-    value: activeAlerts.query,
+    id: ALERT_STATUS_ACTIVE,
+    value: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
+    label: i18n.translate('xpack.apm.alerts.alertStatusFilter.active', {
+      defaultMessage: 'Active',
+    }),
     'data-test-subj': 'alert-status-filter-active-button',
   },
   {
-    id: recoveredAlerts.status,
-    label: recoveredAlerts.label,
-    value: recoveredAlerts.query,
+    id: ALERT_STATUS_RECOVERED,
+    value: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
+    label: i18n.translate('xpack.apm.alerts.alertStatusFilter.recovered', {
+      defaultMessage: 'Recovered',
+    }),
     'data-test-subj': 'alert-status-filter-recovered-button',
   },
 ];
