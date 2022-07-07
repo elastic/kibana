@@ -19,38 +19,6 @@ import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/syn
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
-export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
-  method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
-  validate: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
-    }),
-  },
-  handler: async ({
-    request,
-    response,
-    server: { encryptedSavedObjects },
-    savedObjectsClient,
-  }): Promise<any> => {
-    const { monitorId } = request.params;
-    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
-    try {
-      return await libs.requests.getSyntheticsMonitor({
-        monitorId,
-        encryptedSavedObjectsClient,
-        savedObjectsClient,
-      });
-    } catch (getErr) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        return getMonitorNotFoundResponse(response, monitorId);
-      }
-
-      throw getErr;
-    }
-  },
-});
-
 const querySchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
@@ -65,49 +33,6 @@ const querySchema = schema.object({
 });
 
 type MonitorsQuery = TypeOf<typeof querySchema>;
-
-export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
-  method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS,
-  validate: {
-    query: querySchema,
-  },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
-    const { filters, query } = request.query;
-    const monitorsPromise = getMonitors(request.query, server, savedObjectsClient);
-
-
-    if (filters || query) {
-      const totalMonitorsPromise = savedObjectsClient.find({
-        type: syntheticsMonitorType,
-        perPage: 0,
-        page: 1,
-      });
-
-      const allResolved = await Promise.all([monitorsPromise, totalMonitorsPromise]);
-      const { saved_objects: monitors, per_page: perPageT, ...rest } = allResolved[0];
-      const { total } = allResolved[1];
-
-      return {
-        ...rest,
-        monitors,
-        perPage: perPageT,
-        absoluteTotal: total,
-        syncErrors: server.syntheticsService.syncErrors,
-      };
-    }
-
-    const { saved_objects: monitors, per_page: perPageT, ...rest } = await monitorsPromise;
-
-    return {
-      ...rest,
-      monitors,
-      perPage: perPageT,
-      absoluteTotal: rest.total,
-      syncErrors: server.syntheticsService.syncErrors,
-    };
-  },
-});
 
 const getMonitors = (
   request: MonitorsQuery,
@@ -144,6 +69,80 @@ const getMonitors = (
     filter: filters + filter,
   });
 };
+
+export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'GET',
+  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  validate: {
+    params: schema.object({
+      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    }),
+  },
+  handler: async ({
+    request,
+    response,
+    server: { encryptedSavedObjects },
+    savedObjectsClient,
+  }): Promise<any> => {
+    const { monitorId } = request.params;
+    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+    try {
+      return await libs.requests.getSyntheticsMonitor({
+        monitorId,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
+      });
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        return getMonitorNotFoundResponse(response, monitorId);
+      }
+
+      throw getErr;
+    }
+  },
+});
+
+export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+  method: 'GET',
+  path: API_URLS.SYNTHETICS_MONITORS,
+  validate: {
+    query: querySchema,
+  },
+  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
+    const { filters, query } = request.query;
+    const monitorsPromise = getMonitors(request.query, server, savedObjectsClient);
+
+    if (filters || query) {
+      const totalMonitorsPromise = savedObjectsClient.find({
+        type: syntheticsMonitorType,
+        perPage: 0,
+        page: 1,
+      });
+
+      const allResolved = await Promise.all([monitorsPromise, totalMonitorsPromise]);
+      const { saved_objects: monitors, per_page: perPageT, ...rest } = allResolved[0];
+      const { total } = allResolved[1];
+
+      return {
+        ...rest,
+        monitors,
+        perPage: perPageT,
+        absoluteTotal: total,
+        syncErrors: server.syntheticsService.syncErrors,
+      };
+    }
+
+    const { saved_objects: monitors, per_page: perPageT, ...rest } = await monitorsPromise;
+
+    return {
+      ...rest,
+      monitors,
+      perPage: perPageT,
+      absoluteTotal: rest.total,
+      syncErrors: server.syntheticsService.syncErrors,
+    };
+  },
+});
 
 const getFilter = (field: string, values?: string | string[], operator = 'OR') => {
   if (!values) {
