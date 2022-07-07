@@ -178,7 +178,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             <EuiText color="subdued" size="xs">
               <FormattedMessage
                 id="xpack.stackAlerts.components.ui.alertParams.dataViewPopover.createDataViewButton.noPermissionDescription"
-                defaultMessage="Contact your system administrator to create new data views."
+                defaultMessage="You need additional privileges to create data views. Contact your administrator."
               />
             </EuiText>
           </EuiPopoverFooter>
