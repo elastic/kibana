@@ -21,8 +21,14 @@ import {
 } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { VisParams } from '../../common';
-import { getPaletteService, getThemeService, getFormatService } from '../services';
+import {
+  getPaletteService,
+  getThemeService,
+  getFormatService,
+  getUiSettingsService,
+} from '../services';
 import { getCurrencyCode } from './currency_codes';
 
 const defaultColor = euiLightVars.euiColorDarkestShade;
@@ -87,7 +93,9 @@ const getFormatter = (
     return formatter.getConverterFor('text');
   }
 
-  const locale = String(numeral.language());
+  const uiSettings = getUiSettingsService();
+
+  const locale = uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE) || 'en';
 
   const intlOptions: Intl.NumberFormatOptions = {
     maximumFractionDigits: 2,
@@ -98,10 +106,16 @@ const getFormatter = (
   }
 
   if (formatId === 'currency') {
+    const currentNumeralLang = numeral.language();
+    numeral.language(locale);
+
     const {
       currency: { symbol: currencySymbol },
       // @ts-expect-error
     } = numeral.languageData();
+
+    // restore previous value
+    numeral.language(currentNumeralLang);
 
     intlOptions.currency = getCurrencyCode(locale, currencySymbol);
     intlOptions.style = 'currency';

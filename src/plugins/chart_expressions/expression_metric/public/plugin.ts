@@ -14,6 +14,7 @@ import { metricVisFunction } from '../common';
 import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
+import { setUiSettingsService } from './services/ui_settings';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -32,6 +33,7 @@ export class ExpressionMetricPlugin implements Plugin<void, void> {
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer(core.theme));
 
+    setUiSettingsService(core.uiSettings);
     setThemeService(charts.theme);
     const palettes = await charts.palettes.getPalettes();
     setPaletteService(palettes);

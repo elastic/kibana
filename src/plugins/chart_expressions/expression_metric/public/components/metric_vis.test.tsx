@@ -21,6 +21,8 @@ const mockDeserialize = jest.fn(() => ({
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
 
+const mockLookupCurrentLocale = jest.fn(() => 'en');
+
 jest.mock('../services', () => ({
   getFormatService: () => {
     return {
@@ -34,6 +36,17 @@ jest.mock('../services', () => ({
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getThemeService } = require('../__mocks__/theme_service');
     return getThemeService();
+  },
+  getUiSettingsService: () => {
+    return {
+      get: mockLookupCurrentLocale,
+    };
+  },
+}));
+
+jest.mock('@kbn/field-formats-plugin/common', () => ({
+  FORMATS_UI_SETTINGS: {
+    FORMAT_NUMBER_DEFAULT_LOCALE: 'format_number_default_locale',
   },
 }));
 
@@ -818,7 +831,7 @@ describe('MetricVisComponent', function () {
       expect(primary).toBe('$1.00K');
       expect(secondary).toBe('$11.20');
 
-      (numeral.language as jest.Mock).mockReturnValueOnce('be-nl');
+      mockLookupCurrentLocale.mockReturnValueOnce('be-nl');
       // @ts-expect-error
       (numeral.languageData as jest.Mock).mockReturnValueOnce({
         currency: {
@@ -830,6 +843,8 @@ describe('MetricVisComponent', function () {
         id: 'currency',
       });
       expect(primaryEuro).toBe('1,00 тыс. €');
+      // check that we restored the numeral.js state
+      expect(numeral.language).toHaveBeenLastCalledWith('en');
     });
 
     it('correctly formats percentages', () => {

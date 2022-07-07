@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getFormatService, setFormatService } from './format_service';
-export { getThemeService, setThemeService } from './theme_service';
-export { getPaletteService, setPaletteService } from './palette_service';
-export { getUiSettingsService, setUiSettingsService } from './ui_settings';
+import { CoreSetup } from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+
+export const [getUiSettingsService, setUiSettingsService] =
+  createGetterSetter<CoreSetup['uiSettings']>('uiSettings');
