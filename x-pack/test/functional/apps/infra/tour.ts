@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  observTourActiveStorageKey,
+  observTourStepStorageKey,
+} from '@kbn/observability-plugin/public/components/shared/tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -15,11 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
 
   const setInitialTourState = async (activeStep?: number) => {
-    await browser.setLocalStorageItem('guidedOnboarding.observability.tourActive', 'true');
-    await browser.setLocalStorageItem(
-      'guidedOnboarding.observability.tourStep',
-      String(activeStep || 1)
-    );
+    await browser.setLocalStorageItem(observTourActiveStorageKey, 'true');
+    await browser.setLocalStorageItem(observTourStepStorageKey, String(activeStep || 1));
     await browser.refresh();
   };
 
@@ -33,8 +34,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await browser.removeLocalStorageItem('guidedOnboarding.observability.tourActive');
-      await browser.removeLocalStorageItem('guidedOnboarding.observability.tourStep');
+      await browser.removeLocalStorageItem(observTourActiveStorageKey);
+      await browser.removeLocalStorageItem(observTourStepStorageKey);
     });
 
     describe('Tour enabled', () => {

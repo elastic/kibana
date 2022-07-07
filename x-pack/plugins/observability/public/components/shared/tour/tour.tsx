@@ -33,8 +33,8 @@ const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
 const overviewPath = '/overview';
 const guidedSetupStep = 6;
 
-const observTourActiveStorageKey = 'guidedOnboarding.observability.tourActive';
-const observTourStepStorageKey = 'guidedOnboarding.observability.tourStep';
+export const observTourActiveStorageKey = 'guidedOnboarding.observability.tourActive';
+export const observTourStepStorageKey = 'guidedOnboarding.observability.tourStep';
 
 const getSteps = ({
   activeStep,
