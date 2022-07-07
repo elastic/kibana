@@ -42,6 +42,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
   const closePopover = () => setTagOptionsVisible(false);
 
   const updateTagsHook = useUpdateTags();
+  const bulkUpdateTags = updateTagsHook.bulkUpdateTags;
 
   const TAGS_QUERY = 'tags:{name}';
 
@@ -49,9 +50,9 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
     () =>
       debounce((newName: string) => {
         const kuery = TAGS_QUERY.replace('{name}', tagName);
-        updateTagsHook.bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
+        bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
       }, 1000),
-    [onTagsUpdated, tagName, updateTagsHook]
+    [onTagsUpdated, tagName, bulkUpdateTags]
   );
 
   return (
