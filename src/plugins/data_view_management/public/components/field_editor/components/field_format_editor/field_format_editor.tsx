@@ -21,7 +21,7 @@ export interface FieldFormatEditorProps {
   fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: FieldFormatParams<{ type?: string }>;
-  fieldFormatEditors: FormatEditorServiceStart;
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }

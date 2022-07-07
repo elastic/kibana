@@ -23,7 +23,7 @@ import { FormatEditor } from './format_editor';
 export interface FormatSelectEditorProps {
   esTypes: ES_FIELD_TYPES[];
   indexPattern: DataView;
-  fieldFormatEditors: FormatEditorServiceStart;
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
   onChange: (change?: FieldFormatConfig) => void;

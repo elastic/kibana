@@ -21,10 +21,10 @@ class TestEditor extends PureComponent {
   }
 }
 
-const formatEditors: FormatEditorServiceStart = {
+const formatEditors: FormatEditorServiceStart['fieldFormatEditors'] = {
   getById: jest.fn(
     () => () => Promise.resolve(TestEditor)
-  ) as unknown as FormatEditorServiceStart['getById'],
+  ) as unknown as FormatEditorServiceStart['fieldFormatEditors']['getById'],
   getAll: jest.fn(),
 };
 

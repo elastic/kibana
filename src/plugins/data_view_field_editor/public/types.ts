@@ -22,13 +22,13 @@ import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import { DeleteFieldProviderProps } from './components';
 
 export interface PluginSetup {
-  fieldFormatEditors: FormatEditorServiceSetup;
+  fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
 }
 
 export interface PluginStart {
   openEditor(options: OpenFieldEditorOptions): () => void;
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
-  fieldFormatEditors: FormatEditorServiceStart;
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   userPermissions: {
     editIndexPattern: () => boolean;
   };

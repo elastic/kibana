@@ -12,7 +12,9 @@ import { FormatEditorServiceSetup, FormatEditorServiceStart } from '../format_ed
 export class FieldFormatEditors {
   private editors: FieldFormatEditorFactory[] = [];
 
-  public setup(defaultFieldEditors: FieldFormatEditorFactory[] = []): FormatEditorServiceSetup {
+  public setup(
+    defaultFieldEditors: FieldFormatEditorFactory[] = []
+  ): FormatEditorServiceSetup['fieldFormatEditors'] {
     this.editors = defaultFieldEditors;
 
     return {
@@ -22,7 +24,7 @@ export class FieldFormatEditors {
     };
   }
 
-  public start(): FormatEditorServiceStart {
+  public start(): FormatEditorServiceStart['fieldFormatEditors'] {
     return {
       getAll: () => [...this.editors],
       getById: <P>(id: string) => {

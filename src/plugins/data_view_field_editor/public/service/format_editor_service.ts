@@ -76,11 +76,15 @@ export class FormatEditorService {
 
 /** @internal */
 export interface FormatEditorServiceSetup {
-  register: (editor: FieldFormatEditorFactory) => void;
+  fieldFormatEditors: {
+    register: (editor: FieldFormatEditorFactory) => void;
+  };
 }
 
 /** @internal */
 export interface FormatEditorServiceStart {
-  getAll: () => FieldFormatEditorFactory[];
-  getById: <P>(id: string) => FieldFormatEditorFactory<P> | undefined;
+  fieldFormatEditors: {
+    getAll: () => FieldFormatEditorFactory[];
+    getById: <P>(id: string) => FieldFormatEditorFactory<P> | undefined;
+  };
 }
