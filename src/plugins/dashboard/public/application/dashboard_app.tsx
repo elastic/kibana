@@ -7,13 +7,14 @@
  */
 
 import { History } from 'history';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
 import {
+  dashboardFeatureCatalog,
   getDashboardBreadcrumb,
   getDashboardTitle,
   leaveConfirmStrings,
@@ -49,6 +50,7 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -75,6 +77,15 @@ export function DashboardApp({
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
   });
+
+  // focus on the top header when title or view mode is changed
+  useEffect(() => {
+    dashboardTitleRef.current?.focus();
+  }, [dashboardState.title, dashboardState.viewMode]);
+
+  const dashboardTitle = useMemo(() => {
+    return getDashboardTitle(dashboardState.title, dashboardState.viewMode, !savedDashboardId);
+  }, [dashboardState.title, dashboardState.viewMode, savedDashboardId]);
 
   // Build app leave handler whenever hasUnsavedChanges changes
   useEffect(() => {
@@ -108,10 +119,10 @@ export function DashboardApp({
         },
       },
       {
-        text: getDashboardTitle(dashboardState.title, dashboardState.viewMode, !savedDashboardId),
+        text: dashboardTitle,
       },
     ]);
-  }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
+  }, [chrome, dashboardState.title, redirectTo, savedDashboardId, dashboardTitle]);
 
   // clear search session when leaving dashboard route
   useEffect(() => {
@@ -131,6 +142,12 @@ export function DashboardApp({
 
   return (
     <>
+      <h1
+        id="dashboardTitle"
+        className="euiScreenReaderOnly"
+        ref={dashboardTitleRef}
+        tabIndex={-1}
+      >{`${dashboardFeatureCatalog.getTitle()} - ${dashboardTitle}`}</h1>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
