@@ -12,6 +12,7 @@ export type {
   HandlerFunction,
   HandlerParameters,
 } from './context_provider';
+export type { IContextContainer } from './context_container';
 export type {
   Headers,
   KnownHeaders,

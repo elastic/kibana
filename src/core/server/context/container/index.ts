@@ -7,4 +7,3 @@
  */
 
 export { ContextContainer } from './context';
-export type { IContextContainer } from './context';

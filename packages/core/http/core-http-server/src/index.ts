@@ -48,6 +48,7 @@ export type {
 
 export type {
   IContextProvider,
+  IContextContainer,
   HandlerContextType,
   HandlerFunction,
   HandlerParameters,

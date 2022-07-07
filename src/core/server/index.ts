@@ -147,14 +147,7 @@ export type {
   ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 
-export type {
-  HttpAuth,
-  HttpServerInfo,
-  HttpServicePreboot,
-  HttpServiceStart,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
-} from './http';
+export type { HttpAuth, HttpServerInfo, HttpServicePreboot, HttpServiceStart } from './http';
 
 export { kibanaResponseFactory, CoreKibanaRequest, CspConfig } from './http';
 
@@ -230,6 +223,7 @@ export type {
   IsAuthenticated,
   AuthStatus,
   GetAuthHeaders,
+  IContextContainer,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';

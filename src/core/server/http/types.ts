@@ -21,29 +21,12 @@ import type {
   SessionStorageFactory,
   GetAuthState,
   IsAuthenticated,
+  IAuthHeadersStorage,
+  IContextContainer,
 } from '@kbn/core-http-server';
 import type { ICspConfig } from '@kbn/core-http-server';
-import { IContextContainer } from '../context';
-import { IAuthHeadersStorage } from './auth_headers_storage';
 import { HttpServerSetup } from './http_server';
 import { ExternalUrlConfig } from './external_url';
-
-/**
- * An object that handles registration of http request context providers.
- * @public
- */
-export type RequestHandlerContextContainer = IContextContainer;
-
-/**
- * Context provider for request handler.
- * Extends request context object with provided functionality or data.
- *
- * @public
- */
-export type RequestHandlerContextProvider<
-  Context extends RequestHandlerContextBase,
-  ContextName extends keyof Context
-> = IContextProvider<Context, ContextName>;
 
 /**
  * @public
@@ -386,8 +369,8 @@ export interface HttpServiceSetup<
     ContextName extends keyof Omit<Context, 'resolve'>
   >(
     contextName: ContextName,
-    provider: RequestHandlerContextProvider<Context, ContextName>
-  ) => RequestHandlerContextContainer;
+    provider: IContextProvider<Context, ContextName>
+  ) => IContextContainer;
 
   /**
    * Provides common {@link HttpServerInfo | information} about the running http server.
@@ -414,8 +397,8 @@ export interface InternalHttpServiceSetup
   >(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,
-    provider: RequestHandlerContextProvider<Context, ContextName>
-  ) => RequestHandlerContextContainer;
+    provider: IContextProvider<Context, ContextName>
+  ) => IContextContainer;
 
   registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
 }
