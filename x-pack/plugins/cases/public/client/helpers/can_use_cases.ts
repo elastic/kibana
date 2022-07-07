@@ -7,6 +7,7 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import {
+  FEATURE_ID,
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -32,15 +33,15 @@ export const canUseCases =
   ): CasesPermissions => {
     const aggregatedPermissions = owners.reduce<CasesPermissions>(
       (acc, owner) => {
-        // TODO: this won't work for general cases, I think we need 'general' there instead of 'cases'
-        const userCapabilitiesForOwner = getUICapabilities(capabilities[`${owner}Cases`]);
+        const userCapabilitiesForOwner = getUICapabilities(capabilities[getFeatureID(owner)]);
 
         acc.create = acc.create || userCapabilitiesForOwner.create;
         acc.read = acc.read || userCapabilitiesForOwner.read;
         acc.update = acc.update || userCapabilitiesForOwner.update;
         acc.delete = acc.delete || userCapabilitiesForOwner.delete;
         acc.push = acc.push || userCapabilitiesForOwner.push;
-        acc.all = acc.all || userCapabilitiesForOwner.all;
+        const allFromAcc = acc.create && acc.read && acc.update && acc.delete && acc.push;
+        acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
 
         return acc;
       },
@@ -58,3 +59,11 @@ export const canUseCases =
       ...aggregatedPermissions,
     };
   };
+
+const getFeatureID = (owner: CasesOwners) => {
+  if (owner === GENERAL_CASES_OWNER) {
+    return FEATURE_ID;
+  }
+
+  return `${owner}Cases`;
+};

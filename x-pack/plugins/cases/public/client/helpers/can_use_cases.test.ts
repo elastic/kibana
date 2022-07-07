@@ -6,124 +6,130 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
+import {
+  allCasesPermissions,
+  noCasesPermissions,
+  readCasesPermissions,
+  writeCasesPermissions,
+} from '../../common/mock';
 import { canUseCases } from './can_use_cases';
 
 type CasesCapabilities = Pick<
   ApplicationStart['capabilities'],
-  'securitySolutionCases' | 'observabilityCases'
+  'securitySolutionCases' | 'observabilityCases' | 'generalCases'
 >;
 
+interface Capabilities {
+  create_cases: boolean;
+  read_cases: boolean;
+  update_cases: boolean;
+  delete_cases: boolean;
+  push_cases: boolean;
+}
+
+const noCasesCapabilities = () => buildCapabilities();
+
+const allCasesCapabilities = () => {
+  return buildCapabilities({
+    create_cases: true,
+    read_cases: true,
+    update_cases: true,
+    delete_cases: true,
+    push_cases: true,
+  });
+};
+
+const writeCasesCapabilities = () => {
+  return buildCapabilities({
+    create_cases: true,
+    update_cases: true,
+    delete_cases: true,
+    push_cases: true,
+  });
+};
+
+const readCasesCapabilities = () => {
+  return buildCapabilities({ read_cases: true });
+};
+
+const buildCapabilities = (overrides?: Partial<Capabilities>) => {
+  return {
+    create_cases: overrides?.create_cases ?? false,
+    read_cases: overrides?.read_cases ?? false,
+    update_cases: overrides?.update_cases ?? false,
+    delete_cases: overrides?.delete_cases ?? false,
+    push_cases: overrides?.push_cases ?? false,
+  };
+};
+
 const hasAll: CasesCapabilities = {
-  securitySolutionCases: {
-    crud_cases: true,
-    read_cases: true,
-  },
-  observabilityCases: {
-    crud_cases: true,
-    read_cases: true,
-  },
+  securitySolutionCases: allCasesCapabilities(),
+  observabilityCases: allCasesCapabilities(),
+  generalCases: allCasesCapabilities(),
 };
 
 const hasNone: CasesCapabilities = {
-  securitySolutionCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
-  observabilityCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
+  securitySolutionCases: noCasesCapabilities(),
+  observabilityCases: noCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasSecurity = {
-  securitySolutionCases: {
-    crud_cases: true,
-    read_cases: true,
-  },
-  observabilityCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
+const hasSecurity: CasesCapabilities = {
+  securitySolutionCases: allCasesCapabilities(),
+  observabilityCases: noCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasObservability = {
-  securitySolutionCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
-  observabilityCases: {
-    crud_cases: true,
-    read_cases: true,
-  },
+const hasObservability: CasesCapabilities = {
+  securitySolutionCases: noCasesCapabilities(),
+  observabilityCases: allCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasObservabilityCrudTrue = {
-  securitySolutionCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
-  observabilityCases: {
-    crud_cases: true,
-    read_cases: false,
-  },
+const hasObservabilityWriteTrue: CasesCapabilities = {
+  securitySolutionCases: noCasesCapabilities(),
+  observabilityCases: writeCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasSecurityCrudTrue = {
-  securitySolutionCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
-  observabilityCases: {
-    crud_cases: true,
-    read_cases: false,
-  },
+const hasSecurityWriteTrue: CasesCapabilities = {
+  securitySolutionCases: writeCasesCapabilities(),
+  observabilityCases: noCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasObservabilityReadTrue = {
-  securitySolutionCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
-  observabilityCases: {
-    crud_cases: false,
-    read_cases: true,
-  },
+const hasObservabilityReadTrue: CasesCapabilities = {
+  securitySolutionCases: noCasesCapabilities(),
+  observabilityCases: readCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasSecurityReadTrue = {
-  securitySolutionCases: {
-    crud_cases: false,
-    read_cases: true,
-  },
-  observabilityCases: {
-    crud_cases: false,
-    read_cases: false,
-  },
+const hasSecurityReadTrue: CasesCapabilities = {
+  securitySolutionCases: readCasesCapabilities(),
+  observabilityCases: noCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
-const hasSecurityAsCrudAndObservabilityAsRead = {
-  securitySolutionCases: {
-    crud_cases: true,
-  },
-  observabilityCases: {
-    read_cases: true,
-  },
+const hasSecurityWriteAndObservabilityRead: CasesCapabilities = {
+  securitySolutionCases: writeCasesCapabilities(),
+  observabilityCases: readCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
 describe('canUseCases', () => {
-  it.each([hasAll, hasSecurity, hasObservability, hasSecurityAsCrudAndObservabilityAsRead])(
-    'returns true for both crud and read, if a user has access to both on any solution',
+  it.each([hasAll, hasSecurity, hasObservability, hasSecurityWriteAndObservabilityRead])(
+    'returns true for all permissions, if a user has access to both on any solution',
     (capability) => {
       const permissions = canUseCases(capability)();
-      expect(permissions).toStrictEqual({ crud: true, read: true });
+      expect(permissions).toStrictEqual(allCasesPermissions());
     }
   );
 
-  it.each([hasObservabilityCrudTrue, hasSecurityCrudTrue])(
-    'returns true for only crud, if a user has access to only crud on any solution',
+  it.each([hasObservabilityWriteTrue, hasSecurityWriteTrue])(
+    'returns true for only write, if a user has access to only write on any solution',
     (capability) => {
       const permissions = canUseCases(capability)();
-      expect(permissions).toStrictEqual({ crud: true, read: false });
+      expect(permissions).toStrictEqual(writeCasesPermissions());
     }
   );
 
@@ -131,15 +137,15 @@ describe('canUseCases', () => {
     'returns true for only read, if a user has access to only read on any solution',
     (capability) => {
       const permissions = canUseCases(capability)();
-      expect(permissions).toStrictEqual({ crud: false, read: true });
+      expect(permissions).toStrictEqual(readCasesPermissions());
     }
   );
 
   it.each([hasNone, {}])(
-    'returns false for both, if a user has access to no solution',
+    'returns false for all permissions, if a user has access to no solution',
     (capability) => {
       const permissions = canUseCases(capability)();
-      expect(permissions).toStrictEqual({ crud: false, read: false });
+      expect(permissions).toStrictEqual(noCasesPermissions());
     }
   );
 });

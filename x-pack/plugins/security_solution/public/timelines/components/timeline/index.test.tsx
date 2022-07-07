@@ -31,6 +31,7 @@ import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -39,6 +40,13 @@ jest.mock('../../containers', () => ({
 jest.mock('./tabs_content');
 
 jest.mock('../../../common/lib/kibana');
+const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
 jest.mock('../../../common/components/url_state/normalize_time_range');
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');

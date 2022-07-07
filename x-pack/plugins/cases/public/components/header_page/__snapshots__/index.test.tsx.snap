@@ -43,7 +43,11 @@ exports[`HeaderPage it renders 1`] = `
               ],
               "permissions": Object {
                 "all": true,
+                "create": true,
+                "delete": true,
+                "push": true,
                 "read": true,
+                "update": true,
               },
             }
           }

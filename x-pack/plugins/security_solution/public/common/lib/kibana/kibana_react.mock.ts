@@ -104,7 +104,7 @@ export const createStartServicesMock = (
 
   return {
     ...core,
-    cases: mockCasesContract(),
+    cases,
     unifiedSearch,
     data: {
       ...data,

@@ -15,7 +15,6 @@ import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -63,7 +62,14 @@ jest.mock('../../../../common/lib/kibana', () => ({
       cases: mockCasesContract(),
     },
   }),
-  useGetUserCasesPermissions: jest.fn().mockReturnValue(allCasesPermissions()),
+  useGetUserCasesPermissions: jest.fn().mockReturnValue({
+    all: true,
+    create: true,
+    read: true,
+    update: true,
+    delete: true,
+    push: true,
+  }),
 }));
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
