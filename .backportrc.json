@@ -45,5 +45,6 @@
   },
   "autoMerge": true,
   "autoMergeMethod": "squash",
-  "backportBinary": "node scripts/backport"
+  "backportBinary": "node scripts/backport",
+  "prDescription": "{defaultPrDescription}\n\n<!--BACKPORT {commits} BACKPORT-->"
 }
