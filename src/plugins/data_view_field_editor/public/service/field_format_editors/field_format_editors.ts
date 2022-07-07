@@ -16,8 +16,8 @@ export class FieldFormatEditors {
     this.editors = defaultFieldEditors;
 
     return {
-      register: <P>(editor: FieldFormatEditorFactory<P>) => {
-        this.editors.push(editor as FieldFormatEditorFactory<unknown>);
+      register: (editor: FieldFormatEditorFactory) => {
+        this.editors.push(editor);
       },
     };
   }

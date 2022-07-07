@@ -38,7 +38,7 @@ export class FormatEditorService {
   }
 
   public setup() {
-    const defaultFieldFormatEditorFactories = [
+    const defaultFieldFormatEditorFactories: FieldFormatEditorFactory[] = [
       bytesFormatEditorFactory,
       colorFormatEditorFactory,
       dateFormatEditorFactory,
@@ -52,7 +52,7 @@ export class FormatEditorService {
       truncateFormatEditorFactory,
       urlFormatEditorFactory,
       histogramFormatEditorFactory,
-    ] as Array<FieldFormatEditorFactory<unknown>>;
+    ];
 
     const fieldFormatEditorsSetup = this.fieldFormatEditors.setup(
       defaultFieldFormatEditorFactories
@@ -76,7 +76,7 @@ export class FormatEditorService {
 
 /** @internal */
 export interface FormatEditorServiceSetup {
-  register: <P>(editor: FieldFormatEditorFactory<P>) => void;
+  register: (editor: FieldFormatEditorFactory) => void;
 }
 
 /** @internal */
