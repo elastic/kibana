@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { isEqual } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
@@ -31,20 +32,28 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
     id: settingsSo.id,
     ...settingsSo.attributes,
     fleet_server_hosts: settingsSo.attributes.fleet_server_hosts || [],
+    preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
   };
 }
 
 export async function settingsSetup(soClient: SavedObjectsClientContract) {
   try {
     const settings = await getSettings(soClient);
+    const defaultSettings = createDefaultSettings();
+
+    const fleetServerHostsIsPreconfigured = getConfigFleetServerHosts()?.length ?? 0 > 0;
+
+    const fleetServerHostsShouldBeUpdated =
+      !settings.fleet_server_hosts ||
+      settings.fleet_server_hosts.length === 0 ||
+      (fleetServerHostsIsPreconfigured &&
+        !isEqual(settings.fleet_server_hosts, defaultSettings.fleet_server_hosts));
+
     // Migration for < 7.13 Kibana
-    if (!settings.fleet_server_hosts || settings.fleet_server_hosts.length === 0) {
-      const defaultSettings = createDefaultSettings();
-      if (defaultSettings.fleet_server_hosts.length > 0) {
-        return saveSettings(soClient, {
-          fleet_server_hosts: defaultSettings.fleet_server_hosts,
-        });
-      }
+    if (defaultSettings.fleet_server_hosts.length > 0 && fleetServerHostsShouldBeUpdated) {
+      return saveSettings(soClient, {
+        fleet_server_hosts: defaultSettings.fleet_server_hosts,
+      });
     }
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
@@ -103,8 +112,15 @@ export async function saveSettings(
   }
 }
 
+function getConfigFleetServerHosts() {
+  const config = appContextService.getConfig();
+  return config?.agents?.fleet_server?.hosts && config.agents.fleet_server.hosts.length > 0
+    ? config?.agents?.fleet_server?.hosts
+    : undefined;
+}
+
 export function createDefaultSettings(): BaseSettings {
-  const configFleetServerHosts = appContextService.getConfig()?.agents?.fleet_server?.hosts;
+  const configFleetServerHosts = getConfigFleetServerHosts();
   const cloudFleetServerHosts = getCloudFleetServersHosts();
 
   const fleetServerHosts = configFleetServerHosts ?? cloudFleetServerHosts ?? [];
