@@ -100,7 +100,7 @@
               {
                 "pluginId": "core",
                 "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
+                "docId": "kibCorePluginApi",
                 "section": "def-server.RequestHandler",
                 "text": "RequestHandler"
               },
@@ -516,7 +516,7 @@
                   {
                     "pluginId": "core",
                     "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
+                    "docId": "kibCorePluginApi",
                     "section": "def-server.RequestHandler",
                     "text": "RequestHandler"
                   },

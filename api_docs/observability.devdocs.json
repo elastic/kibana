@@ -7138,7 +7138,9 @@
           },
           ">>[TEndpoint] extends ",
           "ServerRoute",
-          "<any, any, any, infer TReturnType, ServerRouteCreateOptions> ? TReturnType : never"
+          "<any, any, any, infer TReturnType, ",
+          "ServerRouteCreateOptions",
+          "> ? TReturnType : never"
         ],
         "path": "x-pack/plugins/observability/server/routes/types.ts",
         "deprecated": false,

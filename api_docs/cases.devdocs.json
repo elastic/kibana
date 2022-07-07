@@ -490,7 +490,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; userCanCrud: boolean; releasePhase?: ",
+          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
           "ReleasePhase",
           " | undefined; hiddenStatuses?: ",
           "CaseStatusWithAllStatus",
@@ -518,7 +518,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; owner: string[]; userCanCrud: boolean; onComponentInitialized?: (() => void) | undefined; actionsNavigation?: ",
+          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; onComponentInitialized?: (() => void) | undefined; actionsNavigation?: ",
           "CasesNavigation",
           "<string, \"configurable\"> | undefined; ruleDetailsNavigation?: ",
           "CasesNavigation",
@@ -552,7 +552,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; userCanCrud: boolean; releasePhase?: ",
+          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
           "ReleasePhase",
           " | undefined; afterCaseCreated?: ((theCase: ",
           {
@@ -596,7 +596,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; owner: string[]; userCanCrud: boolean; releasePhase?: ",
+          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
           "ReleasePhase",
           " | undefined; maxCasesToShow: number; }"
         ],

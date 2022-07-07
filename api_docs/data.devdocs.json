@@ -4328,7 +4328,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -14551,7 +14553,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,

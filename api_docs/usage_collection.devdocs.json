@@ -2187,7 +2187,7 @@
         "tags": [],
         "label": "AllowedSchemaTypes",
         "description": [
-          "\r\nPossible type values in the schema"
+          "\nPossible type values in the schema"
         ],
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
