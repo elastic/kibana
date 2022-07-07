@@ -8,9 +8,10 @@
 
 import { getColorAssignments } from './color_assignment';
 import type { DataLayerConfig } from '../../common';
-import type { FormatFactory } from '../types';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { LayersFieldFormats } from './layers';
 
 describe('color_assignment', () => {
   const tables: Record<string, Datatable> = {
@@ -83,23 +84,55 @@ describe('color_assignment', () => {
     },
   ];
 
-  const formatFactory = (() =>
-    ({
-      convert(x: unknown) {
-        return x;
+  const fieldFormats = {
+    first: {
+      splitSeriesAccessors: {
+        split1: {
+          format: { id: 'string' },
+          formatter: {
+            convert: (x) => x,
+          } as FieldFormat,
+        },
       },
-    } as unknown)) as FormatFactory;
+    },
+    second: {
+      splitSeriesAccessors: {
+        split2: {
+          format: { id: 'string' },
+          formatter: {
+            convert: (x) => x,
+          } as FieldFormat,
+        },
+      },
+    },
+  } as unknown as LayersFieldFormats;
+
+  const formattedDatatables = {
+    first: {
+      table: tables['1'],
+      formattedColumns: {},
+    },
+    second: {
+      table: tables['2'],
+      formattedColumns: {},
+    },
+  };
 
   describe('totalSeriesCount', () => {
     it('should calculate total number of series per palette', () => {
-      const assignments = getColorAssignments(layers, formatFactory, {
-        yTitles: {
-          y1: 'test1',
-          y2: 'test2',
-          y3: 'test3',
-          y4: 'test4',
+      const assignments = getColorAssignments(
+        layers,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
         },
-      });
+        fieldFormats,
+        formattedDatatables
+      );
       // two y accessors, with 3 splitted series
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 3);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
@@ -108,7 +141,6 @@ describe('color_assignment', () => {
     it('should calculate total number of series spanning multible layers', () => {
       const assignments = getColorAssignments(
         [layers[0], { ...layers[1], palette: layers[0].palette }],
-        formatFactory,
         {
           yTitles: {
             y1: 'test1',
@@ -116,7 +148,9 @@ describe('color_assignment', () => {
             y3: 'test3',
             y4: 'test4',
           },
-        }
+        },
+        fieldFormats,
+        formattedDatatables
       );
       // two y accessors, with 3 splitted series, two times
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 3 + 2 * 3);
@@ -126,7 +160,6 @@ describe('color_assignment', () => {
     it('should calculate total number of series for non split series', () => {
       const assignments = getColorAssignments(
         [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessors: undefined }],
-        formatFactory,
         {
           yTitles: {
             y1: 'test1',
@@ -134,7 +167,9 @@ describe('color_assignment', () => {
             y3: 'test3',
             y4: 'test4',
           },
-        }
+        },
+        fieldFormats,
+        formattedDatatables
       );
       // two y accessors, with 3 splitted series for the first layer, 2 non splitted y accessors for the second layer
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 3 + 2);
@@ -151,13 +186,20 @@ describe('color_assignment', () => {
         },
         layers[1],
       ];
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = formatMock;
+      const newFormattedDatatables = {
+        first: {
+          formattedColumns: formattedDatatables.first.formattedColumns,
+          table: {
+            ...formattedDatatables.first.table,
+            rows: [{ split1: complexObject }, { split1: 'abc' }],
+          },
+        },
+        second: formattedDatatables.second,
+      };
 
       const assignments = getColorAssignments(
         newLayers,
-        (() =>
-          ({
-            convert: formatMock,
-          } as unknown)) as FormatFactory,
         {
           yTitles: {
             y1: 'test1',
@@ -165,8 +207,13 @@ describe('color_assignment', () => {
             y3: 'test3',
             y4: 'test4',
           },
-        }
+        },
+        fieldFormats,
+        newFormattedDatatables
       );
+
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (x) => x as string;
+      expect(formatMock).toHaveBeenCalledWith(complexObject);
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
       expect(formatMock).toHaveBeenCalledWith(complexObject);
@@ -174,14 +221,26 @@ describe('color_assignment', () => {
 
     it('should handle missing columns', () => {
       const newLayers = [{ ...layers[0], table: { ...tables['1'], columns: [] } }, layers[1]];
-      const assignments = getColorAssignments(newLayers, formatFactory, {
-        yTitles: {
-          y1: 'test1',
-          y2: 'test2',
-          y3: 'test3',
-          y4: 'test4',
+      const newFormattedDatatables = {
+        first: {
+          formattedColumns: formattedDatatables.first.formattedColumns,
+          table: { ...formattedDatatables.first.table, columns: [] },
         },
-      });
+        second: formattedDatatables.second,
+      };
+      const assignments = getColorAssignments(
+        newLayers,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
+        },
+        fieldFormats,
+        newFormattedDatatables
+      );
 
       // if the split column is missing, just assume a single split
       expect(assignments.palette1.totalSeriesCount).toEqual(2);
@@ -190,14 +249,19 @@ describe('color_assignment', () => {
 
   describe('getRank', () => {
     it('should return the correct rank for a series key', () => {
-      const assignments = getColorAssignments(layers, formatFactory, {
-        yTitles: {
-          y1: 'test1',
-          y2: 'test2',
-          y3: 'test3',
-          y4: 'test4',
+      const assignments = getColorAssignments(
+        layers,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
         },
-      });
+        fieldFormats,
+        formattedDatatables
+      );
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
       expect(assignments.palette1.getRank(layers[0], '2 - test2')).toEqual(3);
       // 1 series in front of 1/y4 - 1/y3
@@ -206,14 +270,19 @@ describe('color_assignment', () => {
 
     it('should return the correct rank for a series key spanning multiple layers', () => {
       const newLayers = [layers[0], { ...layers[1], palette: layers[0].palette }];
-      const assignments = getColorAssignments(newLayers, formatFactory, {
-        yTitles: {
-          y1: 'test1',
-          y2: 'test2',
-          y3: 'test3',
-          y4: 'test4',
+      const assignments = getColorAssignments(
+        newLayers,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
         },
-      });
+        fieldFormats,
+        formattedDatatables
+      );
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
       expect(assignments.palette1.getRank(newLayers[0], '2 - test2')).toEqual(3);
       // 2 series in front for the current layer (1/y3, 1/y4), plus all 6 series from the first layer
@@ -225,14 +294,19 @@ describe('color_assignment', () => {
         layers[0],
         { ...layers[1], palette: layers[0].palette, splitAccessors: undefined },
       ];
-      const assignments = getColorAssignments(newLayers, formatFactory, {
-        yTitles: {
-          y1: 'test1',
-          y2: 'test2',
-          y3: 'test3',
-          y4: 'test4',
+      const assignments = getColorAssignments(
+        newLayers,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
         },
-      });
+        fieldFormats,
+        formattedDatatables
+      );
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
       expect(assignments.palette1.getRank(newLayers[0], '2 - test2')).toEqual(3);
       // 1 series in front for the current layer (y3), plus all 6 series from the first layer
@@ -247,13 +321,21 @@ describe('color_assignment', () => {
         },
         layers[1],
       ];
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (value: unknown) =>
+        (typeof value === 'object' ? 'formatted' : value) as string;
+      const newFormattedDatatables = {
+        first: {
+          formattedColumns: formattedDatatables.first.formattedColumns,
+          table: {
+            ...formattedDatatables.first.table,
+            rows: [{ split1: 'abc' }, { split1: { aProp: 123 } }],
+          },
+        },
+        second: formattedDatatables.second,
+      };
 
       const assignments = getColorAssignments(
         newLayers,
-        (() =>
-          ({
-            convert: (value: unknown) => (typeof value === 'object' ? 'formatted' : value),
-          } as unknown)) as FormatFactory,
         {
           yTitles: {
             y1: 'test1',
@@ -261,23 +343,39 @@ describe('color_assignment', () => {
             y3: 'test3',
             y4: 'test4',
           },
-        }
+        },
+        fieldFormats,
+        newFormattedDatatables
       );
+
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (x) => x as string;
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
       expect(assignments.palette1.getRank(layers[0], 'formatted - test1')).toEqual(2);
     });
 
     it('should handle missing columns', () => {
       const newLayers = [{ ...layers[0], table: { ...tables['1'], columns: [] } }, layers[1]];
-
-      const assignments = getColorAssignments(newLayers, formatFactory, {
-        yTitles: {
-          y1: 'test1',
-          y2: 'test2',
-          y3: 'test3',
-          y4: 'test4',
+      const newFormattedDatatables = {
+        first: {
+          formattedColumns: formattedDatatables.first.formattedColumns,
+          table: { ...formattedDatatables.first.table, columns: [] },
         },
-      });
+        second: formattedDatatables.second,
+      };
+
+      const assignments = getColorAssignments(
+        newLayers,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
+        },
+        fieldFormats,
+        newFormattedDatatables
+      );
 
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
       expect(assignments.palette1.getRank(layers[0], 'test2')).toEqual(1);

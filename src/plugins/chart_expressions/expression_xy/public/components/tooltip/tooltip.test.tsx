@@ -89,7 +89,7 @@ describe('Tooltip', () => {
       splitSeriesAccessors: {
         [splitAccessors[0] as string]: {
           format: { id: 'date' },
-          formatter: {} as FieldFormat,
+          formatter: { convert: (value) => `formatted-date-${value}` } as FieldFormat,
         },
       },
       splitRowAccessors: { [splitRowAccessor]: { id: 'number' } },

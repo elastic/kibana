@@ -33,6 +33,7 @@ function getSplitName(
   fieldFormats: LayerFieldFormats
 ) {
   return splitAccessors.reduce<string>((splitName, accessor) => {
+    if (!formattedDatatable.table.columns.length) return;
     const splitAccessor = getAccessorByDimension(accessor, formattedDatatable.table.columns);
     const splitFormatterObj = fieldFormats.splitSeriesAccessors[splitAccessor];
     const name = formattedDatatable.formattedColumns[splitAccessor]
