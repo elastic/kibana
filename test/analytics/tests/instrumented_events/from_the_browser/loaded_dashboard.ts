@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ebtUIHelper.getEvents(count, {
         eventTypes: ['dashboard-data-loaded'],
         fromTimestamp,
-        withTimeoutMs: 500,
+        withTimeoutMs: 1000,
       });
 
     const checkEmitsOnce = async () => {
@@ -90,16 +90,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('emits when saved search is added', async () => {
         await dashboardAddPanel.addSavedSearch(SAVED_SEARCH_PANEL_TITLE);
-        await PageObjects.dashboard.waitForRenderComplete();
         const event = await checkEmitsOnce();
 
         expect(event.context.entityId).to.be('new');
-        expect(event.context.numOfPanels).to.be(1);
+        expect(event.properties.numOfPanels).to.be(1);
       });
 
       it('doesnt emit when removing saved search panel', async () => {
         await dashboardPanelActions.removePanelByTitle(SAVED_SEARCH_PANEL_TITLE);
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkDoesNotEmit();
       });
 
@@ -108,13 +106,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        */
       it('emits when visualization is added', async () => {
         await dashboardAddPanel.addVisualization(VIS_PANEL_TITLE);
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkEmitsOnce();
       });
 
       it('doesnt emit when removing vis panel', async () => {
         await dashboardPanelActions.removePanelByTitle(VIS_PANEL_TITLE);
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkDoesNotEmit();
       });
 
@@ -129,13 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           saveAsNew: false,
           redirectToOrigin: true,
         });
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkEmitsOnce();
       });
 
       it('doesnt emit when removing markup panel', async () => {
         await dashboardPanelActions.removePanelByTitle(MARKDOWN_PANEL_TITLE);
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkDoesNotEmit();
       });
 
@@ -144,13 +138,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        */
       it('emits when map is added', async () => {
         await dashboardAddPanel.addEmbeddable(MAP_PANEL_TITLE, 'map');
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkEmitsOnce();
       });
 
       it('doesnt emit when removing map panel', async () => {
         await dashboardPanelActions.removePanelByTitle(MAP_PANEL_TITLE);
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkDoesNotEmit();
       });
 
@@ -159,7 +151,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        */
       it('emits when hitting refresh', async () => {
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkEmitsOnce();
       });
 
@@ -169,7 +160,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('emits when query is set', async () => {
         await queryBar.setQuery('Cancelled:false');
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.waitForRenderComplete();
         await checkEmitsOnce();
       });
     });

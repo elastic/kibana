@@ -158,7 +158,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private onDataLoaded(data: DashboardLoadedEvent) {
     this.services.analytics?.reportEvent('dashboard-data-loaded', {
       ...data,
-      id: this.id,
     });
   }
 
