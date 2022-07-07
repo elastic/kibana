@@ -25,7 +25,7 @@ function onFilterCell(
   const field = context.indexPattern.fields.getByName(columnId);
 
   if (field) {
-    context.onFilter(field, typeof value === 'undefined' ? undefined : String(value), mode);
+    context.onFilter(field, value, mode);
   }
 }
 
