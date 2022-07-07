@@ -169,6 +169,13 @@ export interface IEmbeddable<
   render(domNode: HTMLElement | Element): void;
 
   /**
+   * Renders a custom embeddable error at the given node.
+   * @param domNode
+   * @returns A callback that will be called on error destroy.
+   */
+  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
+
+  /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
    * if the embeddable takes relative time as input (e.g. now to now-15)
    */

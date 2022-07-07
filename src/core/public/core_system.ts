@@ -18,9 +18,10 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
-import { first } from 'rxjs/operators';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { filter, firstValueFrom } from 'rxjs';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { HttpService } from './http';
@@ -35,7 +36,6 @@ import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
-import { ExecutionContextService } from './execution_context';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { KBN_LOAD_MARKS } from './utils';
 
@@ -304,7 +304,7 @@ export class CoreSystem {
       });
 
       // Wait for the first app navigation to report Kibana Loaded
-      application.currentAppId$.pipe(first((appId) => appId !== undefined)).subscribe(() => {
+      firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
         performance.mark(KBN_LOAD_MARKS, {
           detail: 'first_app_nav',
         });

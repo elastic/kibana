@@ -5,8 +5,8 @@
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-# Virtual teams
-/x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
+# Alerting commmunal ownership
+/x-pack/plugins/rule_registry/ @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
@@ -240,7 +240,7 @@
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-type-summarizer/ @elastic/kibana-operations
+/packages/kbn-type-summarizer*/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
@@ -290,6 +290,7 @@
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
+/packages/kbn-es-errors/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
@@ -329,7 +330,7 @@
 # Kibana Platform Security
 /packages/kbn-crypto/ @elastic/kibana-security
 /packages/kbn-handlebars/ @elastic/kibana-security
-/src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
+/src/core/server/http/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
@@ -363,7 +364,7 @@
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
 /docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
-#CC# /x-pack/plugins/stack_alerts @elastic/response-ops
+#CC# /x-pack/plugins/stack_alerts/ @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
@@ -570,8 +571,8 @@
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-onboarding-and-lifecycle-mgt
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
-x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
+x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
 x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
@@ -594,6 +595,7 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
@@ -640,16 +642,25 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Application Experience
 
-## Shared UX
+## Shared UX Team
 /src/plugins/shared_ux/ @elastic/shared-ux
 /packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
+
+### Kibana React (to be deprecated)
 /src/plugins/kibana_react/ @elastic/shared-ux
 /src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation
+
+### Home Plugin and Packages
+/packages/home/ @elastic/shared-ux
 /src/plugins/home/public @elastic/shared-ux
 /src/plugins/home/server/*.ts @elastic/shared-ux
 /src/plugins/home/server/services/ @elastic/shared-ux
+
+### Overview Plugin and Packages
+/src/plugins/kibana_overview/ @elastic/shared-ux
+
+### Code Coverage
 #CC# /src/plugins/home/public @elastic/shared-ux
 #CC# /src/plugins/home/server/services/ @elastic/shared-ux
 #CC# /src/plugins/home/ @elastic/shared-ux
-/src/plugins/kibana_overview/ @elastic/shared-ux

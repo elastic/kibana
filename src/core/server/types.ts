@@ -44,4 +44,4 @@ export type {
 export type { DomainDeprecationDetails, DeprecationsGetResponse } from './deprecations/types';
 export * from './ui_settings/types';
 export type { EnvironmentMode, PackageInfo } from '@kbn/config';
-export type { ExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+export type { ExternalUrlConfig, IExternalUrlPolicy } from './http';

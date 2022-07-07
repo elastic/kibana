@@ -7,12 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointResponseActionsConsoleCommands,
 } from '../../components/endpoint_responder';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
+import { HeaderEndpointInfo } from '../../components/endpoint_responder/header_endpoint_info';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -22,9 +24,16 @@ const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_ov
 
 export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
+  const { canAccessResponseConsole } = useUserPrivileges().endpointPrivileges;
 
   return useCallback(
     (endpointMetadata: HostMetadata) => {
+      // If no authz, just exit and log something to the console
+      if (!canAccessResponseConsole) {
+        window.console.error(new Error('Access denied to endpoint response actions console'));
+        return;
+      }
+
       const endpointAgentId = endpointMetadata.agent.id;
       const endpointRunningConsole = consoleManager.getOne(endpointAgentId);
 
@@ -40,7 +49,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             consoleProps: {
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
-              TitleComponent: () => <>{endpointMetadata.host.name}</>,
+              TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             ActionComponents: [ActionLogButton],
@@ -48,6 +57,6 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
           .show();
       }
     },
-    [consoleManager]
+    [canAccessResponseConsole, consoleManager]
   );
 };
