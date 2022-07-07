@@ -38,3 +38,14 @@ The <<correlations-latency,latency correlations>> feature can be used to visuali
 
 [role="screenshot"]
 image::apm/images/lambda-correlations.png[lambda correlations example]
+
+[float]
+[[apm-lambda-service-config]]
+==== AWS Lambda function grouping
+
+The default APM agent configuration results in one APM service per AWS Lambda function,
+where the Lambda function name is the service name.
+
+In some use cases, it makes more sense to logically group multiple lambda functions under a single
+APM service. You can achieve this by setting the `ELASTIC_APM_SERVICE_NAME` environment variable
+on related Lambda functions to the same value.
