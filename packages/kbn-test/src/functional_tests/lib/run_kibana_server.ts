@@ -49,9 +49,8 @@ export async function runKibanaServer({
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
-  const cmd = getKibanaCmd(installDir);
 
-  const mainArgs = parseRawFlags([
+  const args = parseRawFlags([
     // When installDir is passed, we run from a built version of Kibana which uses different command line
     // arguments. If installDir is not passed, we run from source code.
     ...(installDir
@@ -62,28 +61,20 @@ export async function runKibanaServer({
     ...extraArgs,
   ]);
 
-  const env = {
-    FORCE_COLOR: 1,
-    ...process.env,
-    ...config.get('kbnTestServer.env'),
-    ...extendNodeOptions(installDir),
-  };
-  const cwd = installDir || KIBANA_ROOT;
-  const wait = runOptions.wait;
-
-  const promises = [
-    // main process
-    procs.run('kibana', {
-      cmd,
-      args: installDir ? mainArgs : [KIBANA_SCRIPT_PATH, ...mainArgs],
-      env,
-      cwd,
-      wait,
-      onEarlyExit,
-    }),
-  ];
-
-  await Promise.all(promises);
+  // main process
+  await procs.run('kibana', {
+    cmd: getKibanaCmd(installDir),
+    args: installDir ? args : [KIBANA_SCRIPT_PATH, ...args],
+    env: {
+      FORCE_COLOR: 1,
+      ...process.env,
+      ...config.get('kbnTestServer.env'),
+      ...extendNodeOptions(installDir),
+    },
+    cwd: installDir || KIBANA_ROOT,
+    wait: runOptions.wait,
+    onEarlyExit,
+  });
 }
 
 function getKibanaCmd(installDir?: string) {
