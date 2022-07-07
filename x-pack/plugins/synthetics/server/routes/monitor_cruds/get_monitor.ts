@@ -76,8 +76,6 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const { filters, query } = request.query;
     const monitorsPromise = getMonitors(request.query, server, savedObjectsClient);
 
-    // 1. Sorting requirements are difficult to define in aggregations
-    //    Requires sorting by fields that are not used as the aggregation key, such as created_on or updated_on
 
     if (filters || query) {
       const totalMonitorsPromise = savedObjectsClient.find({
