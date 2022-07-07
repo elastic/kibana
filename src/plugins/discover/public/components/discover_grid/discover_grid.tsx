@@ -35,19 +35,16 @@ import {
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
-import {
-  GRID_STYLE,
-  pageSizeArr,
-  toolbarVisibility as toolbarVisibilityDefaults,
-} from './constants';
+import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
+import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../../../common/constants';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
-import { DEFAULT_ROWS_PER_PAGE } from '../../constants';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
@@ -262,7 +259,12 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const currentPageSize = rowsPerPageState ?? DEFAULT_ROWS_PER_PAGE;
+  const sampleRowsPerPage = useMemo(
+    () =>
+      parseInt(services.uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE,
+    [services.uiSettings]
+  );
+  const currentPageSize = rowsPerPageState ?? sampleRowsPerPage;
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: currentPageSize,
@@ -288,7 +290,7 @@ export const DiscoverGrid = ({
           onChangePage,
           pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
           pageSize: pagination.pageSize,
-          pageSizeOptions: sortBy(uniq([...pageSizeArr, pagination.pageSize])),
+          pageSizeOptions: sortBy(uniq([...ROWS_PER_PAGE_OPTIONS, pagination.pageSize])),
         }
       : undefined;
   }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);

@@ -73,6 +73,7 @@ export interface UsageStats {
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
+  'discover:sampleRowsPerPage': string;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];

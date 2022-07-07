@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
+export const DEFAULT_ROWS_PER_PAGE = 100;
+export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];

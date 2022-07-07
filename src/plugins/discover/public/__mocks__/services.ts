@@ -15,6 +15,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
 } from '../../common';
@@ -67,6 +68,8 @@ export const discoverServiceMock = {
         return false;
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
+      } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
+        return '100';
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
       } else if (key === HIDE_ANNOUNCEMENTS) {

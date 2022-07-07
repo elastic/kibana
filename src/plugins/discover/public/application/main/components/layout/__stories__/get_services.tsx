@@ -19,6 +19,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
 } from '../../../../../../common';
@@ -32,6 +33,8 @@ export const uiSettingsMock = {
       return 3;
     } else if (key === SAMPLE_SIZE_SETTING) {
       return 10;
+    } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
+      return '100';
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
     } else if (key === DOC_TABLE_LEGACY) {
