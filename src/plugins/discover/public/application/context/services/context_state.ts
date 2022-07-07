@@ -141,7 +141,8 @@ export function getState({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const globalStateInitial = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) ?? { filters: [] };
+  const globalStateFromUrl = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) as GlobalState;
+  const globalStateInitial = createInitialGloblalState(globalStateFromUrl);
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
@@ -311,4 +312,22 @@ function createInitialAppState(
     },
     uiSettings
   );
+}
+
+/**
+ * Helper function to return the initial global state, which is a merged object of url state and
+ * default state
+ */
+function createInitialGloblalState(urlState: GlobalState): GlobalState {
+  const defaultState: GlobalState = {
+    filters: [],
+  };
+  if (typeof urlState !== 'object') {
+    return defaultState;
+  }
+
+  return {
+    ...defaultState,
+    ...urlState,
+  };
 }

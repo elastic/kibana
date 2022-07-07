@@ -41,11 +41,13 @@ export function useContextAppState({ services }: { services: DiscoverServices })
 
   useEffect(() => {
     const unsubscribeAppState = stateContainer.appState.subscribe((newState) => {
-      setAppState((prevState) => ({ ...prevState, ...newState }));
+      const newStateEnsureFilter = { ...newState, filters: newState.filters ?? [] };
+      setAppState((prevState) => ({ ...prevState, ...newStateEnsureFilter }));
     });
 
     const unsubscribeGlobalState = stateContainer.globalState.subscribe((newState) => {
-      setGlobalState((prevState) => ({ ...prevState, ...newState }));
+      const newStateEnsureFilter = { ...newState, filters: newState.filters ?? [] };
+      setGlobalState((prevState) => ({ ...prevState, ...newStateEnsureFilter }));
     });
 
     return () => {
