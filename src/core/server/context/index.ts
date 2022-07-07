@@ -8,4 +8,3 @@
 
 export { ContextService } from './context_service';
 export type { InternalContextPreboot, InternalContextSetup } from './context_service';
-export type { IContextContainer } from './container';

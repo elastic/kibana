@@ -8,7 +8,8 @@
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { IContextContainer, ContextContainer } from './container';
+import type { IContextContainer } from '@kbn/core-http-server';
+import { ContextContainer } from './container';
 
 type PrebootDeps = SetupDeps;
 

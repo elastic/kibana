@@ -16,6 +16,10 @@ import type {
   OnPostAuthToolkit,
   OnPreAuthToolkit,
   OnPreResponseToolkit,
+  IAuthHeadersStorage,
+  HttpServicePreboot,
+  HttpServiceSetup,
+  HttpServiceStart,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
 
@@ -23,16 +27,12 @@ import { CspConfig } from './csp';
 import { mockRouter, RouterMock } from './router/router.mock';
 import {
   InternalHttpServicePreboot,
-  HttpServicePreboot,
   InternalHttpServiceSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
   InternalHttpServiceStart,
 } from './types';
 import { HttpService } from './http_service';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { ExternalUrlConfig } from './external_url';
-import type { IAuthHeadersStorage } from './auth_headers_storage';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
