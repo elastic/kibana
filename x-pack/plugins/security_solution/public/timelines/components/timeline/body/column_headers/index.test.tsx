@@ -26,8 +26,17 @@ import { getDefaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
 import { HeaderActions } from '../actions/header_actions';
 import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
+import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      timelines: mockTimelines,
+      triggersActionsUi: mockTriggersActionsUi,
+    },
+  }),
+}));
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../fields_browser', () => ({

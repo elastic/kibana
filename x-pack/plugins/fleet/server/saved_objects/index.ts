@@ -40,6 +40,7 @@ import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migra
 import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
 import { migratePackagePolicyToV820 } from './migrations/to_v8_2_0';
 import { migrateInstallationToV830, migratePackagePolicyToV830 } from './migrations/to_v8_3_0';
+import { migrateInstallationToV840 } from './migrations/to_v8_4_0';
 
 /*
  * Saved object types and mappings
@@ -268,6 +269,7 @@ const getSavedObjectTypes = (
       '7.16.0': migrateInstallationToV7160,
       '8.0.0': migrateInstallationToV800,
       '8.3.0': migrateInstallationToV830,
+      '8.4.0': migrateInstallationToV840,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

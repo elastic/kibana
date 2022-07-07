@@ -40,6 +40,7 @@ import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -97,6 +98,7 @@ export const createStartServicesMock = (
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const triggersActionsUi = triggersActionsUiMock.createStart();
 
   return {
     ...core,
@@ -161,6 +163,7 @@ export const createStartServicesMock = (
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
     },
+    triggersActionsUi,
   } as unknown as StartServices;
 };
 

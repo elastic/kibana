@@ -75,10 +75,12 @@ jest.mock('../../../../common/lib/kibana', () => {
         savedObjects: {
           client: {},
         },
+        triggersActionsUi: {
+          getFieldBrowser: jest.fn(),
+        },
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () =>
             jest.fn().mockReturnValue({
               onBlur: jest.fn(),
