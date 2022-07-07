@@ -61,7 +61,7 @@ Fixes an issue where alerting rules that were created or edited in 8.2.0 stopped
 
 ====
 [IMPORTANT]
-If you already upgraded to 8.3.0 or 8.3.1 and noticed that rules created or updated in 8.2.x were failing with an error similar to the message below, complete the appropriate steps to restore your rules after you upgrade to 8.3.2. Refer to the <<known-issue-8.3.1, known issue section>> of the 8.3.1 release notes for more information.
+If you already upgraded to 8.3.0 or 8.3.1 and noticed that rules created or updated in 8.2.x were failing with an error similar to the message below, complete the appropriate steps to restore your rules after you upgrade to 8.3.2. Refer to the <<known-issues-8.3.1, known issue section>> of the 8.3.1 release notes for more information.
 [source,text]
 ----
 <rule-type>:<UUID>: execution failed - security_exception: [security_exception] Reason: missing authentication credentials for REST request [/_security/user/_has_privileges], caused by: ""
