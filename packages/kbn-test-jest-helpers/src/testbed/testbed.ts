@@ -55,18 +55,18 @@ const defaultConfig: TestBedConfig = {
   });
   ```
  */
-export function registerTestBed<T extends string = string>(
+export function registerTestBed<T extends string = string, P extends object = any>(
   Component: ComponentType<any>,
   config: AsyncTestBedConfig
-): AsyncSetupFunc<T>;
-export function registerTestBed<T extends string = string>(
+): AsyncSetupFunc<T, Partial<P>>;
+export function registerTestBed<T extends string = string, P extends object = any>(
   Component: ComponentType<any>,
   config?: TestBedConfig
-): SyncSetupFunc<T>;
-export function registerTestBed<T extends string = string>(
+): SyncSetupFunc<T, Partial<P>>;
+export function registerTestBed<T extends string = string, P extends object = any>(
   Component: ComponentType<any>,
   config?: AsyncTestBedConfig | TestBedConfig
-): SetupFunc<T> {
+): SetupFunc<T, Partial<P>> {
   const {
     defaultProps = defaultConfig.defaultProps,
     memoryRouter = defaultConfig.memoryRouter!,

@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { TableListView } from './table_list_view';
-
-export type { Props as TableListViewProps, State as TableListViewState } from './table_list_view';
+export { UpdatedAtField } from './updated_at_field';
