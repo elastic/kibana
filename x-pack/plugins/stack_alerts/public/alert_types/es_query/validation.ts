@@ -12,11 +12,22 @@ import { EsQueryAlertParams, ExpressionErrors } from './types';
 import { isSearchSourceAlert } from './util';
 import { EXPRESSION_ERRORS } from './constants';
 
-export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
-  const { size, threshold, timeWindowSize, thresholdComparator } = alertParams;
+export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationResult => {
+  const { size, threshold, timeWindowSize, thresholdComparator } = ruleParams;
   const validationResult = { errors: {} };
   const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
   validationResult.errors = errors;
+
+  if (!('index' in ruleParams) && !ruleParams.searchType) {
+    errors.searchType.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchType', {
+        defaultMessage: 'Query type is required.',
+      })
+    );
+
+    return validationResult;
+  }
+
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
@@ -72,9 +83,9 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
    * Skip esQuery and index params check if it is search source alert,
    * since it should contain searchConfiguration instead of esQuery and index.
    */
-  const isSearchSource = isSearchSourceAlert(alertParams);
+  const isSearchSource = isSearchSourceAlert(ruleParams);
   if (isSearchSource) {
-    if (!alertParams.searchConfiguration) {
+    if (!ruleParams.searchConfiguration) {
       errors.searchConfiguration.push(
         i18n.translate(
           'xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration',
@@ -83,11 +94,17 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
           }
         )
       );
+    } else if (!ruleParams.searchConfiguration.index) {
+      errors.index.push(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
+          defaultMessage: 'Data view is required.',
+        })
+      );
     }
     return validationResult;
   }
 
-  if (!alertParams.index || alertParams.index.length === 0) {
+  if (!ruleParams.index || ruleParams.index.length === 0) {
     errors.index.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
         defaultMessage: 'Index is required.',
@@ -95,7 +112,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     );
   }
 
-  if (!alertParams.timeField) {
+  if (!ruleParams.timeField) {
     errors.timeField.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
         defaultMessage: 'Time field is required.',
@@ -103,7 +120,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     );
   }
 
-  if (!alertParams.esQuery) {
+  if (!ruleParams.esQuery) {
     errors.esQuery.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
         defaultMessage: 'Elasticsearch query is required.',
@@ -111,7 +128,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     );
   } else {
     try {
-      const parsedQuery = JSON.parse(alertParams.esQuery);
+      const parsedQuery = JSON.parse(ruleParams.esQuery);
       if (!parsedQuery.query) {
         errors.esQuery.push(
           i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
@@ -129,4 +146,11 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
   }
 
   return validationResult;
+};
+
+export const hasExpressionValidationErrors = (ruleParams: EsQueryAlertParams) => {
+  const { errors: validationErrors } = validateExpression(ruleParams);
+  return Object.keys(validationErrors).some(
+    (key) => validationErrors[key] && validationErrors[key].length
+  );
 };
