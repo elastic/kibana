@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { debounce } from 'lodash';
+import React, { useState, useEffect } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
@@ -39,6 +39,10 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
 
   const [updatedName, setUpdatedName] = useState<string | undefined>(tagName);
 
+  useEffect(() => {
+    setUpdatedName(tagName);
+  }, [tagName]);
+
   const closePopover = () => setTagOptionsVisible(false);
 
   const updateTagsHook = useUpdateTags();
@@ -46,14 +50,15 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
 
   const TAGS_QUERY = 'tags:{name}';
 
-  const debouncedSendRenameTag = useMemo(
-    () =>
-      debounce((newName: string) => {
-        const kuery = TAGS_QUERY.replace('{name}', tagName);
-        bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
-      }, 1000),
-    [onTagsUpdated, tagName, bulkUpdateTags]
-  );
+  const handleRename = (newName: string) => {
+    const kuery = TAGS_QUERY.replace('{name}', tagName);
+    bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
+  };
+
+  const handleDelete = () => {
+    const kuery = TAGS_QUERY.replace('{name}', tagName);
+    updateTagsHook.bulkUpdateTags(kuery, [], [tagName], () => onTagsUpdated());
+  };
 
   return (
     <>
@@ -79,29 +84,43 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
         >
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
             <EuiFlexItem>
-              <EuiFieldText
-                placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
-                  defaultMessage: 'Enter new name for tag',
-                })}
-                value={updatedName}
-                required
-                onChange={(e: any) => {
-                  const newName = e.target.value;
-                  setUpdatedName(newName);
-                  if (!newName) {
-                    return;
-                  }
-                  debouncedSendRenameTag(newName);
-                }}
-              />
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiFieldText
+                    placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
+                      defaultMessage: 'Enter new name for tag',
+                    })}
+                    value={updatedName}
+                    required
+                    onChange={(e: any) => {
+                      const newName = e.target.value;
+                      setUpdatedName(newName);
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color="primary"
+                    disabled={!updatedName || updatedName === tagName}
+                    onClick={() => {
+                      handleRename(updatedName!);
+                      closePopover();
+                    }}
+                  >
+                    {i18n.translate('xpack.fleet.tagOptions.renameTagButtonText', {
+                      defaultMessage: 'Rename',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonEmpty
                 size="s"
                 color="danger"
                 onClick={() => {
-                  const kuery = TAGS_QUERY.replace('{name}', tagName);
-                  updateTagsHook.bulkUpdateTags(kuery, [], [tagName], () => onTagsUpdated());
+                  handleDelete();
                   closePopover();
                 }}
               >
