@@ -6,13 +6,35 @@
  */
 import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+<<<<<<< HEAD
 import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
+=======
+import type {
+  PackagePolicyServiceInterface,
+  AgentPolicyServiceInterface,
+  AgentService,
+} from '@kbn/fleet-plugin/server';
+import type {
+  GetAgentPoliciesResponseItem,
+  PackagePolicy,
+  AgentPolicy,
+  ListResult,
+} from '@kbn/fleet-plugin/common';
+>>>>>>> 15190e2c82411b6c77179339d879adf93ad5f868
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
+<<<<<<< HEAD
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
+=======
+import {
+  BENCHMARK_PACKAGE_POLICY_PREFIX,
+  benchmarksQueryParamsSchema,
+  BenchmarksQueryParams,
+} from '../../../common/schemas/benchmark';
+>>>>>>> 15190e2c82411b6c77179339d879adf93ad5f868
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import type { CspRule } from '../../../common/schemas';
@@ -29,6 +51,68 @@ import {
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
+<<<<<<< HEAD
+=======
+const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
+  const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
+  const kquery = benchmarkFilter
+    ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
+    : integrationNameQuery;
+
+  return kquery;
+};
+
+export const getCspPackagePolicies = (
+  soClient: SavedObjectsClientContract,
+  packagePolicyService: PackagePolicyServiceInterface,
+  packageName: string,
+  queryParams: Partial<BenchmarksQueryParams>
+): Promise<ListResult<PackagePolicy>> => {
+  if (!packagePolicyService) {
+    throw new Error('packagePolicyService is undefined');
+  }
+
+  const sortField = queryParams.sort_field?.startsWith(BENCHMARK_PACKAGE_POLICY_PREFIX)
+    ? queryParams.sort_field.substring(BENCHMARK_PACKAGE_POLICY_PREFIX.length)
+    : queryParams.sort_field;
+
+  return packagePolicyService?.list(soClient, {
+    kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
+    page: queryParams.page,
+    perPage: queryParams.per_page,
+    sortField,
+    sortOrder: queryParams.sort_order,
+  });
+};
+
+export const getAgentPolicies = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicies: PackagePolicy[],
+  agentPolicyService: AgentPolicyServiceInterface
+): Promise<AgentPolicy[]> => {
+  const agentPolicyIds = uniq(map(packagePolicies, 'policy_id'));
+  const agentPolicies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
+
+  return agentPolicies;
+};
+
+const addRunningAgentToAgentPolicy = async (
+  agentService: AgentService,
+  agentPolicies: AgentPolicy[]
+): Promise<GetAgentPoliciesResponseItem[]> => {
+  if (!agentPolicies?.length) return [];
+  return Promise.all(
+    agentPolicies.map((agentPolicy) =>
+      agentService.asInternalUser
+        .getAgentStatusForAgentPolicy(agentPolicy.id)
+        .then((agentStatus) => ({
+          ...agentPolicy,
+          agents: agentStatus.total,
+        }))
+    )
+  );
+};
+>>>>>>> 15190e2c82411b6c77179339d879adf93ad5f868
 export interface RulesStatusAggregation {
   enabled_status: {
     doc_count: number;
