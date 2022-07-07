@@ -28,7 +28,7 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocuments$, DataDocumentsMsg } from '../../hooks/use_saved_search';
+import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -37,7 +37,7 @@ import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
-import { isPlainRecordType } from '../../utils/is_plain_record';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -70,8 +70,10 @@ function DiscoverDocumentsComponent({
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
-  const isPlainRecord = isPlainRecordType(documentState.recordRawType);
-
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
+    [state.query]
+  );
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({

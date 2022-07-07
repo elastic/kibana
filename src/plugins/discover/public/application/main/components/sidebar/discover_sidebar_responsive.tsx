@@ -28,12 +28,12 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { isPlainRecordType } from '../../utils/is_plain_record';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -116,7 +116,10 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const isPlainRecord = isPlainRecordType(props.documents$.getValue().recordRawType);
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
+    [props.state.query]
+  );
   const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
