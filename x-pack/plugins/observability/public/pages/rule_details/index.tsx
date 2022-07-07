@@ -40,7 +40,7 @@ import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alertin
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
-import { getHealthColor, OBSERVABILITY_SOLUTIONS } from '../rules/config';
+import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
 import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -48,7 +48,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
 import { useKibana } from '../../utils/kibana_react';
-import { formatInterval } from './utils';
+import { formatInterval, getHealthColor } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
