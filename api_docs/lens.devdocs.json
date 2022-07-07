@@ -1711,7 +1711,7 @@
               "\nMethod which Lens consumer can import and given a formula string,\nreturn a parsed result as list of columns to use as Embeddable attributes.\n"
             ],
             "signature": [
-              "(id: string, column: { formula: string; label?: string | undefined; }, layer: ",
+              "(id: string, column: { formula: string; label?: string | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }, layer: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -1785,6 +1785,19 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.FormulaPublicApi.insertOrReplaceFormulaColumn.$2.format",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "format",
+                    "description": [],
+                    "signature": [
+                      "{ id: string; params?: { decimals: number; } | undefined; } | undefined"
                     ],
                     "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula_public_api.ts",
                     "deprecated": false
@@ -3653,7 +3666,15 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FieldBasedIndexPatternColumn",
+                "text": "FieldBasedIndexPatternColumn"
+              },
+              " | undefined; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
               "ValueFormatConfig",
               " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],

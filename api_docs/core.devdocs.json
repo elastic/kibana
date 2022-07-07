@@ -649,7 +649,7 @@
         "tags": [],
         "label": "AnalyticsClient",
         "description": [
-          "\r\nAnalytics client's public APIs"
+          "\nAnalytics client's public APIs"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -661,7 +661,7 @@
             "tags": [],
             "label": "reportEvent",
             "description": [
-              "\r\nReports a telemetry event."
+              "\nReports a telemetry event."
             ],
             "signature": [
               "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
@@ -711,7 +711,7 @@
             "tags": [],
             "label": "registerEventType",
             "description": [
-              "\r\nRegisters the event type that will be emitted via the reportEvent API."
+              "\nRegisters the event type that will be emitted via the reportEvent API."
             ],
             "signature": [
               "<EventTypeData>(eventTypeOps: ",
@@ -748,7 +748,7 @@
             "tags": [],
             "label": "registerShipper",
             "description": [
-              "\r\nSet up the shipper that will be used to report the telemetry events."
+              "\nSet up the shipper that will be used to report the telemetry events."
             ],
             "signature": [
               "<Shipper extends ",
@@ -822,7 +822,7 @@
             "tags": [],
             "label": "optIn",
             "description": [
-              "\r\nUsed to control the user's consent to report the data.\r\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
+              "\nUsed to control the user's consent to report the data.\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
             ],
             "signature": [
               "(optInConfig: ",
@@ -858,7 +858,7 @@
             "tags": [],
             "label": "registerContextProvider",
             "description": [
-              "\r\nRegisters the context provider to enrich the any reported events."
+              "\nRegisters the context provider to enrich the any reported events."
             ],
             "signature": [
               "<Context>(contextProviderOpts: ",
@@ -895,7 +895,7 @@
             "tags": [],
             "label": "removeContextProvider",
             "description": [
-              "\r\nRemoves the context provider and stop enriching the events from its context."
+              "\nRemoves the context provider and stop enriching the events from its context."
             ],
             "signature": [
               "(contextProviderName: string) => void"
@@ -929,7 +929,7 @@
             "tags": [],
             "label": "telemetryCounter$",
             "description": [
-              "\r\nObservable to emit the stats of the processed events."
+              "\nObservable to emit the stats of the processed events."
             ],
             "signature": [
               "Observable",
@@ -947,7 +947,7 @@
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\r\nStops the client."
+              "\nStops the client."
             ],
             "signature": [
               "() => void"
@@ -1126,7 +1126,7 @@
         "tags": [],
         "label": "ContextProviderOpts",
         "description": [
-          "\r\nDefinition of a context provider"
+          "\nDefinition of a context provider"
         ],
         "signature": [
           "ContextProviderOpts",
@@ -1142,7 +1142,7 @@
             "tags": [],
             "label": "name",
             "description": [
-              "\r\nThe name of the provider."
+              "\nThe name of the provider."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -1154,7 +1154,7 @@
             "tags": [],
             "label": "context$",
             "description": [
-              "\r\nObservable that emits the custom context."
+              "\nObservable that emits the custom context."
             ],
             "signature": [
               "Observable",
@@ -1170,7 +1170,7 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\r\nSchema declaring and documenting the expected output in the context$\r\n"
+              "\nSchema declaring and documenting the expected output in the context$\n"
             ],
             "signature": [
               "{ [Key in keyof Required<Context>]: ",
@@ -1345,13 +1345,7 @@
               "{@link ExecutionContextSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1514,13 +1508,7 @@
               "{@link ExecutionContextStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1721,7 +1709,7 @@
         "tags": [],
         "label": "CoreTheme",
         "description": [
-          "\r\nContains all the required information to apply Kibana's theme at the various levels it can be used.\r\n"
+          "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
         ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
@@ -2038,51 +2026,48 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-public.Event_2",
+        "id": "def-public.Event",
         "type": "Interface",
         "tags": [],
-        "label": "Event_2",
+        "label": "Event",
         "description": [
-          "\r\nDefinition of the full event structure"
-        ],
-        "signature": [
-          "Event"
+          "\nDefinition of the full event structure"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.Event_2.timestamp",
+            "id": "def-public.Event.timestamp",
             "type": "string",
             "tags": [],
             "label": "timestamp",
             "description": [
-              "\r\nThe time the event was generated in ISO format."
+              "\nThe time the event was generated in ISO format."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.Event_2.event_type",
+            "id": "def-public.Event.event_type",
             "type": "string",
             "tags": [],
             "label": "event_type",
             "description": [
-              "\r\nThe event type."
+              "\nThe event type."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.Event_2.properties",
+            "id": "def-public.Event.properties",
             "type": "Object",
             "tags": [],
             "label": "properties",
             "description": [
-              "\r\nThe specific properties of the event type."
+              "\nThe specific properties of the event type."
             ],
             "signature": [
               "{ [x: string]: unknown; }"
@@ -2092,12 +2077,12 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.Event_2.context",
+            "id": "def-public.Event.context",
             "type": "Object",
             "tags": [],
             "label": "context",
             "description": [
-              "\r\nThe {@link EventContext} enriched during the processing pipeline."
+              "\nThe {@link EventContext} enriched during the processing pipeline."
             ],
             "signature": [
               "EventContext"
@@ -2115,7 +2100,7 @@
         "tags": [],
         "label": "EventContext",
         "description": [
-          "\r\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+          "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -2127,7 +2112,7 @@
             "tags": [],
             "label": "cluster_uuid",
             "description": [
-              "\r\nThe UUID of the cluster"
+              "\nThe UUID of the cluster"
             ],
             "signature": [
               "string | undefined"
@@ -2142,7 +2127,7 @@
             "tags": [],
             "label": "cluster_name",
             "description": [
-              "\r\nThe name of the cluster."
+              "\nThe name of the cluster."
             ],
             "signature": [
               "string | undefined"
@@ -2157,7 +2142,7 @@
             "tags": [],
             "label": "license_id",
             "description": [
-              "\r\nThe license ID."
+              "\nThe license ID."
             ],
             "signature": [
               "string | undefined"
@@ -2172,7 +2157,7 @@
             "tags": [],
             "label": "userId",
             "description": [
-              "\r\nThe unique user ID."
+              "\nThe unique user ID."
             ],
             "signature": [
               "string | undefined"
@@ -2187,7 +2172,7 @@
             "tags": [],
             "label": "cloudId",
             "description": [
-              "\r\nThe Cloud ID."
+              "\nThe Cloud ID."
             ],
             "signature": [
               "string | undefined"
@@ -2202,7 +2187,7 @@
             "tags": [],
             "label": "isElasticCloudUser",
             "description": [
-              "\r\n`true` if the user is logged in via the Elastic Cloud authentication provider."
+              "\n`true` if the user is logged in via the Elastic Cloud authentication provider."
             ],
             "signature": [
               "boolean | undefined"
@@ -2217,7 +2202,7 @@
             "tags": [],
             "label": "version",
             "description": [
-              "\r\nThe product's version."
+              "\nThe product's version."
             ],
             "signature": [
               "string | undefined"
@@ -2232,7 +2217,7 @@
             "tags": [],
             "label": "pageName",
             "description": [
-              "\r\nThe name of the current page."
+              "\nThe name of the current page."
             ],
             "signature": [
               "string | undefined"
@@ -2247,7 +2232,7 @@
             "tags": [],
             "label": "applicationId",
             "description": [
-              "\r\nThe current application ID."
+              "\nThe current application ID."
             ],
             "signature": [
               "string | undefined"
@@ -2262,7 +2247,7 @@
             "tags": [],
             "label": "entityId",
             "description": [
-              "\r\nThe current entity ID (dashboard ID, visualization ID, etc.)."
+              "\nThe current entity ID (dashboard ID, visualization ID, etc.)."
             ],
             "signature": [
               "string | undefined"
@@ -2277,7 +2262,7 @@
             "tags": [],
             "label": "[key: string]: unknown",
             "description": [
-              "\r\nAdditional keys are allowed."
+              "\nAdditional keys are allowed."
             ],
             "signature": [
               "[key: string]:  unknown"
@@ -2295,7 +2280,7 @@
         "tags": [],
         "label": "EventTypeOpts",
         "description": [
-          "\r\nDefinition of an Event Type."
+          "\nDefinition of an Event Type."
         ],
         "signature": [
           "EventTypeOpts",
@@ -2311,7 +2296,7 @@
             "tags": [],
             "label": "eventType",
             "description": [
-              "\r\nThe event type's unique name."
+              "\nThe event type's unique name."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -2323,7 +2308,7 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\r\nSchema declaring and documenting the expected structure of this event type.\r\n"
+              "\nSchema declaring and documenting the expected structure of this event type.\n"
             ],
             "signature": [
               "{ [Key in keyof Required<EventTypeData>]: ",
@@ -2345,7 +2330,7 @@
         "description": [
           "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
         ],
-        "path": "src/core/public/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -2363,7 +2348,7 @@
               "KibanaExecutionContext",
               ">"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -2380,7 +2365,7 @@
               "KibanaExecutionContext",
               ") => void"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2393,7 +2378,7 @@
                 "signature": [
                   "KibanaExecutionContext"
                 ],
-                "path": "src/core/public/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2413,7 +2398,7 @@
               "() => ",
               "KibanaExecutionContext"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2430,7 +2415,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2448,7 +2433,7 @@
               "() => ",
               "Labels"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2468,7 +2453,7 @@
               " | undefined) => ",
               "KibanaExecutionContext"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2482,7 +2467,7 @@
                   "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "src/core/public/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2499,7 +2484,7 @@
         "tags": [],
         "label": "FatalErrorInfo",
         "description": [
-          "\r\nRepresents the `message` and `stack` of a fatal Error\r\n"
+          "\nRepresents the `message` and `stack` of a fatal Error\n"
         ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
@@ -2537,7 +2522,7 @@
         "tags": [],
         "label": "FatalErrorsSetup",
         "description": [
-          "\r\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\r\nwith details about the Kibana build and the error.\r\n"
+          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
         ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
@@ -2549,7 +2534,7 @@
             "tags": [],
             "label": "add",
             "description": [
-              "\r\nAdd a new fatal error. This will stop the Kibana Public Core and display\r\na fatal error screen with details about the Kibana build and the error.\r\n"
+              "\nAdd a new fatal error. This will stop the Kibana Public Core and display\na fatal error screen with details about the Kibana build and the error.\n"
             ],
             "signature": [
               "(error: string | Error, source?: string | undefined) => never"
@@ -2599,7 +2584,7 @@
             "tags": [],
             "label": "get$",
             "description": [
-              "\r\nAn Observable that will emit whenever a fatal error is added with `add()`"
+              "\nAn Observable that will emit whenever a fatal error is added with `add()`"
             ],
             "signature": [
               "() => ",
@@ -2623,7 +2608,7 @@
         "tags": [],
         "label": "I18nStart",
         "description": [
-          "\r\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\r\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\r\n"
+          "\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\n"
         ],
         "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
         "deprecated": false,
@@ -2635,7 +2620,7 @@
             "tags": [],
             "label": "Context",
             "description": [
-              "\r\nReact Context provider required as the topmost component for any i18n-compatible React tree."
+              "\nReact Context provider required as the topmost component for any i18n-compatible React tree."
             ],
             "signature": [
               "({ children }: { children: React.ReactNode; }) => JSX.Element"
@@ -2683,7 +2668,7 @@
         "description": [
           "\nA policy describing whether access to an external destination is allowed."
         ],
-        "path": "src/core/server/external_url/external_url_config.ts",
+        "path": "src/core/server/http/external_url/external_url_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -2695,7 +2680,7 @@
             "description": [
               "\nIndicates if this policy allows or denies access to the described destination."
             ],
-            "path": "src/core/server/external_url/external_url_config.ts",
+            "path": "src/core/server/http/external_url/external_url_config.ts",
             "deprecated": false
           },
           {
@@ -2710,7 +2695,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/external_url/external_url_config.ts",
+            "path": "src/core/server/http/external_url/external_url_config.ts",
             "deprecated": false
           },
           {
@@ -2725,7 +2710,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/external_url/external_url_config.ts",
+            "path": "src/core/server/http/external_url/external_url_config.ts",
             "deprecated": false
           }
         ],
@@ -2738,7 +2723,7 @@
         "tags": [],
         "label": "IShipper",
         "description": [
-          "\r\nBasic structure of a Shipper"
+          "\nBasic structure of a Shipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -2750,7 +2735,7 @@
             "tags": [],
             "label": "reportEvents",
             "description": [
-              "\r\nAdapts and ships the event to the persisting/analytics solution."
+              "\nAdapts and ships the event to the persisting/analytics solution."
             ],
             "signature": [
               "(events: ",
@@ -2787,7 +2772,7 @@
             "tags": [],
             "label": "optIn",
             "description": [
-              "\r\nStops/restarts the shipping mechanism based on the value of isOptedIn"
+              "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
             ],
             "signature": [
               "(isOptedIn: boolean) => void"
@@ -2821,7 +2806,7 @@
             "tags": [],
             "label": "extendContext",
             "description": [
-              "\r\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
+              "\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
             ],
             "signature": [
               "((newContext: ",
@@ -2857,7 +2842,7 @@
             "tags": [],
             "label": "telemetryCounter$",
             "description": [
-              "\r\nObservable to emit the stats of the processed events."
+              "\nObservable to emit the stats of the processed events."
             ],
             "signature": [
               "Observable",
@@ -2875,7 +2860,7 @@
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\r\nShutdown the shipper."
+              "\nShutdown the shipper."
             ],
             "signature": [
               "() => void"
@@ -3617,7 +3602,7 @@
         "tags": [],
         "label": "OptInConfig",
         "description": [
-          "\r\n"
+          "\n"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -3629,7 +3614,7 @@
             "tags": [],
             "label": "global",
             "description": [
-              "\r\nControls the global enabled/disabled behaviour of the client and shippers."
+              "\nControls the global enabled/disabled behaviour of the client and shippers."
             ],
             "signature": [
               "OptInConfigPerType"
@@ -3644,7 +3629,7 @@
             "tags": [],
             "label": "event_types",
             "description": [
-              "\r\nControls if an event type should be disabled for a specific type of shipper."
+              "\nControls if an event type should be disabled for a specific type of shipper."
             ],
             "signature": [
               "Record<string, ",
@@ -6912,7 +6897,7 @@
         "tags": [],
         "label": "ShipperClassConstructor",
         "description": [
-          "\r\nConstructor of a {@link IShipper}"
+          "\nConstructor of a {@link IShipper}"
         ],
         "signature": [
           "ShipperClassConstructor",
@@ -6928,7 +6913,7 @@
             "tags": [],
             "label": "shipperName",
             "description": [
-              "\r\nThe shipper's unique name"
+              "\nThe shipper's unique name"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -6940,7 +6925,7 @@
             "tags": [],
             "label": "new",
             "description": [
-              "\r\nThe constructor"
+              "\nThe constructor"
             ],
             "signature": [
               "any"
@@ -6993,7 +6978,7 @@
         "tags": [],
         "label": "TelemetryCounter",
         "description": [
-          "\r\nShape of the events emitted by the telemetryCounter$ observable"
+          "\nShape of the events emitted by the telemetryCounter$ observable"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -7001,14 +6986,14 @@
           {
             "parentPluginId": "core",
             "id": "def-public.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "TelemetryCounterType"
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7020,7 +7005,7 @@
             "tags": [],
             "label": "source",
             "description": [
-              "\r\nWho emitted the event? It can be \"client\" or the name of the shipper."
+              "\nWho emitted the event? It can be \"client\" or the name of the shipper."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7032,7 +7017,7 @@
             "tags": [],
             "label": "event_type",
             "description": [
-              "\r\nThe event type the success/failure/drop event refers to."
+              "\nThe event type the success/failure/drop event refers to."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7044,7 +7029,7 @@
             "tags": [],
             "label": "code",
             "description": [
-              "\r\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
+              "\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7056,7 +7041,7 @@
             "tags": [],
             "label": "count",
             "description": [
-              "\r\nThe number of events that this counter refers to."
+              "\nThe number of events that this counter refers to."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7478,21 +7463,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "core",
-        "id": "def-public.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "core",
@@ -7501,7 +7472,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7533,7 +7504,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7571,7 +7542,7 @@
         "tags": [],
         "label": "EventType",
         "description": [
-          "\r\nEvent Type used for indexed structures. Only used to improve the readability of the types"
+          "\nEvent Type used for indexed structures. Only used to improve the readability of the types"
         ],
         "signature": [
           "string"
@@ -7590,15 +7561,9 @@
           "\nSee {@link ExecutionContextSetup}."
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "src/core/public/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7609,7 +7574,7 @@
         "tags": [],
         "label": "FatalErrorsStart",
         "description": [
-          "\r\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\r\nwith details about the Kibana build and the error.\r\n"
+          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
         ],
         "signature": [
           "FatalErrorsSetup"
@@ -7792,7 +7757,7 @@
           "KibanaExecutionContext",
           " | undefined; }"
         ],
-        "path": "src/core/types/execution_context.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8049,6 +8014,22 @@
         "deprecated": false,
         "returnComment": [],
         "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\nIndicates if the event contains data about succeeded, failed or dropped events:\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\n- sent_to_shipper: The event was sent to at least one shipper.\n- succeeded: The event was successfully sent by the shipper.\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -8521,110 +8502,6 @@
     "classes": [
       {
         "parentPluginId": "core",
-        "id": "def-server.CspConfig",
-        "type": "Class",
-        "tags": [],
-        "label": "CspConfig",
-        "description": [
-          "\nCSP configuration for use in Kibana."
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.CspConfig",
-            "text": "CspConfig"
-          },
-          " implements ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ICspConfig",
-            "text": "ICspConfig"
-          }
-        ],
-        "path": "src/core/server/csp/csp_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.DEFAULT",
-            "type": "Object",
-            "tags": [],
-            "label": "DEFAULT",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CspConfig",
-                "text": "CspConfig"
-              }
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.directives",
-            "type": "Object",
-            "tags": [],
-            "label": "#directives",
-            "description": [],
-            "signature": [
-              "CspDirectives"
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.strict",
-            "type": "boolean",
-            "tags": [],
-            "label": "strict",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.warnLegacyBrowsers",
-            "type": "boolean",
-            "tags": [],
-            "label": "warnLegacyBrowsers",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.disableEmbedding",
-            "type": "boolean",
-            "tags": [],
-            "label": "disableEmbedding",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.header",
-            "type": "string",
-            "tags": [],
-            "label": "header",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.ElasticsearchConfig",
         "type": "Class",
         "tags": [],
@@ -9074,7 +8951,7 @@
         "tags": [],
         "label": "AnalyticsClient",
         "description": [
-          "\r\nAnalytics client's public APIs"
+          "\nAnalytics client's public APIs"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -9086,7 +8963,7 @@
             "tags": [],
             "label": "reportEvent",
             "description": [
-              "\r\nReports a telemetry event."
+              "\nReports a telemetry event."
             ],
             "signature": [
               "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
@@ -9136,7 +9013,7 @@
             "tags": [],
             "label": "registerEventType",
             "description": [
-              "\r\nRegisters the event type that will be emitted via the reportEvent API."
+              "\nRegisters the event type that will be emitted via the reportEvent API."
             ],
             "signature": [
               "<EventTypeData>(eventTypeOps: ",
@@ -9173,7 +9050,7 @@
             "tags": [],
             "label": "registerShipper",
             "description": [
-              "\r\nSet up the shipper that will be used to report the telemetry events."
+              "\nSet up the shipper that will be used to report the telemetry events."
             ],
             "signature": [
               "<Shipper extends ",
@@ -9247,7 +9124,7 @@
             "tags": [],
             "label": "optIn",
             "description": [
-              "\r\nUsed to control the user's consent to report the data.\r\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
+              "\nUsed to control the user's consent to report the data.\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
             ],
             "signature": [
               "(optInConfig: ",
@@ -9283,7 +9160,7 @@
             "tags": [],
             "label": "registerContextProvider",
             "description": [
-              "\r\nRegisters the context provider to enrich the any reported events."
+              "\nRegisters the context provider to enrich the any reported events."
             ],
             "signature": [
               "<Context>(contextProviderOpts: ",
@@ -9320,7 +9197,7 @@
             "tags": [],
             "label": "removeContextProvider",
             "description": [
-              "\r\nRemoves the context provider and stop enriching the events from its context."
+              "\nRemoves the context provider and stop enriching the events from its context."
             ],
             "signature": [
               "(contextProviderName: string) => void"
@@ -9354,7 +9231,7 @@
             "tags": [],
             "label": "telemetryCounter$",
             "description": [
-              "\r\nObservable to emit the stats of the processed events."
+              "\nObservable to emit the stats of the processed events."
             ],
             "signature": [
               "Observable",
@@ -9372,7 +9249,7 @@
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\r\nStops the client."
+              "\nStops the client."
             ],
             "signature": [
               "() => void"
@@ -10026,7 +9903,7 @@
         "tags": [],
         "label": "ConfigDeprecationContext",
         "description": [
-          "\r\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\r\n"
+          "\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\n"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -10133,7 +10010,7 @@
         "tags": [],
         "label": "ConfigDeprecationFactory",
         "description": [
-          "\r\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\r\nwhen invoking a {@link ConfigDeprecationProvider}.\r\n\r\nSee methods documentation for more detailed examples.\r\n"
+          "\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\nwhen invoking a {@link ConfigDeprecationProvider}.\n\nSee methods documentation for more detailed examples.\n"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -10145,10 +10022,12 @@
             "tags": [],
             "label": "deprecate",
             "description": [
-              "\r\nDeprecate a configuration property from inside a plugin's configuration path.\r\nWill log a deprecation warning if the deprecatedKey was found.\r\n"
+              "\nDeprecate a configuration property from inside a plugin's configuration path.\nWill log a deprecation warning if the deprecatedKey was found.\n"
             ],
             "signature": [
-              "(deprecatedKey: string, removeBy: string, details: FactoryConfigDeprecationDetails) => ",
+              "(deprecatedKey: string, removeBy: string, details: ",
+              "FactoryConfigDeprecationDetails",
+              ") => ",
               "ConfigDeprecation"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
@@ -10206,10 +10085,12 @@
             "tags": [],
             "label": "deprecateFromRoot",
             "description": [
-              "\r\nDeprecate a configuration property from the root configuration.\r\nWill log a deprecation warning if the deprecatedKey was found.\r\n\r\nThis should be only used when deprecating properties from different configuration's path.\r\nTo deprecate properties from inside a plugin's configuration, use 'deprecate' instead.\r\n"
+              "\nDeprecate a configuration property from the root configuration.\nWill log a deprecation warning if the deprecatedKey was found.\n\nThis should be only used when deprecating properties from different configuration's path.\nTo deprecate properties from inside a plugin's configuration, use 'deprecate' instead.\n"
             ],
             "signature": [
-              "(deprecatedKey: string, removeBy: string, details: FactoryConfigDeprecationDetails) => ",
+              "(deprecatedKey: string, removeBy: string, details: ",
+              "FactoryConfigDeprecationDetails",
+              ") => ",
               "ConfigDeprecation"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
@@ -10267,10 +10148,12 @@
             "tags": [],
             "label": "rename",
             "description": [
-              "\r\nRename a configuration property from inside a plugin's configuration path.\r\nWill log a deprecation warning if the oldKey was found and deprecation applied.\r\n"
+              "\nRename a configuration property from inside a plugin's configuration path.\nWill log a deprecation warning if the oldKey was found and deprecation applied.\n"
             ],
             "signature": [
-              "(oldKey: string, newKey: string, details: FactoryConfigDeprecationDetails) => ",
+              "(oldKey: string, newKey: string, details: ",
+              "FactoryConfigDeprecationDetails",
+              ") => ",
               "ConfigDeprecation"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
@@ -10328,10 +10211,12 @@
             "tags": [],
             "label": "renameFromRoot",
             "description": [
-              "\r\nRename a configuration property from the root configuration.\r\nWill log a deprecation warning if the oldKey was found and deprecation applied.\r\n\r\nThis should be only used when renaming properties from different configuration's path.\r\nTo rename properties from inside a plugin's configuration, use 'rename' instead.\r\n"
+              "\nRename a configuration property from the root configuration.\nWill log a deprecation warning if the oldKey was found and deprecation applied.\n\nThis should be only used when renaming properties from different configuration's path.\nTo rename properties from inside a plugin's configuration, use 'rename' instead.\n"
             ],
             "signature": [
-              "(oldKey: string, newKey: string, details: FactoryConfigDeprecationDetails) => ",
+              "(oldKey: string, newKey: string, details: ",
+              "FactoryConfigDeprecationDetails",
+              ") => ",
               "ConfigDeprecation"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
@@ -10389,10 +10274,12 @@
             "tags": [],
             "label": "unused",
             "description": [
-              "\r\nRemove a configuration property from inside a plugin's configuration path.\r\nWill log a deprecation warning if the unused key was found and deprecation applied.\r\n"
+              "\nRemove a configuration property from inside a plugin's configuration path.\nWill log a deprecation warning if the unused key was found and deprecation applied.\n"
             ],
             "signature": [
-              "(unusedKey: string, details: FactoryConfigDeprecationDetails) => ",
+              "(unusedKey: string, details: ",
+              "FactoryConfigDeprecationDetails",
+              ") => ",
               "ConfigDeprecation"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
@@ -10436,10 +10323,12 @@
             "tags": [],
             "label": "unusedFromRoot",
             "description": [
-              "\r\nRemove a configuration property from the root configuration.\r\nWill log a deprecation warning if the unused key was found and deprecation applied.\r\n\r\nThis should be only used when removing properties from outside of a plugin's configuration.\r\nTo remove properties from inside a plugin's configuration, use 'unused' instead.\r\n"
+              "\nRemove a configuration property from the root configuration.\nWill log a deprecation warning if the unused key was found and deprecation applied.\n\nThis should be only used when removing properties from outside of a plugin's configuration.\nTo remove properties from inside a plugin's configuration, use 'unused' instead.\n"
             ],
             "signature": [
-              "(unusedKey: string, details: FactoryConfigDeprecationDetails) => ",
+              "(unusedKey: string, details: ",
+              "FactoryConfigDeprecationDetails",
+              ") => ",
               "ConfigDeprecation"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
@@ -10486,7 +10375,7 @@
         "tags": [],
         "label": "ContextProviderOpts",
         "description": [
-          "\r\nDefinition of a context provider"
+          "\nDefinition of a context provider"
         ],
         "signature": [
           "ContextProviderOpts",
@@ -10502,7 +10391,7 @@
             "tags": [],
             "label": "name",
             "description": [
-              "\r\nThe name of the provider."
+              "\nThe name of the provider."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -10514,7 +10403,7 @@
             "tags": [],
             "label": "context$",
             "description": [
-              "\r\nObservable that emits the custom context."
+              "\nObservable that emits the custom context."
             ],
             "signature": [
               "Observable",
@@ -10530,7 +10419,7 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\r\nSchema declaring and documenting the expected output in the context$\r\n"
+              "\nSchema declaring and documenting the expected output in the context$\n"
             ],
             "signature": [
               "{ [Key in keyof Required<Context>]: ",
@@ -10539,45 +10428,6 @@
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ContextSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ContextSetup",
-        "description": [
-          "\n{@inheritdoc IContextContainer}\n"
-        ],
-        "path": "src/core/server/context/context_service.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ContextSetup.createContextContainer",
-            "type": "Function",
-            "tags": [],
-            "label": "createContextContainer",
-            "description": [
-              "\nCreates a new {@link IContextContainer} for a service owner."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IContextContainer",
-                "text": "IContextContainer"
-              }
-            ],
-            "path": "src/core/server/context/context_service.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10662,7 +10512,16 @@
                 "docId": "kibCoreHttpPluginApi",
                 "section": "def-server.HttpServicePreboot",
                 "text": "HttpServicePreboot"
-              }
+              },
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              ">"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -10700,7 +10559,7 @@
         "description": [
           "\nThe `core` context provided to route handler.\n\nProvides the following clients and services:\n   - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client\n     which uses the credentials of the incoming request\n   - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing\n     all the registered types.\n   - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch\n     data client which uses the credentials of the incoming request\n   - {@link IUiSettingsClient | uiSettings.client} - uiSettings client\n     which uses the credentials of the incoming request"
         ],
-        "path": "src/core/server/index.ts",
+        "path": "src/core/server/core_route_handler_context.ts",
         "deprecated": false,
         "children": [
           {
@@ -10711,73 +10570,15 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              "{ client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
-              "; typeRegistry: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
-              "; getClient: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientProviderOptions",
-                "text": "SavedObjectsClientProviderOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
-              "; getExporter: (client: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsExporter",
-                "text": "ISavedObjectsExporter"
-              },
-              "; getImporter: (client: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsImporter",
-                "text": "ISavedObjectsImporter"
-              },
-              "; }"
+                "section": "def-server.SavedObjectsRequestHandlerContext",
+                "text": "SavedObjectsRequestHandlerContext"
+              }
             ],
-            "path": "src/core/server/index.ts",
+            "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false
           },
           {
@@ -10788,17 +10589,15 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              },
-              "; }"
+                "section": "def-server.ElasticsearchRequestHandlerContext",
+                "text": "ElasticsearchRequestHandlerContext"
+              }
             ],
-            "path": "src/core/server/index.ts",
+            "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false
           },
           {
@@ -10809,17 +10608,15 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              "{ client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
-              "; }"
+                "section": "def-server.UiSettingsRequestHandlerContext",
+                "text": "UiSettingsRequestHandlerContext"
+              }
             ],
-            "path": "src/core/server/index.ts",
+            "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false
           },
           {
@@ -10830,17 +10627,15 @@
             "label": "deprecations",
             "description": [],
             "signature": [
-              "{ client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationsClient",
-                "text": "DeprecationsClient"
-              },
-              "; }"
+                "section": "def-server.DeprecationsRequestHandlerContext",
+                "text": "DeprecationsRequestHandlerContext"
+              }
             ],
-            "path": "src/core/server/index.ts",
+            "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false
           }
         ],
@@ -10922,27 +10717,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.CoreSetup.context",
-            "type": "Object",
-            "tags": [],
-            "label": "context",
-            "description": [
-              "{@link ContextSetup}"
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ContextSetup",
-                "text": "ContextSetup"
-              }
-            ],
-            "path": "src/core/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.CoreSetup.docLinks",
             "type": "Object",
             "tags": [],
@@ -10987,13 +10761,7 @@
               "{@link ExecutionContextSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11015,7 +10783,15 @@
                 "section": "def-server.HttpServiceSetup",
                 "text": "HttpServiceSetup"
               },
-              " & { resources: ",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              "> & { resources: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -11297,13 +11073,7 @@
               "{@link ExecutionContextStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11670,6 +11440,40 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.DeprecationsRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecationsRequestHandlerContext",
+        "description": [
+          "\nCore's `deprecations` request handler context."
+        ],
+        "path": "src/core/server/deprecations/deprecations_route_handler_context.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DeprecationsRequestHandlerContext.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationsClient",
+                "text": "DeprecationsClient"
+              }
+            ],
+            "path": "src/core/server/deprecations/deprecations_route_handler_context.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.DeprecationsServiceSetup",
         "type": "Interface",
         "tags": [],
@@ -11734,7 +11538,7 @@
         "tags": [],
         "label": "DiscoveredPlugin",
         "description": [
-          "\r\nSmall container object used to expose information about discovered plugins that may\r\nor may not have been started."
+          "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
         ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
@@ -11746,7 +11550,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\r\nIdentifier of the plugin."
+              "\nIdentifier of the plugin."
             ],
             "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
@@ -11758,7 +11562,7 @@
             "tags": [],
             "label": "configPath",
             "description": [
-              "\r\nRoot configuration path used by the plugin, defaults to \"id\" in snake_case format."
+              "\nRoot configuration path used by the plugin, defaults to \"id\" in snake_case format."
             ],
             "signature": [
               "string | string[]"
@@ -11773,7 +11577,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nType of the plugin, defaults to `standard`."
+              "\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
               "PluginType"
@@ -11788,7 +11592,7 @@
             "tags": [],
             "label": "requiredPlugins",
             "description": [
-              "\r\nAn optional list of the other plugins that **must be** installed and enabled\r\nfor this plugin to function properly."
+              "\nAn optional list of the other plugins that **must be** installed and enabled\nfor this plugin to function properly."
             ],
             "signature": [
               "readonly string[]"
@@ -11803,7 +11607,7 @@
             "tags": [],
             "label": "optionalPlugins",
             "description": [
-              "\r\nAn optional list of the other plugins that if installed and enabled **may be**\r\nleveraged by this plugin for some additional functionality but otherwise are\r\nnot required for this plugin to work properly."
+              "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
             ],
             "signature": [
               "readonly string[]"
@@ -11818,7 +11622,7 @@
             "tags": [],
             "label": "requiredBundles",
             "description": [
-              "\r\nList of plugin ids that this plugin's UI code imports modules from that are\r\nnot in `requiredPlugins`.\r\n"
+              "\nList of plugin ids that this plugin's UI code imports modules from that are\nnot in `requiredPlugins`.\n"
             ],
             "signature": [
               "readonly string[]"
@@ -11833,7 +11637,7 @@
             "tags": [],
             "label": "enabledOnAnonymousPages",
             "description": [
-              "\r\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\r\nconfigured, etc.) Default is false."
+              "\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\nconfigured, etc.) Default is false."
             ],
             "signature": [
               "boolean | undefined"
@@ -11940,25 +11744,33 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ElasticsearchErrorDetails",
+        "id": "def-server.ElasticsearchRequestHandlerContext",
         "type": "Interface",
         "tags": [],
-        "label": "ElasticsearchErrorDetails",
-        "description": [],
-        "path": "src/core/server/elasticsearch/client/types.ts",
+        "label": "ElasticsearchRequestHandlerContext",
+        "description": [
+          "\nCore's `elasticsearch` request handler context."
+        ],
+        "path": "src/core/server/elasticsearch/elasticsearch_route_handler_context.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.ElasticsearchErrorDetails.error",
+            "id": "def-server.ElasticsearchRequestHandlerContext.client",
             "type": "Object",
             "tags": [],
-            "label": "error",
+            "label": "client",
             "description": [],
             "signature": [
-              "{ type: string; reason?: string | undefined; } | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              }
             ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
+            "path": "src/core/server/elasticsearch/elasticsearch_route_handler_context.ts",
             "deprecated": false
           }
         ],
@@ -12362,51 +12174,48 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.Event_2",
+        "id": "def-server.Event",
         "type": "Interface",
         "tags": [],
-        "label": "Event_2",
+        "label": "Event",
         "description": [
-          "\r\nDefinition of the full event structure"
-        ],
-        "signature": [
-          "Event"
+          "\nDefinition of the full event structure"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.Event_2.timestamp",
+            "id": "def-server.Event.timestamp",
             "type": "string",
             "tags": [],
             "label": "timestamp",
             "description": [
-              "\r\nThe time the event was generated in ISO format."
+              "\nThe time the event was generated in ISO format."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.Event_2.event_type",
+            "id": "def-server.Event.event_type",
             "type": "string",
             "tags": [],
             "label": "event_type",
             "description": [
-              "\r\nThe event type."
+              "\nThe event type."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.Event_2.properties",
+            "id": "def-server.Event.properties",
             "type": "Object",
             "tags": [],
             "label": "properties",
             "description": [
-              "\r\nThe specific properties of the event type."
+              "\nThe specific properties of the event type."
             ],
             "signature": [
               "{ [x: string]: unknown; }"
@@ -12416,12 +12225,12 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.Event_2.context",
+            "id": "def-server.Event.context",
             "type": "Object",
             "tags": [],
             "label": "context",
             "description": [
-              "\r\nThe {@link EventContext} enriched during the processing pipeline."
+              "\nThe {@link EventContext} enriched during the processing pipeline."
             ],
             "signature": [
               "EventContext"
@@ -12439,7 +12248,7 @@
         "tags": [],
         "label": "EventContext",
         "description": [
-          "\r\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+          "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -12451,7 +12260,7 @@
             "tags": [],
             "label": "cluster_uuid",
             "description": [
-              "\r\nThe UUID of the cluster"
+              "\nThe UUID of the cluster"
             ],
             "signature": [
               "string | undefined"
@@ -12466,7 +12275,7 @@
             "tags": [],
             "label": "cluster_name",
             "description": [
-              "\r\nThe name of the cluster."
+              "\nThe name of the cluster."
             ],
             "signature": [
               "string | undefined"
@@ -12481,7 +12290,7 @@
             "tags": [],
             "label": "license_id",
             "description": [
-              "\r\nThe license ID."
+              "\nThe license ID."
             ],
             "signature": [
               "string | undefined"
@@ -12496,7 +12305,7 @@
             "tags": [],
             "label": "userId",
             "description": [
-              "\r\nThe unique user ID."
+              "\nThe unique user ID."
             ],
             "signature": [
               "string | undefined"
@@ -12511,7 +12320,7 @@
             "tags": [],
             "label": "cloudId",
             "description": [
-              "\r\nThe Cloud ID."
+              "\nThe Cloud ID."
             ],
             "signature": [
               "string | undefined"
@@ -12526,7 +12335,7 @@
             "tags": [],
             "label": "isElasticCloudUser",
             "description": [
-              "\r\n`true` if the user is logged in via the Elastic Cloud authentication provider."
+              "\n`true` if the user is logged in via the Elastic Cloud authentication provider."
             ],
             "signature": [
               "boolean | undefined"
@@ -12541,7 +12350,7 @@
             "tags": [],
             "label": "version",
             "description": [
-              "\r\nThe product's version."
+              "\nThe product's version."
             ],
             "signature": [
               "string | undefined"
@@ -12556,7 +12365,7 @@
             "tags": [],
             "label": "pageName",
             "description": [
-              "\r\nThe name of the current page."
+              "\nThe name of the current page."
             ],
             "signature": [
               "string | undefined"
@@ -12571,7 +12380,7 @@
             "tags": [],
             "label": "applicationId",
             "description": [
-              "\r\nThe current application ID."
+              "\nThe current application ID."
             ],
             "signature": [
               "string | undefined"
@@ -12586,7 +12395,7 @@
             "tags": [],
             "label": "entityId",
             "description": [
-              "\r\nThe current entity ID (dashboard ID, visualization ID, etc.)."
+              "\nThe current entity ID (dashboard ID, visualization ID, etc.)."
             ],
             "signature": [
               "string | undefined"
@@ -12601,7 +12410,7 @@
             "tags": [],
             "label": "[key: string]: unknown",
             "description": [
-              "\r\nAdditional keys are allowed."
+              "\nAdditional keys are allowed."
             ],
             "signature": [
               "[key: string]:  unknown"
@@ -12619,7 +12428,7 @@
         "tags": [],
         "label": "EventTypeOpts",
         "description": [
-          "\r\nDefinition of an Event Type."
+          "\nDefinition of an Event Type."
         ],
         "signature": [
           "EventTypeOpts",
@@ -12635,7 +12444,7 @@
             "tags": [],
             "label": "eventType",
             "description": [
-              "\r\nThe event type's unique name."
+              "\nThe event type's unique name."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -12647,7 +12456,7 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\r\nSchema declaring and documenting the expected structure of this event type.\r\n"
+              "\nSchema declaring and documenting the expected structure of this event type.\n"
             ],
             "signature": [
               "{ [Key in keyof Required<EventTypeData>]: ",
@@ -12667,7 +12476,7 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [],
-        "path": "src/core/server/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -12684,7 +12493,7 @@
               "KibanaExecutionContext",
               " | undefined, fn: (...args: any[]) => R) => R"
             ],
-            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -12698,7 +12507,7 @@
                   "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "src/core/server/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -12712,7 +12521,7 @@
                 "signature": [
                   "(...args: any[]) => R"
                 ],
-                "path": "src/core/server/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -12730,7 +12539,7 @@
               "() => ",
               "Labels"
             ],
-            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -15021,8 +14830,8 @@
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
+                "section": "def-server.RequestHandlerContextBase",
+                "text": "RequestHandlerContextBase"
               },
               ", ContextName extends keyof Context>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
               {
@@ -15111,7 +14920,7 @@
               {
                 "pluginId": "core",
                 "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
+                "docId": "kibCorePluginApi",
                 "section": "def-server.RequestHandler",
                 "text": "RequestHandler"
               },
@@ -15545,7 +15354,7 @@
                   {
                     "pluginId": "core",
                     "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
+                    "docId": "kibCorePluginApi",
                     "section": "def-server.RequestHandler",
                     "text": "RequestHandler"
                   },
@@ -15759,69 +15568,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ICspConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "ICspConfig",
-        "description": [
-          "\nCSP configuration for use in Kibana."
-        ],
-        "path": "src/core/server/csp/csp_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.strict",
-            "type": "boolean",
-            "tags": [],
-            "label": "strict",
-            "description": [
-              "\nSpecify whether browsers that do not support CSP should be\nable to use Kibana. Use `true` to block and `false` to allow."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.warnLegacyBrowsers",
-            "type": "boolean",
-            "tags": [],
-            "label": "warnLegacyBrowsers",
-            "description": [
-              "\nSpecify whether users with legacy browsers should be warned\nabout their lack of Kibana security compliance."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.disableEmbedding",
-            "type": "boolean",
-            "tags": [],
-            "label": "disableEmbedding",
-            "description": [
-              "\nWhether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled, a restrictive 'frame-ancestors' rule will be added to the default CSP rules."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.header",
-            "type": "string",
-            "tags": [],
-            "label": "header",
-            "description": [
-              "\nThe CSP rules in a formatted directives string for use\nin a `Content-Security-Policy` header."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.ICustomClusterClient",
         "type": "Interface",
         "tags": [],
@@ -15876,7 +15622,7 @@
         "tags": [],
         "label": "IExecutionContextContainer",
         "description": [],
-        "path": "src/core/server/execution_context/execution_context_container.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -15889,7 +15635,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/core/server/execution_context/execution_context_container.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -15906,104 +15652,10 @@
               "KibanaExecutionContext",
               ">"
             ],
-            "path": "src/core/server/execution_context/execution_context_container.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.IExternalUrlConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "IExternalUrlConfig",
-        "description": [
-          "\nExternal Url configuration for use in Kibana."
-        ],
-        "path": "src/core/server/external_url/external_url_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlConfig.policy",
-            "type": "Array",
-            "tags": [],
-            "label": "policy",
-            "description": [
-              "\nA set of policies describing which external urls are allowed."
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IExternalUrlPolicy",
-                "text": "IExternalUrlPolicy"
-              },
-              "[]"
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.IExternalUrlPolicy",
-        "type": "Interface",
-        "tags": [],
-        "label": "IExternalUrlPolicy",
-        "description": [
-          "\nA policy describing whether access to an external destination is allowed."
-        ],
-        "path": "src/core/server/external_url/external_url_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlPolicy.allow",
-            "type": "boolean",
-            "tags": [],
-            "label": "allow",
-            "description": [
-              "\nIndicates if this policy allows or denies access to the described destination."
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlPolicy.host",
-            "type": "string",
-            "tags": [],
-            "label": "host",
-            "description": [
-              "\nOptional host describing the external destination.\nMay be combined with `protocol`.\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlPolicy.protocol",
-            "type": "string",
-            "tags": [],
-            "label": "protocol",
-            "description": [
-              "\nOptional protocol describing the external destination.\nMay be combined with `host`.\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -18562,7 +18214,7 @@
         "tags": [],
         "label": "IShipper",
         "description": [
-          "\r\nBasic structure of a Shipper"
+          "\nBasic structure of a Shipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -18574,7 +18226,7 @@
             "tags": [],
             "label": "reportEvents",
             "description": [
-              "\r\nAdapts and ships the event to the persisting/analytics solution."
+              "\nAdapts and ships the event to the persisting/analytics solution."
             ],
             "signature": [
               "(events: ",
@@ -18611,7 +18263,7 @@
             "tags": [],
             "label": "optIn",
             "description": [
-              "\r\nStops/restarts the shipping mechanism based on the value of isOptedIn"
+              "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
             ],
             "signature": [
               "(isOptedIn: boolean) => void"
@@ -18645,7 +18297,7 @@
             "tags": [],
             "label": "extendContext",
             "description": [
-              "\r\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
+              "\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
             ],
             "signature": [
               "((newContext: ",
@@ -18681,7 +18333,7 @@
             "tags": [],
             "label": "telemetryCounter$",
             "description": [
-              "\r\nObservable to emit the stats of the processed events."
+              "\nObservable to emit the stats of the processed events."
             ],
             "signature": [
               "Observable",
@@ -18699,7 +18351,7 @@
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\r\nShutdown the shipper."
+              "\nShutdown the shipper."
             ],
             "signature": [
               "() => void"
@@ -19027,7 +18679,7 @@
         "tags": [],
         "label": "Logger",
         "description": [
-          "\r\nLogger exposes all the necessary methods to log any type of information and\r\nthis is the interface used by the logging consumers including plugins.\r\n"
+          "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -19039,7 +18691,7 @@
             "tags": [],
             "label": "trace",
             "description": [
-              "\r\nLog messages at the most detailed log level\r\n"
+              "\nLog messages at the most detailed log level\n"
             ],
             "signature": [
               "<Meta extends ",
@@ -19093,7 +18745,7 @@
             "tags": [],
             "label": "debug",
             "description": [
-              "\r\nLog messages useful for debugging and interactive investigation"
+              "\nLog messages useful for debugging and interactive investigation"
             ],
             "signature": [
               "<Meta extends ",
@@ -19147,7 +18799,7 @@
             "tags": [],
             "label": "info",
             "description": [
-              "\r\nLogs messages related to general application flow"
+              "\nLogs messages related to general application flow"
             ],
             "signature": [
               "<Meta extends ",
@@ -19201,7 +18853,7 @@
             "tags": [],
             "label": "warn",
             "description": [
-              "\r\nLogs abnormal or unexpected errors or messages"
+              "\nLogs abnormal or unexpected errors or messages"
             ],
             "signature": [
               "<Meta extends ",
@@ -19255,7 +18907,7 @@
             "tags": [],
             "label": "error",
             "description": [
-              "\r\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\r\n"
+              "\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\n"
             ],
             "signature": [
               "<Meta extends ",
@@ -19309,7 +18961,7 @@
             "tags": [],
             "label": "fatal",
             "description": [
-              "\r\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\r\n"
+              "\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\n"
             ],
             "signature": [
               "<Meta extends ",
@@ -19363,7 +19015,7 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\r\nReturns a new {@link Logger} instance extending the current logger context.\r\n"
+              "\nReturns a new {@link Logger} instance extending the current logger context.\n"
             ],
             "signature": [
               "(...childContextPaths: string[]) => ",
@@ -19399,7 +19051,7 @@
         "tags": [],
         "label": "LoggerConfigType",
         "description": [
-          "\r\nDescribes the configuration of a given logger.\r\n"
+          "\nDescribes the configuration of a given logger.\n"
         ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
@@ -19450,7 +19102,7 @@
         "tags": [],
         "label": "LoggerContextConfigInput",
         "description": [
-          "\r\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+          "\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
         ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
@@ -19496,7 +19148,7 @@
         "tags": [],
         "label": "LoggerFactory",
         "description": [
-          "\r\nThe single purpose of `LoggerFactory` interface is to define a way to\r\nretrieve a context-based logger instance.\r\n"
+          "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -19508,7 +19160,7 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\r\nReturns a `Logger` instance for the specified context.\r\n"
+              "\nReturns a `Logger` instance for the specified context.\n"
             ],
             "signature": [
               "(...contextParts: string[]) => ",
@@ -19524,7 +19176,7 @@
                 "tags": [],
                 "label": "contextParts",
                 "description": [
-                  "- Parts of the context to return logger for. For example\r\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
+                  "- Parts of the context to return logger for. For example\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
                 ],
                 "signature": [
                   "string[]"
@@ -19546,7 +19198,7 @@
         "tags": [],
         "label": "LoggingServiceSetup",
         "description": [
-          "\r\nProvides APIs to plugins for customizing the plugin's logger."
+          "\nProvides APIs to plugins for customizing the plugin's logger."
         ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
@@ -19558,7 +19210,7 @@
             "tags": [],
             "label": "configure",
             "description": [
-              "\r\nCustomizes the logging config for the plugin's context.\r\n"
+              "\nCustomizes the logging config for the plugin's context.\n"
             ],
             "signature": [
               "(config$: ",
@@ -19643,6 +19295,75 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.NodeInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeInfo",
+        "description": [
+          "\nContains information about how this Kibana process has been configured.\n"
+        ],
+        "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodeInfo.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "A list of roles this node has been configured with."
+            ],
+            "signature": [
+              "NodeRoles"
+            ],
+            "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.NodeRoles",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeRoles",
+        "description": [
+          "\nThe Kibana process can be run in dedicated \"modes\" via `node.roles`.\nThis configuration is then exposed to plugins via `NodeRoles`,\nwhich is available on the `PluginInitializerContext`.\n\nThe node roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured.\n"
+        ],
+        "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodeRoles.backgroundTasks",
+            "type": "boolean",
+            "tags": [],
+            "label": "backgroundTasks",
+            "description": [
+              "\nThe backgroundTasks role includes operations which don't involve\nresponding to incoming http traffic from the UI."
+            ],
+            "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodeRoles.ui",
+            "type": "boolean",
+            "tags": [],
+            "label": "ui",
+            "description": [
+              "\nThe ui role covers any operations that need to occur in order\nto handle http traffic from the browser."
+            ],
+            "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -20176,7 +19897,7 @@
         "tags": [],
         "label": "OptInConfig",
         "description": [
-          "\r\n"
+          "\n"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -20188,7 +19909,7 @@
             "tags": [],
             "label": "global",
             "description": [
-              "\r\nControls the global enabled/disabled behaviour of the client and shippers."
+              "\nControls the global enabled/disabled behaviour of the client and shippers."
             ],
             "signature": [
               "OptInConfigPerType"
@@ -20203,7 +19924,7 @@
             "tags": [],
             "label": "event_types",
             "description": [
-              "\r\nControls if an event type should be disabled for a specific type of shipper."
+              "\nControls if an event type should be disabled for a specific type of shipper."
             ],
             "signature": [
               "Record<string, ",
@@ -20585,6 +20306,21 @@
               "; packageInfo: Readonly<",
               "PackageInfo",
               ">; instanceUuid: string; configs: readonly string[]; }"
+            ],
+            "path": "src/core/server/plugins/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginInitializerContext.node",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "\nAccess the configuration for this particular Kibana node.\nCan be used to determine which `roles` the current process was started with.\n"
+            ],
+            "signature": [
+              "NodeInfo"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false
@@ -22375,7 +22111,7 @@
         "tags": [],
         "label": "RequestHandlerContext",
         "description": [
-          "\nBase context passed to a route handler.\n"
+          "\nBase context passed to a route handler, containing the `core` context part.\n"
         ],
         "signature": [
           {
@@ -22427,7 +22163,9 @@
         "type": "Interface",
         "tags": [],
         "label": "RequestHandlerContextBase",
-        "description": [],
+        "description": [
+          "\nBase, abstract type for request handler contexts."
+        ],
         "path": "src/core/server/index.ts",
         "deprecated": false,
         "children": [
@@ -23102,7 +22840,7 @@
         "tags": [],
         "label": "ShipperClassConstructor",
         "description": [
-          "\r\nConstructor of a {@link IShipper}"
+          "\nConstructor of a {@link IShipper}"
         ],
         "signature": [
           "ShipperClassConstructor",
@@ -23118,7 +22856,7 @@
             "tags": [],
             "label": "shipperName",
             "description": [
-              "\r\nThe shipper's unique name"
+              "\nThe shipper's unique name"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23130,7 +22868,7 @@
             "tags": [],
             "label": "new",
             "description": [
-              "\r\nThe constructor"
+              "\nThe constructor"
             ],
             "signature": [
               "any"
@@ -23362,7 +23100,7 @@
         "tags": [],
         "label": "TelemetryCounter",
         "description": [
-          "\r\nShape of the events emitted by the telemetryCounter$ observable"
+          "\nShape of the events emitted by the telemetryCounter$ observable"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -23370,14 +23108,14 @@
           {
             "parentPluginId": "core",
             "id": "def-server.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "TelemetryCounterType"
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23389,7 +23127,7 @@
             "tags": [],
             "label": "source",
             "description": [
-              "\r\nWho emitted the event? It can be \"client\" or the name of the shipper."
+              "\nWho emitted the event? It can be \"client\" or the name of the shipper."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23401,7 +23139,7 @@
             "tags": [],
             "label": "event_type",
             "description": [
-              "\r\nThe event type the success/failure/drop event refers to."
+              "\nThe event type the success/failure/drop event refers to."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23413,7 +23151,7 @@
             "tags": [],
             "label": "code",
             "description": [
-              "\r\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
+              "\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23425,7 +23163,7 @@
             "tags": [],
             "label": "count",
             "description": [
-              "\r\nThe number of events that this counter refers to."
+              "\nThe number of events that this counter refers to."
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23679,6 +23417,40 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.UiSettingsRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiSettingsRequestHandlerContext",
+        "description": [
+          "\nCore's `uiSettings` request handler context."
+        ],
+        "path": "src/core/server/ui_settings/ui_settings_route_handler_context.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsRequestHandlerContext.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "src/core/server/ui_settings/ui_settings_route_handler_context.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -24089,19 +23861,6 @@
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -24112,7 +23871,7 @@
         "tags": [],
         "label": "AddConfigDeprecation",
         "description": [
-          "\r\nConfig deprecation hook used when invoking a {@link ConfigDeprecation}\r\n"
+          "\nConfig deprecation hook used when invoking a {@link ConfigDeprecation}\n"
         ],
         "signature": [
           "(details: ",
@@ -24146,7 +23905,7 @@
         "tags": [],
         "label": "AnalyticsServicePreboot",
         "description": [
-          "\r\nExposes the public APIs of the AnalyticsClient during the preboot phase\r\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the preboot phase\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24178,7 +23937,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24210,7 +23969,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24364,7 +24123,7 @@
         "tags": [],
         "label": "ConfigDeprecation",
         "description": [
-          "\r\nConfiguration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.\r\n"
+          "\nConfiguration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.\n"
         ],
         "signature": [
           "(config: Readonly<{ [x: string]: any; }>, fromPath: string, addDeprecation: ",
@@ -24457,7 +24216,7 @@
         "tags": [],
         "label": "ConfigDeprecationProvider",
         "description": [
-          "\r\nA provider that should returns a list of {@link ConfigDeprecation}.\r\n\r\nSee {@link ConfigDeprecationFactory} for more usage examples.\r\n"
+          "\nA provider that should returns a list of {@link ConfigDeprecation}.\n\nSee {@link ConfigDeprecationFactory} for more usage examples.\n"
         ],
         "signature": [
           "(factory: ",
@@ -24506,7 +24265,9 @@
         "type": "Type",
         "tags": [],
         "label": "CustomRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\nMixin allowing plugins to define their own request handler contexts.\n"
+        ],
         "signature": [
           {
             "pluginId": "core",
@@ -24570,10 +24331,83 @@
         "tags": [],
         "label": "Ecs",
         "description": [
-          "\r\nRepresents the full ECS schema.\r\n"
+          "\nRepresents the full ECS schema.\n"
         ],
         "signature": [
-          "EcsBase & EcsTracing & { ecs: EcsField; agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; data_stream?: EcsDataStream | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; email?: EcsEmail | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: EcsLog | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; orchestrator?: EcsOrchestrator | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
+          "EcsBase",
+          " & ",
+          "EcsTracing",
+          " & { ecs: ",
+          "EcsField",
+          "; agent?: ",
+          "EcsAgent",
+          " | undefined; as?: ",
+          "EcsAutonomousSystem",
+          " | undefined; client?: ",
+          "EcsClient",
+          " | undefined; cloud?: ",
+          "EcsCloud",
+          " | undefined; container?: ",
+          "EcsContainer",
+          " | undefined; data_stream?: ",
+          "EcsDataStream",
+          " | undefined; destination?: ",
+          "EcsDestination",
+          " | undefined; dns?: ",
+          "EcsDns",
+          " | undefined; email?: ",
+          "EcsEmail",
+          " | undefined; error?: ",
+          "EcsError",
+          " | undefined; event?: ",
+          "EcsEvent",
+          " | undefined; file?: ",
+          "EcsFile",
+          " | undefined; group?: ",
+          "EcsGroup",
+          " | undefined; host?: ",
+          "EcsHost",
+          " | undefined; http?: ",
+          "EcsHttp",
+          " | undefined; log?: ",
+          "EcsLog",
+          " | undefined; network?: ",
+          "EcsNetwork",
+          " | undefined; observer?: ",
+          "EcsObserver",
+          " | undefined; orchestrator?: ",
+          "EcsOrchestrator",
+          " | undefined; organization?: ",
+          "EcsOrganization",
+          " | undefined; package?: ",
+          "EcsPackage",
+          " | undefined; process?: ",
+          "EcsProcess",
+          " | undefined; registry?: ",
+          "EcsRegistry",
+          " | undefined; related?: ",
+          "EcsRelated",
+          " | undefined; rule?: ",
+          "EcsRule",
+          " | undefined; server?: ",
+          "EcsServer",
+          " | undefined; service?: ",
+          "EcsService",
+          " | undefined; source?: ",
+          "EcsSource",
+          " | undefined; threat?: ",
+          "EcsThreat",
+          " | undefined; tls?: ",
+          "EcsTls",
+          " | undefined; url?: ",
+          "EcsUrl",
+          " | undefined; user?: ",
+          "EcsUser",
+          " | undefined; user_agent?: ",
+          "EcsUserAgent",
+          " | undefined; vulnerability?: ",
+          "EcsVulnerability",
+          " | undefined; }"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -25870,7 +25704,7 @@
         "tags": [],
         "label": "EventType",
         "description": [
-          "\r\nEvent Type used for indexed structures. Only used to improve the readability of the types"
+          "\nEvent Type used for indexed structures. Only used to improve the readability of the types"
         ],
         "signature": [
           "string"
@@ -25887,15 +25721,9 @@
         "label": "ExecutionContextStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "src/core/server/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -26772,7 +26600,7 @@
           "KibanaExecutionContext",
           " | undefined; }"
         ],
-        "path": "src/core/types/execution_context.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -26783,10 +26611,76 @@
         "tags": [],
         "label": "LogMeta",
         "description": [
-          "\r\nRepresents the ECS schema with the following reserved keys excluded:\r\n- `ecs`\r\n- `@timestamp`\r\n- `message`\r\n- `log.level`\r\n- `log.logger`\r\n"
+          "\nRepresents the ECS schema with the following reserved keys excluded:\n- `ecs`\n- `@timestamp`\n- `message`\n- `log.level`\n- `log.logger`\n"
         ],
         "signature": [
-          "Omit<EcsBase, \"message\" | \"@timestamp\"> & EcsTracing & { agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: Omit<EcsLog, \"logger\" | \"level\"> | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
+          "Omit<",
+          "EcsBase",
+          ", \"message\" | \"@timestamp\"> & ",
+          "EcsTracing",
+          " & { agent?: ",
+          "EcsAgent",
+          " | undefined; as?: ",
+          "EcsAutonomousSystem",
+          " | undefined; client?: ",
+          "EcsClient",
+          " | undefined; cloud?: ",
+          "EcsCloud",
+          " | undefined; container?: ",
+          "EcsContainer",
+          " | undefined; destination?: ",
+          "EcsDestination",
+          " | undefined; dns?: ",
+          "EcsDns",
+          " | undefined; error?: ",
+          "EcsError",
+          " | undefined; event?: ",
+          "EcsEvent",
+          " | undefined; file?: ",
+          "EcsFile",
+          " | undefined; group?: ",
+          "EcsGroup",
+          " | undefined; host?: ",
+          "EcsHost",
+          " | undefined; http?: ",
+          "EcsHttp",
+          " | undefined; log?: Omit<",
+          "EcsLog",
+          ", \"logger\" | \"level\"> | undefined; network?: ",
+          "EcsNetwork",
+          " | undefined; observer?: ",
+          "EcsObserver",
+          " | undefined; organization?: ",
+          "EcsOrganization",
+          " | undefined; package?: ",
+          "EcsPackage",
+          " | undefined; process?: ",
+          "EcsProcess",
+          " | undefined; registry?: ",
+          "EcsRegistry",
+          " | undefined; related?: ",
+          "EcsRelated",
+          " | undefined; rule?: ",
+          "EcsRule",
+          " | undefined; server?: ",
+          "EcsServer",
+          " | undefined; service?: ",
+          "EcsService",
+          " | undefined; source?: ",
+          "EcsSource",
+          " | undefined; threat?: ",
+          "EcsThreat",
+          " | undefined; tls?: ",
+          "EcsTls",
+          " | undefined; url?: ",
+          "EcsUrl",
+          " | undefined; user?: ",
+          "EcsUser",
+          " | undefined; user_agent?: ",
+          "EcsUserAgent",
+          " | undefined; vulnerability?: ",
+          "EcsVulnerability",
+          " | undefined; }"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -26933,7 +26827,7 @@
         "tags": [],
         "label": "PluginName",
         "description": [
-          "\r\nDedicated type for plugin name/id that is supposed to make Map/Set/Arrays\r\nthat use it as a key or value more obvious.\r\n"
+          "\nDedicated type for plugin name/id that is supposed to make Map/Set/Arrays\nthat use it as a key or value more obvious.\n"
         ],
         "signature": [
           "string"
@@ -26953,6 +26847,141 @@
           "symbol"
         ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PublicHttpServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicHttpServiceSetup",
+        "description": [
+          "\nPublic version of RequestHandlerContext, default-scoped to {@link RequestHandlerContext}\nSee [@link RequestHandlerContext}"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpServiceSetup",
+            "text": "HttpServiceSetup"
+          },
+          "<ContextType>"
+        ],
+        "path": "src/core/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PublicRequestHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicRequestHandler",
+        "description": [
+          "\nPublic version of RequestHandler, default-scoped to {@link RequestHandlerContext}\nSee [@link RequestHandler}"
+        ],
+        "signature": [
+          "(context: Context, request: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<P, Q, B, Method>, response: ResponseFactory) => ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<any> | Promise<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<any>>"
+        ],
+        "path": "src/core/server/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PublicRequestHandler.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Context"
+            ],
+            "path": "src/core/server/http/router/router.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PublicRequestHandler.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<P, Q, B, Method>"
+            ],
+            "path": "src/core/server/http/router/router.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PublicRequestHandler.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "ResponseFactory"
+            ],
+            "path": "src/core/server/http/router/router.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PublicRouter",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicRouter",
+        "description": [
+          "\nPublic version of IRouter, default-scoped to {@link RequestHandlerContext}\nSee [@link IRouter}"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.IRouter",
+            "text": "IRouter"
+          },
+          "<ContextType>"
+        ],
+        "path": "src/core/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -27108,6 +27137,22 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\nIndicates if the event contains data about succeeded, failed or dropped events:\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\n- sent_to_shipper: The event was sent to at least one shipper.\n- succeeded: The event was successfully sent by the shipper.\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.UiSettingsType",
         "type": "Type",
         "tags": [],
@@ -27119,21 +27164,6 @@
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"json\" | \"markdown\" | \"select\" | \"array\""
         ],
         "path": "src/core/types/ui_settings.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.UnauthorizedError",
-        "type": "Type",
-        "tags": [],
-        "label": "UnauthorizedError",
-        "description": [],
-        "signature": [
-          "ResponseError",
-          " & { statusCode: 401; }"
-        ],
-        "path": "src/core/server/elasticsearch/client/errors.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

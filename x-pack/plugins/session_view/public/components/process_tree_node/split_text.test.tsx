@@ -19,10 +19,4 @@ describe('SplitText component', () => {
     }
     expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(text);
   });
-  it('should provide an acessible label for screen readers', async () => {
-    const text = 'hello world';
-
-    const renderResult = render(<SplitText>{text}</SplitText>);
-    expect(renderResult.queryByRole('document', { name: text })).toBeTruthy();
-  });
 });

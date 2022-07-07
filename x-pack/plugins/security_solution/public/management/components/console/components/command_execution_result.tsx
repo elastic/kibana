@@ -8,22 +8,23 @@
 import React, { memo, PropsWithChildren, ComponentType, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CommonProps, EuiPanel, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { CommonProps, EuiPanel, EuiSpacer } from '@elastic/eui';
 import classNames from 'classnames';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ConsoleText } from './console_text';
 
 const COMMAND_EXECUTION_RESULT_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.successTitle',
-  { defaultMessage: 'Command successful.' }
+  { defaultMessage: 'Success. Action was complete.' }
 );
 const COMMAND_EXECUTION_RESULT_FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.failureTitle',
-  { defaultMessage: 'Command failed.' }
+  { defaultMessage: 'Error. Action failed.' }
 );
 const COMMAND_EXECUTION_RESULT_PENDING = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.pending',
-  { defaultMessage: 'Waiting for response' }
+  { defaultMessage: 'Action pending' }
 );
 
 export type CommandExecutionResultProps = PropsWithChildren<{
@@ -84,24 +85,19 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
         data-test-subj={dataTestSubj ? dataTestSubj : getTestId('commandExecutionResult')}
       >
         {showAs === 'pending' ? (
-          <EuiText size="s">
-            <EuiTextColor color="subdued">
-              {children ?? COMMAND_EXECUTION_RESULT_PENDING}
-            </EuiTextColor>
-          </EuiText>
+          <ConsoleText>{children ?? COMMAND_EXECUTION_RESULT_PENDING}</ConsoleText>
         ) : (
           <>
             {showTitle && (
               <>
-                <EuiText size="s">
-                  <EuiTextColor color={showAs === 'success' ? 'success' : 'danger'}>
-                    {title
-                      ? title
-                      : showAs === 'success'
-                      ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
-                      : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
-                  </EuiTextColor>
-                </EuiText>
+                <ConsoleText color={showAs === 'success' ? 'success' : 'danger'}>
+                  {title
+                    ? title
+                    : showAs === 'success'
+                    ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
+                    : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
+                </ConsoleText>
+
                 <EuiSpacer size="s" />
               </>
             )}
