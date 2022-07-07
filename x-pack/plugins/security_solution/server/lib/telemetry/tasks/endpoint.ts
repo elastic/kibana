@@ -21,6 +21,7 @@ import { ITelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
+  createUsageCounterLabel,
   extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
@@ -37,6 +38,8 @@ const EmptyFleetAgentResponse = {
   page: 0,
   perPage: 0,
 };
+
+const usageLabelPrefix: string[] = ['security_telemetry', 'endpoint_task'];
 
 export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -97,6 +100,15 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         logger.debug(`no endpoint metrics to report`);
         return 0;
       }
+
+      const telemetryUsageCounter = sender.getTelemetryUsageCluster();
+      telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(
+          usageLabelPrefix.concat(['payloads', TELEMETRY_CHANNEL_ENDPOINT_META])
+        ),
+        counterType: 'num_endpoint',
+        incrementBy: endpointMetricsResponse.aggregations.endpoint_count.value,
+      });
 
       const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
         (epMetrics) => {
