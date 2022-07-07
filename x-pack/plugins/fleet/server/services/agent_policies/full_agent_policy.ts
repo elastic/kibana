@@ -98,29 +98,21 @@ export async function getFullAgentPolicy(
       getOutputIdForAgentPolicy(dataOutput)
     ),
     revision: agentPolicy.revision,
-    ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-      ? {
-          agent: {
-            download: {
-              source_uri: sourceUri,
-            },
-            monitoring: {
+    agent: {
+      download: {
+        source_uri: sourceUri,
+      },
+      monitoring:
+        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
+          ? {
               namespace: agentPolicy.namespace,
               use_output: getOutputIdForAgentPolicy(monitoringOutput),
               enabled: true,
               logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            },
-          },
-        }
-      : {
-          agent: {
-            download: {
-              source_uri: sourceUri,
-            },
-            monitoring: { enabled: false, logs: false, metrics: false },
-          },
-        }),
+            }
+          : { enabled: false, logs: false, metrics: false },
+    },
   };
 
   const dataPermissions =

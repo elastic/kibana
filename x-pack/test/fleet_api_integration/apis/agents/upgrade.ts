@@ -27,8 +27,27 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     setupFleetAndAgents(providerContext);
+
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await supertest
+        .post(`/api/fleet/agent_download_sources`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'My download source',
+          host: 'http://custom-registry-test',
+          is_default: true,
+        })
+        .expect(200);
+      const { body: response } = await supertest
+        .get(`/api/fleet/agent_download_sources`)
+        .expect(200);
+
+      const defaultDownloadSource = response.items.find((item: any) => item.is_default);
+
+      if (!defaultDownloadSource) {
+        throw new Error('default source_uri not set');
+      }
     });
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
@@ -126,7 +145,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
       });
-      it('should respond 200 to upgrade agent and update the agent SO without source_uri', async () => {
+      it('should write default source_uri to actions if is not passed as parameter', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
@@ -147,8 +166,45 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         const res = await supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx');
         expect(typeof res.body.item.upgrade_started_at).to.be('string');
-      });
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
 
+        expect(action.data.source_uri).contain('http://custom-registry-test');
+      });
+      it('should respond 200 if trying to upgrade with source_uri set', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+            source_uri: 'http://path/to/download',
+          })
+          .expect(200);
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
+        expect(action.data.source_uri).contain('http://path/to/download');
+      });
       it('should respond 400 if trying to upgrade to a version that does not match installed kibana version', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         const higherVersion = semver.inc(kibanaVersion, 'patch');
@@ -160,7 +216,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
-
       it('should respond 400 if trying to downgrade version', async () => {
         await es.update({
           id: 'agent1',
@@ -179,21 +234,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '6.0.0',
           })
           .expect(400);
-      });
-      it('should respond 400 if trying to upgrade with source_uri set', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        const res = await supertest
-          .post(`/api/fleet/agents/agent1/upgrade`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            version: kibanaVersion,
-            source_uri: 'http://path/to/download',
-          })
-          .expect(400);
-
-        expect(res.body.message).to.eql(
-          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
-        );
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
         const kibanaVersion = await kibanaServer.version.get();
@@ -815,8 +855,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       });
 
-      it('should throw an error if source_uri parameter is passed', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
+      it('should respond 200 if source_uri parameter is passed', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -833,23 +872,78 @@ export default function (providerContext: FtrProviderContext) {
           index: AGENTS_INDEX,
           body: {
             doc: {
+              local_metadata: {
+                elastic: {
+                  agent: { upgradeable: false, version: '0.0.0' },
+                },
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            agents: ['agent1', 'agent2'],
+            source_uri: 'http://path/to/download',
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
+
+        expect(action.data.source_uri).contain('http://path/to/download');
+      });
+
+      it('should write default source_uri to actions if is not passed as parameter', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
               local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
             },
           },
         });
-        const res = await supertest
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: { upgradeable: false, version: '0.0.0' },
+                },
+              },
+            },
+          },
+        });
+        await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
+            version: fleetServerVersion,
             agents: ['agent1', 'agent2'],
-            version: kibanaVersion,
-            source_uri: 'http://path/to/download',
-            force: true,
           })
-          .expect(400);
-        expect(res.body.message).to.eql(
-          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
-        );
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
+
+        expect(action.data.source_uri).contain('http://custom-registry-test');
       });
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {

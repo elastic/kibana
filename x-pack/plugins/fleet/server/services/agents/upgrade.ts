@@ -171,7 +171,16 @@ async function upgradeBatch(
     return agents;
   }, []);
 
-  const sourceUri = options.sourceUri ? options.sourceUri : await getDefaultSourceUri(soClient);
+  let sourceUri;
+  if (options.sourceUri) {
+    sourceUri = options.sourceUri;
+  } else {
+    try {
+      sourceUri = await getDefaultSourceUri(soClient);
+    } catch (err) {
+      throw new IngestManagerError(err);
+    }
+  }
   // Create upgrade action for each agent
   const now = new Date().toISOString();
   const data = {
