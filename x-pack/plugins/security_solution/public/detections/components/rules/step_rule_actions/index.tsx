@@ -87,6 +87,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [application]
   );
   const osqueryStatus = osquery?.fetchInstallationStatus();
+  const isOsqueryEnabled = !osqueryStatus?.disabled && !osqueryStatus?.permissionDenied;
 
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
@@ -165,14 +166,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             componentProps={{
               messageVariables: actionMessageParams,
               hasErrorOnCreationCaseAction,
-              isOsqueryDisabled: osqueryStatus?.disabled || osqueryStatus?.permissionDenied,
+              isOsqueryDisabled: !isOsqueryEnabled,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+    [throttle, actionMessageParams, hasErrorOnCreationCaseAction, isOsqueryEnabled]
   );
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
