@@ -15,7 +15,7 @@ import {
   EuiContextMenuPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import * as i18n from './translations';
+import * as i18n from '../../translations';
 import { styles } from './field_table_header.styles';
 
 export interface FieldTableHeaderProps {

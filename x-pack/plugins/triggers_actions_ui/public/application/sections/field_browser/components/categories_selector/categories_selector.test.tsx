@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { mockBrowserFields } from './mock';
+import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
 
 const mockSetSelectedCategoryIds = jest.fn();

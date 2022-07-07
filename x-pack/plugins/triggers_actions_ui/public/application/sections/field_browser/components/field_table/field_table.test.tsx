@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
-import { mockBrowserFields } from './mock';
+import { mockBrowserFields } from '../../mock';
 
 import { FieldTable, FieldTableProps } from './field_table';
 

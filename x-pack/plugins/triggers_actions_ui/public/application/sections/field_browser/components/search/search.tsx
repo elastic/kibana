@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
-import * as i18n from './translations';
+import * as i18n from '../../translations';
 interface Props {
   isSearching: boolean;
   onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;

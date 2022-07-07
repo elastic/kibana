@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 
-import { getEmptyValue, getExampleText, getIconFromType } from './helpers';
+import { getEmptyValue, getExampleText, getIconFromType } from '../../helpers';
 import type {
   BrowserFields,
   BrowserFieldItem,
   FieldTableColumns,
   GetFieldTableColumns,
-} from './types';
-import { FieldName } from './field_name';
-import * as i18n from './translations';
+} from '../../types';
+import { FieldName } from '../field_name';
+import * as i18n from '../../translations';
 import { styles } from './field_items.style';
 
 /**

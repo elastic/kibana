@@ -8,7 +8,7 @@ import React from 'react';
 import { omit } from 'lodash/fp';
 import { render } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { mockBrowserFields } from './mock';
+import { mockBrowserFields } from '../../mock';
 
 import { getFieldColumns, getFieldItems } from './field_items';
 
