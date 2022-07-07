@@ -19,10 +19,9 @@ import {
   EuiScreenReaderOnly,
   EuiI18nNumber,
   EuiText,
-  EuiCodeBlock,
   EuiToolTip,
+  EuiCodeBlock,
   RIGHT_ALIGNMENT,
-  EuiFlexGrid,
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
@@ -61,13 +60,18 @@ const customDescriptionListCss = css`
   dd {
     color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
     font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
+    margin-top: ${(props) => props.theme.eui.euiSizeS} !important;
   }
   dt {
     font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+    margin-top: ${(props) => props.theme.eui.euiSizeS} !important;
   }
 `;
 
-const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
+const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({
+  compressed: true,
+  type: 'column',
+})`
   ${customDescriptionListCss}
 `;
 
@@ -93,7 +97,7 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
   transparentBackground: true,
   paddingSize: 'none',
 })`
-  code {
+  code: {
     color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
   }
 `;
@@ -164,38 +168,39 @@ export const ResponseActionsList = memo<
           : undefined;
 
         const command = getCommand(_command);
-        const descriptionListLeft = [
+        const dataList = [
           {
             title: OUTPUT_MESSAGES.expandSection.placedAt,
             description: `${startedAt}`,
           },
           {
-            title: OUTPUT_MESSAGES.expandSection.input,
-            description: `${command}`,
-          },
-        ];
-
-        const descriptionListCenter = [
-          {
             title: OUTPUT_MESSAGES.expandSection.startedAt,
             description: `${startedAt}`,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.completedAt,
+            description: `${completedAt ?? emptyValue}`,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.input,
+            description: `${command}`,
           },
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
             description: parametersList ? parametersList : emptyValue,
           },
-        ];
-
-        const descriptionListRight = [
-          {
-            title: OUTPUT_MESSAGES.expandSection.completedAt,
-            description: `${completedAt ?? emptyValue}`,
-          },
-        ];
+        ].map(({ title, description }) => {
+          return {
+            title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+            description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+          };
+        });
 
         const outputList = [
           {
-            title: OUTPUT_MESSAGES.expandSection.output,
+            title: (
+              <StyledEuiCodeBlock>{`${OUTPUT_MESSAGES.expandSection.output}:`}</StyledEuiCodeBlock>
+            ),
             description: (
               // codeblock for output
               <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
@@ -218,32 +223,10 @@ export const ResponseActionsList = memo<
               direction="column"
               style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
+              gutterSize="s"
             >
               <EuiFlexItem grow={false}>
-                <EuiFlexGrid columns={3}>
-                  {[descriptionListLeft, descriptionListCenter, descriptionListRight].map(
-                    (_list, i) => {
-                      const list = _list.map((l) => {
-                        const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
-                        return {
-                          title: l.title,
-                          description: isParameters ? (
-                            // codeblock for parameters
-                            <StyledEuiCodeBlock>{l.description}</StyledEuiCodeBlock>
-                          ) : (
-                            l.description
-                          ),
-                        };
-                      });
-
-                      return (
-                        <EuiFlexItem key={i}>
-                          <StyledDescriptionList listItems={list} />
-                        </EuiFlexItem>
-                      );
-                    }
-                  )}
-                </EuiFlexGrid>
+                <StyledDescriptionList listItems={dataList} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <StyledDescriptionListOutput listItems={outputList} />
