@@ -149,19 +149,12 @@ export type {
 
 export type {
   GetAuthHeaders,
-  GetAuthState,
   HttpAuth,
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
-  IsAuthenticated,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
-  SessionStorage,
-  SessionStorageCookieOptions,
-  SessionCookieValidationResult,
-  SessionStorageFactory,
-  AuthStatus,
 } from './http';
 
 export { kibanaResponseFactory, CoreKibanaRequest, CspConfig } from './http';
@@ -230,6 +223,13 @@ export type {
   IExternalUrlConfig,
   IExternalUrlPolicy,
   IBasePath,
+  SessionStorage,
+  SessionStorageCookieOptions,
+  SessionCookieValidationResult,
+  SessionStorageFactory,
+  GetAuthState,
+  IsAuthenticated,
+  AuthStatus,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';

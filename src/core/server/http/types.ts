@@ -17,14 +17,15 @@ import type {
   OnPreResponseHandler,
   IContextProvider,
   IBasePath,
+  SessionStorageCookieOptions,
+  SessionStorageFactory,
+  GetAuthState,
+  IsAuthenticated,
 } from '@kbn/core-http-server';
 import type { ICspConfig } from '@kbn/core-http-server';
 import { IContextContainer } from '../context';
-import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { IAuthHeadersStorage } from './auth_headers_storage';
 import { HttpServerSetup } from './http_server';
-import { SessionStorageCookieOptions } from './cookie_session_storage';
-import { SessionStorageFactory } from './session_storage';
 import { ExternalUrlConfig } from './external_url';
 
 /**

@@ -104,3 +104,13 @@ export type { ICspConfig } from './csp';
 export type { IExternalUrlPolicy, IExternalUrlConfig } from './external_url';
 
 export type { IBasePath } from './base_path';
+
+export type {
+  SessionStorage,
+  SessionStorageFactory,
+  SessionCookieValidationResult,
+  SessionStorageCookieOptions,
+} from './session_storage';
+
+export type { GetAuthState, IsAuthenticated } from './auth_state';
+export { AuthStatus } from './auth_state';

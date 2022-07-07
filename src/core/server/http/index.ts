@@ -10,13 +10,7 @@ export { config, HttpConfig } from './http_config';
 export type { HttpConfigType } from './http_config';
 export { HttpService } from './http_service';
 export type { GetAuthHeaders, SetAuthHeaders, IAuthHeadersStorage } from './auth_headers_storage';
-export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export { isKibanaRequest, isRealRequest, CoreKibanaRequest, kibanaResponseFactory } from './router';
-export type { SessionStorageFactory, SessionStorage } from './session_storage';
-export type {
-  SessionStorageCookieOptions,
-  SessionCookieValidationResult,
-} from './cookie_session_storage';
 export type {
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
