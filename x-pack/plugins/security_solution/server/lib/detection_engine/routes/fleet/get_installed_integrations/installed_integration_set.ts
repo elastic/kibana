@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten } from 'lodash';
+import { capitalize, flatten } from 'lodash';
 import { PackagePolicy, RegistryPackage } from '@kbn/fleet-plugin/common';
 import {
   InstalledIntegration,
@@ -35,7 +35,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
 
   const addPackagePolicy = (policy: PackagePolicy): void => {
     const packageInfo = getPackageInfoFromPolicy(policy);
-    const integrationsInfo = getIntegrationsInfoFromPolicy(policy);
+    const integrationsInfo = getIntegrationsInfoFromPolicy(policy, packageInfo);
     const packageKey = `${packageInfo.package_name}:${packageInfo.package_version}`;
     const existingPackageInfo = packageMap.get(packageKey);
 
@@ -121,11 +121,16 @@ const getPackageInfoFromPolicy = (policy: PackagePolicy): InstalledPackageBasicI
   };
 };
 
-const getIntegrationsInfoFromPolicy = (policy: PackagePolicy): InstalledIntegrationBasicInfo[] => {
+const getIntegrationsInfoFromPolicy = (
+  policy: PackagePolicy,
+  packageInfo: InstalledPackageBasicInfo
+): InstalledIntegrationBasicInfo[] => {
   return policy.inputs.map((input) => {
+    const integrationName = normalizeString(input.policy_template); // e.g. 'cloudtrail'
+    const integrationTitle = `${packageInfo.package_title} ${capitalize(integrationName)}`; // e.g. 'AWS Cloudtrail'
     return {
-      integration_name: normalizeString(input.policy_template),
-      integration_title: '', // this gets initialized later in addRegistryPackage()
+      integration_name: integrationName,
+      integration_title: integrationTitle, // title gets re-initialized later in addRegistryPackage()
       is_enabled: input.enabled,
     };
   });

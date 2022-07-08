@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import type { LinkCategories } from '../../../links';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { SolutionNavPanel, SolutionNavPanelProps } from './solution_grouped_nav_panel';
 import { DefaultSideNavItem } from './types';
+import { bottomNavOffset } from '../../../lib/helpers';
 
-const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
-jest.mock('../../../utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: () => mockUseShowTimeline(),
-}));
+const mockUseIsWithinBreakpoints = jest.fn(() => true);
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: () => mockUseIsWithinBreakpoints(),
+  };
+});
 
 const mockItems: DefaultSideNavItem[] = [
   {
@@ -29,6 +35,17 @@ const mockItems: DefaultSideNavItem[] = [
     label: 'Network',
     href: '/network',
     description: 'Network description',
+  },
+];
+
+const mockCategories: LinkCategories = [
+  {
+    label: 'HOSTS CATEGORY',
+    linkIds: [SecurityPageName.hosts],
+  },
+  {
+    label: 'Empty category',
+    linkIds: [],
   },
 ];
 
@@ -70,6 +87,18 @@ describe('SolutionGroupedNav', () => {
     });
   });
 
+  it('should only render categories with items', () => {
+    const result = renderNavPanel({ categories: mockCategories });
+
+    mockCategories.forEach((mockCategory) => {
+      if (mockCategory.linkIds.length) {
+        expect(result.getByText(mockCategory.label)).toBeInTheDocument();
+      } else {
+        expect(result.queryByText(mockCategory.label)).not.toBeInTheDocument();
+      }
+    });
+  });
+
   describe('links', () => {
     it('should contain correct href in links', () => {
       const result = renderNavPanel();
@@ -97,6 +126,22 @@ describe('SolutionGroupedNav', () => {
       const result = renderNavPanel({ items });
       result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
       expect(mockOnClick).toHaveBeenCalled();
+    });
+  });
+
+  describe('bottom offset', () => {
+    it('should add bottom offset', () => {
+      mockUseIsWithinBreakpoints.mockReturnValueOnce(true);
+      const result = renderNavPanel({ bottomOffset: bottomNavOffset });
+
+      expect(result.getByTestId('groupedNavPanel')).toHaveStyle({ bottom: bottomNavOffset });
+    });
+
+    it('should not add bottom offset if not large screen', () => {
+      mockUseIsWithinBreakpoints.mockReturnValueOnce(false);
+      const result = renderNavPanel({ bottomOffset: bottomNavOffset });
+
+      expect(result.getByTestId('groupedNavPanel')).not.toHaveStyle({ bottom: bottomNavOffset });
     });
   });
 

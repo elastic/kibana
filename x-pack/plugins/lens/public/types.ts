@@ -22,7 +22,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -199,11 +199,18 @@ interface ChartSettings {
   };
 }
 
-export type GetDropProps<T = unknown> = DatasourceDimensionDropProps<T> & {
-  groupId: string;
-  dragging: DragContextState['dragging'];
-  prioritizedOperation?: string;
-};
+export interface GetDropPropsArgs<T = unknown> {
+  state: T;
+  source?: DraggingIdentifier;
+  target: {
+    layerId: string;
+    groupId: string;
+    columnId: string;
+    filterOperations: (meta: OperationMetadata) => boolean;
+    prioritizedOperation?: string;
+    isNewColumn?: boolean;
+  };
+}
 
 /**
  * Interface for the datasource registry
@@ -257,9 +264,9 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: GetDropProps<T>
+    props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
   /**
    * The datasource is allowed to cancel a close event on the dimension editor,
    * mainly used for formulas
@@ -423,7 +430,10 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
+export type ParamEditorCustomProps = Record<string, unknown> & {
+  labels?: string[];
+  isInline?: boolean;
+};
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
@@ -454,16 +464,14 @@ export interface DatasourceLayerPanelProps<T> {
   activeData?: Record<string, Datatable>;
 }
 
-export interface DraggedOperation extends DraggingIdentifier {
+export interface DragDropOperation {
   layerId: string;
   groupId: string;
   columnId: string;
   filterOperations: (operation: OperationMetadata) => boolean;
 }
 
-export function isDraggedOperation(
-  operationCandidate: unknown
-): operationCandidate is DraggedOperation {
+export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
     typeof operationCandidate === 'object' &&
     operationCandidate !== null &&
@@ -471,10 +479,8 @@ export function isDraggedOperation(
   );
 }
 
-export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
-  layerId: string;
-  groupId: string;
-  columnId: string;
+export interface DatasourceDimensionDropProps<T> {
+  target: DragDropOperation;
   state: T;
   setState: StateSetter<
     T,
@@ -484,10 +490,10 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
     }
   >;
   dimensionGroups: VisualizationDimensionGroupConfig[];
-};
+}
 
-export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
-  droppedItem: unknown;
+export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
+  source: DragDropIdentifier;
   dropType: DropType;
 };
 
@@ -851,7 +857,17 @@ export interface Visualization<T = unknown> {
    * look at its internal state to determine which dimension is being affected.
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
-
+  /**
+   * Allow defining custom behavior for the visualization when the drop action occurs.
+   */
+  onDrop?: (props: {
+    prevState: T;
+    target: DragDropOperation;
+    source: DragDropIdentifier;
+    frame: FramePublicAPI;
+    dropType: DropType;
+    group?: VisualizationDimensionGroupConfig;
+  }) => T;
   /**
    * Update the configuration for the visualization. This is used to update the state
    */

@@ -167,7 +167,7 @@ const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 const TechniqueLinkItem = styled(EuiButtonEmpty)`

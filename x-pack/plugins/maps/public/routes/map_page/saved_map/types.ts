@@ -7,7 +7,7 @@
 
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { MapCenter } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
 

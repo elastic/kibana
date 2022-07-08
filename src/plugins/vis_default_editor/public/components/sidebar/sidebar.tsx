@@ -25,7 +25,7 @@ import {
   VisualizeEmbeddableContract,
 } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';

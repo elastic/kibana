@@ -314,14 +314,14 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ConnectorAddFlyout",
+        "id": "def-public.CreateConnectorFlyout",
         "type": "Function",
         "tags": [],
-        "label": "ConnectorAddFlyout",
+        "label": "CreateConnectorFlyout",
         "description": [],
         "signature": [
           "(props: ",
-          "ConnectorAddFlyoutProps",
+          "CreateConnectorFlyoutProps",
           ") => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
@@ -330,39 +330,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ConnectorAddFlyout.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ConnectorEditFlyout",
-        "type": "Function",
-        "tags": [],
-        "label": "ConnectorEditFlyout",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "ConnectorEditFlyoutProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ConnectorEditFlyout.$1",
+            "id": "def-public.CreateConnectorFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -509,6 +477,38 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.EditConnectorFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "EditConnectorFlyout",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "EditConnectorFlyoutProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.EditConnectorFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1536,7 +1536,9 @@
         "label": "snoozeRule",
         "description": [],
         "signature": [
-          "({\n  id,\n  snoozeEndTime,\n  http,\n}: { id: string; snoozeEndTime: string | -1; http: ",
+          "({\n  id,\n  snoozeSchedule,\n  http,\n}: { id: string; snoozeSchedule: ",
+          "SnoozeSchedule",
+          "; http: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1554,7 +1556,7 @@
             "id": "def-public.snoozeRule.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  snoozeEndTime,\n  http,\n}",
+            "label": "{\n  id,\n  snoozeSchedule,\n  http,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
             "deprecated": false,
@@ -1571,13 +1573,13 @@
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.snoozeEndTime",
-                "type": "CompoundType",
+                "id": "def-public.snoozeRule.$1.snoozeSchedule",
+                "type": "Object",
                 "tags": [],
-                "label": "snoozeEndTime",
+                "label": "snoozeSchedule",
                 "description": [],
                 "signature": [
-                  "string | -1"
+                  "SnoozeSchedule"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
                 "deprecated": false
@@ -1758,7 +1760,7 @@
         "label": "unsnoozeRule",
         "description": [],
         "signature": [
-          "({ id, http }: { id: string; http: ",
+          "({\n  id,\n  http,\n  scheduleIds,\n}: { id: string; http: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1766,7 +1768,7 @@
             "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          "; }) => Promise<void>"
+          "; scheduleIds?: string[] | undefined; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
         "deprecated": false,
@@ -1776,7 +1778,7 @@
             "id": "def-public.unsnoozeRule.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ id, http }",
+            "label": "{\n  id,\n  http,\n  scheduleIds,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
             "deprecated": false,
@@ -1806,6 +1808,19 @@
                     "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unsnoozeRule.$1.scheduleIds",
+                "type": "Array",
+                "tags": [],
+                "label": "scheduleIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
                 "deprecated": false
@@ -2182,19 +2197,13 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.flyoutState",
-            "type": "Enum",
+            "id": "def-public.AlertsTableProps.flyoutSize",
+            "type": "CompoundType",
             "tags": [],
-            "label": "flyoutState",
+            "label": "flyoutSize",
             "description": [],
             "signature": [
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.AlertsTableFlyoutState",
-                "text": "AlertsTableFlyoutState"
-              }
+              "\"m\" | \"s\" | \"l\" | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
@@ -2682,6 +2691,193 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.FieldBrowserOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserOptions",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserOptions.createFieldButton",
+            "type": "Function",
+            "tags": [],
+            "label": "createFieldButton",
+            "description": [],
+            "signature": [
+              "CreateFieldComponent",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserOptions.getFieldTableColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldTableColumns",
+            "description": [],
+            "signature": [
+              "GetFieldTableColumns",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.FieldBrowserProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserProps",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.columnIds",
+            "type": "Array",
+            "tags": [],
+            "label": "columnIds",
+            "description": [
+              "The timeline's current column headers"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.browserFields",
+            "type": "Object",
+            "tags": [],
+            "label": "browserFields",
+            "description": [
+              "A map of categoryId -> metadata about the fields in that category"
+            ],
+            "signature": [
+              "{ readonly [x: string]: Partial<",
+              "BrowserField",
+              ">; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.isEventViewer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventViewer",
+            "description": [
+              "When true, this Fields Browser is being used as an \"events viewer\""
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.onResetColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "onResetColumns",
+            "description": [
+              "Callback to reset the default columns"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.onToggleColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggleColumn",
+            "description": [
+              "Callback to toggle a field column"
+            ],
+            "signature": [
+              "(columnId: string) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.FieldBrowserProps.onToggleColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "columnId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "The options to customize the field browser, supporting columns rendering and button to create fields"
+            ],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.FieldBrowserOptions",
+                "text": "FieldBrowserOptions"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "The width of the field browser"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.IErrorObject",
         "type": "Interface",
         "tags": [],
@@ -2765,6 +2961,143 @@
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleDefinitionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleDefinitionProps",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleDefinitionProps.rule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.SanitizedRule",
+                "text": "SanitizedRule"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">, \"alertTypeId\"> & { ruleTypeId: string; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleDefinitionProps.ruleTypeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleTypeRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">[]; get: (id: string) => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">; register: (objectType: ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleDefinitionProps.actionTypeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "actionTypeRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>[]; get: (id: string) => ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>; register: (objectType: ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleDefinitionProps.onEditRule",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditRule",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3443,6 +3776,25 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "public",
+                "docId": "kibActionsPluginApi",
+                "section": "def-public.ActionsPublicPluginSetup",
+                "text": "ActionsPublicPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.TriggersAndActionsUiServices.data",
             "type": "Object",
             "tags": [],
@@ -3474,6 +3826,25 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
               }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -3822,17 +4193,6 @@
       }
     ],
     "enums": [
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertsTableFlyoutState",
-        "type": "Enum",
-        "tags": [],
-        "label": "AlertsTableFlyoutState",
-        "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-public.COMPARATORS",
@@ -5095,6 +5455,42 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getActionForm",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionForm",
+          "description": [],
+          "signature": [
+            "(props: Omit<",
+            "ActionAccordionFormProps",
+            ", \"actionTypeRegistry\">) => React.ReactElement<",
+            "ActionAccordionFormProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getActionForm.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                "ActionAccordionFormProps",
+                ", \"actionTypeRegistry\">"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout",
           "type": "Function",
           "tags": [],
@@ -5102,9 +5498,9 @@
           "description": [],
           "signature": [
             "(props: Omit<",
-            "ConnectorAddFlyoutProps",
+            "CreateConnectorFlyoutProps",
             ", \"actionTypeRegistry\">) => React.ReactElement<",
-            "ConnectorAddFlyoutProps",
+            "CreateConnectorFlyoutProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5119,7 +5515,7 @@
               "description": [],
               "signature": [
                 "Omit<",
-                "ConnectorAddFlyoutProps",
+                "CreateConnectorFlyoutProps",
                 ", \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5138,9 +5534,9 @@
           "description": [],
           "signature": [
             "(props: Omit<",
-            "ConnectorEditFlyoutProps",
+            "EditConnectorFlyoutProps",
             ", \"actionTypeRegistry\">) => React.ReactElement<",
-            "ConnectorEditFlyoutProps",
+            "EditConnectorFlyoutProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5155,7 +5551,7 @@
               "description": [],
               "signature": [
                 "Omit<",
-                "ConnectorEditFlyoutProps",
+                "EditConnectorFlyoutProps",
                 ", \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5325,6 +5721,58 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getFieldBrowser",
+          "type": "Function",
+          "tags": [],
+          "label": "getFieldBrowser",
+          "description": [],
+          "signature": [
+            "(props: ",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.FieldBrowserProps",
+              "text": "FieldBrowserProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.FieldBrowserProps",
+              "text": "FieldBrowserProps"
+            },
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getFieldBrowser.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "triggersActionsUi",
+                  "scope": "public",
+                  "docId": "kibTriggersActionsUiPluginApi",
+                  "section": "def-public.FieldBrowserProps",
+                  "text": "FieldBrowserProps"
+                }
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusDropdown",
           "type": "Function",
           "tags": [],
@@ -5433,11 +5881,13 @@
           "label": "getRuleTagBadge",
           "description": [],
           "signature": [
-            "(props: ",
+            "<T extends ",
+            "RuleTagBadgeOptions",
+            ">(props: ",
             "RuleTagBadgeProps",
-            ") => React.ReactElement<",
+            "<T>) => React.ReactElement<",
             "RuleTagBadgeProps",
-            ", string | React.JSXElementConstructor<any>>"
+            "<T>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -5445,12 +5895,13 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleTagBadge.$1",
-              "type": "Object",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "RuleTagBadgeProps"
+                "RuleTagBadgeProps",
+                "<T>"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -5558,6 +6009,92 @@
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleDefinition",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleDefinition",
+          "description": [],
+          "signature": [
+            "(props: ",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.RuleDefinitionProps",
+              "text": "RuleDefinitionProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.RuleDefinitionProps",
+              "text": "RuleDefinitionProps"
+            },
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleDefinition.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "triggersActionsUi",
+                  "scope": "public",
+                  "docId": "kibTriggersActionsUiPluginApi",
+                  "section": "def-public.RuleDefinitionProps",
+                  "text": "RuleDefinitionProps"
+                }
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusPanel",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleStatusPanel",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "RuleStatusPanelProps",
+            ") => React.ReactElement<",
+            "RuleStatusPanelProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusPanel.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "RuleStatusPanelProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         }
       ],

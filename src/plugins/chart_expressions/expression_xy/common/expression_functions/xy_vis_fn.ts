@@ -21,7 +21,7 @@ import {
   hasAreaLayer,
   hasBarLayer,
   hasHistogramBarLayer,
-  validateExtent,
+  validateExtents,
   validateFillOpacity,
   validateMarkSizeRatioLimits,
   validateValueLabels,
@@ -33,6 +33,7 @@ import {
   validateLineWidthForChartType,
   validatePointsRadiusForChartType,
   validateLinesVisibilityForChartType,
+  validateAxes,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -45,8 +46,11 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     columnToLabel: args.columnToLabel,
     xScaleType: args.xScaleType,
     isHistogram: args.isHistogram,
+    isPercentage: args.isPercentage,
+    isHorizontal: args.isHorizontal,
+    isStacked: args.isStacked,
     palette: args.palette,
-    yConfig: args.yConfig,
+    decorations: args.decorations,
     showPoints: args.showPoints,
     pointsRadius: args.pointsRadius,
     lineWidth: args.lineWidth,
@@ -73,7 +77,10 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     columnToLabel,
     xScaleType,
     isHistogram,
-    yConfig,
+    isHorizontal,
+    isPercentage,
+    isStacked,
+    decorations,
     palette,
     markSizeAccessor,
     showPoints,
@@ -120,8 +127,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
 
-  validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
-  validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+  validateExtents(dataLayers, hasBar || hasArea, args.yAxisConfigs, args.xAxisConfig);
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
@@ -134,6 +140,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateLineWidthForChartType(lineWidth, args.seriesType);
   validateShowPointsForChartType(showPoints, args.seriesType);
   validatePointsRadiusForChartType(pointsRadius, args.seriesType);
+  validateAxes(dataLayers, args.yAxisConfigs);
 
   return {
     type: 'render',

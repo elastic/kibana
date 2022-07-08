@@ -429,7 +429,7 @@ export type DataViewFieldMap = Record<string, FieldSpec>;
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DataViewSpec = {
   /**
-   * Saved object id
+   * Saved object id (or generated id if in-memory only)
    */
   id?: string;
   /**

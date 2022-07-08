@@ -24,6 +24,11 @@ import {
   excess,
   throwErrors,
   CaseSeverity,
+  ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  CommentRequestExternalReferenceType,
+  ExternalReferenceNoSORt,
+  PersistableStateAttachmentRt,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -31,6 +36,9 @@ import {
   isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
+  isCommentRequestTypeExternalReference,
+  assertUnreachable,
+  isCommentRequestTypePersistableState,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
@@ -83,6 +91,31 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeExternalReference(comment)) {
+    decodeExternalReferenceAttachment(comment);
+  } else if (isCommentRequestTypePersistableState(comment)) {
+    pipe(
+      excess(PersistableStateAttachmentRt).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
+  } else {
+    /**
+     * This assertion ensures that TS will show an error
+     * when we add a new attachment type. This way, we rely on TS
+     * to remind us that we have to do a check for the new attachment.
+     */
+    assertUnreachable(comment);
+  }
+};
+
+const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalReferenceType) => {
+  if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
+    pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
+  } else {
+    pipe(
+      excess(ExternalReferenceNoSORt).decode(attachment),
+      fold(throwErrors(badRequest), identity)
+    );
   }
 };
 

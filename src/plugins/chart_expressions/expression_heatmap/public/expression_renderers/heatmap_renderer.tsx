@@ -18,7 +18,13 @@ import {
   FilterEvent,
   BrushEvent,
 } from '../../common';
-import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
+import {
+  getDatatableUtilities,
+  getFormatService,
+  getPaletteService,
+  getUISettings,
+  getThemeService,
+} from '../services';
 import { getTimeZone } from '../utils/get_timezone';
 
 interface ExpressioHeatmapRendererDependencies {
@@ -55,18 +61,17 @@ export const heatmapRenderer: (
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
             timeZone={timeZone}
+            datatableUtilities={getDatatableUtilities()}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
+            renderComplete={() => handlers.done()}
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
           />
         </div>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

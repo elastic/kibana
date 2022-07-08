@@ -47,7 +47,8 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import { LandingPages } from './landing_pages';
+import type { LandingPages } from './landing_pages';
+import type { CloudSecurityPosture } from './cloud_security_posture';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -114,6 +115,7 @@ export interface SubPlugins {
   timelines: Timelines;
   management: Management;
   landingPages: LandingPages;
+  cloudSecurityPosture: CloudSecurityPosture;
 }
 
 // TODO: find a better way to defined these types
@@ -130,4 +132,5 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
+  cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
 }

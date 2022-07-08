@@ -39,11 +39,17 @@ export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
+export const DATA_VIEW_DETAILS = 'Data View';
+
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
 export const INDICATOR_INDEX_QUERY = 'Indicator index query';
 
 export const INDICATOR_MAPPING = 'Indicator mapping';
+
+export const INTEGRATIONS = '[data-test-subj="integrationLink"]';
+
+export const INTEGRATIONS_STATUS = '[data-test-subj="statusBadge"]';
 
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 

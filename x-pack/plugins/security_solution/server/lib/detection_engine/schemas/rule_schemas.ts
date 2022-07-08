@@ -48,6 +48,7 @@ import {
   false_positives,
   rule_id,
   immutable,
+  dataViewIdOrUndefined,
   indexOrUndefined,
   licenseOrUndefined,
   output_index,
@@ -81,6 +82,7 @@ import {
 import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+
 export const baseRuleParams = t.exact(
   t.type({
     author,
@@ -125,9 +127,11 @@ const eqlSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   timestampField: timestampFieldOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
   tiebreakerField: tiebreakerFieldOrUndefined,
 });
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
+export type EqlSpecificRuleParams = t.TypeOf<typeof eqlSpecificRuleParams>;
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
 
 const threatSpecificRuleParams = t.type({
@@ -145,8 +149,10 @@ const threatSpecificRuleParams = t.type({
   threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
+export type ThreatSpecificRuleParams = t.TypeOf<typeof threatSpecificRuleParams>;
 export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
 
 const querySpecificRuleParams = t.exact(
@@ -157,9 +163,11 @@ const querySpecificRuleParams = t.exact(
     query,
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
+    dataViewId: dataViewIdOrUndefined,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
+export type QuerySpecificRuleParams = t.TypeOf<typeof querySpecificRuleParams>;
 export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
 const savedQuerySpecificRuleParams = t.type({
@@ -168,11 +176,13 @@ const savedQuerySpecificRuleParams = t.type({
   // if the saved object gets deleted for some reason
   language: nonEqlLanguages,
   index: indexOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
+export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
 export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
 const thresholdSpecificRuleParams = t.type({
@@ -183,8 +193,10 @@ const thresholdSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
   threshold: thresholdNormalized,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
+export type ThresholdSpecificRuleParams = t.TypeOf<typeof thresholdSpecificRuleParams>;
 export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 
 const machineLearningSpecificRuleParams = t.type({
@@ -196,6 +208,7 @@ export const machineLearningRuleParams = t.intersection([
   baseRuleParams,
   machineLearningSpecificRuleParams,
 ]);
+export type MachineLearningSpecificRuleParams = t.TypeOf<typeof machineLearningSpecificRuleParams>;
 export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParams>;
 
 export const typeSpecificRuleParams = t.union([

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 
@@ -58,7 +57,7 @@ journey(
     });
 
     step('login to Kibana', async () => {
-      await uptime.loginToKibana('obs_admin_user', 'changeme');
+      await uptime.loginToKibana('editor', 'changeme');
       const invalid = await page.locator(
         `text=Username or password is incorrect. Please try again.`
       );
