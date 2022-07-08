@@ -13,6 +13,8 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_TAB_PATH } from '../../routes';
@@ -64,7 +66,9 @@ export const CrawlerDomainDetail: React.FC = () => {
               }
             }}
           >
-            Delete domain
+            {i18n.translate('xpack.enterpriseSearch.crawler.domainDetail.deleteDomainButtonLabel', {
+              defaultMessage: 'Delete domain',
+            })}
           </EuiButton>,
         ],
       }}
@@ -79,7 +83,9 @@ export const CrawlerDomainDetail: React.FC = () => {
           tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
         })}
       >
-        All domains
+        {i18n.translate('xpack.enterpriseSearch.crawler.domainDetail.allDomainsButtonLabel', {
+          defaultMessage: 'All domains',
+        })}
       </EuiButtonTo>
       <EuiSpacer />
       {domain && (
