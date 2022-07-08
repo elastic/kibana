@@ -9,9 +9,9 @@ import React, { useState } from 'react';
 import { DndContext, DragMoveEvent, DragOverlay } from '@dnd-kit/core';
 import { createSnapModifier } from '@dnd-kit/modifiers';
 
-import { Panel } from '../components/presentation_components/panel';
 import { Draggable } from '../components/container_components/draggable';
 import { PanelState } from '../types';
+import { StyledGridItem } from '../components/styled_grid_item';
 
 export default {
   title: 'POC - dnd-kit/Draggable',
@@ -62,17 +62,21 @@ export const BasicExample = () => {
     const id = event.active.id;
     const newPanelState = gridState[id];
     if (type === 'move') {
-      newPanelState.deltaPos.x =
-        Math.ceil((newPanelState.initPos.x + event.delta.x) / gridSize) * gridSize;
-      newPanelState.deltaPos.y =
-        Math.ceil((newPanelState.initPos.y + event.delta.y) / gridSize) * gridSize;
+      newPanelState.deltaPos.x = newPanelState.initPos.x + event.delta.x;
+      newPanelState.deltaPos.y = newPanelState.initPos.y + event.delta.y;
+
+      // GRID MATH:
+      // newPanelState.deltaPos.x =
+      //   Math.ceil((newPanelState.initPos.x + event.delta.x) / gridSize) * gridSize;
+      // newPanelState.deltaPos.y =
+      //   Math.ceil((newPanelState.initPos.y + event.delta.y) / gridSize) * gridSize;
     } else if (type === 'stop') {
       newPanelState.initPos.x += event.delta.x;
       newPanelState.initPos.y += event.delta.y;
     } else if (type === 'cancel') {
       newPanelState.deltaPos = newPanelState.initPos;
     }
-    setGridState({ ...gridState, id: newPanelState });
+    setGridState({ ...gridState, [id]: newPanelState });
   };
 
   return (
@@ -82,30 +86,38 @@ export const BasicExample = () => {
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <Draggable state={gridState.panel1}>
-        <Panel state={gridState.panel1} />
-      </Draggable>
-      <Draggable state={gridState.panel2}>
-        <Panel state={gridState.panel2} />
-      </Draggable>
-
-      {/* {Object.keys(gridState).map((id) => (
+      {Object.keys(gridState).map((id) => (
         <Draggable state={gridState[id]}>
-          <Panel state={gridState[id]} />
+          <StyledGridItem
+            id={gridState[id].id}
+            x={gridState[id].initPos.x}
+            y={gridState[id].initPos.y}
+            w={3}
+            h={3}
+            render={() => <p>{JSON.stringify(gridState[id])}</p>}
+          />
         </Draggable>
       ))}
-      {/* <Droppable /> */}
       <DragOverlay
         dropAnimation={null}
         style={
           draggingId
             ? {
-                transform: `translate3d(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px, 0)`,
+                transform: `translate(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px)`,
               }
             : {}
         }
       >
-        {draggingId ? <Panel state={gridState[draggingId]} /> : null}
+        {draggingId ? (
+          <StyledGridItem
+            id={gridState[draggingId].id}
+            x={gridState[draggingId].initPos.x}
+            y={gridState[draggingId].initPos.y}
+            w={3}
+            h={3}
+            render={() => <p>{JSON.stringify(gridState[draggingId])}</p>}
+          />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );
