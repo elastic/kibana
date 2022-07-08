@@ -114,41 +114,22 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
         >
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiFieldText
-                    placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
-                      defaultMessage: 'Enter new name for tag',
-                    })}
-                    value={updatedName}
-                    required
-                    onKeyDown={(e: { key: string }) => {
-                      if (e.key === 'Enter') {
-                        closePopover();
-                      }
-                    }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                      const newName = e.currentTarget.value;
-                      setUpdatedName(newName);
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    size="m"
-                    display="fill"
-                    iconType="check"
-                    aria-label={i18n.translate('xpack.fleet.tagOptions.renameTagButtonLabel', {
-                      defaultMessage: 'Rename',
-                    })}
-                    color="primary"
-                    isDisabled={!updatedName || updatedName === tagName}
-                    onClick={() => {
-                      closePopover();
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiFieldText
+                placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
+                  defaultMessage: 'Enter new name for tag',
+                })}
+                value={updatedName}
+                required
+                onKeyDown={(e: { key: string }) => {
+                  if (e.key === 'Enter') {
+                    closePopover();
+                  }
+                }}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const newName = e.currentTarget.value;
+                  setUpdatedName(newName);
+                }}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonEmpty
