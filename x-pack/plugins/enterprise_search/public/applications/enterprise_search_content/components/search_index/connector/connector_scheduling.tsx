@@ -127,7 +127,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                   }}
                 >
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.connectorScheduling.saveButton.label',
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.resetButton.label',
                     { defaultMessage: 'Reset' }
                   )}
                 </EuiButtonEmpty>
