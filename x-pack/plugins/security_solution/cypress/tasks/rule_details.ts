@@ -99,23 +99,13 @@ export const goToExceptionsTab = () => {
 };
 
 export const editException = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(EXCEPTION_ITEM_ACTIONS_BUTTON).trigger('click');
-      return $el.find(EDIT_EXCEPTION_BTN);
-    })
-    .should('be.visible');
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
 
   cy.get(EDIT_EXCEPTION_BTN).click();
 };
 
 export const removeException = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(EXCEPTION_ITEM_ACTIONS_BUTTON).trigger('click');
-      return $el.find(REMOVE_EXCEPTION_BTN);
-    })
-    .should('be.visible');
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
 
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
