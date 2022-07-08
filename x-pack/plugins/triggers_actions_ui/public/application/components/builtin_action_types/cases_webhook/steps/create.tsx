@@ -95,6 +95,7 @@ export const CreateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
             messageVariables: casesVars,
             paramsProperty: 'createIncidentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
+            showButtonTitle: true,
           }}
         />
       </EuiFlexItem>

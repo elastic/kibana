@@ -44,6 +44,7 @@ interface Props {
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
   onBlur?: () => void;
+  showButtonTitle?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -64,6 +65,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   onDocumentsChange,
   helpText,
   onBlur,
+  showButtonTitle,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -154,6 +156,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
+          showButtonTitle={showButtonTitle}
         />
       }
       helpText={helpText}

@@ -44,7 +44,8 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookGetUrlText',
               messageVariables: urlVars,
               paramsProperty: 'getIncidentUrl',
-              buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
+              showButtonTitle: true,
             },
           }}
         />
@@ -132,7 +133,8 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'incidentViewUrlText',
               messageVariables: urlVarsExt,
               paramsProperty: 'incidentViewUrl',
-              buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
+              showButtonTitle: true,
             },
           }}
         />

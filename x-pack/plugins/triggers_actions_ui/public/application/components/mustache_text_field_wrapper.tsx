@@ -12,7 +12,6 @@ import {
 import React, { useCallback } from 'react';
 import './json_field_wrapper.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { EuiFormRow } from '@elastic/eui';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 
 interface Props {
@@ -41,23 +40,22 @@ export const MustacheTextFieldWrapper = ({ field, euiFieldProps, idAria, ...rest
   );
 
   return (
-    <EuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
-      describedByIds={idAria ? [idAria] : undefined}
-      {...rest}
-    >
-      <TextFieldWithMessageVariables
-        editAction={editAction}
-        errors={errorMessage ? [errorMessage] : []}
-        index={0}
-        inputTargetValue={value}
-        {...euiFieldProps}
-      />
-    </EuiFormRow>
+    <TextFieldWithMessageVariables
+      editAction={editAction}
+      errors={errorMessage ? [errorMessage] : []}
+      formRowProps={{
+        describedByIds: idAria ? [idAria] : undefined,
+        error: errorMessage,
+        fullWidth: true,
+        helpText: typeof field.helpText === 'function' ? field.helpText() : field.helpText,
+        isInvalid,
+        label: field.label,
+        ...rest,
+      }}
+      index={0}
+      inputTargetValue={value}
+      wrapField
+      {...euiFieldProps}
+    />
   );
 };

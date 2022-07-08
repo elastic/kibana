@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
@@ -21,6 +21,16 @@ interface Props {
   editAction: (property: string, value: any, index: number) => void;
   errors?: string[];
   defaultValue?: string | number | string[];
+  wrapField?: boolean;
+  formRowProps?: {
+    describedByIds?: string[];
+    error: string | null;
+    fullWidth: boolean;
+    helpText: string;
+    isInvalid: boolean;
+    label?: string;
+  };
+  showButtonTitle?: boolean;
 }
 
 export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -31,51 +41,75 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   inputTargetValue,
   editAction,
   errors,
+  formRowProps,
   defaultValue,
+  wrapField = false,
+  showButtonTitle,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
-  const onSelectMessageVariable = (variable: ActionVariable) => {
-    const templatedVar = templateActionVariable(variable);
-    const startPosition = currentTextElement?.selectionStart ?? 0;
-    const endPosition = currentTextElement?.selectionEnd ?? 0;
-    const newValue =
-      (inputTargetValue ?? '').substring(0, startPosition) +
-      templatedVar +
-      (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
-    editAction(paramsProperty, newValue, index);
-  };
+  const onSelectMessageVariable = useCallback(
+    (variable: ActionVariable) => {
+      const templatedVar = templateActionVariable(variable);
+      const startPosition = currentTextElement?.selectionStart ?? 0;
+      const endPosition = currentTextElement?.selectionEnd ?? 0;
+      const newValue =
+        (inputTargetValue ?? '').substring(0, startPosition) +
+        templatedVar +
+        (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
+      editAction(paramsProperty, newValue, index);
+    },
+    [currentTextElement, editAction, index, inputTargetValue, paramsProperty]
+  );
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
     editAction(paramsProperty, e.target.value, index);
   };
+  const VariableButton = useMemo(
+    () => (
+      <AddMessageVariables
+        buttonTitle={buttonTitle}
+        messageVariables={messageVariables}
+        onSelectEventHandler={onSelectMessageVariable}
+        paramsProperty={paramsProperty}
+        showButtonTitle={showButtonTitle}
+      />
+    ),
+    [buttonTitle, messageVariables, onSelectMessageVariable, paramsProperty, showButtonTitle]
+  );
+  const Wrapper = useCallback(
+    ({ children }: { children: React.ReactElement }) =>
+      wrapField ? (
+        <EuiFormRow {...formRowProps} labelAppend={VariableButton}>
+          {children}
+        </EuiFormRow>
+      ) : (
+        <>{children}</>
+      ),
+    [VariableButton, formRowProps, wrapField]
+  );
 
   return (
-    <EuiFieldText
-      fullWidth
-      name={paramsProperty}
-      id={`${paramsProperty}Id`}
-      isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-      data-test-subj={`${paramsProperty}Input`}
-      value={inputTargetValue || ''}
-      defaultValue={defaultValue}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
-      onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-        setCurrentTextElement(e.target);
-      }}
-      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-        if (!inputTargetValue) {
-          editAction(paramsProperty, '', index);
-        }
-      }}
-      append={
-        <AddMessageVariables
-          buttonTitle={buttonTitle}
-          messageVariables={messageVariables}
-          onSelectEventHandler={onSelectMessageVariable}
-          paramsProperty={paramsProperty}
-        />
-      }
-    />
+    <Wrapper>
+      <EuiFieldText
+        fullWidth
+        name={paramsProperty}
+        id={`${paramsProperty}Id`}
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        data-test-subj={`${paramsProperty}Input`}
+        value={inputTargetValue || ''}
+        defaultValue={defaultValue}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
+        onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+          setCurrentTextElement(e.target);
+        }}
+        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+          if (!inputTargetValue) {
+            editAction(paramsProperty, '', index);
+          }
+        }}
+        append={wrapField ? undefined : VariableButton}
+      />
+    </Wrapper>
   );
 };

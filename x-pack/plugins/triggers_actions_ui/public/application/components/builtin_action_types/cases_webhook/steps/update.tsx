@@ -75,7 +75,8 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookUpdateUrlText',
               messageVariables: urlVars,
               paramsProperty: 'updateIncidentUrl',
-              buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
+              showButtonTitle: true,
             },
           }}
         />
@@ -108,6 +109,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
             messageVariables: casesVars,
             paramsProperty: 'updateIncidentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
+            showButtonTitle: true,
           }}
         />
       </EuiFlexItem>
@@ -156,7 +158,8 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookCreateCommentUrlText',
               messageVariables: urlVars,
               paramsProperty: 'createCommentUrl',
-              buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
+              showButtonTitle: true,
             },
           }}
         />
@@ -186,6 +189,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
             messageVariables: commentVars,
             paramsProperty: 'createCommentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
+            showButtonTitle: true,
           }}
         />
       </EuiFlexItem>

@@ -226,7 +226,7 @@ export const CREATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonHelpText',
   {
     defaultMessage:
-      'JSON object to create incident. Use the Add Variable button to add Cases data to the payload.',
+      'JSON object to create incident. Use the variable selector to add Cases data to the payload.',
   }
 );
 
@@ -260,14 +260,7 @@ export const CREATE_INCIDENT_RESPONSE_KEY_HELP = i18n.translate(
 export const ADD_CASES_VARIABLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.addVariable',
   {
-    defaultMessage: 'Add cases variable',
-  }
-);
-
-export const ADD_EXTERNAL_VARIABLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.addExtVariable',
-  {
-    defaultMessage: 'Add external system variable',
+    defaultMessage: 'Add variable',
   }
 );
 
@@ -281,7 +274,7 @@ export const GET_INCIDENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlHelp',
   {
     defaultMessage:
-      'API URL to GET incident details JSON from external system. Use the Add Variable button to add External System Id to the url.',
+      'API URL to GET incident details JSON from external system. Use the variable selector to add external system id to the url.',
   }
 );
 
@@ -336,7 +329,7 @@ export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlHelp',
   {
     defaultMessage:
-      'URL to view incident in external system. Use the Add Variable button to add External System Id or External System Title to the url.',
+      'URL to view incident in external system. Use the variable selector to add external system id or external system title to the url.',
   }
 );
 
@@ -357,7 +350,7 @@ export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlHelp',
   {
     defaultMessage:
-      'API URL to update incident. Use the Add Variable button to add External System Id to the url.',
+      'API URL to update incident. Use the variable selector to add external system id to the url.',
   }
 );
 
@@ -371,7 +364,7 @@ export const UPDATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonHelpl',
   {
     defaultMessage:
-      'JSON object to update incident. Use the Add Variable button to add Cases data to the payload.',
+      'JSON object to update incident. Use the variable selector to add Cases data to the payload.',
   }
 );
 
@@ -392,7 +385,7 @@ export const CREATE_COMMENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlHelp',
   {
     defaultMessage:
-      'API URL to add comment to incident. Use the Add Variable button to add External System Id to the url.',
+      'API URL to add comment to incident. Use the variable selector to add external system id to the url.',
   }
 );
 
@@ -406,7 +399,7 @@ export const CREATE_COMMENT_JSON_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentJsonHelp',
   {
     defaultMessage:
-      'JSON object to create a comment. Use the Add Variable button to add Cases data to the payload.',
+      'JSON object to create a comment. Use the variable selector to add Cases data to the payload.',
   }
 );
 
