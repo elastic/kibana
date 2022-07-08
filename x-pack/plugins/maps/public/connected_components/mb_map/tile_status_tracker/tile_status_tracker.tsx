@@ -234,7 +234,7 @@ export class TileStatusTracker extends Component<Props> {
       (source as IVectorSource).isMvt()
     ) {
       // querySourceFeatures can return duplicated features when features cross tile boundaries.
-      // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
+      // Tile meta will never have duplicated features since by their nature, tile meta is a feature contained within a single tile
       const mbFeatures = this.props.mbMap.querySourceFeatures(layer.getMbSourceId(), {
         sourceLayer: ES_MVT_META_LAYER_NAME,
         filter: [],
