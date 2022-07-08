@@ -44,8 +44,15 @@ export interface ConsoleDataState {
 
   /** state for the command input area */
   input: {
-    /** The text the user is typing into the console input area */
-    textEntered: string;
+    /**
+     * The text the user is typing into the console input area. By default, this
+     * value goes into the left of the cursor position
+     */
+    textEntered: string; // FIXME:PT convert this to same structure as `rightOfCursor`
+
+    rightOfCursor: {
+      text: string;
+    };
 
     /** The command name that was entered (derived from `textEntered` */
     commandEntered: string;
@@ -68,6 +75,7 @@ export interface InputHistoryItem {
 
 export interface CommandHistoryItem {
   id: string;
+  enteredAt: string;
   command: Command;
   state: CommandExecutionState;
 }
@@ -104,9 +112,11 @@ export type ConsoleDataAction =
     }
   | {
       type: 'updateInputTextEnteredState';
-      payload: {
-        textEntered: string | ((prevState: string) => string);
-      };
+      payload: PayloadValueOrFunction<{
+        textEntered: string;
+        /** When omitted, the right side of the cursor value will be blanked out */
+        rightOfCursor?: ConsoleDataState['input']['rightOfCursor'];
+      }>;
     }
   | {
       type: 'updateInputPopoverState';
@@ -126,6 +136,8 @@ export type ConsoleDataAction =
         command: string;
       };
     };
+
+type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);
 
 export interface ConsoleStore {
   state: ConsoleDataState;

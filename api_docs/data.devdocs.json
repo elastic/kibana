@@ -4328,7 +4328,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -11890,7 +11892,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11901,7 +11903,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -14534,7 +14553,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -18317,7 +18338,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -18328,7 +18349,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

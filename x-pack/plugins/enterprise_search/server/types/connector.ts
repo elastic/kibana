@@ -7,20 +7,23 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
+}
+
+export type ConnectorConfiguration = Record<string, KeyValuePair | undefined>;
+export interface ConnectorScheduling {
+  enabled: boolean;
+  interval: string;
 }
 
 export interface Connector {
   api_key_id: string | null;
-  configuration: Record<string, KeyValuePair | undefined>;
+  configuration: ConnectorConfiguration;
   created_at: string | null;
   index_name: string;
   last_seen: string | null;
   last_synced: string | null;
-  scheduling: {
-    enabled: boolean;
-    interval: string | null; // crontab syntax
-  };
+  scheduling: ConnectorScheduling;
   service_type: string | null;
   status: string | null;
   sync_error: string | null;
