@@ -77,6 +77,18 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loading: false,
   },
+  overview: {
+    pageState: {
+      perPage: 10,
+    },
+    data: {
+      total: 0,
+      allMonitorIds: [],
+      pages: {},
+    },
+    error: null,
+    loading: false,
+  },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorStatus: {
     data: null,

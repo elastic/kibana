@@ -74,6 +74,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     describe('uptime CRUD routes', () => {
       loadTestFile(require.resolve('./get_monitor'));
+      loadTestFile(require.resolve('./get_monitor_overview'));
       loadTestFile(require.resolve('./add_monitor'));
       loadTestFile(require.resolve('./add_monitor_project'));
       loadTestFile(require.resolve('./edit_monitor'));
