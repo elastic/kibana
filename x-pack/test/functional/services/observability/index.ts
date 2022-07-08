@@ -10,11 +10,11 @@ import { ObservabilityUsersProvider } from './users';
 import { ObservabilityAlertsProvider } from './alerts';
 
 export function ObservabilityProvider(context: FtrProviderContext) {
-  const users = ObservabilityUsersProvider(context);
   const alerts = ObservabilityAlertsProvider(context);
+  const users = ObservabilityUsersProvider(context);
 
   return {
-    users,
     alerts,
+    users,
   };
 }

@@ -62,7 +62,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await retry.try(async () => {
           await observability.alerts.addToCase.addToExistingCaseButtonClick();
-          await observability.alerts.addToCase.getAddtoExistingCaseModalOrFail();
+          await observability.alerts.addToCase.getAddToExistingCaseModalOrFail();
         });
       });
     });

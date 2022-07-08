@@ -12,9 +12,9 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToApp() {
-      await common.navigateToApp('cases');
-      await testSubjects.existOrFail('cases-app', { timeout: 2000 });
+    async navigateToApp(app: string = 'cases', appSelector: string = 'cases-app') {
+      await common.navigateToApp(app);
+      await testSubjects.existOrFail(appSelector, { timeout: 2000 });
     },
 
     async navigateToConfigurationPage() {
