@@ -62,6 +62,24 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       });
+      // 1 agent inactive
+      await es.create({
+        id: 'agent5',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            active: false,
+            access_api_key_id: 'api-key-4',
+            policy_id: 'policy1',
+            type: 'PERMANENT',
+            local_metadata: { host: { hostname: 'host5' } },
+            user_provided_metadata: {},
+            enrolled_at: '2022-06-21T12:17:25Z',
+            last_checkin: '2022-06-27T12:29:29Z',
+          },
+        },
+      });
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
@@ -78,8 +96,8 @@ export default function ({ getService }: FtrProviderContext) {
           error: 0,
           offline: 1,
           updating: 1,
-          other: 1,
-          inactive: 0,
+          other: 2,
+          inactive: 1,
         },
       });
     });
