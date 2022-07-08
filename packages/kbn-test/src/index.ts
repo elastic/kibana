@@ -27,6 +27,8 @@ export { runTests, startServers } from './functional_tests/tasks';
 // @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
+export { getKibanaCliArg, getKibanaCliLoggers } from './functional_tests/lib/kibana_cli_args';
+
 export type {
   CreateTestEsClusterOptions,
   EsTestCluster,
