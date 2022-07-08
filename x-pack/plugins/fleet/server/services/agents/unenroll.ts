@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
-import * as APIKeyService from '../api_keys';
+import { invalidateAPIKeys } from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { createAgentAction } from './actions';
@@ -163,12 +163,14 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
     if (agent.default_api_key_id) {
       keys.push(agent.default_api_key_id);
     }
-
+    if (agent.default_api_key_history) {
+      agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
+    }
     return keys;
   }, []);
 
   if (apiKeys.length) {
-    await APIKeyService.invalidateAPIKeys(apiKeys);
+    await invalidateAPIKeys(apiKeys);
   }
 }
 
