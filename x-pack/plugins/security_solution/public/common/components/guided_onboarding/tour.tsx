@@ -44,7 +44,7 @@ const saveTourStepToLocalStorage = (step: number): void => {
 const minWidth: EuiTourStepProps['minWidth'] = 360;
 const maxWidth: EuiTourStepProps['maxWidth'] = 360;
 const offset: EuiTourStepProps['offset'] = 30;
-const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = false;
+const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
 
 const getSteps = (tourControls: {
   activeStep: number;
