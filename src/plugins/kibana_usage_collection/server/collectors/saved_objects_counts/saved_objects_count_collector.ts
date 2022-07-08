@@ -16,13 +16,13 @@ interface SavedObjectsCountUsageByType {
 
 interface SavedObjectsCountUsage {
   total: number;
-  others: number;
   by_type: SavedObjectsCountUsageByType[];
 }
 
 export function registerSavedObjectsCountUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  getAllSavedObjectTypes: () => Promise<string[]>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<SavedObjectsCountUsage>({
@@ -33,12 +33,6 @@ export function registerSavedObjectsCountUsageCollector(
           type: 'long',
           _meta: {
             description: 'Total number of saved objects in the cluster',
-          },
-        },
-        others: {
-          type: 'long',
-          _meta: {
-            description: 'Total number of saved objects that are not Kibana built-in SO types',
           },
         },
         by_type: {
@@ -56,17 +50,17 @@ export function registerSavedObjectsCountUsageCollector(
         },
       },
       async fetch({ esClient }) {
-        const {
-          total,
-          per_type: buckets,
-          others,
-        } = await getSavedObjectsCounts(esClient, kibanaIndex);
+        const allRegisteredSOTypes = await getAllSavedObjectTypes();
+        const { total, per_type: buckets } = await getSavedObjectsCounts(
+          esClient,
+          kibanaIndex,
+          allRegisteredSOTypes
+        );
         return {
           total,
           by_type: buckets.map(({ key: type, doc_count: count }) => {
             return { type, count };
           }),
-          others,
         };
       },
     })

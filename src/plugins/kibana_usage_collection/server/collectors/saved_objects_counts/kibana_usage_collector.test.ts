@@ -69,7 +69,6 @@ describe('getKibanaSavedObjectCounts', () => {
   test('Merge the zeros with the results', async () => {
     getSavedObjectsCountsMock.mockResolvedValueOnce({
       total: 3,
-      others: 0,
       per_type: [
         { key: 'dashboard', doc_count: 1 },
         { key: 'index-pattern', value: 2 }, // Malformed on purpose

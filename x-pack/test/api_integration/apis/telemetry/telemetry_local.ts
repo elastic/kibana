@@ -90,8 +90,6 @@ export default function ({ getService }: FtrProviderContext) {
       // Saved Objects Count collector
       expect(stats.stack_stats.kibana.plugins.saved_objects_counts.total).to.be.a('number');
       expect(stats.stack_stats.kibana.plugins.saved_objects_counts.total).to.be.greaterThan(0); // At least the `config` document should be there
-      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.others).to.be.a('number');
-      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.others).to.be(0); // Unless there are test plugins registering and creating SOs, it should be 0
       expect(stats.stack_stats.kibana.plugins.saved_objects_counts.by_type).to.be.an('array');
       expect(
         stats.stack_stats.kibana.plugins.saved_objects_counts.by_type.length

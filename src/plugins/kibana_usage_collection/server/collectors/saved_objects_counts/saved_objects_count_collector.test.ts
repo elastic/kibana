@@ -19,7 +19,11 @@ describe('saved_objects_count_collector', () => {
 
   const kibanaIndex = '.kibana-tests';
 
-  beforeAll(() => registerSavedObjectsCountUsageCollector(usageCollectionMock, kibanaIndex));
+  beforeAll(() =>
+    registerSavedObjectsCountUsageCollector(usageCollectionMock, kibanaIndex, () =>
+      Promise.resolve(['type_one', 'type_two', 'type-three', 'type-four'])
+    )
+  );
   afterAll(() => jest.clearAllTimers());
 
   afterEach(() => getSavedObjectsCountsMock.mockReset());
@@ -33,29 +37,15 @@ describe('saved_objects_count_collector', () => {
   });
 
   test('should return an empty array when no results are returned', async () => {
-    getSavedObjectsCountsMock.mockResolvedValueOnce({ total: 0, others: 0, per_type: [] });
+    getSavedObjectsCountsMock.mockResolvedValueOnce({ total: 0, per_type: [] });
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
     expect(await collector.fetch(fetchContextMock)).toStrictEqual({
       by_type: [],
       total: 0,
-      others: 0,
     });
   });
 
   test('should return some values when the aggregations return something', async () => {
-    fetchContextMock.esClient.search = jest.fn().mockImplementation(() => ({
-      aggregations: {
-        types: {
-          buckets: [
-            { key: 'type_one', doc_count: 20 },
-            { key: 'type_two', doc_count: 45 },
-            { key: 'type-three', doc_count: 66 },
-            { key: 'type-four', doc_count: 0 },
-          ],
-        },
-      },
-    }));
-
     getSavedObjectsCountsMock.mockResolvedValueOnce({
       total: 4,
       per_type: [
@@ -64,7 +54,6 @@ describe('saved_objects_count_collector', () => {
         { key: 'type-three', doc_count: 66 },
         { key: 'type-four', doc_count: 0 },
       ],
-      others: 10,
     });
 
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
@@ -76,7 +65,13 @@ describe('saved_objects_count_collector', () => {
         { type: 'type-four', count: 0 },
       ],
       total: 4,
-      others: 10,
     });
+
+    expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(fetchContextMock.esClient, kibanaIndex, [
+      'type_one',
+      'type_two',
+      'type-three',
+      'type-four',
+    ]);
   });
 });
