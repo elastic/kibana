@@ -32,10 +32,7 @@ import type {
   DataStatsFetchProgress,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
-import {
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-} from '../search_strategy/requests/get_document_stats';
+import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
 
@@ -167,6 +164,16 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         )
     );
 
+    // getDocumentCountStats(data.search, searchStrategyParams, searchOptions).then(
+    //   (documentStats) => {
+    //     // setOverallStats({
+    //     //   documentCountStats: documentStats,
+    //     //   totalCount: documentStats.totalCount,
+    //     // });
+    //
+    //     console.log('documentStats', documentStats);
+    //   }
+    // );
     // Have to divide into smaller requests to avoid 413 payload too large
     const aggregatableFieldsChunks = chunk(aggregatableFields, 30);
 
@@ -197,61 +204,58 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           })
         )
     );
-    const documentCountStats$ = data.search.search(
-      {
-        params: getDocumentCountStatsRequest(searchStrategyParams),
-      },
-      searchOptions
-    );
+    // const documentCountStats$ = data.search.search(
+    //   {
+    //     params: getDocumentCountStatsRequest(searchStrategyParams),
+    //   },
+    //   searchOptions
+    // );
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
     >(
-      [documentCountStats$, ...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs],
+      [
+        from(getDocumentCountStats(data.search, searchStrategyParams, searchOptions)),
+        ...aggregatableOverallStatsObs,
+        ...nonAggregatableFieldsObs,
+      ],
       MAX_CONCURRENT_REQUESTS
     );
 
     searchSubscription$.current = sub.subscribe({
       next: (value) => {
-        {
-          const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
-          const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
-          const documentCountStatsResp = value[0];
+        const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
+        const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
+        const documentCountStats = value[0];
 
-          value.forEach((resp, idx) => {
-            if (!resp) return;
-            if (isAggregatableFieldOverallStats(resp)) {
-              aggregatableOverallStatsResp.push(resp);
-            } else {
-              nonAggregatableOverallStatsResp.push(resp);
-            }
-          });
+        value.forEach((resp, idx) => {
+          if (!resp || idx === 0) return;
+          if (isAggregatableFieldOverallStats(resp)) {
+            aggregatableOverallStatsResp.push(resp);
+          } else {
+            nonAggregatableOverallStatsResp.push(resp);
+          }
+        });
 
-          const documentCountStats = processDocumentCountStats(
-            documentCountStatsResp?.rawResponse,
-            searchStrategyParams
-          );
+        const totalCount = documentCountStats?.totalCount ?? 0;
 
-          const totalCount = documentCountStats?.totalCount ?? 0;
+        const aggregatableOverallStats = processAggregatableFieldsExistResponse(
+          aggregatableOverallStatsResp,
+          aggregatableFields,
+          samplerShardSize,
+          totalCount
+        );
 
-          const aggregatableOverallStats = processAggregatableFieldsExistResponse(
-            aggregatableOverallStatsResp,
-            aggregatableFields,
-            samplerShardSize,
-            totalCount
-          );
+        const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
+          nonAggregatableOverallStatsResp,
+          nonAggregatableFields
+        );
 
-          const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
-            nonAggregatableOverallStatsResp,
-            nonAggregatableFields
-          );
-
-          setOverallStats({
-            documentCountStats,
-            ...nonAggregatableOverallStats,
-            ...aggregatableOverallStats,
-            totalCount,
-          });
-        }
+        setOverallStats({
+          documentCountStats,
+          ...nonAggregatableOverallStats,
+          ...aggregatableOverallStats,
+          totalCount,
+        });
       },
       error: (error) => {
         displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));

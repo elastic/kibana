@@ -6,10 +6,10 @@
  */
 
 import React, { FC } from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
 import { DocumentCountChart, DocumentCountChartPoint } from './document_count_chart';
 import { TotalCountHeader } from './total_count_header';
 import { DocumentCountStats } from '../../../../../common/types/field_stats';
-
 export interface Props {
   documentCountStats?: DocumentCountStats;
   totalCount: number;
@@ -39,6 +39,7 @@ export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount
         timeRangeLatest={timeRangeLatest}
         interval={documentCountStats.interval}
       />
+      <EuiCodeBlock>{`randomly sampled: ${documentCountStats.randomlySampled}\nprobability: ${documentCountStats.probability}\ntook: ${documentCountStats.took}`}</EuiCodeBlock>
     </>
   );
 };
