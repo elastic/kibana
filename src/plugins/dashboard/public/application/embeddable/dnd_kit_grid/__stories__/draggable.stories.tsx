@@ -62,8 +62,10 @@ export const BasicExample = () => {
     const id = event.active.id;
     const newPanelState = gridState[id];
     if (type === 'move') {
-      newPanelState.deltaPos.x = newPanelState.initPos.x + event.delta.x;
-      newPanelState.deltaPos.y = newPanelState.initPos.y + event.delta.y;
+      newPanelState.deltaPos.x =
+        Math.ceil((newPanelState.initPos.x + event.delta.x) / gridSize) * gridSize;
+      newPanelState.deltaPos.y =
+        Math.ceil((newPanelState.initPos.y + event.delta.y) / gridSize) * gridSize;
     } else if (type === 'stop') {
       newPanelState.initPos.x += event.delta.x;
       newPanelState.initPos.y += event.delta.y;
