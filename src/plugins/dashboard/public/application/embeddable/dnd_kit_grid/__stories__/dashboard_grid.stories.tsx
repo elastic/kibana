@@ -26,12 +26,12 @@ export default {
       label: 'Number of columns',
       control: { type: 'select' },
       options: [12, 24, 48],
-      defaultValue: { columns: 48 },
+      defaultValue: 48,
     },
     guttersize: {
       control: { type: 'select' },
       options: [0, 4, 8, 16],
-      defaultValue: { guttersize: 4 },
+      defaultValue: 4,
     },
   },
 };
@@ -43,7 +43,6 @@ const data = {
 };
 
 export const BasicExample = (args: GridProps) => {
-  console.log(data[args.columns]);
   return <Grid {...args} gridData={data[args.columns as 12 | 24 | 48] as GridItemProps[]} />;
 };
 

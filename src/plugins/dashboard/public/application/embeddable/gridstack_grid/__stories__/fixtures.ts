@@ -272,10 +272,18 @@ export const simpleNestedGridData = [
       margin: 4,
       minRow: 6,
       column: 24,
-      children: [{ id: 'nested-panel', x: 0, y: 0, w: 6, h: 3, render: () => 'nested-panel' }],
+      children: [
+        { id: 'nested-panel-1', x: 0, y: 0, w: 6, h: 3, render: () => 'nested-panel-1' },
+        { id: 'nested-panel-2', x: 6, y: 0, w: 6, h: 3, render: () => 'nested-panel-2' },
+        { id: 'nested-panel-3', x: 12, y: 0, w: 6, h: 3, render: () => 'nested-panel-3' },
+        { id: 'nested-panel-4', x: 18, y: 0, w: 6, h: 3, render: () => 'nested-panel-4' },
+      ],
     },
   },
   { id: 'panel1', x: 0, y: 7, w: 6, h: 3, render: () => 'panel1' },
+  { id: 'panel2', x: 6, y: 7, w: 6, h: 3, render: () => 'panel2' },
+  { id: 'panel3', x: 12, y: 7, w: 6, h: 3, render: () => 'panel3' },
+  { id: 'panel4', x: 18, y: 7, w: 6, h: 3, render: () => 'panel4' },
 ];
 
 export const nestedGridData = [
