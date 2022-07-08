@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
   externalReferenceAttachmentESAttributes,
   externalReferenceAttachmentSOAttributes,
+  externalReferenceAttachmentSOAttributesWithoutRefs,
   getPersistableStateAttachmentTypeRegistry,
   persistableStateAttachmentAttributes,
+  persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../attachment_framework/mocks';
 import {
   extractAttachmentSORefsFromAttributes,
   getUniqueReferences,
   injectAttachmentSOAttributesFromRefs,
+  injectAttachmentSOAttributesFromRefsForPatch,
 } from './so_references';
 
 describe('so_references', () => {
@@ -32,16 +34,6 @@ describe('so_references', () => {
       type: 'test-so',
     },
   ];
-
-  const persistableStateAttachmentAttributesWithoutInjectedId = omit(
-    persistableStateAttachmentAttributes,
-    'persistableStateAttachmentState.injectedId'
-  );
-
-  const externalReferenceAttachmentSOAttributesWithoutRefs = omit(
-    externalReferenceAttachmentSOAttributes,
-    'externalReferenceId'
-  );
 
   describe('getUniqueReferences', () => {
     const dupObj = { id: 'dup', name: 'test', type: 'testType' };
@@ -119,6 +111,71 @@ describe('so_references', () => {
       };
 
       const res = injectAttachmentSOAttributesFromRefs(
+        savedObject,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        ...savedObject,
+        attributes: externalReferenceAttachmentESAttributes,
+      });
+    });
+  });
+
+  describe('injectAttachmentSOAttributesFromRefsForPatch', () => {
+    it('should inject the references to the attributes correctly (persistable state)', () => {
+      const savedObject = {
+        id: 'so-id',
+        attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+        references,
+        version: 'so-version',
+        type: 'cases-comments',
+      };
+
+      const res = injectAttachmentSOAttributesFromRefsForPatch(
+        persistableStateAttachmentAttributes,
+        savedObject,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        ...savedObject,
+        attributes: persistableStateAttachmentAttributes,
+      });
+    });
+
+    it('should inject the references to the attributes correctly (external reference savedObject)', () => {
+      const savedObject = {
+        id: 'so-id',
+        attributes: externalReferenceAttachmentSOAttributesWithoutRefs,
+        references,
+        version: 'so-version',
+        type: 'cases-comments',
+      };
+
+      const res = injectAttachmentSOAttributesFromRefsForPatch(
+        externalReferenceAttachmentSOAttributes,
+        savedObject,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(res).toEqual({
+        ...savedObject,
+        attributes: externalReferenceAttachmentSOAttributes,
+      });
+    });
+
+    it('should inject the references to the attributes correctly (external reference elasticSearchDoc)', () => {
+      const savedObject = {
+        id: 'so-id',
+        attributes: externalReferenceAttachmentESAttributes,
+        references,
+        version: 'so-version',
+        type: 'cases-comments',
+      };
+
+      const res = injectAttachmentSOAttributesFromRefsForPatch(
+        externalReferenceAttachmentESAttributes,
         savedObject,
         persistableStateAttachmentTypeRegistry
       );
