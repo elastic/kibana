@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
@@ -75,7 +75,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   const { uiSettings, notifications } = useKibana().services;
 
   // Data grid states
-  const [logs, setLogs] = useState<IExecutionLog[]>([]);
+  const [logs, setLogs] = useState<IExecutionLog[]>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
     return (
       JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
@@ -108,7 +108,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     );
   });
 
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const isInitialized = useRef(false);
 
   const isOnLastPage = useMemo(() => {
     const { pageIndex, pageSize } = pagination;
@@ -141,7 +141,6 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         ...pagination,
         totalItemCount: Math.min(result.total, MAX_RESULTS),
       });
-      setIsInitialized(true);
       setActualTotalItemCount(result.total);
     } catch (e) {
       notifications.toasts.addDanger({
@@ -200,7 +199,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   );
 
   const renderList = () => {
-    if (!isInitialized) {
+    if (!logs) {
       return <CenterJustifiedSpinner />;
     }
     return (
@@ -229,11 +228,12 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
 
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized.current) {
       loadEventLogs();
     }
+    isInitialized.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshToken, isInitialized]);
+  }, [refreshToken]);
 
   useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
