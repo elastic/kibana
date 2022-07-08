@@ -107,8 +107,8 @@ describe('Instances table', () => {
       ).click();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
-      cy.contains('Container logs');
-      cy.contains('Container metrics');
+      // cy.contains('Container logs');
+      // cy.contains('Container metrics');
       cy.contains('Filter overview by instance');
       cy.contains('Metrics');
     });
