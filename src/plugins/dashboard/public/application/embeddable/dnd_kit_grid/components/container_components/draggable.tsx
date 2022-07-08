@@ -21,9 +21,7 @@ export const Draggable = ({ state, element, children }: Props) => {
   });
 
   const transform = {
-    transform: isDragging
-      ? `translate3d(${state.deltaPos.x}px, ${state.deltaPos.y}px, 0)`
-      : `translate3d(${state.initPos.x}px, ${state.initPos.y}px, 0)`,
+    transform: `translate3d(${state.initPos.x}px, ${state.initPos.y}px, 0)`,
   };
 
   const style = {

@@ -7,11 +7,16 @@
  */
 import { EuiPanel } from '@elastic/eui';
 import React, { forwardRef } from 'react';
+import { PanelState } from '../../types';
 
-export const Panel = forwardRef<HTMLDivElement>((props, ref) => {
+interface Props {
+  state: PanelState;
+}
+
+export const Panel = forwardRef<HTMLDivElement, Props>(({ state }, ref) => {
   return (
     <div ref={ref}>
-      <EuiPanel {...props}>Panel</EuiPanel>
+      <EuiPanel>{JSON.stringify(state)}</EuiPanel>
     </div>
   );
 });

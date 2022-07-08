@@ -12,7 +12,7 @@ import { createSnapModifier, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 // import { Droppable } from '../components/container_components/droppable';
 import { Panel } from '../components/presentation_components/panel';
 import { Draggable } from '../components/container_components/draggable';
-import { GridState } from '../types';
+import { GridState, PanelState } from '../types';
 import { Grid } from '../components/grid';
 import {
   largeGridData,
@@ -28,25 +28,25 @@ export default {
 };
 
 export const BasicExample = () => {
-  const [gridState, setGridState] = useState<GridState>({
-    panel1: {
+  const [gridState, setGridState] = useState<Record<string, PanelState>>({
+    ['panel1']: {
       id: 'panel1',
       initPos: { x: 0, y: 0 },
       deltaPos: { x: 0, y: 0 },
     },
-    panel2: {
+    ['panel2']: {
       id: 'panel2',
       initPos: { x: 50, y: 50 },
       deltaPos: { x: 50, y: 50 },
     },
   });
-  const [isDragging, setIsDragging] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | undefined>(undefined);
 
   const gridSize = 30; // pixels
   const snapToGridModifier = createSnapModifier(gridSize);
 
   const handleDragStart = (event: DragMoveEvent) => {
-    setIsDragging(true);
+    setDraggingId(event.active.id);
   };
 
   const handleDragMove = (event: DragMoveEvent) => {
@@ -55,7 +55,7 @@ export const BasicExample = () => {
 
   const handleDragEnd = (event: DragMoveEvent) => {
     console.log('drag end:', event.active.id);
-    setIsDragging(false);
+    setDraggingId(undefined);
     setElementPos(event, 'stop');
     console.log('After 2:', gridState[event.active.id]);
   };
@@ -88,20 +88,30 @@ export const BasicExample = () => {
       onDragCancel={handleDragCancel}
     >
       <Draggable state={gridState.panel1}>
-        <Panel />
+        <Panel state={gridState.panel1} />
       </Draggable>
       <Draggable state={gridState.panel2}>
-        <Panel />
+        <Panel state={gridState.panel2} />
       </Draggable>
 
-      {/* THIS IS BROKEN - WHY?!?!?! when above works fine?!?!?!?
-      {Object.keys(gridState).map((id) => (
+      {/* {Object.keys(gridState).map((id) => (
         <Draggable state={gridState[id]}>
-          <Panel />
+          <Panel state={gridState[id]} />
         </Draggable>
-      ))} */}
+      ))}
       {/* <Droppable /> */}
-      {/* <DragOverlay modifiers={[snapToGridModifier]}>{isDragging ? <Panel /> : null}</DragOverlay> */}
+      <DragOverlay
+        dropAnimation={null}
+        style={
+          draggingId
+            ? {
+                transform: `translate3d(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px, 0)`,
+              }
+            : {}
+        }
+      >
+        {draggingId ? <Panel state={gridState[draggingId]} /> : null}
+      </DragOverlay>
     </DndContext>
   );
 };
