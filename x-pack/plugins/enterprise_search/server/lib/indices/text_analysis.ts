@@ -146,7 +146,7 @@ const languageData: Record<string, LanguageDataEntry> = {
 
 const FRONT_NGRAM_MAX_GRAM = 12;
 
-const genericFilters:Record<string, AnalysisTokenFilter> = {
+const genericFilters: Record<string, AnalysisTokenFilter> = {
   front_ngram: {
     type: 'edge_ngram' as const,
     min_gram: 1,
