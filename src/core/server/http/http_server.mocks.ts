@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { URL, format as formatUrl } from 'url';
-import { Request } from '@hapi/hapi';
-import { merge } from 'lodash';
+import { URL } from 'url';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
+import { hapiMocks } from '@kbn/hapi-mocks';
 
 import { schema } from '@kbn/config-schema';
 
@@ -73,7 +72,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
   return CoreKibanaRequest.from<P, Q, B>(
-    createRawRequestMock({
+    hapiMocks.createRequest({
       app: kibanaRequestState,
       auth,
       headers,
@@ -104,47 +103,6 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
       query: validation.query || schema.any(),
     }
   );
-}
-
-type DeepPartial<T> = T extends any[]
-  ? DeepPartialArray<T[number]>
-  : T extends object
-  ? DeepPartialObject<T>
-  : T;
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
-
-type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
-
-function createRawRequestMock(customization: DeepPartial<Request> = {}) {
-  const pathname = customization.url?.pathname || '/';
-  const path = `${pathname}${customization.url?.search || ''}`;
-  const url = new URL(
-    formatUrl(Object.assign({ pathname, path, href: path }, customization.url)),
-    'http://localhost'
-  );
-
-  return merge(
-    {},
-    {
-      app: { xsrfRequired: true } as any,
-      auth: {
-        isAuthenticated: true,
-      },
-      headers: {},
-      path,
-      route: { settings: {} },
-      url,
-      raw: {
-        req: {
-          url: path,
-          socket: {},
-        },
-      },
-    },
-    customization
-  ) as Request;
 }
 
 const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
@@ -183,7 +141,7 @@ const createToolkitMock = (): ToolkitMock => {
 
 export const httpServerMock = {
   createKibanaRequest: createKibanaRequestMock,
-  createRawRequest: createRawRequestMock,
+  createRawRequest: hapiMocks.createRequest,
   createResponseFactory: createResponseFactoryMock,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
   createToolkit: createToolkitMock,
