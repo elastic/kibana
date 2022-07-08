@@ -6,7 +6,14 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -35,12 +42,6 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
     return (
       <div>
         <EuiText grow={false}>
-          <h4>
-            <FormattedMessage
-              id="stackAlerts.esQuery.ui.thresholdHelp.stepsTitle"
-              defaultMessage="Set the threshold and time window"
-            />
-          </h4>
           <ol>
             <li>
               <FormattedMessage
@@ -59,19 +60,16 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
               />
             </li>
           </ol>
-          <h4>
-            <FormattedMessage
-              id="stackAlerts.esQuery.ui.thresholdHelp.duplicatesTitle"
-              defaultMessage="Handling multiple matches of the same document"
-            />
-          </h4>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiCallOut title="Multiple matches of the same document" iconType="pin">
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches"
-              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, it is omitted from threshold calculations. The rule uses the timestamp of the matches to avoid alerting on the same match multiple times."
+              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, it is considered in only the first threshold calculation. The rule uses the timestamp of the matches to avoid alerting on the same match multiple times."
             />
           </p>
-        </EuiText>
+        </EuiCallOut>
       </div>
     );
   }
@@ -98,7 +96,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
         <EuiPopoverTitle>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.thresholdHelp.title"
-            defaultMessage="Elasticsearch query rule threshold and time window"
+            defaultMessage="Set the threshold and time window"
           />
         </EuiPopoverTitle>
         {this._renderContent()}
