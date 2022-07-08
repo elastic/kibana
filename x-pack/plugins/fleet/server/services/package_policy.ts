@@ -855,6 +855,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      skipArchive: true,
     });
     if (packageInfo) {
       return packageToPackagePolicy(packageInfo, '', '');
