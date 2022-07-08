@@ -110,6 +110,22 @@ function containsHelper(this: any, item: string, check: string | string[], optio
 }
 handlebars.registerHelper('contains', containsHelper);
 
+function escapeStringHelper(str: string) {
+  const regex = /\'/;
+  return "'" + str.replace(regex, "''") + "'";
+}
+handlebars.registerHelper('escape_string', escapeStringHelper);
+
+function toJsonHelper(value: any) {
+  if (typeof value === 'string') {
+    // if we get a string we assume it is a yaml or json serialized object
+    const yaml = safeLoad(value, {});
+    return JSON.stringify(yaml);
+  }
+  return JSON.stringify(value);
+}
+handlebars.registerHelper('to_json', toJsonHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;
