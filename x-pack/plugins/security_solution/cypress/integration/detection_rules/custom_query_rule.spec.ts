@@ -88,9 +88,7 @@ import {
   createAndEnableRule,
   fillAboutRule,
   fillAboutRuleAndContinue,
-  fillBasicAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue,
   fillEmailConnectorForm,
   fillScheduleRuleAndContinue,
   goToAboutStepTab,
@@ -100,7 +98,6 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
 import { saveEditedRule } from '../../tasks/edit_rule';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visit } from '../../tasks/login';
 import { enablesRule, getDetails } from '../../tasks/rule_details';
 
@@ -109,8 +106,6 @@ import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/naviga
 describe('Custom query rules', () => {
   before(() => {
     cleanKibana();
-    esArchiverResetKibana();
-
     login();
   });
   describe('Custom detection rules creation', () => {
@@ -203,89 +198,6 @@ describe('Custom query rules', () => {
         .invoke('text')
         .should('match', /^[1-9].+$/); // Any number of alerts
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);
-    });
-  });
-
-  // adding these tests as "skipped" as they are a work-in-progress
-  // don't want these tests to hold up pushing in bug fixes as part of this PR.
-  // cannot reliably select the
-  describe.skip('Custom detection rules creation with data view', () => {
-    const expectedNumberOfRules = 1;
-
-    beforeEach(() => {
-      deleteAlertsAndRules();
-      createTimeline(getNewRule().timeline).then((response) => {
-        cy.wrap({
-          ...getNewRule(),
-          timeline: {
-            ...getNewRule().timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
-          },
-        }).as('rule');
-      });
-    });
-
-    it.skip('Creates and enables a new rule with data view', function () {
-      visit(RULE_CREATION);
-      fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue(this.rule);
-      fillBasicAboutRuleAndContinue(this.rule);
-      fillScheduleRuleAndContinue(this.rule);
-
-      // expect define step to repopulate
-      cy.get(DEFINE_EDIT_BUTTON).click();
-      cy.get(CUSTOM_QUERY_INPUT).should('have.value', this.rule.customQuery);
-      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-      cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
-
-      // expect about step to populate
-      cy.get(ABOUT_EDIT_BUTTON).click();
-      cy.get(RULE_NAME_INPUT).invoke('val').should('eql', this.rule.name);
-      cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
-      cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
-
-      createAndEnableRule();
-
-      cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-      cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
-      cy.get(RULE_NAME).should('have.text', this.rule.name);
-      cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
-
-      goToRuleDetails();
-
-      cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
-      cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails('Data View').should('have.text', 'auditbeat-*');
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
-        getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
-        getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      });
-      cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should(
-          'have.text',
-          `${getNewRule().runsEvery.interval}${getNewRule().runsEvery.type}`
-        );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-          'have.text',
-          `${getNewRule().lookBack.interval}${getNewRule().lookBack.type}`
-        );
-      });
-
-      waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
-
-      cy.get(NUMBER_OF_ALERTS)
-        .invoke('text')
-        .should('match', /^[1-9].+$/); // Any number of alerts
-      cy.get(ALERT_GRID_CELL).contains(this.rule.name);
-    });
-
-    it.skip('Can edit rule definition and switch from data view to index pattern', function () {
-      visit(RULE_CREATION);
-      fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue(this.rule);
-      cy.get('[data-test-subj="edit-define-rule"]').click();
-      cy.get('[data-test-subj="rule-index-toggle-indexPatterns"]').click();
     });
   });
 
