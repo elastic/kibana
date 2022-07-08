@@ -83,6 +83,7 @@ import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigg
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { synchronizeMovement } from './synchronize_movement';
 import { getFilterByMapExtent } from '../trigger_actions/filter_by_map_extent_action';
+import { getGeoFieldsLabel } from './get_geo_fields_label';
 
 import {
   MapByValueInput,
@@ -579,12 +580,8 @@ export class MapEmbeddable
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
-      defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
-      values: {
-        lat: center.lat,
-        lon: center.lon,
-        zoom,
-      },
+      defaultMessage: '{geoFieldsLabel} within map bounds',
+      values: { geoFieldsLabel: getGeoFieldsLabel(geoFieldNames) },
     });
 
     const executeContext = {

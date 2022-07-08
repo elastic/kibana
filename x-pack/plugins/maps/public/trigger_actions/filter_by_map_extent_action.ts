@@ -24,18 +24,30 @@ export function getFilterByMapExtent(input: { filterByMapExtent?: boolean }) {
   return input.filterByMapExtent === undefined ? false : input.filterByMapExtent;
 }
 
+function getContainerLabel(embeddable: Embeddable<FilterByMapExtentInput>) {
+  return embeddable.parent?.type === 'dashboard'
+    ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.dashboardLabel', {
+        defaultMessage: 'dashboard',
+      })
+    : '';
+}
+
 export const filterByMapExtentAction = createAction<FilterByMapExtentActionContext>({
   id: FILTER_BY_MAP_EXTENT,
   type: FILTER_BY_MAP_EXTENT,
   order: 20,
-  getDisplayName: ({ embeddable }: FilterByMapExtentActionContext) => {
-    return getFilterByMapExtent(embeddable.getInput())
-      ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.disableDisplayName', {
-          defaultMessage: 'Disable filter by map extent',
-        })
-      : i18n.translate('xpack.maps.filterByMapExtentMenuItem.enableDisplayName', {
-          defaultMessage: 'Enable filter by map extent',
-        });
+  getDisplayName: (context: FilterByMapExtentActionContext) => {
+    return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayName', {
+      defaultMessage: 'Filter {containerLabel} by map bounds',
+      values: { containerLabel: getContainerLabel(context.embeddable) }
+    });
+  },
+  getDisplayNameTooltip: (context: FilterByMapExtentActionContext) => {
+    return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayNameTooltip', {
+      defaultMessage:
+        'As you zoom and pan your map, update {containerLabel} panels to only include data that is visible in your map',
+      values: { containerLabel: getContainerLabel(context.embeddable) }
+    });
   },
   getIconType: () => {
     return 'filter';
@@ -43,7 +55,6 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
   isCompatible: async ({ embeddable }: FilterByMapExtentActionContext) => {
     return (
       embeddable.type === MAP_SAVED_OBJECT_TYPE &&
-      embeddable.getInput().viewMode === ViewMode.EDIT &&
       !embeddable.getInput().disableTriggers
     );
   },
