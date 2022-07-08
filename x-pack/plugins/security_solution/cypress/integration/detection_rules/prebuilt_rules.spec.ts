@@ -92,7 +92,6 @@ describe('Prebuilt rules', () => {
         waitForRuleToChangeStatus();
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-        selectAllRules();
         disableSelectedRules();
         waitForRuleToChangeStatus();
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
