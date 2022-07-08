@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { useEuiTheme } from './use_eui_theme';
-export { useSetFilter } from './use_filter';
-export { useLastUpdated } from './use_last_updated';
+export interface MonitorOverviewPageState {
+  perPage: number;
+}
