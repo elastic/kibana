@@ -31,7 +31,8 @@ import { VisualizeConstants } from '../../../../common/constants';
 export const useVisualizeAppState = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
-  instance?: VisualizeEditorVisInstance
+  instance?: VisualizeEditorVisInstance,
+  preserveFilters?: boolean
 ) => {
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [appState, setAppState] = useState<VisualizeAppStateContainer | null>(null);
@@ -40,11 +41,14 @@ export const useVisualizeAppState = (
     if (instance) {
       const stateDefaults = visStateToEditorState(instance, services);
       const byValue = !('savedVis' in instance);
+      const { filterManager, queryString } = services.data.query;
       const { stateContainer, stopStateSync } = createVisualizeAppState({
         stateDefaults,
         kbnUrlStateStorage: services.kbnUrlStateStorage,
         byValue,
+        filters: preserveFilters ? cloneDeep(filterManager.getAppFilters()) : undefined,
       });
+
       const currentAppState = stateContainer.getState();
 
       const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
@@ -57,7 +61,6 @@ export const useVisualizeAppState = (
 
       eventEmitter.on('dirtyStateChange', onDirtyStateChange);
 
-      const { filterManager, queryString } = services.data.query;
       // sync initial app state from state to managers
       filterManager.setAppFilters(cloneDeep(currentAppState.filters));
       queryString.setQuery(migrateLegacyQuery(currentAppState.query));
@@ -149,7 +152,7 @@ export const useVisualizeAppState = (
         stopSyncingAppFilters();
       };
     }
-  }, [eventEmitter, instance, services]);
+  }, [eventEmitter, instance, services, preserveFilters]);
 
   return { appState, hasUnappliedChanges };
 };

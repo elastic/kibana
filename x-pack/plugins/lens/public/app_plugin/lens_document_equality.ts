@@ -66,14 +66,25 @@ export const isLensEqual = (
     return false;
   }
 
+  return true;
+};
+
+export const areFiltersEqual = (
+  doc1In: Document | undefined,
+  doc2In: Document | undefined,
+  injectFilterReferences: FilterManager['inject']
+) => {
+  if (doc1In === undefined || doc2In === undefined) {
+    return doc1In === doc2In;
+  }
+
+  // we do this so that undefined props are the same as non-existant props
+  const doc1 = removeNonSerializable(doc1In);
+  const doc2 = removeNonSerializable(doc2In);
   const [filtersInjected1, filtersInjected2] = [doc1, doc2].map((doc) =>
     removePinnedFilters(injectDocFilterReferences(injectFilterReferences, doc))
   );
-  if (!isEqual(filtersInjected1?.state.filters, filtersInjected2?.state.filters)) {
-    return false;
-  }
-
-  return true;
+  return isEqual(filtersInjected1?.state.filters, filtersInjected2?.state.filters);
 };
 
 function injectDocFilterReferences(

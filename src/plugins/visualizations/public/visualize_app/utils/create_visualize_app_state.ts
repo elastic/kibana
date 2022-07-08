@@ -13,6 +13,7 @@ import {
   syncState,
   IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { migrateAppState } from './migrate_app_state';
 import type { SavedVisState } from '../../types';
 import type { VisualizeAppState, VisualizeAppStateTransitions } from '../types';
@@ -23,6 +24,7 @@ interface Arguments {
   kbnUrlStateStorage: IKbnUrlStateStorage;
   stateDefaults: VisualizeAppState;
   byValue?: boolean;
+  filters?: Filter[];
 }
 
 function toObject(state: SavedVisState): SavedVisState {
@@ -76,12 +78,16 @@ function createVisualizeByValueAppState(stateDefaults: VisualizeAppState) {
   return { stateContainer, stopStateSync };
 }
 
-function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
+function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage, filters }: Arguments) {
   const urlState = kbnUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
-  const initialState = migrateAppState({
+  const stateToMigrate = {
     ...stateDefaults,
     ...urlState,
-  });
+  };
+  if (filters) {
+    stateToMigrate.filters = filters;
+  }
+  const initialState = migrateAppState(stateToMigrate);
   /*
      make sure url ('_a') matches initial state
      Initializing appState does two things - first it translates the defaults into AppState,
@@ -112,9 +118,14 @@ function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: A
   return { stateContainer, stopStateSync };
 }
 
-export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage, byValue }: Arguments) {
+export function createVisualizeAppState({
+  stateDefaults,
+  kbnUrlStateStorage,
+  byValue,
+  filters,
+}: Arguments) {
   if (byValue) {
     return createVisualizeByValueAppState(stateDefaults);
   }
-  return createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage });
+  return createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage, filters });
 }
