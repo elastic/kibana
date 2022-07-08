@@ -105,7 +105,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             />,
             ...(isAnyRuleSelected
               ? [
-                  <>
+                  <div key="refreshSettingsSelectionNote">
                     <EuiSpacer size="s" />
                     <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
                       <FormattedMessage
@@ -113,7 +113,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                         defaultMessage="Note: Refresh is disabled while there is an active selection."
                       />
                     </EuiTextColor>
-                  </>,
+                  </div>,
                 ]
               : []),
           ]}
