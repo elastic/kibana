@@ -13,7 +13,7 @@ Object {
           data-euiicon-type="heatmap"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -27,7 +27,7 @@ Object {
           </span>
         </button>
         <span
-          class="css-i06r1q-EuiIcon"
+          class="emotion-EuiIcon"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -35,7 +35,7 @@ Object {
           data-euiicon-type="nested"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -49,7 +49,7 @@ Object {
           </span>
         </button>
         <span
-          class="css-i06r1q-EuiIcon"
+          class="emotion-EuiIcon"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -57,7 +57,7 @@ Object {
           data-euiicon-type="package"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -71,7 +71,7 @@ Object {
           </span>
         </button>
         <span
-          class="css-i06r1q-EuiIcon"
+          class="emotion-EuiIcon"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -79,7 +79,7 @@ Object {
           data-euiicon-type="image"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-15fawq9-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -104,7 +104,7 @@ Object {
         data-euiicon-type="heatmap"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
@@ -118,7 +118,7 @@ Object {
         </span>
       </button>
       <span
-        class="css-i06r1q-EuiIcon"
+        class="emotion-EuiIcon"
         data-euiicon-type="arrowRight"
       />
       <span
@@ -126,7 +126,7 @@ Object {
         data-euiicon-type="nested"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
@@ -140,7 +140,7 @@ Object {
         </span>
       </button>
       <span
-        class="css-i06r1q-EuiIcon"
+        class="emotion-EuiIcon"
         data-euiicon-type="arrowRight"
       />
       <span
@@ -148,7 +148,7 @@ Object {
         data-euiicon-type="package"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
@@ -162,7 +162,7 @@ Object {
         </span>
       </button>
       <span
-        class="css-i06r1q-EuiIcon"
+        class="emotion-EuiIcon"
         data-euiicon-type="arrowRight"
       />
       <span
@@ -170,7 +170,7 @@ Object {
         data-euiicon-type="image"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-15fawq9-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
@@ -252,7 +252,7 @@ Object {
           data-euiicon-type="heatmap"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -266,7 +266,7 @@ Object {
           </span>
         </button>
         <span
-          class="css-i06r1q-EuiIcon"
+          class="emotion-EuiIcon"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -274,7 +274,7 @@ Object {
           data-euiicon-type="node"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-15fawq9-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -288,7 +288,7 @@ Object {
           </span>
         </button>
         <span
-          class="css-i06r1q-EuiIcon"
+          class="emotion-EuiIcon"
           data-euiicon-type="arrowRight"
         />
         <span
@@ -296,7 +296,7 @@ Object {
           data-euiicon-type="image"
         />
         <button
-          class="euiButtonEmpty euiButtonEmpty--text css-15fawq9-EuiButtonEmpty"
+          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -321,7 +321,7 @@ Object {
         data-euiicon-type="heatmap"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-126n2n1-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
@@ -335,7 +335,7 @@ Object {
         </span>
       </button>
       <span
-        class="css-i06r1q-EuiIcon"
+        class="emotion-EuiIcon"
         data-euiicon-type="arrowRight"
       />
       <span
@@ -343,7 +343,7 @@ Object {
         data-euiicon-type="node"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-15fawq9-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
@@ -357,7 +357,7 @@ Object {
         </span>
       </button>
       <span
-        class="css-i06r1q-EuiIcon"
+        class="emotion-EuiIcon"
         data-euiicon-type="arrowRight"
       />
       <span
@@ -365,7 +365,7 @@ Object {
         data-euiicon-type="image"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--text css-15fawq9-EuiButtonEmpty"
+        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
         type="button"
       >
         <span
