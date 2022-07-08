@@ -243,7 +243,7 @@ describe('loadRuleAggregations', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now))",
             "search": undefined,
             "search_fields": undefined,
           },
@@ -262,7 +262,7 @@ describe('loadRuleAggregations', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)",
             "search": undefined,
             "search_fields": undefined,
           },
@@ -281,7 +281,7 @@ describe('loadRuleAggregations', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)",
             "search": undefined,
             "search_fields": undefined,
           },
