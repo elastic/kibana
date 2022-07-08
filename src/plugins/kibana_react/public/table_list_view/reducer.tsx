@@ -76,7 +76,6 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         isFetchingItems: false,
         items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
         totalItems: action.data.response.total,
-        showLimitError: action.data.response.total > action.data.listingLimit,
         ...tableColumnState,
         pagination: {
           ...state.pagination,
@@ -91,7 +90,6 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         isFetchingItems: false,
         items: [],
         totalItems: 0,
-        showLimitError: false,
         fetchError: action.data,
       };
     }

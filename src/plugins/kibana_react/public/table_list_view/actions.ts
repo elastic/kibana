@@ -19,7 +19,6 @@ export interface OnFetchItemsSuccessAction<T> {
       total: number;
       hits: T[];
     };
-    listingLimit: number;
   };
 }
 

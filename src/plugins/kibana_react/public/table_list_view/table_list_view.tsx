@@ -17,7 +17,6 @@ import {
   EuiEmptyPrompt,
   Pagination,
   Direction,
-  EuiLink,
   EuiSpacer,
   EuiTableActionsColumnType,
   SearchFilterConfig,
@@ -28,7 +27,7 @@ import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from
 import { keyBy, uniq, get } from 'lodash';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
-import { Table, ConfirmDeleteModal } from './components';
+import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import type { Action } from './actions';
 import { reducer } from './reducer';
 
@@ -74,7 +73,6 @@ export interface State<T = unknown> {
   isFetchingItems: boolean;
   isDeletingItems: boolean;
   showDeleteModal: boolean;
-  showLimitError: boolean;
   fetchError?: HttpFetchError;
   searchQuery: string;
   selectedIds: string[];
@@ -119,7 +117,6 @@ function TableListView<T>({
     isFetchingItems: false,
     isDeletingItems: false,
     showDeleteModal: false,
-    showLimitError: false,
     selectedIds: [],
     tableColumns: null,
     searchQuery: initialQuery,
@@ -140,7 +137,6 @@ function TableListView<T>({
     showDeleteModal,
     isDeletingItems,
     selectedIds,
-    showLimitError,
     totalItems,
     tableColumns: stateTableColumns,
     pagination,
@@ -148,6 +144,8 @@ function TableListView<T>({
   } = state;
   const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
+  const showFetchError = Boolean(fetchError);
+  const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const tableColumns = useMemo(() => {
     let columns = tableColumnsProps.slice();
@@ -198,6 +196,9 @@ function TableListView<T>({
     return selectedIds.map((id) => itemsById[id]);
   }, [selectedIds, itemsById]);
 
+  // ------------
+  // Callbacks
+  // ------------
   const fetchItems = useCallback(async () => {
     dispatch({ type: 'onFetchItems' });
 
@@ -214,7 +215,6 @@ function TableListView<T>({
           type: 'onFetchItemsSuccess',
           data: {
             response,
-            listingLimit,
           },
         });
       }
@@ -224,7 +224,7 @@ function TableListView<T>({
         data: err,
       });
     }
-  }, [searchQuery, findItems, listingLimit]);
+  }, [searchQuery, findItems]);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -304,96 +304,33 @@ function TableListView<T>({
     }
   }, [emptyPrompt, entityNamePlural, renderCreateButton]);
 
-  const renderListingLimitWarning = useCallback(() => {
-    if (showLimitError) {
-      const canEditAdvancedSettings = application.capabilities.advancedSettings.save;
-      const setting = 'savedObjects:listingLimit';
-      const advancedSettingsLink = application.getUrlForApp('management', {
-        path: `/kibana/settings?query=${setting}`,
-      });
-      return (
-        <React.Fragment>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="kibana-react.tableListView.listing.listingLimitExceededTitle"
-                defaultMessage="Listing limit exceeded"
-              />
-            }
-            color="warning"
-            iconType="help"
-          >
-            <p>
-              {canEditAdvancedSettings ? (
-                <FormattedMessage
-                  id="kibana-react.tableListView.listing.listingLimitExceededDescription"
-                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
-                the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
-                  values={{
-                    entityNamePlural,
-                    totalItems,
-                    listingLimitValue: listingLimit,
-                    listingLimitText: <strong>listingLimit</strong>,
-                    advancedSettingsLink: (
-                      <EuiLink href={advancedSettingsLink}>
-                        <FormattedMessage
-                          id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
-                          defaultMessage="Advanced Settings"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="kibana-react.tableListView.listing.listingLimitExceededDescriptionNoPermissions"
-                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
-                  the table below from displaying more than {listingLimitValue}. Contact your system administrator to change this setting."
-                  values={{
-                    entityNamePlural,
-                    totalItems,
-                    listingLimitValue: listingLimit,
-                    listingLimitText: <strong>listingLimit</strong>,
-                  }}
-                />
-              )}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </React.Fragment>
-      );
-    }
-  }, [application, entityNamePlural, listingLimit, showLimitError, totalItems]);
-
   const renderFetchError = useCallback(() => {
-    if (fetchError) {
-      return (
-        <React.Fragment>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="kibana-react.tableListView.listing.fetchErrorTitle"
-                defaultMessage="Fetching listing failed"
-              />
-            }
-            color="danger"
-            iconType="alert"
-          >
-            <p>
-              <FormattedMessage
-                id="kibana-react.tableListView.listing.fetchErrorDescription"
-                defaultMessage="The {entityName} listing could not be fetched: {message}."
-                values={{
-                  entityName,
-                  message: fetchError.body?.message || fetchError.message,
-                }}
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </React.Fragment>
-      );
-    }
+    return (
+      <React.Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="kibana-react.tableListView.listing.fetchErrorTitle"
+              defaultMessage="Fetching listing failed"
+            />
+          }
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="kibana-react.tableListView.listing.fetchErrorDescription"
+              defaultMessage="The {entityName} listing could not be fetched: {message}."
+              values={{
+                entityName,
+                message: fetchError!.body?.message || fetchError!.message,
+              }}
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </React.Fragment>
+    );
   }, [entityName, fetchError]);
 
   // ------------
@@ -409,6 +346,9 @@ function TableListView<T>({
     };
   }, []);
 
+  // ------------
+  // Render
+  // ------------
   if (!hasInitialFetchReturned) {
     return null;
   }
@@ -439,19 +379,26 @@ function TableListView<T>({
         'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
       }}
     >
-      {showDeleteModal && (
-        <ConfirmDeleteModal<T>
-          isDeletingItems={isDeletingItems}
-          entityName={entityName}
+      {/* Any children passed to the component */}
+      {children}
+
+      {/* Too many items error */}
+      {showLimitError && (
+        <ListingLimitWarning
+          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings.save)}
+          advancedSettingsLink={application.getUrlForApp('management', {
+            path: `/kibana/settings?query=savedObjects:listingLimit`,
+          })}
           entityNamePlural={entityNamePlural}
-          items={selectedItems}
-          onConfirm={deleteSelectedItems}
-          onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+          totalItems={totalItems}
+          listingLimit={listingLimit}
         />
       )}
-      {children}
-      {renderListingLimitWarning()}
-      {renderFetchError()}
+
+      {/* Error while fetching items */}
+      {showFetchError && renderFetchError()}
+
+      {/* Table of items */}
       <Table
         dispatch={dispatch}
         items={items}
@@ -468,6 +415,18 @@ function TableListView<T>({
         tableCaption={tableCaption}
         rowHeader={rowHeader}
       />
+
+      {/* Delete modal */}
+      {showDeleteModal && (
+        <ConfirmDeleteModal<T>
+          isDeletingItems={isDeletingItems}
+          entityName={entityName}
+          entityNamePlural={entityNamePlural}
+          items={selectedItems}
+          onConfirm={deleteSelectedItems}
+          onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+        />
+      )}
     </KibanaPageTemplate>
   );
 }
