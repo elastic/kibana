@@ -5,35 +5,37 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup } from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
 import type { useGetEndpointActionList } from '../../../hooks';
 import type { DateRangePickerValues } from './action_list_date_range_picker';
 import { ActionListDateRangePicker } from './action_list_date_range_picker';
-import { ActionListFilterGroup } from './action_list_filter_group';
+import { ActionListFilter } from './action_list_filter';
 
 export const ActionListFilters = memo(
   ({
     dateRangePickerState,
     isDataLoading,
     onClick,
-    onChangeCommand,
+    onChangeCommands,
+    onChangeUserIds,
     onRefresh,
     onRefreshChange,
     onTimeChange,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
-    onChangeCommand: (selectedCommands: Array<typeof RESPONSE_ACTION_COMMANDS[number]>) => void;
+    onChangeCommands: (selectedCommands: string[]) => void;
+    onChangeUserIds: (selectedUserIds: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
   }) => {
+    const filterNames = ['commands', 'users'];
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem>
@@ -47,10 +49,16 @@ export const ActionListFilters = memo(
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ActionListFilterGroup
-            onChangeCommand={onChangeCommand}
-            filters={[{ filterName: 'Command', filterItems: RESPONSE_ACTION_COMMANDS.slice() }]}
-          />
+          <EuiFilterGroup>
+            {filterNames.map((filterName) => (
+              <ActionListFilter
+                key={filterName}
+                filterName={filterName}
+                onChangeCommands={onChangeCommands}
+                onChangeUserIds={onChangeUserIds}
+              />
+            ))}
+          </EuiFilterGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

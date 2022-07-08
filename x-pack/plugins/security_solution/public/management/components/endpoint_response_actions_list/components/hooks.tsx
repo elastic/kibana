@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import type { DateRangePickerValues } from './action_list_date_range_picker';
+import { useGetKibanaUsers } from '../../../hooks/endpoint/use_get_kibana_users';
+import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -84,4 +86,45 @@ export const useDateRangePicker = () => {
   );
 
   return { dateRangePickerState, onRefreshChange, onTimeChange };
+};
+
+export type FilterItems = Array<{
+  key: string;
+  label: string;
+  checked: 'on' | 'off' | undefined;
+}>;
+
+export const useActionListFilter = (filterName: string) => {
+  const isUsersFilter = filterName === 'users';
+  const { data: users } = useGetKibanaUsers({ enabled: isUsersFilter });
+  const [items, setItems] = useState<FilterItems>(
+    isUsersFilter
+      ? []
+      : RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
+          key: filter,
+          label: filter === 'unisolate' ? 'release' : filter,
+          checked: undefined,
+        }))
+  );
+
+  useEffect(() => {
+    if (isUsersFilter && users) {
+      setItems(
+        users.map((filter) => ({
+          key: filter.username,
+          label: filter.username,
+          checked: undefined,
+        }))
+      );
+    }
+  }, [filterName, isUsersFilter, setItems, users]);
+
+  const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
+  const numActiveFilters = useMemo(
+    () => items.filter((item) => item.checked === 'on').length,
+    [items]
+  );
+  const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
+
+  return { items, setItems, hasActiveFilters, numActiveFilters, numFilters };
 };

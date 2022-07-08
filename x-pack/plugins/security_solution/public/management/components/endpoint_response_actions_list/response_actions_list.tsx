@@ -31,7 +31,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import type { ActionDetails, RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
@@ -137,9 +137,16 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
     }, [dateRangePickerState.autoRefreshOptions.enabled, reFetchEndpointActionList]);
 
     // handle on change command filter
-    const onChangeCommand = useCallback(
-      (selectedCommands: Array<typeof RESPONSE_ACTION_COMMANDS[number]>) => {
+    const onChangeCommands = useCallback(
+      (selectedCommands: string[]) => {
         setQueryParams((prevState) => ({ ...prevState, commands: selectedCommands }));
+      },
+      [setQueryParams]
+    );
+
+    const onChangeUserIds = useCallback(
+      (selectedUserIds: string[]) => {
+        setQueryParams((prevState) => ({ ...prevState, userIds: selectedUserIds }));
       },
       [setQueryParams]
     );
@@ -514,7 +521,8 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
           dateRangePickerState={dateRangePickerState}
           isDataLoading={isFetching}
           onClick={reFetchEndpointActionList}
-          onChangeCommand={onChangeCommand}
+          onChangeCommands={onChangeCommands}
+          onChangeUserIds={onChangeUserIds}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
