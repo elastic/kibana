@@ -123,7 +123,6 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
    signal,
  });
 
-
 /**
  * Preview provided Rule
  *

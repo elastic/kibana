@@ -9,6 +9,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DeleteExceptionListSchemaDecoded,
+  ExceptionListTypeEnum,
   deleteExceptionListSchema,
   exceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
