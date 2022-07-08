@@ -372,6 +372,8 @@ export const convertPatchAPIToInternalSchema = (
       severityMapping: params.severity_mapping ?? existingParams.severityMapping,
       threat: params.threat ?? existingParams.threat,
       timestampOverride: params.timestamp_override ?? existingParams.timestampOverride,
+      disableTimestampFallback:
+        params.disable_timestamp_fallback ?? existingParams.disableTimestampFallback,
       to: params.to ?? existingParams.to,
       references: params.references ?? existingParams.references,
       namespace: params.namespace ?? existingParams.namespace,
