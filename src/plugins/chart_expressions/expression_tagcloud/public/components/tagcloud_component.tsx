@@ -23,6 +23,7 @@ import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
 import './tag_cloud.scss';
+import { EmptyPlaceholder } from "@kbn/charts-plugin/public";
 
 const MAX_TAG_COUNT = 200;
 
