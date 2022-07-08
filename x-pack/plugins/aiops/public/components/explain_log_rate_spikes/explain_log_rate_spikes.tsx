@@ -7,7 +7,17 @@
 
 import React, { useEffect, FC } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -41,16 +51,6 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   const { services } = useAiOpsKibana();
   const basePath = services.http?.basePath.get() ?? '';
 
-  const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(AppStateKey, {
-    pageIndex: 0,
-    pageSize: 25,
-    sortField: 'fieldName',
-    sortDirection: 'asc',
-    // searchString: '',
-    searchQuery: { match_all: {} },
-    // searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-    filters: [],
-  });
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const { overallStats, timefilter } = useData(dataView, setGlobalState);
@@ -93,13 +93,6 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
-  // TODO: improve
-  useEffect(() => {
-    setDataVisualizerListState({
-      ...dataVisualizerListState,
-    });
-  }, [setDataVisualizerListState, dataVisualizerListState]);
-
   useEffect(() => {
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,46 +102,70 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup>
+      <EuiPageBody data-test-subj="aiOpsIndexPage" paddingSize="none" panelled={false}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiPageContentHeader className="aiOpsPageHeader">
+              <EuiPageContentHeaderSection>
+                <div className="aiOpsTitleHeader">
+                  <EuiTitle size={'s'}>
+                    <h2>{dataView.title}</h2>
+                  </EuiTitle>
+                </div>
+              </EuiPageContentHeaderSection>
+
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="s"
+                data-test-subj="aiOpsTimeRangeSelectorSection"
+              >
+                {dataView.timeFieldName !== undefined && (
+                  <EuiFlexItem grow={false}>
+                    <FullTimeRangeSelector
+                      dataView={dataView}
+                      query={undefined}
+                      disabled={false}
+                      timefilter={timefilter}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageContentHeader>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule />
+        <EuiPageContentBody>
+          <EuiFlexGroup direction="column">
+            {overallStats?.totalCount !== undefined && (
+              <EuiFlexItem>
+                <DocumentCountContent
+                  documentCountStats={overallStats.documentCountStats}
+                  totalCount={overallStats.totalCount}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
-              <EuiText>
-                <h2>{dataView.title}</h2>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FullTimeRangeSelector
-                dataView={dataView}
-                query={undefined}
-                disabled={false}
-                timefilter={timefilter}
+              <ProgressControls
+                progress={data.loaded}
+                progressMessage={data.loadingState ?? ''}
+                isRunning={isRunning}
+                onRefresh={start}
+                onCancel={cancel}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <DatePickerWrapper />
-            </EuiFlexItem>
+            {data?.changePoints ? (
+              <EuiFlexItem>
+                <SpikeAnalysisTable changePointData={data.changePoints} />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
-        </EuiFlexItem>
-        {overallStats?.totalCount !== undefined && (
-          <EuiFlexItem grow={true}>
-            <DocumentCountContent
-              documentCountStats={overallStats.documentCountStats}
-              totalCount={overallStats.totalCount}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiHorizontalRule />
-      <ProgressControls
-        progress={data.loaded}
-        progressMessage={data.loadingState ?? ''}
-        isRunning={isRunning}
-        onRefresh={start}
-        onCancel={cancel}
-      />
-      {data?.changePoints ? <SpikeAnalysisTable changePointData={data.changePoints} /> : null}
+        </EuiPageContentBody>
+      </EuiPageBody>
     </>
   );
 };
