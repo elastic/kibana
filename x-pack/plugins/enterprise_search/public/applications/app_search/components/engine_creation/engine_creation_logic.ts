@@ -17,12 +17,19 @@ import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { SearchIndexSelectableOption } from './search_index_selectable';
 import { getRedirectToAfterEngineCreation, formatIndicesToSelectable } from './utils';
 
+export enum EngineCreationSteps {
+  SelectStep = 'Select Engine Type',
+  ConfigureStep = 'Configure Engine',
+  ReviewStep = 'Review',
+}
+
 export type EngineType = 'appSearch' | 'elasticsearch';
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
   setIngestionMethod(method: string): { method: string };
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
+  setCreationStep(creationStep: EngineCreationSteps): EngineCreationSteps;
   submitEngine(): void;
   onSubmitError(): void;
   loadIndices(): void;
@@ -32,6 +39,7 @@ interface EngineCreationActions {
 }
 
 interface EngineCreationValues {
+  currentEngineCreationStep: EngineCreationSteps;
   ingestionMethod: string;
   isLoading: boolean;
   language: string;
@@ -58,6 +66,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     onLoadIndicesSuccess: (indices) => ({ indices }),
     setSelectedIndex: (selectedIndexName) => ({ selectedIndexName }),
     setEngineType: (engineType) => ({ engineType }),
+    setCreationStep: (creationStep) => ({ creationStep }),
   },
   reducers: {
     ingestionMethod: [
@@ -112,6 +121,12 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         setEngineType: (_, { engineType }) => engineType,
       },
     ],
+    currentEngineCreationStep: [
+      EngineCreationSteps.SelectStep,
+      {
+        setCreationStep: (_, currentEngineCreationStep) => currentEngineCreationStep,
+      }
+    ]
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],

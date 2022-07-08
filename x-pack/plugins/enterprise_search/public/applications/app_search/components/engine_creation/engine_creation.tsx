@@ -49,17 +49,18 @@ import {
   SANITIZED_NAME_NOTE,
   SUPPORTED_LANGUAGES,
 } from './constants';
-import { EngineCreationLogic } from './engine_creation_logic';
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 import { SearchIndexSelectable } from './search_index_selectable';
 import { SelectEngineType } from './select_engine_type';
+import { ConfigureAppSearchEngine } from './configure_app_search_engine';
 
 export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;
   const { method } = parseQueryParams(search);
 
-  const { name, rawName, language, isLoading, engineType, isSubmitDisabled } =
+  const { name, rawName, language, isLoading, engineType, isSubmitDisabled, currentEngineCreationStep } =
     useValues(EngineCreationLogic);
-  const { setIngestionMethod, setLanguage, setRawName, submitEngine, setEngineType } =
+  const { setIngestionMethod, setLanguage, setRawName, submitEngine, setEngineType, setCreationStep } =
     useActions(EngineCreationLogic);
 
   useEffect(() => {
@@ -74,12 +75,35 @@ export const EngineCreation: React.FC = () => {
       pageHeader={{ pageTitle: ENGINE_CREATION_TITLE }}
       data-test-subj="EngineCreation"
     >
-      <SelectEngineType
-        selectedEngineType={engineType}
-        advanceStep={(): void => {
-          throw new Error('Function not implemented.');
-        } }      
-      />
+      {currentEngineCreationStep === EngineCreationSteps.SelectStep && (
+        <SelectEngineType
+          selectedEngineType={engineType}
+          setAppSearchEngineType={ () => { setEngineType('appSearch')}}
+          setElasticsearchEngineType={ () => { setEngineType('elasticsearch')}}
+          setConfigurationStep={ () => { setCreationStep(EngineCreationSteps.ConfigureStep)}}
+        />
+      )}
+      {currentEngineCreationStep === EngineCreationSteps.ConfigureStep && engineType === 'appSearch' && (
+        <p> Elasticsearch engine configure step</p>
+        /*
+        <ConfigureAppSearchEngine
+          name={name}
+          rawName={rawName}
+          language={language}
+          isLoading={isLoading}
+          isSubmitDisabled={isSubmitDisabled}
+          submitEngine={submitEngine}
+          setRawName={setRawName}
+          setLanguage={setLanguage}
+        />
+        */
+      )}
+      {currentEngineCreationStep === EngineCreationSteps.ConfigureStep && engineType === 'elasticsearch' && (
+        <> Elasticsearch engine configure step</>
+      )}
+      {currentEngineCreationStep === EngineCreationSteps.ReviewStep && (
+        <>Review Step</>
+      )}
     </AppSearchPageTemplate>
   );
 };

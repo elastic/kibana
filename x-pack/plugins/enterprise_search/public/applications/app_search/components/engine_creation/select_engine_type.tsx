@@ -9,25 +9,35 @@ import React from 'react';
 
 import {
   EuiButton,
-  EuiSpacer,
   EuiPanel,
   EuiStepsHorizontal,
+  EuiFlexGroup,
+  EuiCard,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import {
+  ENGINE_CREATION_SELECT_APP_SEARCH_TITLE,
+  ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION,
+  ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE,
+  ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION,
+  ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL
 } from './constants';
+
 import { EngineType } from './engine_creation_logic';
 
 interface SelectEngineTypeProps {
   selectedEngineType: EngineType;
-  setEngineType(): void;
-  setStep(): void;
+  setAppSearchEngineType(): void;
+  setElasticsearchEngineType(): void;
+  setConfigurationStep(): void;
 }
 
 export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
   selectedEngineType,
-  setStep,
+  setAppSearchEngineType,
+  setElasticsearchEngineType,
+  setConfigurationStep,
 }) => (
   <>
     <EuiStepsHorizontal steps={[
@@ -38,7 +48,7 @@ export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
         },
         {
           title: 'Configuration',
-          onClick: advanceStep,
+          onClick: setConfigurationStep,
         },
         {
           title: 'Review',
@@ -47,6 +57,41 @@ export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
         },
     ]} />
     <EuiPanel hasBorder>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
+          <EuiCard
+            title={ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE}
+            description={ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION}
+            betaBadgeProps={{
+              label: 'Beta',
+              tooltipContent:
+                'This module is not GA. Please help us by reporting any bugs.',
+            }}
+            selectable={{
+              onClick: setElasticsearchEngineType,
+              isSelected: selectedEngineType === 'elasticsearch',
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            title={ENGINE_CREATION_SELECT_APP_SEARCH_TITLE}
+            description={ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION}
+            selectable={{
+              onClick: setAppSearchEngineType,
+              isSelected: selectedEngineType === 'appSearch',
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButton
+          fill
+          onClick={setConfigurationStep}
+          >{ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL}</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   </>
 );

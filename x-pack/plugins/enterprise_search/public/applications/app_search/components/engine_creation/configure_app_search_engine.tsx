@@ -5,6 +5,55 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import {
+  EuiButton,
+  EuiPanel,
+  EuiStepsHorizontal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiSpacer,
+  EuiFormRow,
+  EuiTitle,
+  EuiFieldText,
+  EuiSelect,
+} from '@elastic/eui';
+
+import {
+  ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL,
+  ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
+  SANITIZED_NAME_NOTE,
+  ALLOWED_CHARS_NOTE,
+  ENGINE_CREATION_FORM_TITLE,
+  ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
+  ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
+  SUPPORTED_LANGUAGES,
+  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL
+} from './constants';
+
+interface ConfigureAppSearchEngineProps {
+  name: string;
+  rawName: string;
+  language: string;
+  isLoading: boolean;
+  isSubmitDisabled: boolean;
+  submitEngine: () => void;
+  setRawName: (rawName: string) => void;
+  setLanguage: (language: string) => void;
+}
+
+export const ConfigureAppSearchEngine: React.FC<ConfigureAppSearchEngineProps> = ({
+  name,
+  rawName,
+  language,
+  isLoading,
+  isSubmitDisabled,
+  submitEngine,
+  setRawName,
+  setLanguage,
+}) => (
 <EuiPanel hasBorder>
         <EuiForm
           component="form"
@@ -57,119 +106,7 @@
                 />
               </EuiFormRow>
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiPanel color="subdued">
-            <EuiAccordion id="advancedSettingsAccordion" buttonContent="Advanced settings">
-              <EuiSpacer />
-              <EuiFormFieldset
-                legend={{
-                  children: (
-                    <EuiTitle size="xs">
-                      <span>
-                        {i18n.translate('xpack.enterpriseSearch.engineCreation.engineTypeLabel', {
-                          defaultMessage:
-                            "Select how you'd like to manage the index for this engine",
-                        })}
-                      </span>
-                    </EuiTitle>
-                  ),
-                }}
-              >
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiCheckableCard
-                      id="checkableCardId__appSearchManaged"
-                      name="engineTypeSelection"
-                      onChange={() => setEngineType('appSearch')}
-                      checked={engineType === 'appSearch'}
-                      label={
-                        <>
-                          <EuiTitle size="xxs">
-                            <span>
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.engineCreation.appSearchManagedLabel',
-                                { defaultMessage: 'I want App Search to ingest and manage my data' }
-                              )}
-                            </span>
-                          </EuiTitle>
-                          <EuiSpacer size="xs" />
-                          <EuiText size="s" color="subdued">
-                            <p>
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.engineCreation.appSearchManagedDescription',
-                                {
-                                  defaultMessage:
-                                    'Create and engine and add documents via Web Crawler, API, or JSON file.',
-                                }
-                              )}
-                            </p>
-                          </EuiText>
-                        </>
-                      }
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiCheckableCard
-                      id="checkableCardId__elasticsearchManaged"
-                      name="engineTypeSelection"
-                      onChange={() => setEngineType('elasticsearch')}
-                      checked={engineType === 'elasticsearch'}
-                      label={
-                        <>
-                          <EuiBadge color="success" iconType="cheer">
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.engineCreation.elasticsearchTechPreviewBadge',
-                              { defaultMessage: 'Technical Preview' }
-                            )}
-                          </EuiBadge>
-                          <EuiSpacer size="xs" />
-                          <EuiTitle size="xxs">
-                            <span>
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.engineCreation.elasticsearchManagedLabel',
-                                { defaultMessage: 'I want to manage my data with Elasticsearch' }
-                              )}
-                            </span>
-                          </EuiTitle>
-                          <EuiSpacer size="xs" />
-                          <EuiText size="s" color="subdued">
-                            <p>
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.engineCreation.elasticsearchIndexedLabel',
-                                {
-                                  defaultMessage:
-                                    'Create an engine based on data managed in an Elasticsearch index.',
-                                }
-                              )}
-                            </p>
-                            <p>
-                              <small>
-                                <EuiLink
-                                  href={docLinks.appSearchElasticsearchIndexedEngines}
-                                  target="_blank"
-                                >
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.engineCreation.elasticsearchIndexedLink',
-                                    {
-                                      defaultMessage:
-                                        'Learn more about using an existing Elasticsearch index',
-                                    }
-                                  )}
-                                </EuiLink>
-                              </small>
-                            </p>
-                          </EuiText>
-                        </>
-                      }
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormFieldset>
-              <EuiSpacer />
-              {engineType === 'elasticsearch' && <SearchIndexSelectable />}
-            </EuiAccordion>
-          </EuiPanel>
+          </EuiFlexGroup> 
           <EuiSpacer />
           <EuiButton
             disabled={isSubmitDisabled}
@@ -183,3 +120,4 @@
           </EuiButton>
         </EuiForm>
       </EuiPanel>
+);
