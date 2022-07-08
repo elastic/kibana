@@ -27,6 +27,11 @@ describe('get_list_template', () => {
       template: {
         mappings: { listMappings: {} },
         settings: { index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } } },
+        mapping:  {
+          total_fields:  {
+            limit: 10000,
+          },
+        },
       },
     });
   });
