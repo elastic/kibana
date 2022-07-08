@@ -156,6 +156,14 @@ export interface UpdateAgentRequest {
   };
 }
 
+export interface PostBulkUpdateAgentTagsRequest {
+  body: {
+    agents: string[] | string;
+    tagsToAdd?: string[];
+    tagsToRemove?: string[];
+  };
+}
+
 export interface GetAgentStatusRequest {
   query: {
     kuery?: string;

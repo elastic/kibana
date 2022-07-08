@@ -24,12 +24,12 @@ import { sortOrderSchema } from './common_schemas';
  * Not fully supported:
  * - filter
  * - filters
+ * - composite
  *
  * Not implemented:
  * - adjacency_matrix
  * - auto_date_histogram
  * - children
- * - composite
  * - date_histogram
  * - diversified_sampler
  * - geo_distance
@@ -93,6 +93,41 @@ const multiTermsSchema = s.object({
   order: s.maybe(s.recordOf(s.string(), orderSchema)),
 });
 
+const histogramSchema = s.object({
+  field: s.maybe(s.string()),
+  interval: s.maybe(s.number()),
+  min_doc_count: s.maybe(s.number({ min: 1 })),
+  extended_bounds: s.maybe(
+    s.object({
+      min: s.number(),
+      max: s.number(),
+    })
+  ),
+  hard_bounds: s.maybe(
+    s.object({
+      min: s.number(),
+      max: s.number(),
+    })
+  ),
+  missing: s.maybe(s.number()),
+  keyed: s.maybe(s.boolean()),
+  order: s.maybe(
+    s.object({
+      _count: s.string(),
+      _key: s.string(),
+    })
+  ),
+});
+
+const compositeSchema = s.object({
+  sources: s.arrayOf(
+    s.recordOf(
+      s.string(),
+      s.oneOf([s.object({ terms: termsSchema }), s.object({ histogram: histogramSchema })])
+    )
+  ),
+});
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
   date_range: s.object({
     field: s.string(),
@@ -103,31 +138,7 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   filters: s.object({
     filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),
-  histogram: s.object({
-    field: s.maybe(s.string()),
-    interval: s.maybe(s.number()),
-    min_doc_count: s.maybe(s.number({ min: 1 })),
-    extended_bounds: s.maybe(
-      s.object({
-        min: s.number(),
-        max: s.number(),
-      })
-    ),
-    hard_bounds: s.maybe(
-      s.object({
-        min: s.number(),
-        max: s.number(),
-      })
-    ),
-    missing: s.maybe(s.number()),
-    keyed: s.maybe(s.boolean()),
-    order: s.maybe(
-      s.object({
-        _count: s.string(),
-        _key: s.string(),
-      })
-    ),
-  }),
+  histogram: histogramSchema,
   nested: s.object({
     path: s.string(),
   }),
@@ -136,4 +147,5 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   }),
   multi_terms: multiTermsSchema,
   terms: termsSchema,
+  composite: compositeSchema,
 };

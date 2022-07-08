@@ -54,3 +54,11 @@ export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
     values: { name },
     defaultMessage: 'Show more {name}',
   });
+
+export const WIDGET_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.show', {
+  defaultMessage: 'Show widgets',
+});
+
+export const WIDGET_TOGGLE_HIDE = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.hide', {
+  defaultMessage: 'Hide widgets',
+});

@@ -13,6 +13,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -41,12 +42,10 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//react",
   "//packages/kbn-i18n",
   "//packages/kbn-shared-ux-components",
   "//packages/kbn-shared-ux-services",
-  "//packages/kbn-shared-ux-storybook",
   "//packages/shared-ux/prompt/no_data_views",
 ]
 
@@ -63,7 +62,6 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
@@ -71,7 +69,6 @@ TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-shared-ux-components:npm_module_types",
   "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
   "//packages/shared-ux/prompt/no_data_views:npm_module_types",
 ]
 
@@ -107,6 +104,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
