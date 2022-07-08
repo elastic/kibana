@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import deepEqual from 'fast-deep-equal';
-import { Subscription } from 'rxjs';
+import { useEffect, useMemo } from 'react';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import {
-  NetworkQueries,
-  NetworkDetailsRequestOptions,
-  NetworkDetailsStrategyResponse,
-} from '../../../../common/search_strategy';
+import { NetworkQueries, NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 import * as i18n from './translations';
-import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export const ID = 'networkDetailsQuery';
 
@@ -36,111 +27,61 @@ export interface NetworkDetailsArgs {
 }
 
 interface UseNetworkDetails {
-  id?: string;
-  ip: string;
-  indexNames: string[];
   filterQuery?: ESTermQuery | string;
+  id?: string;
+  indexNames: string[];
+  ip: string;
   skip: boolean;
 }
 
 export const useNetworkDetails = ({
   filterQuery,
-  indexNames,
   id = ID,
-  skip,
+  indexNames,
   ip,
+  skip,
 }: UseNetworkDetails): [boolean, NetworkDetailsArgs] => {
-  const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
-
-  const [networkDetailsRequest, setNetworkDetailsRequest] =
-    useState<NetworkDetailsRequestOptions | null>(null);
-
-  const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
-    networkDetails: {},
-    id,
-    inspect: {
-      dsl: [],
-      response: [],
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+  } = useSearchStrategy<NetworkQueries.details>({
+    factoryQueryType: NetworkQueries.details,
+    initialResult: {
+      networkDetails: {},
     },
-    isInspected: false,
-    refetch: refetch.current,
+    errorMessage: i18n.ERROR_NETWORK_DETAILS,
+    abort: skip,
   });
-  const { addError, addWarning } = useAppToasts();
 
-  const networkDetailsSearch = useCallback(
-    (request: NetworkDetailsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        searchSubscription$.current = data.search
-          .search<NetworkDetailsRequestOptions, NetworkDetailsStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                setLoading(false);
-                setNetworkDetailsResponse((prevResponse) => ({
-                  ...prevResponse,
-                  networkDetails: response.networkDetails,
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  refetch: refetch.current,
-                }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_DETAILS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_NETWORK_DETAILS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-      refetch.current = asyncSearch;
-    },
-    [data.search, addError, addWarning, skip]
+  const networkDetailsResponse = useMemo(
+    () => ({
+      networkDetails: response.networkDetails,
+      id,
+      inspect,
+      isInspected: false,
+      refetch,
+    }),
+    [id, inspect, refetch, response.networkDetails]
+  );
+
+  const networkDetailsRequest = useMemo(
+    () => ({
+      defaultIndex: indexNames,
+      factoryQueryType: NetworkQueries.details,
+      filterQuery: createFilter(filterQuery),
+      ip,
+    }),
+    [filterQuery, indexNames, ip]
   );
 
   useEffect(() => {
-    setNetworkDetailsRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: NetworkQueries.details,
-        filterQuery: createFilter(filterQuery),
-        ip,
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [indexNames, filterQuery, ip, id]);
-
-  useEffect(() => {
-    networkDetailsSearch(networkDetailsRequest);
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [networkDetailsRequest, networkDetailsSearch]);
+    if (!skip && networkDetailsRequest) {
+      search(networkDetailsRequest);
+    }
+  }, [networkDetailsRequest, search, skip]);
 
   return [loading, networkDetailsResponse];
 };
