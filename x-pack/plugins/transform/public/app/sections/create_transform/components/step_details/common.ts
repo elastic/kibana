@@ -33,6 +33,7 @@ export interface StepDetailsExposedState {
   transformFrequency: string;
   transformSettingsMaxPageSearchSize: number;
   transformSettingsDocsPerSecond: number | null;
+  transformSettingsNumFailureRetries?: number;
   valid: boolean;
   dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
@@ -52,6 +53,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+    transformSettingsNumFailureRetries: undefined,
     destinationIndex: '',
     destinationIngestPipeline: '',
     touched: false,
@@ -106,6 +108,9 @@ export function applyTransformConfigToDetailsState(
         state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
       } else {
         state.transformSettingsDocsPerSecond = null;
+      }
+      if (typeof transformConfig.settings?.num_failure_retries === 'number') {
+        state.transformSettingsNumFailureRetries = transformConfig.settings.num_failure_retries;
       }
     }
 

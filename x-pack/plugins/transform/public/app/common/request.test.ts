@@ -311,6 +311,7 @@ describe('Transform: Common', () => {
       transformFrequency: '10m',
       transformSettingsMaxPageSearchSize: 100,
       transformSettingsDocsPerSecond: 400,
+      transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
       touched: true,
@@ -334,6 +335,7 @@ describe('Transform: Common', () => {
       settings: {
         max_page_search_size: 100,
         docs_per_second: 400,
+        num_failure_retries: 5,
       },
       source: {
         index: ['the-data-view-title'],
