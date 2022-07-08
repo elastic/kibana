@@ -53,17 +53,20 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
         http,
         features,
       });
-      const ruleAlertsAggByTimeRange = await fetchRuleAlertsAggByTimeRange({
+      const { active, recovered, error } = await fetchRuleAlertsAggByTimeRange({
         http,
         index,
         ruleId,
         signal: abortCtrlRef.current.signal,
       });
-      if (ruleAlertsAggByTimeRange.error) throw ruleAlertsAggByTimeRange.error;
+      if (error) throw error;
       if (!isCancelledRef.current) {
         setRuleAlertsAggs((oldState: LoadRuleAlertsAggs) => ({
           ...oldState,
-          ruleAlertsAggs: ruleAlertsAggByTimeRange,
+          ruleAlertsAggs: {
+            active: active || 0,
+            recovered: recovered || 0,
+          },
           isLoadingRuleAlertsAggs: false,
         }));
       }
