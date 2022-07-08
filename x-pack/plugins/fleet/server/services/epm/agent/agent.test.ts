@@ -224,8 +224,11 @@ text_var: {{escape_string text_var}}
 
     it('should respect new lines and literal escapes', () => {
       const vars = {
-        password: { type: 'text_var', value: `This is a text with
-        New lines and \n escaped values.` },
+        password: {
+          type: 'text_var',
+          value: `This is a text with
+        New lines and \n escaped values.`,
+        },
       };
 
       const output = compileTemplate(vars, streamTemplateWithNewlinesAndEscapes);
@@ -257,17 +260,20 @@ yaml_var: {{to_json yaml_var}}
       expect(output).toEqual({
         input: 'log',
         json_var: {
-          foo: ["bar", "bazz"],
+          foo: ['bar', 'bazz'],
         },
       });
     });
 
     it('should parse a yaml string into a json object', () => {
       const vars = {
-        password: { type: 'yaml_var', value: `foo:
+        password: {
+          type: 'yaml_var',
+          value: `foo:
   bar:
     - a
-    - b` },
+    - b`,
+        },
       };
 
       const output = compileTemplate(vars, streamTemplateWithNewYaml);
@@ -275,7 +281,7 @@ yaml_var: {{to_json yaml_var}}
         input: 'log',
         yaml_var: {
           foo: {
-            bar: ["a", "b"],
+            bar: ['a', 'b'],
           },
         },
       });
