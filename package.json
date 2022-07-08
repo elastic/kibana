@@ -69,7 +69,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.14.2",
+    "node": "16.16.0",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -381,7 +381,7 @@
     "mime": "^2.4.4",
     "mime-types": "^2.1.27",
     "minimatch": "^3.1.2",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.27",
     "monaco-editor": "^0.22.3",
@@ -580,6 +580,8 @@
     "@kbn/test-subj-selector": "link:bazel-bin/packages/kbn-test-subj-selector",
     "@kbn/tooling-log": "link:bazel-bin/packages/kbn-tooling-log",
     "@kbn/type-summarizer": "link:bazel-bin/packages/kbn-type-summarizer",
+    "@kbn/type-summarizer-cli": "link:bazel-bin/packages/kbn-type-summarizer-cli",
+    "@kbn/type-summarizer-core": "link:bazel-bin/packages/kbn-type-summarizer-core",
     "@loaders.gl/polyfills": "^2.3.5",
     "@mapbox/vector-tile": "1.3.1",
     "@microsoft/api-documenter": "7.13.68",
@@ -833,6 +835,9 @@
     "@types/kbn__test": "link:bazel-bin/packages/kbn-test/npm_module_types",
     "@types/kbn__test-jest-helpers": "link:bazel-bin/packages/kbn-test-jest-helpers/npm_module_types",
     "@types/kbn__tooling-log": "link:bazel-bin/packages/kbn-tooling-log/npm_module_types",
+    "@types/kbn__type-summarizer": "link:bazel-bin/packages/kbn-type-summarizer/npm_module_types",
+    "@types/kbn__type-summarizer-cli": "link:bazel-bin/packages/kbn-type-summarizer-cli/npm_module_types",
+    "@types/kbn__type-summarizer-core": "link:bazel-bin/packages/kbn-type-summarizer-core/npm_module_types",
     "@types/kbn__typed-react-router-config": "link:bazel-bin/packages/kbn-typed-react-router-config/npm_module_types",
     "@types/kbn__ui-shared-deps-npm": "link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types",
     "@types/kbn__ui-shared-deps-src": "link:bazel-bin/packages/kbn-ui-shared-deps-src/npm_module_types",
@@ -951,7 +956,7 @@
     "babel-plugin-require-context-hook": "^1.0.0",
     "babel-plugin-styled-components": "^2.0.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "backport": "^8.5.2",
+    "backport": "^8.8.0",
     "callsites": "^3.1.0",
     "chai": "3.5.0",
     "chance": "1.0.18",

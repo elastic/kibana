@@ -3608,6 +3608,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/type-summarizer-cli@link:bazel-bin/packages/kbn-type-summarizer-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/type-summarizer-core@link:bazel-bin/packages/kbn-type-summarizer-core":
+  version "0.0.0"
+  uid ""
+
 "@kbn/type-summarizer@link:bazel-bin/packages/kbn-type-summarizer":
   version "0.0.0"
   uid ""
@@ -7139,6 +7147,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__type-summarizer-cli@link:bazel-bin/packages/kbn-type-summarizer-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__type-summarizer-core@link:bazel-bin/packages/kbn-type-summarizer-core/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__type-summarizer@link:bazel-bin/packages/kbn-type-summarizer/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config/npm_module_types":
   version "0.0.0"
   uid ""
@@ -9795,10 +9815,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^8.5.2:
-  version "8.5.2"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-8.5.2.tgz#500f0f6b7a5bb78996c88553bfb7b6d85a3e627a"
-  integrity sha512-qtPWz51O02tnRN2qNMhWJvZNaNlh8K+LXNO8ktXiBIEAkrI96VVKzWNvOXcNYl8lOBq0ZYyPkAE6HH8W/l/tdA==
+backport@^8.8.0:
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-8.8.0.tgz#eb01e1b4f2c713aad8ceae700ae71748e8f5cf8e"
+  integrity sha512-m+qr3ydtZADJLUDe3Gd8iFjhMS74IcuVH1QzGlZ7N2KPEC1j/zN+XEDCzofbOlA6T+dKPEagXEOFtBqLAgqkcA==
   dependencies:
     "@octokit/rest" "^18.12.0"
     axios "^0.27.2"
@@ -21097,10 +21117,10 @@ moment-timezone@^0.5.27:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.2:
-  version "2.29.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
-  integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
+"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
 monaco-editor@*, monaco-editor@^0.22.3:
   version "0.22.3"

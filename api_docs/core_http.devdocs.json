@@ -1195,6 +1195,16 @@
         "description": [
           "\nKibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality\nallows Kibana to serve user requests even before Kibana becomes fully operational. Only Core and `preboot` plugins\ncan define HTTP routes at this stage.\n"
         ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpServicePreboot",
+            "text": "HttpServicePreboot"
+          },
+          "<DefaultRequestHandlerType>"
+        ],
         "path": "src/core/server/http/types.ts",
         "deprecated": false,
         "children": [
@@ -1208,7 +1218,7 @@
               "\nProvides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler\nfunctions for any number of nested routes.\n"
             ],
             "signature": [
-              "(path: string, callback: (router: ",
+              "<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(path: string, callback: (router: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1216,15 +1226,7 @@
                 "section": "def-server.IRouter",
                 "text": "IRouter"
               },
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
-              ">) => void) => void"
+              "<ContextType>) => void) => void"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false,
@@ -1259,15 +1261,7 @@
                     "section": "def-server.IRouter",
                     "text": "IRouter"
                   },
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  },
-                  ">) => void"
+                  "<ContextType>) => void"
                 ],
                 "path": "src/core/server/http/types.ts",
                 "deprecated": false,
@@ -1342,6 +1336,16 @@
         "label": "HttpServiceSetup",
         "description": [
           "\nKibana HTTP Service provides own abstraction for work with HTTP stack.\nPlugins don't have direct access to `hapi` server and its primitives anymore. Moreover,\nplugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.\nThis gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins.\nIf the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.HttpServiceSetup",
+            "text": "HttpServiceSetup"
+          },
+          "<DefaultRequestHandlerType>"
         ],
         "path": "src/core/server/http/types.ts",
         "deprecated": false,
@@ -1705,23 +1709,7 @@
               "\nProvides ability to declare a handler function for a particular path and HTTP request method.\n"
             ],
             "signature": [
-              "<Context extends ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
-              " = ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
-              ">() => ",
+              "<Context extends DefaultRequestHandlerType = DefaultRequestHandlerType>() => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1746,15 +1734,7 @@
               "\nRegister a context provider for a route handler."
             ],
             "signature": [
-              "<Context extends ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
-              ", ContextName extends Exclude<keyof Context, \"resolve\">>(contextName: ContextName, provider: ",
+              "<Context extends DefaultRequestHandlerType, ContextName extends Exclude<keyof Context, \"resolve\">>(contextName: ContextName, provider: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -4958,16 +4938,16 @@
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
+                "section": "def-server.RequestHandlerContextBase",
+                "text": "RequestHandlerContextBase"
               },
               " = ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
+                "section": "def-server.RequestHandlerContextBase",
+                "text": "RequestHandlerContextBase"
               },
               ", Method extends ",
               {
@@ -8607,11 +8587,11 @@
             "section": "def-server.OnPreAuthToolkit",
             "text": "OnPreAuthToolkit"
           },
-          ") => ",
+          ") => Next | ",
           "KibanaResponse",
-          "<any> | Next | Promise<",
+          "<any> | Promise<Next | ",
           "KibanaResponse",
-          "<any> | Next>"
+          "<any>>"
         ],
         "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
         "deprecated": false,
@@ -9063,11 +9043,11 @@
             "section": "def-server.OnPreRoutingToolkit",
             "text": "OnPreRoutingToolkit"
           },
-          ") => OnPreRoutingResult | ",
+          ") => ",
           "KibanaResponse",
-          "<any> | Promise<OnPreRoutingResult | ",
+          "<any> | OnPreRoutingResult | Promise<",
           "KibanaResponse",
-          "<any>>"
+          "<any> | OnPreRoutingResult>"
         ],
         "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
         "deprecated": false,
@@ -9850,16 +9830,16 @@
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
+            "section": "def-server.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
           },
           " = ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
+            "section": "def-server.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
           },
           ", Method extends ",
           {

@@ -3,7 +3,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2022-07-06
+date: 2022-07-08
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -81,14 +81,6 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibFeaturesPluginApi" section="def-server.FeatureKibanaPrivileges.disabled" text="disabled"/> | security, fleet | 8.8.0 |
 | <DocLink id="kibFeaturesPluginApi" section="def-server.PluginSetupContract.getElasticsearchFeatures" text="getElasticsearchFeatures"/> | security | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.refresh" text="refresh"/> | mapsEms | 8.8.0 |
-| <DocLink id="kibFeaturesPluginApi" section="def-common.FeatureElasticsearchPrivileges.requiredRoles" text="requiredRoles"/> | security | 8.8.0
-
-This is relied on by the reporting feature, and should be removed once reporting
-migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914 |
-| <DocLink id="kibFeaturesPluginApi" section="def-server.FeatureElasticsearchPrivileges.requiredRoles" text="requiredRoles"/> | security | 8.8.0
-
-This is relied on by the reporting feature, and should be removed once reporting
-migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914 |
 | <DocLink id="kibCorePluginApi" section="def-public.IHttpFetchError.req" text="req"/> | ml, @kbn/core-http-browser-internal | 8.8.0
 
 Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
@@ -97,6 +89,14 @@ so TS and code-reference navigation might not highlight them. |
 
 Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
 so TS and code-reference navigation might not highlight them. |
+| <DocLink id="kibFeaturesPluginApi" section="def-common.FeatureElasticsearchPrivileges.requiredRoles" text="requiredRoles"/> | security | 8.8.0
+
+This is relied on by the reporting feature, and should be removed once reporting
+migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914 |
+| <DocLink id="kibFeaturesPluginApi" section="def-server.FeatureElasticsearchPrivileges.requiredRoles" text="requiredRoles"/> | security | 8.8.0
+
+This is relied on by the reporting feature, and should be removed once reporting
+migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914 |
      
 
 ## Unreferenced deprecated APIs

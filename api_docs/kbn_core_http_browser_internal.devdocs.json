@@ -25,6 +25,17 @@
         "tags": [],
         "label": "BasePath",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
+            "section": "def-common.BasePath",
+            "text": "BasePath"
+          },
+          " implements ",
+          "IBasePath"
+        ],
         "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
         "deprecated": false,
         "children": [
