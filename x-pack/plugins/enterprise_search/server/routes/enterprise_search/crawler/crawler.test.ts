@@ -28,12 +28,12 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2',
       });
     });
 
     it('validates correctly with name', () => {
-      const request = { params: { name: 'some-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
@@ -43,14 +43,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/indices/{indexName}/crawler/crawl_requests', () => {
+  describe('GET /internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{crawlRequestId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests',
+        path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{crawlRequestId}',
       });
 
       registerCrawlerRoutes({
@@ -61,55 +61,22 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_requests',
-      });
-    });
-
-    it('validates correctly with name', () => {
-      const request = { params: { name: 'some-engine' } };
-      mockRouter.shouldValidate(request);
-    });
-
-    it('fails validation without name', () => {
-      const request = { params: {} };
-      mockRouter.shouldThrow(request);
-    });
-  });
-
-  describe('GET /internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{id}', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{id}',
-      });
-
-      registerCrawlerRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_requests/:id',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_requests/:crawlRequestId',
       });
     });
 
     it('validates correctly with name and id', () => {
-      const request = { params: { name: 'some-engine', id: '12345' } };
+      const request = { params: { indexName: 'index-name', crawlRequestId: '12345' } };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without name', () => {
-      const request = { params: { id: '12345' } };
+      const request = { params: { crawlRequestId: '12345' } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without id', () => {
-      const request = { params: { name: 'some-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldThrow(request);
     });
   });
@@ -132,18 +99,18 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_requests',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_requests',
       });
     });
 
     it('validates correctly with name', () => {
-      const request = { params: { name: 'some-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with domain urls', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { overrides: { domain_allowlist: ['https://www.elastic.co'] } },
       };
       mockRouter.shouldValidate(request);
@@ -151,7 +118,7 @@ describe('crawler routes', () => {
 
     it('validates correctly with max crawl depth', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { overrides: { max_crawl_depth: 10 } },
       };
       mockRouter.shouldValidate(request);
@@ -159,7 +126,7 @@ describe('crawler routes', () => {
 
     it('validates correctly with seed urls', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { overrides: { seed_urls: ['https://www.elastic.co/guide'] } },
       };
       mockRouter.shouldValidate(request);
@@ -167,7 +134,7 @@ describe('crawler routes', () => {
 
     it('validates correctly with sitemap urls', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { overrides: { sitemap_urls: ['https://www.elastic.co/sitemap1.xml'] } },
       };
       mockRouter.shouldValidate(request);
@@ -175,14 +142,14 @@ describe('crawler routes', () => {
 
     it('validates correctly when we set sitemap discovery', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { overrides: { sitemap_discovery_disabled: true } },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with empty overrides', () => {
-      const request = { params: { name: 'some-engine' }, body: { overrides: {} } };
+      const request = { params: { indexName: 'index-name' }, body: { overrides: {} } };
       mockRouter.shouldValidate(request);
     });
 
@@ -210,13 +177,13 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/domains',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains',
       });
     });
 
     it('validates correctly', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         query: {
           'page[current]': 5,
           'page[size]': 10,
@@ -249,12 +216,12 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_requests/active/cancel',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_requests/active/cancel',
       });
     });
 
     it('validates correctly with name', () => {
-      const request = { params: { name: 'some-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
@@ -282,23 +249,14 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/domains',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains',
       });
     });
 
     it('validates correctly with params and body', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
-      };
-      mockRouter.shouldValidate(request);
-    });
-
-    it('accepts a query param', () => {
-      const request = {
-        params: { name: 'some-engine' },
-        body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
-        query: { respond_with: 'crawler_details' },
       };
       mockRouter.shouldValidate(request);
     });
@@ -313,21 +271,21 @@ describe('crawler routes', () => {
 
     it('fails validation without a body', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: {},
       };
       mockRouter.shouldThrow(request);
     });
   });
 
-  describe('DELETE /internal/enterprise_search/indices/{indexName}/crawler/domains/{id}', () => {
+  describe('DELETE /internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{id}',
+        path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
       });
 
       registerCrawlerRoutes({
@@ -338,42 +296,34 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/domains/:id',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains/:domainId',
       });
     });
 
     it('validates correctly with name and id', () => {
-      const request = { params: { name: 'some-engine', id: '1234' } };
+      const request = { params: { indexName: 'index-name', domainId: '1234' } };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without name', () => {
-      const request = { params: { id: '1234' } };
+      const request = { params: { domainId: '1234' } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without id', () => {
-      const request = { params: { name: 'test-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldThrow(request);
-    });
-
-    it('accepts a query param', () => {
-      const request = {
-        params: { name: 'test-engine', id: '1234' },
-        query: { respond_with: 'crawler_details' },
-      };
-      mockRouter.shouldValidate(request);
     });
   });
 
-  describe('PUT /internal/enterprise_search/indices/{indexName}/crawler/domains/{id}', () => {
+  describe('PUT /internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{id}',
+        path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
       });
 
       registerCrawlerRoutes({
@@ -384,13 +334,13 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/domains/:id',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains/:domainId',
       });
     });
 
     it('validates correctly with crawl rules', () => {
       const request = {
-        params: { name: 'some-engine', id: '1234' },
+        params: { indexName: 'index-name', domainId: '1234' },
         body: {
           crawl_rules: [
             {
@@ -405,7 +355,7 @@ describe('crawler routes', () => {
 
     it('validates correctly with deduplication enabled', () => {
       const request = {
-        params: { name: 'some-engine', id: '1234' },
+        params: { indexName: 'index-name', domainId: '1234' },
         body: {
           deduplication_enabled: true,
         },
@@ -415,7 +365,7 @@ describe('crawler routes', () => {
 
     it('validates correctly with deduplication fields', () => {
       const request = {
-        params: { name: 'some-engine', id: '1234' },
+        params: { indexName: 'index-name', domainId: '1234' },
         body: {
           deduplication_fields: ['title', 'description'],
         },
@@ -424,14 +374,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/indices/{indexName}/crawler/domains/{id}', () => {
+  describe('GET /internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{id}',
+        path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
       });
 
       registerCrawlerRoutes({
@@ -442,34 +392,34 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/domains/:id',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains/:domainId',
       });
     });
 
     it('validates correctly with name and id', () => {
-      const request = { params: { name: 'some-engine', id: '1234' } };
+      const request = { params: { indexName: 'index-name', domainId: '1234' } };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without name', () => {
-      const request = { params: { id: '1234' } };
+      const request = { params: { domainId: '1234' } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without id', () => {
-      const request = { params: { name: 'test-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldThrow(request);
     });
   });
 
-  describe('POST /internal/app_search/crawler/validate_url', () => {
+  describe('POST /internal/enterprise_search/crawler/validate_url', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/internal/app_search/crawler/validate_url',
+        path: '/internal/enterprise_search/crawler/validate_url',
       });
 
       registerCrawlerRoutes({
@@ -480,7 +430,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v1/crawler/validate_url',
+        path: '/api/ent/v1/internal/crawler/validate_url',
       });
     });
 
@@ -517,13 +467,13 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/process_crawls',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/process_crawls',
       });
     });
 
     it('validates correctly', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { domains: ['https://elastic.co', 'https://swiftype.com'] },
       };
       mockRouter.shouldValidate(request);
@@ -531,7 +481,7 @@ describe('crawler routes', () => {
 
     it('validates correctly without body', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: {},
       };
       mockRouter.shouldValidate(request);
@@ -564,13 +514,13 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_schedule',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
       });
     });
 
     it('validates correctly', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
@@ -601,13 +551,13 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_schedule',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
       });
     });
 
     it('validates correctly', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { unit: 'day', frequency: 7 },
       };
       mockRouter.shouldValidate(request);
@@ -623,7 +573,7 @@ describe('crawler routes', () => {
 
     it('fails validation without a unit property in body', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { frequency: 7 },
       };
       mockRouter.shouldThrow(request);
@@ -631,7 +581,7 @@ describe('crawler routes', () => {
 
     it('fails validation without a frequency property in body', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
         body: { unit: 'day' },
       };
       mockRouter.shouldThrow(request);
@@ -656,13 +606,13 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/crawl_schedule',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
       });
     });
 
     it('validates correctly', () => {
       const request = {
-        params: { name: 'some-engine' },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
@@ -693,12 +643,12 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices/:indexName/crawler/domain_configs',
+        path: '/api/ent/v1/internal/indices/:indexName/crawler2/domain_configs',
       });
     });
 
     it('validates correctly with name', () => {
-      const request = { params: { name: 'some-engine' } };
+      const request = { params: { indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 

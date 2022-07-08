@@ -147,7 +147,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { http } = HttpLogic.values;
 
       try {
-        await http.post(`/internal/ent_search/indices/${indexName}/crawler/crawl_requests`, {
+        await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
           body: JSON.stringify({ overrides }),
         });
         actions.fetchCrawlerData();
@@ -160,7 +160,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { http } = HttpLogic.values;
 
       try {
-        await http.post(`/internal/ent_search/indices/${indexName}/crawler/crawl_requests/cancel`);
+        await http.post(
+          `/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests/cancel`
+        );
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);

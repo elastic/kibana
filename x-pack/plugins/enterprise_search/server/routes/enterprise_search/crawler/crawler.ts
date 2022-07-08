@@ -62,7 +62,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
 
   router.post(
     {
-      path: '/internal/ent_search/indices/{indexName}/crawler/crawl_requests',
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests',
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -87,7 +87,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
 
   router.post(
     {
-      path: '/internal/ent_search/indices/{indexName}/crawler/crawl_requests/cancel',
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/cancel',
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -120,6 +120,10 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       validate: {
         params: schema.object({
           indexName: schema.string(),
+        }),
+        query: schema.object({
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
         }),
       },
     },
@@ -272,7 +276,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
 
   router.delete(
     {
-      path: '/internal/enterprise_search/engines/{indexName}/crawler/crawl_schedule',
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
       validate: {
         params: schema.object({
           indexName: schema.string(),
