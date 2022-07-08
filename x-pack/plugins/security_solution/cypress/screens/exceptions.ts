@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const EDIT_EXCEPTIONS_BTN = '[data-test-subj="exceptionsViewerEditBtn"]';
-
 export const ADD_EXCEPTIONS_BTN = '[data-test-subj="exceptionsHeaderAddExceptionBtn"]';
 
 export const CLOSE_ALERTS_CHECKBOX =

@@ -14,7 +14,7 @@ import { addExceptionFromFirstAlert, goToClosedAlerts, goToOpenedAlerts } from '
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload, esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addsException,
@@ -26,15 +26,15 @@ import {
 } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { deleteAlertsAndRules } from '../../tasks/common';
 
 describe('Adds rule exception', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
 
   before(() => {
-    cleanKibana();
-    login();
+    esArchiverResetKibana();
     esArchiverLoad('exceptions');
+    login();
   });
 
   beforeEach(() => {

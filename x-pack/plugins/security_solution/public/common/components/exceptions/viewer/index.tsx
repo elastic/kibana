@@ -260,7 +260,6 @@ const ExceptionsViewerComponent = ({
         lists: exceptionListsMeta,
         exception,
       });
-
       setCurrentModal('editException');
     },
     [setCurrentModal, exceptionListsMeta]
@@ -328,8 +327,7 @@ const ExceptionsViewerComponent = ({
     `security/detections/rules/id/${encodeURI(ruleId)}/edit`
   );
 
-  const showEmpty: boolean =
-    !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
+  const showEmpty: boolean = !isInitLoading && !loadingList && exceptions.length === 0;
 
   const showNoResults: boolean =
     exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
@@ -396,7 +394,6 @@ const ExceptionsViewerComponent = ({
           isInitLoading={isInitLoading}
           exceptions={exceptions}
           loadingItemIds={loadingItemIds}
-          commentsAccordionId={commentsAccordionId}
           onDeleteException={handleDeleteException}
           onEditExceptionItem={handleEditException}
         />
