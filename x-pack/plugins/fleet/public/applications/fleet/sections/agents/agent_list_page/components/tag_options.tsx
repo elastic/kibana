@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useUpdateTags } from '../hooks';
+import { sanitizeTag } from '../utils';
 
 interface Props {
   tagName: string;
@@ -53,7 +54,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
   const updateTagsHook = useUpdateTags();
   const bulkUpdateTags = updateTagsHook.bulkUpdateTags;
 
-  const TAGS_QUERY = 'tags:{name}';
+  const TAGS_QUERY = 'tags:"{name}"';
 
   const handleRename = (newName?: string) => {
     if (newName === tagName || !newName) {
@@ -127,7 +128,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                 }}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const newName = e.currentTarget.value;
-                  setUpdatedName(newName);
+                  setUpdatedName(sanitizeTag(newName));
                 }}
               />
             </EuiFlexItem>

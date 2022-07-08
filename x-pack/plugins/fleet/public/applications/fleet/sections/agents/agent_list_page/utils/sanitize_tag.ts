@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './truncate_tag';
-export * from './get_common_tags';
-export * from './sanitize_tag';
+export function sanitizeTag(tag: string): string {
+  return tag.replace(/[^a-zA-Z0-9 \-_]/g, '').slice(0, 20);
+}
