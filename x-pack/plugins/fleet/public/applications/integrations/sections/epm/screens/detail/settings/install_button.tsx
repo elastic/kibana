@@ -48,7 +48,7 @@ export function InstallButton(props: InstallationButtonProps) {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
   const toggleUnverifiedModal = useCallback(() => {
-    setIsInstallModalVisible(!isUnverifiedModalVisible);
+    setIsUnverifiedModalVisible(!isUnverifiedModalVisible);
   }, [isUnverifiedModalVisible]);
 
   const handleClickInstall = useCallback(() => {
