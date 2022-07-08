@@ -7,7 +7,17 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
+import type { Installation } from '../../../common';
+
 import type { AgentPolicy } from '../../types';
+
+export const migrateInstallationToV840: SavedObjectMigrationFn<Installation, Installation> = (
+  installationDoc
+) => {
+  installationDoc.attributes.verification_status = 'unknown';
+
+  return installationDoc;
+};
 
 export const migrateAgentPolicyToV840: SavedObjectMigrationFn<
   Exclude<AgentPolicy, 'download_source_id'> & {
@@ -21,3 +31,4 @@ export const migrateAgentPolicyToV840: SavedObjectMigrationFn<
 
   return agentPolicyDoc;
 };
+

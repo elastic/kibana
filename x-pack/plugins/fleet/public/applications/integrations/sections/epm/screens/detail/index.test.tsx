@@ -34,7 +34,8 @@ import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
-ExperimentalFeaturesService.init({ createPackagePolicyMultiPageLayout: false });
+// @ts-ignore this saves us having to define all experimental features
+ExperimentalFeaturesService.init({});
 import { Detail } from '.';
 
 describe('when on integration detail', () => {
