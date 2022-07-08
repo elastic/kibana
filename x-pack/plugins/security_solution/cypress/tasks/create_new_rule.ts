@@ -292,7 +292,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
-  // cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
+  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
