@@ -81,7 +81,10 @@ export class Watcher {
           }
         }
 
-        this.watchpack.watch(Array.from(watchPaths), [], startTime);
+        this.watchpack.watch({
+          files: Array.from(watchPaths),
+          startTime,
+        });
         return Rx.EMPTY;
       })
     );
