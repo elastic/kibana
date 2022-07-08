@@ -8,10 +8,10 @@
 import { DEFAULT_QUERY } from '../../../common/constants';
 import { KubernetesCollection, QueryDslQueryContainerBool, TreeNavSelection } from '../../types';
 
-const KUBERNETES_COLLECTION_FIELDS = {
+export const KUBERNETES_COLLECTION_FIELDS = {
   [KubernetesCollection.cluster]: 'orchestrator.cluster.name',
   [KubernetesCollection.namespace]: 'orchestrator.namespace',
-  [KubernetesCollection.node]: 'orchestrator.namespace', // TODO: Update node field name
+  [KubernetesCollection.node]: 'cloud.instance.name',
   [KubernetesCollection.pod]: 'orchestrator.resource.name',
   [KubernetesCollection.containerImage]: 'container.image.name',
 };
