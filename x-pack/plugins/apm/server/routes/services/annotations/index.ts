@@ -6,13 +6,9 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  ScopedAnnotationsClient,
-  WrappedElasticsearchClientError,
-} from '@kbn/observability-plugin/server';
-import { errors } from '@elastic/elasticsearch';
-import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Setup } from '../../../lib/helpers/setup_request';
+import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
@@ -49,13 +45,7 @@ export async function getServiceAnnotations({
     start,
     end,
   }).catch((error) => {
-    if (
-      error instanceof WrappedElasticsearchClientError &&
-      error.originalError instanceof errors.RequestAbortedError
-    ) {
-      return [];
-    }
-    // When another error was thrown, save it and wait for Stored annotations before re-throwing it
+    // Save Error and wait for Stored annotations before re-throwing it
     derivedAnnotationError = error;
     return [];
   });
