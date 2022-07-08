@@ -14,6 +14,7 @@ import type {
   SeriesType,
   OperationType,
   YConfig,
+  MetricState,
 } from '@kbn/lens-plugin/public';
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -22,6 +23,7 @@ import {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -52,12 +54,21 @@ export interface MetricOption {
   field?: string;
   label: string;
   description?: string;
-  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnType?:
+    | 'range'
+    | 'operation'
+    | 'FILTER_RECORDS'
+    | 'TERMS_COLUMN'
+    | 'unique_count'
+    | typeof FORMULA_COLUMN;
   columnFilters?: ColumnFilter[];
   columnFilter?: ColumnFilter;
   paramFilters?: ParamFilter[];
   timeScale?: string;
   showPercentileAnnotations?: boolean;
+  formula?: string;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette'>;
+  palette?: PaletteOutput;
 }
 
 export interface SeriesConfig {

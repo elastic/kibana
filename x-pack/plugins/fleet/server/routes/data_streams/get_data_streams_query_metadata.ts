@@ -24,10 +24,7 @@ export async function getDataStreamsQueryMetadata({
     esClient.search({
       size: 1,
       index: dataStreamName,
-      sort: {
-        // @ts-expect-error Type '{ 'event.ingested': string; }' is not assignable to type 'string | string[] | undefined'.
-        'event.ingested': 'desc',
-      },
+      sort: 'event.ingested:desc',
       _source: false,
       fields: ['event.ingested'],
     }),
@@ -55,9 +52,10 @@ export async function getDataStreamsQueryMetadata({
     }),
   ]);
 
-  const maxIngested = new Date(
-    maxEventIngestedResponse.hits.hits[0]?.fields!['event.ingested']
-  ).getTime();
+  const maxIngested =
+    maxEventIngestedResponse.hits.hits[0]?.fields !== undefined
+      ? new Date(maxEventIngestedResponse.hits.hits[0].fields['event.ingested']).getTime()
+      : undefined;
 
   const namespace = namespaceResponse.terms[0] ?? '';
   const dataset = datasetResponse.terms[0] ?? '';
