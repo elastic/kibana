@@ -59,7 +59,7 @@ export interface AutomaticCrawlSchedulerLogicActions {
 export const AutomaticCrawlSchedulerLogic = kea<
   MakeLogicType<AutomaticCrawlSchedulerLogicValues, AutomaticCrawlSchedulerLogicActions>
 >({
-  path: ['enterprise_search', 'crawler', 'automatic_crawl_scheduler'],
+  path: ['enterprise_search', 'crawler', 'automatic_crawl_scheduler_logic'],
   actions: () => ({
     clearCrawlSchedule: true,
     deleteCrawlSchedule: true,

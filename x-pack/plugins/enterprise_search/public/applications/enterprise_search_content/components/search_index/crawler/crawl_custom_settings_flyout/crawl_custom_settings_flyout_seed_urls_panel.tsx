@@ -27,9 +27,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
+
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { SimplifiedSelectable } from './simplified_selectable';
-import { UrlComboBox } from './url_combo_box';
 
 export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
   const {

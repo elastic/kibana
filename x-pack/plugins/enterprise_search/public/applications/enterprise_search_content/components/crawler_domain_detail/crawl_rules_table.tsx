@@ -101,7 +101,7 @@ const DEFAULT_DESCRIPTION = (
       defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match. {link}"
       values={{
         link: (
-          <EuiLink href={/* TODO GET DOC LINK */} target="_blank" external>
+          <EuiLink href={'' /* TODO GET DOC LINK */} target="_blank" external>
             {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.descriptionLinkText', {
               defaultMessage: 'Learn more about crawl rules',
             })}

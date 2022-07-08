@@ -75,7 +75,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
             defaultMessage:
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
           })}{' '}
-          <EuiLink href={/* TODO get docs url */} target="_blank" external>
+          <EuiLink href={'' /* TODO get docs url */} target="_blank" external>
             {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.learnMoreLinkText', {
               defaultMessage: 'Learn more about entry points.',
             })}

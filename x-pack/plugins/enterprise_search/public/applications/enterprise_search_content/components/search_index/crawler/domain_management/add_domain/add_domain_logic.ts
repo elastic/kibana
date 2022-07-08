@@ -15,19 +15,21 @@ import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messag
 import { HttpLogic } from '../../../../../../shared/http';
 import { KibanaLogic } from '../../../../../../shared/kibana';
 import { CrawlerDomain, CrawlerDomainFromServer } from '../../../../../api/crawler/types';
-import { crawlerDomainServerToClient } from '../../../../../api/crawler/utils';
-import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
-import { CrawlerLogic } from '../../crawler_logic';
-import { DomainManagementLogic } from '../domain_management_logic';
-
 import {
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
   CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStepName,
-} from './types';
+} from '../../../../../api/crawler/types';
 import {
   crawlDomainValidationToResult,
+  crawlerDomainServerToClient,
+} from '../../../../../api/crawler/utils';
+import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
+import { CrawlerLogic } from '../../crawler_logic';
+import { DomainManagementLogic } from '../domain_management_logic';
+
+import {
   domainValidationFailureResultChange,
   extractDomainAndEntryPointFromUrl,
   getDomainWithProtocol,
@@ -94,7 +96,7 @@ const DEFAULT_SELECTOR_VALUES = {
 };
 
 export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainLogicActions>>({
-  path: ['enterprise_search', 'crawler', 'add_domain'],
+  path: ['enterprise_search', 'crawler', 'add_domain_logic'],
   actions: () => ({
     clearDomainFormInputValue: true,
     closeFlyout: true,

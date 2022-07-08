@@ -66,7 +66,7 @@ const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): s
 export const CrawlCustomSettingsFlyoutLogic = kea<
   MakeLogicType<CrawlCustomSettingsFlyoutLogicValues, CrawlCustomSettingsFlyoutLogicActions>
 >({
-  path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout'],
+  path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_logic'],
   connect: {
     actions: [GetCrawlerApiLogic, ['apiSuccess', 'apiError', 'makeRequest']],
     values: [GetCrawlerApiLogic, ['status']],

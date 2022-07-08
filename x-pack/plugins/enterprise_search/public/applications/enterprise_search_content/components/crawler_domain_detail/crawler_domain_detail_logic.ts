@@ -53,7 +53,7 @@ interface CrawlerDomainDetailActions {
 export const CrawlerDomainDetailLogic = kea<
   MakeLogicType<CrawlerDomainDetailValues, CrawlerDomainDetailActions>
 >({
-  path: ['enterprise_search', 'crawler', 'crawler_domain_detail'],
+  path: ['enterprise_search', 'crawler', 'crawler_domain_detail_logic'],
   actions: {
     deleteDomain: () => true,
     fetchDomainData: (domainId) => ({ domainId }),

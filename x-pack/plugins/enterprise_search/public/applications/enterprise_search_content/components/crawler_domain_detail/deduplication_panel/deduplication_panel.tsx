@@ -84,7 +84,7 @@ export const DeduplicationPanel: React.FC = () => {
           documents on this domain. {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink href={/* TODO add docs url */} target="_blank" external>
+              <EuiLink href={'' /* TODO add docs url */} target="_blank" external>
                 {i18n.translate(
                   'xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage',
                   {

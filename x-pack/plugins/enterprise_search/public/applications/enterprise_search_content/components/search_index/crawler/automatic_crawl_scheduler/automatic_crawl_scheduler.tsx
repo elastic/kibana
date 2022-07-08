@@ -69,7 +69,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
             defaultMessage="Setup automated crawling. {readMoreMessage}."
             values={{
               readMoreMessage: (
-                <EuiLink href={/* TODO Add docs url */} target="_blank">
+                <EuiLink href={'' /* TODO Add docs url */} target="_blank">
                   {i18n.translate(
                     'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.readMoreLink',
                     {
