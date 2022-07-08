@@ -22,7 +22,11 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { IngestManagerError, PackageNotFoundError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -268,8 +272,10 @@ export async function getPackageFromSource(options: {
       try {
         res = await Registry.getRegistryPackage(pkgName, pkgVersion);
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
-        // TODO: add to cache and storage here?
       } catch (error) {
+        if (error instanceof PackageFailedVerificationError) {
+          throw error;
+        }
         // treating this is a 404 as no status code returned
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
