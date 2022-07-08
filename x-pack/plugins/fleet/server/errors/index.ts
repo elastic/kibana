@@ -16,7 +16,13 @@ export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handl
 
 export { isESClientError } from './utils';
 export class IngestManagerError extends Error {
-  attributes?: { type?: FleetErrorType };
+  constructor(message?: string, public readonly meta?: unknown) {
+    super(message);
+    this.name = this.constructor.name; // for stack traces
+  }
+}
+export class IngestManagerPackageError extends IngestManagerError {
+  attributes?: { type: FleetErrorType; package: { name: string; version: string } };
   constructor(message?: string, public readonly meta?: unknown) {
     super(message);
     this.name = this.constructor.name; // for stack traces
@@ -33,11 +39,15 @@ export class RegistryResponseError extends RegistryError {
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
-export class PackageFailedVerificationError extends IngestManagerError {
-  constructor(pkgKey: string) {
-    super(`${pkgKey} failed signature verification.`);
+export class PackageFailedVerificationError extends IngestManagerPackageError {
+  constructor(pkgName: string, pkgVersion: string) {
+    super(`${pkgName}-${pkgVersion} failed signature verification.`);
     this.attributes = {
       type: 'verification_failed',
+      package: {
+        name: pkgName,
+        version: pkgVersion,
+      },
     };
   }
 }

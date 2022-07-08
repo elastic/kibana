@@ -7,10 +7,14 @@
 
 export type FleetErrorType = 'verification_failed';
 
-export interface FleetErrorResponse {
+export interface FleetPackageErrorResponse {
   message: string;
   statusCode: number;
   attributes?: {
     type?: FleetErrorType;
+    package?: {
+      name: string;
+      version: string;
+    };
   };
 }
