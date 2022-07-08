@@ -58,7 +58,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCreateCasePath(basePath)}>
-          {permissions.create ? (
+          {permissions.all ? (
             <CreateCase
               onSuccess={onCreateCaseSuccess}
               onCancel={navigateToAllCases}
@@ -70,8 +70,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {/* TODO: should we add push here?*/}
-          {permissions.update ? (
+          {permissions.all ? (
             <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />

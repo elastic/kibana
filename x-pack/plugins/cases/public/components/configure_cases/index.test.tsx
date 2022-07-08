@@ -188,7 +188,7 @@ describe('ConfigureCases', () => {
       expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(false);
     });
 
-    test('it disables correctly when the user cannot update', () => {
+    test('it disables correctly when the user does not have all privileges', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
         wrappingComponentProps: { permissions: noUpdateCasesPermissions() },

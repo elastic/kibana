@@ -230,7 +230,7 @@ export const UserActions = React.memo(
 
     const { permissions } = useCasesContext();
 
-    const bottomActions = permissions.create
+    const bottomActions = permissions.all
       ? [
           {
             username: (

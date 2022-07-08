@@ -113,7 +113,7 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should hide the component when the user does not have create permissions', () => {
+  it('should hide the component when the user does not have all permissions', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({
       ...defaultResponse,
       isLoading: true,

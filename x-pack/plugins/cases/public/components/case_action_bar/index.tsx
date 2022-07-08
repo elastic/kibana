@@ -107,7 +107,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                   <EuiDescriptionListDescription>
                     <StatusContextMenu
                       currentStatus={caseData.status}
-                      disabled={!permissions.update || isLoading}
+                      disabled={!permissions.all || isLoading}
                       onStatusChanged={onStatusChanged}
                     />
                   </EuiDescriptionListDescription>
@@ -134,7 +134,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 responsive={false}
                 justifyContent="spaceBetween"
               >
-                {permissions.update && isSyncAlertsEnabled && (
+                {permissions.all && isSyncAlertsEnabled && (
                   <EuiFlexItem grow={false}>
                     <EuiDescriptionListTitle>
                       <EuiFlexGroup
@@ -172,7 +172,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                     </EuiButtonEmpty>
                   </span>
                 </EuiFlexItem>
-                {/* currently just delete should we limit it to that? */}
                 {permissions.all && (
                   <EuiFlexItem grow={false} data-test-subj="case-view-actions">
                     <Actions

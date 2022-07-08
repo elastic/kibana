@@ -60,10 +60,10 @@ const UserActionPropertyActionsComponent = ({
   }, []);
 
   const propertyActions = useMemo(() => {
-    const showEditPencilIcon = permissions.update;
+    const showEditPencilIcon = permissions.all;
     const showTrashIcon = permissions.delete && deleteLabel && onDelete;
-    const showQuoteIcon = permissions.create;
-    const showLensEditor = permissions.update && canUseEditor && actionConfig;
+    const showQuoteIcon = permissions.all;
+    const showLensEditor = permissions.all && canUseEditor && actionConfig;
 
     return [
       ...(showEditPencilIcon
@@ -96,9 +96,8 @@ const UserActionPropertyActionsComponent = ({
       ...(showLensEditor ? [actionConfig] : []),
     ];
   }, [
-    permissions.update,
+    permissions.all,
     permissions.delete,
-    permissions.create,
     deleteLabel,
     onDelete,
     canUseEditor,

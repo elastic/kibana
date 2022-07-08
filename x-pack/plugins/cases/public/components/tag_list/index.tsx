@@ -104,7 +104,7 @@ export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) 
           <h4>{i18n.TAGS}</h4>
         </EuiFlexItem>
         {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-        {!isLoading && permissions.update && (
+        {!isLoading && permissions.all && (
           <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
             <EuiButtonIcon
               data-test-subj="tag-list-edit-button"

@@ -280,7 +280,7 @@ describe('usePushToService', () => {
   });
 
   describe('user does not have write permissions', () => {
-    it('disables the push button when the user does not have push permissions', async () => {
+    it('disables the push button when the user does not have all permissions', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () => usePushToService(defaultArgs),

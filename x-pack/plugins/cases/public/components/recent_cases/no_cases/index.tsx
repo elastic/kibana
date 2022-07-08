@@ -24,7 +24,7 @@ const NoCasesComponent = () => {
     [navigateToCreateCase]
   );
 
-  return permissions.create ? (
+  return permissions.all ? (
     <>
       <span>{i18n.NO_CASES}</span>
       <LinkAnchor

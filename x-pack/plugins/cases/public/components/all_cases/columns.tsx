@@ -319,7 +319,7 @@ export const useCasesColumns = ({
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}
-                  disabled={!permissions.update || isLoadingUpdateCase}
+                  disabled={!permissions.all || isLoadingUpdateCase}
                   onStatusChanged={(status) =>
                     handleDispatchUpdate({
                       updateKey: 'status',

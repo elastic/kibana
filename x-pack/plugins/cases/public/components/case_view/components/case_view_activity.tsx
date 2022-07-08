@@ -133,7 +133,7 @@ export const CaseViewActivity = ({
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
-                  permissions.update ? (
+                  permissions.all ? (
                     <StatusActionButton
                       status={caseData.status}
                       onStatusChanged={changeStatus}
@@ -149,7 +149,7 @@ export const CaseViewActivity = ({
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <SeveritySidebarSelector
-          isDisabled={!permissions.update}
+          isDisabled={!permissions.all}
           isLoading={isLoading}
           selectedSeverity={caseData.severity}
           onSeverityChange={onUpdateSeverity}

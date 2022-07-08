@@ -107,7 +107,7 @@ describe('TagList ', () => {
     expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
   });
 
-  it('does not render when the user does not have update permissions', () => {
+  it('does not render when the user does not have all permissions', () => {
     const wrapper = mount(
       <TestProviders permissions={readCasesPermissions()}>
         <TagList {...defaultProps} />
