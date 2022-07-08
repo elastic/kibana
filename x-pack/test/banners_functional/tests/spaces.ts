@@ -19,44 +19,47 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'spaceSelector',
   ]);
 
-  describe('per-spaces banners', () => {
+  describe.only('per-spaces banners', () => {
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/banners/multispace'
-      );
+      // await kibanaServer.importExport.load(
+      //   'x-pack/test/functional/fixtures/kbn_archiver/banners/multispace'
+      // );
       await spacesService.create({
         id: 'another-space',
         name: 'Another Space',
         disabledFeatures: [],
       });
+      // await kibanaServer.uiSettings.replace(
+      //   {
+      //     defaultRoute: '/app/canvas',
+      //     buildNum: 8467,
+      //     'dateFormat:tz': 'UTC',
+      //   },
+      //   { space: 'another-space' }
+      // );
       await kibanaServer.uiSettings.replace(
         {
-          defaultRoute: '/app/canvas',
-          buildNum: 8467,
-          'dateFormat:tz': 'UTC',
+          'banners:textContent': 'default space banner text',
         },
-        { space: 'another-space' }
+        { space: 'default' }
       );
-    });
-
-    after(async () => {
-      await spacesService.delete('another-space');
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    before(async () => {
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
       await PageObjects.spaceSelector.clickSpaceCard('default');
 
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
+      // await PageObjects.settings.navigateTo();
+      // await PageObjects.settings.clickKibanaSettings();
 
-      await PageObjects.settings.setAdvancedSettingsTextArea(
-        'banners:textContent',
-        'default space banner text'
-      );
+      // await PageObjects.settings.setAdvancedSettingsTextArea(
+      //   'banners:textContent',
+      //   'default space banner text'
+      // );
+    });
+
+    after(async () => {
+      await spacesService.delete('another-space');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('displays the space-specific banner within the space', async () => {

@@ -122,6 +122,7 @@ export class SettingsPageObject extends FtrService {
     const wrapper = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
     const textarea = await wrapper.findByTagName('textarea');
     await textarea.focus();
+    await this.common.sleep(2000);
     // only way to properly replace the value of the ace editor is via the JS api
     await this.browser.execute(
       (editor: string, value: string) => {
@@ -130,7 +131,11 @@ export class SettingsPageObject extends FtrService {
       `advancedSetting-editField-${propertyName}-editor`,
       propertyValue
     );
+    await textarea.focus();
+    await textarea.type(this.browser.keys.RETURN);
+    await this.common.sleep(20000);
     await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.common.sleep(20000);
     await this.header.waitUntilLoadingHasFinished();
   }
 
