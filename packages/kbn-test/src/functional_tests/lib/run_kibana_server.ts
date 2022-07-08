@@ -62,7 +62,7 @@ export async function runKibanaServer({
     onEarlyExit,
   };
 
-  const prefixArgs = installDir ? [KIBANA_SCRIPT_PATH] : [];
+  const prefixArgs = !installDir ? [KIBANA_SCRIPT_PATH] : [];
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
