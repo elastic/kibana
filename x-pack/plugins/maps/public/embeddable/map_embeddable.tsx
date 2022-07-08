@@ -569,7 +569,7 @@ export class MapEmbeddable
 
   // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled
   // When moving map with filterByMapExtent:false, previous map extent filter(s) does not get removed
-  // Cuased by syncDashboardContainerInput applyContainerChangesToState. 
+  // Cuased by syncDashboardContainerInput applyContainerChangesToState.
   //   1) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
   //      removing previous map extent filter and adding new map extent filter
   //   2) applyContainerChangesToState then re-adds stale input.filters (which contains previous map extent filter)
