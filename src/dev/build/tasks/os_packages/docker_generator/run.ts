@@ -29,7 +29,7 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'ubi9' | 'ubi8' | 'ubuntu';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
@@ -39,11 +39,12 @@ export async function runDockerGenerator(
 ) {
   let baseImageName = '';
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
-  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
-  const ubiVersionTag = 'ubi8';
+  if (flags.baseImage === 'ubi8') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi9') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'ubi') imageFlavor += `-${ubiVersionTag}`;
+  if (flags.baseImage === 'ubi8') imageFlavor += `-ubi8`;
+  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
 
