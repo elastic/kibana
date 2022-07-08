@@ -6,14 +6,29 @@
  */
 
 import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const UnverifiedPackageModal: React.FC<{ onCancel: () => void; onConfirm: () => void }> = ({
-  onCancel,
-  onConfirm,
-}) => {
+import type { PackageInfo } from '../../common';
+
+export const UnverifiedPackageModal: React.FC<{
+  onCancel: () => void;
+  onConfirm: () => void;
+  pkg?: Pick<PackageInfo, 'name' | 'version'>;
+}> = ({ onCancel, onConfirm, pkg }) => {
+  const title = pkg
+    ? i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleWithPkg', {
+        defaultMessage: 'Integration {pkgName}-{pkgVersion} has failed verification',
+        values: {
+          pkgName: pkg.name,
+          pkgVersion: pkg.version,
+        },
+      })
+    : i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleNoPkg', {
+        defaultMessage: 'The integration has failed verification',
+      });
   // TODO: add link to docs
   return (
     <EuiConfirmModal
@@ -42,9 +57,7 @@ export const UnverifiedPackageModal: React.FC<{ onCancel: () => void; onConfirm:
       buttonColor="danger"
     >
       <EuiCallOut
-        title={i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitle', {
-          defaultMessage: 'The integration has failed verification',
-        })}
+        title={title}
         color="warning"
         iconType="alert"
         children={

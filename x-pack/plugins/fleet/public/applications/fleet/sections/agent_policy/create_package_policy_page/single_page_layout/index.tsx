@@ -568,6 +568,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <UnverifiedPackageModal
             onConfirm={() => onSubmit({ force: true })}
             onCancel={() => setFormState('VALID')}
+            pkg={packageInfo}
           />
         )}
         {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (

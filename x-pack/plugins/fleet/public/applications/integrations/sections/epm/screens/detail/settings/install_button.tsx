@@ -70,7 +70,11 @@ export function InstallButton(props: InstallationButtonProps) {
   );
 
   const unverifiedModal = (
-    <UnverifiedPackageModal onConfirm={handleClickForceInstall} onCancel={toggleUnverifiedModal} />
+    <UnverifiedPackageModal
+      onConfirm={handleClickForceInstall}
+      onCancel={toggleUnverifiedModal}
+      pkg={{ name, version }}
+    />
   );
 
   return canInstallPackages ? (
