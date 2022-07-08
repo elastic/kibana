@@ -590,8 +590,8 @@ export class MapEmbeddable
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
-      defaultMessage: '{geoFieldsLabel} within map bounds, {id}',
-      values: { geoFieldsLabel: getGeoFieldsLabel(geoFieldNames), id: this.input.id },
+      defaultMessage: '{geoFieldsLabel} within map bounds',
+      values: { geoFieldsLabel: getGeoFieldsLabel(geoFieldNames) },
     });
 
     const executeContext = {

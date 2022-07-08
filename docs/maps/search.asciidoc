@@ -81,19 +81,17 @@ Create filters from your map to focus in on just the data you want. *Maps* provi
 
 [float]
 [[maps-map-extent-filter]]
-==== Filter dashboard by map extent
+==== Filter dashboard by map bounds
 
-A map extent shows uniform data across all panels.
-As you pan and zoom your map, all panels will update to only include data that is visible in your map.
-
-To enable filtering your dashboard by map extent:
+To filter your dashboard by map bounds as you pan and zoom your map:
 
 * Open the main menu, and then click *Dashboard*.
 * Select your dashboard from the list or click *Create dashboard*.
 * If your dashboard does not have a map, add a map panel.
 * Click the gear icon image:maps/images/gear_icon.png[gear icon] to open the map panel menu.
 * Select *More* to view all panel options.
-* Select *Enable filter by map extent*.
+* Select *Filter dashboard by map bounds*.
+* In the "Filter dashboard by map bounds" modal, select the checkbox for your map panel.
 
 [role="screenshot"]
 image::maps/images/enable_filter_by_map_extent.png[]
