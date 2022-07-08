@@ -37,7 +37,7 @@ export const usePrimaryNavigation = ({
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
 
-  const { isTourActive } = useTourContext();
+  const { isTourShown } = useTourContext();
 
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
@@ -60,7 +60,7 @@ export const usePrimaryNavigation = ({
   });
 
   return {
-    canBeCollapsed: !isTourActive,
+    canBeCollapsed: !isTourShown,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled

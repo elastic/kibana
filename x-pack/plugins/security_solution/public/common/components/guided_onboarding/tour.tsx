@@ -46,18 +46,19 @@ const maxWidth: EuiTourStepProps['maxWidth'] = 360;
 const offset: EuiTourStepProps['offset'] = 30;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = false;
 
-const getSteps = (
-  activeStep: number,
-  incrementStep: TourContextValue['incrementStep'],
-  skipTour: TourContextValue['skipTour']
-) => {
+const getSteps = (tourControls: {
+  activeStep: number;
+  incrementStep: () => void;
+  resetTour: () => void;
+}) => {
+  const { activeStep, incrementStep, resetTour } = tourControls;
   const footerAction = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiButtonEmpty
           size="xs"
           color="text"
-          onClick={() => skipTour()}
+          onClick={() => resetTour()}
           data-test-subj="onboarding--securityTourSkipButton"
         >
           <FormattedMessage
@@ -85,7 +86,7 @@ const getSteps = (
     <EuiButtonEmpty
       size="xs"
       color="text"
-      onClick={() => skipTour()}
+      onClick={() => resetTour()}
       data-test-subj="onboarding--securityTourEndButton"
     >
       <FormattedMessage
@@ -126,17 +127,11 @@ const getSteps = (
 };
 
 export interface TourContextValue {
-  incrementStep: () => void;
-  skipTour: () => void;
-  resetTour: () => void;
-  isTourActive: boolean;
+  isTourShown: boolean;
 }
 
 const TourContext = createContext<TourContextValue>({
-  incrementStep: () => {},
-  skipTour: () => {},
-  resetTour: () => {},
-  isTourActive: false,
+  isTourShown: false,
 } as TourContextValue);
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
@@ -147,10 +142,6 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   }, []);
 
   const [activeStep, _setActiveStep] = useState<number>(getTourStepFromLocalStorage());
-  const setActiveStep = useCallback((value: number) => {
-    _setActiveStep(value);
-    saveTourStepToLocalStorage(value);
-  }, []);
 
   const incrementStep = useCallback(() => {
     _setActiveStep((prevState) => {
@@ -159,23 +150,27 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
       return nextStep;
     });
   }, []);
-  const skipTour = useCallback(() => setIsTourActive(false), [setIsTourActive]);
-  const resetTour = useCallback(() => {
-    setActiveStep(1);
-    setIsTourActive(true);
-  }, [setActiveStep, setIsTourActive]);
 
-  const context: TourContextValue = { incrementStep, skipTour, resetTour, isTourActive };
+  const resetStep = useCallback(() => {
+    _setActiveStep(1);
+    saveTourStepToLocalStorage(1);
+  }, []);
+
+  const resetTour = useCallback(() => {
+    setIsTourActive(false);
+    resetStep();
+  }, [setIsTourActive, resetStep]);
 
   const { services } = useKibana();
   const hideAnnouncements = Boolean(services.uiSettings?.get('hideAnnouncements'));
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
   const showTour = isTourActive && !hideAnnouncements && !isSmallScreen;
+  const context: TourContextValue = { isTourShown: showTour };
   return (
     <TourContext.Provider value={context}>
       <>
         {children}
-        {showTour && <>{getSteps(activeStep, incrementStep, skipTour)}</>}
+        {showTour && <>{getSteps({ activeStep, incrementStep, resetTour })}</>}
       </>
     </TourContext.Provider>
   );
