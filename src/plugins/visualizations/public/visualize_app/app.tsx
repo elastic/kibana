@@ -8,7 +8,7 @@
 
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
-import { Route, Switch, useLocation } from 'react-router-dom';
+import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -30,6 +30,7 @@ import { VisualizeConstants } from '../../common/constants';
 
 export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
+  preserveFilters?: boolean;
 }
 
 interface NoDataComponentProps {
@@ -66,7 +67,8 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       dataViewEditor,
     },
   } = useKibana<VisualizeServices>();
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  const history = useHistory();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -134,7 +136,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
       <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
-        <VisualizeEditor onAppLeave={onAppLeave} />
+        <VisualizeEditor onAppLeave={onAppLeave} preserveFilters={true} />
       </Route>
       <Route
         exact

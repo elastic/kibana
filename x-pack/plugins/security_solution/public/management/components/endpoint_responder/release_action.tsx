@@ -7,12 +7,12 @@
 
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
 import { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
 import { CommandExecutionComponentProps } from '../console/types';
+import { ActionError } from './action_error';
 
 export const ReleaseActionResult = memo<
   CommandExecutionComponentProps<
@@ -74,32 +74,21 @@ export const ReleaseActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.release.pendingMessage"
-          defaultMessage="Releasing"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
-          { defaultMessage: 'Release action Failure' }
+          { defaultMessage: 'Error. Release action failed.' }
         )}
-        data-test-subj="releaseErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.release.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'releaseErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 
@@ -108,7 +97,7 @@ export const ReleaseActionResult = memo<
     <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.release.successMessageTitle',
-        { defaultMessage: 'Host isolated successfully!' }
+        { defaultMessage: 'Success. Host released.' }
       )}
       data-test-subj="releaseSuccessCallout"
     />

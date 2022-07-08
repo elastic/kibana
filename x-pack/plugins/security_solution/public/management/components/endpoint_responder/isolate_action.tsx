@@ -7,12 +7,12 @@
 
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
 import { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
 import { CommandExecutionComponentProps } from '../console/types';
+import { ActionError } from './action_error';
 
 export const IsolateActionResult = memo<
   CommandExecutionComponentProps<
@@ -74,33 +74,21 @@ export const IsolateActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.isolate.pendingMessage"
-          defaultMessage="Isolating"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
+      <ActionError
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle',
-          { defaultMessage: 'Isolate action failed' }
+          { defaultMessage: 'Error. Isolate action failed.' }
         )}
-        data-test-subj="isolateErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.isolate.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+        dataTestSubj={'isolateErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 
@@ -109,7 +97,7 @@ export const IsolateActionResult = memo<
     <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle',
-        { defaultMessage: 'Host isolated successfully!' }
+        { defaultMessage: 'Success. Host isolated.' }
       )}
       data-test-subj="isolateSuccessCallout"
     />

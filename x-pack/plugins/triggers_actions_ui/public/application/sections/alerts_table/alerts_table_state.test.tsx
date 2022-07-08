@@ -16,7 +16,6 @@ import {
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
-  AlertsTableFlyoutState,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
@@ -110,7 +109,6 @@ describe('AlertsTableState', () => {
     configurationId: PLUGIN_ID,
     id: `test-alerts`,
     featureIds: [AlertConsumers.LOGS],
-    flyoutState: AlertsTableFlyoutState.internal,
     query: {},
     showExpandToDetails: true,
   };
@@ -193,6 +191,27 @@ describe('AlertsTableState', () => {
           },
         })
       );
+    });
+  });
+
+  describe('empty state', () => {
+    beforeEach(() => {
+      hookUseFetchAlerts.mockClear();
+      hookUseFetchAlerts.mockImplementation(() => [
+        false,
+        {
+          alerts: [],
+          isInitializing: false,
+          getInspectQuery: jest.fn(),
+          refetch: jest.fn(),
+          totalAlerts: 0,
+        },
+      ]);
+    });
+
+    it('should render an empty screen if there are no alerts', async () => {
+      const result = render(<AlertsTableState {...tableProps} />);
+      expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
   });
 });
