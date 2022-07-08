@@ -18,6 +18,8 @@ import { SettingsUserActionBuilder } from './builders/settings';
 import { DeleteCaseUserActionBuilder } from './builders/delete_case';
 import { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { BuilderDeps } from './types';
 
 const builderMap = {
   title: TitleUserActionBuilder,
@@ -34,7 +36,15 @@ const builderMap = {
 };
 
 export class BuilderFactory {
+  private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+
+  constructor(deps: BuilderDeps) {
+    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
+  }
+
   getBuilder<T extends UserActionTypes>(type: T): UserActionBuilder | undefined {
-    return new builderMap[type]();
+    return new builderMap[type]({
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+    });
   }
 }
