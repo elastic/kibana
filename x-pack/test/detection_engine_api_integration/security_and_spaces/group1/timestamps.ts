@@ -22,6 +22,7 @@ import {
   createRule,
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
+  getOpenSignals,
   getRuleForSignalTesting,
   getSignalsByIds,
   getEqlRuleForSignalTesting,
@@ -31,6 +32,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const log = getService('log');
 
   /**
@@ -184,6 +186,30 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOrderedByEventId.length).equal(3);
         });
 
+        it('should generate 2 signals with event.ingested when timestamp fallback is disabled', async () => {
+          const rule: QueryCreateSchema = {
+            ...getRuleForSignalTesting(['myfa*']),
+            rule_id: 'rule-without-timestamp-fallback',
+            timestamp_override: 'event.ingested',
+            disable_timestamp_fallback: true,
+          };
+
+          const { id } = await createRule(supertest, log, rule);
+
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id], 2);
+          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+          expect(signalsOrderedByEventId.length).equal(2);
+        });
+
         it('should generate 2 signals with @timestamp', async () => {
           const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
 
@@ -222,6 +248,25 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
           expect(signalsOrderedByEventId.length).equal(2);
+        });
+
+        it('should not generate any signals when timestamp override does not exist and timestamp fallback is disabled', async () => {
+          const rule: QueryCreateSchema = {
+            ...getRuleForSignalTesting(['myfa*']),
+            rule_id: 'rule-without-timestamp-fallback',
+            timestamp_override: 'event.fakeingestfield',
+            disable_timestamp_fallback: true,
+          };
+
+          const createdRule = await createRule(supertest, log, rule);
+          const signalsOpen = await getOpenSignals(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatus['partial failure']
+          );
+          expect(signalsOpen.hits.hits.length).eql(0);
         });
 
         /**
@@ -286,6 +331,23 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
           expect(signalsOrderedByEventId.length).equal(2);
+        });
+
+        it('should not generate any signals when timestamp override does not exist and timestamp fallback is disabled', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['myfa*']),
+            timestamp_override: 'event.fakeingestfield',
+            disable_timestamp_fallback: true,
+          };
+          const createdRule = await createRule(supertest, log, rule);
+          const signalsOpen = await getOpenSignals(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatus['partial failure']
+          );
+          expect(signalsOpen.hits.hits.length).eql(0);
         });
       });
     });
