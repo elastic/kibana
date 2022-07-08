@@ -52,7 +52,7 @@ describe('Transaction details', () => {
 
   it('shows top errors table', () => {
     cy.contains('Top 5 errors');
-    cy.get('[data-test-subj="top-errors-for-transaction-table"]')
+    cy.get('[data-test-subj="topErrorsForTransactionTable"]')
       .contains('a', '[MockError] Foo')
       .click();
     cy.url().should('include', 'opbeans-java/errors');

@@ -5,12 +5,19 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  rangeQuery,
+  kqlQuery,
+  termQuery,
+  termsQuery,
+} from '@kbn/observability-plugin/server';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -28,6 +35,8 @@ export async function getErrorGroupDetailedStatistics({
   start,
   end,
   offset,
+  transactionName,
+  transactionType,
 }: {
   kuery: string;
   serviceName: string;
@@ -38,6 +47,8 @@ export async function getErrorGroupDetailedStatistics({
   start: number;
   end: number;
   offset?: string;
+  transactionName?: string;
+  transactionType?: string;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
   const { apmEventClient } = setup;
 
@@ -64,8 +75,14 @@ export async function getErrorGroupDetailedStatistics({
         query: {
           bool: {
             filter: [
-              { terms: { [ERROR_GROUP_ID]: groupIds } },
-              { term: { [SERVICE_NAME]: serviceName } },
+              ...termsQuery(ERROR_GROUP_ID, ...groupIds),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...(transactionName
+                ? termQuery(TRANSACTION_NAME, transactionName)
+                : []),
+              ...(transactionType
+                ? termQuery(TRANSACTION_TYPE, transactionType)
+                : []),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -125,6 +142,8 @@ export async function getErrorGroupPeriods({
   start,
   end,
   offset,
+  transactionName,
+  transactionType,
 }: {
   kuery: string;
   serviceName: string;
@@ -135,6 +154,8 @@ export async function getErrorGroupPeriods({
   start: number;
   end: number;
   offset?: string;
+  transactionName?: string;
+  transactionType?: string;
 }) {
   const commonProps = {
     environment,
@@ -143,6 +164,8 @@ export async function getErrorGroupPeriods({
     setup,
     numBuckets,
     groupIds,
+    transactionName,
+    transactionType,
   };
 
   const currentPeriodPromise = getErrorGroupDetailedStatistics({

@@ -23,7 +23,6 @@ import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldst
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetRt } from '../../../common/comparison_rt';
-import { getTopErrorsForTransaction } from './get_top_errors';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -595,58 +594,6 @@ const transactionChartsColdstartRateByTransactionNameRoute =
     },
   });
 
-const topErrorsForTransactionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/top_errors',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
-      t.intersection([environmentRt, kueryRt, rangeRt]),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    topErrors: Array<{
-      groupId: string;
-      errorName: string;
-      errorRatio: number;
-    }>;
-  }> => {
-    const { params } = resources;
-    const setup = await setupRequest(resources);
-
-    const {
-      path: { serviceName },
-      query: {
-        transactionType,
-        transactionName,
-        environment,
-        kuery,
-        start,
-        end,
-      },
-    } = params;
-
-    return await getTopErrorsForTransaction({
-      setup,
-      serviceName,
-      transactionType,
-      transactionName,
-      environment,
-      kuery,
-      start,
-      end,
-    });
-  },
-});
-
 export const transactionRouteRepository = {
   ...transactionGroupsMainStatisticsRoute,
   ...transactionGroupsDetailedStatisticsRoute,
@@ -656,5 +603,4 @@ export const transactionRouteRepository = {
   ...transactionChartsErrorRateRoute,
   ...transactionChartsColdstartRateRoute,
   ...transactionChartsColdstartRateByTransactionNameRoute,
-  ...topErrorsForTransactionRoute,
 };
