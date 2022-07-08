@@ -37,6 +37,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
           command: this.randomResponseActionCommand(),
           comment: this.randomString(15),
           parameter: undefined,
+          output: undefined,
         },
       },
       overrides
