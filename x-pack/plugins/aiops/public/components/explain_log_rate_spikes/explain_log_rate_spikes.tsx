@@ -32,7 +32,7 @@ import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { useData } from '../../hooks/use_data';
-import { AppStateKey, usePageUrlState, useUrlState } from '../../hooks/url_state';
+import { useUrlState } from '../../hooks/url_state';
 
 /**
  * ExplainLogRateSpikes props require a data view.
