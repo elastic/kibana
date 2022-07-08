@@ -7,13 +7,14 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../../hooks';
 
 export const useStyles = (depth: number) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size } = euiTheme;
+    const { size, colors } = euiTheme;
 
     const loadMoreButtonWrapper: CSSObject = {
       position: 'relative',
@@ -25,7 +26,7 @@ export const useStyles = (depth: number) => {
         position: 'absolute',
         top: '50%',
         width: '100%',
-        border: '1px dashed rgb(152, 162, 179)',
+        border: `1px dashed ${colors.mediumShade}`,
         left: 0,
       },
     };
@@ -45,12 +46,20 @@ export const useStyles = (depth: number) => {
       marginLeft: size.s,
     };
 
+    const treeViewWrapper = (expanded: boolean): CSSObject => ({
+      display: !expanded ? 'none' : 'inherit',
+      '.euiTreeView__node--selected > .euiTreeView__nodeInner': {
+        backgroundColor: transparentize(colors.darkestShade, 0.1),
+      },
+    });
+
     return {
       loadMoreButton,
       loadMoreButtonWrapper,
       loadMoreText,
       loadMoreTextLeft,
       labelIcon,
+      treeViewWrapper,
     };
   }, [euiTheme, depth]);
 
