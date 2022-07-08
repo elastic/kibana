@@ -46,7 +46,7 @@ import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import type { TelemetryConfigType } from './config';
+import type { TelemetryConfigLabels, TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { getTelemetrySavedObject, TelemetrySavedObject } from './telemetry_repository';
 import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
@@ -158,7 +158,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
     });
 
-    analytics.registerContextProvider({
+    analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
       name: 'telemetry labels',
       context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
       schema: {
