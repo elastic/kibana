@@ -24,6 +24,14 @@ interface VerificationResult {
 
 let cachedKey: openpgp.Key | undefined | null = null;
 
+export async function getGpgKeyIdOrUndefined(): Promise<string | undefined> {
+  const key = await getGpgKeyOrUndefined();
+
+  if (!key) return undefined;
+
+  return key.getKeyID().toHex();
+}
+
 export async function getGpgKeyOrUndefined(): Promise<openpgp.Key | undefined> {
   if (cachedKey !== null) return cachedKey;
 
