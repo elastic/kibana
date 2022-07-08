@@ -30,3 +30,4 @@ export const ORCHESTRATOR_CLUSTER_ID = 'orchestrator.cluster.id';
 export const ORCHESTRATOR_NAMESPACE = 'orchestrator.namespace';
 export const ORCHESTRATOR_RESOURCE_ID = 'orchestrator.resource.id';
 export const CONTAINER_IMAGE_NAME = 'container.image.name';
+export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';

@@ -13,10 +13,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { KubernetesSecurityRoutes } from '.';
 import { createAppRootMockRenderer } from '../../test';
 
-jest.mock('../kubernetes_widget', () => ({
-  KubernetesWidget: () => <div>{'Mock kubernetes widget'}</div>,
-}));
-
 jest.mock('../percent_widget', () => ({
   PercentWidget: () => <div>{'Mock percent widget'}</div>,
 }));

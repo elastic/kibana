@@ -53,7 +53,7 @@ export const CountWidget = ({
   );
 
   const countValue = useMemo((): CountResult => {
-    return data ? data?.pages[0] : 0 as unknown as CountResult;
+    return data ? data?.pages[0] : (0 as unknown as CountResult);
   }, [data]);
 
   const NumberFormatter = useCallback((num: CountResult) => {

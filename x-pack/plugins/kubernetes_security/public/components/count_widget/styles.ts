@@ -21,8 +21,6 @@ export const useStyles = () => {
       borderRadius: border.radius.medium,
       overflow: 'auto',
       position: 'relative',
-      width: '144px',
-      height: '80px',
     };
 
     const title: CSSObject = {

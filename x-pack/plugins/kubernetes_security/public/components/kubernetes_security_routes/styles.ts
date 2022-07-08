@@ -48,12 +48,25 @@ export const useStyles = () => {
       margin: size.l,
     };
 
+    const widgetHolder: CSSObject = {
+      position: 'relative',
+      width: '332px',
+      height: '235px',
+      padding: '16px',
+      border: `1px solid `,
+      borderRadius: '6px',
+      fontWeight: 700,
+      fontSize: '12px',
+      lineHeight: '16px',
+    };
+
     return {
       widgetBadge,
       treeViewContainer,
       percentageWidgets,
       percentageChartTitle,
       countWidgets,
+      widgetHolder,
     };
   }, [euiTheme]);
 
