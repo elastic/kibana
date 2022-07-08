@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
@@ -38,10 +38,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        // Enable debug fleet logs by default
-        `--logging.loggers[0].name=plugins.fleet`,
-        `--logging.loggers[0].level=debug`,
-        `--logging.loggers[0].appenders=${JSON.stringify(['default'])}`,
+
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
+
+          // Enable debug fleet logs by default
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+            appenders: ['default'],
+          },
+        ])}`,
       ],
     },
   };

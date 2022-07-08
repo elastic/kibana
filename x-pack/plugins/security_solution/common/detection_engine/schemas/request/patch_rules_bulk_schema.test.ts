@@ -23,16 +23,6 @@ describe('patch_rules_bulk_schema', () => {
     expect(output.schema).toEqual([]);
   });
 
-  test('made up values do not validate for a single element', () => {
-    const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
-
-    const decoded = patchRulesBulkSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUp"']);
-    expect(output.schema).toEqual({});
-  });
-
   test('single array of [id] does validate', () => {
     const payload: PatchRulesBulkSchema = [{ id: '4125761e-51da-4de9-a0c8-42824f532ddb' }];
 

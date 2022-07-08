@@ -40,6 +40,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { prepareEcsFieldsToValidate } from '../../common/helpers';
 import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
 
@@ -57,6 +58,7 @@ import {
   UseArray,
   ArrayItem,
   FormArrayField,
+  useFormContext,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -768,8 +770,20 @@ export const ECSMappingEditorField = React.memo(
   ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
+    const itemsList = useRef<ArrayItem[]>([]);
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
     const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
+
+    const { validateFields } = useFormContext();
+
+    useEffect(() => {
+      // Additional 'suspended' validation of osquery ecs fields. fieldsToValidateOnChange doesn't work because it happens before the osquerySchema gets updated.
+      const fieldsToValidate = prepareEcsFieldsToValidate(itemsList.current);
+      // it is always at least 2 - empty fields
+      if (fieldsToValidate.length > 2) {
+        setTimeout(() => validateFields(fieldsToValidate), 0);
+      }
+    }, [query, validateFields]);
 
     useEffect(() => {
       if (!query?.length) {
@@ -1074,6 +1088,7 @@ export const ECSMappingEditorField = React.memo(
           {({ items, addItem, removeItem }) => {
             lastItemPath.current = items[items.length - 1]?.path;
             onAdd.current = addItem;
+            itemsList.current = items;
 
             return (
               <>

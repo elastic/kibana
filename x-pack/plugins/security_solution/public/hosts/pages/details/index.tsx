@@ -156,13 +156,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               >
                 {({ isLoadingAnomaliesData, anomaliesData }) => (
                   <HostOverviewManage
-                    docValueFields={docValueFields}
                     id={id}
                     isInDetailsSidePanel={false}
                     data={hostOverview as HostItem}
                     anomaliesData={anomaliesData}
                     isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    indexNames={selectedPatterns}
                     loading={loading}
                     startDate={from}
                     endDate={to}
@@ -178,6 +176,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     refetch={refetch}
                     inspect={inspect}
                     hostName={detailName}
+                    indexNames={selectedPatterns}
                   />
                 )}
               </AnomalyTableProvider>
