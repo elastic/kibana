@@ -34,11 +34,11 @@ describe('AggsService - public', () => {
     setupDeps = {
       registerFunction: expressionsPluginMock.createSetupContract().registerFunction,
       uiSettings,
+      nowProvider: createNowProviderMock(),
     };
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
-      nowProvider: createNowProviderMock(),
     };
   });
 
