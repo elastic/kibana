@@ -450,6 +450,7 @@ describe('SecurityNavControl', () => {
                 id="xpack.security.navControlComponent.editProfileLinkText"
                 values={Object {}}
               />,
+              "onClick": [Function],
             },
             Object {
               "data-test-subj": "logoutLink",
