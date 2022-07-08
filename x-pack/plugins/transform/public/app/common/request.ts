@@ -206,6 +206,9 @@ export const getCreateTransformSettingsRequestBody = (
       DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND
       ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
       : {}),
+    ...(typeof transformDetailsState.transformSettingsNumFailureRetries === 'number'
+      ? { num_failure_retries: transformDetailsState.transformSettingsNumFailureRetries }
+      : {}),
   };
   return Object.keys(settings).length > 0 ? { settings } : {};
 };
