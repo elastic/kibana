@@ -56,9 +56,16 @@ const buildTimeRangeFilter = ({
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverrideOrUndefined;
 }): estypes.QueryDslQueryContainer => {
-  // If the timestampOverride is provided, documents must either populate timestampOverride with a timestamp in the range
-  // or must NOT populate the timestampOverride field at all and `@timestamp` must fall in the range.
-  // If timestampOverride is not provided, we simply use `@timestamp`
+  // The primaryTimestamp is always provided and will contain either the timestamp override field or `@timestamp` otherwise.
+  // The secondaryTimestamp is `undefined` if
+  //   1. timestamp override field is not specified
+  //   2. timestamp override field is set and timestamp fallback is disabled
+  //   3. timestamp override field is set to `@timestamp`
+  // or `@timestamp` otherwise.
+  //
+  // If the secondaryTimestamp is provided, documents must either populate primaryTimestamp with a timestamp in the range
+  // or must NOT populate the primaryTimestamp field at all and secondaryTimestamp must fall in the range.
+  // If secondaryTimestamp is not provided, we simply use primaryTimestamp
   return secondaryTimestamp != null
     ? {
         bool: {
