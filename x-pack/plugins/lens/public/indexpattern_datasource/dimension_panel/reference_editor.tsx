@@ -25,7 +25,7 @@ import {
   IncompleteColumn,
   GenericOperationDefinition,
 } from '../operations';
-import { FieldChoice, FieldSelect } from './field_select';
+import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
 import type {
   IndexPattern,
@@ -96,7 +96,7 @@ export interface ReferenceEditorProps {
       | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
       | GenericIndexPatternColumn
   ) => void;
-  onChooseField: (choice: FieldChoice) => void;
+  onChooseField: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn: () => void;
   onChooseFunction: (operationType: string, field?: IndexPatternField) => void;
 
