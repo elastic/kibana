@@ -325,7 +325,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       />
       {isRecurring && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <RecurrenceScheduler
             startDate={startDT}
             endDate={endDT}

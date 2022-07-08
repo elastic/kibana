@@ -113,15 +113,9 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
 
   return (
     <>
-      <EuiFormRowWithDelimitedFixer
-        data-test-subj="customRecurrenceScheduler"
-        style={{ alignItems: 'center' }}
-        fullWidth
-        label=" "
-      >
+      <EuiFormRowWithDelimitedFixer data-test-subj="customRecurrenceScheduler" fullWidth label=" ">
         <EuiFormControlLayoutDelimited
           compressed
-          fullWidth
           delimiter=""
           prepend={i18n.translate(
             'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel',
