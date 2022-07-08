@@ -136,7 +136,7 @@ describe('PartitionVisComponent', function () {
       <PartitionVisComponent
         {...{
           ...wrapperProps,
-          visType: ChartTypes.MOSAIC,
+          visType: ChartTypes.WAFFLE,
           visParams: waffleVisParams,
         }}
       />

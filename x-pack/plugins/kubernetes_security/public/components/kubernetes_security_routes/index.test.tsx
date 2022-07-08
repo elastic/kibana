@@ -17,6 +17,10 @@ jest.mock('../percent_widget', () => ({
   PercentWidget: () => <div>{'Mock percent widget'}</div>,
 }));
 
+jest.mock('../../hooks/use_last_updated', () => ({
+  useLastUpdated: () => <div>{'Mock updated now'}</div>,
+}));
+
 jest.mock('../count_widget', () => ({
   CountWidget: () => <div>{'Mock count widget'}</div>,
 }));
@@ -66,5 +70,6 @@ describe('Kubernetes security routes', () => {
     renderWithRouter();
     expect(screen.getAllByText('Mock count widget')).toHaveLength(5);
     expect(screen.getAllByText('Mock percent widget')).toHaveLength(2);
+    expect(screen.getAllByText('Mock updated now')).toHaveLength(1);
   });
 });
