@@ -22,7 +22,7 @@ const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = laz
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   children,
   releasePhase,
@@ -33,7 +33,7 @@ const CasesProviderLazyWrapper = ({
         value={{
           externalReferenceAttachmentTypeRegistry,
           owner,
-          userCanCrud,
+          permissions,
           features,
           releasePhase,
         }}
