@@ -7,7 +7,6 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
@@ -51,6 +50,9 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
   const TAGS_QUERY = 'tags:{name}';
 
   const handleRename = (newName: string) => {
+    if (newName === tagName) {
+      return;
+    }
     const kuery = TAGS_QUERY.replace('{name}', tagName);
     bulkUpdateTags(
       kuery,
@@ -114,6 +116,12 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                     })}
                     value={updatedName}
                     required
+                    onKeyDown={(e: { key: string }) => {
+                      if (e.key === 'Enter') {
+                        handleRename(updatedName!);
+                        closePopover();
+                      }
+                    }}
                     onChange={(e: any) => {
                       const newName = e.target.value;
                       setUpdatedName(newName);
@@ -121,19 +129,20 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
+                  <EuiButtonIcon
+                    size="m"
+                    display="fill"
+                    iconType="save"
+                    aria-label={i18n.translate('xpack.fleet.tagOptions.renameTagButtonLabel', {
+                      defaultMessage: 'Rename',
+                    })}
                     color="primary"
-                    disabled={!updatedName || updatedName === tagName}
+                    isDisabled={!updatedName || updatedName === tagName}
                     onClick={() => {
                       handleRename(updatedName!);
                       closePopover();
                     }}
-                  >
-                    {i18n.translate('xpack.fleet.tagOptions.renameTagButtonText', {
-                      defaultMessage: 'Rename',
-                    })}
-                  </EuiButton>
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

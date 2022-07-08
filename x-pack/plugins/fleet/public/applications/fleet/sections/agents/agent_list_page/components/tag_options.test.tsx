@@ -75,7 +75,32 @@ describe('TagOptions', () => {
     fireEvent.input(nameInput, {
       target: { value: 'newName' },
     });
-    fireEvent.click(result.getByText('Rename'));
+    fireEvent.click(
+      result.getAllByRole('button').find((btn) => btn.getAttribute('aria-label') === 'Rename')!
+    );
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'tags:agent',
+      ['newName'],
+      ['agent'],
+      expect.anything(),
+      'Tag renamed',
+      'Tag rename failed'
+    );
+  });
+
+  it('should rename tag when enter key is pressed', async () => {
+    const result = renderComponent();
+
+    fireEvent.click(result.getByRole('button'));
+
+    const nameInput = result.getByDisplayValue('agent');
+    fireEvent.input(nameInput, {
+      target: { value: 'newName' },
+    });
+    fireEvent.keyDown(nameInput, {
+      key: 'Enter',
+    });
 
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
       'tags:agent',
