@@ -39,6 +39,11 @@ export class Instance extends Entity<ApmFields> {
     });
   }
 
+  containerId(containerId: string) {
+    this.fields['container.id'] = containerId;
+    return this;
+  }
+
   podId(podId: string) {
     this.fields['kubernetes.pod.uid'] = podId;
     return this;
