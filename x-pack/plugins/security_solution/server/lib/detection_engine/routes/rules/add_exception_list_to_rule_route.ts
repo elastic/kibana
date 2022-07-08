@@ -8,7 +8,12 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { exceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { CreateRuleDefaultExceptionListSchemaDecoded, createRuleDefaultExceptionListSchema } from '../../../../../common/detection_engine/schemas/request';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import {
+  CreateRuleDefaultExceptionListSchemaDecoded,
+  createRuleDefaultExceptionListSchema,
+} from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -17,13 +22,8 @@ import { getIdError } from './utils';
 import { patchRules } from '../../rules/patch_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { readRules } from '../../rules/read_rules';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-const ALLOWED_LIST_TYPES = [
-  ExceptionListTypeEnum.DETECTION,
-  ExceptionListTypeEnum.RULE_DEFAULT,
-];
+const ALLOWED_LIST_TYPES = [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.RULE_DEFAULT];
 
 export const createRuleExceptionListRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -43,7 +43,13 @@ export const createRuleExceptionListRoute = (router: SecuritySolutionPluginRoute
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing', 'lists']);
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'licensing',
+          'lists',
+        ]);
         const rulesClient = ctx.alerting.getRulesClient();
         const listsClient = ctx.securitySolution.getExceptionListClient();
 
@@ -63,7 +69,10 @@ export const createRuleExceptionListRoute = (router: SecuritySolutionPluginRoute
         } = request.body;
 
         if (!ALLOWED_LIST_TYPES.includes(type)) {
-          return siemResponse.error({ statusCode: 500, body: `Unable to add an exception list of type - ${type}- to a rule.` });
+          return siemResponse.error({
+            statusCode: 500,
+            body: `Unable to add an exception list of type - ${type}- to a rule.`,
+          });
         }
 
         // Check that the rule they're trying to add an exception list to exists
@@ -72,9 +81,12 @@ export const createRuleExceptionListRoute = (router: SecuritySolutionPluginRoute
           ruleId: rule_id,
           id: rule_so_id,
         });
-        
+
         if (rule == null) {
-          return siemResponse.error({ statusCode: 500, body: `Unable to add exception list to rule - rule ${rule_id} not found` });
+          return siemResponse.error({
+            statusCode: 500,
+            body: `Unable to add exception list to rule - rule ${rule_id} not found`,
+          });
         }
 
         // Check that they're not trying to create a list with a `list_id` that already exists
@@ -95,10 +107,16 @@ export const createRuleExceptionListRoute = (router: SecuritySolutionPluginRoute
         // does not already have a default exception list attached. If it does, do not move forward
         // with exception list creation.
         if (type === ExceptionListTypeEnum.RULE_DEFAULT) {
-          const ruleHasDefaultList = rule.params.exceptionsList.filter((list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT).length > 0;
+          const ruleHasDefaultList =
+            rule.params.exceptionsList.filter(
+              (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
+            ).length > 0;
 
           if (ruleHasDefaultList) {
-            return siemResponse.error({ statusCode: 405, body: 'Rule already contains a default exception list.' });
+            return siemResponse.error({
+              statusCode: 405,
+              body: 'Rule already contains a default exception list.',
+            });
           }
         }
 
@@ -119,21 +137,21 @@ export const createRuleExceptionListRoute = (router: SecuritySolutionPluginRoute
         }
 
         // The list client has no rules client context, so once we've created the exception list,
-        // we need to go ahead and "attach" it to the rule.  
-        const existingRuleExceptionLists = rule.params.exceptionsList ?? [];    
+        // we need to go ahead and "attach" it to the rule.
+        const existingRuleExceptionLists = rule.params.exceptionsList ?? [];
         const patchedRule = await patchRules({
           rulesClient,
           rule,
           exceptionsList: [
-              ...existingRuleExceptionLists,
-              {
-                id: createdExceptionList.id,
-                list_id: createdExceptionList.list_id,
-                type: createdExceptionList.type,
-                namespace_type: createdExceptionList.namespace_type 
-              },
-            ],
-          });
+            ...existingRuleExceptionLists,
+            {
+              id: createdExceptionList.id,
+              list_id: createdExceptionList.list_id,
+              type: createdExceptionList.type,
+              namespace_type: createdExceptionList.namespace_type,
+            },
+          ],
+        });
 
         if (patchedRule != null) {
           const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();

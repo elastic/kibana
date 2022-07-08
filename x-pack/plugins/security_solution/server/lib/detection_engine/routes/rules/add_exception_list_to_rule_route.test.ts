@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 import { buildHapiStream } from '../__mocks__/utils';
 import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
-  getEmptyFindResult,
   getRuleMock,
   getFindResultWithSingleHit,
-  getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
-import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
-import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { createRuleExceptionListRoute } from './add_exception_list_to_rule_route';
 import * as createRulesAndExceptionsStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
-import {
-  getImportRulesWithIdSchemaMock,
-  ruleIdsToNdJsonString,
-  rulesToNdJsonString,
-} from '../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { ruleIdsToNdJsonString } from '../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { getDetectionsExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock'
-import { getCreateExceptionListDetectionSchemaMock } from '../../../../../../lists/common/schemas/request/create_exception_list_schema.mock'
+import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -45,18 +37,22 @@ describe('createRuleExceptionListRoute', () => {
     request = requestMock.create({
       method: 'post',
       path: `${DETECTION_ENGINE_RULES_URL}/exceptions`,
-      body: { 
+      body: {
         rule_so_id: '1234',
         rule_id: 'my_rule',
         list: getCreateExceptionListDetectionSchemaMock(),
-       },
+      },
     });
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.lists.exceptionListClient.getExceptionList = jest.fn().mockResolvedValue(getDetectionsExceptionListSchemaMock());
-    clients.lists.exceptionListClient.createExceptionList = jest.fn().mockResolvedValue(getDetectionsExceptionListSchemaMock());
+    clients.lists.exceptionListClient.getExceptionList = jest
+      .fn()
+      .mockResolvedValue(getDetectionsExceptionListSchemaMock());
+    clients.lists.exceptionListClient.createExceptionList = jest
+      .fn()
+      .mockResolvedValue(getDetectionsExceptionListSchemaMock());
     // context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
     //   elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     // );

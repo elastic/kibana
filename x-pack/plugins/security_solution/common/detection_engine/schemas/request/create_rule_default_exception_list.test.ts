@@ -8,9 +8,12 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { CreateRuleDefaultExceptionListSchema, createRuleDefaultExceptionListSchema } from './create_rule_default_exception_list';
+import {
+  CreateRuleDefaultExceptionListSchema,
+  createRuleDefaultExceptionListSchema,
+} from './create_rule_default_exception_list';
 
-import { getCreateExceptionListSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_schema.mock'
+import { getCreateExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 describe('createRuleDefaultExceptionListSchema', () => {
   test('empty objects do not validate', () => {
@@ -38,11 +41,11 @@ describe('createRuleDefaultExceptionListSchema', () => {
   });
 
   test('made up parameters do not validate', () => {
-    const payload: Partial<CreateRuleDefaultExceptionListSchema> & { madeUp: string } = { 
+    const payload: Partial<CreateRuleDefaultExceptionListSchema> & { madeUp: string } = {
       list: getCreateExceptionListSchemaMock(),
       rule_so_id: 'so_id',
       rule_id: 'rule_id',
-      madeUp: 'invalid value'
+      madeUp: 'invalid value',
     };
 
     const decoded = createRuleDefaultExceptionListSchema.decode(payload);
