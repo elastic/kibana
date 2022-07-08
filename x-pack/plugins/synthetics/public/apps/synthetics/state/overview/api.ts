@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   MonitorOverviewResult,
   MonitorOverviewResultCodec,
@@ -18,7 +18,7 @@ export const fetchMonitorOverview = async (
   pageState: MonitorOverviewPageState
 ): Promise<MonitorOverviewResult> => {
   return await apiService.get(
-    API_URLS.SYNTHETICS_OVERVIEW,
+    SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
     { perPage: pageState.perPage },
     MonitorOverviewResultCodec
   );

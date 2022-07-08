@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
@@ -74,7 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
           const savedResponse = await Promise.all(monitors.map(saveMonitor));
           savedMonitors = savedResponse;
 
-          const apiResponse = await supertest.get(API_URLS.SYNTHETICS_OVERVIEW + '?perPage=20');
+          const apiResponse = await supertest.get(
+            SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW + '?perPage=20'
+          );
 
           expect(apiResponse.body.total).eql(monitors.length * 2);
           expect(apiResponse.body.allMonitorIds.sort()).eql(
@@ -97,7 +99,9 @@ export default function ({ getService }: FtrProviderContext) {
           const savedResponse = await Promise.all(monitors.map(saveMonitor));
           savedMonitors = savedResponse;
 
-          const apiResponse = await supertest.get(API_URLS.SYNTHETICS_OVERVIEW + '?perPage=5');
+          const apiResponse = await supertest.get(
+            SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW + '?perPage=5'
+          );
 
           expect(apiResponse.body.total).eql(monitors.length * 2);
           expect(apiResponse.body.allMonitorIds.sort()).eql(

@@ -14,7 +14,7 @@ import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../../common/ru
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
@@ -178,7 +178,7 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
 
 export const getSyntheticsMonitorOverviewRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_OVERVIEW,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
   validate: {
     query: querySchema,
   },
