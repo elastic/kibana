@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors, font, border } = euiTheme;
+    const { size, font, border } = euiTheme;
 
     const container: CSSObject = {
       padding: size.base,

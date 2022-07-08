@@ -7,6 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { CountResult } from '../../../common/types/count';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
@@ -51,12 +52,12 @@ export const CountWidget = ({
     indexPattern?.title
   );
 
-  const countValue = useMemo((): number => {
-    return data ? data?.pages[0] : 0;
+  const countValue = useMemo((): CountResult => {
+    return data ? data?.pages[0] : undefined;
   }, [data]);
 
-  const NumberFormatter = useCallback((num: number) => {
-    if (num < 1e6) {
+  const NumberFormatter = useCallback((num: CountResult) => {
+    if (Number(num) < 1e6) {
       return num.toLocaleString();
     }
     return new Intl.NumberFormat('en-GB', {
@@ -66,7 +67,7 @@ export const CountWidget = ({
     }).format(num);
   }, []);
 
-  const formattedNumber = useMemo((): number => {
+  const formattedNumber = useMemo((): string => {
     return NumberFormatter(countValue);
   }, [countValue, NumberFormatter]);
 

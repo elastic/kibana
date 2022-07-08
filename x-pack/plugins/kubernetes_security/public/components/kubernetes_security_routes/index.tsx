@@ -16,6 +16,10 @@ import {
   ENTRY_LEADER_INTERACTIVE,
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_ENTITY_ID,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_RESOURCE_ID,
+  CONTAINER_IMAGE_NAME,
 } from '../../../common/constants';
 import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
@@ -67,7 +71,7 @@ const KubernetesSecurityRoutesComponent = ({
               indexPattern={indexPattern}
               globalFilter={globalFilter}
               widgetKey="CountClustersWidget"
-              groupedBy={'orchestrator.cluster.id'}
+              groupedBy={ORCHESTRATOR_CLUSTER_ID}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -76,7 +80,7 @@ const KubernetesSecurityRoutesComponent = ({
               indexPattern={indexPattern}
               globalFilter={globalFilter}
               widgetKey="CountNamespaceWidgets"
-              groupedBy={'orchestrator.namespace'}
+              groupedBy={ORCHESTRATOR_NAMESPACE}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -85,7 +89,7 @@ const KubernetesSecurityRoutesComponent = ({
               indexPattern={indexPattern}
               globalFilter={globalFilter}
               widgetKey="CountNodesWidgets"
-              groupedBy={'orchestrator.resource.id'}
+              groupedBy={ORCHESTRATOR_RESOURCE_ID}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -94,7 +98,7 @@ const KubernetesSecurityRoutesComponent = ({
               indexPattern={indexPattern}
               globalFilter={globalFilter}
               widgetKey="CountPodsWidgets"
-              groupedBy={'orchestrator.resource.id'}
+              groupedBy={ORCHESTRATOR_RESOURCE_ID}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -103,7 +107,7 @@ const KubernetesSecurityRoutesComponent = ({
               indexPattern={indexPattern}
               globalFilter={globalFilter}
               widgetKey="CountContainerImagesWidgets"
-              groupedBy={'container.image.name'}
+              groupedBy={CONTAINER_IMAGE_NAME}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
