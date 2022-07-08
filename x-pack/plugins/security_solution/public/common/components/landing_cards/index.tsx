@@ -6,14 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
@@ -22,7 +15,6 @@ import siemSvg from '../../images/siem1.svg';
 import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
-import { useTourContext } from '../guided_onboarding';
 
 const imgUrls = {
   cloud: cloudSvg,
@@ -73,15 +65,8 @@ export const LandingCards = memo(() => {
   } = useKibana().services;
 
   const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
-
-  const { resetTour, incrementStep } = useTourContext();
-
   return (
     <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={() => resetTour()}>(Re)start the tour</EuiButtonEmpty>
-        <EuiButton onClick={() => incrementStep()}>Next step</EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
