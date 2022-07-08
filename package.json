@@ -949,7 +949,6 @@
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "backport": "^8.8.0",
     "callsites": "^3.1.0",
-    "chai": "3.5.0",
     "chance": "1.0.18",
     "chokidar": "^3.4.3",
     "chromedriver": "^103.0.0",
