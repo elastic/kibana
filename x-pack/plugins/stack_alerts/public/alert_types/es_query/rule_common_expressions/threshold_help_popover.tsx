@@ -35,26 +35,40 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
     return (
       <div>
         <EuiText grow={false}>
-          <p>
+          <h4>
             <FormattedMessage
-              id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
-              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold (for example, is above 1000)."
+              id="stackAlerts.esQuery.ui.thresholdHelp.stepsTitle"
+              defaultMessage="Set the threshold and time window"
             />
-          </p>
-          <p>
+          </h4>
+          <ol>
+            <li>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
+                defaultMessage="Specify a threshold value and a comparison operator. For example, is above 1000. Each time the rule runs, it checks whether the number of documents that match your query meets this threshold."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.thresholdHelp.timeWindow"
+                defaultMessage="Specify how far back in time to search. 
+                To avoid gaps in detection, generally this time window should be greater than the value you chose for the {checkField} field."
+                values={{
+                  checkField: <b>Check every</b>,
+                }}
+              />
+            </li>
+          </ol>
+          <h4>
             <FormattedMessage
-              id="xpack.stackAlerts.esQuery.ui.thresholdHelp.timeWindow"
-              defaultMessage="You must also specify how far back in time to search. 
-              To avoid gaps in detection, generally this time window should be greater than the value you chose for the {checkField} field."
-              values={{
-                checkField: <b>Check every</b>,
-              }}
+              id="stackAlerts.esQuery.ui.thresholdHelp.duplicatesTitle"
+              defaultMessage="Handling multiple matches of the same document"
             />
-          </p>
+          </h4>
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches"
-              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, an alert occurs only once."
+              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, it is omitted from threshold calculations. The rule uses the timestamp of the matches to avoid alerting on the same match multiple times."
             />
           </p>
         </EuiText>
@@ -83,8 +97,8 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
       >
         <EuiPopoverTitle>
           <FormattedMessage
-            id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-            defaultMessage="Set the query threshold and time window"
+            id="xpack.stackAlerts.esQuery.ui.thresholdHelp.title"
+            defaultMessage="Elasticsearch query rule threshold and time window"
           />
         </EuiPopoverTitle>
         {this._renderContent()}
