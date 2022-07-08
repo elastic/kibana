@@ -51,8 +51,8 @@ describe('EngineLogic', () => {
           sort: true,
           snippet: true,
           boost: true,
-        }
-      }
+        },
+      },
     },
     apiTokens: [],
     apiKey: 'some-key',
