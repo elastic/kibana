@@ -58,6 +58,13 @@ import type { RuleEventLogListProps } from './application/sections/rule_details/
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
+import type {
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
+} from './application/sections/field_browser/types';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -98,6 +105,11 @@ export type {
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   RulesListNotifyBadgeProps,
+  FieldBrowserProps,
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  BrowserFieldItem,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -342,6 +354,12 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredSolutions?: string[] | undefined;
+}
+export interface RuleDefinitionProps {
+  rule: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onEditRule: () => Promise<void>;
 }
 
 export enum Percentiles {
