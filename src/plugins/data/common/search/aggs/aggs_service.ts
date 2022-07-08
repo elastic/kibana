@@ -9,8 +9,7 @@
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
-import { CalculateBoundsOptions } from '../../query';
-import { UI_SETTINGS, AggTypesDependencies, calculateBounds } from '../..';
+import { UI_SETTINGS, AggTypesDependencies } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -42,7 +41,7 @@ export interface AggsCommonStartDependencies {
   getIndexPattern(id: string): Promise<DataView>;
   getConfig: GetConfigFn;
   fieldFormats: FieldFormatsStartCommon;
-  calculateBoundsOptions: CalculateBoundsOptions;
+  calculateBounds: AggTypesDependencies['calculateBounds'];
 }
 
 /**
@@ -75,13 +74,13 @@ export class AggsCommonService {
   public start({
     getConfig,
     fieldFormats,
-    calculateBoundsOptions,
+    calculateBounds,
   }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start({
       getConfig,
       getFieldFormatsStart: () => fieldFormats,
       aggExecutionContext: this.aggExecutionContext,
-      calculateBounds: (timeRange) => calculateBounds(timeRange, calculateBoundsOptions),
+      calculateBounds,
     });
 
     return {
