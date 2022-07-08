@@ -40,6 +40,7 @@ export type {
   FieldBrowserOptions,
   FieldBrowserProps,
   RuleDefinitionProps,
+  RulesListVisibleColumns,
 } from './types';
 
 export {

@@ -104,7 +104,15 @@ describe('RulesPage with all capabilities', () => {
         showActionFilter: false,
         showCreateRuleButton: false,
         ruleDetailsRoute: 'alerts/rules/:ruleId',
-        filteredSolutions: ['ruleType1', 'ruleType2'],
+        filteredRuleTypes: ['ruleType1', 'ruleType2'],
+        rulesListKey: 'observability_rulesListColumns',
+        visibleColumns: [
+          'ruleName',
+          'ruleExecutionStatusLastDate',
+          'ruleSnoozeNotify',
+          'ruleExecutionStatus',
+          'ruleExecutionState',
+        ],
       })
     );
   });
