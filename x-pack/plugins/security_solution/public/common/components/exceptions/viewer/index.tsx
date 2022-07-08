@@ -327,8 +327,7 @@ const ExceptionsViewerComponent = ({
     `security/detections/rules/id/${encodeURI(ruleId)}/edit`
   );
 
-  const showEmpty: boolean =
-    !isInitLoading && !loadingList && exceptions.length === 0;
+  const showEmpty: boolean = !isInitLoading && !loadingList && exceptions.length === 0;
 
   const showNoResults: boolean =
     exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
