@@ -6,101 +6,37 @@
  */
 
 import React from 'react';
-import {
-  Chart,
-  Settings,
-  Axis,
-  AreaSeries,
-  Position,
-  ScaleType,
-  CurveType,
-  LineSeries,
-  timeFormatter,
-  niceTimeFormatByDay,
-} from '@elastic/charts';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { useDurationRange } from '../hooks/use_duration_range';
-
-const dateFormatter = timeFormatter(niceTimeFormatByDay(3));
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useParams } from 'react-router-dom';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorDurationTrend = () => {
-  const { timeSeries, loading } = useDurationRange();
+  const { observability } = useKibana<ClientPluginsStart>().services;
 
-  if (loading) {
-    return <EuiLoadingSpinner />;
-  }
+  const { ExploratoryViewEmbeddable } = observability;
 
-  const percentiles = ['25th', '50th', '75th', '95th'];
+  const { monitorId } = useParams<{ monitorId: string }>();
+
+  const metricsToShow = ['min', 'max', 'median', '25th', '75th'];
 
   return (
-    <Chart>
-      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis
-        id="bottom"
-        title="@timestamp"
-        position={Position.Bottom}
-        showOverlappingTicks
-        showGridLines={true}
-        tickFormat={dateFormatter}
-        style={{
-          axisTitle: {
-            visible: false,
-          },
-        }}
-      />
-      <Axis
-        id="left"
-        domain={{
-          min: 0,
-          max: NaN,
-          fit: true,
-        }}
-        title={'Duration'}
-        position={Position.Left}
-        tickFormat={(d) => Number(d).toFixed(0)}
-        labelFormat={(d) => Number(d).toFixed(0) + ' ms'}
-        showGridLines={true}
-        ticks={5}
-      />
-
-      <AreaSeries
-        id="Duration"
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['max']}
-        y0Accessors={['min']}
-        data={timeSeries}
-        curve={CurveType.CURVE_MONOTONE_X}
-        tickFormat={(d) => Number(d).toFixed(0) + ' ms'}
-        areaSeriesStyle={{
-          area: {
-            opacity: 0.8,
-          },
-        }}
-        color={'#D7E1DF'}
-      />
-
-      {percentiles.map((per) => (
-        <LineSeries
-          id={`${per} Percentile`}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={[per]}
-          data={timeSeries}
-          curve={CurveType.CURVE_MONOTONE_X}
-          tickFormat={(d) => Number(d).toFixed(0) + ' ms'}
-          lineSeriesStyle={{
-            point: {
-              visible: false,
-            },
-            line: {
-              strokeWidth: 3,
-            },
-          }}
-        />
-      ))}
-    </Chart>
+    <ExploratoryViewEmbeddable
+      customHeight={'300px'}
+      reportType="kpi-over-time"
+      attributes={metricsToShow.map((metric) => ({
+        dataType: 'synthetics',
+        time: {
+          from: 'now-30d/d',
+          to: 'now',
+        },
+        name: metric + ' Series',
+        selectedMetricField: 'monitor.duration.us',
+        reportDefinitions: {
+          'monitor.id': [monitorId],
+        },
+        seriesType: 'line',
+        operationType: metric,
+      }))}
+    />
   );
 };
