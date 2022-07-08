@@ -14,7 +14,8 @@ import { AggregateBucketPaginationResult } from '../../../../common/types/aggreg
 export const useFetchDynamicTreeView = (
   query: QueryDslQueryContainerBool,
   groupBy: string,
-  index?: string
+  index?: string,
+  enabled?: boolean
 ) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_PROCESS_EVENTS, query, groupBy, index];
@@ -32,6 +33,7 @@ export const useFetchDynamicTreeView = (
         },
       }),
     {
+      enabled,
       getNextPageParam: (lastPage, pages) => (lastPage.hasNextPage ? pages.length : undefined),
     }
   );

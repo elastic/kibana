@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef, MouseEvent } from 'react';
+import React, { useEffect, useState, useRef, MouseEvent, KeyboardEvent, useMemo } from 'react';
 import {
   EuiIcon,
   EuiText,
-  EuiIconProps,
   EuiI18n,
   EuiScreenReaderOnly,
   EuiBadge,
@@ -20,9 +19,17 @@ import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
 } from '../../../../common/translations';
-import { QueryDslQueryContainerBool, KubernetesCollection, TreeNavSelection } from '../../../types';
 import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
+import { disableEventDefaults, focusNextElement } from './helpers';
+import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
+
+const focusNextButton = (event: KeyboardEvent) => {
+  focusNextElement(event, '[data-test-subj="dynamicTreeViewButton"]', 'next');
+};
+const focusPreviousButton = (event: KeyboardEvent) => {
+  focusNextElement(event, '[data-test-subj="dynamicTreeViewButton"]', 'prev');
+};
 
 const DynamicTreeViewExpander = ({
   children,
@@ -30,6 +37,7 @@ const DynamicTreeViewExpander = ({
   children: (childrenProps: { isExpanded: boolean; onToggleExpand: () => void }) => JSX.Element;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
   const onToggleExpand = () => {
     setIsExpanded((e) => !e);
   };
@@ -40,107 +48,64 @@ const DynamicTreeViewExpander = ({
   });
 };
 
-type DynamicTree = {
-  key: string;
-  type: KubernetesCollection;
-  iconProps: EuiIconProps;
-  name: string;
-};
-
-type Props = {
-  tree: DynamicTree[];
-  depth?: number;
-  selectionDepth?: TreeNavSelection;
-  query: QueryDslQueryContainerBool;
-  indexPattern?: string;
-  onSelect?: (selectionDepth: TreeNavSelection, key: string | number, type: string) => void;
-  hasSelection?: boolean;
-  'aria-label': string;
-};
-
 export const DynamicTreeView = ({
   tree,
   depth = 0,
   selectionDepth = {},
   query,
-  indexPattern,
+  indexPattern = '',
   onSelect,
   hasSelection,
+  selected = '',
+  expanded = true,
   ...props
-}: Props) => {
+}: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
-    useFetchDynamicTreeView(query, tree[depth].key, indexPattern);
+    useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
 
   const ariaLabel = props['aria-label'];
-
-  const buttonRef = useRef<Record<string, any>>({});
-
-  const onChildrenKeydown = (event: React.KeyboardEvent, key: string) => {
-    if (event.key === keys.ARROW_LEFT) {
-      event.preventDefault();
-      event.stopPropagation();
-      buttonRef.current[key].focus();
-    }
-  };
 
   const onLoadMoreKeydown = (event: React.KeyboardEvent) => {
     switch (event.key) {
       case keys.ARROW_DOWN: {
-        const nodeButtons = Array.from(
-          document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
-        );
-        const currentIndex = nodeButtons.indexOf(event.currentTarget);
-        if (currentIndex > -1) {
-          const nextButton = nodeButtons[currentIndex + 1] as HTMLElement;
-          if (nextButton) {
-            event.preventDefault();
-            event.stopPropagation();
-            nextButton.focus();
-          }
-        }
+        focusNextButton(event);
         break;
       }
       case keys.ARROW_UP: {
-        const nodeButtons = Array.from(
-          document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
-        );
-        const currentIndex = nodeButtons.indexOf(event.currentTarget);
-        if (currentIndex > -1) {
-          const prevButton = nodeButtons[currentIndex + -1] as HTMLElement;
-          if (prevButton) {
-            event.preventDefault();
-            event.stopPropagation();
-            prevButton.focus();
-          }
-        }
+        focusPreviousButton(event);
         break;
       }
       case keys.ARROW_RIGHT: {
-        event.preventDefault();
-        event.stopPropagation();
+        disableEventDefaults(event);
         fetchNextPage();
       }
     }
   };
 
   useEffect(() => {
-    fetchNextPage();
-  }, [fetchNextPage]);
+    if (expanded) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, expanded]);
 
   useEffect(() => {
     if (!hasSelection && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
-      onSelect?.({}, data.pages[0].buckets[0].key, tree[depth].type);
+      onSelect({}, data.pages[0].buckets[0].key, tree[depth].type);
     }
   }, [data, depth, hasSelection, onSelect, tree]);
 
-  const onClickNextPageHandler = (e: MouseEvent<HTMLButtonElement>) => {
+  const onClickNextPageHandler = () => {
     fetchNextPage();
   };
 
   return (
-    <EuiText size="s" className="euiTreeView__wrapper">
+    <EuiText
+      size="s"
+      className={`euiTreeView__wrapper ${!expanded ? 'euiTreeView__wrapper--hidden' : ''}`}
+      css={styles.treeViewWrapper(expanded)}
+    >
       {isLoading && (
         <div>
           <EuiLoadingSpinner size="s" />
@@ -175,125 +140,32 @@ export const DynamicTreeView = ({
             };
 
             return (
-              <DynamicTreeViewExpander>
-                {({ isExpanded, onToggleExpand }) => {
-                  const isLastNode = depth === tree.length - 1;
-
-                  const onToggle = () => {
-                    if (!isLastNode) {
-                      onToggleExpand();
-                    }
-                    onSelect?.(selectionDepth, aggData.key, tree[depth].type);
-                  };
-
-                  // Enable keyboard navigation
-                  const onKeyDown = (event: React.KeyboardEvent) => {
-                    switch (event.key) {
-                      case keys.ARROW_DOWN: {
-                        const nodeButtons = Array.from(
-                          document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
-                        );
-                        const currentIndex = nodeButtons.indexOf(event.currentTarget);
-                        if (currentIndex > -1) {
-                          const nextButton = nodeButtons[currentIndex + 1] as HTMLElement;
-                          if (nextButton) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            nextButton.focus();
-                          }
-                        }
-                        break;
-                      }
-                      case keys.ARROW_UP: {
-                        const nodeButtons = Array.from(
-                          document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
-                        );
-                        const currentIndex = nodeButtons.indexOf(event.currentTarget);
-                        if (currentIndex > -1) {
-                          const prevButton = nodeButtons[currentIndex + -1] as HTMLElement;
-                          if (prevButton) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            prevButton.focus();
-                          }
-                        }
-                        break;
-                      }
-                      case keys.ARROW_RIGHT: {
-                        if (!isExpanded && !isLastNode) {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          onToggle();
-                        }
-                        break;
-                      }
-                      case keys.ARROW_LEFT: {
-                        if (isExpanded) {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          onToggle();
-                        }
-                      }
-                      default:
-                        break;
-                    }
-                  };
-                  return (
-                    <li
-                      className={`euiTreeView__node ${
-                        isExpanded ? 'euiTreeView__node--expanded' : ''
-                      }`}
-                      key={aggData.key}
-                    >
-                      <button
-                        data-test-subj="dynamicTreeViewButton"
-                        className="euiTreeView__nodeInner euiTreeView__nodeInner--withArrows"
-                        onClick={onToggle}
-                        onKeyDown={(event: React.KeyboardEvent) => onKeyDown(event)}
-                        ref={(el) => (buttonRef.current[aggData.key] = el)}
-                      >
-                        {!isLastNode && (
-                          <EuiIcon
-                            className="euiTreeView__expansionArrow"
-                            type={isExpanded ? 'arrowDown' : 'arrowRight'}
-                          />
-                        )}
-                        <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-                        <span className="euiTreeView__nodeLabel">{aggData.key}</span>
-                      </button>
-                      {isExpanded && (
-                        <div
-                          onKeyDown={(event: React.KeyboardEvent) =>
-                            onChildrenKeydown(event, aggData.key.toString())
-                          }
-                        >
-                          <DynamicTreeView
-                            key={aggData.key}
-                            query={queryFilter}
-                            depth={depth + 1}
-                            selectionDepth={{
-                              ...selectionDepth,
-                              [tree[depth].type]: aggData.key,
-                            }}
-                            tree={tree}
-                            indexPattern={indexPattern}
-                            onSelect={onSelect}
-                            aria-label={`${aggData.key} child of ${ariaLabel}`}
-                          />
-                        </div>
-                      )}
-                    </li>
-                  );
-                }}
+              <DynamicTreeViewExpander key={aggData.key}>
+                {({ isExpanded, onToggleExpand }) => (
+                  <DynamicTreeViewItem
+                    aggData={aggData}
+                    aria-label={ariaLabel}
+                    depth={depth}
+                    expanded={expanded}
+                    indexPattern={indexPattern}
+                    isExpanded={isExpanded}
+                    onSelect={onSelect}
+                    onToggleExpand={onToggleExpand}
+                    query={queryFilter}
+                    selected={selected}
+                    selectionDepth={selectionDepth}
+                    tree={tree}
+                  />
+                )}
               </DynamicTreeViewExpander>
             );
           });
         })}
         {hasNextPage && (
-          <li className="euiTreeView__node" css={styles.loadMoreButtonWrapper}>
+          <li key="load_more" className="euiTreeView__node" css={styles.loadMoreButtonWrapper}>
             <EuiBadge
               css={styles.loadMoreButton}
-              onClickAriaLabel={TREE_NAVIGATION_SHOW_MORE(tree[depth].name)}
+              onClickAriaLabel={TREE_NAVIGATION_SHOW_MORE(tree[depth].namePlural)}
               data-test-subj="dynamicTreeViewButton"
               onKeyDown={(event: React.KeyboardEvent) => onLoadMoreKeydown(event)}
               onClick={onClickNextPageHandler}
@@ -301,7 +173,7 @@ export const DynamicTreeView = ({
               <span css={styles.loadMoreText}>
                 {isFetchingNextPage
                   ? TREE_NAVIGATION_LOADING
-                  : TREE_NAVIGATION_SHOW_MORE(tree[depth].name)}
+                  : TREE_NAVIGATION_SHOW_MORE(tree[depth].namePlural)}
               </span>
               {isFetchingNextPage ? (
                 <EuiLoadingSpinner size="s" />
@@ -313,5 +185,138 @@ export const DynamicTreeView = ({
         )}
       </ul>
     </EuiText>
+  );
+};
+
+const DynamicTreeViewItem = ({
+  depth,
+  tree,
+  onToggleExpand,
+  onSelect,
+  aggData,
+  selectionDepth,
+  isExpanded,
+  selected,
+  expanded,
+  query,
+  indexPattern,
+  ...props
+}: DynamicTreeViewItemProps) => {
+  const isLastNode = depth === tree.length - 1;
+  const styles = useStyles(depth);
+  const buttonRef = useRef<Record<string, any>>({});
+
+  const onKeyboardToggle = () => {
+    if (!isLastNode) {
+      onToggleExpand();
+    }
+    onSelect(selectionDepth, aggData.key, tree[depth].type);
+  };
+
+  const onButtonToggle = () => {
+    if (!isLastNode && !isExpanded) {
+      onToggleExpand();
+    }
+    onSelect(selectionDepth, aggData.key, tree[depth].type);
+  };
+
+  const onArrowToggle = (event: MouseEvent<SVGElement>) => {
+    disableEventDefaults(event);
+    if (!isLastNode) {
+      onToggleExpand();
+    }
+  };
+
+  // Enable keyboard navigation
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    switch (event.key) {
+      case keys.ARROW_DOWN: {
+        focusNextButton(event);
+        break;
+      }
+      case keys.ARROW_UP: {
+        focusPreviousButton(event);
+        break;
+      }
+      case keys.ARROW_RIGHT: {
+        if (!isExpanded && !isLastNode) {
+          disableEventDefaults(event);
+          onKeyboardToggle();
+        }
+        break;
+      }
+      case keys.ARROW_LEFT: {
+        if (isExpanded) {
+          disableEventDefaults(event);
+          onKeyboardToggle();
+        }
+      }
+      default:
+        break;
+    }
+  };
+
+  const onChildrenKeydown = (event: React.KeyboardEvent, key: string) => {
+    if (event.key === keys.ARROW_LEFT) {
+      disableEventDefaults(event);
+      buttonRef.current[key].focus();
+    }
+  };
+
+  const isSelected = useMemo(() => {
+    return (
+      selected ===
+      Object.entries({ ...selectionDepth, [tree[depth].type]: aggData.key })
+        .map(([k, v]) => `${k}.${v}`)
+        .join()
+    );
+  }, [aggData.key, depth, selected, selectionDepth, tree]);
+
+  return (
+    <li
+      className={`euiTreeView__node
+        ${isExpanded ? 'euiTreeView__node--expanded' : ''}
+        ${isSelected ? 'euiTreeView__node--selected' : ''}
+      `}
+      data-test-subj={`${isSelected ? 'euiTreeView__node--selected' : ''}`}
+    >
+      <button
+        data-test-subj={`dynamicTreeViewButton${!expanded ? 'Hidden' : ''}`}
+        className="euiTreeView__nodeInner euiTreeView__nodeInner--withArrows"
+        onClick={onButtonToggle}
+        onKeyDown={(event: React.KeyboardEvent) => onKeyDown(event)}
+        ref={(el) => (buttonRef.current[aggData.key] = el)}
+      >
+        {!isLastNode && (
+          <EuiIcon
+            className="euiTreeView__expansionArrow"
+            type={isExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={onArrowToggle}
+          />
+        )}
+        <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
+        <span className="euiTreeView__nodeLabel">{aggData.key}</span>
+      </button>
+      <div
+        onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}
+      >
+        {!isLastNode && (
+          <DynamicTreeView
+            expanded={isExpanded}
+            query={query}
+            depth={depth + 1}
+            selectionDepth={{
+              ...selectionDepth,
+              [tree[depth].type]: aggData.key,
+            }}
+            tree={tree}
+            indexPattern={indexPattern}
+            onSelect={onSelect}
+            selected={selected}
+            aria-label={`${aggData.key} child of ${props['aria-label']}`}
+          />
+        )}
+      </div>
+    </li>
   );
 };
