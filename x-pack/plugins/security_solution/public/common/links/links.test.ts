@@ -27,9 +27,9 @@ const defaultAppLinks: AppLinkItems = [
     path: '/hosts',
     links: [
       {
-        id: SecurityPageName.hostsAuthentications,
-        title: 'Authentications',
-        path: `/hosts/authentications`,
+        id: SecurityPageName.hostsAnomalies,
+        title: 'Anomalies',
+        path: `/hosts/anomalies`,
       },
       {
         id: SecurityPageName.hostsEvents,
@@ -47,6 +47,25 @@ const mockCapabilities = {
   [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
   [SERVER_APP_ID]: { show: true },
 } as unknown as Capabilities;
+
+const fakePageId = 'fakePage';
+const testFeatureflag = 'detectionResponseEnabled';
+
+jest.mock('./app_links', () => {
+  const actual = jest.requireActual('./app_links');
+  const fakeLink = {
+    id: fakePageId,
+    title: 'test fake menu item',
+    path: 'test fake path',
+    hideWhenExperimentalKey: testFeatureflag,
+  };
+
+  return {
+    ...actual,
+    getAppLinks: () => [...actual.appLinks, fakeLink],
+    appLinks: [...actual.appLinks, fakeLink],
+  };
+});
 
 const licenseBasicMock = jest.fn().mockImplementation((arg: LicenseType) => arg === 'basic');
 const licensePremiumMock = jest.fn().mockReturnValue(true);

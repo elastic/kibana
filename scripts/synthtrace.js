@@ -13,4 +13,4 @@ require('../src/setup_node_env');
 // compile scenarios with `yarn kbn bootstrap` every time scenario changes.
 
 // eslint-disable-next-line @kbn/imports/uniform_imports
-require('../packages/elastic-apm-synthtrace/src/index').runSynthtrace();
+require('../packages/elastic-apm-synthtrace/src/cli').runSynthtrace();

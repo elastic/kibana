@@ -15,11 +15,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { IntegrationsPopover } from '../../../../../common/components/integrations_popover';
+import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
   APP_UI_ID,
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../../common/constants';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -28,7 +29,7 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
@@ -163,11 +164,11 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   name: null,
   align: 'center',
   render: (integrations: Rule['related_integrations']) => {
-    if (integrations?.length === 0) {
+    if (integrations == null || integrations.length === 0) {
       return null;
     }
 
-    return <IntegrationsPopover integrations={integrations} />;
+    return <IntegrationsPopover relatedIntegrations={integrations} />;
   },
   width: '143px',
   truncateText: true,
@@ -201,11 +202,12 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
   const enabledColumn = useEnabledColumn({ hasPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
+  const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
 
   return useMemo(
     () => [
       ruleNameColumn,
-      INTEGRATIONS_COLUMN,
+      ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
         field: 'risk_score',
@@ -294,7 +296,14 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
       enabledColumn,
       ...(hasPermissions ? [actionsColumn] : []),
     ],
-    [actionsColumn, enabledColumn, hasPermissions, isInMemorySorting, ruleNameColumn]
+    [
+      actionsColumn,
+      enabledColumn,
+      hasPermissions,
+      isInMemorySorting,
+      ruleNameColumn,
+      showRelatedIntegrations,
+    ]
   );
 };
 
@@ -304,6 +313,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
   const enabledColumn = useEnabledColumn({ hasPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
+  const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
 
   return useMemo(
     () => [
@@ -311,7 +321,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         ...ruleNameColumn,
         width: '28%',
       },
-      INTEGRATIONS_COLUMN,
+      ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
         field: 'execution_summary.last_execution.metrics.total_indexing_duration_ms',
@@ -426,6 +436,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
       hasPermissions,
       isInMemorySorting,
       ruleNameColumn,
+      showRelatedIntegrations,
     ]
   );
 };

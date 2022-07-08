@@ -240,7 +240,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
-                selectedOptions={createSelectedOptions(aggOption, aggOptions)}
+                selectedOptions={createSelectedOptions(aggOption)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
               />
@@ -251,7 +251,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={currentFieldOptions}
-                selectedOptions={createSelectedOptions(fieldOption, currentFieldOptions)}
+                selectedOptions={createSelectedOptions(fieldOption)}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldOptionEnabled === false}
@@ -266,7 +266,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={createSelectedOptions(byFieldOption, splitFieldOptions)}
+                selectedOptions={createSelectedOptions(byFieldOption)}
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
@@ -278,7 +278,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={createSelectedOptions(overFieldOption, splitFieldOptions)}
+                selectedOptions={createSelectedOptions(overFieldOption)}
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
@@ -290,7 +290,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={createSelectedOptions(partitionFieldOption, splitFieldOptions)}
+                selectedOptions={createSelectedOptions(partitionFieldOption)}
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
@@ -302,10 +302,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
-                selectedOptions={createSelectedOptions(
-                  excludeFrequentOption,
-                  excludeFrequentOptions
-                )}
+                selectedOptions={createSelectedOptions(excludeFrequentOption)}
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
@@ -427,17 +424,8 @@ function createDefaultDescription(dtr: RichDetector) {
   return detectorToString(basicDetector);
 }
 
-// fixes issue with EuiComboBox.
-// if the options list only contains one option and nothing has been selected, set
-// selectedOptions list to be an empty array
-function createSelectedOptions(
-  selectedOption: EuiComboBoxOptionOption,
-  options: EuiComboBoxOptionOption[]
-): EuiComboBoxOptionOption[] {
-  return (options.length === 1 && options[0].label !== selectedOption.label) ||
-    selectedOption.label === ''
-    ? []
-    : [selectedOption];
+function createSelectedOptions(selectedOption: EuiComboBoxOptionOption): EuiComboBoxOptionOption[] {
+  return selectedOption === undefined || selectedOption.label === '' ? [] : [selectedOption];
 }
 
 function comboBoxOptionsSort(a: EuiComboBoxOptionOption, b: EuiComboBoxOptionOption) {

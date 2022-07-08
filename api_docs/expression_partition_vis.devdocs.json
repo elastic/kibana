@@ -253,7 +253,9 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<object> | undefined; }"
+              "<",
+              "SerializableRecord",
+              "> | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false

@@ -19,7 +19,6 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ConfigSchema } from '..';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
@@ -48,7 +47,6 @@ function App() {
 }
 
 export const renderApp = ({
-  config,
   core,
   plugins,
   appMountParameters,
@@ -56,8 +54,8 @@ export const renderApp = ({
   ObservabilityPageTemplate,
   kibanaFeatures,
   usageCollection,
+  isDev,
 }: {
-  config: ConfigSchema;
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
@@ -65,6 +63,7 @@ export const renderApp = ({
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   kibanaFeatures: KibanaFeature[];
   usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -86,12 +85,11 @@ export const renderApp = ({
     <ApplicationUsageTrackingProvider>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider
-          services={{ ...core, ...plugins, storage: new Storage(localStorage) }}
+          services={{ ...core, ...plugins, storage: new Storage(localStorage), isDev }}
         >
           <PluginContext.Provider
             value={{
               appMountParameters,
-              config,
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate,
               kibanaFeatures,

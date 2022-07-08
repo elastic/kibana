@@ -89,15 +89,15 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText emotion-euiText-s"
           >
             Status
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -186,15 +186,15 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText emotion-euiText-s"
           >
             Risk Score
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -253,7 +253,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
       </div>
     </div>
     <div
-      class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
       class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
@@ -262,15 +262,15 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText emotion-euiText-s"
           >
             Rule
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -279,7 +279,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
               class="c2"
             >
               <button
-                class="euiLink css-102pf9n-euiLink-primary"
+                class="euiLink emotion-euiLink-primary"
                 data-test-subj="ruleName"
                 type="button"
               >
@@ -330,56 +330,6 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  .c0 {
-  position: fixed;
-  bottom: 60px;
-  left: 20px;
-  height: 50vh;
-  width: 48vw;
-  max-width: 90vw;
-}
-
-.c0.is-hidden {
-  display: none;
-}
-
-.c0.is-confirming .modal-content {
-  opacity: 0.3;
-}
-
-.c0 .console-holder {
-  height: 100%;
-}
-
-.c0 .terminate-confirm-panel {
-  max-width: 85%;
-  -webkit-box-flex: 0;
-  -webkit-flex-grow: 0;
-  -ms-flex-positive: 0;
-  flex-grow: 0;
-}
-
-<div
-    class="c0 euiModal euiModal--maxWidth-default is-hidden"
-    data-test-subj="consolePopupWrapper"
-  >
-    <div
-      class="euiModal__flex modal-content"
-    >
-      <div
-        class="euiModalBody"
-        data-test-subj="consolePopupBody"
-      >
-        <div
-          class="euiModalBody__overflow"
-        >
-          <div
-            class="console-holder"
-          />
         </div>
       </div>
     </div>

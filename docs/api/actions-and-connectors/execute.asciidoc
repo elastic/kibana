@@ -1,19 +1,19 @@
 [[execute-connector-api]]
-=== Execute connector API
+== Run connector API
 ++++
-<titleabbrev>Execute connector</titleabbrev>
+<titleabbrev>Run connector</titleabbrev>
 ++++
 
-Executes a connector by ID.
+Runs a connector by ID.
 
 [[execute-connector-api-request]]
-==== {api-request-title}
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/actions/connector/<id>/_execute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
 
-[discrete]
+[[execute-connector-api-prereq]]
 === {api-prereq-title}
 
 You must have `read` privileges for the *Actions and Connectors* feature in the
@@ -23,30 +23,161 @@ You must have `read` privileges for the *Actions and Connectors* feature in the
 If you use an index connector, you must also have `all`, `create`, `index`, or
 `write` {ref}/security-privileges.html[indices privileges].
 
+[[execute-connector-api-desc]]
+=== {api-description-title}
+
+You can use this API to test an <<alerting-concepts-actions,action>> that 
+involves interaction with Kibana services or integrations with third-party
+systems.
+
 [[execute-connector-api-params]]
-==== {api-path-parms-title}
+=== {api-path-parms-title}
 
 `id`::
-  (Required, string) The ID of the connector.
+(Required, string) The ID of the connector.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
+[role="child_attributes"]
 [[execute-connector-api-request-body]]
-==== {api-request-body-title}
+=== {api-request-body-title}
 
 `params`::
-  (Required, object) The parameters of the connector. Parameter properties vary depending on
-  the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
+(Required, object) The parameters of the connector. Parameter properties vary
+depending on the connector type. For information about the parameter properties,
+refer to <<action-types>>.
++
+--
+.Index connectors
+[%collapsible%open]
+====
+`documents`::
+(Required, array of objects) The documents to index in JSON format.
+
+For more information, refer to
+{kibana-ref}/index-action-type.html[Index connector and action].
+====
+
+.Jira connectors
+[%collapsible%open]
+====
+`subAction`::
+(Required, string) The action to test. Valid values include: `fieldsByIssueType`,
+`getFields`, `getIncident`, `issue`, `issues`, `issueTypes`, and `pushToService`.
+
+`subActionParams`::
+(Required^*^, object) The set of configuration properties, which vary depending
+on the `subAction` value. This object is not required when `subAction` is
+`getFields` or `issueTypes`.
++
+.Properties when `subAction` is `fieldsByIssueType`
+[%collapsible%open]
+=====
+`id`:::
+(Required, string) The Jira issue type identifier. For example, `10024`.
+=====
++
+.Properties when `subAction` is `getIncident`
+[%collapsible%open]
+=====
+`externalId`:::
+(Required, string) The Jira issue identifier. For example, `71778`.
+=====
++
+.Properties when `subAction` is `issue`
+[%collapsible%open]
+=====
+`id`:::
+(Required, string) The Jira issue identifier. For example, `71778`.
+=====
++
+.Properties when `subAction` is `issues`
+[%collapsible%open]
+=====
+`title`:::
+(Required, string) The title of the Jira issue.
+=====
++
+.Properties when `subAction` is `pushToService`
+[%collapsible%open]
+=====
+comments:::
+(Optional, array of objects) Additional information that is sent to Jira.
++
+.Properties of `comments`
+[%collapsible%open]
+======
+comment::::
+(string) A comment related to the incident. For example, describe how to
+troubleshoot the issue.
+
+commentId::::
+(integer) A unique identifier for the comment.
+======
+
+incident:::
+(Required, object) Information necessary to create or update a Jira incident.
++
+.Properties of `incident`
+[%collapsible%open]
+======
+`description`::::
+(Optional, string) The details about the incident.
+
+`externalId`::::
+(Optional, string) The Jira issue identifier. If present, the incident is
+updated. Otherwise, a new incident is created.
+
+`labels`::::
+(Optional, array of strings) The labels for the incident. For example,
+`["LABEL1"]`. NOTE: Labels cannot contain spaces.
+
+`issueType`::::
+(Optional, integer) The type of incident. For example, `10006`. To obtain the
+list of valid values, set `subAction` to `issueTypes`.
+
+`parent`::::
+(Optional, string) The ID or key of the parent issue. Applies only to `Sub-task`
+types of issues.
+
+`priority`::::
+(Optional, string) The incident priority level. For example, `Lowest`.
+
+`summary`::::
+(Required, string) A summary of the incident.
+
+`title`::::
+(Optional, string) A title for the incident, used for searching the contents of
+the knowledge base.
+======
+=====
+
+For more information, refer to
+{kibana-ref}/jira-action-type.html[{jira} connector and action].
+====
+
+.Server log connectors
+[%collapsible%open]
+====
+`level`::
+(Optional, string) The log level of the message: `trace`, `debug`, `info`,
+`warn`, `error`, or `fatal`. Defaults to `info`.
+
+`message`::
+(Required, string) The message to log.
+====
+--
 
 [[execute-connector-api-codes]]
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[execute-connector-api-example]]
-==== {api-examples-title}
+=== {api-examples-title}
 
 Run an index connector:
 
@@ -79,7 +210,7 @@ The API returns the following:
     "items": [
       {
         "index": {
-          "_index": "updated-index",
+          "_index": "test-index",
           "_id": "iKyijHcBKCsmXNFrQe3T",
           "_version": 1,
           "result": "created",
@@ -88,7 +219,7 @@ The API returns the following:
             "successful": 1,
             "failed": 0
           },
-          "_seq_no": 7,
+          "_seq_no": 0,
           "_primary_term": 1,
           "status": 201
         }
@@ -96,5 +227,54 @@ The API returns the following:
     ]
   },
   "connector_id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+}
+--------------------------------------------------
+
+Run a server log connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/7fc7b9a0-ecc9-11ec-8736-e7d63118c907/_execute
+{
+  "params": {
+    "level": "warn",
+    "message": "Test warning message"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{"status":"ok","connector_id":"7fc7b9a0-ecc9-11ec-8736-e7d63118c907"}
+--------------------------------------------------
+
+Retrieve the list of issue types for a Jira connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/b3aad810-edbe-11ec-82d1-11348ecbf4a6/_execute
+{
+  "params": {
+    "subAction": "issueTypes"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "status":"ok",
+  "data":[
+    {"id":"10024","name":"Improvement"},{"id":"10006","name":"Task"},
+    {"id":"10007","name":"Sub-task"},{"id":"10025","name":"New Feature"},
+    {"id":"10023","name":"Bug"},{"id":"10000","name":"Epic"}
+  ],
+  "connector_id":"b3aad810-edbe-11ec-82d1-11348ecbf4a6"
 }
 --------------------------------------------------

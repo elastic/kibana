@@ -89,7 +89,7 @@ export function OverviewPage({ routeParams }: Props) {
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
 
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
@@ -128,6 +128,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
 
   useEffect(() => {
     if (hasAnyData !== true) {
@@ -155,13 +156,12 @@ export function OverviewPage({ routeParams }: Props) {
     docsLink: docLinks.links.observability.guide,
   });
 
-  const alertsLink = config.unsafe.alertingExperience.enabled
-    ? paths.observability.alerts
-    : paths.management.rules;
+  const alertsLink = paths.observability.alerts;
 
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      isPageDataLoaded={Boolean(hasAnyData)}
       pageHeader={
         hasData
           ? {
@@ -197,11 +197,10 @@ export function OverviewPage({ routeParams }: Props) {
                     defaultMessage: 'Show alerts',
                   }),
                 }}
-                showExperimentalBadge={true}
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
-                  userCanCrud={userPermissions?.crud ?? false}
+                  permissions={casesPermissions}
                   features={{ alerts: { sync: false } }}
                 >
                   <AlertsTableTGrid
@@ -310,6 +309,7 @@ function PageHeader({
         <EuiButton
           // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
           buttonRef={buttonRef}
+          id="guidedSetupButton"
           color="text"
           iconType="wrench"
           onClick={handleGuidedSetupClick}

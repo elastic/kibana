@@ -22,7 +22,6 @@ import type {
   Logger,
   LoggerFactory,
   OnPreResponseToolkit,
-  UnauthorizedError,
   UnauthorizedErrorHandler,
   UnauthorizedErrorHandlerToolkit,
 } from '@kbn/core/server';
@@ -34,6 +33,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { UnauthorizedError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
@@ -49,6 +49,7 @@ import { securityMock } from '../mocks';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
+import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
 
@@ -69,9 +70,11 @@ describe('AuthenticationService', () => {
     http: jest.Mocked<HttpServiceStart>;
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
+    userProfileService: ReturnType<typeof userProfileServiceMock.createStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
     applicationName: 'kibana-.kibana';
     kibanaFeatures: [];
+    isElasticCloudDeployment: jest.Mock;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -110,8 +113,10 @@ describe('AuthenticationService', () => {
       loggers: loggingSystemMock.create(),
       featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
       session: sessionMock.create(),
+      userProfileService: userProfileServiceMock.createStart(),
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
+      isElasticCloudDeployment: jest.fn().mockReturnValue(false),
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath

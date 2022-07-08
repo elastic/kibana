@@ -12,8 +12,11 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   perPage: t.number,
   sortField: t.string,
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
-  search: t.string,
+  query: t.string,
   searchFields: t.array(t.string),
+  tags: t.array(t.string),
+  locations: t.array(t.string),
+  monitorType: t.array(t.string),
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<

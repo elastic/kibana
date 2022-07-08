@@ -31,7 +31,7 @@ describe(`Console's send request`, () => {
 
   it('correctly implements timeout and abort mechanism', async () => {
     fakeRequest = {
-      abort: sinon.stub(),
+      destroy: sinon.stub(),
       on() {},
       once() {},
     } as any;
@@ -47,7 +47,7 @@ describe(`Console's send request`, () => {
       fail('Should not reach here!');
     } catch (e) {
       expect(e.message).toEqual('Client request timeout');
-      expect((fakeRequest.abort as sinon.SinonStub).calledOnce).toBe(true);
+      expect((fakeRequest.destroy as sinon.SinonStub).calledOnce).toBe(true);
     }
   });
 
@@ -148,22 +148,6 @@ describe(`Console's send request`, () => {
       expect(result).toEqual('done');
       const [httpRequestOptions] = stub.firstCall.args;
       expect((httpRequestOptions as any).path).toEqual('/%3Cmy-index-%7Bnow%2Fd%7D%3E');
-    });
-
-    it('should not encode path if it does not require encoding', async () => {
-      const result = await proxyRequest({
-        agent: null as any,
-        headers: {},
-        method: 'get',
-        payload: null as any,
-        timeout: 30000,
-        uri: new URL(`http://noone.nowhere.none/my-index/_doc/this%2Fis%2Fa%2Fdoc`),
-        originalPath: 'my-index/_doc/this%2Fis%2Fa%2Fdoc',
-      });
-
-      expect(result).toEqual('done');
-      const [httpRequestOptions] = stub.firstCall.args;
-      expect((httpRequestOptions as any).path).toEqual('/my-index/_doc/this%2Fis%2Fa%2Fdoc');
     });
   });
 });

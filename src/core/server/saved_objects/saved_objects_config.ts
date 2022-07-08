@@ -19,6 +19,12 @@ const migrationSchema = schema.object({
         valid(value) ? undefined : 'The value is not a valid semantic version',
     })
   ),
+  discardCorruptObjects: schema.maybe(
+    schema.string({
+      validate: (value: string) =>
+        valid(value) ? undefined : 'The value is not a valid semantic version',
+    })
+  ),
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),

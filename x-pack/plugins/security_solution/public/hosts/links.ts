@@ -18,22 +18,12 @@ export const links: LinkItem = {
     defaultMessage: 'A comprehensive overview of all hosts and host-related security events.',
   }),
   path: HOSTS_PATH,
-  globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.hosts', {
       defaultMessage: 'Hosts',
     }),
   ],
-  globalNavOrder: 9002,
   links: [
-    {
-      id: SecurityPageName.hostsAuthentications,
-      title: i18n.translate('xpack.securitySolution.appLinks.hosts.authentications', {
-        defaultMessage: 'Authentications',
-      }),
-      path: `${HOSTS_PATH}/authentications`,
-      hideWhenExperimentalKey: 'usersEnabled',
-    },
     {
       id: SecurityPageName.uncommonProcesses,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.uncommonProcesses', {

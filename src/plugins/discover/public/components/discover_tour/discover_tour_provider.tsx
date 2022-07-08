@@ -26,7 +26,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { PLUGIN_ID } from '../../../common';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverTourContext, DiscoverTourContextProps } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 

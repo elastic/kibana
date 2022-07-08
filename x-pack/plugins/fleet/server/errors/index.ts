@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type { ElasticsearchErrorDetails } from '@kbn/core/server';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isESClientError } from './utils';
 
@@ -31,6 +31,11 @@ export class RegistryResponseError extends RegistryError {
 export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
+export class PackageFailedVerificationError extends IngestManagerError {
+  constructor(pkgKey: string) {
+    super(`${pkgKey} failed signature verification.`);
+  }
+}
 export class AgentPolicyError extends IngestManagerError {}
 export class AgentPolicyNotFoundError extends IngestManagerError {}
 export class AgentNotFoundError extends IngestManagerError {}
@@ -60,6 +65,7 @@ export class FleetUnauthorizedError extends IngestManagerError {}
 export class OutputUnauthorizedError extends IngestManagerError {}
 export class OutputInvalidError extends IngestManagerError {}
 export class OutputLicenceError extends IngestManagerError {}
+export class DownloadSourceError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {

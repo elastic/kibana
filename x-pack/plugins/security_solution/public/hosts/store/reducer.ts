@@ -36,8 +36,8 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.hosts]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        direction: Direction.desc,
         limit: DEFAULT_TABLE_LIMIT,
+        direction: Direction.desc,
         sortField: HostsFields.lastSeen,
       },
       [HostsTableType.events]: {

@@ -7,9 +7,26 @@
 
 export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
 export type { User, EditUser } from './user';
+export type {
+  AuthenticatedUserProfile,
+  UserProfile,
+  UserData,
+  UserInfo,
+  UserAvatarData,
+} from './user_profile';
+export {
+  getUserAvatarColor,
+  getUserAvatarInitials,
+  USER_AVATAR_MAX_INITIALS,
+} from './user_profile';
 export { getUserDisplayName } from './user';
 export type { AuthenticatedUser, UserRealm } from './authenticated_user';
-export { canUserChangePassword } from './authenticated_user';
+export {
+  canUserChangePassword,
+  canUserChangeDetails,
+  isUserAnonymous,
+  canUserHaveProfile,
+} from './authenticated_user';
 export type { AuthenticationProvider } from './authentication_provider';
 export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';

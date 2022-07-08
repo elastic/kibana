@@ -101,10 +101,6 @@ export function ObservabilityAlertsCommonProvider({
     return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
   };
 
-  const getExperimentalDisclaimer = async () => {
-    return testSubjects.existOrFail('o11yExperimentalDisclaimer');
-  };
-
   const getTableCellsInRows = async () => {
     const columnHeaders = await getTableColumnHeaders();
     if (columnHeaders.length <= 0) {
@@ -338,7 +334,6 @@ export function ObservabilityAlertsCommonProvider({
     openActionsMenuForRow,
     getTimeRange,
     navigateWithoutFilter,
-    getExperimentalDisclaimer,
     getActionsButtonByIndex,
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,

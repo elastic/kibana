@@ -22,7 +22,6 @@ import { HOSTS_PATH } from '../../../common/constants';
 import {
   HostsQueryTabBody,
   HostRiskScoreQueryTabBody,
-  AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
@@ -86,9 +85,6 @@ export const HostsTabs = memo<HostsTabsProps>(
       <Switch>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}>
           <HostRiskScoreQueryTabBody {...tabProps} />
