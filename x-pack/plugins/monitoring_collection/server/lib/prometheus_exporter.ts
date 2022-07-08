@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-// Adapted from https://github.com/open-telemetry/opentelemetry-js/blob/aabc5f6b89e3d9af6640fb854967212ca5b1a3b8/experimental/packages/opentelemetry-exporter-prometheus/src/PrometheusExporter.ts
-
 import { AggregationTemporality, MetricReader } from '@opentelemetry/sdk-metrics-base';
-import { PrometheusExporter as OpenTelemetryPrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { ExporterConfig } from '@opentelemetry/exporter-prometheus';
+import {
+  PrometheusExporter as OpenTelemetryPrometheusExporter,
+  ExporterConfig,
+  PrometheusSerializer,
+} from '@opentelemetry/exporter-prometheus';
 import { KibanaResponseFactory } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
-import { PrometheusSerializer } from './prometheus_serializer';
 
 export class PrometheusExporter extends MetricReader {
   private readonly _prefix?: string;
   private readonly _appendTimestamp: boolean;
   private _serializer: PrometheusSerializer;
 
-  constructor(logger: Logger, config: ExporterConfig = {}) {
+  constructor(config: ExporterConfig = {}) {
     super();
     this._prefix = config.prefix || OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.prefix;
     this._appendTimestamp =
@@ -27,7 +26,7 @@ export class PrometheusExporter extends MetricReader {
         ? config.appendTimestamp
         : OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.appendTimestamp;
 
-    this._serializer = new PrometheusSerializer(logger, this._prefix, this._appendTimestamp);
+    this._serializer = new PrometheusSerializer(this._prefix, this._appendTimestamp);
   }
 
   selectAggregationTemporality(): AggregationTemporality {
@@ -45,31 +44,30 @@ export class PrometheusExporter extends MetricReader {
   /**
    * Responds to incoming message with current state of all metrics.
    */
-  public exportMetrics(res: KibanaResponseFactory) {
-    // TODO: How can I type this return without requiring (forbidden path) KibanaReponse?
-    return this.collect().then(
-      (collectionResult) => {
-        const { resourceMetrics, errors } = collectionResult;
-        if (errors.length) {
-          return res.customError({
-            statusCode: 500,
-            body: `PrometheusExporter: metrics collection errors ${errors}`,
-          });
-        }
-        const result = this._serializer.serialize(resourceMetrics);
-        if (result === '') {
-          return res.noContent();
-        }
-        return res.ok({
-          body: result,
-        });
-      },
-      (err) => {
+  public async exportMetrics(res: KibanaResponseFactory) {
+    try {
+      const collectionResult = await this.collect();
+      const { resourceMetrics, errors } = collectionResult;
+      if (errors.length) {
         return res.customError({
           statusCode: 500,
-          body: `# Failed to export metrics ${err}`,
+          body: `PrometheusExporter: Metrics collection errors ${errors}`,
         });
       }
-    );
+      const result = this._serializer.serialize(resourceMetrics);
+      if (result === '') {
+        return res.noContent();
+      }
+      return res.ok({
+        body: result,
+      });
+    } catch (error) {
+      return res.customError({
+        statusCode: 500,
+        body: {
+          message: `PrometheusExporter: Failed to export metrics ${error}`,
+        },
+      });
+    }
   }
 }

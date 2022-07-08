@@ -55,7 +55,7 @@ import {
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { InMemoryMetrics, IN_MEMORY_METRICS, Metrics } from '../monitoring';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
@@ -111,7 +111,6 @@ export class TaskRunner<
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
-  private readonly metrics: Metrics;
   private alertingEventLogger: AlertingEventLogger;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
@@ -129,8 +128,7 @@ export class TaskRunner<
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics,
-    metrics: Metrics
+    inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
     this.logger = context.logger;
@@ -143,7 +141,6 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
-    this.metrics = metrics;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -679,7 +676,6 @@ export class TaskRunner<
     if (null != duration) {
       executionStatus.lastDuration = nanosToMillis(duration);
       monitoringHistory.duration = executionStatus.lastDuration;
-      this.metrics.ruleDuration.record(executionStatus.lastDuration);
     }
 
     // if executionStatus indicates an error, fill in fields in
@@ -696,12 +692,8 @@ export class TaskRunner<
 
     if (!this.cancelled) {
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-      // NOTE: Using the typesafe opentelemetry counter here directly
-      this.metrics.ruleExecutionsTotal.add(1);
-      this.metrics.ruleExecutions.add(1, { ruleType: this.ruleType.id });
       if (executionStatus.error) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-        this.metrics.ruleFailures.add(1);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(

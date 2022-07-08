@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerDynamicRoute } from './dynamic_route';
+import { registerDynamicRoute } from '.';
 import { KibanaRequest, KibanaResponseFactory, ServiceStatusLevels } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -15,7 +15,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-jest.mock('../lib', () => ({
+jest.mock('../../../../lib', () => ({
   getESClusterUuid: () => 'clusterA',
   getKibanaStats: () => ({ name: 'myKibana' }),
 }));
@@ -42,7 +42,7 @@ describe('dynamic route', () => {
     const router = httpServiceMock.createRouter();
 
     const getMetric = async () => {
-      return { foo: 1 };
+      return Promise.resolve({ foo: 1 });
     };
     registerDynamicRoute({
       router,
@@ -81,7 +81,7 @@ describe('dynamic route', () => {
     const router = httpServiceMock.createRouter();
 
     const getMetric = async () => {
-      return {};
+      return Promise.resolve({});
     };
     registerDynamicRoute({ router, config: kibanaStatsConfig, getStatus, getMetric });
 

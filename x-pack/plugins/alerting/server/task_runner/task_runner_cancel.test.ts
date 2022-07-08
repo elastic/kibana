@@ -35,7 +35,6 @@ import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { metricsMock } from '../monitoring/metrics.mock';
 import {
   AlertingEventLogger,
   RuleContextOpts,
@@ -96,7 +95,6 @@ describe('Task Runner Cancel', () => {
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const dataPlugin = dataPluginMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
-  const metrics = metricsMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -178,8 +176,7 @@ describe('Task Runner Cancel', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      metrics
+      inMemoryMetrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -247,8 +244,7 @@ describe('Task Runner Cancel', () => {
         ...taskRunnerFactoryInitializerParams,
         cancelAlertsOnRuleTimeout: false,
       },
-      inMemoryMetrics,
-      metrics
+      inMemoryMetrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -312,8 +308,7 @@ describe('Task Runner Cancel', () => {
       updatedRuleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      metrics
+      inMemoryMetrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -373,8 +368,7 @@ describe('Task Runner Cancel', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      metrics
+      inMemoryMetrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 

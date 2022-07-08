@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { registerV1PrometheusRoute } from './prometheus';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { PrometheusExporter } from '../lib/prometheus_exporter';
+import { registerV1PrometheusRoute } from '.';
+import { PrometheusExporter } from '../../../../lib';
 
-describe('prometheus route', () => {
+describe('Prometheus route', () => {
   it('forwards the request to the prometheus exporter', async () => {
     const router = httpServiceMock.createRouter();
-    const prometheusExporter = { exportMetrics: jest.fn() } as unknown as PrometheusExporter;
+    const prometheusExporter = {
+      exportMetrics: jest.fn(),
+    } as Partial<PrometheusExporter> as PrometheusExporter;
+
     registerV1PrometheusRoute({ router, prometheusExporter });
 
     const [, handler] = router.get.mock.calls[0];
 
-    const context = {};
-    const req = { params: {} } as KibanaRequest;
-    const factory: jest.Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
+    const context = {} as jest.Mocked<RequestHandlerContext>;
+    const req = httpServerMock.createKibanaRequest();
+    const factory = httpServerMock.createResponseFactory();
 
     await handler(context, req, factory);
 

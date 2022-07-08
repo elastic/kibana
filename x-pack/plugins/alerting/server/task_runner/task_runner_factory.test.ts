@@ -26,10 +26,8 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { metricsMock } from '../monitoring/metrics.mock';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
-const metrics = metricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -117,7 +115,7 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics, metrics)
+      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

@@ -49,7 +49,6 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { metrics } from '@opentelemetry/api-metrics';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -78,12 +77,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import {
-  registerNodeCollector,
-  registerClusterCollector,
-  InMemoryMetrics,
-  Metrics,
-} from './monitoring';
+import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
 
@@ -179,7 +173,6 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private metrics: Metrics;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -190,7 +183,6 @@ export class AlertingPlugin {
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
-    this.metrics = new Metrics(metrics.getMeter('kibana.alerting'));
   }
 
   public setup(
@@ -235,7 +227,6 @@ export class AlertingPlugin {
       licensing: plugins.licensing,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
-      metrics: this.metrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 

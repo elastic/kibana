@@ -6,9 +6,14 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+  ServiceStatus,
+} from '@kbn/core/server';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { ServiceStatus } from '@kbn/core/server';
 import { metrics } from '@opentelemetry/api-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
@@ -17,8 +22,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import * as grpc from '@grpc/grpc-js';
 import { PrometheusExporter } from './lib/prometheus_exporter';
 import { MonitoringCollectionConfig } from './config';
-import { registerDynamicRoute, registerV1PrometheusRoute } from './routes';
-import { PROMETHEUS_ROUTE, TYPE_ALLOWLIST } from './constants';
+import { registerDynamicRoute, registerV1PrometheusRoute, PROMETHEUS_PATH } from './routes';
+import { TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {
   registerMetric: <T>(metric: Metric<T>) => void;
@@ -126,14 +131,9 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       const url = otlpConfig.url;
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
 
-      // Enable SSL when otlp url starts with https
-      // NOTE: We can remove the explicit credentials once https://github.com/open-telemetry/opentelemetry-js/pull/3019 is released
-      let credentials: grpc.ChannelCredentials;
-      if (url.startsWith('https://')) {
-        credentials = grpc.credentials.createSsl();
-      } else {
-        credentials = grpc.credentials.createInsecure();
-      }
+      const credentials = url.startsWith('https://')
+        ? grpc.credentials.createSsl()
+        : grpc.credentials.createInsecure();
 
       // Set Authorization headers
       const metadata = new grpc.Metadata();
@@ -154,8 +154,8 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     if (this.config.opentelemetry?.metrics.prometheus.enabled) {
       // Add Prometheus exporter
-      this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_ROUTE}`);
-      this.prometheusExporter = new PrometheusExporter(this.logger);
+      this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_PATH}`);
+      this.prometheusExporter = new PrometheusExporter();
       meterProvider.addMetricReader(this.prometheusExporter);
     }
   }

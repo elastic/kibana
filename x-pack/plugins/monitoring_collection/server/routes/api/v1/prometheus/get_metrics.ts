@@ -6,9 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { PROMETHEUS_ROUTE } from '../constants';
-import { PrometheusExporter } from '../lib/prometheus_exporter';
+import { MONITORING_COLLECTION_BASE_PATH } from '../../../../constants';
+import { PrometheusExporter } from '../../../../lib';
 
+export const PROMETHEUS_PATH = `${MONITORING_COLLECTION_BASE_PATH}/v1/prometheus`;
 export function registerV1PrometheusRoute({
   router,
   prometheusExporter,
@@ -18,14 +19,14 @@ export function registerV1PrometheusRoute({
 }) {
   router.get(
     {
-      path: PROMETHEUS_ROUTE,
+      path: PROMETHEUS_PATH,
       options: {
         authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {},
     },
-    async (context, req, res) => {
+    async (_context, _req, res) => {
       return prometheusExporter.exportMetrics(res);
     }
   );
