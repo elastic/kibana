@@ -15,11 +15,8 @@ import {
   mapDestroyed,
   mapExtentChanged,
   mapReady,
-  setAreTilesLoaded,
-  setLayerDataLoadErrorStatus,
   setMapInitError,
   setMouseCoordinates,
-  updateMetaFromTiles,
 } from '../../actions';
 import {
   getCustomIcons,
@@ -27,7 +24,6 @@ import {
   getLayerList,
   getMapReady,
   getMapSettings,
-  getScrollZoom,
   getSpatialFiltersLayer,
   getTimeslice,
 } from '../../selectors/map_selectors';
@@ -35,7 +31,6 @@ import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common/constants';
-import { TileMetaFeature } from '../../../common/descriptor_types';
 import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
@@ -47,7 +42,6 @@ function mapStateToProps(state: MapStoreState) {
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
     timeslice: getTimeslice(state),
     featureModeActive:
@@ -81,18 +75,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));
-    },
-    setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
-      dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
-    },
-    updateMetaFromTiles(layerId: string, features: TileMetaFeature[]) {
-      dispatch(updateMetaFromTiles(layerId, features));
-    },
-    clearTileLoadError(layerId: string) {
-      dispatch(setLayerDataLoadErrorStatus(layerId, null));
-    },
-    setTileLoadError(layerId: string, errorMessage: string) {
-      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
     },
   };
 }

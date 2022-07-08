@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../../common/constants';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { useKibana, useUiSetting$ } from '../../../../../../common/lib/kibana';
@@ -117,12 +125,24 @@ export interface RulesTableActions {
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsInMemorySorting: (value: boolean) => void;
+  /**
+   * enable/disable rules table auto refresh
+   *
+   * @example
+   *
+   * setIsRefreshOn(true) // enables auto refresh
+   * setIsRefreshOn(false) // disables auto refresh
+   */
   setIsRefreshOn: React.Dispatch<React.SetStateAction<boolean>>;
   setLoadingRules: React.Dispatch<React.SetStateAction<LoadingRules>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPerPage: React.Dispatch<React.SetStateAction<number>>;
   setSelectedRuleIds: React.Dispatch<React.SetStateAction<string[]>>;
   setSortingOptions: React.Dispatch<React.SetStateAction<SortingOptions>>;
+  /**
+   * clears rules selection on a page
+   */
+  clearRulesSelection: () => void;
 }
 
 export interface RulesTableContextType {
@@ -163,6 +183,7 @@ export const RulesTableContextProvider = ({
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
+  const autoRefreshBeforePause = useRef<boolean | null>(null);
 
   const toggleInMemorySorting = useCallback(
     (value: boolean) => {
@@ -192,6 +213,26 @@ export const RulesTableContextProvider = ({
     setSelectedRuleIds([]);
     setIsAllSelected(false);
   }, []);
+
+  const clearRulesSelection = useCallback(() => {
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
+
+  useEffect(() => {
+    // pause table auto refresh when any of rule selected
+    // store current auto refresh value, to use it later, when all rules selection will be cleared
+    if (selectedRuleIds.length > 0) {
+      setIsRefreshOn(false);
+      if (autoRefreshBeforePause.current == null) {
+        autoRefreshBeforePause.current = isRefreshOn;
+      }
+    } else {
+      // if no rules selected, update auto refresh value, with previously stored value
+      setIsRefreshOn(autoRefreshBeforePause.current ?? isRefreshOn);
+      autoRefreshBeforePause.current = null;
+    }
+  }, [selectedRuleIds, isRefreshOn]);
 
   // Fetch rules
   const {
@@ -257,6 +298,7 @@ export const RulesTableContextProvider = ({
         setPerPage,
         setSelectedRuleIds,
         setSortingOptions,
+        clearRulesSelection,
       },
     }),
     [
@@ -281,7 +323,9 @@ export const RulesTableContextProvider = ({
       selectedRuleIds,
       sortingOptions,
       toggleInMemorySorting,
+      setSelectedRuleIds,
       total,
+      clearRulesSelection,
     ]
   );
 

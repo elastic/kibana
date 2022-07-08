@@ -10,7 +10,7 @@ import { Server } from '@hapi/hapi';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { configMock } from '@kbn/config-mocks';
 
-import { CspConfig } from '../csp';
+import { CspConfig } from './csp';
 import { mockRouter, RouterMock } from './router/router.mock';
 import {
   InternalHttpServicePreboot,
@@ -28,8 +28,9 @@ import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
-import { ExternalUrlConfig } from '../external_url';
+import { ExternalUrlConfig } from './external_url';
 import type { IAuthHeadersStorage } from './auth_headers_storage';
+import type { RequestHandlerContextBase } from '..';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
@@ -38,9 +39,9 @@ export type HttpServicePrebootMock = jest.Mocked<HttpServicePreboot>;
 export type InternalHttpServicePrebootMock = jest.Mocked<
   Omit<InternalHttpServicePreboot, 'basePath'>
 > & { basePath: BasePathMocked };
-export type HttpServiceSetupMock = jest.Mocked<
-  Omit<HttpServiceSetup, 'basePath' | 'createRouter'>
-> & {
+export type HttpServiceSetupMock<
+  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
+> = jest.Mocked<Omit<HttpServiceSetup<ContextType>, 'basePath' | 'createRouter'>> & {
   basePath: BasePathMocked;
   createRouter: jest.MockedFunction<() => RouterMock>;
 };
@@ -166,10 +167,12 @@ const createInternalSetupContractMock = () => {
   return mock;
 };
 
-const createSetupContractMock = () => {
+const createSetupContractMock = <
+  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
+>() => {
   const internalMock = createInternalSetupContractMock();
 
-  const mock: HttpServiceSetupMock = {
+  const mock: HttpServiceSetupMock<ContextType> = {
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
     registerOnPreRouting: internalMock.registerOnPreRouting,
     registerOnPreAuth: jest.fn(),
