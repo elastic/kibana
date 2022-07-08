@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { Rule } from '../../../../types';
@@ -36,13 +36,13 @@ export const RuleAlertsSummary = ({ rule, filteredSolutions }: RuleAlertsSummary
   if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
   if (errorRuleAlertsAggs) return <EuiFlexItem>Error</EuiFlexItem>;
   return (
-    <EuiFlexGroup direction="column">
+    <EuiPanel hasShadow={false}>
       <EuiFlexGroup>
         <EuiFlexItem>Total: {ruleAlertsAggs.active + ruleAlertsAggs.recovered}</EuiFlexItem>
         <EuiFlexItem>Active: {ruleAlertsAggs.active}</EuiFlexItem>
         <EuiFlexItem>Recovered: {ruleAlertsAggs.recovered}</EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 
