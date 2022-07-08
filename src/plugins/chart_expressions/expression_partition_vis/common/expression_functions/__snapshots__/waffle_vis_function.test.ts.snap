@@ -151,6 +151,4 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#waffleVis throws error if provided not valid legend position 1`] = `"Invalid legend position: 'some not valid position'. Supported values: top, bottom, left, right."`;
-
 exports[`interpreter/functions#waffleVis throws error if provided split row and split column at once 1`] = `"A split row and column are specified. Expression is supporting only one of them at once."`;
