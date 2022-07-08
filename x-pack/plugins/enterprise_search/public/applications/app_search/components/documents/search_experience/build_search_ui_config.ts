@@ -18,7 +18,7 @@ export const buildSearchUIConfig = (
   initialState = { sortDirection: 'desc' as SortDirection, sortField: 'id' }
 ) => {
   const facets = fields.filterFields
-    .filter(fieldName => schema[fieldName].type !== SchemaType.Geolocation)
+    .filter(fieldName =>  !!schema[fieldName] && schema[fieldName].type !== SchemaType.Geolocation)
     .filter(fieldName => !!schema[fieldName].capabilities.facet)
     .reduce((facetsConfig, fieldName) => {
       return {
