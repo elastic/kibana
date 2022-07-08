@@ -161,6 +161,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
             pkgVersion: packagePolicy.package.version,
+            force: options?.force,
           }),
           pkgInfoPromise,
         ]);
