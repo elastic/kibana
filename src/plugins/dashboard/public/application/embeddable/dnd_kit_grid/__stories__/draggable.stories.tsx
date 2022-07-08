@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { DndContext, DragMoveEvent, DragOverlay } from '@dnd-kit/core';
 import { createSnapModifier } from '@dnd-kit/modifiers';
+import { debounce } from 'lodash';
 
 import { Draggable } from '../components/container_components/draggable';
 import { PanelState } from '../types';
@@ -58,7 +59,7 @@ export const BasicExample = () => {
     setElementPos(event, 'cancel');
   };
 
-  const setElementPos = (event: DragMoveEvent, type: string) => {
+  const setElementPos = debounce((event: DragMoveEvent, type: string) => {
     const id = event.active.id;
     const newPanelState = gridState[id];
     if (type === 'move') {
@@ -77,7 +78,7 @@ export const BasicExample = () => {
       newPanelState.deltaPos = newPanelState.initPos;
     }
     setGridState({ ...gridState, [id]: newPanelState });
-  };
+  }, 10);
 
   return (
     <DndContext
