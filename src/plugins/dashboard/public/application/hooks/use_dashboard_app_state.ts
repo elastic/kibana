@@ -238,6 +238,7 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
+          type: 'dashboard',
           description: savedDashboard.title,
         },
       });

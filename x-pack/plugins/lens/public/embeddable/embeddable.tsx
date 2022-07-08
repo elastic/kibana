@@ -490,10 +490,30 @@ export class Embeddable
       };
       trackLensOperationsEvents(layers);
     }
-    trackExecutionContextEvents(this.parent);
+    trackExecutionContextEvents(this.getExecutionContext());
 
     this.renderComplete.dispatchComplete();
   };
+
+  getExecutionContext() {
+    if (this.savedVis) {
+      const parentContext = this.parent?.getInput().executionContext || this.input.executionContext;
+      const child: KibanaExecutionContext = {
+        type: 'lens',
+        name: this.savedVis.visualizationType ?? '',
+        id: this.id,
+        description: this.savedVis.title || this.input.title || '',
+        url: this.output.editUrl,
+      };
+
+      return parentContext
+        ? {
+            ...parentContext,
+            child,
+          }
+        : child;
+    }
+  }
 
   /**
    *
@@ -513,22 +533,6 @@ export class Embeddable
     this.domNode.setAttribute('data-shared-item', '');
 
     this.renderComplete.dispatchInProgress();
-
-    const parentContext = this.parent?.getInput().executionContext || this.input.executionContext;
-
-    const child: KibanaExecutionContext = {
-      type: 'lens',
-      name: this.savedVis.visualizationType ?? '',
-      id: this.id,
-      description: this.savedVis.title || this.input.title || '',
-      url: this.output.editUrl,
-    };
-    const executionContext = parentContext
-      ? {
-          ...parentContext,
-          child,
-        }
-      : child;
 
     const input = this.getInput();
 
@@ -556,7 +560,7 @@ export class Embeddable
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
-          executionContext={executionContext}
+          executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
           onRuntimeError={() => {
             this.logError('runtime');
