@@ -7,8 +7,11 @@
 
 import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test';
-import { defineDockerServersConfig } from '@kbn/test';
+import {
+  FtrConfigProviderContext,
+  defineDockerServersConfig,
+  getKibanaCliLoggers,
+} from '@kbn/test';
 
 // Docker image to use for Fleet API integration tests.
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
@@ -67,10 +70,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
         '--xpack.cloudSecurityPosture.enabled=true',
-        // Enable debug fleet logs by default
-        `--logging.loggers[0].name=plugins.fleet`,
-        `--logging.loggers[0].level=debug`,
-        `--logging.loggers[0].appenders=${JSON.stringify(['default'])}`,
+
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
+
+          // Enable debug fleet logs by default
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+            appenders: ['default'],
+          },
+        ])}`,
       ],
     },
   };
