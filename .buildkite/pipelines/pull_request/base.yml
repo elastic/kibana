@@ -4,34 +4,34 @@ steps:
     agents:
       queue: n2-4-spot
     key: test-1
-    concurrency: 1
-    concurrency_group: 'kibana-reuse-test'
     timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - wait: ~
+    continue_on_failure: true
 
   - command: .buildkite/scripts/re-use.sh
     label: 'Test 2'
     agents:
       queue: n2-4-spot
     key: test-2
-    concurrency: 1
-    concurrency_group: 'kibana-reuse-test'
     timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
 
+  - wait: ~
+    continue_on_failure: true
+
   - command: .buildkite/scripts/re-use.sh
     label: 'Test 3'
     agents:
       queue: n2-4-spot
     key: test-3
-    concurrency: 1
-    concurrency_group: 'kibana-reuse-test'
     timeout_in_minutes: 60
     retry:
       automatic:
