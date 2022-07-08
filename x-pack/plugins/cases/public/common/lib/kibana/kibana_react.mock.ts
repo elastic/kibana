@@ -57,7 +57,7 @@ export const createStartServicesMock = (): StartServices => {
       create_cases: true,
       read_cases: true,
       update_cases: true,
-      delete_case: true,
+      delete_cases: true,
       push_cases: true,
     },
     visualize: { save: true, show: true },
