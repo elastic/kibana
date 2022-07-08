@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
-import type { Filter, Query } from '@kbn/es-query';
-import { useDispatch, useSelector } from 'react-redux';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
@@ -25,13 +23,8 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
-import {
-  useInitializeUrlParam,
-  useSyncGlobalQueryString,
-} from '../../common/utils/global_query_string';
-import { CONSTANTS } from '../../common/components/url_state/constants';
-import { inputsActions, inputsSelectors } from '../../common/store/inputs';
-import { useKibana } from '../../common/lib/kibana';
+import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
+import { useInitSearchBarUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -76,85 +69,3 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 HomePageComponent.displayName = 'HomePage';
 
 export const HomePage = React.memo(HomePageComponent);
-
-const useInitSearchBarUrlParams = () => {
-  const dispatch = useDispatch();
-  const { filterManager, savedQueries } = useKibana().services.data.query;
-  const getGlobalFiltersQuerySelector = useMemo(
-    () => inputsSelectors.globalFiltersQuerySelector(),
-    []
-  );
-  const filtersFromStore = useSelector(getGlobalFiltersQuerySelector);
-
-  const onInitializeAppQueryUrlParam = useCallback(
-    (initialState: Query | null) => {
-      if (initialState != null) {
-        dispatch(
-          inputsActions.setFilterQuery({
-            id: 'global',
-            query: initialState.query,
-            language: initialState.language,
-          })
-        );
-      }
-    },
-    [dispatch]
-  );
-
-  const onInitializeFiltersUrlParam = useCallback(
-    (initialState: Filter[] | null) => {
-      if (initialState != null) {
-        filterManager.setFilters(initialState);
-        dispatch(
-          inputsActions.setSearchBarFilter({
-            id: 'global',
-            filters: initialState,
-          })
-        );
-      } else {
-        // Clear app filters and preserve pinned filters. It ensures that other App filters don't leak into security solution.
-        filterManager.setAppFilters(filtersFromStore);
-
-        dispatch(
-          inputsActions.setSearchBarFilter({
-            id: 'global',
-            filters: filterManager.getFilters(),
-          })
-        );
-      }
-    },
-    [filterManager, dispatch, filtersFromStore]
-  );
-
-  const onInitializeSavedQueryUrlParam = useCallback(
-    (savedQueryId: string | null) => {
-      if (savedQueryId != null && savedQueryId !== '') {
-        savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
-          const filters = savedQueryData.attributes.filters || [];
-          const query = savedQueryData.attributes.query;
-
-          filterManager.setFilters(filters);
-          dispatch(
-            inputsActions.setSearchBarFilter({
-              id: 'global',
-              filters,
-            })
-          );
-
-          dispatch(
-            inputsActions.setFilterQuery({
-              id: 'global',
-              ...query,
-            })
-          );
-          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
-        });
-      }
-    },
-    [dispatch, filterManager, savedQueries]
-  );
-
-  useInitializeUrlParam(CONSTANTS.appQuery, onInitializeAppQueryUrlParam);
-  useInitializeUrlParam(CONSTANTS.filters, onInitializeFiltersUrlParam);
-  useInitializeUrlParam(CONSTANTS.savedQuery, onInitializeSavedQueryUrlParam);
-};

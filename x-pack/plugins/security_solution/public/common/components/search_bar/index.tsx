@@ -6,9 +6,9 @@
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
-import { getOr, isEmpty } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps, useDispatch, useSelector } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
@@ -19,7 +19,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
-import { inputsActions, inputsSelectors } from '../../store/inputs';
+import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 import { State, inputsModel } from '../../store';
@@ -39,8 +39,7 @@ import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../users/store';
 import { hostsActions } from '../../../hosts/store';
 import { networkActions } from '../../../network/store';
-import { useUpdateUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../url_state/constants';
+import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
@@ -91,7 +90,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
 
-    useSyncSearchBarUrlParam();
+    useSyncSearchBarUrlParams();
 
     useEffect(() => {
       if (fromStr != null && toStr != null) {
@@ -461,41 +460,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-const useSyncSearchBarUrlParam = () => {
-  const updateSavedQueryUrlParam = useUpdateUrlParam<string>(CONSTANTS.savedQuery);
-  const updateAppQueryUrlParam = useUpdateUrlParam<Query>(CONSTANTS.appQuery);
-  const updateFilterUrlParam = useUpdateUrlParam<Filter[]>(CONSTANTS.filters);
-
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const getGlobalFiltersQuerySelector = useMemo(
-    () => inputsSelectors.globalFiltersQuerySelector(),
-    []
-  );
-  const getGlobalSavedQuerySelector = useMemo(() => inputsSelectors.globalSavedQuerySelector(), []);
-
-  const query = useSelector(getGlobalQuerySelector);
-  const filters = useSelector(getGlobalFiltersQuerySelector);
-  const savedQuery = useSelector(getGlobalSavedQuerySelector);
-
-  useEffect(() => {
-    if (savedQuery != null && savedQuery.id !== '') {
-      updateSavedQueryUrlParam(savedQuery?.id ?? null);
-      updateAppQueryUrlParam(null);
-      updateFilterUrlParam(null);
-    } else {
-      updateSavedQueryUrlParam(null);
-      updateAppQueryUrlParam(isEmpty(query.query) ? null : query);
-      updateFilterUrlParam(isEmpty(filters) ? null : filters);
-    }
-  }, [
-    savedQuery,
-    query,
-    filters,
-    updateSavedQueryUrlParam,
-    updateAppQueryUrlParam,
-    updateFilterUrlParam,
-  ]);
-};
 export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
