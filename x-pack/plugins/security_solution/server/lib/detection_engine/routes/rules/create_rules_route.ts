@@ -7,10 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -21,7 +18,7 @@ import { buildSiemResponse } from '../utils';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { createRules } from '../../rules/create_rules';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -56,7 +53,6 @@ export const createRulesRoute = (
         const rulesClient = ctx.alerting.getRulesClient();
         const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
-        const siemClient = ctx.securitySolution.getAppClient();
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
@@ -72,27 +68,20 @@ export const createRulesRoute = (
           }
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
-
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
         });
-        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         // This will create the endpoint list if it does not exist yet
         await ctx.lists?.getExceptionListClient().createEndpointList();
-
-        const createdRule = await rulesClient.create({
-          data: internalRule,
+        const createdRule = await createRules({
+          rulesClient,
+          params: request.body,
         });
-
-        // mutes if we are creating the rule with the explicit "no_actions"
-        if (request.body.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
-          await rulesClient.muteAll({ id: createdRule.id });
-        }
 
         const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
 
