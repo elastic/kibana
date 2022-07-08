@@ -13,7 +13,6 @@ import { mountReactNode } from '@kbn/core/public/utils';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
@@ -86,7 +85,22 @@ export const createVislibVisController = (
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
       this.vislibVis.on('brush', fireEvent);
       this.vislibVis.on('click', fireEvent);
-      this.vislibVis.on('renderComplete', handlers.done);
+
+      this.vislibVis.on('renderComplete', () => {
+        // refreshing the legend after the chart is rendered.
+        // this is necessary because some visualizations
+        // provide data necessary for the legend only after a render cycle.
+        if (
+          this.showLegend(visParams) &&
+          CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
+        ) {
+          this.unmountLegend?.();
+          this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
+        }
+
+        handlers.done();
+      });
+
       this.removeListeners = () => {
         this.vislibVis.off('brush', fireEvent);
         this.vislibVis.off('click', fireEvent);
@@ -105,18 +119,6 @@ export const createVislibVisController = (
       }
 
       this.vislibVis.render(esResponse, uiState);
-
-      // refreshing the legend after the chart is rendered.
-      // this is necessary because some visualizations
-      // provide data necessary for the legend only after a render cycle.
-      if (
-        this.showLegend(visParams) &&
-        CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
-      ) {
-        this.unmountLegend?.();
-        this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
-        this.vislibVis.render(esResponse, uiState);
-      }
     }
 
     mountLegend(
