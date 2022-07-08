@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface State {
   isPopoverOpen: boolean;
@@ -70,7 +71,9 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           <EuiButtonIcon
             onClick={this._togglePopover}
             iconType="documentation"
-            aria-label="Threshold and time window documentation"
+            aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel', {
+              defaultMessage: 'Help',
+            })}
           />
         }
         isOpen={this.state.isPopoverOpen}
