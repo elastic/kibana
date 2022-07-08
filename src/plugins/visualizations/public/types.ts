@@ -61,6 +61,7 @@ export interface SaveVisOptions {
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void;
   copyOnSave?: boolean;
+  saveFilters?: boolean;
 }
 
 export interface GetVisOptions {

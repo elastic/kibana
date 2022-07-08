@@ -143,7 +143,11 @@ export const getTopNavConfig = (
    * Called when the user clicks "Save" button.
    */
   async function doSave(
-    saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
+    saveOptions: SavedObjectSaveOpts & {
+      dashboardId?: string;
+      copyOnSave?: boolean;
+      saveFilters?: boolean;
+    }
   ) {
     const newlyCreated = !Boolean(savedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
@@ -152,6 +156,10 @@ export const getTopNavConfig = (
     });
 
     savedVis.savedSearchId = vis.data.savedSearchId;
+    if (!Boolean(saveOptions.saveFilters) && vis.data.searchSource) {
+      vis.data.searchSource.setField('filter', []);
+      data.query.filterManager.setAppFilters([]);
+    }
     savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = vis.uiState.toString();
@@ -468,6 +476,7 @@ export const getTopNavConfig = (
                 returnToOrigin,
                 dashboardId,
                 addToLibrary,
+                saveFilters,
               }: OnSaveProps & { returnToOrigin?: boolean } & {
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
@@ -488,6 +497,7 @@ export const getTopNavConfig = (
                   returnToOrigin,
                   dashboardId: !!dashboardId ? dashboardId : undefined,
                   copyOnSave: newCopyOnSave,
+                  saveFilters,
                 };
 
                 // If we're adding to a dashboard and not saving to library,
@@ -598,6 +608,7 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    showSaveFilters={true}
                   />
                 );
               }

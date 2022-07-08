@@ -192,6 +192,7 @@ export const runSaveLensVisualization = async (
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
     originatingApp?: string;
+    saveFilters?: boolean;
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
@@ -249,6 +250,10 @@ export const runSaveLensVisualization = async (
         delete filter.meta.value;
       }
     });
+  }
+
+  if (!saveProps.saveFilters) {
+    docToSave.state.filters = [];
   }
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;

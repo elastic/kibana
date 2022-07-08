@@ -310,6 +310,7 @@ export async function saveVisualization(
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
     copyOnSave = false,
+    saveFilters = true,
   }: SaveVisOptions,
   services: {
     savedObjectsClient: SavedObjectsClientContract;
@@ -340,6 +341,9 @@ export async function saveVisualization(
   let references: SavedObjectReference[] = [];
 
   if (savedObject.searchSource) {
+    if (!saveFilters) {
+      savedObject.searchSource.setField('filter', []);
+    }
     const { searchSourceJSON, references: searchSourceReferences } =
       savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
@@ -347,6 +351,9 @@ export async function saveVisualization(
   }
 
   if (savedObject.searchSourceFields) {
+    if (savedObject.searchSourceFields.filter && !saveFilters) {
+      savedObject.searchSourceFields.filter = [];
+    }
     const [searchSourceFields, searchSourceReferences] = extractSearchSourceReferences(
       savedObject.searchSourceFields
     );
