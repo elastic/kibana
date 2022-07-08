@@ -49,9 +49,15 @@ export const RulesList = suspendedComponentWithProps(
 export const RulesListNotifyBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rules_list_notify_badge'))
 );
+export const RuleDefinition = suspendedComponentWithProps(
+  lazy(() => import('./rule_details/components/rule_definition'))
+);
 export const RuleTagBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_tag_badge'))
 );
 export const RuleAlertsSummary = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/rule_alerts_summary'))
+);
+export const RuleStatusPanel = suspendedComponentWithProps(
+  lazy(() => import('./rule_details/components/rule_status_panel'))
 );
