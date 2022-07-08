@@ -110,10 +110,6 @@ export function getPageIndexById(state: State, id: string): number {
   return pages.findIndex((page) => page.id === id);
 }
 
-export function getWorkpadId(state: State): string {
-  return get(state, append(workpadRoot, 'id'));
-}
-
 export function getWorkpadName(state: State): string {
   return get(state, append(workpadRoot, 'name'));
 }

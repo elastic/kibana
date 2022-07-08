@@ -8,7 +8,7 @@
 import { duplicatePage } from '../actions/pages';
 import { fetchAllRenderables } from '../actions/elements';
 import { setWriteable } from '../actions/workpad';
-import { getWorkpadName, getWorkpadId, isWriteable } from '../selectors/workpad';
+import { getWorkpadName, isWriteable } from '../selectors/workpad';
 import { getWindow } from '../../lib/get_window';
 import { setDocTitle } from '../../lib/doc_title';
 
@@ -23,11 +23,7 @@ export const workpadUpdate =
 
     // This middleware updates the page title when the workpad name changes
     if (getWorkpadName(getState()) !== oldName) {
-      if (getWorkpadName(getState()).length) {
-        setDocTitle(getWorkpadName(getState()));
-      } else {
-        setDocTitle(getWorkpadId(getState()));
-      }
+      setDocTitle(getWorkpadName(getState()));
     }
 
     // This middleware fetches all of the renderable elements on new, duplicate page

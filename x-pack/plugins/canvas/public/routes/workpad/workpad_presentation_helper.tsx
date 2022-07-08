@@ -33,9 +33,9 @@ export const WorkpadPresentationHelper: FC = ({ children }) => {
   useEffect(() => {
     platformService.setBreadcrumbs([
       getBaseBreadcrumb(history),
-      getWorkpadBreadcrumb({ name: workpad.name || workpad.id }),
+      getWorkpadBreadcrumb({ name: workpad.name }),
     ]);
-  }, [workpad.name, workpad.id, platformService, history]);
+  }, [workpad.name, platformService, history]);
 
   useEffect(() => {
     setDocTitle(workpad.name || workpad.id);

@@ -27,6 +27,7 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
   const interactivePageLayout = useRef<CommitFn | null>(null); // future versions may enable editing on multiple pages => use array then
   const workpadTitle = useRef<HTMLHeadingElement>(null); // future versions may enable editing on multiple pages => use array then
 
+  // TODO: Remove this focus when https://github.com/elastic/kibana/issues/38980 is addressed
   useEffect(() => {
     workpadTitle.current?.focus();
   }, [workpadTitle]);
@@ -56,7 +57,7 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
                 className="euiScreenReaderOnly"
                 ref={workpadTitle}
                 tabIndex={-1}
-              >{`${CANVAS} - ${workpad.name || workpad.id}`}</h1>
+              >{`${CANVAS} - ${workpad.name || 'Workpad'}`}</h1>
               <WorkpadHeader commit={commit} />
             </div>
 
