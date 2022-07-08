@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { fetchSnapshotCount } from './snapshot';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
@@ -59,7 +60,7 @@ describe('snapshot API', () => {
   });
 
   it('throws an error when response is not ok', async () => {
-    mockResponse = new Error('There was an error fetching your data.');
+    mockResponse = createHttpFetchError('There was an error fetching your data.');
     fetchMock.mockReturnValue(mockResponse);
     const result = await fetchSnapshotCount({
       dateRangeStart: 'now-15m',

@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type LoadingCountSetup, LoadingCountService } from './loading_count_service';
+import type { LoadingCountSetup, LoadingCountService } from './loading_count_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<LoadingCountSetup> = {

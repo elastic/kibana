@@ -42,7 +42,7 @@ import type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-import {
+import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
@@ -64,15 +64,21 @@ import {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import { NotificationsSetup, NotificationsStart } from './notifications';
-import { OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { SavedObjectsStart } from './saved_objects';
-import { DeprecationsServiceStart } from './deprecations';
+import type { NotificationsSetup, NotificationsStart } from './notifications';
+import type { OverlayStart } from './overlays';
+import type {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginOpaqueId,
+} from './plugins';
+import type { UiSettingsState, IUiSettingsClient } from './ui_settings';
+import type { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import type { SavedObjectsStart } from './saved_objects';
+import type { DeprecationsServiceStart } from './deprecations';
 
-export type { PackageInfo, EnvironmentMode, DomainDeprecationDetails } from '../server/types';
+export type { PackageInfo, EnvironmentMode } from '@kbn/config';
+export type { DomainDeprecationDetails } from '../server/types';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';

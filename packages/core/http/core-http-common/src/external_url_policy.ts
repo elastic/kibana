@@ -10,7 +10,6 @@
  * A policy describing whether access to an external destination is allowed.
  * @public
  */
-
 export interface IExternalUrlPolicy {
   /**
    * Indicates if this policy allows or denies access to the described destination.

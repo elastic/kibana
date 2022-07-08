@@ -32,7 +32,7 @@ export interface LoadingCountSetup {
  */
 export type LoadingCountStart = LoadingCountSetup;
 
-/** @public */
+/** @internal */
 export class LoadingCountService implements CoreService<LoadingCountSetup, LoadingCountStart> {
   private readonly stop$ = new Subject<void>();
   private readonly loadingCount$ = new BehaviorSubject(0);

@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { HttpService, BasePath } from '@kbn/core-http-browser-internal';
+import { type HttpService, BasePath } from '@kbn/core-http-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { basePathMock } from './base_path.mock';

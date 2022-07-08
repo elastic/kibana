@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IHttpFetchError } from './types';
+import type { IHttpFetchError } from './types';
 
+/** @public */
 export function isHttpFetchError<T>(error: T | IHttpFetchError): error is IHttpFetchError {
   return error instanceof Error && ('request' in error || 'req' in error) && 'name' in error;
 }

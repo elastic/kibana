@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { IBasePath } from '@kbn/core-http-browser';
 import { modifyUrl } from '@kbn/std';
 
-export class BasePath {
+export class BasePath implements IBasePath {
   constructor(
     private readonly basePath: string = '',
     public readonly serverBasePath: string = basePath,

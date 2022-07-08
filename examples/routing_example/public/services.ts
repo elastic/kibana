@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   RANDOM_NUMBER_ROUTE_PATH,

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HttpInterceptor, HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import type {
+  HttpInterceptor,
+  HttpResponse,
+  HttpFetchOptionsWithPath,
+} from '@kbn/core-http-browser';
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 

@@ -1,3 +1,3 @@
 # @kbn/core-http-browser-mocks
 
-This package contains the public mocks for Core's browser-side HTTP service.
+This package contains useful mocks for Core's HTTP browser-side packages.
