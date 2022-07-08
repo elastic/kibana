@@ -18,6 +18,7 @@ import {
   UserAction,
   UserActionTypes,
 } from '../../../common/api';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export interface BuilderParameters {
   title: {
@@ -104,3 +105,7 @@ export type CommonBuilderArguments = CommonArguments & {
   value: unknown;
   valueKey: string;
 };
+
+export interface BuilderDeps {
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
