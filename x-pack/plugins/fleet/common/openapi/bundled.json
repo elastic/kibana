@@ -2011,6 +2011,22 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "sys_monitoring",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "force_install",
+            "required": false
           }
         ]
       }

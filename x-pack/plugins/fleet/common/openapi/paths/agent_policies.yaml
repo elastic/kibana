@@ -52,3 +52,14 @@ post:
   security: []
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: boolean
+      in: query
+      name: sys_monitoring
+      required: false
+    - schema:
+        type: boolean
+      in: query
+      name: force_install
+      required: false
+
