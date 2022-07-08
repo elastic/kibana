@@ -272,7 +272,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices which you would like to add. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -280,7 +280,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.transl
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Delete default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices which you would like to delete. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
