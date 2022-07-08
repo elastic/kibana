@@ -18,6 +18,7 @@ import {
 import { CommonAlertParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
+import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
 export interface RuleCommonExpressionsProps {
   thresholdComparator?: CommonAlertParams['thresholdComparator'];
@@ -60,8 +61,9 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.conditionsPrompt"
-            defaultMessage="Set the threshold and duration"
-          />
+            defaultMessage="Set the threshold and time window"
+          />{' '}
+          <QueryThresholdHelpPopover />
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
