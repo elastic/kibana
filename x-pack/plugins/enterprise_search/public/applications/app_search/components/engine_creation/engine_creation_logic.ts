@@ -17,7 +17,7 @@ import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { SearchIndexSelectableOption } from './search_index_selectable';
 import { getRedirectToAfterEngineCreation, formatIndicesToSelectable } from './utils';
 
-type EngineType = 'appSearch' | 'elasticsearch';
+export type EngineType = 'appSearch' | 'elasticsearch';
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
   setIngestionMethod(method: string): { method: string };
