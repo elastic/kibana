@@ -14,7 +14,6 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
-  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiInMemoryTable,
   Pagination,
@@ -32,6 +31,7 @@ import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from
 import { keyBy, uniq, get } from 'lodash';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
+import { ConfirmDeleteModal } from './components';
 import type { Action } from './actions';
 import { reducer } from './reducer';
 
@@ -194,6 +194,12 @@ function TableListView<T>({
 
     return columns;
   }, [tableColumnsProps, stateTableColumns, editItem, rowHeader]);
+  const itemsById = useMemo(() => {
+    return keyBy(items, 'id');
+  }, [items]);
+  const selectedItems = useMemo(() => {
+    return selectedIds.map((id) => itemsById[id]);
+  }, [selectedIds, itemsById]);
 
   const fetchItems = useCallback(async () => {
     dispatch({ type: 'onFetchItems' });
@@ -224,15 +230,14 @@ function TableListView<T>({
   }, [filter, findItems, listingLimit]);
 
   const deleteSelectedItems = useCallback(async () => {
-    if (isDeletingItems || !deleteItems) {
+    if (isDeletingItems) {
       return;
     }
 
     dispatch({ type: 'onDeleteItems' });
 
     try {
-      const itemsById = keyBy(items, 'id');
-      await deleteItems(selectedIds.map((id) => itemsById[id]));
+      await deleteItems!(selectedItems);
     } catch (error) {
       toastNotifications.addDanger({
         title: toMountPoint(
@@ -255,8 +260,7 @@ function TableListView<T>({
     entityName,
     fetchItems,
     isDeletingItems,
-    items,
-    selectedIds,
+    selectedItems,
     theme.theme$,
     toastNotifications,
   ]);
@@ -302,58 +306,6 @@ function TableListView<T>({
       );
     }
   }, [emptyPrompt, entityNamePlural, renderCreateButton]);
-
-  const renderConfirmDeleteModal = useCallback(() => {
-    let deleteButton = (
-      <FormattedMessage
-        id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
-        defaultMessage="Delete"
-      />
-    );
-
-    if (isDeletingItems) {
-      deleteButton = (
-        <FormattedMessage
-          id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
-          defaultMessage="Deleting"
-        />
-      );
-    }
-
-    return (
-      <EuiConfirmModal
-        title={
-          <FormattedMessage
-            id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
-            defaultMessage="Delete {itemCount} {entityName}?"
-            values={{
-              itemCount: selectedIds.length,
-              entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
-            }}
-          />
-        }
-        buttonColor="danger"
-        onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
-        onConfirm={deleteSelectedItems}
-        cancelButtonText={
-          <FormattedMessage
-            id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={deleteButton}
-        defaultFocusedButton="cancel"
-      >
-        <p>
-          <FormattedMessage
-            id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
-            defaultMessage="You can't recover deleted {entityNamePlural}."
-            values={{ entityNamePlural }}
-          />
-        </p>
-      </EuiConfirmModal>
-    );
-  }, [deleteSelectedItems, entityName, entityNamePlural, isDeletingItems, selectedIds.length]);
 
   const renderListingLimitWarning = useCallback(() => {
     if (showLimitError) {
@@ -448,9 +400,7 @@ function TableListView<T>({
   }, [entityName, fetchError]);
 
   const renderToolsLeft = useCallback(() => {
-    const selection = selectedIds;
-
-    if (selectedIds.length === 0) {
+    if (!deleteItems || selectedIds.length === 0) {
       return;
     }
 
@@ -465,13 +415,13 @@ function TableListView<T>({
           id="kibana-react.tableListView.listing.deleteButtonMessage"
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
-            itemCount: selection.length,
-            entityName: selection.length === 1 ? entityName : entityNamePlural,
+            itemCount: selectedIds.length,
+            entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
           }}
         />
       </EuiButton>
     );
-  }, [entityName, entityNamePlural, selectedIds]);
+  }, [deleteItems, entityName, entityNamePlural, selectedIds]);
 
   const renderTable = useCallback(() => {
     const selection = deleteItems
@@ -579,7 +529,16 @@ function TableListView<T>({
         'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
       }}
     >
-      {showDeleteModal && renderConfirmDeleteModal()}
+      {showDeleteModal && (
+        <ConfirmDeleteModal<T>
+          isDeletingItems={isDeletingItems}
+          entityName={entityName}
+          entityNamePlural={entityNamePlural}
+          items={selectedItems}
+          onConfirm={deleteSelectedItems}
+          onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+        />
+      )}
       {children}
       {renderListingLimitWarning()}
       {renderFetchError()}
