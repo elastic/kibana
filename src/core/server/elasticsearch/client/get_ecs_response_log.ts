@@ -9,7 +9,9 @@ import { type IncomingHttpHeaders } from 'http';
 import { type DiagnosticResult } from '@elastic/elasticsearch';
 import { type LogMeta } from '@kbn/logging';
 
-const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
+// If you are updating these, consider whether they should also be updated in the
+// http service `getEcsResponseLog`
+const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie', 'x-elastic-app-auth'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.

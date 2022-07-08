@@ -68,6 +68,27 @@ describe('getEcsResponseLog', () => {
       `);
     });
 
+    test('redacts x-elastic-app-auth headers by default', () => {
+      const event = createResponseEvent({
+        requestParams: { headers: { 'x-elastic-app-auth': 'hello', 'user-agent': 'world' } },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const log = getEcsResponseLog(event);
+      // @ts-expect-error ECS custom field
+      expect(log.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-elastic-app-auth": "[REDACTED]",
+        }
+      `);
+      // @ts-expect-error ECS custom field
+      expect(log.http.response.headers).toMatchInlineSnapshot(`
+        Object {
+          "content-length": "123",
+        }
+      `);
+    });
+
     test('does not mutate original headers', () => {
       const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
       const resHeaders = { c: 'bar' };
