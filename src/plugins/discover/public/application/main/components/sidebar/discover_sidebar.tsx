@@ -110,7 +110,7 @@ export function DiscoverSidebarComponent({
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
-  onEditRuntimeField,
+  onFieldEdited,
   onChangeIndexPattern,
   setFieldEditorRef,
   closeFlyout,
@@ -272,7 +272,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                onEditRuntimeField();
+                onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -288,7 +288,7 @@ export function DiscoverSidebarComponent({
       editField,
       setFieldEditorRef,
       closeFlyout,
-      onEditRuntimeField,
+      onFieldEdited,
       dataViewFieldEditor,
     ]
   );

@@ -94,7 +94,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onEditRuntimeField: () => void;
+  onFieldEdited: () => void;
   /**
    * callback to execute on create dataview
    */
@@ -120,7 +120,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
     [props.state.query]
   );
-  const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
+  const { selectedIndexPattern, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -223,7 +223,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
               fieldName,
               onSave: async () => {
-                onEditRuntimeField();
+                onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -241,7 +241,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       dataViewFieldEditor,
       setFieldEditorRef,
       closeFlyout,
-      onEditRuntimeField,
+      onFieldEdited,
     ]
   );
 

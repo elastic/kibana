@@ -22,10 +22,10 @@ function onFilterCell(
   mode: '+' | '-'
 ) {
   const row = context.rows[rowIndex];
-  const value = String(row.flattened[columnId]);
+  const value = row.flattened[columnId];
   const field = context.indexPattern.fields.getByName(columnId);
 
-  if (value && field && context.onFilter) {
+  if (field && context.onFilter) {
     context.onFilter(field, value, mode);
   }
 }
