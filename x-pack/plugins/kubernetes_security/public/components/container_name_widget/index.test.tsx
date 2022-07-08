@@ -9,7 +9,7 @@ import React from 'react';
 import { ENTRY_LEADER_ENTITY_ID, CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
-import { ContainerNameWidget } from '.';
+import { ContainerNameWidget, LOADING_TEST_ID } from '.';
 import { useFetchContainerNameData } from './hooks';
 import { ContainerNameRow } from './container_name_row';
 import { fireEvent } from '@testing-library/react';
@@ -118,6 +118,18 @@ describe('ContainerNameWidget component', () => {
         expect(renderResult.getByText(TITLE)).toBeVisible();
         expect(renderResult.getByText('No items found')).toBeVisible();
         expect(renderResult.getByTestId(TABLE_ID)).toBeVisible();
+      });
+    });
+
+    describe('when loading data', () => {
+      it('should show progress bar', async () => {
+        mockUseFetchData.mockImplementation(() => ({
+          data: MOCK_DATA,
+          isFetchingNextPage: false,
+          isLoading: true,
+        }));
+        render();
+        expect(renderResult.getByTestId(LOADING_TEST_ID)).toBeVisible();
       });
     });
   });

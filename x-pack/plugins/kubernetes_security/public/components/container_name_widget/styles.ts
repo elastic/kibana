@@ -23,6 +23,7 @@ export const useStyles = () => {
       overflow: 'auto',
       height: '250px',
       minWidth: '332px',
+      position: 'relative',
     };
 
     const dataInfo: CSSObject = {

@@ -30,7 +30,7 @@ export const CONTAINER_NAME_SESSION = i18n.translate(
 );
 
 export const CONTAINER_NAME_SESSION_COUNT_COLUMN = i18n.translate(
-  'xpack.kubernetesSecurity.containerNameWidget.ContainerImage',
+  'xpack.kubernetesSecurity.containerNameWidget.ContainerImageCountColumn',
   {
     defaultMessage: 'Count',
   }

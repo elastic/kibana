@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react';
-import { EuiBasicTable, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiTableSortingType, EuiProgress } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
@@ -19,6 +19,8 @@ import {
   CONTAINER_NAME_SESSION,
   CONTAINER_NAME_SESSION_COUNT_COLUMN,
 } from '../../../common/translations';
+
+export const LOADING_TEST_ID = 'kubernetesSecurity:container-name-widget-loading';
 
 export interface ContainerNameWidgetDataValueMap {
   key: string;
@@ -65,7 +67,7 @@ export const ContainerNameWidget = ({
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const { data, fetchNextPage, isFetchingNextPage } = useFetchContainerNameData(
+  const { data, fetchNextPage, isFetchingNextPage, isLoading } = useFetchContainerNameData(
     filterQueryWithTimeRange,
     widgetKey,
     groupedBy,
@@ -203,6 +205,14 @@ export const ContainerNameWidget = ({
       css={styles.container}
       ref={scrollerRef}
     >
+      {isLoading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj={LOADING_TEST_ID}
+        />
+      )}
       <EuiBasicTable
         aria-label="Container Name Session Widget"
         items={containerNameArray}
