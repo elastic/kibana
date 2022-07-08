@@ -60,7 +60,7 @@ describe('useAddToExistingCase', () => {
     expect(result.current.disabled).toEqual(false);
   });
 
-  it("button disabled if user Can't Crud", () => {
+  it("button disabled if user can't create and read", () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
 
     const { result } = renderHook(() =>

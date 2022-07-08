@@ -83,7 +83,8 @@ export const useAddToCaseActions = ({
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
       ].includes(timelineId as TimelineId) &&
-      casePermissions.all &&
+      casePermissions.create &&
+      casePermissions.read &&
       isAlert
     ) {
       return [
@@ -112,7 +113,8 @@ export const useAddToCaseActions = ({
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    casePermissions.all,
+    casePermissions.create,
+    casePermissions.read,
     timelineId,
     isAlert,
   ]);

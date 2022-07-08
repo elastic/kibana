@@ -37,7 +37,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   });
 
   return useMemo(() => {
-    return casePermissions.create
+    return casePermissions.create && casePermissions.read
       ? [
           {
             label: ADD_TO_NEW_CASE,
@@ -67,5 +67,11 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
           },
         ]
       : [];
-  }, [casesUi.helpers, createCaseFlyout, casePermissions.create, selectCaseModal]);
+  }, [
+    casesUi.helpers,
+    createCaseFlyout,
+    casePermissions.create,
+    casePermissions.read,
+    selectCaseModal,
+  ]);
 };
