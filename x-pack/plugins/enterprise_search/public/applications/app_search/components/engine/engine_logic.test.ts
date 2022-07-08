@@ -41,7 +41,7 @@ describe('EngineLogic', () => {
     isMeta: false,
     invalidBoosts: false,
     schema: { test: SchemaType.Text },
-    advanceSchema: {
+    advancedSchema: {
       test: {
         type: SchemaType.Text,
         capabilities: {
