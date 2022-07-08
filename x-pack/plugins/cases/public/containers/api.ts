@@ -230,6 +230,7 @@ export const patchCasesStatus = async (
     body: JSON.stringify({ cases }),
     signal,
   });
+
   return convertCasesToCamelCase(decodeCasesResponse(response));
 };
 

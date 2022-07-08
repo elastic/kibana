@@ -42,13 +42,13 @@ exports[`HeaderPage it renders 1`] = `
               "owner": Array [
                 "securitySolution",
               ],
-              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
-                "collection": Map {},
-                "name": "PersistableStateAttachmentTypeRegistry",
-              },
               "permissions": Object {
                 "all": true,
                 "read": true,
+              },
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
               },
             }
           }

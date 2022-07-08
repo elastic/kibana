@@ -41,7 +41,6 @@ import {
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
-  isCommentRequestTypePersistableState,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
