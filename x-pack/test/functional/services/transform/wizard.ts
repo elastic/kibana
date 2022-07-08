@@ -859,7 +859,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         ).getVisibleText();
 
         expect(actualValue).to.eql(
-          actualValue,
+          expectedValue,
           `Transform num failure retries summary value should be '${expectedValue}' (got '${actualValue}')`
         );
       });
