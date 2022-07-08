@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Unit } from '@kbn/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
@@ -29,6 +29,8 @@ import { LoadingHistogram } from './loading_histogram';
 import { FieldValueThreshold } from '../threshold_input';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 const HelpTextComponent = (
   <EuiFlexGroup direction="column" gutterSize="none">
@@ -41,6 +43,7 @@ export interface RulePreviewProps {
   index: string[];
   isDisabled: boolean;
   query: FieldValueQueryBar;
+  dataViewId?: string;
   ruleType: Type;
   threatIndex: string[];
   threatMapping: ThreatMapping;
@@ -63,6 +66,7 @@ const defaultTimeRange: Unit = 'h';
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   ruleType,
@@ -106,6 +110,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   } = usePreviewRoute({
     index,
     isDisabled,
+    dataViewId,
     query,
     threatIndex,
     threatQuery,
@@ -122,6 +127,13 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   useEffect(() => {
     setTimeFrame(defaultTimeRange);
   }, [ruleType]);
+
+  const { startTransaction } = useStartTransaction();
+
+  const handlePreviewClick = useCallback(() => {
+    startTransaction({ name: SINGLE_RULE_ACTIONS.PREVIEW });
+    createPreview();
+  }, [createPreview, startTransaction]);
 
   return (
     <>
@@ -150,7 +162,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
               fill
               isLoading={isPreviewRequestInProgress}
               isDisabled={isDisabled || !areRelaventMlJobsRunning}
-              onClick={createPreview}
+              onClick={handlePreviewClick}
               data-test-subj="queryPreviewButton"
             >
               {i18n.QUERY_PREVIEW_BUTTON}

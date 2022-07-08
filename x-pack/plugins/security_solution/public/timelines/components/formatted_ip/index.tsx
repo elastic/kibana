@@ -12,7 +12,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
   DraggableWrapper,
@@ -198,9 +198,9 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           panelView: 'networkDetail',
           params: {
             ip: address,
-            flowTarget: fieldName.includes(FlowTarget.destination)
-              ? FlowTarget.destination
-              : FlowTarget.source,
+            flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+              ? FlowTargetSourceDest.destination
+              : FlowTargetSourceDest.source,
           },
         };
 

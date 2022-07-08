@@ -47,6 +47,7 @@ import type { MapExtentState } from '../../reducers/map/types';
 // @ts-expect-error
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
+import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 
 export interface Props {
   isMapReady: boolean;
@@ -57,7 +58,6 @@ export interface Props {
   goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
-  scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
   onMapDestroyed: () => void;
@@ -77,6 +77,7 @@ export interface Props {
   filterModeActive: boolean;
   setTileLoadError(layerId: string, errorMessage: string): void;
   clearTileLoadError(layerId: string): void;
+  onMapMove?: (lat: number, lon: number, zoom: number) => void;
 }
 
 interface State {
@@ -185,7 +186,6 @@ export class MbMap extends Component<Props, State> {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
-        scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
@@ -277,6 +277,15 @@ export class MbMap extends Component<Props, State> {
       }, 100)
     );
 
+    // do not update redux state on 'move' event for performance reasons
+    // instead, callback provided for cases where consumers need to react to "move" event
+    mbMap.on('move', () => {
+      if (this.props.onMapMove) {
+        const { zoom, center } = this._getMapExtentState();
+        this.props.onMapMove(center.lat, center.lon, zoom);
+      }
+    });
+
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.settings.hideViewControl) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
@@ -304,7 +313,9 @@ export class MbMap extends Component<Props, State> {
 
   async _loadMakiSprites(mbMap: MapboxMap) {
     if (this._isMounted) {
-      const pixelRatio = Math.floor(window.devicePixelRatio);
+      // Math.floor rounds values < 1 to 0. This occurs when browser is zoomed out
+      // Math.max wrapper ensures value is always at least 1 in these cases
+      const pixelRatio = Math.max(Math.floor(window.devicePixelRatio), 1);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
@@ -460,6 +471,7 @@ export class MbMap extends Component<Props, State> {
     let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
+    let keydownScrollZoomControl;
     if (this.state.mbMap) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
@@ -481,6 +493,9 @@ export class MbMap extends Component<Props, State> {
       scaleControl = this.props.settings.showScaleControl ? (
         <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
+      keydownScrollZoomControl = this.props.settings.keydownScrollZoom ? (
+        <KeydownScrollZoom mbMap={this.state.mbMap} />
+      ) : null;
     }
     return (
       <div
@@ -491,6 +506,7 @@ export class MbMap extends Component<Props, State> {
       >
         {drawFilterControl}
         {drawFeatureControl}
+        {keydownScrollZoomControl}
         {scaleControl}
         {tooltipControl}
       </div>

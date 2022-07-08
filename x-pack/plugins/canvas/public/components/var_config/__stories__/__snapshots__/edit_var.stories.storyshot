@@ -38,29 +38,25 @@ Array [
   >
     <div>
       <div
-        className="euiCallOut euiCallOut--warning euiCallOut--small"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
-        <div
-          className="euiCallOutHeader"
+        <p
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="euiCallOutHeader__icon"
+            className="emotion-euiCallOut__icon"
             color="inherit"
             data-euiicon-type="alert"
             size="m"
           >
             
           </span>
-          <span
-            className="euiCallOutHeader__title"
-          >
-            Editing a variable in use may adversely affect your workpad
-          </span>
-        </div>
+          Editing a variable in use may adversely affect your workpad
+        </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
@@ -233,7 +229,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -335,29 +331,25 @@ Array [
   >
     <div>
       <div
-        className="euiCallOut euiCallOut--warning euiCallOut--small"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
-        <div
-          className="euiCallOutHeader"
+        <p
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="euiCallOutHeader__icon"
+            className="emotion-euiCallOut__icon"
             color="inherit"
             data-euiicon-type="alert"
             size="m"
           >
             
           </span>
-          <span
-            className="euiCallOutHeader__title"
-          >
-            Editing a variable in use may adversely affect your workpad
-          </span>
-        </div>
+          Editing a variable in use may adversely affect your workpad
+        </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
@@ -471,7 +463,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -573,29 +565,25 @@ Array [
   >
     <div>
       <div
-        className="euiCallOut euiCallOut--warning euiCallOut--small"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
-        <div
-          className="euiCallOutHeader"
+        <p
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="euiCallOutHeader__icon"
+            className="emotion-euiCallOut__icon"
             color="inherit"
             data-euiicon-type="alert"
             size="m"
           >
             
           </span>
-          <span
-            className="euiCallOutHeader__title"
-          >
-            Editing a variable in use may adversely affect your workpad
-          </span>
-        </div>
+          Editing a variable in use may adversely affect your workpad
+        </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
@@ -709,7 +697,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -920,7 +908,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"

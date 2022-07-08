@@ -11,12 +11,13 @@ export type { ControlWidth } from './types';
 // Control Group exports
 export {
   CONTROL_GROUP_TYPE,
-  type ControlPanelState,
   type ControlsPanels,
   type ControlGroupInput,
+  type ControlPanelState,
   type ControlGroupTelemetry,
   type RawControlGroupAttributes,
   type PersistableControlGroupInput,
+  type SerializableControlGroupInput,
 } from './control_group/types';
 export {
   controlGroupInputToRawControlGroupAttributes,

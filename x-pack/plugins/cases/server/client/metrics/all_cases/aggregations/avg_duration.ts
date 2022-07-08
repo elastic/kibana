@@ -23,7 +23,7 @@ export class AverageDuration implements AggregationBuilder<CasesMetricsResponse>
   formatResponse(aggregations: AggregationResponse) {
     const aggs = aggregations as MTTRAggregate;
 
-    const mttr = aggs?.mttr?.value ?? 0;
+    const mttr = aggs?.mttr?.value ?? null;
 
     return { mttr };
   }

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  handleInputAreaState,
+  INPUT_DEFAULT_PLACEHOLDER_TEXT,
+} from './state_update_handlers/handle_input_area_state';
+import { handleSidePanel } from './state_update_handlers/handle_side_panel';
 import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
 import type { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
@@ -12,40 +17,89 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent'
+  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey' | 'keyCapture'
 >;
 
-export const initiateState = ({
-  commands,
-  scrollToBottom,
-  dataTestSubj,
-  HelpComponent,
-}: InitialStateInterface): ConsoleDataState => {
-  return {
-    commands: getBuiltinCommands().concat(commands),
-    scrollToBottom,
-    HelpComponent,
-    dataTestSubj,
+export const initiateState = (
+  { commands: userCommandList, ...otherOptions }: InitialStateInterface,
+  managedConsolePriorState?: ConsoleDataState
+): ConsoleDataState => {
+  const commands = getBuiltinCommands().concat(userCommandList);
+  const state = managedConsolePriorState ?? {
+    commands,
+    ...otherOptions,
     commandHistory: [],
+    sidePanel: { show: null },
+    footerContent: '',
+    input: {
+      textEntered: '',
+      rightOfCursor: { text: '' },
+      commandEntered: '',
+      placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
+      showPopover: undefined,
+      history: [],
+    },
   };
-};
 
-export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
-  switch (action.type) {
-    case 'scrollDown':
-      state.scrollToBottom();
-      return state;
-
-    case 'executeCommand':
-      return handleExecuteCommand(state, action);
-
-    case 'updateCommandStatusState':
-    case 'updateCommandStoreState':
-      return handleUpdateCommandState(state, action);
-
-    case 'clear':
-      return { ...state, commandHistory: [] };
+  // If we have prior state from ConsoleManager, then ensure that its updated
+  // with the initial state provided by `Console` during initial render so that
+  // we don't reference stale references.
+  if (managedConsolePriorState) {
+    Object.assign(state, {
+      commands,
+      ...otherOptions,
+    });
   }
 
   return state;
+};
+
+export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
+  let newState = state;
+
+  switch (action.type) {
+    case 'scrollDown':
+      state.scrollToBottom();
+      break;
+
+    case 'addFocusToKeyCapture':
+      state.keyCapture?.current?.focus();
+      break;
+
+    case 'removeFocusFromKeyCapture':
+      state.keyCapture?.current?.blur();
+      break;
+
+    case 'updateFooterContent':
+      if (state.footerContent !== action.payload.value) {
+        newState = { ...state, footerContent: action.payload.value };
+      }
+      break;
+
+    case 'executeCommand':
+      newState = handleExecuteCommand(state, action);
+      break;
+
+    case 'updateCommandStatusState':
+    case 'updateCommandStoreState':
+      newState = handleUpdateCommandState(state, action);
+      break;
+
+    case 'showSidePanel':
+      newState = handleSidePanel(state, action);
+      break;
+
+    case 'updateInputPopoverState':
+    case 'updateInputHistoryState':
+    case 'updateInputTextEnteredState':
+    case 'updateInputPlaceholderState':
+      newState = handleInputAreaState(state, action);
+      break;
+
+    case 'clear':
+      newState = { ...state, commandHistory: [] };
+      break;
+  }
+
+  return newState;
 };

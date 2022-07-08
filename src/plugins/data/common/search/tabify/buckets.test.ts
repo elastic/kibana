@@ -71,6 +71,7 @@ describe('Buckets wrapper', () => {
             },
           ],
         },
+        aggConfigs: {},
       } as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
@@ -103,6 +104,7 @@ describe('Buckets wrapper', () => {
             },
           ],
         },
+        aggConfigs: {},
       } as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
@@ -130,6 +132,7 @@ describe('Buckets wrapper', () => {
             },
           ],
         },
+        aggConfigs: {},
       } as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
@@ -187,6 +190,7 @@ describe('Buckets wrapper', () => {
             name: 'date',
           },
         },
+        aggConfigs: {},
       } as IAggConfig;
       const timeRange = {
         from: moment(150),
@@ -211,6 +215,7 @@ describe('Buckets wrapper', () => {
         serialize: () => ({
           params: { used_interval: '100ms' },
         }),
+        aggConfigs: {},
       } as unknown as IAggConfig;
       const timeRange = {
         from: moment(1050),
@@ -245,6 +250,7 @@ describe('Buckets wrapper', () => {
             name: 'date',
           },
         },
+        aggConfigs: {},
       } as IAggConfig;
       const timeRange = {
         from: moment(150),
@@ -264,6 +270,7 @@ describe('Buckets wrapper', () => {
             name: 'date',
           },
         },
+        aggConfigs: {},
       } as IAggConfig;
       const timeRange = {
         from: moment(100),
@@ -283,6 +290,7 @@ describe('Buckets wrapper', () => {
             name: 'other_time',
           },
         },
+        aggConfigs: {},
       } as IAggConfig;
       const timeRange = {
         from: moment(150),
@@ -302,6 +310,7 @@ describe('Buckets wrapper', () => {
             name: 'date',
           },
         },
+        aggConfigs: {},
       } as IAggConfig;
       const timeRange = {
         from: moment(100),
@@ -321,6 +330,7 @@ describe('Buckets wrapper', () => {
             name: 'date',
           },
         },
+        aggConfigs: {},
       } as IAggConfig;
       const timeRange = {
         from: moment(100),

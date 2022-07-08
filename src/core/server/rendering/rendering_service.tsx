@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import { firstValueFrom, of } from 'rxjs';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { UiPlugins } from '../plugins';
-import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -29,6 +29,7 @@ import { getSettingValue, getStylesheetPaths } from './render_utils';
 import type { HttpAuth, KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 import { filterUiPlugins } from './filter_ui_plugins';
+import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
   | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
@@ -42,7 +43,7 @@ export class RenderingService {
     http,
     uiPlugins,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
-    http.registerRoutes('', (router) => {
+    http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
       registerBootstrapRoute({
         router,
         renderer: bootstrapRendererFactory({
@@ -66,7 +67,7 @@ export class RenderingService {
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
-      router: http.createRouter(''),
+      router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
         serverBasePath: http.basePath.serverBasePath,

@@ -6,7 +6,13 @@
  */
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { EuiDataGridColumn, EuiProgress, EuiDataGridSorting, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiProgress,
+  EuiDataGridSorting,
+  EuiEmptyPrompt,
+  EuiFlyoutSize,
+} from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -16,7 +22,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState } from '../../../types';
+import { EmptyState } from './empty_state';
+import { AlertsTableConfigurationRegistry } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 
@@ -30,7 +37,7 @@ export interface AlertsTableStateProps {
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
-  flyoutState: AlertsTableFlyoutState;
+  flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
@@ -64,7 +71,7 @@ const AlertsTableState = ({
   configurationId,
   id,
   featureIds,
-  flyoutState,
+  flyoutSize,
   query,
   pageSize,
   showExpandToDetails,
@@ -191,7 +198,7 @@ const AlertsTableState = ({
       bulkActions: [],
       deletedEventIds: [],
       disabledCellActions: [],
-      flyoutState,
+      flyoutSize,
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       leadingControlColumns: [],
@@ -205,7 +212,7 @@ const AlertsTableState = ({
     [
       alertsTableConfiguration,
       columns,
-      flyoutState,
+      flyoutSize,
       pagination.pageSize,
       showCheckboxes,
       showExpandToDetails,
@@ -215,10 +222,11 @@ const AlertsTableState = ({
 
   return hasAlertsTableConfiguration ? (
     <>
+      {!isLoading && alertsCount === 0 && <EmptyState />}
       {isLoading && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      <AlertsTable {...tableProps} />
+      {alertsCount !== 0 && <AlertsTable {...tableProps} />}
     </>
   ) : (
     <EuiEmptyPrompt

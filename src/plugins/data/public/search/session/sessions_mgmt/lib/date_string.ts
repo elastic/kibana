@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { DATE_STRING_FORMAT } from '../types';
 
 export const dateString = (inputString: string, tz: string): string => {

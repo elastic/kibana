@@ -11,14 +11,15 @@ import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 
 import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory, KibanaRequest } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
 import { registerBundleRoutes } from './bundle_routes';
 import { UiPlugins } from '../plugins';
+import type { InternalCoreAppRequestHandlerContext } from './internal_types';
 
 /** @internal */
 interface CommonRoutesParams {
@@ -85,7 +86,7 @@ export class CoreApp {
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter<InternalCoreAppRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get({ path: '/', validate: false }, async (context, req, res) => {

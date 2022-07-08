@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  AggGroupNames,
-  BUCKET_TYPES,
-  IAggConfig,
-  IAggType,
-  IndexPattern,
-} from '@kbn/data-plugin/public';
+import { AggGroupNames, BUCKET_TYPES, IAggConfig, IAggType } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import {
@@ -168,7 +163,7 @@ describe('DefaultEditorAggParams helpers', () => {
 
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
-      const indexPattern = {} as IndexPattern;
+      const indexPattern = {} as DataView;
       const aggs = getAggTypeOptions(
         { metrics: [] },
         {} as IAggConfig,

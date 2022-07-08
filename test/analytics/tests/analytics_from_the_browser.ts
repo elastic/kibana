@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import type { Event, TelemetryCounter } from '@kbn/core/server';
-import type { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
+import type { Action } from '@kbn/analytics-plugin-a-plugin/public/custom_shipper';
 import type { FtrProviderContext } from '../services';
 import '@kbn/analytics-plugin-a-plugin/public/types';
 
@@ -87,28 +87,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('after setting opt-in', () => {
       let actions: Action[];
-      let context: Action['meta'];
 
       before(async () => {
         actions = await getActions();
-        context = actions[1].meta;
-      });
-
-      it('it should extend the contexts with pid injected by "analytics_plugin_a"', () => {
-        // Validating the remote user_agent because that's the only field that it's added by the FTR plugin.
-        expect(context).to.have.property('user_agent');
-        expect(context.user_agent).to.be.a('string');
       });
 
       it('it calls optIn first, then extendContext, followed by reportEvents', async () => {
         const [optInAction, extendContextAction, ...reportEventsAction] = actions;
         expect(optInAction).to.eql({ action: 'optIn', meta: true });
-        expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
-        while (reportEventsAction[0].action === 'extendContext') {
-          // it could happen that a context provider emits a bit delayed
-          reportEventsAction.shift();
-        }
-        reportEventsAction.forEach((entry) => expect(entry.action).to.eql('reportEvents'));
+        expect(extendContextAction).to.have.property('action', 'extendContext');
+        // Checking `some` because there could be more `extendContext` actions for late context providers
+        expect(reportEventsAction.some((entry) => entry.action === 'reportEvents')).to.be(true);
       });
 
       it('Initial calls to reportEvents from cached events group the requests by event_type', async () => {
@@ -157,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(startEvent).to.be.greaterThan(setupEvent);
 
         // This helps us to also test the helpers
-        const events = await ebtUIHelper.getLastEvents(2, ['test-plugin-lifecycle']);
+        const events = await ebtUIHelper.getEvents(2, { eventTypes: ['test-plugin-lifecycle'] });
         expect(events).to.eql([
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
@@ -172,6 +161,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             properties: { plugin: 'analyticsPluginA', step: 'start' },
           },
         ]);
+      });
+
+      it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
+        const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['test-plugin-lifecycle'] });
+        // Validating the remote user_agent because that's the only field that it's added by the FTR plugin.
+        expect(event.context).to.have.property('user_agent');
+        expect(event.context.user_agent).to.be.a('string');
+      });
+
+      describe('Test helpers capabilities', () => {
+        it('should return the count of the events', async () => {
+          const eventCount = await ebtUIHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+          });
+          expect(eventCount).to.be(2);
+        });
+
+        it('should return 0 events when filtering by timestamp', async () => {
+          const eventCount = await ebtUIHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+            fromTimestamp: new Date().toISOString(),
+          });
+          expect(eventCount).to.be(0);
+        });
+
+        it('should return 1 event when filtering by the latest timestamp', async () => {
+          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['test-plugin-lifecycle'],
+            withTimeoutMs: 500,
+          });
+          expect(events.length).to.be.greaterThan(0);
+          const lastEvent = events[events.length - 1];
+          const eventCount = await ebtUIHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+            fromTimestamp: lastEvent.timestamp,
+          });
+          expect(eventCount).to.be(1);
+        });
       });
     });
   });

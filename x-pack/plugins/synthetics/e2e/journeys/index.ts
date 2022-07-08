@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+export * from './alerts';
 export * from './synthetics';
 export * from './data_view_permissions';
 export * from './uptime.journey';
 export * from './step_duration.journey';
-export * from './alerts';
 export * from './read_only_user';
 export * from './monitor_details.journey';
 export * from './monitor_name.journey';

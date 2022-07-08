@@ -7,10 +7,10 @@
 
 export const INFO_ROUTE_PATH = '/internal/cloud_security_posture/setup_status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
-export const FINDINGS_ROUTE_PATH = '/internal/cloud_security_posture/findings';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 export const UPDATE_RULES_CONFIG_ROUTE_PATH =
   '/internal/cloud_security_posture/update_rules_config';
+export const ES_PIT_ROUTE_PATH = '/internal/cloud_security_posture/es_pit';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 
@@ -23,6 +23,8 @@ export const LATEST_FINDINGS_INDEX_DEFAULT_NS = 'logs-' + LATEST_FINDINGS_INDEX_
 export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
 
+export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
+
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
 
@@ -34,4 +36,5 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingsGroupBy: true,
 } as const;
 
-export const cspRuleAssetSavedObjectType = 'csp_rule';
+export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp_rule';
+export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';

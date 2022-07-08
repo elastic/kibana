@@ -11,10 +11,10 @@ import 'source-map-support/register';
 import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
+import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
 import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, BundleRefs } from '../common';
 import { getWebpackConfig } from './webpack.config';
-import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 
 const PLUGIN_NAME = '@kbn/optimizer';
 

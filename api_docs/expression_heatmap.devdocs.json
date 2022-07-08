@@ -486,13 +486,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -522,13 +516,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
@@ -592,6 +580,14 @@
           },
           "; chartsThemeService: ",
           "Theme",
+          "; datatableUtilities: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.DatatableUtilitiesService",
+            "text": "DatatableUtilitiesService"
+          },
           "; onClickValue: (data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
@@ -618,7 +614,7 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          "; interactive: boolean; }"
+          "; interactive: boolean; renderComplete: () => void; }"
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,

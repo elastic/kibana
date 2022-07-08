@@ -35,7 +35,11 @@ export const useAddToCaseActions = ({
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
-  const hasWritePermissions = casePermissions?.crud ?? false;
+  const hasWritePermissions = casePermissions.crud;
+
+  const isAlert = useMemo(() => {
+    return ecsData?.event?.kind?.includes('signal');
+  }, [ecsData]);
 
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
@@ -80,7 +84,8 @@ export const useAddToCaseActions = ({
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
       ].includes(timelineId as TimelineId) &&
-      hasWritePermissions
+      hasWritePermissions &&
+      isAlert
     ) {
       return [
         // add to existing case menu item
@@ -110,6 +115,7 @@ export const useAddToCaseActions = ({
     handleAddToNewCaseClick,
     hasWritePermissions,
     timelineId,
+    isAlert,
   ]);
 
   return {

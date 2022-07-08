@@ -40,7 +40,7 @@ If you already know the visualization type you want to use, and how you want to 
 
 Choose the visualization type. 
 
-. Before you drag fields to the workspace, open the *Chart type* dropdown, then select the visualization type.  
+. Before you drag fields to the workspace, open the *Visualization type* dropdown, then select the visualization you want to use.  
 
 . To view more visualizations that *Lens* automatically created for the fields, click *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
 
@@ -66,14 +66,14 @@ TIP: You can manually apply the changes you make, which is helpful when creating
 
 Change the fields list to display a different {data-source}, different time range, or add your own fields.
 
-* To create a visualization with fields in a different {data-source}, open the *Data view* dropdown, then select the {data-source}. 
+* To create a visualization with fields in a different {data-source}, open the {data-source} dropdown, then select the {data-source}. 
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
-* To add fields, open the action menu (*...*) next to the *Data view* dropdown, then select *Add field to {data-source}*.
+* To add fields, open the {data-source} dropdown, then select *Add a field to this {data-source}*.
 +
 [role="screenshot"]
-image:images/runtime-field-menu.png[Dropdown menu located next to {data-source} field with items for adding and managing fields, width=50%]
+image:images/lens_dataViewDropDown_8.3.png[Dropdown menu located next to {data-source} field with items for adding and managing fields]
 +
 For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
@@ -83,7 +83,7 @@ For more information about adding fields to {data-sources} and examples, refer t
 
 Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
 
-. From the *Chart type* dropdown, select *Table*. 
+. From the *Visualization type* dropdown, select *Table*. 
 
 . Drag the fields you want to visualize to the workspace. 
 
@@ -91,9 +91,9 @@ Tables are highly customizable, and provide you with text alignment, value forma
 +
 All columns that belong to the same layer pane group are sorted in the table.
 
-. To change the display options, click a *Metrics* field, then configure the following options:
+. To change the display options, click a *Metrics* field in the layer pane, then configure the following options:
 
-* *Display name* &mdash; Specifies the field display name. 
+* *Name* &mdash; Specifies the field display name. 
 
 * *Value format* &mdash; Specifies how the field value displays in the table. 
 
@@ -110,9 +110,6 @@ All columns that belong to the same layer pane group are sorted in the table.
 ==== Create visualizations with keyboard navigation
 
 To use a keyboard instead of a mouse, use the *Lens* fully accessible and continuously improved drag system.
-
-[role="screenshot"]
-image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
 
 . Select the field in the fields list or layer pane. Most fields have an inner and outer select state. The inner state opens a panel with detailed information or options. 
 The outer state allows you to drag the field. Tab through the fields until you get the outer state on the field.
@@ -197,7 +194,13 @@ image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 . To open the annotation options, click *Event*.
 
-. Specify the *Annotation date*, then change the *Appearance* options you want to display.
+. Specify the *Annotation date*.
+
+. To display the annotation as a time range, select *Apply as range*, then specify the *From* and *To* time range.
+
+. Enter the annotation *Name*.
+
+. Change the *Appearance* options for how you want the annotation to display.
 
 . Click *Close*.
 

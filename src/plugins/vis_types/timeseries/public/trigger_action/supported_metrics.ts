@@ -72,6 +72,10 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     name: 'percentile',
     isFullReference: false,
   },
+  percentile_rank: {
+    name: 'percentile_rank',
+    isFullReference: false,
+  },
   sum: {
     name: 'sum',
     isFullReference: false,
@@ -89,7 +93,7 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     isFullReference: true,
   },
   positive_only: {
-    name: 'clamp',
+    name: 'pick_max',
     isFullReference: true,
   },
   static: {

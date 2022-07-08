@@ -29,6 +29,7 @@ import {
 
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
+import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup?: SecurityPluginSetup;
@@ -37,6 +38,7 @@ interface CasesClientFactoryArgs {
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
 /**
@@ -98,7 +100,11 @@ export class CasesClientFactory {
       excludedWrappers: ['security'],
     });
 
-    const attachmentService = new AttachmentService(this.logger);
+    const attachmentService = new AttachmentService(
+      this.logger,
+      this.options.persistableStateAttachmentTypeRegistry
+    );
+
     const caseService = new CasesService({
       log: this.logger,
       authentication: this.options?.securityPluginStart?.authc,
@@ -115,7 +121,10 @@ export class CasesClientFactory {
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(this.logger),
+      userActionService: new CaseUserActionService(
+        this.logger,
+        this.options.persistableStateAttachmentTypeRegistry
+      ),
       attachmentService,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,

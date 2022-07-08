@@ -14,9 +14,11 @@ import {
 } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
+import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
@@ -28,8 +30,13 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
+    const monitorType = monitor[ConfigKey.MONITOR_TYPE];
+    const monitorWithDefaults = {
+      ...DEFAULT_FIELDS[monitorType],
+      ...monitor,
+    };
 
-    const validationResult = validateMonitor(monitor as MonitorFields);
+    const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
 
     if (!validationResult.valid) {
       const { reason: message, details, payload } = validationResult;
@@ -42,7 +49,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       newMonitor = await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
         syntheticsMonitorType,
         formatSecrets({
-          ...monitor,
+          ...monitorWithDefaults,
           revision: 1,
         })
       );
@@ -84,14 +91,13 @@ export const syncNewMonitor = async ({
   monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
   server: UptimeServerSetup;
 }) => {
-  const errors = await server.syntheticsService.addConfig({
-    ...monitor,
-    id: (monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObject.id,
-    fields: {
-      config_id: monitorSavedObject.id,
-    },
-    fields_under_root: true,
-  });
+  const errors = await server.syntheticsService.addConfig(
+    formatHeartbeatRequest({
+      monitor,
+      monitorId: monitorSavedObject.id,
+      customHeartbeatId: (monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+    })
+  );
 
   sendTelemetryEvents(
     server.logger,

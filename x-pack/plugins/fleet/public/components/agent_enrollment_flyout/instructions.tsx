@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -39,9 +39,14 @@ export const Instructions = (props: InstructionProps) => {
     mode,
     setMode,
     isIntegrationFlow,
+    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+
+  useEffect(() => {
+    refreshAgentPolicies();
+  }, [refreshAgentPolicies]);
 
   const fleetServerAgentPolicies: string[] = useMemo(
     () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
@@ -65,6 +70,8 @@ export const Instructions = (props: InstructionProps) => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
 
+  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
+
   const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
 
   const showAgentEnrollment =
@@ -83,8 +90,6 @@ export const Instructions = (props: InstructionProps) => {
   } else {
     setSelectionType('tabs');
   }
-
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;

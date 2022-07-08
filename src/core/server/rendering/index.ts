@@ -8,7 +8,6 @@
 
 export { RenderingService } from './rendering_service';
 export type {
-  InjectedMetadata,
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   IRenderOptions,

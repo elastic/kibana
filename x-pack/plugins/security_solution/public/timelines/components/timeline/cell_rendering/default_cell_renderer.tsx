@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CellValueElementProps } from '.';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
@@ -38,14 +37,9 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   timelineId,
   truncate,
 }) => {
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
-
   const asPlainText = useMemo(() => {
-    return (
-      getLinkColumnDefinition(header.id, header.type, undefined, usersEnabled) !== undefined &&
-      !isTimeline
-    );
-  }, [header.id, header.type, isTimeline, usersEnabled]);
+    return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
+  }, [header.id, header.type, isTimeline]);
 
   const values = useGetMappedNonEcsValue({
     data,

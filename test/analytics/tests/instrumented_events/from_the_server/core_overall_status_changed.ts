@@ -13,15 +13,14 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
-  // Failing: See https://github.com/elastic/kibana/issues/132953
-  describe.skip('core-overall_status_changed', () => {
+  describe('core-overall_status_changed', () => {
     let initialEvent: Event;
     let secondEvent: Event;
 
     before(async () => {
-      [initialEvent, secondEvent] = await ebtServerHelper.getLastEvents(2, [
-        'core-overall_status_changed',
-      ]);
+      [initialEvent, secondEvent] = await ebtServerHelper.getEvents(2, {
+        eventTypes: ['core-overall_status_changed'],
+      });
     });
 
     it('should emit the initial "degraded" event with the context set to `initializing`', () => {
@@ -32,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Kibana is starting up'
       );
       expect(initialEvent.properties).to.have.property('overall_status_level', 'degraded');
+      expect(initialEvent.properties).to.have.property('overall_status_summary');
       expect(initialEvent.properties.overall_status_summary).to.be.a('string');
     });
 

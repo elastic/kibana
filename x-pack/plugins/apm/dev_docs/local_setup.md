@@ -30,8 +30,7 @@ yarn start
 **Run Synthtrace**
 
 ```
-node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts \
-  --local
+node scripts/synthtrace simple_trace.ts --local
 ```
 
 The `--local` flag is a shortcut to specifying `--target` and `--kibana`. It autodiscovers the current kibana basepath and installs the appropiate APM package.
@@ -56,9 +55,7 @@ Use the [oblt-cli](https://github.com/elastic/observability-test-environments/bl
 If you want to bootstrap some data on a cloud instance you can also use the following
 
 ```
-node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts \
-  --cloudId "myname:<base64string>" \
-  --maxDocs 100000
+node scripts/synthtrace simple_trace.ts --cloudId "myname:<base64string>" --maxDocs 100000
 ```
 
 ## 3. Local ES Cluster
@@ -93,8 +90,8 @@ node x-pack/plugins/apm/scripts/create_apm_users.js --username admin --password 
 
 This will create:
 
-- **viewer_user**: User with `viewer` role (read-only)
-- **editor_user**: User with `editor` role (read/write)
+- **viewer**: User with `viewer` role (read-only)
+- **editor**: User with `editor` role (read/write)
 
 # Debugging Elasticsearch queries
 

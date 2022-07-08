@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { InternalHttpServiceSetup } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
+import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
 import { registerCreateRoute } from './create';
@@ -46,7 +47,8 @@ export function registerRoutes({
   kibanaVersion: string;
   kibanaIndex: string;
 }) {
-  const router = http.createRouter('/api/saved_objects/');
+  const router =
+    http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
   registerGetRoute(router, { coreUsageData });
   registerResolveRoute(router, { coreUsageData });
@@ -62,7 +64,7 @@ export function registerRoutes({
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
-  const legacyRouter = http.createRouter('');
+  const legacyRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>('');
   registerLegacyImportRoute(legacyRouter, {
     maxImportPayloadBytes: config.maxImportPayloadBytes,
     coreUsageData,
@@ -70,7 +72,9 @@ export function registerRoutes({
   });
   registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData, logger });
 
-  const internalRouter = http.createRouter('/internal/saved_objects/');
+  const internalRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>(
+    '/internal/saved_objects/'
+  );
 
   registerMigrateRoute(internalRouter, migratorPromise);
   registerDeleteUnknownTypesRoute(internalRouter, { kibanaIndex, kibanaVersion });

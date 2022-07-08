@@ -11,64 +11,76 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
 import { Position } from '@elastic/charts';
 import { ReferenceLineLayerConfig } from '../../../common/types';
-import { getGroupId } from './utils';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
+import { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
+import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paddingMap: Partial<Record<Position, number>>;
-  axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
+  titles?: LayerAccessorsTitles;
+  xAxisFormatter: FieldFormat;
+  axesConfiguration: GroupsConfiguration;
+  yAxesMap: AxesMap;
 }
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   layer,
-  formatters,
+  axesConfiguration,
+  xAxisFormatter,
   paddingMap,
-  axesMap,
   isHorizontal,
+  titles,
+  yAxesMap,
 }) => {
-  if (!layer.yConfig) {
+  if (!layer.decorations) {
     return null;
   }
 
-  const { columnToLabel, yConfig: yConfigs, table } = layer;
+  const { columnToLabel, decorations, table } = layer;
   const columnToLabelMap: Record<string, string> = columnToLabel ? JSON.parse(columnToLabel) : {};
 
   const row = table.rows[0];
 
-  const yConfigByValue = yConfigs.sort(
+  const decorationConfigsByValue = decorations.sort(
     ({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]
   );
 
-  const groupedByDirection = groupBy(yConfigByValue, 'fill');
+  const groupedByDirection = groupBy(decorationConfigsByValue, 'fill');
   if (groupedByDirection.below) {
     groupedByDirection.below.reverse();
   }
 
-  const referenceLineElements = yConfigByValue.flatMap((yConfig) => {
-    const { axisMode } = yConfig;
-
-    // Find the formatter for the given axis
-    const groupId = getGroupId(axisMode);
-
-    const formatter = formatters[groupId || 'bottom'];
-    const name = columnToLabelMap[yConfig.forAccessor];
-    const value = row[yConfig.forAccessor];
-    const yConfigsWithSameDirection = groupedByDirection[yConfig.fill!];
-    const indexFromSameType = yConfigsWithSameDirection.findIndex(
-      ({ forAccessor }) => forAccessor === yConfig.forAccessor
+  const referenceLineElements = decorationConfigsByValue.flatMap((decorationConfig) => {
+    const axisGroup = getAxisGroupForReferenceLine(
+      axesConfiguration,
+      decorationConfig,
+      isHorizontal
     );
 
-    const shouldCheckNextReferenceLine = indexFromSameType < yConfigsWithSameDirection.length - 1;
+    const formatter = axisGroup?.formatter || xAxisFormatter;
+    const name =
+      columnToLabelMap[decorationConfig.forAccessor] ??
+      titles?.yTitles?.[decorationConfig.forAccessor];
+    const value = row[decorationConfig.forAccessor];
+    const yDecorationsWithSameDirection = groupedByDirection[decorationConfig.fill!].filter(
+      (yDecoration) =>
+        getAxisGroupForReferenceLine(axesConfiguration, yDecoration, isHorizontal) === axisGroup
+    );
+    const indexFromSameType = yDecorationsWithSameDirection.findIndex(
+      ({ forAccessor }) => forAccessor === decorationConfig.forAccessor
+    );
+
+    const shouldCheckNextReferenceLine =
+      indexFromSameType < yDecorationsWithSameDirection.length - 1;
 
     const nextValue = shouldCheckNextReferenceLine
-      ? row[yConfigsWithSameDirection[indexFromSameType + 1].forAccessor]
+      ? row[yDecorationsWithSameDirection[indexFromSameType + 1].forAccessor]
       : undefined;
 
-    const { forAccessor, type, ...restAnnotationConfig } = yConfig;
-    const id = `${layer.layerId}-${yConfig.forAccessor}`;
+    const { forAccessor, type, ...restAnnotationConfig } = decorationConfig;
+    const id = `${layer.layerId}-${decorationConfig.forAccessor}`;
 
     return (
       <ReferenceLineAnnotations
@@ -79,9 +91,10 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
           nextValue,
           name,
           ...restAnnotationConfig,
+          axisGroup,
         }}
+        axesMap={yAxesMap}
         paddingMap={paddingMap}
-        axesMap={axesMap}
         formatter={formatter}
         isHorizontal={isHorizontal}
       />

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '@kbn/logging';
-import { CoreContext } from '../core_context';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { InternalPrebootServicePreboot } from './types';
 
 /** @internal */

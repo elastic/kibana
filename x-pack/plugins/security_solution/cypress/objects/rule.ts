@@ -321,7 +321,10 @@ export const getNewThresholdRule = (): ThresholdRule => ({
 });
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
-  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
+  machineLearningJobs: [
+    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity',
+  ],
   anomalyScoreThreshold: '20',
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
@@ -457,7 +460,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     description,
     risk_score: riskScore,
     severity,
-    output_index: '.siem-signals-default',
+    output_index: '',
     author: [],
     false_positives: [],
     from: 'now-50000h',

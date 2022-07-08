@@ -30,7 +30,8 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           label = snakeCase(label);
         }
 
-        const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
+        // label might be not purely alphanumeric, wrap in brackets to map sure it's resolved correctly
+        const varName = [`[${label}]`, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter =
           seriesModel.formatter === DATA_FORMATTERS.DEFAULT
@@ -61,7 +62,8 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
         }
 
         set(variables, varName, data);
-        set(variables, `${label}.label`, rowLabel);
+        // label might be not purely alphanumeric, wrap in brackets to map sure it's resolved correctly
+        set(variables, `[${label}].label`, rowLabel);
       });
   });
   return variables;

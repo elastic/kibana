@@ -12,20 +12,16 @@ import {
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
   HostOverviewRequestOptions,
-  HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
   HostsUncommonProcessesStrategyResponse,
   HostsUncommonProcessesRequestOptions,
   HostsKpiQueries,
-  HostsKpiAuthenticationsStrategyResponse,
-  HostsKpiAuthenticationsRequestOptions,
   HostsKpiHostsStrategyResponse,
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
-  HostFirstLastSeenRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -84,11 +80,22 @@ import {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
 } from './users/kpi/total_users';
+
+import {
+  UsersKpiAuthenticationsRequestOptions,
+  UsersKpiAuthenticationsStrategyResponse,
+} from './users/kpi/authentications';
+
 import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
 import {
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from './users/authentications';
+import {
+  FirstLastSeenQuery,
+  FirstLastSeenRequestOptions,
+  FirstLastSeenStrategyResponse,
+} from './first_last_seen';
 
 export * from './cti';
 export * from './hosts';
@@ -96,6 +103,7 @@ export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
 export * from './users';
+export * from './first_last_seen';
 
 export type FactoryQueryTypes =
   | HostsQueries
@@ -105,7 +113,8 @@ export type FactoryQueryTypes =
   | NetworkKpiQueries
   | RiskQueries
   | CtiQueries
-  | typeof MatrixHistogramQuery;
+  | typeof MatrixHistogramQuery
+  | typeof FirstLastSeenQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -133,12 +142,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenStrategyResponse
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
-  : T extends HostsKpiQueries.kpiAuthentications
-  ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
@@ -151,6 +158,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UserAuthenticationsStrategyResponse
   : T extends UsersQueries.users
   ? UsersStrategyResponse
+  : T extends UsersQueries.kpiAuthentications
+  ? UsersKpiAuthenticationsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -195,12 +204,10 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenRequestOptions
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
-  : T extends HostsKpiQueries.kpiAuthentications
-  ? HostsKpiAuthenticationsRequestOptions
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
@@ -213,6 +220,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? TotalUsersKpiRequestOptions
   : T extends UsersQueries.users
   ? UsersRequestOptions
+  : T extends UsersQueries.kpiAuthentications
+  ? UsersKpiAuthenticationsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -255,4 +264,7 @@ export interface DocValueFieldsInput {
   field: string;
 
   format: string;
+}
+export interface CommonFields {
+  '@timestamp'?: string[];
 }

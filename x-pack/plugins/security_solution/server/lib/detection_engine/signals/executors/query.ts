@@ -13,8 +13,9 @@ import {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { ListClient } from '@kbn/lists-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
@@ -25,6 +26,8 @@ import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 export const queryExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   listClient,
@@ -39,7 +42,9 @@ export const queryExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -56,13 +61,6 @@ export const queryExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
@@ -90,6 +88,7 @@ export const queryExecutor = async ({
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings,
     });
   });
 };

@@ -29,7 +29,11 @@ import {
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient } from './service_api_client';
-import { formatMonitorConfig } from './formatters/format_configs';
+import {
+  formatMonitorConfig,
+  formatHeartbeatRequest,
+  SyntheticsConfig,
+} from './formatters/format_configs';
 import {
   ConfigKey,
   MonitorFields,
@@ -50,11 +54,6 @@ const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
 const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
-
-export type SyntheticsConfig = SyntheticsMonitorWithId & {
-  fields_under_root?: boolean;
-  fields?: { config_id: string; run_once?: boolean; test_run_id?: string };
-};
 
 export class SyntheticsService {
   private logger: Logger;
@@ -173,6 +172,7 @@ export class SyntheticsService {
                   type: 'runTaskError',
                   code: e?.code,
                   status: e.status,
+                  kibanaVersion: service.server.kibanaVersion,
                 });
                 throw e;
               }
@@ -218,6 +218,7 @@ export class SyntheticsService {
         type: 'scheduleTaskError',
         code: e?.code,
         status: e.status,
+        kibanaVersion: this.server.kibanaVersion,
       });
 
       this.logger?.error(
@@ -429,19 +430,17 @@ export class SyntheticsService {
 
     return (monitors ?? []).map((monitor) => {
       const attributes = monitor.attributes as unknown as MonitorFields;
-      const id = attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id;
-      return {
-        ...normalizeSecrets(monitor).attributes,
-        id, // heartbeat id
-        fields_under_root: true,
-        fields: { config_id: monitor.id }, // monitor saved object id
-      };
+      return formatHeartbeatRequest({
+        monitor: normalizeSecrets(monitor).attributes,
+        monitorId: monitor.id,
+        customHeartbeatId: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      });
     });
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {
-    return configs.map((config: Partial<MonitorFields>) =>
-      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    return configs.map((config: SyntheticsMonitor) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config as Partial<MonitorFields>)
     );
   }
 

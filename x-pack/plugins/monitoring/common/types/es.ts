@@ -6,6 +6,7 @@
  */
 
 export interface ElasticsearchResponse {
+  timed_out?: boolean;
   hits?: {
     hits: ElasticsearchResponseHit[];
     total: {

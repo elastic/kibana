@@ -29,13 +29,15 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import { EventsTh, EventsThContent } from '../../styles';
 import { EventsSelect } from '../column_headers/events_select';
 import * as i18n from '../column_headers/translations';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { isFullScreen } from '../column_headers';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { getColumnHeader } from '../column_headers/helpers';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -54,7 +56,7 @@ const SortingColumnsContainer = styled.div`
 const FieldBrowserContainer = styled.div`
   .euiToolTipAnchor {
     .euiButtonContent {
-      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.xs}`};
+      padding: ${({ theme }) => `0 ${theme.eui.euiSizeXS}`};
     }
     button {
       color: ${({ theme }) => theme.eui.euiColorPrimary};
@@ -88,10 +90,14 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   timelineId,
   fieldBrowserOptions,
 }) => {
-  const { timelines: timelinesUi } = useKibana().services;
+  const { triggersActionsUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
       setTimelineFullScreen(!timelineFullScreen);
@@ -168,6 +174,32 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     [columnHeaders]
   );
 
+  const onResetColumns = useCallback(() => {
+    dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultColumns }));
+  }, [defaultColumns, dispatch, timelineId]);
+
+  const onToggleColumn = useCallback(
+    (columnId: string) => {
+      if (columnHeaders.some(({ id }) => id === columnId)) {
+        dispatch(
+          timelineActions.removeColumn({
+            columnId,
+            id: timelineId,
+          })
+        );
+      } else {
+        dispatch(
+          timelineActions.upsertColumn({
+            column: getColumnHeader(columnId, defaultColumns),
+            id: timelineId,
+            index: 1,
+          })
+        );
+      }
+    },
+    [columnHeaders, dispatch, timelineId, defaultColumns]
+  );
+
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
@@ -187,10 +219,11 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
       <EventsTh role="button">
         <FieldBrowserContainer>
-          {timelinesUi.getFieldBrowser({
+          {triggersActionsUi.getFieldBrowser({
             browserFields,
-            columnHeaders,
-            timelineId,
+            columnIds: columnHeaders.map(({ id }) => id),
+            onResetColumns,
+            onToggleColumn,
             options: fieldBrowserOptions,
           })}
         </FieldBrowserContainer>

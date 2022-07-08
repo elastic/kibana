@@ -11,16 +11,16 @@ import { mockHttpServer } from './http_service.test.mocks';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '../config/mocks';
+import { ConfigService, Env } from '@kbn/config';
+import { getEnvOptions } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
-import { ConfigService, Env } from '../config';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { config as cspConfig } from '../csp';
-import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
+import { cspConfig } from './csp';
+import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import { Router } from './router';
 
 const logger = loggingSystemMock.create();
@@ -106,6 +106,7 @@ test('creates and sets up http server', async () => {
   await service.start();
   expect(httpServer.start).toHaveBeenCalled();
   expect(prebootHttpServer.stop).toHaveBeenCalled();
+  await service.stop();
 });
 
 test('spins up `preboot` server until started if configured with `autoListen:true`', async () => {
@@ -161,6 +162,7 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
 
   expect(httpServer.start).toBeCalledTimes(1);
   expect(prebootHapiServer.stop).toBeCalledTimes(1);
+  await service.stop();
 });
 
 test('logs error if already set up', async () => {
@@ -189,6 +191,7 @@ test('logs error if already set up', async () => {
   await service.setup(setupDeps);
 
   expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
+  await service.stop();
 });
 
 test('stops http server', async () => {
@@ -314,6 +317,7 @@ test('register route handler', async () => {
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
+  await service.stop();
 });
 
 test('register preboot route handler on preboot', async () => {
@@ -340,6 +344,7 @@ test('register preboot route handler on preboot', async () => {
   const [[router]] = registerRoutesMock.mock.calls;
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenCalledWith(router);
+  await service.stop();
 });
 
 test('register preboot route handler on setup', async () => {
@@ -353,8 +358,14 @@ test('register preboot route handler on setup', async () => {
       }),
       start: noop,
       stop: noop,
+      isListening: jest.fn(),
     }))
-    .mockImplementationOnce(() => ({ setup: () => ({ server: {} }), start: noop, stop: noop }));
+    .mockImplementationOnce(() => ({
+      setup: () => ({ server: {} }),
+      start: noop,
+      stop: noop,
+      isListening: jest.fn(),
+    }));
 
   const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
   await service.preboot(prebootDeps);
@@ -369,6 +380,7 @@ test('register preboot route handler on setup', async () => {
   const [[router]] = registerRoutesMock.mock.calls;
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenCalledWith(router);
+  await service.stop();
 });
 
 test('returns `preboot` http server contract on preboot', async () => {
@@ -400,6 +412,7 @@ test('returns `preboot` http server contract on preboot', async () => {
     registerStaticDir: expect.any(Function),
     getServerInfo: expect.any(Function),
   });
+  await service.stop();
 });
 
 test('returns http server contract on setup', async () => {
@@ -430,6 +443,7 @@ test('returns http server contract on setup', async () => {
     createRouter: expect.any(Function),
     registerPrebootRoutes: expect.any(Function),
   });
+  await service.stop();
 });
 
 test('does not start http server if configured with `autoListen:false`', async () => {
@@ -464,4 +478,5 @@ test('does not start http server if configured with `autoListen:false`', async (
   await service.start();
 
   expect(httpServer.start).not.toHaveBeenCalled();
+  await service.stop();
 });

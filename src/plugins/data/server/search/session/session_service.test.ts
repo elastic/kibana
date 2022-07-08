@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
@@ -19,7 +20,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { nodeBuilder, SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const MAX_UPDATE_RETRIES = 3;

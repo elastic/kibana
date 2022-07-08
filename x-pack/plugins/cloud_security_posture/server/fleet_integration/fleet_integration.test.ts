@@ -19,7 +19,7 @@ import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plu
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 import {
   onPackagePolicyPostCreateCallback,
-  onPackagePolicyDeleteCallback,
+  removeCspRulesInstancesCallback,
 } from './fleet_integration';
 
 describe('create CSP rules with post package create callback', () => {
@@ -109,10 +109,10 @@ describe('create CSP rules with post package create callback', () => {
       ],
       pit_id: undefined,
     } as unknown as SavedObjectsFindResponse);
-    await onPackagePolicyDeleteCallback(
-      logger,
+    await removeCspRulesInstancesCallback(
       mockDeletePackagePolicy[0],
-      savedObjectRepositoryMock
+      savedObjectRepositoryMock,
+      logger
     );
 
     expect(savedObjectRepositoryMock.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });

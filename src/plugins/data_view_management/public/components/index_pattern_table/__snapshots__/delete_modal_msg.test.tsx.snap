@@ -29,7 +29,7 @@ exports[`delete modal content render 1`] = `
     columns={
       Array [
         Object {
-          "field": "title",
+          "field": "name",
           "name": "Data view",
           "sortable": true,
         },
@@ -46,7 +46,9 @@ exports[`delete modal content render 1`] = `
     items={
       Array [
         Object {
+          "getName": [Function],
           "id": "1",
+          "name": "logstash-*",
           "namespaces": Array [
             "a",
             "b",
@@ -98,7 +100,7 @@ exports[`delete modal content render 2`] = `
     columns={
       Array [
         Object {
-          "field": "title",
+          "field": "name",
           "name": "Data view",
           "sortable": true,
         },
@@ -107,7 +109,9 @@ exports[`delete modal content render 2`] = `
     items={
       Array [
         Object {
+          "getName": [Function],
           "id": "1",
+          "name": "logstash-*",
           "namespaces": Array [
             "a",
             "b",
@@ -159,7 +163,7 @@ exports[`delete modal content render 3`] = `
     columns={
       Array [
         Object {
-          "field": "title",
+          "field": "name",
           "name": "Data view",
           "sortable": true,
         },
@@ -176,7 +180,9 @@ exports[`delete modal content render 3`] = `
     items={
       Array [
         Object {
+          "getName": [Function],
           "id": "1",
+          "name": "logstash-*",
           "namespaces": Array [
             "*",
           ],
@@ -226,7 +232,7 @@ exports[`delete modal content render 4`] = `
     columns={
       Array [
         Object {
-          "field": "title",
+          "field": "name",
           "name": "Data view",
           "sortable": true,
         },
@@ -243,14 +249,18 @@ exports[`delete modal content render 4`] = `
     items={
       Array [
         Object {
+          "getName": [Function],
           "id": "1",
+          "name": "logstash-*",
           "namespaces": Array [
             "*",
           ],
           "title": "logstash-*",
         },
         Object {
+          "getName": [Function],
           "id": "1",
+          "name": "log*",
           "namespaces": Array [
             "a",
             "b",

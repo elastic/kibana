@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Logger,
@@ -29,9 +28,9 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  RulesClientApi,
 } from '../types';
 import { TaskRunner } from './task_runner';
-import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
@@ -42,7 +41,7 @@ export interface TaskRunnerContext {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
-  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
+  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;

@@ -81,6 +81,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
   return {
     type,
+    allowAsReference: true,
     priority,
     displayName,
     description,
@@ -108,9 +109,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    onOtherColumnChanged: (layer, thisColumnId) =>
       optionalTimeScaling
-        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId) as T)
+        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId) as T)
         : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
@@ -142,7 +143,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) => {
+    getAdvancedOptions: ({
+      layer,
+      columnId,
+      currentColumn,
+      paramEditorUpdater,
+    }: ParamEditorProps<T>) => {
       if (!hideZeroOption) return [];
       return [
         {
@@ -160,7 +166,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
                 }}
                 checked={Boolean(currentColumn.params?.emptyAsNull)}
                 onChange={() => {
-                  updateLayer(
+                  paramEditorUpdater(
                     updateColumnParam({
                       layer,
                       columnId,
@@ -221,7 +227,7 @@ Example: Get the {metric} of price for orders from the UK:
       }),
     },
     shiftable: true,
-  } as OperationDefinition<T, 'field'>;
+  } as OperationDefinition<T, 'field', {}, true>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;

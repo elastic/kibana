@@ -264,7 +264,6 @@ class DocLinks {
     this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
     this.workplaceSearchNetworkDrive = docLinks.links.workplaceSearch.networkDrive;
     this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
-    this.workplaceSearchOutlook = docLinks.links.workplaceSearch.outlook;
     this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
     this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
     this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
@@ -273,9 +272,7 @@ class DocLinks {
     this.workplaceSearchSharePointServer = docLinks.links.workplaceSearch.sharePointServer;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
-    this.workplaceSearchTeams = docLinks.links.workplaceSearch.teams;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
-    this.workplaceSearchZoom = docLinks.links.workplaceSearch.zoom;
   }
 }
 
