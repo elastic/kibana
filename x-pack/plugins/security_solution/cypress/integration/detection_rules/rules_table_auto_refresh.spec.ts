@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { RULE_CHECKBOX, REFRESH_RULES_STATUS } from '../../screens/alerts_detection_rules';
+import {
+  RULE_CHECKBOX,
+  REFRESH_RULES_STATUS,
+  REFRESH_SETTINGS_SWITCH,
+  REFRESH_SETTINGS_SELECTION_NOTE,
+} from '../../screens/alerts_detection_rules';
 import {
   changeRowsPerPageTo,
   checkAutoRefresh,
@@ -75,19 +80,27 @@ describe('Alerts detection rules table auto-refresh', () => {
     waitForRulesTableToBeLoaded();
     changeRowsPerPageTo(5);
 
-    openRefreshSettingsPopover();
-
     // check refresh settings if it's enabled before selecting
+    openRefreshSettingsPopover();
     checkAutoRefreshIsEnabled();
 
     selectAllRules();
 
     // auto refresh should be disabled after rules selected
+    openRefreshSettingsPopover();
     checkAutoRefreshIsDisabled();
+
+    // if any rule selected, refresh switch should be disabled and help note to users should displayed
+    cy.get(REFRESH_SETTINGS_SWITCH).should('be.disabled');
+    cy.contains(
+      REFRESH_SETTINGS_SELECTION_NOTE,
+      'Note: Refresh is disabled while there is an active selection.'
+    );
 
     clearAllRuleSelection();
 
     // after all rules unselected, auto refresh should renew
+    openRefreshSettingsPopover();
     checkAutoRefreshIsEnabled();
   });
 
@@ -107,6 +120,7 @@ describe('Alerts detection rules table auto-refresh', () => {
     clearAllRuleSelection();
 
     // after all rules unselected, auto refresh should still be disabled
+    openRefreshSettingsPopover();
     checkAutoRefreshIsDisabled();
   });
 });
