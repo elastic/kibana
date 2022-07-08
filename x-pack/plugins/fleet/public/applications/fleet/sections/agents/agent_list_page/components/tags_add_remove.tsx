@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 
 import { useUpdateTags } from '../hooks';
 
+import { sanitizeTag } from '../utils';
+
 import { TagOptions } from './tag_options';
 
 interface Props {
@@ -138,8 +140,9 @@ export const TagsAddRemove: React.FC<Props> = ({
               defaultMessage: 'Find or create label...',
             }),
             onChange: (value: string) => {
-              setSearchValue(value);
+              setSearchValue(sanitizeTag(value));
             },
+            value: searchValue ?? '',
           }}
           options={labels}
           renderOption={renderOption}
@@ -162,14 +165,20 @@ export const TagsAddRemove: React.FC<Props> = ({
                 );
               }}
             >
-              <EuiIcon type="plus" />{' '}
-              <FormattedMessage
-                id="xpack.fleet.tagsAddRemove.createText"
-                defaultMessage='Create a new tag "{name}"'
-                values={{
-                  name: searchValue,
-                }}
-              />
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="plus" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.fleet.tagsAddRemove.createText"
+                    defaultMessage='Create a new tag "{name}"'
+                    values={{
+                      name: searchValue,
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiButtonEmpty>
           }
         >
