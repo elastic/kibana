@@ -26,10 +26,9 @@ const fmtList = (list: Iterable<string>) => [...list].map((i) => ` - ${i}`).join
 export async function runCheckJestConfigsCli() {
   run(
     async ({ log }) => {
-      const jestPaths = await getAllJestPaths();
-
       const start = performance.now();
 
+      const jestPaths = await getAllJestPaths();
       const allConfigs = await getTestsForConfigPaths(jestPaths.configs);
       const missingConfigs = new Set<string>();
       const multipleConfigs = new Set<{ configs: string[]; rel: string }>();
