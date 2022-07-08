@@ -14,8 +14,7 @@ import { isVerificationError } from '../../../../../../../services';
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
-
-import { UnverifiedPackageModal } from '../../../components/unverified_package_modal';
+import { UnverifiedPackageModal } from '../../../../../../../components/unverified_package_modal';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
