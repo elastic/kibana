@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SpikeAnalysisTable } from './spike_analytis_table';
+export { SpikeAnalysisTable } from './spike_analysis_table';

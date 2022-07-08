@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+// This is currently copied over from the APM plugin
 const CORRELATIONS_IMPACT_THRESHOLD = {
   HIGH: i18n.translate('xpack.aiOps.correlations.highImpactText', {
     defaultMessage: 'High',
