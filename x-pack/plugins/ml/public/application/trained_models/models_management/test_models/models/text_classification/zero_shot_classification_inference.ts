@@ -24,7 +24,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   protected info = [
     i18n.translate('xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.info1', {
       defaultMessage:
-        'Provide a set of labels and test how well the model classifies your input text',
+        'Provide a set of labels and test how well the model classifies your input text.',
     }),
   ];
 

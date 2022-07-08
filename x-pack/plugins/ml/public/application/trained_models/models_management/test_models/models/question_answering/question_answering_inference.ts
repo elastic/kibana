@@ -51,7 +51,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   protected info = [
     i18n.translate('xpack.ml.trainedModels.testModelsFlyout.questionAnswer.info1', {
       defaultMessage:
-        'Provide a question and test how well the model extracts an answer from your input text',
+        'Provide a question and test how well the model extracts an answer from your input text.',
     }),
   ];
 

@@ -24,7 +24,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   protected info = [
     i18n.translate('xpack.ml.trainedModels.testModelsFlyout.fillMask.info1', {
-      defaultMessage: 'Test how well the model predicts a missing word in a phrase',
+      defaultMessage: 'Test how well the model predicts a missing word in a phrase.',
     }),
   ];
 
