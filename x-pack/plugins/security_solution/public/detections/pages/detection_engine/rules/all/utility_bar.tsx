@@ -103,17 +103,19 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
               disabled={isAnyRuleSelected}
               data-test-subj="refreshSettingsSwitch"
             />,
-            isAnyRuleSelected ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
-                  <FormattedMessage
-                    id="xpack.securitySolution.detectionEngine.rules.refreshRulePopoverSelectionHelpText"
-                    defaultMessage="Note: Refresh is disabled while there is an active selection."
-                  />
-                </EuiTextColor>
-              </>
-            ) : null,
+            ...(isAnyRuleSelected
+              ? [
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
+                      <FormattedMessage
+                        id="xpack.securitySolution.detectionEngine.rules.refreshRulePopoverSelectionHelpText"
+                        defaultMessage="Note: Refresh is disabled while there is an active selection."
+                      />
+                    </EuiTextColor>
+                  </>,
+                ]
+              : []),
           ]}
         />
       ),
