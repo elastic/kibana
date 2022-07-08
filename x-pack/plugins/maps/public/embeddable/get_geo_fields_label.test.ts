@@ -16,5 +16,7 @@ test('two fields', () => {
 });
 
 test('three or more fields', () => {
-  expect(getGeoFieldsLabel(['location', 'secondLocation', 'thirdLocation'])).toEqual('location, secondLocation, and thirdLocation');
+  expect(getGeoFieldsLabel(['location', 'secondLocation', 'thirdLocation'])).toEqual(
+    'location, secondLocation, and thirdLocation'
+  );
 });

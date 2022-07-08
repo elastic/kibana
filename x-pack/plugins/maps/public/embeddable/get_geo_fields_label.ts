@@ -20,10 +20,14 @@ export function getGeoFieldsLabel(geoFieldNames: string[]) {
     defaultMessage: ' and ',
   });
 
-
   if (geoFieldNames.length === 2) {
     return geoFieldNames[0] + connector + geoFieldNames[1];
   }
 
-  return geoFieldNames.slice(0, geoFieldNames.length - 1).join(', ') + ',' + connector + geoFieldNames[geoFieldNames.length - 1];
+  return (
+    geoFieldNames.slice(0, geoFieldNames.length - 1).join(', ') +
+    ',' +
+    connector +
+    geoFieldNames[geoFieldNames.length - 1]
+  );
 }
