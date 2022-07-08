@@ -11,6 +11,10 @@ export interface KeyValuePair {
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | undefined>;
+export interface ConnectorScheduling {
+  enabled: boolean;
+  interval: string;
+}
 
 export interface Connector {
   api_key_id: string | null;
@@ -19,10 +23,7 @@ export interface Connector {
   index_name: string;
   last_seen: string | null;
   last_synced: string | null;
-  scheduling: {
-    enabled: boolean;
-    interval: string | null; // crontab syntax
-  };
+  scheduling: ConnectorScheduling;
   service_type: string | null;
   status: string | null;
   sync_error: string | null;
