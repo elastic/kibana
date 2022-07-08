@@ -20,14 +20,14 @@ describe('buildSearchUIConfig', () => {
         capabilities: {
           snippet: true,
           facet: true,
-        }
+        },
       },
       bar: {
         type: SchemaType.Number,
         capabilities: {
           snippet: false,
           facet: false,
-        }
+        },
       },
     };
     const fields = {

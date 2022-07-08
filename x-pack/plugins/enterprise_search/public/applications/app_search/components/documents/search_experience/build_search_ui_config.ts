@@ -18,8 +18,8 @@ export const buildSearchUIConfig = (
   initialState = { sortDirection: 'desc' as SortDirection, sortField: 'id' }
 ) => {
   const facets = fields.filterFields
-    .filter(fieldName =>  !!schema[fieldName] && schema[fieldName].type !== SchemaType.Geolocation)
-    .filter(fieldName => !!schema[fieldName].capabilities.facet)
+    .filter((fieldName) => !!schema[fieldName] && schema[fieldName].type !== SchemaType.Geolocation)
+    .filter((fieldName) => !!schema[fieldName].capabilities.facet)
     .reduce((facetsConfig, fieldName) => {
       return {
         ...facetsConfig,
@@ -31,9 +31,9 @@ export const buildSearchUIConfig = (
     .filter(([, schemaField]) => schemaField.type !== SchemaType.Nested)
     .reduce((acc, [fieldName, schemaField]) => {
       if (schemaField.capabilities.snippet) {
-        return {  ...acc,  [fieldName]: {  raw: {},  snippet: { size: 300 } } };
+        return { ...acc, [fieldName]: { raw: {}, snippet: { size: 300 } } };
       }
-      return {  ...acc,  [fieldName]: {  raw: {} } };
+      return { ...acc, [fieldName]: { raw: {} } };
     }, {});
 
   return {
