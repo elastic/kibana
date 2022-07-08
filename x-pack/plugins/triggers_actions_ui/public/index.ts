@@ -37,6 +37,8 @@ export type {
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
+  FieldBrowserOptions,
+  FieldBrowserProps,
   RuleDefinitionProps,
 } from './types';
 

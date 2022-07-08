@@ -2881,7 +2881,9 @@
               "RangeFilter",
               " | ",
               "ScriptedRangeFilter",
-              " | MatchAllRangeFilter | undefined; createRelativeFilter: (indexPattern: ",
+              " | ",
+              "MatchAllRangeFilter",
+              " | undefined; createRelativeFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2895,7 +2897,9 @@
               "RangeFilter",
               " | ",
               "ScriptedRangeFilter",
-              " | MatchAllRangeFilter | undefined; getBounds: () => ",
+              " | ",
+              "MatchAllRangeFilter",
+              " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3121,7 +3125,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined; createRelativeFilter: (indexPattern: ",
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined; createRelativeFilter: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3135,7 +3141,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined; getBounds: () => ",
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined; getBounds: () => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -3350,7 +3358,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -3454,7 +3464,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,

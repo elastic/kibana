@@ -19,6 +19,7 @@ import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/publi
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -30,6 +31,7 @@ import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
+import { getFieldBrowserLazy } from './common/get_field_browser';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
@@ -71,6 +73,7 @@ import { PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 
@@ -101,6 +104,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
+  getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
   getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
@@ -126,6 +130,7 @@ interface PluginsSetup {
 interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -218,6 +223,7 @@ export class Plugin
           actions: plugins.actions,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
+          dataViewEditor: pluginsStart.dataViewEditor,
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
@@ -305,6 +311,9 @@ export class Plugin
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
+      },
+      getFieldBrowser: (props: FieldBrowserProps) => {
+        return getFieldBrowserLazy(props);
       },
       getRuleStatusDropdown: (props: RuleStatusDropdownProps) => {
         return getRuleStatusDropdownLazy(props);
