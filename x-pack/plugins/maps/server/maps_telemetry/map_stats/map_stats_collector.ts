@@ -12,8 +12,8 @@ import {
   LAYER_KEYS,
   RESOLUTION_KEYS,
   SCALING_KEYS,
-  LayerStatsCollector,
-} from '../../../common/telemetry';
+} from '../../../common/telemetry/types';
+import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_collector';
 
 import { ClusterCountStats, MapStats } from './types';
 
