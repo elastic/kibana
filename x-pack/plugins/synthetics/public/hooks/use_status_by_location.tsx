@@ -8,16 +8,16 @@
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { Ping } from '../../../../../../common/runtime_types';
+import { Ping } from '../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
   SUMMARY_FILTER,
-} from '../../../../../../common/constants/client_defaults';
-import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../../../common/constants';
+} from '../../common/constants/client_defaults';
+import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../common/constants';
+import { useSyntheticsRefreshContext } from '../apps/synthetics/contexts';
 
-export function useStatusByLocation() {
+export function useStatusByLocation(monitorIdArg?: string) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -35,7 +35,7 @@ export function useStatusByLocation() {
               getTimeSpanFilter(),
               {
                 term: {
-                  config_id: monitorId,
+                  config_id: monitorIdArg ?? monitorId,
                 },
               },
             ],
@@ -60,7 +60,7 @@ export function useStatusByLocation() {
         },
       },
     },
-    [lastRefresh, monitorId],
+    [lastRefresh, monitorId, monitorIdArg],
     { name: 'getMonitorStatusByLocation' }
   );
 

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { useTheme } from '@kbn/observability-plugin/public';
-import { useStatusByLocation } from '../hooks/use_status_by_location';
+import { useStatusByLocation } from '../../../../../hooks/use_status_by_location';
 
 export const LocationsStatus = () => {
   const { locations, loading } = useStatusByLocation();
