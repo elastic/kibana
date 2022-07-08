@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TestProvidersComponent } from '../../../../common/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/Indicator';
 import {
   CODE_BLOCK_TEST_ID,
@@ -18,14 +19,20 @@ const mockIndicator: Indicator = generateMockIndicator();
 
 describe('IndicatorsFlyoutJson', () => {
   it('should render code block component on valid indicator', () => {
-    const { getByTestId } = render(<IndicatorsFlyoutJson indicator={mockIndicator} />);
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <IndicatorsFlyoutJson indicator={mockIndicator} />
+      </TestProvidersComponent>
+    );
 
     expect(getByTestId(CODE_BLOCK_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
-      <IndicatorsFlyoutJson indicator={{} as unknown as Indicator} />
+      <TestProvidersComponent>
+        <IndicatorsFlyoutJson indicator={{} as unknown as Indicator} />
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();

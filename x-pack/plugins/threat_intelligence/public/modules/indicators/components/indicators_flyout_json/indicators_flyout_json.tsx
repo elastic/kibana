@@ -7,6 +7,7 @@
 
 import React, { VFC } from 'react';
 import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Indicator } from '../../../../../common/types/Indicator';
 
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutJsonEmptyPrompt';
@@ -17,8 +18,22 @@ export const IndicatorsFlyoutJson: VFC<{ indicator: Indicator }> = ({ indicator 
     <EuiEmptyPrompt
       iconType="alert"
       color="danger"
-      title={<h2>Unable to display indicator information</h2>}
-      body={<p>There was an error displaying the indicator fields and values.</p>}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.flyoutJson.errorMessageTitle"
+            defaultMessage="Unable to display indicator information"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.flyoutJson.errorMessageBody"
+            defaultMessage="There was an error displaying the indicator fields and values."
+          />
+        </p>
+      }
       data-test-subj={EMPTY_PROMPT_TEST_ID}
     />
   ) : (

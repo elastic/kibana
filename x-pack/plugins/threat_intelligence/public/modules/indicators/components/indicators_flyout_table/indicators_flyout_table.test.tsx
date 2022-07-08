@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TestProvidersComponent } from '../../../../common/test_providers';
 import {
   generateMockIndicator,
   Indicator,
@@ -24,7 +25,11 @@ const mockIndicator: Indicator = generateMockIndicator();
 
 describe('IndicatorsFlyoutTable', () => {
   it('should render fields and values in table', () => {
-    const { getByTestId, getByText } = render(<IndicatorsFlyoutTable indicator={mockIndicator} />);
+    const { getByTestId, getByText } = render(
+      <TestProvidersComponent>
+        <IndicatorsFlyoutTable indicator={mockIndicator} />
+      </TestProvidersComponent>
+    );
 
     expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
 
@@ -39,7 +44,9 @@ describe('IndicatorsFlyoutTable', () => {
 
   it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
-      <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} />
+      <TestProvidersComponent>
+        <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} />
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();

@@ -6,6 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
@@ -17,12 +18,22 @@ export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';
 const columns = [
   {
     field: 'field',
-    name: 'Field',
+    name: (
+      <FormattedMessage
+        id="xpack.threatIntelligence.indicator.flyoutTable.fieldColumnLabel"
+        defaultMessage="Field"
+      />
+    ),
     sortable: true,
   },
   {
     field: 'value',
-    name: 'Value',
+    name: (
+      <FormattedMessage
+        id="xpack.threatIntelligence.indicator.flyoutTable.valueColumnLabel"
+        defaultMessage="Value"
+      />
+    ),
     truncateText: true,
   },
 ];
@@ -48,13 +59,26 @@ export const IndicatorsFlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator
     <EuiEmptyPrompt
       iconType="alert"
       color="danger"
-      title={<h2>Unable to display indicator information</h2>}
-      body={<p>There was an error displaying the indicator fields and values.</p>}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.flyoutTable.errorMessageTitle"
+            defaultMessage="Unable to display indicator information"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.flyoutTable.errorMessageBody"
+            defaultMessage="There was an error displaying the indicator fields and values."
+          />
+        </p>
+      }
       data-test-subj={EMPTY_PROMPT_TEST_ID}
     />
   ) : (
     <EuiInMemoryTable
-      tableCaption="Indicator of Compromise fields"
       items={items}
       columns={columns}
       search={search}
