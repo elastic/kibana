@@ -32,9 +32,9 @@ export type DiscoverTopNavProps = Pick<
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
-  onEditRuntimeField: () => void;
   textBasedLanguageMode?: string;
   textBasedLanguageModeErrors?: Error;
+  onFieldEdited: () => void;
 };
 
 export const DiscoverTopNav = ({
@@ -49,9 +49,9 @@ export const DiscoverTopNav = ({
   savedSearch,
   resetSavedSearch,
   onChangeIndexPattern,
-  onEditRuntimeField,
   textBasedLanguageMode,
   textBasedLanguageModeErrors,
+  onFieldEdited,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -103,13 +103,13 @@ export const DiscoverTopNav = ({
                 },
                 fieldName,
                 onSave: async () => {
-                  onEditRuntimeField();
+                  onFieldEdited();
                 },
               });
             }
           }
         : undefined,
-    [canEditDataView, indexPattern?.id, data.dataViews, dataViewFieldEditor, onEditRuntimeField]
+    [canEditDataView, indexPattern?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
   );
 
   const addField = useMemo(

@@ -173,7 +173,7 @@ export function DiscoverLayout({
   const textBasedLanguageMode = state.query ? getTextBasedLanguageMode(state.query) : '';
 
   const onAddFilter = useCallback(
-    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
@@ -185,7 +185,7 @@ export function DiscoverLayout({
     [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
   );
 
-  const onEditRuntimeField = useCallback(() => {
+  const onFieldEdited = useCallback(() => {
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
 
@@ -254,9 +254,9 @@ export function DiscoverLayout({
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
-        onEditRuntimeField={onEditRuntimeField}
         textBasedLanguageMode={textBasedLanguageMode}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+        onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -279,7 +279,7 @@ export function DiscoverLayout({
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
-              onEditRuntimeField={onEditRuntimeField}
+              onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
@@ -369,6 +369,7 @@ export function DiscoverLayout({
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
+                      onFieldEdited={onFieldEdited}
                     />
                   ) : (
                     <FieldStatisticsTableMemoized

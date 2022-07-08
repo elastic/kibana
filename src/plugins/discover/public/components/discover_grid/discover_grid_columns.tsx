@@ -21,6 +21,7 @@ import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
 import { DataTableRecord } from '../../types';
+import { buildEditFieldButton } from './build_edit_field_button';
 
 const openDetails = {
   id: 'openDetails',
@@ -59,7 +60,7 @@ export function getLeadControlColumns(setExpandedDoc?: (doc?: DataTableRecord) =
   return [openDetails, select];
 }
 
-export function buildEuiGridColumn({
+function buildEuiGridColumn({
   columnName,
   columnWidth = 0,
   indexPattern,
@@ -69,6 +70,7 @@ export function buildEuiGridColumn({
   valueToStringConverter,
   rowsCount,
   onFilter,
+  editField,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -79,8 +81,13 @@ export function buildEuiGridColumn({
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
   onFilter?: DocViewFilterFn;
+  editField?: (fieldName: string) => void;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
+  const editFieldButton =
+    editField &&
+    indexPatternField &&
+    buildEditFieldButton({ services, dataView: indexPattern, field: indexPatternField, editField });
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
@@ -113,6 +120,7 @@ export function buildEuiGridColumn({
           rowsCount,
           valueToStringConverter,
         }),
+        ...(editFieldButton ? [editFieldButton] : []),
       ],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField, onFilter) : [],
@@ -162,6 +170,7 @@ export function getEuiGridColumns({
   services,
   valueToStringConverter,
   onFilter,
+  editField,
 }: {
   columns: string[];
   rowsCount: number;
@@ -173,6 +182,7 @@ export function getEuiGridColumns({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   onFilter: DocViewFilterFn;
+  editField?: (fieldName: string) => void;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -193,6 +203,7 @@ export function getEuiGridColumns({
       valueToStringConverter,
       rowsCount,
       onFilter,
+      editField,
     })
   );
 }
