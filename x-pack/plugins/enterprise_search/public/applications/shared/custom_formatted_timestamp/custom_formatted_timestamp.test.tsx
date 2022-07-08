@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { FormattedDateTime } from '../../../utils/formatted_date_time';
+import { FormattedDateTime } from '../formatted_date_time';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 

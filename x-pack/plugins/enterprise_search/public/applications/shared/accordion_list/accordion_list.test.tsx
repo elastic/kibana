@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/engine_logic.mock';
-
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';

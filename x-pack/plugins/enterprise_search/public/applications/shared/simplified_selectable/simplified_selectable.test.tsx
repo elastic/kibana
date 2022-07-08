@@ -11,7 +11,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSelectable, EuiSelectableList, EuiSelectableSearch } from '@elastic/eui';
 
-import { mountWithIntl } from '../../../../../test_helpers';
+import { mountWithIntl } from '../../test_helpers';
 
 import { SimplifiedSelectable } from './simplified_selectable';
 

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { FormattedDateTime } from '../../../../shared/formatted_date_time';
+import { FormattedDateTime } from '../formatted_date_time';
 
 interface CustomFormattedTimestampProps {
   timestamp: string;

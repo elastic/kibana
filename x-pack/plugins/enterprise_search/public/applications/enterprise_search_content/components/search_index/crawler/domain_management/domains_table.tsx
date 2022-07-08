@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { CustomFormattedTimestamp } from '../../../../../shared/custom_formatted_timestamp/custom_formatted_timestamp';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -24,7 +25,6 @@ import { convertMetaToPagination, handlePageChange } from '../../../../../shared
 import { CrawlerDomain } from '../../../../api/crawler/types';
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
 import { IndexNameLogic } from '../../index_name_logic';
-import { CustomFormattedTimestamp } from '../custom_formatted_timestamp';
 
 import { getDeleteDomainConfirmationMessage } from '../utils';
 

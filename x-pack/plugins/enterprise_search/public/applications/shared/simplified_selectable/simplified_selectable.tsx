@@ -51,7 +51,7 @@ export const SimplifiedSelectable: React.FC<Props> = ({
             disabled={selectedOptions.length === options.length}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.crawler.simplifiedSelectable.selectAllButtonLabel',
+              'xpack.enterpriseSearch.appSearch.crawler.simplifiedSelectable.selectAllButtonLabel',
               {
                 defaultMessage: 'Select all',
               }
@@ -66,7 +66,7 @@ export const SimplifiedSelectable: React.FC<Props> = ({
             disabled={selectedOptions.length === 0}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.crawler.simplifiedSelectable.deselectAllButtonLabel',
+              'xpack.enterpriseSearch.appSearch.crawler.simplifiedSelectable.deselectAllButtonLabel',
               {
                 defaultMessage: 'Deselect all',
               }

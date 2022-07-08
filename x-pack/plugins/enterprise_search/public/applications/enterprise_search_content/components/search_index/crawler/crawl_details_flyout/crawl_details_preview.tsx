@@ -12,7 +12,8 @@ import { useValues } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AccordionList } from './accordion_list';
+import { AccordionList } from '../../../../../shared/accordion_list/accordion_list';
+
 import { CrawlDetailLogic } from './crawl_detail_logic';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 

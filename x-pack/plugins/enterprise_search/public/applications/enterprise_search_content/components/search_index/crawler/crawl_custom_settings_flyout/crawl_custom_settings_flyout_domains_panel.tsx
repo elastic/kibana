@@ -22,8 +22,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { SimplifiedSelectable } from '../../../../../shared/simplified_selectable/simplified_selectable';
+
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
-import { SimplifiedSelectable } from './simplified_selectable';
 
 export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
   const { domainUrls, selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
