@@ -18,16 +18,17 @@ import { addTimerangeToQuery } from '../../../utils/add_timerange_to_query';
 import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
 import { TreeViewKind, TreeViewOptionsGroup } from './types';
 
-interface TreeNavDeps {
+interface TreeNavProps {
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
   onSelect: (selection: TreeNavSelection) => void;
   hasSelection: boolean;
 }
 
-export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: TreeNavDeps) => {
+export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: TreeNavProps) => {
   const styles = useStyles();
   const [tree, setTree] = useState(TREE_VIEW.logical);
+  const [selected, setSelected] = useState('');
 
   const filterQueryWithTimeRange = useMemo(() => {
     return addTimerangeToQuery(
@@ -77,9 +78,8 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
         css={styles.treeViewSwitcher}
       />
       <EuiSpacer size="xs" />
-      <EuiText color="subdued" size="xs">
-        Cluster / {toggleIdSelected === logicalTreeViewPrefix ? 'Namespace' : 'Node'} / Pod /
-        Container Image
+      <EuiText color="subdued" size="xs" css={styles.treeViewLegend}>
+        {tree.map((t) => t.name).join(' / ')}
       </EuiText>
       <EuiSpacer size="s" />
       <div css={styles.treeViewContainer} className="eui-scrollBar">
@@ -88,11 +88,18 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
           indexPattern={indexPattern?.title}
           tree={tree}
           aria-label="Logical Tree View"
+          selected={selected}
           onSelect={(selectionDepth, key, type) => {
-            onSelect({
+            const newSelectionDepth = {
               ...selectionDepth,
               [type]: key,
-            });
+            };
+            setSelected(
+              Object.entries(newSelectionDepth)
+                .map(([k, v]) => `${k}.${v}`)
+                .join()
+            );
+            onSelect(newSelectionDepth);
           }}
           hasSelection={hasSelection}
         />
