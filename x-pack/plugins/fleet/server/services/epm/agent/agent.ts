@@ -115,7 +115,7 @@ handlebars.registerHelper('contains', containsHelper);
 // and to respect any incoming newline we also need to double them, otherwise
 // they will be replaced with a space.
 function escapeStringHelper(str: string) {
-  return "'" + str.replace( /\'/g, "''").replace(/\n/g, "\n\n") + "'";
+  return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
 

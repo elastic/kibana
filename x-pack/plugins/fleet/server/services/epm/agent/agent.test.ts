@@ -224,8 +224,11 @@ text_var: {{escape_string text_var}}
 
     it('should respect new lines and literal escapes', () => {
       const vars = {
-        text_var: { type: 'text', value: `This is a text with
-New lines and \\n escaped values.` },
+        text_var: {
+          type: 'text',
+          value: `This is a text with
+New lines and \\n escaped values.`,
+        },
       };
 
       const output = compileTemplate(vars, streamTemplateWithNewlinesAndEscapes);
@@ -264,7 +267,9 @@ yaml_var: {{to_json yaml_var}}
 
     it('should parse a yaml string into a json object', () => {
       const vars = {
-        yaml_var: { type: 'yaml', value: `foo:
+        yaml_var: {
+          type: 'yaml',
+          value: `foo:
   bar:
     - a
     - b`,
