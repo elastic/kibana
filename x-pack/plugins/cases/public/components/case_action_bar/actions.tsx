@@ -14,6 +14,7 @@ import { PropertyActions } from '../property_actions';
 import { Case } from '../../../common/ui/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CaseViewActions {
   caseData: Case;
@@ -25,14 +26,19 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
     useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
+  const { permissions } = useCasesContext();
 
   const propertyActions = useMemo(
     () => [
-      {
-        iconType: 'trash',
-        label: i18n.DELETE_CASE(),
-        onClick: handleToggleModal,
-      },
+      ...(permissions.delete
+        ? [
+            {
+              iconType: 'trash',
+              label: i18n.DELETE_CASE(),
+              onClick: handleToggleModal,
+            },
+          ]
+        : []),
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
@@ -43,13 +49,18 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           ]
         : []),
     ],
-    [handleToggleModal, currentExternalIncident]
+    [handleToggleModal, currentExternalIncident, permissions.delete]
   );
 
   if (isDeleted) {
     navigateToAllCases();
     return null;
   }
+
+  if (propertyActions.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <PropertyActions propertyActions={propertyActions} />

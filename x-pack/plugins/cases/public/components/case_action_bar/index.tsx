@@ -172,15 +172,9 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                     </EuiButtonEmpty>
                   </span>
                 </EuiFlexItem>
-                {/* currently just delete should we limit it to that? */}
-                {permissions.all && (
-                  <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-                    <Actions
-                      caseData={caseData}
-                      currentExternalIncident={currentExternalIncident}
-                    />
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem grow={false} data-test-subj="case-view-actions">
+                  <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiDescriptionList>
           </EuiFlexItem>

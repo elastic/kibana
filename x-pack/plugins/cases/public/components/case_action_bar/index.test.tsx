@@ -11,7 +11,12 @@ import { render, screen } from '@testing-library/react';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
 import { CaseActionBar, CaseActionBarProps } from '.';
-import { noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import {
+  allCasesPermissions,
+  noDeleteCasesPermissions,
+  noUpdateCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
@@ -219,13 +224,23 @@ describe('CaseActionBar', () => {
     expect(queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
-  it('should not show the actions menu when the user does not have all privileges', () => {
-    const { queryByTestId } = render(
-      <TestProviders permissions={noUpdateCasesPermissions()}>
+  it('should not show the actions menu when the user does not have delete privileges', () => {
+    const { queryByText } = render(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    expect(queryByTestId('case-view-actions')).not.toBeInTheDocument();
+    expect(queryByText('Delete case')).not.toBeInTheDocument();
+  });
+
+  it('should show the actions menu when the user does have delete privileges', () => {
+    const { queryByText } = render(
+      <TestProviders permissions={allCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Delete case')).not.toBeInTheDocument();
   });
 });
