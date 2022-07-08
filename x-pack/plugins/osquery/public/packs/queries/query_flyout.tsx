@@ -73,7 +73,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           id: savedQuery.id,
           query: savedQuery.query,
           description: savedQuery.description,
-          platform: savedQuery.platform,
+          platform: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
           version: savedQuery.version,
           interval: savedQuery.interval,
           // @ts-expect-error update types
