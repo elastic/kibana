@@ -213,7 +213,7 @@ export function getState({
     }
   }
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
-  if (appStateFromUrl.preserveFilters) {
+  if (appStateFromUrl?.preserveFilters) {
     defaultFilters = appStateFromUrl.filters;
   }
   let initialAppState = handleSourceColumnState(

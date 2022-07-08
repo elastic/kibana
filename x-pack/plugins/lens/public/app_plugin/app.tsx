@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { cloneDeep } from 'lodash';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -30,7 +29,7 @@ import {
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
-import { areFiltersEqual, isLensEqual } from './lens_document_equality';
+import { isLensEqual } from './lens_document_equality';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -320,20 +319,15 @@ export function App({
         initialDocFromContext,
         lastKnownDoc,
         data.query.filterManager.inject,
-        datasourceMap
+        datasourceMap,
+        false
       );
       if (!initialDocFromContextHasChanged) {
-        if (
-          !areFiltersEqual(initialDocFromContext, lastKnownDoc, data.query.filterManager.inject)
-        ) {
-          data.query.filterManager.setAppFilters(cloneDeep(lastKnownDoc?.state?.filters || []));
-        }
         onAppLeave((actions) => {
           return actions.default();
         });
         application.navigateToApp('visualize', {
           path: initialContext.vizEditorOriginatingAppUrl,
-          state: { preserveFilters: 'true' },
         });
       } else {
         setIsGoBackToVizEditorModalVisible(true);

@@ -18,7 +18,8 @@ export const isLensEqual = (
   doc1In: Document | undefined,
   doc2In: Document | undefined,
   injectFilterReferences: FilterManager['inject'],
-  datasourceMap: DatasourceMap
+  datasourceMap: DatasourceMap,
+  compareFilters = true
 ) => {
   if (doc1In === undefined || doc2In === undefined) {
     return doc1In === doc2In;
@@ -64,6 +65,10 @@ export const isLensEqual = (
 
   if (!datasourcesEqual) {
     return false;
+  }
+
+  if (compareFilters) {
+    return areFiltersEqual(doc1In, doc2In, injectFilterReferences);
   }
 
   return true;
