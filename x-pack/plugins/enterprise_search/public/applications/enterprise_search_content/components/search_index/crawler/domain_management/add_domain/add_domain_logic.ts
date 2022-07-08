@@ -26,8 +26,8 @@ import {
   crawlerDomainServerToClient,
 } from '../../../../../api/crawler/utils';
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
+import { IndexNameLogic } from '../../../index_name_logic';
 import { CrawlerLogic } from '../../crawler_logic';
-import { DomainManagementLogic } from '../domain_management_logic';
 
 import {
   domainValidationFailureResultChange,
@@ -236,7 +236,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
   }),
   listeners: ({ actions, values }) => ({
     onSubmitNewDomainSuccess: ({ domain }) => {
-      const { indexName } = DomainManagementLogic.props;
+      const { indexName } = IndexNameLogic.values;
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.add.successMessage', {
           defaultMessage: "Successfully added domain '{domainUrl}'",
@@ -306,7 +306,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     },
     submitNewDomain: async () => {
       const { http } = HttpLogic.values;
-      const { indexName } = DomainManagementLogic.props;
+      const { indexName } = IndexNameLogic.values;
 
       const requestBody = JSON.stringify({
         entry_points: [{ value: values.entryPointValue }],
