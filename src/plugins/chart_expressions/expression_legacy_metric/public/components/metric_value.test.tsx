@@ -75,7 +75,7 @@ describe('MetricVisValue', () => {
       />
     );
     component.simulate('click');
-    expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(1);
+    expect(component.find('.legacyMtrVis__container-isfilterable')).toHaveLength(1);
   });
 
   it('should not add -isfilterable class if onFilter is not provided', () => {
@@ -88,7 +88,7 @@ describe('MetricVisValue', () => {
       />
     );
     component.simulate('click');
-    expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(0);
+    expect(component.find('.legacyMtrVis__container-isfilterable')).toHaveLength(0);
   });
 
   it('should call onFilter callback if provided', () => {
@@ -116,6 +116,6 @@ describe('MetricVisValue', () => {
         labelConfig={labelConfig}
       />
     );
-    expect(component.find('.mtrVis__container-isfull').exists()).toBe(true);
+    expect(component.find('.legacyMtrVis__container-isfull').exists()).toBe(true);
   });
 });

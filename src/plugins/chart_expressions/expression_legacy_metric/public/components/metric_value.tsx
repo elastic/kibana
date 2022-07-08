@@ -23,10 +23,10 @@ interface MetricVisValueProps {
 
 export const MetricVisValue = (props: MetricVisValueProps) => {
   const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
-  const containerClassName = classNames('mtrVis__container', {
-    'mtrVis__container--light': metric.lightText,
-    'mtrVis__container-isfilterable': onFilter,
-    'mtrVis__container-isfull': !autoScale && colorFullBackground,
+  const containerClassName = classNames('legacyMtrVis__container', {
+    'legacyMtrVis__container--light': metric.lightText,
+    'legacyMtrVis__container-isfilterable': onFilter,
+    'legacyMtrVis__container-isfull': !autoScale && colorFullBackground,
   });
 
   useLayoutEffect(() => {
@@ -41,7 +41,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
     >
       <div
         data-test-subj="metric_value"
-        className="mtrVis__value"
+        className="legacyMtrVis__value"
         style={{
           ...(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),
@@ -75,7 +75,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
       <button
         style={{ display: 'block' }}
         onClick={() => onFilter()}
-        title={i18n.translate('expressionMetricVis.filterTitle', {
+        title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
           defaultMessage: 'Click to filter by field',
         })}
       >

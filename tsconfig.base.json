@@ -55,6 +55,8 @@
       "@kbn/expression-gauge-plugin/*": ["src/plugins/chart_expressions/expression_gauge/*"],
       "@kbn/expression-heatmap-plugin": ["src/plugins/chart_expressions/expression_heatmap"],
       "@kbn/expression-heatmap-plugin/*": ["src/plugins/chart_expressions/expression_heatmap/*"],
+      "@kbn/expression-legacy-metric-vis-plugin": ["src/plugins/chart_expressions/expression_legacy_metric"],
+      "@kbn/expression-legacy-metric-vis-plugin/*": ["src/plugins/chart_expressions/expression_legacy_metric/*"],
       "@kbn/expression-metric-vis-plugin": ["src/plugins/chart_expressions/expression_metric"],
       "@kbn/expression-metric-vis-plugin/*": ["src/plugins/chart_expressions/expression_metric/*"],
       "@kbn/expression-partition-vis-plugin": ["src/plugins/chart_expressions/expression_partition_vis"],

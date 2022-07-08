@@ -14,7 +14,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
-  describe('metricVis pipeline expression tests', () => {
+  describe('legacyMetricVis pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
@@ -31,7 +31,7 @@ export default function ({
       });
 
       it('with empty data', async () => {
-        const expression = 'metricVis metric={visdimension 0}';
+        const expression = 'legacyMetricVis metric={visdimension 0}';
         await (
           await expectExpression('metric_empty_data', expression, {
             ...dataContext,
@@ -41,7 +41,7 @@ export default function ({
       });
 
       it('with single metric data', async () => {
-        const expression = 'metricVis metric={visdimension 0}';
+        const expression = 'legacyMetricVis metric={visdimension 0}';
         await (
           await expectExpression(
             'metric_single_metric_data',
@@ -52,7 +52,7 @@ export default function ({
       });
 
       it('with multiple metric data', async () => {
-        const expression = 'metricVis metric={visdimension 0} metric={visdimension 1}';
+        const expression = 'legacyMetricVis metric={visdimension 0} metric={visdimension 1}';
         await (
           await expectExpression(
             'metric_multi_metric_data',
@@ -63,7 +63,7 @@ export default function ({
       });
 
       it('with metric and bucket data', async () => {
-        const expression = 'metricVis metric={visdimension 0} bucket={visdimension 2}';
+        const expression = 'legacyMetricVis metric={visdimension 0} bucket={visdimension 2}';
         await (
           await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()
         ).toMatchScreenshot();
@@ -71,7 +71,7 @@ export default function ({
 
       it('with percentageMode option', async () => {
         const expression =
-          'metricVis metric={visdimension 0} percentageMode=true \
+          'legacyMetricVis metric={visdimension 0} percentageMode=true \
             palette={palette stop=0 color="rgb(0,0,0,0)" stop=10000 color="rgb(100, 100, 100)" range="number" continuity="none"}';
         await (
           await expectExpression(
@@ -85,7 +85,7 @@ export default function ({
 
     describe('throws error at metric', () => {
       it('with invalid data', async () => {
-        const expression = 'metricVis metric={visdimension 0}';
+        const expression = 'legacyMetricVis metric={visdimension 0}';
         await (
           await expectExpression('metric_invalid_data', expression).toMatchSnapshot()
         ).toMatchScreenshot();

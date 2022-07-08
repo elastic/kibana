@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.navigationalSearch.clickOnOption(0);
           await PageObjects.lens.waitForEmptyWorkspace();
           await PageObjects.lens.switchToVisualization('lnsMetric');
-          await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'mtrVis');
+          await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'legacyMtrVis');
         });
         it('preserves time range', async () => {
           // fill the navigation search and select empty
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickVisType('lens');
         await PageObjects.lens.waitForEmptyWorkspace();
         await PageObjects.lens.switchToVisualization('lnsMetric');
-        await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'mtrVis');
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'legacyMtrVis');
 
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(timePickerValues.start).to.eql(PageObjects.timePicker.defaultStartTime);

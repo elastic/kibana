@@ -96,6 +96,7 @@ pageLoadAssetSize:
   securitySolution: 273763
   customIntegrations: 28810
   expressionMetricVis: 23121
+  expressionLegacyMetricVis: 23121
   expressionHeatmap: 27505
   visTypeMetric: 23332
   bfetch: 22837

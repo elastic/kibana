@@ -477,7 +477,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async clickMetricByIndex(index: number) {
     const metrics = await this.find.allByCssSelector(
-      '[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container'
+      '[data-test-subj="visualizationLoader"] .legacyMtrVis .legacyMtrVis__container'
     );
     expect(metrics.length).greaterThan(index);
     await metrics[index].click();

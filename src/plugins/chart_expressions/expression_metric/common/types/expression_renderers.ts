@@ -6,38 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { $Values } from '@kbn/utility-types';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import {
-  ColorMode,
-  Labels,
-  CustomPaletteState,
-  Style as ChartStyle,
-} from '@kbn/charts-plugin/common';
-import { Style } from '@kbn/expressions-plugin/common';
-import { LabelPosition } from '../constants';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { LayoutDirection } from '@elastic/charts';
 
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metrics: Array<ExpressionValueVisDimension | string>;
-  bucket?: ExpressionValueVisDimension | string;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
+  progressMax?: ExpressionValueVisDimension | string;
 }
 
-export type LabelPositionType = $Values<typeof LabelPosition>;
-
-export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
-
-export type LabelsConfig = Labels & { style: Style; position: LabelPositionType };
 export interface MetricVisParam {
-  percentageMode: boolean;
-  percentageFormatPattern?: string;
-  metricColorMode: ColorMode;
+  subtitle?: string;
+  extraText?: string;
   palette?: CustomPaletteState;
-  labels: LabelsConfig;
-  style: MetricStyle;
-  colorFullBackground: boolean;
-  autoScale?: boolean;
+  progressDirection: LayoutDirection;
+  maxCols: number;
+  minTiles?: number;
 }
 
 export interface VisParams {
