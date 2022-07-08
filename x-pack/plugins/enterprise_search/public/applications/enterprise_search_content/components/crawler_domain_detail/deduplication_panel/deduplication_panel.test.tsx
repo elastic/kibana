@@ -65,7 +65,7 @@ describe('DeduplicationPanel', () => {
 
     wrapper.find(DataPanel).dive().find(EuiButton).simulate('click');
 
-    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith(MOCK_VALUES.domain, {
+    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith({
       fields: [],
     });
   });
@@ -82,16 +82,9 @@ describe('DeduplicationPanel', () => {
 
     wrapper.find(EuiSwitch).simulate('change');
 
-    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenNthCalledWith(
-      1,
-      {
-        ...MOCK_VALUES.domain,
-        deduplicationEnabled: false,
-      },
-      {
-        enabled: true,
-      }
-    );
+    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenNthCalledWith(1, {
+      enabled: true,
+    });
 
     setMockValues({
       ...MOCK_VALUES,
@@ -104,17 +97,10 @@ describe('DeduplicationPanel', () => {
 
     wrapper.find(EuiSwitch).simulate('change');
 
-    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenNthCalledWith(
-      2,
-      {
-        ...MOCK_VALUES.domain,
-        deduplicationEnabled: true,
-      },
-      {
-        enabled: false,
-        fields: [],
-      }
-    );
+    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenNthCalledWith(2, {
+      enabled: false,
+      fields: [],
+    });
   });
 
   it('contains a popover to switch between displaying all fields or only selected ones', () => {
@@ -161,7 +147,7 @@ describe('DeduplicationPanel', () => {
       .find(EuiSelectable)
       .simulate('change', [{ label: 'title' }, { label: 'description', checked: 'on' }]);
 
-    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith(MOCK_VALUES.domain, {
+    expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith({
       fields: ['description'],
     });
 
