@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
+
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
@@ -25,6 +26,8 @@ import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
 import { useInitSearchBarUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
+import { useInitTimerangeUrlParams } from '../../common/hooks/search_bar/use_init_timerange_url_params';
+import { useUpdateTimerangeOnPageChange } from '../../common/hooks/search_bar/use_update_timerange_on_page_change';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -41,6 +44,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   useSyncGlobalQueryString();
   useInitSourcerer(getScopeFromPath(pathname));
   useInitSearchBarUrlParams();
+  useInitTimerangeUrlParams();
+  useUpdateTimerangeOnPageChange();
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
