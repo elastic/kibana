@@ -7,9 +7,13 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import {
+  allCasesCapabilities,
   allCasesPermissions,
+  noCasesCapabilities,
   noCasesPermissions,
+  readCasesCapabilities,
   readCasesPermissions,
+  writeCasesCapabilities,
   writeCasesPermissions,
 } from '../../common/mock';
 import { canUseCases } from './can_use_cases';
@@ -18,49 +22,6 @@ type CasesCapabilities = Pick<
   ApplicationStart['capabilities'],
   'securitySolutionCases' | 'observabilityCases' | 'generalCases'
 >;
-
-interface Capabilities {
-  create_cases: boolean;
-  read_cases: boolean;
-  update_cases: boolean;
-  delete_cases: boolean;
-  push_cases: boolean;
-}
-
-const noCasesCapabilities = () => buildCapabilities();
-
-const allCasesCapabilities = () => {
-  return buildCapabilities({
-    create_cases: true,
-    read_cases: true,
-    update_cases: true,
-    delete_cases: true,
-    push_cases: true,
-  });
-};
-
-const writeCasesCapabilities = () => {
-  return buildCapabilities({
-    create_cases: true,
-    update_cases: true,
-    delete_cases: true,
-    push_cases: true,
-  });
-};
-
-const readCasesCapabilities = () => {
-  return buildCapabilities({ read_cases: true });
-};
-
-const buildCapabilities = (overrides?: Partial<Capabilities>) => {
-  return {
-    create_cases: overrides?.create_cases ?? false,
-    read_cases: overrides?.read_cases ?? false,
-    update_cases: overrides?.update_cases ?? false,
-    delete_cases: overrides?.delete_cases ?? false,
-    push_cases: overrides?.push_cases ?? false,
-  };
-};
 
 const hasAll: CasesCapabilities = {
   securitySolutionCases: allCasesCapabilities(),

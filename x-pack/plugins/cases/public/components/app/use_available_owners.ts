@@ -12,11 +12,8 @@ type Capability = 'create' | 'read' | 'update' | 'delete' | 'push';
 
 /**
  *
- * @param level : 'crud' | 'read' (default: 'crud')
- *
- * `securitySolution` owner uses cases capability feature id: 'securitySolutionCases'; //owner
- * `observability` owner uses cases capability feature id: 'observabilityCases';
- * both solutions use `crud_cases` and `read_cases` capability names
+ * @param capabilities : specifies the requirements for a valid owner, an owner will be included if it has the specified
+ *  capabilities
  **/
 
 export const useAvailableCasesOwners = (

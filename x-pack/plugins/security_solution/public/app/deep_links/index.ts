@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import {
@@ -74,7 +74,7 @@ import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
 import { AppLinkItems } from '../../common/links/types';
 
-const FEATURE = {
+export const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
   casesCreate: `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
   casesRead: `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
@@ -83,11 +83,24 @@ const FEATURE = {
   casesPush: `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
 } as const;
 
-type Feature = typeof FEATURE[keyof typeof FEATURE];
+type FeatureKey = typeof FEATURE[keyof typeof FEATURE];
+
+/**
+ * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
+ * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
+ * is satisfied the deeplinks would be included. To require that the features be AND'd together a second level array
+ * can be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify
+ * features that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean
+ * operation feature1 && feature2.
+ *
+ * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
+ * features: [feature1]
+ */
+type Features = FeatureKey | Array<FeatureKey | FeatureKey[]>;
 
 type SecuritySolutionDeepLink = AppDeepLink & {
   isPremium?: boolean;
-  features?: Feature[];
+  features?: Features;
   /**
    * Displays deep link when feature flag is enabled.
    */
@@ -435,14 +448,15 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             ],
             isPremium: true,
           },
-          // TODO: can we just use create here?
           [SecurityPageName.caseCreate]: {
             features: [
-              FEATURE.casesCreate,
-              FEATURE.casesRead,
-              FEATURE.casesUpdate,
-              FEATURE.casesDelete,
-              FEATURE.casesPush,
+              [
+                FEATURE.casesCreate,
+                FEATURE.casesRead,
+                FEATURE.casesUpdate,
+                FEATURE.casesDelete,
+                FEATURE.casesPush,
+              ],
             ],
           },
         },
@@ -547,14 +561,24 @@ export function getDeepLinks(
   return filterDeepLinks(securitySolutionsDeepLinks);
 }
 
-function hasFeaturesCapability(
-  features: Feature[] | undefined,
+export function hasFeaturesCapability(
+  features: Features | undefined,
   capabilities: Capabilities
 ): boolean {
   if (!features) {
     return true;
   }
-  return features.some((featureKey) => get(capabilities, featureKey, false));
+
+  if (!isArray(features)) {
+    return !!get(capabilities, features, false);
+  } else {
+    return features.some((featureKeyOr) => {
+      if (isArray(featureKeyOr)) {
+        return featureKeyOr.every((featureKeyAnd) => get(capabilities, featureKeyAnd, false));
+      }
+      return get(capabilities, featureKeyOr, false);
+    });
+  }
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {

@@ -68,7 +68,7 @@ describe('getUICapabilities', () => {
     `);
   });
 
-  it('returns false for the all field a single field is false', () => {
+  it('returns false for the all field when a single field is false', () => {
     expect(
       getUICapabilities({
         create_cases: false,

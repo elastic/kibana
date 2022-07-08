@@ -117,7 +117,6 @@ export const OWNER_INFO = {
     label: 'Observability',
     iconType: 'logoObservability',
   },
-  // TODO: is this the correct icon?
   [GENERAL_CASES_OWNER]: {
     label: 'Stack',
     iconType: 'casesApp',

@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../common/constants';
@@ -173,9 +173,35 @@ const getFilteredAppLinks = (
     return acc;
   }, []);
 
+/**
+ * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
+ * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
+ * is satisfied the links would be included. To require that the features be AND'd together a second level array
+ * can be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3).
+ *
+ * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
+ * features: [feature1]
+ */
+type LinkCapabilities = string | Array<string | string[]>;
+
 // It checks if the user has at least one of the link capabilities needed
-const hasCapabilities = (linkCapabilities: string[], userCapabilities: Capabilities): boolean =>
-  linkCapabilities.some((linkCapability) => get(userCapabilities, linkCapability, false));
+const hasCapabilities = (
+  linkCapabilities: LinkCapabilities,
+  userCapabilities: Capabilities
+): boolean => {
+  if (!isArray(linkCapabilities)) {
+    return !!get(userCapabilities, linkCapabilities, false);
+  } else {
+    return linkCapabilities.some((linkCapabilityKeyOr) => {
+      if (isArray(linkCapabilityKeyOr)) {
+        return linkCapabilityKeyOr.every((linkCapabilityKeyAnd) =>
+          get(userCapabilities, linkCapabilityKeyAnd, false)
+        );
+      }
+      return get(userCapabilities, linkCapabilityKeyOr, false);
+    });
+  }
+};
 
 const isLinkAllowed = (
   link: LinkItem,

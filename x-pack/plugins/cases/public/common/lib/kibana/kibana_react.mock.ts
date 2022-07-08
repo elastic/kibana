@@ -21,7 +21,6 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { BehaviorSubject } from 'rxjs';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';
-import { allCasesCapabilities } from '../../mock';
 
 export const createStartServicesMock = (): StartServices => {
   const services = {
@@ -54,7 +53,13 @@ export const createStartServicesMock = (): StartServices => {
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCases: allCasesCapabilities(),
+    generalCases: {
+      create_cases: true,
+      read_cases: true,
+      update_cases: true,
+      delete_case: true,
+      push_cases: true,
+    },
     visualize: { save: true, show: true },
     dashboard: { show: true, createNew: true },
   };

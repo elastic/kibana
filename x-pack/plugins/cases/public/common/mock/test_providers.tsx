@@ -14,7 +14,7 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
+import { CasesCapabilities, CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import {
   createKibanaContextProviderMock,
@@ -135,14 +135,11 @@ export const readCasesCapabilities = () =>
     delete_cases: false,
     push_cases: false,
   });
-
-interface CasesCapabilities {
-  create_cases: boolean;
-  read_cases: boolean;
-  update_cases: boolean;
-  delete_cases: boolean;
-  push_cases: boolean;
-}
+export const writeCasesCapabilities = () => {
+  return buildCasesCapabilities({
+    read_cases: false,
+  });
+};
 
 export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) => {
   return {
