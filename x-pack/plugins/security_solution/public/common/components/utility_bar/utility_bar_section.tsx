@@ -11,10 +11,15 @@ import { BarSection, BarSectionProps } from './styles';
 
 export interface UtilityBarSectionProps extends BarSectionProps {
   children: React.ReactNode;
+  dataTestSubj?: string;
 }
 
-export const UtilityBarSection = React.memo<UtilityBarSectionProps>(({ grow, children }) => (
-  <BarSection grow={grow}>{children}</BarSection>
-));
+export const UtilityBarSection = React.memo<UtilityBarSectionProps>(
+  ({ grow, children, dataTestSubj }) => (
+    <BarSection grow={grow} data-test-subj={dataTestSubj}>
+      {children}
+    </BarSection>
+  )
+);
 
 UtilityBarSection.displayName = 'UtilityBarSection';
