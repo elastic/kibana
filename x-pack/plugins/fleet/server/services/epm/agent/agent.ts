@@ -110,6 +110,25 @@ function containsHelper(this: any, item: string, check: string | string[], optio
 }
 handlebars.registerHelper('contains', containsHelper);
 
+// escapeStringHelper will wrap the provided string with single quotes.
+// Single quoted strings in yaml need to escape single quotes by doubling them
+// and to respect any incoming newline we also need to double them, otherwise
+// they will be replaced with a space.
+function escapeStringHelper(str: string) {
+  return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
+}
+handlebars.registerHelper('escape_string', escapeStringHelper);
+
+// toJsonHelper will convert any object to a Json string.
+function toJsonHelper(value: any) {
+  if (typeof value === 'string') {
+    // if we get a string we assume is an already serialized json
+    return value;
+  }
+  return JSON.stringify(value);
+}
+handlebars.registerHelper('to_json', toJsonHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;
