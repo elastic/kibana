@@ -7,12 +7,13 @@
  */
 
 import moment from 'moment';
-
+import { Position } from '@elastic/charts';
 import {
   VisToExpressionAst,
   getVisSchemas,
   DateHistogramParams,
   HistogramParams,
+  LegendSize,
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
@@ -202,6 +203,11 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       }
     }
   });
+  let legendSize = vis.params.legendSize;
+
+  if (vis.params.legendPosition === Position.Top || vis.params.legendPosition === Position.Bottom) {
+    legendSize = LegendSize.AUTO;
+  }
 
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
     type: vis.type.name as XyVisType,
@@ -209,7 +215,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     addTimeMarker: vis.params.addTimeMarker,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    legendSize: vis.params.legendSize,
+    legendSize,
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,

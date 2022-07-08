@@ -33,7 +33,7 @@ Object {
       "top",
     ],
     "legendSize": Array [
-      "small",
+      "auto",
     ],
     "maxLegendLines": Array [
       1,
