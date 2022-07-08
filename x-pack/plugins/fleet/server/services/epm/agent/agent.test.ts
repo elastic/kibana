@@ -212,30 +212,27 @@ text_var: {{escape_string text_var}}
 
     it('should wrap in single quotes and escape any single quotes in the string', () => {
       const vars = {
-        password: { type: 'password', value: `abc"'"'!@#$%^&*()_-+=}{][|\\/?>.<,~\`:;]}123` },
+        password: { type: 'password', value: "ab'c'" },
       };
 
       const output = compileTemplate(vars, streamTemplate);
       expect(output).toEqual({
         input: 'log',
-        password: `'abc"''"''!@#$%^&*()_-+=}{][|\\/?>.<,~\`:;]}123'`,
+        password: "ab'c'",
       });
     });
 
     it('should respect new lines and literal escapes', () => {
       const vars = {
-        password: {
-          type: 'text_var',
-          value: `This is a text with
-        New lines and \n escaped values.`,
-        },
+        text_var: { type: 'text', value: `This is a text with
+New lines and \\n escaped values.` },
       };
 
       const output = compileTemplate(vars, streamTemplateWithNewlinesAndEscapes);
       expect(output).toEqual({
         input: 'log',
-        password: `This is a text with
-        New lines and \n escaped values.`,
+        text_var: `This is a text with
+New lines and \\n escaped values.`,
       });
     });
   });
@@ -253,7 +250,7 @@ yaml_var: {{to_json yaml_var}}
 
     it('should parse a json string into a json object', () => {
       const vars = {
-        password: { type: 'json_var', value: `{"foo":["bar","bazz"]}` },
+        json_var: { type: 'text', value: `{"foo":["bar","bazz"]}` },
       };
 
       const output = compileTemplate(vars, streamTemplate);
@@ -267,9 +264,7 @@ yaml_var: {{to_json yaml_var}}
 
     it('should parse a yaml string into a json object', () => {
       const vars = {
-        password: {
-          type: 'yaml_var',
-          value: `foo:
+        yaml_var: { type: 'yaml', value: `foo:
   bar:
     - a
     - b`,
