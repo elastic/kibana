@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MouseEvent, ChangeEvent } from 'react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiButtonEmpty,
@@ -98,8 +99,8 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
             defaultMessage: 'Tag Options',
           })}
           color="text"
-          onClick={(event: any) => {
-            setTagOptionsButton(event.target);
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            setTagOptionsButton(event.currentTarget);
             setTagOptionsVisible(!tagOptionsVisible);
           }}
         />
@@ -126,8 +127,8 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                         closePopover();
                       }
                     }}
-                    onChange={(e: any) => {
-                      const newName = e.target.value;
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      const newName = e.currentTarget.value;
                       setUpdatedName(newName);
                     }}
                   />
@@ -136,7 +137,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                   <EuiButtonIcon
                     size="m"
                     display="fill"
-                    iconType="save"
+                    iconType="check"
                     aria-label={i18n.translate('xpack.fleet.tagOptions.renameTagButtonLabel', {
                       defaultMessage: 'Rename',
                     })}
