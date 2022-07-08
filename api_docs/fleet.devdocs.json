@@ -7847,7 +7847,7 @@
         "signature": [
           "any"
         ],
-        "path": "x-pack/plugins/fleet/server/index.ts",
+        "path": "x-pack/plugins/fleet/server/config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9946,7 +9946,7 @@
           "\nParses the string value used in `xpack.fleet.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ createPackagePolicyMultiPageLayout: boolean; }>"
+          "(configValue: string[]) => Readonly<{ createPackagePolicyMultiPageLayout: boolean; packageVerification: boolean; }>"
         ],
         "path": "x-pack/plugins/fleet/common/experimental_features.ts",
         "deprecated": false,
@@ -15312,6 +15312,32 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.verification_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verification_status",
+            "description": [],
+            "signature": [
+              "\"unknown\" | \"verified\" | \"unverified\""
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.verification_key_id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verification_key_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -18319,7 +18345,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ has_seen_add_data_notice?: boolean | undefined; has_seen_fleet_migration_notice?: boolean | undefined; fleet_server_hosts?: string[] | undefined; }"
+              "{ fleet_server_hosts?: string[] | undefined; preconfigured_fields?: \"fleet_server_hosts\"[] | undefined; has_seen_add_data_notice?: boolean | undefined; has_seen_fleet_migration_notice?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/settings.ts",
             "deprecated": false
@@ -19235,6 +19261,19 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Settings.preconfigured_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "preconfigured_fields",
+            "description": [],
+            "signature": [
+              "\"fleet_server_hosts\"[] | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/settings.ts",
             "deprecated": false
           }
@@ -20885,7 +20924,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly createPackagePolicyMultiPageLayout: boolean; }"
+          "{ readonly createPackagePolicyMultiPageLayout: boolean; readonly packageVerification: boolean; }"
         ],
         "path": "x-pack/plugins/fleet/common/experimental_features.ts",
         "deprecated": false,
@@ -22318,6 +22357,20 @@
           "{ kibana: { version: string; }; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PackageVerificationStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "PackageVerificationStatus",
+        "description": [],
+        "signature": [
+          "\"unknown\" | \"verified\" | \"unverified\""
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -23884,7 +23937,7 @@
           "\nA list of allowed values that can be used in `xpack.fleet.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly createPackagePolicyMultiPageLayout: boolean; }"
+          "{ readonly createPackagePolicyMultiPageLayout: boolean; readonly packageVerification: boolean; }"
         ],
         "path": "x-pack/plugins/fleet/common/experimental_features.ts",
         "deprecated": false,

@@ -963,6 +963,32 @@
     "interfaces": [
       {
         "parentPluginId": "cases",
+        "id": "def-server.PluginSetupContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginSetupContract",
+        "description": [],
+        "path": "x-pack/plugins/cases/server/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.PluginSetupContract.attachmentFramework",
+            "type": "Object",
+            "tags": [],
+            "label": "attachmentFramework",
+            "description": [],
+            "signature": [
+              "AttachmentFramework"
+            ],
+            "path": "x-pack/plugins/cases/server/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-server.PluginStartContract",
         "type": "Interface",
         "tags": [],
@@ -970,7 +996,7 @@
         "description": [
           "\nCases server exposed contract for interacting with cases entities."
         ],
-        "path": "x-pack/plugins/cases/server/plugin.ts",
+        "path": "x-pack/plugins/cases/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1001,7 +1027,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/cases/server/plugin.ts",
+            "path": "x-pack/plugins/cases/server/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1023,7 +1049,7 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/cases/server/plugin.ts",
+                "path": "x-pack/plugins/cases/server/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1306,9 +1332,9 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".externalReference; owner: string; } | { externalReferenceStorage: { type: ",
+          ".externalReference; owner: string; } | { externalReferenceId: string; externalReferenceStorage: { type: ",
           "ExternalReferenceStorageType",
-          ".savedObject; soType: string; }; externalReferenceId: string; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
+          ".savedObject; soType: string; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
           "JsonValue",
           "; } | null; type: ",
           {
@@ -1318,7 +1344,17 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
+          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: ",
+          "JsonValue",
+          "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
           "Comment",
           "[]; }"
         ],
