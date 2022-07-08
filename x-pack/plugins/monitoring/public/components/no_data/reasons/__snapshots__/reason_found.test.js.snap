@@ -3,15 +3,15 @@
 exports[`ReasonFound should load ExplainCollectionInterval component 1`] = `
 Array [
   <h2
-    class="euiTitle css-1bexacr-euiTitle-l"
+    class="euiTitle emotion-euiTitle-l"
   >
     Monitoring is currently off
   </h2>,
   <span
-    class="css-xv0fhq-euiTextColor-subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText css-1lo1kz-euiText-m"
+      class="euiText emotion-euiText-m"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -19,10 +19,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText css-1lo1kz-euiText-m"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the cluster settings and found that 
@@ -43,7 +43,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -74,15 +74,15 @@ Array [
 exports[`ReasonFound should load ExplainExporters component 1`] = `
 Array [
   <h2
-    class="euiTitle css-1bexacr-euiTitle-l"
+    class="euiTitle emotion-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="css-xv0fhq-euiTextColor-subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText css-1lo1kz-euiText-m"
+      class="euiText emotion-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -90,10 +90,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText eui-textLeft css-1lo1kz-euiText-m"
+    class="euiText eui-textLeft emotion-euiText-m"
   >
     <p>
       We checked the 
@@ -143,22 +143,22 @@ Array [
 exports[`ReasonFound should load ExplainExportersCloud component 1`] = `
 Array [
   <span
-    class="css-xv0fhq-euiTextColor-subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText css-1lo1kz-euiText-m"
+      class="euiText emotion-euiText-m"
     >
       <p>
         Configure monitoring through 
         <a
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Elasticsearch Service Console
           <span
-            class="css-q4vwwx-euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -171,14 +171,14 @@ Array [
         </a>
          Go to 
         <a
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Logs and metrics
           <span
-            class="css-q4vwwx-euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -191,14 +191,14 @@ Array [
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener"
           target="_blank"
         >
           the documentation page.
           <span
-            class="css-q4vwwx-euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -213,10 +213,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText eui-textLeft css-1lo1kz-euiText-m"
+    class="euiText eui-textLeft emotion-euiText-m"
   >
     <p>
       In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
@@ -228,15 +228,15 @@ Array [
 exports[`ReasonFound should load ExplainPluginEnabled component 1`] = `
 Array [
   <h2
-    class="euiTitle css-1bexacr-euiTitle-l"
+    class="euiTitle emotion-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="css-xv0fhq-euiTextColor-subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText css-1lo1kz-euiText-m"
+      class="euiText emotion-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -244,10 +244,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText css-1lo1kz-euiText-m"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the node001foo settings and found that 

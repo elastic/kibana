@@ -13,6 +13,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type SuperTest from 'supertest';
 import {
@@ -58,6 +59,7 @@ import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_en
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
+import { SavedObjectsRawDocSource } from '@kbn/core/server/saved_objects/serialization';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
@@ -1290,3 +1292,28 @@ export const getCasesMetrics = async ({
 
   return metricsResponse;
 };
+
+export const getSOFromKibanaIndex = async ({
+  es,
+  soType,
+  soId,
+}: {
+  es: Client;
+  soType: string;
+  soId: string;
+}) => {
+  const esResponse = await es.get<SavedObjectsRawDocSource>(
+    {
+      index: '.kibana',
+      id: `${soType}:${soId}`,
+    },
+    { meta: true }
+  );
+
+  return esResponse;
+};
+
+export const getReferenceFromEsResponse = (
+  esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
+  id: string
+) => esResponse.body._source?.references?.find((r) => r.id === id);

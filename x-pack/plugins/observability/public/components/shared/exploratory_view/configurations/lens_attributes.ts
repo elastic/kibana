@@ -46,7 +46,14 @@ import {
   PERCENTILE_RANKS,
   ReportTypes,
 } from './constants';
-import { ColumnFilter, ParamFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
+import {
+  ColumnFilter,
+  MetricOption,
+  ParamFilter,
+  SeriesConfig,
+  UrlFilter,
+  URLReportDefinition,
+} from '../types';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
@@ -69,16 +76,10 @@ export function getPercentileParam(operationType: string) {
   };
 }
 
-export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricField?: string) => {
-  let columnType;
-  let columnFilters;
-  let columnFilter;
-  let paramFilters;
-  let timeScale;
-  let columnLabel;
-  let columnField;
-  let showPercentileAnnotations;
-
+export const parseCustomFieldName = (
+  seriesConfig: SeriesConfig,
+  selectedMetricField?: string
+): Partial<MetricOption> & { fieldName: string; columnLabel?: string; columnField?: string } => {
   const metricOptions = seriesConfig.metricOptions ?? [];
 
   if (selectedMetricField) {
@@ -86,27 +87,18 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       const currField = metricOptions.find(
         ({ field, id }) => field === selectedMetricField || id === selectedMetricField
       );
-      columnType = currField?.columnType;
-      columnFilters = currField?.columnFilters;
-      columnFilter = currField?.columnFilter;
-      timeScale = currField?.timeScale;
-      columnLabel = currField?.label;
-      showPercentileAnnotations = currField?.showPercentileAnnotations;
-      paramFilters = currField?.paramFilters;
-      columnField = currField?.field;
+
+      return {
+        ...(currField ?? {}),
+        fieldName: selectedMetricField,
+        columnLabel: currField?.label,
+        columnField: currField?.field,
+      };
     }
   }
 
   return {
     fieldName: selectedMetricField!,
-    columnType,
-    columnFilters,
-    paramFilters,
-    timeScale,
-    columnLabel,
-    columnFilter,
-    columnField,
-    showPercentileAnnotations,
   };
 };
 
@@ -592,6 +584,7 @@ export class LensAttributes {
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
     if (sourceField === REPORT_METRIC_FIELD) {
       const {
+        palette,
         fieldName,
         columnType,
         columnLabel,
@@ -602,6 +595,7 @@ export class LensAttributes {
       } = parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
       return {
+        palette,
         fieldMeta,
         fieldName,
         columnType,
@@ -884,12 +878,12 @@ export class LensAttributes {
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: !this.isMultiSeries,
         yRight: !this.isMultiSeries,
       },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
       layers: this.getDataLayers(),
       ...(this.layerConfigs[0].seriesConfig.yTitle
@@ -899,40 +893,53 @@ export class LensAttributes {
   }
 
   getDataLayers(): XYState['layers'] {
-    const dataLayers = this.layerConfigs.map((layerConfig, index) => ({
-      accessors: [
-        `y-axis-column-layer${index}`,
-        ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
-      ],
-      layerId: `layer${index}`,
-      layerType: 'data' as any,
-      seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
-      palette: layerConfig.seriesConfig.palette,
-      yConfig: layerConfig.seriesConfig.yConfig || [
-        {
-          forAccessor: `y-axis-column-layer${index}`,
-          color: layerConfig.color,
-          /* if the fields format matches the field format of the first layer, use the default y axis (right)
-           * if not, use the secondary y axis (left) */
-          axisMode:
-            layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
-            this.layerConfigs[0].indexPattern.fieldFormatMap[
-              this.layerConfigs[0].selectedMetricField
-            ]?.id
-              ? ('left' as YAxisMode)
-              : ('right' as YAxisMode),
-        },
-      ],
-      xAccessor: `x-axis-column-layer${index}`,
-      ...(layerConfig.breakdown &&
-      layerConfig.breakdown !== PERCENTILE &&
-      layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-        ? { splitAccessor: `breakdown-column-layer${index}` }
-        : {}),
-      ...(this.layerConfigs[0].seriesConfig.yTitle
-        ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
-        : {}),
-    }));
+    const dataLayers = this.layerConfigs.map((layerConfig, index) => {
+      const { sourceField } = layerConfig.seriesConfig.yAxisColumns[0];
+
+      let palette = layerConfig.seriesConfig.palette;
+
+      if (sourceField) {
+        const fieldMeta = this.getFieldMeta(sourceField, layerConfig);
+        if (fieldMeta.palette) {
+          palette = fieldMeta.palette;
+        }
+      }
+
+      return {
+        accessors: [
+          `y-axis-column-layer${index}`,
+          ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
+        ],
+        layerId: `layer${index}`,
+        layerType: 'data' as any,
+        seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
+        palette: palette ?? layerConfig.seriesConfig.palette,
+        yConfig: layerConfig.seriesConfig.yConfig || [
+          {
+            forAccessor: `y-axis-column-layer${index}`,
+            color: layerConfig.color,
+            /* if the fields format matches the field format of the first layer, use the default y axis (right)
+             * if not, use the secondary y axis (left) */
+            axisMode:
+              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+              this.layerConfigs[0].indexPattern.fieldFormatMap[
+                this.layerConfigs[0].selectedMetricField
+              ]?.id
+                ? ('left' as YAxisMode)
+                : ('right' as YAxisMode),
+          },
+        ],
+        xAccessor: `x-axis-column-layer${index}`,
+        ...(layerConfig.breakdown &&
+        layerConfig.breakdown !== PERCENTILE &&
+        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+          ? { splitAccessor: `breakdown-column-layer${index}` }
+          : {}),
+        ...(this.layerConfigs[0].seriesConfig.yTitle
+          ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
+          : {}),
+      };
+    });
 
     const referenceLineLayers: XYState['layers'] = [];
 
