@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import { installationStatuses } from '../../../../../../../common/constants';
+
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
+import { isPackageUnverified } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+
+import { useGetPackages } from '../../../../hooks';
+
+import type { Section } from '../../..';
 
 import type { CategoryFacet } from './category_facets';
 import { InstalledPackages } from './installed_packages';
@@ -43,21 +50,29 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
   return categories.some((c) => c.id === category);
 };
 
-export const mapToCard = (
-  getAbsolutePath: (p: string) => string,
-  getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string,
-  item: CustomIntegration | PackageListItem,
-  selectedCategory?: string
-): IntegrationCardItem => {
+export const mapToCard = ({
+  getAbsolutePath,
+  getHref,
+  item,
+  packageVerificationKeyId,
+  selectedCategory,
+}: {
+  getAbsolutePath: (p: string) => string;
+  getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
+  item: CustomIntegration | PackageListItem;
+  packageVerificationKeyId?: string;
+  selectedCategory?: string;
+}): IntegrationCardItem => {
   let uiInternalPathUrl;
 
+  let isUnverified = false;
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
-
     if ('savedObject' in item) {
       urlVersion = item.savedObject.attributes.version || item.version;
+      isUnverified = isPackageUnverified(item, packageVerificationKeyId);
     }
 
     const url = getHref('integration_details_overview', {
@@ -87,22 +102,38 @@ export const mapToCard = (
     version: 'version' in item ? item.version || '' : '',
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
+    isUnverified,
   };
 };
 
-export const EPMHomePage: React.FC = memo(() => {
+export const EPMHomePage: React.FC = () => {
+  const { data: allPackages, isLoading } = useGetPackages({
+    experimental: true,
+  });
+
+  const installedPackages = useMemo(
+    () =>
+      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
+    [allPackages?.response]
+  );
+
+  const atLeastOneUnverifiedPackageInstalled = installedPackages.some(
+    (pkg) => 'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
+  );
+
+  const sectionsWithWarning = (atLeastOneUnverifiedPackageInstalled ? ['manage'] : []) as Section[];
   return (
     <Switch>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
-        <DefaultLayout section="manage">
-          <InstalledPackages />
+        <DefaultLayout section="manage" sectionsWithWarning={sectionsWithWarning}>
+          <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        <DefaultLayout section="browse">
-          <AvailablePackages />
+        <DefaultLayout section="browse" sectionsWithWarning={sectionsWithWarning}>
+          <AvailablePackages allPackages={allPackages} isLoading={isLoading} />
         </DefaultLayout>
       </Route>
     </Switch>
   );
-});
+};

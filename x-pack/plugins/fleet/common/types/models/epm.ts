@@ -406,6 +406,8 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isUnverified?: boolean;
+  showLabels?: boolean;
 }
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';

@@ -2557,6 +2557,8 @@ components:
             type: string
             enum:
               - encrypted_saved_object_encryption_key_required
+        package_verification_key_id:
+          type: string
       required:
         - isReady
         - missing_requirements

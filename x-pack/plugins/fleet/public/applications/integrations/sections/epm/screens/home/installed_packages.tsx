@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
@@ -13,10 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { installationStatuses } from '../../../../../../../common/constants';
 import { pagePathGetters } from '../../../../constants';
-import { useGetPackages, useBreadcrumbs, useLink, useStartServices } from '../../../../hooks';
+import { useBreadcrumbs, useLink, useStartServices, useFleetStatus } from '../../../../hooks';
 import { PackageListGrid } from '../../components/package_list_grid';
+
+import type { PackageListItem } from '../../../../types';
 
 import type { CategoryFacet } from './category_facets';
 import { CategoryFacets } from './category_facets';
@@ -37,7 +38,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const Callout = () => (
+const InstalledIntegrationsInfoCallout = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -56,14 +57,33 @@ const Callout = () => (
   </EuiCallOut>
 );
 
+const VerificationWarningCallout = () => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
+      defaultMessage: 'Some installed integrations are not verified',
+    })}
+    iconType="alert"
+    color="warning"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.epmList.verificationWarningCalloutIntroText"
+        defaultMessage="One or more of the installed integrations contains an unsigned package with unknown authenticity."
+        // TODO: add documentation link
+      />
+    </p>
+  </EuiCallOut>
+);
+
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
-export const InstalledPackages: React.FC = memo(() => {
+export const InstalledPackages: React.FC<{
+  installedPackages: PackageListItem[];
+  isLoading: boolean;
+}> = ({ installedPackages, isLoading }) => {
   useBreadcrumbs('integrations_installed');
 
-  const { data: allPackages, isLoading } = useGetPackages({
-    experimental: true,
-  });
+  const { packageVerificationKeyId } = useFleetStatus();
 
   const { getHref, getAbsolutePath } = useLink();
 
@@ -93,26 +113,20 @@ export const InstalledPackages: React.FC = memo(() => {
     );
   }
 
-  const allInstalledPackages = useMemo(
-    () =>
-      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
-    [allPackages?.response]
-  );
-
   const updatablePackages = useMemo(
     () =>
-      allInstalledPackages.filter(
+      installedPackages.filter(
         (item) =>
           'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
       ),
-    [allInstalledPackages]
+    [installedPackages]
   );
 
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
         ...INSTALLED_CATEGORY,
-        count: allInstalledPackages.length,
+        count: installedPackages.length,
       },
       {
         id: 'updates_available',
@@ -122,7 +136,7 @@ export const InstalledPackages: React.FC = memo(() => {
         }),
       },
     ],
-    [allInstalledPackages.length, updatablePackages.length]
+    [installedPackages.length, updatablePackages.length]
   );
 
   if (!categoryExists(selectedCategory, categories)) {
@@ -142,10 +156,22 @@ export const InstalledPackages: React.FC = memo(() => {
   );
 
   const cards = (
-    selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages
-  ).map((item) => mapToCard(getAbsolutePath, getHref, item, selectedCategory || 'installed'));
+    selectedCategory === 'updates_available' ? updatablePackages : installedPackages
+  ).map((item) =>
+    mapToCard({
+      getAbsolutePath,
+      getHref,
+      item,
+      selectedCategory: selectedCategory || 'installed',
+      packageVerificationKeyId,
+    })
+  );
 
-  const callout = selectedCategory === 'updates_available' ? null : <Callout />;
+  const CalloutComponent = cards.some((c) => c.isUnverified)
+    ? VerificationWarningCallout
+    : InstalledIntegrationsInfoCallout;
+  const callout =
+    selectedCategory === 'updates_available' || isLoading ? null : <CalloutComponent />;
 
   return (
     <PackageListGrid
@@ -155,4 +181,4 @@ export const InstalledPackages: React.FC = memo(() => {
       list={cards}
     />
   );
-});
+};
