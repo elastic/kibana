@@ -123,7 +123,7 @@ exports[`CcrShard that it renders normally 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
-    <WithEuiTheme(EuiAccordionClass)
+    <EuiAccordionClass
       buttonContent={
         <EuiTitle>
           <h2>
@@ -175,7 +175,7 @@ exports[`CcrShard that it renders normally 1`] = `
   "total_transferred_bytes": 234156
 }
       </EuiCodeBlock>
-    </WithEuiTheme(EuiAccordionClass)>
+    </EuiAccordionClass>
   </EuiPageBody>
 </EuiPage>
 `;

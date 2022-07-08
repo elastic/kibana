@@ -10,13 +10,22 @@ import React, { lazy, Suspense } from 'react';
 import { CasesProvider, CasesContextProps } from '../../components/cases_context';
 import { RecentCasesProps } from '../../components/recent_cases';
 
-export type GetRecentCasesProps = RecentCasesProps & CasesContextProps;
+type GetRecentCasesPropsInternal = RecentCasesProps & CasesContextProps;
+export type GetRecentCasesProps = Omit<
+  GetRecentCasesPropsInternal,
+  'externalReferenceAttachmentTypeRegistry'
+>;
 
 const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
   () => import('../../components/recent_cases')
 );
-export const getRecentCasesLazy = ({ owner, userCanCrud, maxCasesToShow }: GetRecentCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud }}>
+export const getRecentCasesLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+  owner,
+  permissions,
+  maxCasesToShow,
+}: GetRecentCasesPropsInternal) => (
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, permissions }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <RecentCasesLazy maxCasesToShow={maxCasesToShow} />
     </Suspense>

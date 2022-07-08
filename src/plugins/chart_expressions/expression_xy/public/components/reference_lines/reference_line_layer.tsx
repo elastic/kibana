@@ -64,7 +64,10 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
       columnToLabelMap[decorationConfig.forAccessor] ??
       titles?.yTitles?.[decorationConfig.forAccessor];
     const value = row[decorationConfig.forAccessor];
-    const yDecorationsWithSameDirection = groupedByDirection[decorationConfig.fill!];
+    const yDecorationsWithSameDirection = groupedByDirection[decorationConfig.fill!].filter(
+      (yDecoration) =>
+        getAxisGroupForReferenceLine(axesConfiguration, yDecoration, isHorizontal) === axisGroup
+    );
     const indexFromSameType = yDecorationsWithSameDirection.findIndex(
       ({ forAccessor }) => forAccessor === decorationConfig.forAccessor
     );
