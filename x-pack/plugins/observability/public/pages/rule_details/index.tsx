@@ -318,14 +318,23 @@ export function RuleDetailsPage() {
       }}
     >
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {getRuleStatusPanel({
-          rule,
-          isEditable: hasEditButton,
-          requestRefresh: reloadRule,
-          healthColor: getHealthColor(rule.executionStatus.status),
-          statusMessage,
-        })}
-        {getRuleAlertsSummary({ rule })}
+        <EuiFlexItem style={{ minWidth: 350 }}>
+          {getRuleStatusPanel({
+            rule,
+            isEditable: hasEditButton,
+            requestRefresh: reloadRule,
+            healthColor: getHealthColor(rule.executionStatus.status),
+            statusMessage,
+          })}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexItem style={{ minWidth: 350 }}>
+          {getRuleAlertsSummary({
+            rule,
+            filteredSolutions: OBSERVABILITY_SOLUTIONS,
+          })}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
         {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
