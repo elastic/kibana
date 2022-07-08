@@ -66,7 +66,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     onLoadIndicesSuccess: (indices) => ({ indices }),
     setSelectedIndex: (selectedIndexName) => ({ selectedIndexName }),
     setEngineType: (engineType) => ({ engineType }),
-    setCreationStep: (creationStep) => ({ creationStep }),
+    setCreationStep: (currentEngineCreationStep) => currentEngineCreationStep,
   },
   reducers: {
     ingestionMethod: [
