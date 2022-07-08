@@ -1083,7 +1083,6 @@
     "rxjs-marbles": "^5.0.6",
     "sass-loader": "^10.2.0",
     "selenium-webdriver": "^4.3.0",
-    "shelljs": "^0.8.4",
     "simple-git": "1.116.0",
     "sinon": "^7.4.2",
     "sort-package-json": "^1.53.1",
