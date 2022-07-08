@@ -64,7 +64,7 @@ const routes = {
             },
           },
           '/': {
-            element: <Redirect to="/flamegraphs/flamegraph" />,
+            element: <Redirect to="/stacktraces/containers" />,
           },
         },
         element: <Outlet />,

@@ -7,7 +7,7 @@
 
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -29,13 +29,24 @@ export function ProfilingAppPageTemplate({
   } = useProfilingParams('/*');
 
   const {
-    start: { observability },
+    start: { observability, data },
   } = useProfilingDependencies();
 
   const { PageTemplate: ObservabilityPageTemplate } = observability.navigation;
 
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
+
+  useEffect(() => {
+    // set time if both to and from are given in the url
+    if (rangeFrom && rangeTo) {
+      data.query.timefilter.timefilter.setTime({
+        from: rangeFrom,
+        to: rangeTo,
+      });
+      return;
+    }
+  }, [rangeFrom, rangeTo, data]);
 
   return (
     <ObservabilityPageTemplate
