@@ -36,18 +36,14 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
-import type {
-  IndexPattern,
-  IndexPatternPrivateState,
-  IndexPatternField,
-  IndexPatternRef,
-} from './types';
+import type { IndexPattern, IndexPatternPrivateState, IndexPatternField } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { FieldGroups, FieldList } from './field_list';
+import { IndexPatternRef } from '../shared_components';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;

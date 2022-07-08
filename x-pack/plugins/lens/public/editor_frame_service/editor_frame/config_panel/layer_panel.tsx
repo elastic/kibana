@@ -318,45 +318,56 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
+            {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
             {layerDatasource && (
-              <>
-                <EuiSpacer size="s" />
-                <NativeRenderer
-                  render={layerDatasource.renderLayerPanel}
-                  nativeProps={{
-                    layerId,
-                    state: layerDatasourceState,
-                    activeData: props.framePublicAPI.activeData,
-                    setState: (updater: unknown) => {
-                      const newState =
-                        typeof updater === 'function' ? updater(layerDatasourceState) : updater;
-                      // Look for removed columns
-                      const nextPublicAPI = layerDatasource.getPublicAPI({
-                        state: newState,
+              <NativeRenderer
+                render={layerDatasource.renderLayerPanel}
+                nativeProps={{
+                  layerId,
+                  state: layerDatasourceState,
+                  activeData: props.framePublicAPI.activeData,
+                  setState: (updater: unknown) => {
+                    const newState =
+                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
+                    // Look for removed columns
+                    const nextPublicAPI = layerDatasource.getPublicAPI({
+                      state: newState,
+                      layerId,
+                    });
+                    const nextTable = new Set(
+                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                    );
+                    const removed = datasourcePublicAPI
+                      .getTableSpec()
+                      .map(({ columnId }) => columnId)
+                      .filter((columnId) => !nextTable.has(columnId));
+                    let nextVisState = props.visualizationState;
+                    removed.forEach((columnId) => {
+                      nextVisState = activeVisualization.removeDimension({
                         layerId,
+                        columnId,
+                        prevState: nextVisState,
+                        frame: framePublicAPI,
                       });
-                      const nextTable = new Set(
-                        nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-                      );
-                      const removed = datasourcePublicAPI
-                        .getTableSpec()
-                        .map(({ columnId }) => columnId)
-                        .filter((columnId) => !nextTable.has(columnId));
-                      let nextVisState = props.visualizationState;
-                      removed.forEach((columnId) => {
-                        nextVisState = activeVisualization.removeDimension({
-                          layerId,
-                          columnId,
-                          prevState: nextVisState,
-                          frame: framePublicAPI,
-                        });
-                      });
+                    });
 
-                      props.updateAll(datasourceId, newState, nextVisState);
-                    },
-                  }}
-                />
-              </>
+                    props.updateAll(datasourceId, newState, nextVisState);
+                  },
+                }}
+              />
+            )}
+            {activeVisualization.renderLayerPanel && (
+              <NativeRenderer
+                render={activeVisualization.renderLayerPanel}
+                nativeProps={{
+                  layerId,
+                  state: visualizationState,
+                  frame: framePublicAPI,
+                  setState: (newState) => {
+                    props.updateVisualization(newState);
+                  },
+                }}
+              />
             )}
           </header>
 

@@ -18,7 +18,6 @@ import type {
 } from '../types';
 import {
   IndexPattern,
-  IndexPatternRef,
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternField,
@@ -32,6 +31,7 @@ import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
 import { memoizedGetAvailableOperationsByMetadata } from './operations';
+import type { IndexPatternRef } from '../shared_components';
 
 type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
 type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
@@ -200,6 +200,13 @@ export function injectReferences(
   };
 }
 
+export function getIndexPatterns({
+  indexPatternRefs,
+  indexPatterns,
+}: Partial<IndexPatternPrivateState> = {}) {
+  return { indexPatternRefs: indexPatternRefs ?? [], indexPatterns: indexPatterns ?? {} };
+}
+
 export async function loadInitialState({
   persistedState,
   references,
@@ -226,13 +233,14 @@ export async function loadInitialState({
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
   const indexPatternIds = [];
-  if (initialContext && 'isVisualizeAction' in initialContext) {
-    for (let layerIdx = 0; layerIdx < initialContext.layers.length; layerIdx++) {
-      const layerContext = initialContext.layers[layerIdx];
-      indexPatternIds.push(layerContext.indexPatternId);
+  if (initialContext) {
+    if ('isVisualizeAction' in initialContext) {
+      for (const { indexPatternId } of initialContext.layers) {
+        indexPatternIds.push(indexPatternId);
+      }
+    } else {
+      indexPatternIds.push(initialContext.indexPatternId);
     }
-  } else if (initialContext) {
-    indexPatternIds.push(initialContext.indexPatternId);
   }
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
@@ -244,12 +252,9 @@ export async function loadInitialState({
     // take out the undefined from the list
     .filter(Boolean);
 
-  const notUsedPatterns: string[] = difference(
-    uniq(indexPatternRefs.map(({ id }) => id)),
-    usedPatterns
-  );
-
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+
+  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedPatterns);
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
@@ -262,11 +267,9 @@ export async function loadInitialState({
   // * start with the indexPattern in context
   // * then fallback to the used ones
   // * then as last resort use a first one from not used refs
-  const availableIndexPatternIds = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns].filter(
+  const currentIndexPatternId = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns].find(
     (id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]
   );
-
-  const currentIndexPatternId = availableIndexPatternIds[0];
 
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);

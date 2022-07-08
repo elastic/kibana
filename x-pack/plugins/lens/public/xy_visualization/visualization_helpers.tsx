@@ -277,10 +277,17 @@ const newLayerFn = {
     layerType: layerTypes.REFERENCELINE,
     accessors: [],
   }),
-  [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
+  [layerTypes.ANNOTATIONS]: ({
+    layerId,
+    indexPatternId,
+  }: {
+    layerId: string;
+    indexPatternId: string;
+  }): XYAnnotationLayerConfig => ({
     layerId,
     layerType: layerTypes.ANNOTATIONS,
     annotations: [],
+    indexPatternId,
   }),
 };
 
@@ -288,12 +295,14 @@ export function newLayerState({
   layerId,
   layerType = layerTypes.DATA,
   seriesType,
+  indexPatternId,
 }: {
   layerId: string;
   layerType?: LayerType;
   seriesType: SeriesType;
+  indexPatternId: string;
 }) {
-  return newLayerFn[layerType]({ layerId, seriesType });
+  return newLayerFn[layerType]({ layerId, seriesType, indexPatternId });
 }
 
 export function getLayersByType(state: State, byType?: string) {

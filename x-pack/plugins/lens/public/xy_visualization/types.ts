@@ -114,6 +114,7 @@ export interface XYAnnotationLayerConfig {
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
   hide?: boolean;
+  indexPatternId: string;
 }
 
 export type XYLayerConfig =

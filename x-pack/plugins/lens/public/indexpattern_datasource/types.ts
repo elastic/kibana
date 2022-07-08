@@ -11,6 +11,7 @@ import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import { DragDropOperation } from '../types';
+import { IndexPatternRef } from '../shared_components';
 
 export type {
   GenericIndexPatternColumn,
@@ -103,12 +104,6 @@ export interface IndexPatternPrivateState {
   existenceFetchTimeout?: boolean;
 
   isDimensionClosePrevented?: boolean;
-}
-
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-  name?: string;
 }
 
 export interface DataViewDragDropOperation extends DragDropOperation {

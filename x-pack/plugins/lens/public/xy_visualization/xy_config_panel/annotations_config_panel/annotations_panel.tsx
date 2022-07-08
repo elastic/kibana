@@ -244,6 +244,7 @@ export const AnnotationsPanel = (
             onChange={setAnnotations}
             frame={frame}
             state={state}
+            layer={localLayer}
           />
         ) : (
           <ConfigPanelManualAnnotation
@@ -385,15 +386,34 @@ const ConfigPanelQueryAnnotation = ({
   frame,
   state,
   onChange,
+  layer,
 }: {
   annotation?: PointInTimeQueryEventAnnotationConfig;
   onChange: (annotations: Partial<PointInTimeQueryEventAnnotationConfig> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
+  layer: XYAnnotationLayerConfig;
 }) => {
   const inputQuery = annotation?.query ?? defaultQuery;
+  const currentIndexPattern = frame.indexPatterns[layer.indexPatternId];
   // list only supported field by operation, remove the rest
-  const options = [];
+  const options = currentIndexPattern.fields
+    .filter((field) => field.type === 'date' && field.displayName)
+    .map((field) => {
+      return {
+        label: field.displayName,
+        value: {
+          type: 'field',
+          field: field.name,
+          dataType: field.type,
+        },
+        exists: true,
+        compatible: true,
+        'data-test-subj': `lns-fieldOption-${field.name}`,
+      };
+    });
+
+  const selectedField = annotation?.key.field;
   return (
     <>
       <EuiFormRow
@@ -405,7 +425,17 @@ const ConfigPanelQueryAnnotation = ({
         })}
       >
         <FieldPicker
-          options={[]}
+          options={options}
+          selectedOptions={
+            selectedField
+              ? [
+                  {
+                    label: selectedField,
+                    value: { type: 'field', field: selectedField },
+                  },
+                ]
+              : []
+          }
           onChoose={function (choice: FieldOptionValue | undefined): void {
             throw new Error('Function not implemented.');
           }}
@@ -425,7 +455,7 @@ const ConfigPanelQueryAnnotation = ({
           onChange={function (input: Query): void {
             throw new Error('Function not implemented.');
           }}
-          indexPatternTitle={''}
+          indexPatternTitle={frame.indexPatterns[layer.indexPatternId].title}
           isInvalid={false}
           onSubmit={() => {}}
           placeholder={

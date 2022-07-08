@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './types';
-import { ChangeIndexPattern } from './change_indexpattern';
+import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
 export interface IndexPatternLayerPanelProps
   extends DatasourceLayerPanelProps<IndexPatternPrivateState> {

@@ -39,6 +39,7 @@ import {
   extractReferences,
   injectReferences,
   loadIndexPatterns,
+  getIndexPatterns,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -180,6 +181,8 @@ export function getIndexPatternDatasource({
         options,
       });
     },
+
+    getIndexPatterns,
 
     getPersistableState(state: IndexPatternPrivateState) {
       return extractReferences(state);

@@ -45,6 +45,8 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
+import type { IndexPattern } from './indexpattern_datasource';
+import type { IndexPatternRef } from './shared_components';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -227,6 +229,11 @@ export interface Datasource<T = unknown, P = unknown> {
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     options?: InitializationOptions
   ) => Promise<T>;
+
+  getIndexPatterns: (state?: T) => {
+    indexPatterns: Record<string, IndexPattern>;
+    indexPatternRefs: IndexPatternRef[];
+  };
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
@@ -550,6 +557,10 @@ export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProp
   setState: (newState: T) => void;
 };
 
+export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T> & {
+  defaultIndexPatternId: string;
+};
+
 export interface VisualizationToolbarProps<T = unknown> {
   setState: (newState: T) => void;
   frame: FramePublicAPI;
@@ -712,6 +723,8 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
+  indexPatternRefs: IndexPatternRef[];
+  indexPatterns: Record<string, IndexPattern>;
 }
 export interface FrameDatasourceAPI extends FramePublicAPI {
   query: Query;
@@ -795,7 +808,7 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId?: string) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
@@ -826,10 +839,19 @@ export interface Visualization<T = unknown> {
   };
 
   /**
-   * Header rendered as layer title This can be used for both static and dynamic content lioke
+   * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
    */
   renderLayerHeader?: (
+    domElement: Element,
+    props: VisualizationLayerWidgetProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+
+  /**
+   * Layer panel content rendered. This can be used to render a custom content below the title,
+   * like a custom dataview switch
+   */
+  renderLayerPanel?: (
     domElement: Element,
     props: VisualizationLayerWidgetProps<T>
   ) => ((cleanupElement: Element) => void) | void;
@@ -949,6 +971,11 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  getInnerDatasource?: (
+    state: T,
+    frame: FramePublicAPI
+  ) => { datasource: Datasource; state: unknown };
 }
 
 // Use same technique as TriggerContext

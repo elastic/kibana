@@ -30,6 +30,27 @@ import {
   getUnknownVisualizationTypeError,
 } from '../error_helper';
 import { DatasourceStates } from '../../state_management';
+import { IndexPattern } from '../../indexpattern_datasource/types';
+
+export function mergeIndexPatterns(
+  datasourceMap: DatasourceMap,
+  datasourceStates: DatasourceStates
+) {
+  const dataViewWithDuplicates = Object.entries(datasourceMap).map(([datasourceId, datasource]) =>
+    datasource.getIndexPatterns(datasourceStates[datasourceId].state)
+  );
+  // it's always the same, so just pick the first one
+  const indexPatternRefs = dataViewWithDuplicates[0].indexPatternRefs;
+  const indexPatternDedup: Record<string, IndexPattern> = {};
+  for (const { indexPatterns } of dataViewWithDuplicates) {
+    for (const [indexPatternId, indexPattern] of Object.entries(indexPatterns)) {
+      if (!(indexPatternId in indexPatternDedup)) {
+        indexPatternDedup[indexPatternId] = indexPattern;
+      }
+    }
+  }
+  return { indexPatternRefs, indexPatterns: indexPatternDedup };
+}
 
 export async function initializeDatasources(
   datasourceMap: DatasourceMap,
@@ -39,6 +60,7 @@ export async function initializeDatasources(
   options?: InitializationOptions
 ) {
   const states: DatasourceStates = {};
+
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {

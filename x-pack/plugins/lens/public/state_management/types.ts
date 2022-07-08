@@ -20,6 +20,8 @@ import {
   SharingSavedObjectProps,
   VisualizeEditorContext,
 } from '../types';
+import type { IndexPatternRef } from '../shared_components';
+import type { IndexPattern } from '../indexpattern_datasource';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
@@ -53,6 +55,8 @@ export interface LensAppState extends EditorFrameState {
   searchSessionId: string;
   resolvedDateRange: DateRange;
   sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
+  indexPatternRefs: IndexPatternRef[];
+  indexPatterns: Record<string, IndexPattern>;
 }
 
 export type DispatchSetState = (state: Partial<LensAppState>) => {

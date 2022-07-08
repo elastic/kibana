@@ -16,6 +16,7 @@ export {
   FieldOption,
   FieldOptionValue,
 } from './field_picker';
+export { ChangeIndexPattern, IndexPatternRef } from './dataview_picker';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,

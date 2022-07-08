@@ -13,7 +13,7 @@ import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
-import { initializeDatasources } from '../../editor_frame_service/editor_frame';
+import { initializeDatasources, mergeIndexPatterns } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document } from '../../persistence';
@@ -102,6 +102,7 @@ export function loadInitial(
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
   const { lens } = store.getState();
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
@@ -115,6 +116,7 @@ export function loadInitial(
           initEmpty({
             newState: {
               ...emptyState,
+              ...mergeIndexPatterns(datasourceMap, result),
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
               datasourceStates: Object.entries(result).reduce(
                 (state, [datasourceId, datasourceState]) => ({

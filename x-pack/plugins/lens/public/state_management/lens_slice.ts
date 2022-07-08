@@ -38,6 +38,8 @@ export const initialState: LensAppState = {
     state: null,
     activeId: null,
   },
+  indexPatternRefs: [],
+  indexPatterns: {},
 };
 
 export const getPreloadedState = ({
@@ -634,6 +636,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           : undefined,
         datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
         dateRange: current(state.resolvedDateRange),
+        indexPatternRefs: current(state.indexPatternRefs),
+        indexPatterns: current(state.indexPatterns),
       };
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
@@ -693,6 +697,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             : undefined,
           datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
           dateRange: current(state.resolvedDateRange),
+          indexPatternRefs: current(state.indexPatternRefs),
+          indexPatterns: current(state.indexPatterns),
         },
         activeVisualization,
         activeDatasource,

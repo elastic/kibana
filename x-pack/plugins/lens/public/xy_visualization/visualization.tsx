@@ -22,7 +22,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
-import { LayerHeader } from './xy_config_panel/layer_header';
+import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
 import {
   State,
@@ -121,7 +121,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId, layerType) {
+  appendLayer(state, layerId, layerType, indexPatternId) {
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -131,6 +131,7 @@ export const getXyVisualization = ({
           seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
+          indexPatternId: indexPatternId ?? core.uiSettings.get('defaultIndex'),
         }),
       ],
     };
@@ -142,7 +143,11 @@ export const getXyVisualization = ({
       layers: state.layers.map((l) =>
         l.layerId !== layerId
           ? l
-          : newLayerState({ seriesType: state.preferredSeriesType, layerId })
+          : newLayerState({
+              seriesType: state.preferredSeriesType,
+              layerId,
+              indexPatternId: core.uiSettings.get('defaultIndex'),
+            })
       ),
     };
   },
@@ -498,6 +503,20 @@ export const getXyVisualization = ({
       ...prevState,
       layers: newLayers,
     };
+  },
+
+  renderLayerPanel(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerHeaderContent
+            {...props}
+            defaultIndexPatternId={core.uiSettings.get('defaultIndex')}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   renderLayerHeader(domElement, props) {
