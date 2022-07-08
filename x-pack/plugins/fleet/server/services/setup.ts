@@ -23,7 +23,10 @@ import { SO_SEARCH_LIMIT } from '../constants';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import { ensurePreconfiguredOutputs } from './preconfiguration/outputs';
+import {
+  ensurePreconfiguredOutputs,
+  getPreconfiguredOutputFromConfig,
+} from './preconfiguration/outputs';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
@@ -60,18 +63,20 @@ async function createSetupSideEffects(
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
-  const {
-    agentPolicies: policiesOrUndefined,
-    packages: packagesOrUndefined,
-    outputs: outputsOrUndefined,
-  } = appContextService.getConfig() ?? {};
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
 
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
   logger.debug('Setting up Fleet outputs');
+
   await Promise.all([
-    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
+    ensurePreconfiguredOutputs(
+      soClient,
+      esClient,
+      getPreconfiguredOutputFromConfig(appContextService.getConfig())
+    ),
     settingsService.settingsSetup(soClient),
   ]);
 
