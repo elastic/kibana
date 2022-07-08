@@ -6,14 +6,33 @@
  */
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { TrainedModelName } from '../../../../services/ml/api';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
+  const tinyTrainedModels = [
+    'fill_mask',
+    'ner',
+    'pass_through',
+    'text_classification',
+    'text_embedding',
+    'zero_shot',
+  ].map((type) => ({
+    id: `tiny_${type}`,
+    name: `pt_tiny_${type}` as TrainedModelName,
+    desription: `Tiny/Dummy PyTorch model (${type})`,
+    modelTypes: ['pytorch', type],
+  }));
+
   describe('trained models', function () {
     before(async () => {
-      await ml.trainedModels.createTestTrainedModels('classification', 15, true);
-      await ml.trainedModels.createTestTrainedModels('regression', 15);
+      for (const model of tinyTrainedModels) {
+        await ml.api.importTrainedModel(model.id, model.name);
+      }
+
+      await ml.api.createTestTrainedModels('classification', 15, true);
+      await ml.api.createTestTrainedModels('regression', 15);
     });
 
     after(async () => {
@@ -56,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should display the stats bar with the total number of models'
         );
         // +1 because of the built-in model
-        await ml.trainedModels.assertStats(31);
+        await ml.trainedModels.assertStats(37);
 
         await ml.testExecution.logTestStep('should display the table');
         await ml.trainedModels.assertTableExists();
@@ -80,6 +99,16 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertStatsTabContent();
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
+
+      for (const model of tinyTrainedModels) {
+        it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
+          await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
+          await ml.trainedModelsTable.assertDetailsTabContent();
+          await ml.trainedModelsTable.assertInferenceConfigTabContent();
+          await ml.trainedModelsTable.assertStatsTabContent();
+          await ml.trainedModelsTable.assertPipelinesTabContent(false);
+        });
+      }
 
       it('displays the built-in model and no actions are enabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');

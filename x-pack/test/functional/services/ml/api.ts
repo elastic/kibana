@@ -9,7 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import fs from 'fs';
-import path from 'path';
 import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
@@ -29,6 +28,16 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
+export type TrainedModelName =
+  | 'pt_tiny_fill_mask'
+  | 'pt_tiny_ner'
+  | 'pt_tiny_pass_through'
+  | 'pt_tiny_text_classification'
+  | 'pt_tiny_text_embedding'
+  | 'pt_tiny_zero_shot';
+export interface TrainedModelVocabulary {
+  vocabulary: string[];
+}
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -1135,6 +1144,38 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return model;
     },
 
+    async createTrainedModelVocabularyES(modelId: string, body: TrainedModelVocabulary) {
+      log.debug(`Creating vocabulary for trained model "${modelId}"`);
+      const { body: responseBody, status } = await esSupertest
+        .put(`/_ml/trained_models/${modelId}/vocabulary`)
+        .send(body);
+      this.assertResponseStatusCode(200, status, responseBody);
+
+      log.debug('> Trained model vocabulary created');
+    },
+
+    /**
+     * For the purpose of the functional tests where we only deal with very
+     * small models, we assume that the model definition can be uploaded as
+     * one part.
+     */
+    async uploadTrainedModelDefinitionES(modelId: string, modelDefinitionPath: string) {
+      log.debug(`Uploading definition for trained model "${modelId}"`);
+
+      const body = {
+        total_definition_length: fs.statSync(modelDefinitionPath).size,
+        definition: fs.readFileSync(modelDefinitionPath).toString('base64'),
+        total_parts: 1,
+      };
+
+      const { body: responseBody, status } = await esSupertest
+        .put(`/_ml/trained_models/${modelId}/definition/0`)
+        .send(body);
+      this.assertResponseStatusCode(200, status, responseBody);
+
+      log.debug('> Trained model definition uploaded');
+    },
+
     async deleteTrainedModelES(modelId: string) {
       log.debug(`Creating trained model with id "${modelId}"`);
       const { body: model, status } = await esSupertest.delete(`/_ml/trained_models/${modelId}`);
@@ -1149,24 +1190,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       count: number = 10,
       withIngestPipelines = false
     ) {
-      const compressedDefinition = this.getCompressedModelDefinition(modelType);
+      const modelIds = new Array(count).fill(null).map((_v, i) => `dfa_${modelType}_model_n_${i}`);
 
-      const modelIds = new Array(count).fill(null).map((v, i) => `dfa_${modelType}_model_n_${i}`);
-
-      const models = modelIds.map((id) => {
-        return {
-          model_id: id,
-          body: {
-            compressed_definition: compressedDefinition,
-            inference_config: {
-              [modelType]: {},
-            },
-            input: {
-              field_names: ['common_field'],
-            },
-          } as PutTrainedModelConfig,
-        };
-      });
+      const models = modelIds.map((id) => this.createTestTrainedModelConfig(id, modelType));
 
       for (const model of models) {
         await this.createTrainedModel(model.model_id, model.body);
@@ -1178,7 +1204,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return modelIds;
     },
 
-    async createTestTrainedModelConfig(modelId: string, modelType: ModelType) {
+    createTestTrainedModelConfig(modelId: string, modelType: ModelType) {
       const compressedDefinition = this.getCompressedModelDefinition(modelType);
 
       return {
@@ -1201,13 +1227,41 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
      */
     getCompressedModelDefinition(modelType: ModelType) {
       return fs.readFileSync(
-        path.resolve(
-          __dirname,
-          'resources',
-          'trained_model_definitions',
-          `minimum_valid_config_${modelType}.json.gz.b64`
+        require.resolve(
+          `./resources/trained_model_definitions/minimum_valid_config_${modelType}.json.gz.b64`
         ),
         'utf-8'
+      );
+    },
+
+    getTrainedModelConfig(modelName: TrainedModelName) {
+      const configFileContent = fs.readFileSync(
+        require.resolve(`./resources/trained_model_definitions/${modelName}/config.json`),
+        'utf-8'
+      );
+      return JSON.parse(configFileContent) as PutTrainedModelConfig;
+    },
+
+    getTrainedModelVocabulary(modelName: TrainedModelName) {
+      const vocabularyFileContent = fs.readFileSync(
+        require.resolve(`./resources/trained_model_definitions/${modelName}/vocabulary.json`),
+        'utf-8'
+      );
+      return JSON.parse(vocabularyFileContent) as TrainedModelVocabulary;
+    },
+
+    getTrainedModelDefinitionPath(modelName: TrainedModelName) {
+      return require.resolve(
+        `./resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
+      );
+    },
+
+    async importTrainedModel(modelId: string, modelName: TrainedModelName) {
+      await this.createTrainedModel(modelId, this.getTrainedModelConfig(modelName));
+      await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
+      await this.uploadTrainedModelDefinitionES(
+        modelId,
+        this.getTrainedModelDefinitionPath(modelName)
       );
     },
 
