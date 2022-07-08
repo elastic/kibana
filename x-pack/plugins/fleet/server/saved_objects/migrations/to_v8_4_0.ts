@@ -31,4 +31,3 @@ export const migrateAgentPolicyToV840: SavedObjectMigrationFn<
 
   return agentPolicyDoc;
 };
-
