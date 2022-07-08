@@ -16,7 +16,7 @@ import { FlyoutHeader } from '.';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockBrowserFields, mockDocValueFields } from '../../../../common/containers/source/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { allCasesPermissions, noCasesPermissions } from '../../../../cases_test_utils';
+import { allCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../../../common/containers/sourcerer');
@@ -79,7 +79,7 @@ describe('header', () => {
       mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineKpiResponse]);
     });
 
-    it('renders the button when the user has write permissions', () => {
+    it('renders the button when the user has create and read permissions', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
       render(
@@ -91,8 +91,8 @@ describe('header', () => {
       expect(screen.getByTestId('attach-timeline-case-button')).toBeInTheDocument();
     });
 
-    it('does not render the button when the user does not have write permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
+    it('does not render the button when the user does not have create permissions', () => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
 
       render(
         <TestProviders>
