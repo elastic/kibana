@@ -10,6 +10,14 @@ import { ClearCommand } from '../components/builtin_commands/clear_command';
 import { HelpCommand } from '../components/builtin_commands/help_command';
 import { CommandDefinition } from '../types';
 
+export const HELP_GROUPS = {
+  supporting: {
+    label: i18n.translate('xpack.securitySolution.console.builtInCommands.groups.supporting', {
+      defaultMessage: 'Supporting commands & syntaxes',
+    }),
+  },
+};
+
 export const getBuiltinCommands = (): CommandDefinition[] => {
   return [
     {
@@ -18,6 +26,7 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
         defaultMessage: 'View list of available commands',
       }),
       RenderComponent: HelpCommand,
+      helpGroupLabel: HELP_GROUPS.supporting.label,
     },
     {
       name: 'cls',
@@ -25,6 +34,7 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
         defaultMessage: 'Clear the console buffer',
       }),
       RenderComponent: ClearCommand,
+      helpGroupLabel: HELP_GROUPS.supporting.label,
     },
   ];
 };

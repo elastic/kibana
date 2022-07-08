@@ -39,7 +39,7 @@ const ConsoleWindow = styled.div`
 
     &-container {
       padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
-        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeL};
+        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeM};
     }
 
     &-header {
@@ -136,46 +136,53 @@ export const Console = memo<ConsoleProps>(
         dataTestSubj={commonProps['data-test-subj']}
       >
         <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
-          <EuiFlexGroup
-            direction="column"
-            className="layout"
-            gutterSize="none"
-            responsive={false}
-            data-test-subj={getTestId('mainPanel')}
-          >
-            <EuiFlexItem grow={false} className="layout-container layout-header">
-              <ConsoleHeader TitleComponent={TitleComponent} />
-            </EuiFlexItem>
+          <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>
+            <EuiFlexItem>
+              <EuiFlexGroup
+                direction="column"
+                className="layout"
+                gutterSize="none"
+                responsive={false}
+                data-test-subj={getTestId('mainPanel')}
+              >
+                <EuiFlexItem grow={false} className="layout-container layout-header">
+                  <ConsoleHeader TitleComponent={TitleComponent} />
+                </EuiFlexItem>
 
-            <EuiFlexItem grow className="layout-hideOverflow">
-              <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
-                <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
+                <EuiFlexItem grow className="layout-hideOverflow">
                   <EuiFlexGroup
-                    direction="column"
                     gutterSize="none"
                     responsive={false}
                     className="layout-hideOverflow"
                   >
-                    <EuiFlexItem grow className="layout-historyOutput">
-                      <div
-                        className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
-                        ref={scrollingViewport}
+                    <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="none"
+                        responsive={false}
+                        className="layout-hideOverflow"
                       >
-                        <HistoryOutput />
-                      </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="layout-container layout-commandInput">
-                      <CommandInput prompt={prompt} focusRef={inputFocusRef} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="layout-container layout-footer">
-                      <ConsoleFooter />
+                        <EuiFlexItem grow className="layout-historyOutput">
+                          <div
+                            className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
+                            ref={scrollingViewport}
+                          >
+                            <HistoryOutput />
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                          <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false} className="layout-container layout-footer">
+                          <ConsoleFooter />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-
-                {<SidePanelFlexItem />}
               </EuiFlexGroup>
             </EuiFlexItem>
+            {<SidePanelFlexItem />}
           </EuiFlexGroup>
         </ConsoleWindow>
       </ConsoleStateProvider>

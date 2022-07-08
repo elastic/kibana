@@ -6,9 +6,14 @@
  */
 
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
 import { SidePanelContentManager } from './side_panel_content_manager';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
+
+const StyledEuiFlexItemWhite = styled(EuiFlexItem)`
+  background-color: ${({ theme }) => theme.eui.euiHeaderBackgroundColor};
+`;
 
 export const SidePanelFlexItem = memo((props) => {
   const isPanelOpened = Boolean(useWithSidePanel().show);
@@ -18,9 +23,9 @@ export const SidePanelFlexItem = memo((props) => {
   }
 
   return (
-    <EuiFlexItem grow={false} className="layout-rightPanel">
+    <StyledEuiFlexItemWhite grow={false} className="layout-rightPanel">
       <SidePanelContentManager />
-    </EuiFlexItem>
+    </StyledEuiFlexItemWhite>
   );
 });
 SidePanelFlexItem.displayName = 'SidePanelFlexItem';
