@@ -25,6 +25,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorConfiguration } from './connector/connector_configuration';
+import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerStatusIndicator } from './crawler/crawler_status_indicator/crawler_status_indicator';
@@ -33,7 +34,6 @@ import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { SearchIndexOverview } from './overview';
-import { SearchIndexScheduling } from './scheduling';
 
 export enum SearchIndexTabId {
   // all indices
@@ -93,7 +93,7 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
-      content: <SearchIndexScheduling />,
+      content: <ConnectorSchedulingComponent />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
