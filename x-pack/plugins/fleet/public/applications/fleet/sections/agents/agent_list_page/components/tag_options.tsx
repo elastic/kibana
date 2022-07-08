@@ -29,28 +29,33 @@ interface Props {
 export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdated }: Props) => {
   const [tagOptionsVisible, setTagOptionsVisible] = useState<boolean>(false);
   const [tagOptionsButton, setTagOptionsButton] = useState<HTMLElement>();
-
   const [tagMenuButtonVisible, setTagMenuButtonVisible] = useState<boolean>(isTagHovered);
+  const [updatedName, setUpdatedName] = useState<string | undefined>(tagName);
 
   useEffect(() => {
     setTagMenuButtonVisible(isTagHovered || tagOptionsVisible);
   }, [isTagHovered, tagOptionsVisible]);
 
-  const [updatedName, setUpdatedName] = useState<string | undefined>(tagName);
-
   useEffect(() => {
     setUpdatedName(tagName);
   }, [tagName]);
 
-  const closePopover = () => setTagOptionsVisible(false);
+  const closePopover = (isDelete = false) => {
+    setTagOptionsVisible(false);
+    if (isDelete) {
+      handleDelete();
+    } else {
+      handleRename(updatedName);
+    }
+  };
 
   const updateTagsHook = useUpdateTags();
   const bulkUpdateTags = updateTagsHook.bulkUpdateTags;
 
   const TAGS_QUERY = 'tags:{name}';
 
-  const handleRename = (newName: string) => {
-    if (newName === tagName) {
+  const handleRename = (newName?: string) => {
+    if (newName === tagName || !newName) {
       return;
     }
     const kuery = TAGS_QUERY.replace('{name}', tagName);
@@ -118,7 +123,6 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                     required
                     onKeyDown={(e: { key: string }) => {
                       if (e.key === 'Enter') {
-                        handleRename(updatedName!);
                         closePopover();
                       }
                     }}
@@ -139,7 +143,6 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                     color="primary"
                     isDisabled={!updatedName || updatedName === tagName}
                     onClick={() => {
-                      handleRename(updatedName!);
                       closePopover();
                     }}
                   />
@@ -151,8 +154,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                 size="s"
                 color="danger"
                 onClick={() => {
-                  handleDelete();
-                  closePopover();
+                  closePopover(true);
                 }}
               >
                 <EuiIcon type="trash" />{' '}
