@@ -240,7 +240,7 @@ export function ErrorGroupDetails() {
         </Titles>
       )}
       <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem>
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
               fetchStatus={status}
@@ -254,7 +254,7 @@ export function ErrorGroupDetails() {
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem>
           <EuiPanel hasBorder={true}>
             <TopErroneousTransactions serviceName={serviceName} />
           </EuiPanel>

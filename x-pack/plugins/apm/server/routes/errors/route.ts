@@ -234,7 +234,6 @@ const topErroneousTransactionsRoute = createApmServerRoute({
       previousPeriodTimeseries: Array<{ x: number; y: number }>;
       transactionType: string | undefined;
       occurrences: number;
-      errorRatio: number;
     }>;
   }> => {
     const { params } = resources;

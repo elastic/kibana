@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         path: {
           serviceName,
-          groupId: 'test',
+          groupId: '',
           ...overrides?.path,
         },
         query: {
@@ -160,8 +160,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   isFiniteNumber(y)
                 );
 
-              expect(hasCurrentPeriodData).to.equal(true);
-              expect(hasPreviousPeriodData).to.equal(true);
+              expect(hasCurrentPeriodData).to.be(true);
+              expect(hasPreviousPeriodData).to.be(true);
             });
 
             it('has the same start time for both periods', () => {

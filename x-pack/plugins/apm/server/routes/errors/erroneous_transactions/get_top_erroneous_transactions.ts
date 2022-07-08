@@ -117,7 +117,6 @@ async function getTopErroneousTransactions({
         transactionName: key as string,
         transactionType: sample.hits.hits[0]._source.transaction?.type,
         occurrences: docCount,
-        errorRatio: docCount / res.hits.total.value,
         timeseries: timeseries.buckets.map((timeseriesBucket) => {
           return {
             x: timeseriesBucket.key + offsetInMs,

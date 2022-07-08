@@ -74,7 +74,7 @@ describe('Error details', () => {
       it('shows top erroneous transactions table', () => {
         cy.visit(errorDetailsPageHref);
         cy.contains('Top 5 affected transactions');
-        cy.get('[data-test-subj="top-erroneous-transactions-table"]')
+        cy.get('[data-test-subj="topErroneousTransactionsTable"]')
           .contains('a', 'GET /apple 🍎')
           .click();
         cy.url().should('include', 'opbeans-java/transactions/view');

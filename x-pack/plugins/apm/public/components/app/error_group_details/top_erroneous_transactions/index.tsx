@@ -13,12 +13,8 @@ import {
   EuiTitle,
   RIGHT_ALIGNMENT,
   EuiSpacer,
-  EuiToolTip,
-  EuiIcon,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
-import { useHistory } from 'react-router-dom';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import {
@@ -27,13 +23,10 @@ import {
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { asPercent } from '../../../../../common/utils/formatters';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
-import { TRANSACTION_NAME } from '../../../../../common/elasticsearch_fieldnames';
 
 type ErroneousTransactions =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions'>;
@@ -47,8 +40,6 @@ const INITIAL_STATE: ErroneousTransactions = {
 };
 
 export function TopErroneousTransactions({ serviceName }: Props) {
-  const history = useHistory();
-
   const {
     query,
     path: { groupId },
@@ -101,10 +92,6 @@ export function TopErroneousTransactions({ serviceName }: Props) {
   const loading =
     status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED;
 
-  const addKueryBarFilter = ({ key, value }: { key: string; value: any }) => {
-    pushNewItemToKueryBar({ kuery, history, key, value });
-  };
-
   const columns: Array<
     EuiBasicTableColumn<
       ValuesType<ErroneousTransactions['topErroneousTransactions']>
@@ -112,7 +99,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
   > = [
     {
       field: 'transactionName',
-      width: '40%',
+      width: '60%',
       name: i18n.translate(
         'xpack.apm.errorGroupTopTransactions.column.transactionName',
         {
@@ -121,41 +108,20 @@ export function TopErroneousTransactions({ serviceName }: Props) {
       ),
       render: (_, { transactionName, transactionType }) => {
         return (
-          <>
-            <EuiButtonEmpty
-              onClick={() => {
-                addKueryBarFilter({
-                  key: TRANSACTION_NAME,
-                  value: transactionName,
-                });
-              }}
-              data-test-subj={`filter_by_transaction_name`}
-            >
-              <EuiToolTip
-                position="top"
-                content={i18n.translate(
-                  'xpack.apm.errorGroupTopTransactions.actionFilterLabel',
-                  { defaultMessage: 'Filter by value' }
-                )}
+          <TruncateWithTooltip
+            text={transactionName}
+            content={
+              <TransactionDetailLink
+                serviceName={serviceName}
+                transactionName={transactionName}
+                transactionType={transactionType ?? ''}
+                comparisonEnabled={comparisonEnabled}
+                offset={offset}
               >
-                <EuiIcon type="filter" color="text" size="m" />
-              </EuiToolTip>
-            </EuiButtonEmpty>
-            <TruncateWithTooltip
-              text={transactionName}
-              content={
-                <TransactionDetailLink
-                  serviceName={serviceName}
-                  transactionName={transactionName}
-                  transactionType={transactionType ?? ''}
-                  comparisonEnabled={comparisonEnabled}
-                  offset={offset}
-                >
-                  {transactionName}
-                </TransactionDetailLink>
-              }
-            />
-          </>
+                {transactionName}
+              </TransactionDetailLink>
+            }
+          />
         );
       },
     },
@@ -193,37 +159,6 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         );
       },
     },
-    {
-      field: 'errorRatio',
-      align: RIGHT_ALIGNMENT,
-      name: (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.errorGroupTopTransactions.column.errorRatioTooltip',
-            {
-              defaultMessage:
-                'The ratio of the number of occurrences for this error group and transaction group to the total number of occurrences for this error group',
-            }
-          )}
-        >
-          <>
-            {i18n.translate(
-              'xpack.apm.errorGroupTopTransactions.column.errorRatio',
-              {
-                defaultMessage: 'Error ratio',
-              }
-            )}{' '}
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-            />
-          </>
-        </EuiToolTip>
-      ),
-      render: (value: string) => asPercent(parseFloat(value), 1),
-    },
   ];
 
   return (
@@ -240,7 +175,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         items={data.topErroneousTransactions}
         columns={columns}
         loading={loading}
-        data-test-subj="top-erroneous-transactions-table"
+        data-test-subj="topErroneousTransactionsTable"
         error={
           status === FETCH_STATUS.FAILURE
             ? i18n.translate(
