@@ -103,7 +103,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
               disabled={isAnyRuleSelected}
               data-test-subj="refreshSettingsSwitch"
             />,
-            isAnyRuleSelected && (
+            isAnyRuleSelected ? (
               <>
                 <EuiSpacer size="s" />
                 <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
@@ -113,7 +113,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                   />
                 </EuiTextColor>
               </>
-            ),
+            ) : null,
           ]}
         />
       ),
