@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const getDeleteDomainConfirmationMessage = (domainUrl: string) => {
   return i18n.translate(
     'xpack.enterpriseSearch.crawler.action.deleteDomain.confirmationPopupMessage',
