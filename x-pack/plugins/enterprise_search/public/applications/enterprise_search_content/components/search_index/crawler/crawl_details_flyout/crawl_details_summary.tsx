@@ -23,22 +23,22 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlRequestStats } from '../../../../api/crawler/types';
 
-interface ICrawlerSummaryProps {
+export interface CrawlerDetailsSummaryProps {
   crawlDepth: number;
   crawlType: string;
   domainCount: number;
   stats: CrawlRequestStats | null;
 }
 
-export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
+export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
   crawlDepth,
   crawlType,
   domainCount,
   stats,
 }) => {
   const duration = () => {
-    if (stats?.status.crawlDurationMSec) {
-      const milliseconds = moment.duration(stats?.status.crawlDurationMSec, 'milliseconds');
+    if (stats?.status?.crawlDurationMSec) {
+      const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
       const hours = milliseconds.hours();
       const minutes = milliseconds.minutes();
       const seconds = milliseconds.seconds();
@@ -56,14 +56,12 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   };
 
   const statusCounts = {
-    clientErrorCount:
-      stats && stats.status && stats.status.statusCodes
-        ? getStatusCount('4', stats.status.statusCodes)
-        : 0,
-    serverErrorCount:
-      stats && stats.status && stats.status.statusCodes
-        ? getStatusCount('5', stats.status.statusCodes)
-        : 0,
+    clientErrorCount: stats?.status?.statusCodes
+      ? getStatusCount('4', stats.status.statusCodes)
+      : 0,
+    serverErrorCount: stats?.status?.statusCodes
+      ? getStatusCount('5', stats.status.statusCodes)
+      : 0,
   };
 
   const shouldHideStats = !stats;
@@ -130,7 +128,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             <EuiStat
               data-test-subj="urlsAllowed"
               titleSize="s"
-              title={stats?.status.urlsAllowed ?? '--'}
+              title={stats?.status?.urlsAllowed ?? '--'}
               description={
                 <EuiText size="s">
                   URLs{' '}
@@ -160,11 +158,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             <EuiStat
               data-test-subj="pagesVisited"
               titleSize="s"
-              title={
-                stats && stats.status && stats.status.pagesVisited
-                  ? stats.status.pagesVisited
-                  : '--'
-              }
+              title={stats?.status?.pagesVisited ? stats.status.pagesVisited : '--'}
               description={
                 <EuiText size="s">
                   {i18n.translate(
@@ -199,7 +193,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               data-test-subj="avgResponseTime"
               titleSize="s"
               title={
-                stats && stats.status && stats.status.avgResponseTimeMSec
+                stats?.status?.avgResponseTimeMSec
                   ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
                   : '--'
               }
