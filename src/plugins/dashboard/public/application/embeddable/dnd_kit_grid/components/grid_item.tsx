@@ -44,7 +44,7 @@ export const GridItem: FC<Props> = ({ id, x, y, w, h, title, render, isInGroup }
   return (
     <div id={id} className="dshGridItem" css={gridItemStyles}>
       <div className="dshGridItem__content" css={contentStyles}>
-        <h2>{title || '[No title]'}</h2>
+        <h2>{title ?? '[No title]'}</h2>
         {render ? render() : null}
       </div>
     </div>

@@ -25,7 +25,7 @@ import { SubgridDemo } from '../components/basic_react_demos/test_subgrid_demo';
 
 export default {
   component: EuiPanel,
-  title: 'POC - Gridstack',
+  title: 'POC - Gridstack/Grid',
   description: 'POC of new grid layout system',
   argTypes: {},
 };

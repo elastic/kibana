@@ -10,15 +10,16 @@ import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { GridStackEngine } from 'gridstack';
 import { Props as GridItemProps, GridItem } from './grid_item';
+import { StyledGridItem } from './styled_grid_item';
 
-interface Props {
+export interface Props {
   columns?: number;
   guttersize?: number;
   gridData?: GridItemProps[];
   isNested?: boolean;
 }
 
-const CELL_HEIGHT = 32;
+const CELL_HEIGHT = 26;
 
 export const Grid: FC<Props> = ({
   gridData = [],
@@ -26,18 +27,27 @@ export const Grid: FC<Props> = ({
   guttersize = 4,
   isNested = false,
 }) => {
+  const engineRef = useRef<GridStackEngine>();
   const [items, setItems] = useState<GridItemProps[]>(gridData);
   const engine = useMemo(
     () =>
       new GridStackEngine({
         column: columns,
         float: false,
-        nodes: items,
+        nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
       }),
     [columns, items]
   );
 
-  useEffect(() => {});
+  useEffect(() => {
+    engineRef.current =
+      engineRef.current ||
+      new GridStackEngine({
+        column: columns,
+        float: false,
+        nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
+      });
+  }, [columns, items]);
 
   engine.compact();
 
@@ -55,8 +65,7 @@ export const Grid: FC<Props> = ({
     () =>
       css`
         height: 100%;
-        width: 100;
-        background-color: pink;
+        width: 100%;
         display: grid;
         gap: ${guttersize}px;
         grid-template-columns: repeat(
@@ -70,22 +79,38 @@ export const Grid: FC<Props> = ({
   );
 
   return (
-    <div id="dashboardGrid" className="dshGrid" css={gridStyles}>
+    <div className="dshGrid dshLayout--editing" css={gridStyles}>
       {engine.nodes.map((item) =>
         item.subGrid ? (
-          <GridItem
+          <StyledGridItem
             {...item}
             render={() => (
               <Grid
-                columns={columns}
+                id={item.id}
+                columns={item.w}
                 guttersize={guttersize}
                 gridData={item.subGrid.children}
                 isNested
               />
             )}
+            updateItem={(itemId: string, partialItem: Partial<GridItemProps>) => {
+              let removedIndex = -1;
+              const itemToUpdate = items.find(({ id }, index) => {
+                const idMatched = itemId === id;
+                if (idMatched) {
+                  removedIndex = index;
+                }
+                return idMatched;
+              });
+
+              if (removedIndex >= 0) {
+                items.splice(removedIndex, 1);
+                setItems([...items, { ...itemToUpdate, ...partialItem } as GridItemProps]);
+              }
+            }}
           />
         ) : (
-          <GridItem {...item} isInGroup={isNested} />
+          <StyledGridItem {...item} isInGroup={isNested} />
         )
       )}
     </div>
