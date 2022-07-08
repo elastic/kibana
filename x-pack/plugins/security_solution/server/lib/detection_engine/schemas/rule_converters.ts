@@ -38,7 +38,12 @@ import {
   NewTermsSpecificRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
+import {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  RuleExecutionSummary,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
@@ -379,7 +384,11 @@ const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
 
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  params: PatchRulesSchema,
+  params: PatchRulesSchema & {
+    related_integrations?: RelatedIntegrationArray;
+    required_fields?: RequiredFieldArray;
+    setup?: SetupGuide;
+  },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(params, existingRule.params);
@@ -401,12 +410,12 @@ export const convertPatchAPIToInternalSchema = (
       timelineTitle: params.timeline_title ?? existingParams.timelineTitle,
       meta: params.meta ?? existingParams.meta,
       maxSignals: params.max_signals ?? existingParams.maxSignals,
-      relatedIntegrations: existingParams.relatedIntegrations,
-      requiredFields: existingParams.requiredFields,
+      relatedIntegrations: params.related_integrations ?? existingParams.relatedIntegrations,
+      requiredFields: params.required_fields ?? existingParams.requiredFields,
       riskScore: params.risk_score ?? existingParams.riskScore,
       riskScoreMapping: params.risk_score_mapping ?? existingParams.riskScoreMapping,
       ruleNameOverride: params.rule_name_override ?? existingParams.ruleNameOverride,
-      setup: existingParams.setup,
+      setup: params.setup ?? existingParams.setup,
       severity: params.severity ?? existingParams.severity,
       severityMapping: params.severity_mapping ?? existingParams.severityMapping,
       threat: params.threat ?? existingParams.threat,
@@ -434,7 +443,11 @@ export const convertPatchAPIToInternalSchema = (
 };
 
 export const convertCreateAPIToInternalSchema = (
-  input: CreateRulesSchema,
+  input: CreateRulesSchema & {
+    related_integrations?: RelatedIntegrationArray;
+    required_fields?: RequiredFieldArray;
+    setup?: SetupGuide;
+  },
   immutable = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
@@ -472,9 +485,9 @@ export const convertCreateAPIToInternalSchema = (
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
-      relatedIntegrations: [],
-      requiredFields: [],
-      setup: '',
+      relatedIntegrations: input.related_integrations ?? [],
+      requiredFields: input.required_fields ?? [],
+      setup: input.setup ?? '',
       ...typeSpecificParams,
     },
     schedule: { interval: input.interval ?? '5m' },
