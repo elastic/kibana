@@ -85,7 +85,7 @@ const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
 export function FormulaEditor({
   layer,
-  updateLayer,
+  paramEditorUpdater,
   currentColumn,
   columnId,
   indexPattern,
@@ -153,7 +153,7 @@ export function FormulaEditor({
     setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
-      updateLayer(
+      paramEditorUpdater(
         (prevLayer) =>
           insertOrReplaceFormulaColumn(
             columnId,
@@ -183,7 +183,7 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
         if (currentColumn.params.formula) {
           // Only submit if valid
-          updateLayer(
+          paramEditorUpdater(
             insertOrReplaceFormulaColumn(
               columnId,
               {
@@ -232,7 +232,7 @@ export function FormulaEditor({
         if (previousFormulaWasBroken || previousFormulaWasOkButNoData) {
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
-            updateLayer(
+            paramEditorUpdater(
               insertOrReplaceFormulaColumn(
                 columnId,
                 {
@@ -314,7 +314,7 @@ export function FormulaEditor({
           }
         );
 
-        updateLayer(newLayer);
+        paramEditorUpdater(newLayer);
 
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
         const markers: monaco.editor.IMarkerData[] = managedColumns
