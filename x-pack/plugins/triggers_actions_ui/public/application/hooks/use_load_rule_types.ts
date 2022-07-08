@@ -16,10 +16,10 @@ interface RuleTypesState {
 }
 
 interface RuleTypesProps {
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
 }
 
-export function useLoadRuleTypes({ filteredSolutions }: RuleTypesProps) {
+export function useLoadRuleTypes({ filteredRuleTypes }: RuleTypesProps) {
   const { http } = useKibana().services;
   const isMounted = useRef(false);
   const [ruleTypesState, setRuleTypesState] = useState<RuleTypesState>({
@@ -42,8 +42,8 @@ export function useLoadRuleTypes({ filteredSolutions }: RuleTypesProps) {
 
         let filteredResponse = response;
 
-        if (filteredSolutions && filteredSolutions.length > 0) {
-          filteredResponse = response.filter((item) => filteredSolutions.includes(item.producer));
+        if (filteredRuleTypes && filteredRuleTypes.length > 0) {
+          filteredResponse = response.filter((item) => filteredRuleTypes.includes(item.id));
         }
         setRuleTypesState({ ...ruleTypesState, isLoading: false, data: filteredResponse });
       }

@@ -17,20 +17,26 @@ import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '.
 
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-import { OBSERVABILITY_SOLUTIONS } from './config';
 import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
 
+const RULES_LIST_COLUMNS_KEY = 'observability_rulesListColumns';
+
 function RulesPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const { http, docLinks, triggersActionsUi } = useKibana().services;
 
   const documentationLink = docLinks.links.observability.createAlerts;
+
+  const filteredRuleTypes = useMemo(
+    () => observabilityRuleTypeRegistry.list(),
+    [observabilityRuleTypeRegistry]
+  );
 
   const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
   const [refresh, setRefresh] = useState(new Date());
   const { ruleTypes } = useLoadRuleTypes({
-    filteredSolutions: OBSERVABILITY_SOLUTIONS,
+    filteredRuleTypes,
   });
   const authorizedRuleTypes = [...ruleTypes.values()];
 
@@ -61,10 +67,10 @@ function RulesPage() {
           setRefresh(new Date());
           return Promise.resolve();
         },
-        filteredSolutions: OBSERVABILITY_SOLUTIONS,
+        filteredRuleTypes,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [filteredRuleTypes]
   );
 
   const getRulesTable = useMemo(() => {
@@ -73,7 +79,7 @@ function RulesPage() {
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             {triggersActionsUi.getRulesList({
-              filteredSolutions: OBSERVABILITY_SOLUTIONS,
+              filteredRuleTypes,
               showActionFilter: false,
               showCreateRuleButton: false,
               ruleDetailsRoute: 'alerts/rules/:ruleId',
@@ -82,12 +88,21 @@ function RulesPage() {
               lastResponseFilter: lastResponse,
               onLastResponseFilterChange: setLastResponse,
               refresh,
+              rulesListKey: RULES_LIST_COLUMNS_KEY,
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
-  }, [setStatus, status, lastResponse, setLastResponse, triggersActionsUi, refresh]);
+  }, [
+    triggersActionsUi,
+    filteredRuleTypes,
+    status,
+    setStatus,
+    lastResponse,
+    setLastResponse,
+    refresh,
+  ]);
   return (
     <ObservabilityPageTemplate
       pageHeader={{

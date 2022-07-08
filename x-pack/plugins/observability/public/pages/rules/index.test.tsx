@@ -18,7 +18,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { OBSERVABILITY_SOLUTIONS } from './config';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -105,7 +104,7 @@ describe('RulesPage with all capabilities', () => {
         showActionFilter: false,
         showCreateRuleButton: false,
         ruleDetailsRoute: 'alerts/rules/:ruleId',
-        filteredSolutions: OBSERVABILITY_SOLUTIONS,
+        filteredSolutions: ['ruleType1', 'ruleType2'],
       })
     );
   });

@@ -97,7 +97,6 @@ interface RulesPageContainerState {
 
 export interface RulesListProps {
   filteredRuleTypes?: string[];
-  filteredSolutions?: string[];
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
@@ -106,6 +105,7 @@ export interface RulesListProps {
   lastResponseFilter?: string[];
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   refresh?: Date;
+  rulesListKey?: string;
 }
 
 interface RuleTypeState {
@@ -127,7 +127,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 }));
 
 export const RulesList = ({
-  filteredSolutions,
+  filteredRuleTypes = [],
   showActionFilter = true,
   ruleDetailsRoute,
   showCreateRuleButton = true,
@@ -136,6 +136,7 @@ export const RulesList = ({
   lastResponseFilter,
   onLastResponseFilterChange,
   refresh,
+  rulesListKey,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -218,10 +219,10 @@ export const RulesList = ({
 
   const rulesTypesFilter = useMemo(
     () =>
-      isEmpty(typesFilter) && !isEmpty(filteredSolutions)
+      isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)
         ? authorizedRuleTypes.map((art) => art.id)
         : typesFilter,
-    [typesFilter, filteredSolutions, authorizedRuleTypes]
+    [typesFilter, filteredRuleTypes, authorizedRuleTypes]
   );
 
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
@@ -298,10 +299,10 @@ export const RulesList = ({
           index.set(ruleType.id, ruleType);
         }
         let filteredIndex = index;
-        if (filteredSolutions && filteredSolutions.length > 0) {
+        if (filteredRuleTypes && filteredRuleTypes.length > 0) {
           filteredIndex = new Map(
             [...index].filter(([k, v]) => {
-              return filteredSolutions.includes(v.producer);
+              return filteredRuleTypes.includes(v.id);
             })
           );
         }
@@ -802,6 +803,7 @@ export const RulesList = ({
             />
           ) : null;
         }}
+        rulesListKey={rulesListKey}
         config={config}
       />
       {manageLicenseModalOpts && (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -41,7 +41,6 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
 import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -73,10 +72,16 @@ export function RuleDetailsPage() {
   } = useKibana().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+
+  const filteredRuleTypes = useMemo(
+    () => observabilityRuleTypeRegistry.list(),
+    [observabilityRuleTypeRegistry]
+  );
+
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { ruleTypes } = useLoadRuleTypes({
-    filteredSolutions: OBSERVABILITY_SOLUTIONS,
+    filteredRuleTypes,
   });
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
