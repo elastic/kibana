@@ -5,36 +5,29 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { networkModel, networkSelectors } from '../../store';
+import { networkSelectors } from '../../store';
 import {
   DocValueFields,
   NetworkQueries,
   NetworkDnsRequestOptions,
-  NetworkDnsStrategyResponse,
-  MatrixOverOrdinalHistogramData,
   NetworkDnsEdges,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
 import * as i18n from './translations';
-import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export const ID = 'networkDnsQuery';
 
-export interface NetworkDnsArgs {
+export interface NetworkDnsResponse {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
@@ -44,14 +37,12 @@ export interface NetworkDnsArgs {
   refetch: inputsModel.Refetch;
   stackByField?: string;
   totalCount: number;
-  histogram: MatrixOverOrdinalHistogramData[];
 }
 
 interface UseNetworkDns {
   id: string;
   docValueFields: DocValueFields[];
   indexNames: string[];
-  type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
   startDate: string;
@@ -66,15 +57,9 @@ export const useNetworkDns = ({
   indexNames,
   skip,
   startDate,
-  type,
-}: UseNetworkDns): [boolean, NetworkDnsArgs] => {
+}: UseNetworkDns): [boolean, NetworkDnsResponse] => {
   const getNetworkDnsSelector = useMemo(() => networkSelectors.dnsSelector(), []);
   const { activePage, sort, isPtrIncluded, limit } = useDeepEqualSelector(getNetworkDnsSelector);
-  const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
 
   const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(null);
 
@@ -94,76 +79,39 @@ export const useNetworkDns = ({
     [limit]
   );
 
-  const [networkDnsResponse, setNetworkDnsResponse] = useState<NetworkDnsArgs>({
-    networkDns: [],
-    histogram: [],
-    id,
-    inspect: {
-      dsl: [],
-      response: [],
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+  } = useSearchStrategy<NetworkQueries.dns>({
+    factoryQueryType: NetworkQueries.dns,
+    initialResult: {
+      edges: [],
+      totalCount: -1,
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
     },
-    isInspected: false,
-    loadPage: wrappedLoadMore,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
-    refetch: refetch.current,
-    totalCount: -1,
+    errorMessage: i18n.ERROR_NETWORK_DNS,
+    abort: skip,
   });
-  const { addError, addWarning } = useAppToasts();
 
-  const networkDnsSearch = useCallback(
-    (request: NetworkDnsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        searchSubscription$.current = data.search
-          .search<NetworkDnsRequestOptions, NetworkDnsStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                setLoading(false);
-                setNetworkDnsResponse((prevResponse) => ({
-                  ...prevResponse,
-                  networkDns: response.edges,
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  pageInfo: response.pageInfo,
-                  refetch: refetch.current,
-                  totalCount: response.totalCount,
-                  histogram: response.histogram ?? prevResponse.histogram,
-                }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_DNS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_NETWORK_DNS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-      refetch.current = asyncSearch;
-    },
-    [data.search, addError, addWarning, skip]
+  const networkDnsResponse = useMemo(
+    () => ({
+      id,
+      inspect,
+      isInspected: false,
+      loadPage: wrappedLoadMore,
+      networkDns: response.edges,
+      pageInfo: response.pageInfo,
+      refetch,
+      totalCount: response.totalCount,
+    }),
+    [id, inspect, refetch, response.edges, response.pageInfo, response.totalCount, wrappedLoadMore]
   );
 
   useEffect(() => {
@@ -201,20 +149,10 @@ export const useNetworkDns = ({
   ]);
 
   useEffect(() => {
-    networkDnsSearch(networkDnsRequest);
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [networkDnsRequest, networkDnsSearch]);
-
-  useEffect(() => {
-    if (skip) {
-      setLoading(false);
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+    if (!skip && networkDnsRequest) {
+      search(networkDnsRequest);
     }
-  }, [skip]);
+  }, [networkDnsRequest, search, skip]);
 
   return [loading, networkDnsResponse];
 };
