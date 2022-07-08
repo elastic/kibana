@@ -9,8 +9,6 @@ source .buildkite/scripts/common/util.sh
 
 echo '--- Installing all packages'
 
-cd "$XPACK_DIR"
-
 checks-reporter-with-killswitch "Fleet packages Tests" \
  node scripts/functional_tests \
    --debug --bail \
