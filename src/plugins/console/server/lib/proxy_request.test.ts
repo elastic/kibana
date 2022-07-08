@@ -78,9 +78,9 @@ describe(`Console's send request`, () => {
     } as any;
 
     // Don't set a host header this time
-    const result1 = await sendProxyRequest({});
+    const defaultResult = await sendProxyRequest({});
 
-    expect(result1).toEqual('done');
+    expect(defaultResult).toEqual('done');
 
     const [httpRequestOptions1] = stub.firstCall.args;
 
@@ -91,9 +91,9 @@ describe(`Console's send request`, () => {
     });
 
     // Set a host header
-    const result2 = await sendProxyRequest({ headers: { Host: 'myhost' } });
+    const resultWithHostHeader = await sendProxyRequest({ headers: { Host: 'myhost' } });
 
-    expect(result2).toEqual('done');
+    expect(resultWithHostHeader).toEqual('done');
 
     const [httpRequestOptions2] = stub.secondCall.args;
     expect((httpRequestOptions2 as any).headers).toEqual({
@@ -116,7 +116,15 @@ describe(`Console's send request`, () => {
       } as any;
     });
 
-    const runEncodePathTests = async (initialPath: string, expectedPath: string, uri?: URL) => {
+    const verifyRequestPath = async ({
+      initialPath,
+      expectedPath,
+      uri,
+    }: {
+      initialPath: string;
+      expectedPath: string;
+      uri?: URL;
+    }) => {
       const result = await sendProxyRequest({
         requestPath: initialPath,
         uri,
@@ -127,22 +135,26 @@ describe(`Console's send request`, () => {
     };
 
     it('should correctly encode invalid URL characters included in path', async () => {
-      await runEncodePathTests(
-        '%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23',
-        '%25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23'
-      );
+      await verifyRequestPath({
+        initialPath: '%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23',
+        expectedPath:
+          '%25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23',
+      });
     });
 
     it('should not encode the path if it is encoded', async () => {
-      await runEncodePathTests('%3Cmy-index-%7Bnow%2Fd%7D%3E', '%3Cmy-index-%7Bnow%2Fd%7D%3E');
+      await verifyRequestPath({
+        initialPath: '%3Cmy-index-%7Bnow%2Fd%7D%3E',
+        expectedPath: '%3Cmy-index-%7Bnow%2Fd%7D%3E',
+      });
     });
 
     it('should correctly encode path with query params', async () => {
-      await runEncodePathTests(
-        '_index/.test',
-        '_index/.test?q=something&v=something',
-        new URL('http://noone.nowhere.none/_index/.test?q=something&v=something')
-      );
+      await verifyRequestPath({
+        initialPath: '_index/.test',
+        uri: new URL('http://noone.nowhere.none/_index/.test?q=something&v=something'),
+        expectedPath: '_index/.test?q=something&v=something',
+      });
     });
   });
 });
