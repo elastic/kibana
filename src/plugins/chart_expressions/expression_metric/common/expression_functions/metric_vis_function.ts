@@ -79,7 +79,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     maxCols: {
       types: ['number'],
-      help: i18n.translate('expressionMetricVis.function.numCols.help', {
+      help: i18n.translate('expressionMetricVis.function.maxCols.help', {
         defaultMessage: 'Specifies the max number of columns in the metric grid.',
       }),
       default: 5,
