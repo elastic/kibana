@@ -21,7 +21,7 @@ import { OBSERVABILITY_SOLUTIONS } from './config';
 import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
 
 function RulesPage() {
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { http, docLinks, triggersActionsUi } = useKibana().services;
 
   const documentationLink = docLinks.links.observability.createAlerts;
@@ -73,7 +73,6 @@ function RulesPage() {
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             {triggersActionsUi.getRulesList({
-              filteredRuleTypes: observabilityRuleTypeRegistry.list(),
               filteredSolutions: OBSERVABILITY_SOLUTIONS,
               showActionFilter: false,
               showCreateRuleButton: false,
@@ -88,15 +87,7 @@ function RulesPage() {
         </EuiFlexGroup>
       </>
     );
-  }, [
-    observabilityRuleTypeRegistry,
-    setStatus,
-    status,
-    lastResponse,
-    setLastResponse,
-    triggersActionsUi,
-    refresh,
-  ]);
+  }, [setStatus, status, lastResponse, setLastResponse, triggersActionsUi, refresh]);
   return (
     <ObservabilityPageTemplate
       pageHeader={{

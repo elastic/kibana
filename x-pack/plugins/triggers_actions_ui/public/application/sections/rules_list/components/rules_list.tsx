@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { capitalize, sortBy } from 'lodash';
+import { capitalize, isEmpty, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import {
@@ -128,7 +128,6 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 }));
 
 export const RulesList = ({
-  filteredRuleTypes,
   filteredSolutions,
   showActionFilter = true,
   ruleDetailsRoute,
@@ -157,7 +156,7 @@ export const RulesList = ({
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
-  const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [typesFilter, setTypesFilter] = useState<string[]>();
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
     lastResponseFilter || []
@@ -213,10 +212,23 @@ export const RulesList = ({
     [toasts]
   );
 
+  const authorizedRuleTypes = useMemo(() => [...ruleTypesState.data.values()], [ruleTypesState]);
+  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
+    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+  );
+
+  const rulesTypesFilter = useMemo(
+    () =>
+      isEmpty(typesFilter) && !isEmpty(filteredSolutions)
+        ? authorizedRuleTypes.map((art) => art.id)
+        : typesFilter,
+    [typesFilter, filteredSolutions, authorizedRuleTypes]
+  );
+
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
     searchText,
-    typesFilter,
+    typesFilter: rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
@@ -224,7 +236,6 @@ export const RulesList = ({
     sort,
     onPage: setPage,
     onError,
-    filteredRuleTypes,
   });
 
   const { tags, loadTags } = useLoadTags({
@@ -290,7 +301,9 @@ export const RulesList = ({
         let filteredIndex = index;
         if (filteredSolutions && filteredSolutions.length > 0) {
           filteredIndex = new Map(
-            [...index].filter(([k, v]) => filteredSolutions.includes(v.producer))
+            [...index].filter(([k, v]) => {
+              return filteredSolutions.includes(v.producer);
+            })
           );
         }
         setRuleTypesState({ isLoading: false, data: filteredIndex, isInitialized: true });
@@ -415,11 +428,6 @@ export const RulesList = ({
     });
   }, [showErrors, rulesState]);
 
-  const authorizedRuleTypes = [...ruleTypesState.data.values()];
-  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
-  );
-
   const getProducerFeatureName = (producer: string) => {
     return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
   };
@@ -481,16 +489,18 @@ export const RulesList = ({
     return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
+  const filterOptions = sortBy(Object.entries(groupRuleTypesByProducer())).map(
+    ([groupName, ruleTypesOptions]) => ({
+      groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
+      subOptions: ruleTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
+    })
+  );
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={sortBy(Object.entries(groupRuleTypesByProducer())).map(
-        ([groupName, ruleTypesOptions]) => ({
-          groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
-          subOptions: ruleTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
-        })
-      )}
+      options={filterOptions}
     />,
     showActionFilter && (
       <ActionTypeFilter
