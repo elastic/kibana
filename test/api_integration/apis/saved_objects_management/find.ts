@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('find', () => {
@@ -194,14 +193,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('meta attributes injected properly', () => {
-      before(() =>
-        esArchiver.load('test/api_integration/fixtures/es_archiver/management/saved_objects/search')
-      );
-      after(() =>
-        esArchiver.unload(
-          'test/api_integration/fixtures/es_archiver/management/saved_objects/search'
-        )
-      );
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+        );
+      });
 
       it('should inject meta attributes for searches', async () =>
         await supertest
