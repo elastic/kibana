@@ -9,7 +9,6 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EditorFrameSetup } from '../types';
 import type { FormatFactory } from '../../common';
 
@@ -21,24 +20,16 @@ export interface DatatableVisualizationPluginSetupPlugins {
   formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
-  usageCollection?: UsageCollectionStart;
 }
 
 export class DatatableVisualization {
   setup(
     core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
-    {
-      expressions,
-      formatFactory,
-      editorFrame,
-      charts,
-      usageCollection,
-    }: DatatableVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
@@ -48,7 +39,6 @@ export class DatatableVisualization {
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
           paletteService: palettes,
           uiSettings: core.uiSettings,
-          usageCollection,
         })
       );
 

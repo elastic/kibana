@@ -8,14 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
@@ -28,7 +27,6 @@ export const getDatatableRenderer = (dependencies: {
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
   theme: ThemeServiceStart;
-  usageCollection?: UsageCollectionStart;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -46,7 +44,7 @@ export const getDatatableRenderer = (dependencies: {
     const { hasCompatibleActions, isInteractive } = handlers;
 
     const renderComplete = () => {
-      dependencies.usageCollection?.reportUiCounter('lens', METRIC_TYPE.COUNT, 'render_lens_table');
+      trackUiCounterEvents('table');
       handlers.done();
     };
 
