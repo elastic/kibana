@@ -53,7 +53,7 @@ export const CountWidget = ({
   );
 
   const countValue = useMemo((): CountResult => {
-    return data ? data?.pages[0] : undefined;
+    return data ? data?.pages[0] : 0;
   }, [data]);
 
   const NumberFormatter = useCallback((num: CountResult) => {
@@ -64,7 +64,7 @@ export const CountWidget = ({
       // @ts-ignore
       notation: 'compact',
       compactDisplay: 'short',
-    }).format(num);
+    }).format(Number(num));
   }, []);
 
   const formattedNumber = useMemo((): string => {
