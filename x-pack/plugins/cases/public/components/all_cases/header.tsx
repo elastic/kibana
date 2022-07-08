@@ -22,6 +22,8 @@ type Props = OwnProps;
 export const CasesTableHeader: FunctionComponent<Props> = ({ actionsErrors }) => {
   const { permissions } = useCasesContext();
 
+  const showNavButtons = permissions.create && permissions.update;
+
   return (
     <HeaderPage title={i18n.PAGE_TITLE} border data-test-subj="cases-all-title">
       <EuiFlexGroup
@@ -30,7 +32,7 @@ export const CasesTableHeader: FunctionComponent<Props> = ({ actionsErrors }) =>
         wrap={true}
         data-test-subj="all-cases-header"
       >
-        {permissions.all ? (
+        {showNavButtons ? (
           <EuiFlexItem>
             <NavButtons actionsErrors={actionsErrors} />
           </EuiFlexItem>

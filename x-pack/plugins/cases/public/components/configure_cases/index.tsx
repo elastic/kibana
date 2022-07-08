@@ -222,10 +222,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 </EuiCallOut>
               </SectionWrapper>
             )}
+            {/* should these include push? */}
             <SectionWrapper>
               <ClosureOptions
                 closureTypeSelected={closureType}
-                disabled={persistLoading || isLoadingConnectors || !permissions.all}
+                disabled={persistLoading || isLoadingConnectors || !permissions.update}
                 onChangeClosureType={onChangeClosureType}
               />
             </SectionWrapper>
@@ -233,13 +234,13 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <Connectors
                 actionTypes={actionTypes}
                 connectors={connectors ?? []}
-                disabled={persistLoading || isLoadingConnectors || !permissions.all}
+                disabled={persistLoading || isLoadingConnectors || !permissions.update}
                 handleShowEditFlyout={onClickUpdateConnector}
                 isLoading={isLoadingAny}
                 mappings={mappings}
                 onChangeConnector={onChangeConnector}
                 selectedConnector={connector}
-                updateConnectorDisabled={updateConnectorDisabled || !permissions.all}
+                updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
               />
             </SectionWrapper>
             {ConnectorAddFlyout}

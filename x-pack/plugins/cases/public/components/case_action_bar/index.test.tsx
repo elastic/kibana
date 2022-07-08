@@ -189,7 +189,7 @@ describe('CaseActionBar', () => {
     expect(getByText('Case opened')).toBeInTheDocument();
   });
 
-  it('should show the change status text when the user has all privileges', () => {
+  it('should show the change status text when the user has update privileges', () => {
     render(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -199,7 +199,7 @@ describe('CaseActionBar', () => {
     expect(screen.getByTitle('Change status')).toBeInTheDocument();
   });
 
-  it('should not show the change status text when the user does not have all privileges', () => {
+  it('should not show the change status text when the user does not have update privileges', () => {
     render(
       <TestProviders permissions={noUpdateCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
@@ -209,7 +209,7 @@ describe('CaseActionBar', () => {
     expect(screen.queryByTitle('Change status')).not.toBeInTheDocument();
   });
 
-  it('should not show the sync alerts toggle when the user does not have all privileges', () => {
+  it('should not show the sync alerts toggle when the user does not have update privileges', () => {
     const { queryByText } = render(
       <TestProviders permissions={noUpdateCasesPermissions()}>
         <CaseActionBar {...defaultProps} />

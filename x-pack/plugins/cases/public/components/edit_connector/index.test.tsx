@@ -363,7 +363,7 @@ describe('EditConnector ', () => {
     });
   });
 
-  it('does not show the push button if the user does not have all permissions', async () => {
+  it('does not show the push button if the user does not have push permissions', async () => {
     const defaultProps = getDefaultProps();
 
     appMockRender = createAppMockRenderer({ permissions: noPushCasesPermissions() });

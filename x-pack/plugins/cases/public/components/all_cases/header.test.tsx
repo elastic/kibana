@@ -24,7 +24,7 @@ describe('CasesTableHeader', () => {
     expect(result.getByTestId('createNewCaseBtn')).toBeInTheDocument();
   });
 
-  it('does not display the create new case button when the user does not have all privileges', () => {
+  it('does not display the create new case button when the user does not have create or update privileges', () => {
     appMockRender = createAppMockRenderer({
       permissions: buildCasesPermissions({ create: false, update: false }),
     });

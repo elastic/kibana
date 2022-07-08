@@ -114,7 +114,7 @@ describe('Case View Page activity tab', () => {
     expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 
-  it('should not render the case view status button when the user does not have all permissions', () => {
+  it('should not render the case view status button when the user does not have update permissions', () => {
     appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
@@ -126,7 +126,7 @@ describe('Case View Page activity tab', () => {
     expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 
-  it('should disable the severity selector when the user does not have all permissions', () => {
+  it('should disable the severity selector when the user does not have update permissions', () => {
     appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);

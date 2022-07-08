@@ -117,10 +117,10 @@ describe('UserActionPropertyActions ', () => {
         </TestProviders>
       );
 
-      expect(renderResult.queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       expect(renderResult.queryByTestId('property-actions-trash')).not.toBeInTheDocument();
-      expect(renderResult.queryByTestId('property-actions-pencil')).not.toBeInTheDocument();
-      expect(renderResult.queryByTestId('property-actions-quote')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-quote')).toBeInTheDocument();
     });
 
     it('does not show the pencil icon when the user does not have update permissions', () => {
@@ -133,7 +133,7 @@ describe('UserActionPropertyActions ', () => {
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       expect(renderResult.queryByTestId('property-actions-trash')).toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-pencil')).not.toBeInTheDocument();
-      expect(renderResult.queryByTestId('property-actions-quote')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-quote')).toBeInTheDocument();
     });
 
     it('does not show the quote icon when the user does not have create permissions', () => {
@@ -145,7 +145,7 @@ describe('UserActionPropertyActions ', () => {
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       expect(renderResult.queryByTestId('property-actions-trash')).toBeInTheDocument();
-      expect(renderResult.queryByTestId('property-actions-pencil')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-pencil')).toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-quote')).not.toBeInTheDocument();
     });
 

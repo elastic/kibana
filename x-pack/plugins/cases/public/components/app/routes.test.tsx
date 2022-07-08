@@ -90,7 +90,7 @@ describe('Cases routes', () => {
       expect(screen.getByText('Create case')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if the user does not have all privileges', () => {
+    it('shows the no privileges page if the user does not have create privileges', () => {
       renderWithRouter(['/cases/create'], noCreateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
@@ -102,7 +102,7 @@ describe('Cases routes', () => {
       expect(screen.getByText('Configure cases')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if the user does not have all privileges', () => {
+    it('shows the no privileges page if the user does not have update privileges', () => {
       renderWithRouter(['/cases/configure'], noUpdateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });

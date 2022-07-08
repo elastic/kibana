@@ -25,7 +25,7 @@ describe('NoCases', () => {
     );
   });
 
-  it('displays a message without a link to create a case when the user does not have all permissions', () => {
+  it('displays a message without a link to create a case when the user does not have create permissions', () => {
     const wrapper = mount(
       <TestProviders permissions={readCasesPermissions()}>
         <NoCases />
