@@ -22,6 +22,7 @@ import {
   EuiTextColor,
   EuiCallOut,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -153,6 +154,20 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     return `${command.name} --${Object.keys(primaryArgs).join(' --')}`;
   }, []);
 
+  const updateInputText = useCallback(
+    (text) => {
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: () => {
+          return {
+            textEntered: text,
+          };
+        },
+      });
+    },
+    [dispatch]
+  );
+
   const getColumns = useCallback(
     (commandsByGroup) => {
       return [
@@ -175,22 +190,21 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                     data-test-subj={getTestId('commandList-command')}
                   />
                 </EuiFlexItem>
+                {/* Show EuiButtonIcon if is a command */}
                 {command.RenderComponent && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="plusInCircle"
-                      aria-label={`updateTextInputCommand-${command.name}`}
-                      onClick={() => {
-                        dispatch({
-                          type: 'updateInputTextEnteredState',
-                          payload: () => {
-                            return {
-                              textEntered: `${commandNameWithArgs} `,
-                            };
-                          },
-                        });
-                      }}
-                    />
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.securitySolution.console.commandList.addButtonTooltip',
+                        { defaultMessage: 'Add to text bar' }
+                      )}
+                    >
+                      <EuiButtonIcon
+                        iconType="plusInCircle"
+                        aria-label={`updateTextInputCommand-${command.name}`}
+                        onClick={() => updateInputText(`${commandNameWithArgs} `)}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </StyledEuiFlexGroup>
@@ -199,7 +213,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         },
       ];
     },
-    [dispatch, getCommandNameWithArgs, getTestId]
+    [getCommandNameWithArgs, getTestId, updateInputText]
   );
 
   if (display === 'table') {
@@ -231,7 +245,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
           />
         </EuiText>
         <EuiSpacer />
-        {/* //TODO: Add link to the read more */}
+        {/* //TODO: Add link to the read more page */}
         <EuiLink>
           <FormattedMessage
             id="xpack.securitySolution.console.commandList.callout.readMoreLink"
@@ -253,43 +267,42 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         {callout}
       </>
     );
-  } else {
-    return (
-      <>
-        <EuiSpacer />
-        {commandsByGroups.map((commandsByGroup) => {
-          const groupLabel = commandsByGroup[0].helpGroupLabel;
-          const groupedCommands =
-            groupLabel === HELP_GROUPS.supporting.label
-              ? [...commandsByGroup, ...(COMMON_ARGS as CommandDefinition[])]
-              : commandsByGroup;
-          return (
-            <EuiFlexGrid columns={3} responsive={false} gutterSize="m" key={groupLabel}>
-              {groupedCommands.map((command) => {
-                return (
-                  <EuiFlexItem key={command.name}>
-                    <EuiDescriptionList
-                      compressed
-                      listItems={[
-                        {
-                          title: <EuiBadge>{getCommandNameWithArgs(command)}</EuiBadge>,
-                          description: <>{command.about}</>,
-                        },
-                      ]}
-                      data-test-subj={getTestId('commandList-command')}
-                    />
-                  </EuiFlexItem>
-                );
-              })}
-            </EuiFlexGrid>
-          );
-        })}
-        <EuiSpacer />
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{footerMessage}</EuiTextColor>
-        </EuiText>
-      </>
-    );
   }
+  return (
+    <>
+      <EuiSpacer />
+      {commandsByGroups.map((commandsByGroup) => {
+        const groupLabel = commandsByGroup[0].helpGroupLabel;
+        const groupedCommands =
+          groupLabel === HELP_GROUPS.supporting.label
+            ? [...commandsByGroup, ...(COMMON_ARGS as CommandDefinition[])]
+            : commandsByGroup;
+        return (
+          <EuiFlexGrid columns={3} responsive={false} gutterSize="m" key={groupLabel}>
+            {groupedCommands.map((command) => {
+              return (
+                <EuiFlexItem key={command.name}>
+                  <EuiDescriptionList
+                    compressed
+                    listItems={[
+                      {
+                        title: <EuiBadge>{getCommandNameWithArgs(command)}</EuiBadge>,
+                        description: <>{command.about}</>,
+                      },
+                    ]}
+                    data-test-subj={getTestId('commandList-command')}
+                  />
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGrid>
+        );
+      })}
+      <EuiSpacer />
+      <EuiText size="s">
+        <EuiTextColor color="subdued">{footerMessage}</EuiTextColor>
+      </EuiText>
+    </>
+  );
 });
 CommandList.displayName = 'CommandList';
