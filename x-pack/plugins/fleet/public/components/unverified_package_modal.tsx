@@ -18,17 +18,18 @@ export const UnverifiedPackageModal: React.FC<{
   onConfirm: () => void;
   pkg?: Pick<PackageInfo, 'name' | 'version'>;
 }> = ({ onCancel, onConfirm, pkg }) => {
-  const title = pkg
-    ? i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleWithPkg', {
-        defaultMessage: 'Integration {pkgName}-{pkgVersion} has failed verification',
-        values: {
-          pkgName: pkg.name,
-          pkgVersion: pkg.version,
-        },
-      })
-    : i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleNoPkg', {
-        defaultMessage: 'The integration has failed verification',
-      });
+  const title =
+    pkg && pkg.name && pkg.version
+      ? i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleWithPkg', {
+          defaultMessage: 'Integration {pkgName}-{pkgVersion} has failed verification',
+          values: {
+            pkgName: pkg.name,
+            pkgVersion: pkg.version,
+          },
+        })
+      : i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleNoPkg', {
+          defaultMessage: 'The integration has failed verification',
+        });
   // TODO: add link to docs
   return (
     <EuiConfirmModal
