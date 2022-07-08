@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Meta } from '../../../../../common/types';
 
 export enum CrawlerPolicies {
@@ -21,9 +20,9 @@ export enum CrawlerRules {
 
 export interface CrawlRule {
   id: string;
+  pattern: string;
   policy: CrawlerPolicies;
   rule: CrawlerRules;
-  pattern: string;
 }
 
 export interface EntryPoint {
@@ -36,79 +35,22 @@ export interface Sitemap {
   url: string;
 }
 
-export interface CrawlerDomain {
-  createdOn: string;
-  documentCount: number;
-  id: string;
-  lastCrawl?: string;
-  url: string;
-  crawlRules: CrawlRule[];
-  defaultCrawlRule?: CrawlRule;
-  entryPoints: EntryPoint[];
-  sitemaps: Sitemap[];
-  deduplicationEnabled: boolean;
-  deduplicationFields: string[];
-  availableDeduplicationFields: string[];
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'warning' | 'invalid';
+
+// The BE uses a singular form of each unit
+// See shared_togo/app/models/shared_togo/crawler/crawl_schedule.rb
+export enum CrawlUnits {
+  hours = 'hour',
+  days = 'day',
+  weeks = 'week',
+  months = 'month',
 }
 
-export interface CrawlerDomainFromServer {
-  id: string;
-  name: string;
-  created_on: string;
-  last_visited_at?: string;
-  document_count: number;
-  crawl_rules: CrawlRule[];
-  default_crawl_rule?: CrawlRule;
-  entry_points: EntryPoint[];
-  sitemaps: Sitemap[];
-  deduplication_enabled: boolean;
-  deduplication_fields: string[];
-  available_deduplication_fields: string[];
-}
-
-export interface CrawlerDomains {
-  domains: CrawlerDomain[];
-  meta: Meta;
-}
-
-export interface CrawlerDomainsFromServer {
-  meta: Meta;
-  results: CrawlerDomainFromServer[];
-}
-
-export type CrawlEventStage = 'crawl' | 'process';
-
-export enum CrawlType {
-  Full = 'full',
-  Partial = 'partial',
-}
-
-export interface CrawlConfig {
-  domainAllowlist: string[];
-  seedUrls: string[];
-  sitemapUrls: string[];
-  maxCrawlDepth: number;
-}
-
-export interface CrawlConfigFromServer {
-  domain_allowlist: string[];
-  seed_urls: string[];
-  sitemap_urls: string[];
-  max_crawl_depth: number;
-}
-
-export type CrawlEventFromServer = CrawlRequestFromServer & {
-  stage: CrawlEventStage;
-  type: CrawlType;
-  crawl_config: CrawlConfigFromServer;
-};
-
-export type CrawlEvent = CrawlRequest & {
-  stage: CrawlEventStage;
-  type: CrawlType;
-  crawlConfig: CrawlConfig;
-};
-
+export type CrawlerDomainValidationStepName =
+  | 'initialValidation'
+  | 'networkConnectivity'
+  | 'indexingRestrictions'
+  | 'contentVerification';
 // See SharedTogo::Crawler::Status for details on how these are generated
 export enum CrawlerStatus {
   Pending = 'pending',
@@ -123,6 +65,50 @@ export enum CrawlerStatus {
   Skipped = 'skipped',
 }
 
+export type CrawlEventStage = 'crawl' | 'process';
+
+export enum CrawlType {
+  Full = 'full',
+  Partial = 'partial',
+}
+
+// Server
+
+export interface CrawlerDomainFromServer {
+  available_deduplication_fields: string[];
+  crawl_rules: CrawlRule[];
+  created_on: string;
+  deduplication_enabled: boolean;
+  deduplication_fields: string[];
+  default_crawl_rule?: CrawlRule;
+  document_count: number;
+  entry_points: EntryPoint[];
+  id: string;
+  last_visited_at?: string;
+  name: string;
+  sitemaps: Sitemap[];
+}
+
+export interface CrawlerDomainsWithMetaFromServer {
+  meta: Meta;
+  results: CrawlerDomainFromServer[];
+}
+
+export interface CrawlerDataFromServer {
+  domains: CrawlerDomainFromServer[];
+  events: CrawlEventFromServer[];
+  most_recent_crawl_request: CrawlRequestFromServer | null;
+}
+
+export interface CrawlerDomainValidationResultFromServer {
+  results: Array<{
+    comment: string;
+    name: string;
+    result: 'ok' | 'warning' | 'failure';
+  }>;
+  valid: boolean;
+}
+
 export interface CrawlRequestFromServer {
   began_at: string | null;
   completed_at: string | null;
@@ -130,6 +116,91 @@ export interface CrawlRequestFromServer {
   id: string;
   status: CrawlerStatus;
 }
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+    urls_allowed?: number;
+  };
+}
+
+export interface CrawlConfigFromServer {
+  domain_allowlist: string[];
+  max_crawl_depth: number;
+  seed_urls: string[];
+  sitemap_urls: string[];
+}
+
+export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
+  crawl_config: CrawlConfigFromServer;
+  stats: CrawlRequestStatsFromServer;
+  type: CrawlType;
+};
+
+export type CrawlEventFromServer = CrawlRequestFromServer & {
+  crawl_config: CrawlConfigFromServer;
+  stage: CrawlEventStage;
+  type: CrawlType;
+};
+
+export interface DomainConfigFromServer {
+  id: string;
+  name: string;
+  seed_urls: string[];
+  sitemap_urls: string[];
+}
+
+// Client
+
+export interface CrawlerDomain {
+  availableDeduplicationFields: string[];
+  crawlRules: CrawlRule[];
+  createdOn: string;
+  deduplicationEnabled: boolean;
+  deduplicationFields: string[];
+  defaultCrawlRule?: CrawlRule;
+  documentCount: number;
+  entryPoints: EntryPoint[];
+  id: string;
+  lastCrawl?: string;
+  sitemaps: Sitemap[];
+  url: string;
+}
+
+export interface CrawlerDomainsWithMeta {
+  domains: CrawlerDomain[];
+  meta: Meta;
+}
+
+export interface CrawlerData {
+  domains: CrawlerDomain[];
+  events: CrawlEvent[];
+  mostRecentCrawlRequest: CrawlRequest | null;
+}
+
+export interface CrawlerDomainValidationStep {
+  blockingFailure?: boolean;
+  message?: string;
+  state: CrawlerDomainValidationStepState;
+}
+
+interface CrawlerDomainValidationState {
+  contentVerification: CrawlerDomainValidationStep;
+  indexingRestrictions: CrawlerDomainValidationStep;
+  initialValidation: CrawlerDomainValidationStep;
+  networkConnectivity: CrawlerDomainValidationStep;
+}
+
+export interface CrawlerDomainValidationResult {
+  steps: CrawlerDomainValidationState;
+}
+
+export type CrawlerDomainValidationResultChange = Partial<CrawlerDomainValidationState>;
 
 export interface CrawlRequest {
   beganAt: string | null;
@@ -139,23 +210,40 @@ export interface CrawlRequest {
   status: CrawlerStatus;
 }
 
-export interface CrawlerData {
-  domains: CrawlerDomain[];
-  events: CrawlEvent[];
-  mostRecentCrawlRequest: CrawlRequest | null;
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+    urlsAllowed?: number;
+  };
 }
 
-export interface CrawlerDataFromServer {
-  domains: CrawlerDomainFromServer[];
-  events: CrawlEventFromServer[];
-  most_recent_crawl_request: CrawlRequestFromServer | null;
+export interface CrawlConfig {
+  domainAllowlist: string[];
+  maxCrawlDepth: number;
+  seedUrls: string[];
+  sitemapUrls: string[];
 }
 
-export interface DomainConfigFromServer {
-  id: string;
-  name: string;
-  seed_urls: string[];
-  sitemap_urls: string[];
+export type CrawlRequestWithDetails = CrawlRequest & {
+  crawlConfig: CrawlConfig;
+  stats: CrawlRequestStats | null;
+  type: CrawlType;
+};
+
+export type CrawlEvent = CrawlRequest & {
+  crawlConfig: CrawlConfig;
+  stage: CrawlEventStage;
+  type: CrawlType;
+};
+
+export interface CrawlSchedule {
+  frequency: number;
+  unit: CrawlUnits;
 }
 
 export interface DomainConfig {
@@ -164,39 +252,3 @@ export interface DomainConfig {
   seedUrls: string[];
   sitemapUrls: string[];
 }
-
-export interface CrawlRequestStats {
-  status: {
-    avgResponseTimeMSec?: number;
-    crawlDurationMSec?: number;
-    pagesVisited?: number;
-    urlsAllowed?: number;
-    statusCodes?: {
-      [code: string]: number;
-    };
-  };
-}
-
-export interface CrawlRequestStatsFromServer {
-  status: {
-    avg_response_time_msec?: number;
-    crawl_duration_msec?: number;
-    pages_visited?: number;
-    urls_allowed?: number;
-    status_codes?: {
-      [code: string]: number;
-    };
-  };
-}
-
-export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
-  type: CrawlType;
-  crawl_config: CrawlConfigFromServer;
-  stats: CrawlRequestStatsFromServer;
-};
-
-export type CrawlRequestWithDetails = CrawlRequest & {
-  type: CrawlType;
-  crawlConfig: CrawlConfig;
-  stats: CrawlRequestStats | null;
-};

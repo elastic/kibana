@@ -22,7 +22,7 @@ import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_m
 import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
-import { CrawlerDomain, CrawlerDomains } from '../../../../api/crawler/types';
+import { CrawlerDomain, CrawlerDomainsWithMeta } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
 import { CrawlerLogic } from '../crawler_logic';
 
@@ -39,7 +39,7 @@ interface DomainManagementActions {
   deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   deleteSuccess(): void;
   getApiError(error: HttpError): HttpError;
-  getApiSuccess(data: CrawlerDomains): CrawlerDomains;
+  getApiSuccess(data: CrawlerDomainsWithMeta): CrawlerDomainsWithMeta;
   getDomains(): void;
   onPaginate(newPageIndex: number): { newPageIndex: number };
 }

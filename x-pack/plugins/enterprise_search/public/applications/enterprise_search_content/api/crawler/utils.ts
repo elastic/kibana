@@ -6,24 +6,26 @@
  */
 
 import {
-  CrawlConfig,
-  CrawlConfigFromServer,
-  CrawlerData,
-  CrawlerDataFromServer,
   CrawlerDomain,
   CrawlerDomainFromServer,
-  CrawlerDomains,
-  CrawlerDomainsFromServer,
-  CrawlEvent,
-  CrawlEventFromServer,
-  CrawlRequest,
+  CrawlerData,
+  CrawlerDataFromServer,
+  CrawlerDomainValidationResultFromServer,
+  CrawlerDomainValidationStep,
   CrawlRequestFromServer,
+  CrawlRequest,
   CrawlRequestStats,
   CrawlRequestStatsFromServer,
-  CrawlRequestWithDetails,
+  CrawlEventFromServer,
+  CrawlEvent,
+  CrawlConfigFromServer,
+  CrawlConfig,
   CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
   DomainConfig,
   DomainConfigFromServer,
+  CrawlerDomainsWithMetaFromServer,
+  CrawlerDomainsWithMeta,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -43,16 +45,16 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   } = payload;
 
   const clientPayload: CrawlerDomain = {
-    id,
-    url: name,
-    documentCount,
-    createdOn,
+    availableDeduplicationFields,
     crawlRules,
-    sitemaps,
-    entryPoints,
+    createdOn,
     deduplicationEnabled,
     deduplicationFields,
-    availableDeduplicationFields,
+    documentCount,
+    entryPoints,
+    id,
+    sitemaps,
+    url: name,
   };
 
   if (lastCrawl) {
@@ -66,20 +68,37 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   return clientPayload;
 }
 
-export function crawlerDomainsServerToClient({
-  meta,
-  results,
-}: CrawlerDomainsFromServer): CrawlerDomains {
-  return { domains: results.map(crawlerDomainServerToClient), meta };
+export function crawlRequestStatsServerToClient(
+  crawlStats: CrawlRequestStatsFromServer
+): CrawlRequestStats {
+  const {
+    status: {
+      avg_response_time_msec: avgResponseTimeMSec,
+      crawl_duration_msec: crawlDurationMSec,
+      pages_visited: pagesVisited,
+      urls_allowed: urlsAllowed,
+      status_codes: statusCodes,
+    },
+  } = crawlStats;
+
+  return {
+    status: {
+      avgResponseTimeMSec,
+      crawlDurationMSec,
+      pagesVisited,
+      statusCodes,
+      urlsAllowed,
+    },
+  };
 }
 
 export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
   const {
-    began_at: beganAt,
-    completed_at: completedAt,
-    created_at: createdAt,
     id,
     status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
   } = crawlRequest;
 
   return {
@@ -101,9 +120,9 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
 
   return {
     domainAllowlist,
+    maxCrawlDepth,
     seedUrls,
     sitemapUrls,
-    maxCrawlDepth,
   };
 }
 
@@ -120,38 +139,14 @@ export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEven
   } = event;
 
   return {
+    beganAt,
+    completedAt,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+    createdAt,
     id,
     stage,
     status,
-    createdAt,
-    beganAt,
-    completedAt,
     type,
-    crawlConfig: crawlConfigServerToClient(crawlConfig),
-  };
-}
-
-export function crawlRequestStatsServerToClient(
-  crawlStats: CrawlRequestStatsFromServer
-): CrawlRequestStats {
-  const {
-    status: {
-      avg_response_time_msec: avgResponseTimeMSec,
-      crawl_duration_msec: crawlDurationMSec,
-      pages_visited: pagesVisited,
-      urls_allowed: urlsAllowed,
-      status_codes: statusCodes,
-    },
-  } = crawlStats;
-
-  return {
-    status: {
-      urlsAllowed,
-      pagesVisited,
-      avgResponseTimeMSec,
-      crawlDurationMSec,
-      statusCodes,
-    },
   };
 }
 
@@ -192,6 +187,32 @@ export function crawlerDataServerToClient(payload: CrawlerDataFromServer): Crawl
   };
 }
 
+export function crawlDomainValidationToResult(
+  data: CrawlerDomainValidationResultFromServer
+): CrawlerDomainValidationStep {
+  if (!data.valid) {
+    return {
+      blockingFailure: true,
+      message: data.results.find((result) => result.result === 'failure')?.comment,
+      state: 'invalid',
+    };
+  }
+
+  const warningResult = data.results.find((result) => result.result === 'warning');
+
+  if (warningResult) {
+    return {
+      blockingFailure: !data.valid,
+      message: warningResult.comment,
+      state: 'warning',
+    };
+  }
+
+  return {
+    state: 'valid',
+  };
+}
+
 export const domainConfigServerToClient = (
   domainConfigFromServer: DomainConfigFromServer
 ): DomainConfig => ({
@@ -199,4 +220,12 @@ export const domainConfigServerToClient = (
   name: domainConfigFromServer.name,
   seedUrls: domainConfigFromServer.seed_urls,
   sitemapUrls: domainConfigFromServer.sitemap_urls,
+});
+
+export const crawlerDomainsWithMetaServerToClient = ({
+  results,
+  meta,
+}: CrawlerDomainsWithMetaFromServer): CrawlerDomainsWithMeta => ({
+  domains: results.map(crawlerDomainServerToClient),
+  meta,
 });

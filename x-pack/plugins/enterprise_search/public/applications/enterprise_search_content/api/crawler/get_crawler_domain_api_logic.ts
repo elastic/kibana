@@ -17,7 +17,7 @@ export interface GetCrawlerDomainArgs {
   indexName: string;
 }
 
-const getCrawlerDomain = async ({
+export const getCrawlerDomain = async ({
   indexName,
   domainId,
 }: GetCrawlerDomainArgs): Promise<CrawlerDomain> => {

@@ -16,7 +16,7 @@ export interface GetCrawlerArgs {
   indexName: string;
 }
 
-const getCrawler = async ({ indexName }: GetCrawlerArgs): Promise<CrawlerData> => {
+export const getCrawler = async ({ indexName }: GetCrawlerArgs): Promise<CrawlerData> => {
   const response = await HttpLogic.values.http.get<CrawlerDataFromServer>(
     `/internal/enterprise_search/indices/${indexName}/crawler`
   );

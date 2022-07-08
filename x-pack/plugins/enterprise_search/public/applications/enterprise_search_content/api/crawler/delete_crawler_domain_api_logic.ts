@@ -15,7 +15,7 @@ export interface GetCrawlerDomainsArgs {
   indexName: string;
 }
 
-const deleteCrawlerDomain = async ({ domain, indexName }: GetCrawlerDomainsArgs) => {
+export const deleteCrawlerDomain = async ({ domain, indexName }: GetCrawlerDomainsArgs) => {
   await HttpLogic.values.http.delete(
     `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domain.id}`
   );
