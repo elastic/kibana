@@ -10,7 +10,7 @@ import { flatten } from 'lodash';
 import { ShallowPromise, MaybePromise } from '@kbn/utility-types';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
-import type { RequestHandler, RequestHandlerContext } from '../..';
+import type { RequestHandler, RequestHandlerContextBase } from '../..';
 
 /**
  * A function that returns a context value for a specific key of given context type.
@@ -26,7 +26,7 @@ import type { RequestHandler, RequestHandlerContext } from '../..';
  * @public
  */
 export type IContextProvider<
-  Context extends RequestHandlerContext,
+  Context extends RequestHandlerContextBase,
   ContextName extends keyof Context
 > = (
   // context.core will always be available, but plugin contexts are typed as optional
@@ -148,7 +148,7 @@ export interface IContextContainer {
    * @param provider - A {@link IContextProvider} to be called each time a new context is created.
    * @returns The {@link IContextContainer} for method chaining.
    */
-  registerContext<Context extends RequestHandlerContext, ContextName extends keyof Context>(
+  registerContext<Context extends RequestHandlerContextBase, ContextName extends keyof Context>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>
@@ -195,7 +195,7 @@ export class ContextContainer implements IContextContainer {
   }
 
   public registerContext = <
-    Context extends RequestHandlerContext,
+    Context extends RequestHandlerContextBase,
     ContextName extends keyof Context
   >(
     source: symbol,
@@ -243,7 +243,7 @@ export class ContextContainer implements IContextContainer {
     const builtContextPromises: Record<string, Promise<unknown>> = {};
 
     const builtContext = {} as HandlerContextType<RequestHandler>;
-    (builtContext as unknown as RequestHandlerContext).resolve = async (keys) => {
+    (builtContext as unknown as RequestHandlerContextBase).resolve = async (keys) => {
       const resolved = await Promise.all(
         keys.map(async (key) => {
           return [key, await builtContext[key]];

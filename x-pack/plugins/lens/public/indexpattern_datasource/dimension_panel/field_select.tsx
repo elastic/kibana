@@ -62,7 +62,6 @@ export function FieldSelect({
       fields,
       (field) => currentIndexPattern.getFieldByName(field)?.type === 'document'
     );
-
     const containsData = (field: string) =>
       currentIndexPattern.getFieldByName(field)?.type === 'document' ||
       fieldExists(existingFields, currentIndexPattern.title, field);
@@ -150,9 +149,11 @@ export function FieldSelect({
         (selectedOperationType && selectedField
           ? [
               {
-                label: fieldIsInvalid
-                  ? selectedField
-                  : currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField,
+                label:
+                  (selectedOperationType &&
+                    selectedField &&
+                    currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
+                  selectedField,
                 value: { type: 'field', field: selectedField },
               },
             ]
