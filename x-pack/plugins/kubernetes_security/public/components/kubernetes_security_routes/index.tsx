@@ -7,15 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -25,8 +17,8 @@ import {
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_ENTITY_ID,
 } from '../../../common/constants';
-import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentWidget } from '../percent_widget';
+import { CountWidget } from '../count_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useStyles } from './styles';
@@ -70,46 +62,49 @@ const KubernetesSecurityRoutesComponent = ({
         {filter}
         <EuiFlexGroup>
           <EuiFlexItem>
-            <KubernetesWidget
+            <CountWidget
               title="Clusters"
-              icon="heatmap"
-              iconColor="success"
-              data={4}
-              isAlert={true}
-            >
-              <EuiBadge
-                color="danger"
-                href="#"
-                target="blank"
-                css={{
-                  ...styles.widgetBadge,
-                  '.euiBadge__content': {
-                    width: '100%',
-                    '.euiBadge__text': {
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                    },
-                  },
-                }}
-              >
-                <div>{'93 alerts '}</div>View alerts
-              </EuiBadge>
-            </KubernetesWidget>
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              widgetKey="CountClustersWidget"
+              groupedBy={'orchestrator.cluster.id'}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <KubernetesWidget title="Nodes" icon="node" iconColor="#9170B8" data={16} />
+            <CountWidget
+              title="Namespace"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              widgetKey="CountNamespaceWidgets"
+              groupedBy={'orchestrator.namespace'}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <KubernetesWidget title="Pods" icon="package" iconColor="warning" data={775}>
-              <EuiBadge css={{ ...styles.widgetBadge, justifyContent: 'center' }}>
-                <EuiTextColor css={{ marginRight: '16px' }} color="success">
-                  <span css={{ fontWeight: 700 }}>1000</span>
-                  {' live'}
-                </EuiTextColor>
-                <span css={{ fontWeight: 700 }}>42</span>
-                {' disabled'}
-              </EuiBadge>
-            </KubernetesWidget>
+            <CountWidget
+              title="Nodes"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              widgetKey="CountNodesWidgets"
+              groupedBy={'orchestrator.resource.id'}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <CountWidget
+              title="Pods"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              widgetKey="CountPodsWidgets"
+              groupedBy={'orchestrator.resource.id'}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <CountWidget
+              title="Container Images"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              widgetKey="CountContainerImagesWidgets"
+              groupedBy={'container.image.name'}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />

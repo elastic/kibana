@@ -44,11 +44,16 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
+    const countWidgets: CSSObject = {
+      margin: size.l,
+    };
+
     return {
       widgetBadge,
       treeViewContainer,
       percentageWidgets,
       percentageChartTitle,
+      countWidgets,
     };
   }, [euiTheme]);
 
