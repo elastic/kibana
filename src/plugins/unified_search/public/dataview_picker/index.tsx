@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
@@ -77,7 +77,7 @@ export interface DataViewPickerPropsExtended extends DataViewPickerProps {
   /**
    * Callback that is called when the user clicks the submit button
    */
-  onTextLangQuerySubmit?: (query?: AggregateQuery) => void;
+  onTextLangQuerySubmit?: (query?: Query | AggregateQuery) => void;
   /**
    * Text based language that is currently selected; depends on the query
    */

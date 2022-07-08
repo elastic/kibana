@@ -17,6 +17,12 @@ export const ENRICHMENT_QUERY_START_INPUT = '.start-picker';
 
 export const ENRICHMENT_QUERY_END_INPUT = '.end-picker';
 
+export const FIELD = (value: string) => {
+  return `[data-test-subj="event-field-${value}"]`;
+};
+
+export const FILTER_INPUT = '[data-test-subj="eventDetails"] .euiFieldSearch';
+
 export const INDICATOR_MATCH_ENRICHMENT_SECTION = '[data-test-subj="threat-match-detected"]';
 
 export const INVESTIGATION_TIME_ENRICHMENT_SECTION =

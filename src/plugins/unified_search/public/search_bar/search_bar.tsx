@@ -333,7 +333,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     });
   };
 
-  public onTextLangQuerySubmit = (query?: any) => {
+  public onTextLangQuerySubmit = (query?: Query | AggregateQuery) => {
     // clean up all filters
     this.props.onFiltersUpdated?.([]);
     this.setState(

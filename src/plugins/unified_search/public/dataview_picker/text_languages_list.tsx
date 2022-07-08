@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiSelectable, EuiPanel } from '@elastic/eui';
+import { EuiSelectable, EuiPanel, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TextBasedLanguages } from '.';
 
@@ -38,6 +38,16 @@ export default function TextBasedLanguagesList({
         label: lang,
         value: lang,
         checked: lang === selectedOption ? 'on' : undefined,
+        append: (
+          <EuiBetaBadge
+            label="Technical preview"
+            color="hollow"
+            size="s"
+            css={css`
+              vertical-align: middle;
+            `}
+          />
+        ),
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {

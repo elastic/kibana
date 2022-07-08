@@ -8,7 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -27,6 +27,7 @@ import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+import { isPlainRecord } from '../utils/get_raw_record_type';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -242,24 +243,33 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
+  const fetchResults = useCallback(() => {
+    if (documentState.result?.length) {
+      const firstRow = documentState.result[0];
+      return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+    }
+    return [];
+  }, [documentState.result]);
+
   useEffect(() => {
     async function fetchDataview() {
-      if (state.query && isOfAggregateQueryType(state.query)) {
+      if (isPlainRecord(state.query) && documentState.fetchStatus === FetchStatus.COMPLETE) {
         const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
         const idsTitles = await indexPatterns.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
         if (dataViewObj) {
-          let columns: string[] = [];
-          if (documentState.result?.length) {
-            const firstRow = documentState.result[0];
-            columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-          }
-          stateContainer.setAppState({ index: dataViewObj.id, columns });
+          const columns = fetchResults();
+          const nextState = {
+            index: dataViewObj.id,
+            ...(columns.length && { columns }),
+          };
+          stateContainer.setAppState(nextState);
         }
       }
     }
     fetchDataview();
-  }, [config, documentState, indexPatterns, savedSearch.searchSource, state.query, stateContainer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, documentState, indexPatterns]);
 
   return {
     data$,

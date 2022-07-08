@@ -93,7 +93,7 @@ export interface QueryBarTopRowProps {
   showSubmitButton?: boolean;
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
-  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
 }
 

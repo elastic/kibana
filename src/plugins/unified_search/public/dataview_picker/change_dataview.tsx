@@ -324,8 +324,11 @@ export function ChangeDataView({
     (shouldDismissModal: boolean) => {
       setIsTextLangTransitionModalVisible(false);
       setIsTextBasedLangSelected(false);
-      // clean up the Text based language jQuery
-      onTextLangQuerySubmit?.();
+      // clean up the Text based language query
+      onTextLangQuerySubmit?.({
+        language: 'kql',
+        query: '',
+      });
       if (selectedDataViewId) {
         onChangeDataView(selectedDataViewId);
       }
