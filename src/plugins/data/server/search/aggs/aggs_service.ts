@@ -57,7 +57,7 @@ export class AggsService {
    * getForceNow uses window.location on the client, so we must have a
    * separate implementation of calculateBounds on the server.
    */
-  private calculateBounds = (timeRange: TimeRange) => calculateBounds(timeRange, {});
+  private calculateBounds = (timeRange: TimeRange) => calculateBounds(timeRange);
 
   public setup({ registerFunction }: AggsSetupDependencies): AggsSetup {
     return this.aggsCommonService.setup({
