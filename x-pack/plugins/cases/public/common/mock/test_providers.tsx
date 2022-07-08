@@ -24,8 +24,6 @@ import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
 import { CasesPermissions } from '../../client/helpers/capabilities';
-import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 interface TestProviderProps {
@@ -34,7 +32,7 @@ interface TestProviderProps {
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
-  externalReferenceAttachmentTypeRegistry?: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
