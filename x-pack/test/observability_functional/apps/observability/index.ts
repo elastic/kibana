@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ObservabilityApp', function () {
     loadTestFile(require.resolve('./pages/alerts'));
+    loadTestFile(require.resolve('./pages/cases/case_details'));
     loadTestFile(require.resolve('./pages/alerts/add_to_case'));
     loadTestFile(require.resolve('./pages/alerts/alert_status'));
     loadTestFile(require.resolve('./pages/alerts/pagination'));
