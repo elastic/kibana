@@ -18,6 +18,8 @@ import {
   largeGridData,
   mediumGridData,
   smallGridData,
+  simpleNestedGridData,
+  nestedGridData,
 } from '../../gridstack_grid/__stories__/fixtures';
 import { logsDashboardGridData } from '../../gridstack_grid/constants';
 
@@ -120,3 +122,10 @@ export const Columns48Example = () => <Grid gridData={largeGridData} />;
 export const Columns24Example = () => <Grid columns={24} gridData={mediumGridData} />;
 export const Columns12Example = () => <Grid columns={12} gridData={smallGridData} />;
 export const LogsDashboardExample = () => <Grid gridData={logsDashboardGridData} />;
+export const SimpleNestedExample = () => {
+  return <Grid columns={24} gridData={simpleNestedGridData} />;
+};
+
+export const NestedGridsExample = () => {
+  return <Grid columns={12} gridData={nestedGridData} />;
+};
