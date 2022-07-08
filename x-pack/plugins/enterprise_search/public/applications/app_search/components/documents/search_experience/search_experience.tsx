@@ -100,7 +100,7 @@ export const SearchExperience: React.FC = () => {
 
   const searchProviderConfig = buildSearchUIConfig(
     connector,
-    engine.schema || {},
+    engine.advancedSchema || {},
     fields,
     initialState
   );
