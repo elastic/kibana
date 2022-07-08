@@ -21,10 +21,10 @@ function onFilterCell(
   mode: '+' | '-'
 ) {
   const row = context.rowsFlattened[rowIndex];
-  const value = String(row[columnId]);
+  const value = row[columnId];
   const field = context.indexPattern.fields.getByName(columnId);
 
-  if (value && field) {
+  if (field) {
     context.onFilter(field, value, mode);
   }
 }
