@@ -30,7 +30,8 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
     });
     const decoration = getDefaultDecoration(series);
     const splits = await getSplits(resp, panel, series, meta, extractFields);
-    const mathSeries = splits.map((split) => {
+    const globalSplitData = {};
+    splits.forEach((split) => {
       if (mathMetric.variables.length) {
         // Gather the data for the splits. The data will either be a sibling agg or
         // a standard metric/pipeline agg
@@ -67,6 +68,16 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
         // we need to return an empty array for the data since we can't operate
         // without the first variable
         const firstVar = first(mathMetric.variables);
+        globalSplitData[split.id] = {
+          firstVar,
+          all,
+          splitData,
+        };
+      }
+    });
+    const mathSeries = splits.map((split) => {
+      if (mathMetric.variables.length) {
+        const { splitData, firstVar, all } = globalSplitData[split.id];
         if (!splitData[firstVar.name]) {
           return {
             id: split.id,
@@ -76,12 +87,19 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
             ...decoration,
           };
         }
+        // console.log(JSON.stringify(all, null, 2));
         // Use the first var to collect all the timestamps
         const timestamps = splitData[firstVar.name].map((r) => first(r));
         // Map the timestamps to actual data
         const data = timestamps.map((ts, index) => {
           const params = mathMetric.variables.reduce((acc, v) => {
             acc[v.name] = last(splitData[v.name].find((row) => row[0] === ts));
+            return acc;
+          }, {});
+          const last_series = mathMetric.variables.reduce((acc, v) => {
+            acc[v.name] = splits.map((s) =>
+              last(globalSplitData[s.id].splitData[v.name].find((row) => row[0] === ts))
+            );
             return acc;
           }, {});
           // If some of the values are null, return the timestamp and null, this is
@@ -98,9 +116,11 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
                 _index: index,
                 _timestamp: ts,
                 _all: all,
+                _last_series: last_series,
                 _interval: inMsInterval?.value,
               },
             });
+            console.log(result);
             // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.
             if (typeof result === 'object') {
               return [ts, last(flatten(result.valueOf()))];
