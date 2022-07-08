@@ -263,10 +263,12 @@ export const SearchIndices: React.FC = () => {
             />
           </>
         ) : (
-          <AddContentEmptyPrompt />
+          <>
+            <AddContentEmptyPrompt />
+            <EuiSpacer size="xxl" />
+            {engineSteps}
+          </>
         )}
-        <EuiSpacer size="xxl" />
-        {indices.length === 0 && !isLoading && engineSteps}
       </EnterpriseSearchContentPageTemplate>
       )
     </>
