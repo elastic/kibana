@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../../shared/loading';
 
-// import { LogRetentionLogic } from '../../../log_retention';
 import { CrawlDetailLogic } from './crawl_detail_logic';
 
 import { CrawlDetailsPreview } from './crawl_details_preview';
@@ -31,12 +30,6 @@ export const CrawlDetailsFlyout: React.FC = () => {
   const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
   const { crawlRequestFromServer, dataLoading, flyoutClosed, selectedTab } =
     useValues(CrawlDetailLogic);
-  // const { fetchLogRetention } = useActions(LogRetentionLogic);
-  // const { logRetention } = useValues(LogRetentionLogic);
-
-  // useEffect(() => {
-  //   fetchLogRetention();
-  // }, []);
 
   if (flyoutClosed) {
     return null;
