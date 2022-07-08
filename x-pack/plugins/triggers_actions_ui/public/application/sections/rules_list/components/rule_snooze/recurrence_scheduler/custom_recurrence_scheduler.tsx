@@ -28,10 +28,17 @@ import {
 } from './helpers';
 import { i18nEndControlOptions, i18nNthWeekdayShort } from './translations';
 
-// FIXME https://github.com/elastic/eui/issues/5958
+// FIXME https://github.com/elastic/eui/issues/5958 and https://github.com/elastic/eui/issues/6040
 const EuiFormRowWithDelimitedFixer = euiStyled(EuiFormRow)`
   & .euiFormControlLayout__childrenWrapper {
     height: 100%;
+    &:last-of-type {
+      position: relative;
+      & .euiFormControlLayoutIcons {
+        position: absolute;
+        padding: 0;
+      }
+    }
   }
 `;
 
@@ -132,6 +139,8 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
           }
           endControl={
             <EuiSelect
+              compressed
+              className="customRecurrenceSchedulerFrequency"
               data-test-subj="customRecurrenceSchedulerFrequency"
               onChange={(e) => setFrequency(Number(e.target.value))}
               value={frequency}
