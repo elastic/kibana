@@ -7,7 +7,6 @@
 
 import {
   addPrepackagedRulesSchema,
-  AddPrepackagedRulesSchemaDecoded,
   AddPrepackagedRulesSchema,
 } from './add_prepackaged_rules_schema';
 
@@ -16,11 +15,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import {
   getAddPrepackagedRulesSchemaMock,
-  getAddPrepackagedRulesSchemaDecodedMock,
   getAddPrepackagedThreatMatchRulesSchemaMock,
-  getAddPrepackagedThreatMatchRulesSchemaDecodedMock,
 } from './add_prepackaged_rules_schema.mock';
-import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
 describe('add prepackaged rules schema', () => {
@@ -30,15 +26,24 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "description"',
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "rule_id"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "description"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "rule_id"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -63,14 +68,21 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "description"',
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "description"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -83,13 +95,18 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -103,13 +120,18 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -124,13 +146,18 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -146,12 +173,15 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -168,11 +198,12 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "version"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -262,33 +293,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-      type: 'query',
-      query: 'some query',
-      index: ['index-1'],
-      interval: '5m',
-      references: [],
-      actions: [],
-      enabled: false,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
@@ -337,34 +341,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-      references: [],
-      actions: [],
-      enabled: false,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does not validate', () => {
@@ -393,31 +369,6 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index, version] does not validate because output_index is not allowed', () => {
-    const payload: Partial<AddPrepackagedRulesSchema> & { output_index: string } = {
-      rule_id: 'rule-1',
-      output_index: '.siem-signals',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-      version: 1,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "output_index"']);
-    expect(message.schema).toEqual({});
-  });
-
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, version] does validate', () => {
     const payload: Partial<AddPrepackagedRulesSchema> = {
       rule_id: 'rule-1',
@@ -437,32 +388,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      risk_score: 50,
-      version: 1,
-      actions: [],
-      enabled: false,
-      exceptions_list: [],
-      false_positives: [],
-      max_signals: 100,
-      references: [],
-      tags: [],
-      threat: [],
-      throttle: null,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can send in a namespace', () => {
@@ -475,11 +400,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      namespace: 'a namespace',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can send in an empty array to threat', () => {
@@ -492,11 +412,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      threat: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
@@ -535,48 +450,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      threat: [
-        {
-          framework: 'someFramework',
-          tactic: {
-            id: 'fakeId',
-            name: 'fakeName',
-            reference: 'fakeRef',
-          },
-          technique: [
-            {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
-          ],
-        },
-      ],
-      references: [],
-      actions: [],
-      enabled: false,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('allows references to be sent as valid', () => {
@@ -589,24 +462,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      references: ['index-1'],
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('defaults references to an array if it is not sent in', () => {
-    const { references, ...noReferences } = getAddPrepackagedRulesSchemaMock();
-    const decoded = addPrepackagedRulesSchema.decode(noReferences);
-    const checked = exactCheck(noReferences, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      references: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('immutable cannot be set in a pre-packaged rule', () => {
@@ -620,17 +475,6 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
     expect(message.schema).toEqual({});
-  });
-
-  test('defaults enabled to false', () => {
-    const payload: AddPrepackagedRulesSchema = getAddPrepackagedRulesSchemaMock();
-    delete payload.enabled;
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as unknown as AddPrepackagedRulesSchemaDecoded).enabled).toEqual(false);
   });
 
   test('rule_id is required', () => {
@@ -673,49 +517,8 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('defaults interval to 5 min', () => {
-    const { interval, ...noInterval } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noInterval,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { interval: expectedInterval, ...expectedNoInterval } =
-      getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoInterval,
-      interval: '5m',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('defaults max signals to 100', () => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { max_signals, ...noMaxSignals } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noMaxSignals,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { max_signals: expectedMaxSignals, ...expectedNoMaxSignals } =
-      getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoMaxSignals,
-      max_signals: 100,
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
   test('saved_query type can have filters with it', () => {
-    const payload: AddPrepackagedRulesSchema = {
+    const payload = {
       ...getAddPrepackagedRulesSchemaMock(),
       filters: [],
     };
@@ -724,11 +527,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      filters: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('filters cannot be a string', () => {
@@ -747,7 +545,7 @@ describe('add prepackaged rules schema', () => {
   });
 
   test('language validates with kuery', () => {
-    const payload: AddPrepackagedRulesSchema = {
+    const payload = {
       ...getAddPrepackagedRulesSchemaMock(),
       language: 'kuery',
     };
@@ -756,15 +554,10 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      language: 'kuery',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('language validates with lucene', () => {
-    const payload: AddPrepackagedRulesSchema = {
+    const payload = {
       ...getAddPrepackagedRulesSchemaMock(),
       language: 'lucene',
     };
@@ -773,11 +566,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      language: 'lucene',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('language does not validate with something made up', () => {
@@ -833,11 +621,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      max_signals: 1,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of tags', () => {
@@ -850,11 +633,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      tags: ['tag_1', 'tag_2'],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
@@ -955,20 +733,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      threat: [
-        {
-          framework: 'fake',
-          tactic: {
-            id: 'fakeId',
-            name: 'fakeName',
-            reference: 'fakeRef',
-          },
-        },
-      ],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -981,11 +745,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      false_positives: ['false_1', 'false_2'],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
@@ -1043,11 +802,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      risk_score: 0,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can set the risk_score to 100', () => {
@@ -1060,11 +814,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      risk_score: 100,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can set meta to any object you want', () => {
@@ -1079,13 +828,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      meta: {
-        somethingMadeUp: { somethingElse: true },
-      },
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot create meta as a string', () => {
@@ -1103,26 +845,6 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You can omit the query string when filters are present', () => {
-    const { query, ...noQuery } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noQuery,
-      filters: [],
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { query: expectedQuery, ...expectedNoQuery } = getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoQuery,
-      filters: [],
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
   test('validates with timeline_id and timeline_title', () => {
     const payload: AddPrepackagedRulesSchema = {
       ...getAddPrepackagedRulesSchemaMock(),
@@ -1134,50 +856,6 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(),
-      timeline_id: 'timeline-id',
-      timeline_title: 'timeline-title',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('The default for "from" will be "now-6m"', () => {
-    const { from, ...noFrom } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noFrom,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { from: expectedFrom, ...expectedNoFrom } = getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoFrom,
-      from: 'now-6m',
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
-  test('The default for "to" will be "now"', () => {
-    const { to, ...noTo } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noTo,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { to: expectedTo, ...expectedNoTo } = getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoTo,
-      to: 'now',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -1191,26 +869,6 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
     expect(message.schema).toEqual({});
-  });
-
-  test('The default for "actions" will be an empty array', () => {
-    const { actions, ...noActions } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noActions,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { actions: expectedActions, ...expectedNoActions } =
-      getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoActions,
-      actions: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of actions that are missing "group"', () => {
@@ -1295,26 +953,6 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('The default for "throttle" will be null', () => {
-    const { throttle, ...noThrottle } = getAddPrepackagedRulesSchemaMock();
-    const payload: AddPrepackagedRulesSchema = {
-      ...noThrottle,
-    };
-
-    const decoded = addPrepackagedRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { throttle: expectedThrottle, ...expectedNoThrottle } =
-      getAddPrepackagedRulesSchemaDecodedMock();
-    const expected: AddPrepackagedRulesSchemaDecoded = {
-      ...expectedNoThrottle,
-      throttle: null,
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
   describe('note', () => {
     test('You can set note to a string', () => {
       const payload: AddPrepackagedRulesSchema = {
@@ -1326,11 +964,6 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: AddPrepackagedRulesSchemaDecoded = {
-        ...getAddPrepackagedRulesSchemaDecodedMock(),
-        note: '# documentation markdown here',
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('You can set note to an empty string', () => {
@@ -1343,11 +976,6 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: AddPrepackagedRulesSchema = {
-        ...getAddPrepackagedRulesSchemaDecodedMock(),
-        note: '',
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('You cannot create note as an object', () => {
@@ -1387,33 +1015,6 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: AddPrepackagedRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-      };
-      expect(message.schema).toEqual(expected);
     });
   });
 
@@ -1440,47 +1041,6 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: AddPrepackagedRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        filters: [],
-        exceptions_list: [
-          {
-            id: 'some_uuid',
-            list_id: 'list_id_single',
-            namespace_type: 'single',
-            type: 'detection',
-          },
-          {
-            id: 'endpoint_list',
-            list_id: 'endpoint_list',
-            namespace_type: 'agnostic',
-            type: 'endpoint',
-          },
-        ],
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, version, and empty exceptions_list] does validate', () => {
@@ -1505,40 +1065,10 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: AddPrepackagedRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        filters: [],
-        exceptions_list: [],
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and invalid exceptions_list] does NOT validate', () => {
-      const payload: Omit<AddPrepackagedRulesSchema, 'exceptions_list'> & {
-        exceptions_list: Array<{ id: string; namespace_type: string }>;
-      } = {
+      const payload = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1587,34 +1117,6 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: AddPrepackagedRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-        filters: [],
-      };
-      expect(message.schema).toEqual(expected);
     });
   });
 
@@ -1624,9 +1126,7 @@ describe('add prepackaged rules schema', () => {
       const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      const expected = getAddPrepackagedThreatMatchRulesSchemaDecodedMock();
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
     });
   });
 });

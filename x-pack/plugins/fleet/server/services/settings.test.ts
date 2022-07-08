@@ -58,6 +58,7 @@ describe('getCloudFleetServersHosts', () => {
 describe('settingsSetup', () => {
   afterEach(() => {
     mockedAppContextService.getCloud.mockReset();
+    mockedAppContextService.getConfig.mockReset();
   });
   it('should create settings if there is no settings', async () => {
     const soClientMock = savedObjectsClientMock.create();
@@ -158,7 +159,113 @@ describe('settingsSetup', () => {
     });
   });
 
-  it('should not update settings if there is settings with fleet server hosts and default fleet server hosts', async () => {
+  it('should update settings if there is a new fleet server host in the config', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      apm: {},
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agents: {
+        fleet_server: { hosts: ['http://fleetserverupdated.fr:8220'] },
+      },
+    } as any);
+
+    soClientMock.find.mockResolvedValue({
+      total: 1,
+      page: 0,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: 'defaultsettings',
+          attributes: {
+            fleet_server_hosts: ['https://deployment-id-1.fleet.test.fr:9243'],
+          },
+          type: 'so_type',
+          references: [],
+          score: 0,
+        },
+      ],
+    });
+
+    soClientMock.update.mockResolvedValue({
+      id: 'updated',
+      attributes: {},
+      references: [],
+      type: 'so_type',
+    });
+
+    soClientMock.create.mockResolvedValue({
+      id: 'created',
+      attributes: {},
+      references: [],
+      type: 'so_type',
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.create).not.toBeCalled();
+    expect(soClientMock.update).toBeCalledWith('ingest_manager_settings', 'defaultsettings', {
+      fleet_server_hosts: ['http://fleetserverupdated.fr:8220'],
+    });
+  });
+
+  it('should update settings if there is no new fleet server hosts in the config', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      apm: {},
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agents: {
+        fleet_server: { hosts: ['http://fleetserverupdated.fr:8220'] },
+      },
+    } as any);
+
+    soClientMock.find.mockResolvedValue({
+      total: 1,
+      page: 0,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: 'defaultsettings',
+          attributes: {
+            fleet_server_hosts: ['http://fleetserverupdated.fr:8220'],
+          },
+          type: 'so_type',
+          references: [],
+          score: 0,
+        },
+      ],
+    });
+
+    soClientMock.update.mockResolvedValue({
+      id: 'updated',
+      attributes: {},
+      references: [],
+      type: 'so_type',
+    });
+
+    soClientMock.create.mockResolvedValue({
+      id: 'created',
+      attributes: {},
+      references: [],
+      type: 'so_type',
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.create).not.toBeCalled();
+    expect(soClientMock.update).not.toBeCalled();
+  });
+
+  it('should not update settings with cloud settings if there is settings with fleet server hosts and default fleet server hosts', async () => {
     const soClientMock = savedObjectsClientMock.create();
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:

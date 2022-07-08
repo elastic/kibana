@@ -6,14 +6,10 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
-import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -23,14 +19,12 @@ import {
   DocValueFields,
   HostsQueries,
   HostsRequestOptions,
-  HostsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export const ID = 'hostsAllQuery';
 
@@ -50,8 +44,8 @@ export interface HostsArgs {
 
 interface UseAllHost {
   docValueFields?: DocValueFields[];
-  filterQuery?: ESTermQuery | string;
   endDate: string;
+  filterQuery?: ESTermQuery | string;
   indexNames: string[];
   skip?: boolean;
   startDate: string;
@@ -60,8 +54,8 @@ interface UseAllHost {
 
 export const useAllHost = ({
   docValueFields,
-  filterQuery,
   endDate,
+  filterQuery,
   indexNames,
   skip = false,
   startDate,
@@ -71,13 +65,8 @@ export const useAllHost = ({
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
-  const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
-  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -95,73 +84,50 @@ export const useAllHost = ({
     [limit]
   );
 
-  const [hostsResponse, setHostsResponse] = useState<HostsArgs>({
-    endDate,
-    hosts: [],
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+  } = useSearchStrategy<HostsQueries.hosts>({
+    factoryQueryType: HostsQueries.hosts,
+    initialResult: {
+      edges: [],
+      totalCount: -1,
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
     },
-    isInspected: false,
-    loadPage: wrappedLoadMore,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
-    refetch: refetch.current,
-    startDate,
-    totalCount: -1,
+    errorMessage: i18n.FAIL_ALL_HOST,
+    abort: skip,
   });
 
-  const hostsSearch = useCallback(
-    (request: HostsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        searchSubscription.current = data.search
-          .search<HostsRequestOptions, HostsStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                setLoading(false);
-                setHostsResponse((prevResponse) => ({
-                  ...prevResponse,
-                  hosts: response.edges,
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  pageInfo: response.pageInfo,
-                  refetch: refetch.current,
-                  totalCount: response.totalCount,
-                }));
-                searchSubscription.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_ALL_HOST);
-                searchSubscription.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, { title: i18n.FAIL_ALL_HOST });
-              searchSubscription.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-      refetch.current = asyncSearch;
-    },
-    [data.search, addError, addWarning, skip]
+  const hostsResponse = useMemo(
+    () => ({
+      endDate,
+      hosts: response.edges,
+      id: ID,
+      inspect,
+      isInspected: false,
+      loadPage: wrappedLoadMore,
+      pageInfo: response.pageInfo,
+      refetch,
+      startDate,
+      totalCount: response.totalCount,
+    }),
+    [
+      endDate,
+      inspect,
+      refetch,
+      response.edges,
+      response.pageInfo,
+      response.totalCount,
+      startDate,
+      wrappedLoadMore,
+    ]
   );
 
   useEffect(() => {
@@ -201,20 +167,10 @@ export const useAllHost = ({
   ]);
 
   useEffect(() => {
-    hostsSearch(hostsRequest);
-    return () => {
-      searchSubscription.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [hostsRequest, hostsSearch]);
-
-  useEffect(() => {
-    if (skip) {
-      setLoading(false);
-      searchSubscription.current.unsubscribe();
-      abortCtrl.current.abort();
+    if (!skip && hostsRequest) {
+      search(hostsRequest);
     }
-  }, [skip]);
+  }, [hostsRequest, search, skip]);
 
   return [loading, hostsResponse];
 };
