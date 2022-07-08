@@ -86,7 +86,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         timelineId={timelineId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
-        values={actionCellConfig?.stringValues}
+        values={actionCellConfig?.values}
       />
     );
   }

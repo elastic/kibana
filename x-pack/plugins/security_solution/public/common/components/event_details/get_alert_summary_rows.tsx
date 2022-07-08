@@ -40,6 +40,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
   { id: 'kibana.alert.original_event.id', label: i18n.SOURCE_EVENT_ID },
   { id: 'process.entry_leader.entity_id', label: i18n.SESSION_ID },
+  { id: 'process.entity_id', label: i18n.ALERTS_IN_PROCESS_TREE },
 ];
 
 /**

@@ -160,3 +160,10 @@ export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetai
 export const SESSION_ID = i18n.translate('xpack.securitySolution.eventDetails.sessionId', {
   defaultMessage: 'Session ID',
 });
+
+export const ALERTS_IN_PROCESS_TREE = i18n.translate(
+  'xpack.securitySolution.eventDetails.alertsInProcessTree',
+  {
+    defaultMessage: 'Related alerts',
+  }
+);
