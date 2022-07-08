@@ -207,6 +207,114 @@ export function getIndexPatterns({
   return { indexPatternRefs: indexPatternRefs ?? [], indexPatterns: indexPatterns ?? {} };
 }
 
+export function createStateFromPersisted({
+  persistedState,
+  references,
+}: {
+  persistedState?: IndexPatternPersistedState;
+  references?: SavedObjectReference[];
+}) {
+  return persistedState && references ? injectReferences(persistedState, references) : undefined;
+}
+
+export function getUsedIndexPatterns({
+  state,
+  indexPatternRefs,
+  storage,
+  initialContext,
+  defaultIndexPatternId,
+}: {
+  state?: {
+    layers: Record<string, IndexPatternLayer>;
+  };
+  defaultIndexPatternId?: string;
+  storage: IStorageWrapper;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  indexPatternRefs: IndexPatternRef[];
+}) {
+  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
+  const indexPatternIds = [];
+  if (initialContext) {
+    if ('isVisualizeAction' in initialContext) {
+      for (const { indexPatternId } of initialContext.layers) {
+        indexPatternIds.push(indexPatternId);
+      }
+    } else {
+      indexPatternIds.push(initialContext.indexPatternId);
+    }
+  }
+  const usedPatterns = (
+    initialContext
+      ? indexPatternIds
+      : uniq(state ? Object.values(state.layers).map((l) => l.indexPatternId) : [fallbackId])
+  )
+    // take out the undefined from the list
+    .filter(Boolean);
+
+  return { usedPatterns, indexPatternIds };
+}
+
+// @TODO: rewire the new logic to this
+export async function loadInitialStateMini({
+  persistedState,
+  references,
+  defaultIndexPatternId,
+  storage,
+  initialContext,
+  indexPatternRefs,
+  getOrLoadIndexPatterns,
+}: {
+  persistedState?: IndexPatternPersistedState;
+  references?: SavedObjectReference[];
+  defaultIndexPatternId?: string;
+  storage: IStorageWrapper;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  indexPatternRefs: IndexPatternRef[];
+  getOrLoadIndexPatterns: (args: {
+    patterns: string[];
+    notUsedPatterns?: string[];
+  }) => Record<string, IndexPattern>;
+}): Promise<Omit<IndexPatternPrivateState, 'indexPatterns' | 'indexPatternRefs'>> {
+  const state = createStateFromPersisted({ persistedState, references });
+  const { usedPatterns, indexPatternIds } = getUsedIndexPatterns({
+    state,
+    defaultIndexPatternId,
+    storage,
+    initialContext,
+    indexPatternRefs,
+  });
+
+  const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+
+  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedPatterns);
+
+  const indexPatterns = await getOrLoadIndexPatterns({
+    patterns: usedPatterns,
+    notUsedPatterns,
+  });
+
+  // Priority list:
+  // * start with the indexPattern in context
+  // * then fallback to the used ones
+  // * then as last resort use a first one from not used refs
+  const currentIndexPatternId = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns].find(
+    (id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]
+  );
+
+  if (currentIndexPatternId) {
+    setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  }
+
+  return {
+    layers: {},
+    ...state,
+    currentIndexPatternId,
+    existingFields: {},
+    isFirstExistenceFetch: true,
+  };
+}
+
 export async function loadInitialState({
   persistedState,
   references,

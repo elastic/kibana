@@ -89,8 +89,8 @@ function AnnotationLayerHeaderContent({
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
       trigger={{
-        label: frame.indexPatterns[indexPatternId].name || notFoundTitleLabel,
-        title: frame.indexPatterns[indexPatternId].title || notFoundTitleLabel,
+        label: frame.indexPatterns[indexPatternId]?.name || notFoundTitleLabel,
+        title: frame.indexPatterns[indexPatternId]?.title || notFoundTitleLabel,
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',

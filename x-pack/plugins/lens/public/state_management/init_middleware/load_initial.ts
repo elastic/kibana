@@ -108,6 +108,8 @@ export function loadInitial(
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
+    // @TODO: preload indexpattern refs
+    // @TODO: collect all used dataviews/indexpatterns from datasources & visualizations
     return initializeDatasources(datasourceMap, lens.datasourceStates, undefined, initialContext, {
       isFullEditor: true,
     })

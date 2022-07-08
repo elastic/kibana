@@ -12,6 +12,8 @@ import { PointStyleProps } from '../types';
 
 export type QueryPointEventAnnotationArgs = {
   field: string;
+  textSource?: string;
+  textField?: string;
   query: ExpressionValueBoxed<'kibana_query', Query>;
   additionalFields?: string[];
 } & PointStyleProps;

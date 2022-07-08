@@ -19,6 +19,7 @@ import {
   EuiText,
   transparentize,
   EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import moment from 'moment';
@@ -38,7 +39,11 @@ import {
   isQueryAnnotation,
 } from '@kbn/event-annotation-plugin/public';
 import Color from 'color';
-import { FieldOptionValue, FieldPicker } from '../../../shared_components/field_picker';
+import {
+  FieldOption,
+  FieldOptionValue,
+  FieldPicker,
+} from '../../../shared_components/field_picker';
 import { getDataLayers } from '../../visualization_helpers';
 import { FormatFactory } from '../../../../common';
 import { DimensionEditorSection, NameInput, useDebouncedValue } from '../../../shared_components';
@@ -123,6 +128,7 @@ const sanitizeProperties = (annotation: EventAnnotationConfig) => {
       'icon',
       'textVisibility',
       'textSource',
+      'textField',
       'query',
       'additionalFields',
     ]);
@@ -291,13 +297,46 @@ export const AnnotationsPanel = (
                 if (textDecorationSelected !== 'field') {
                   return null;
                 }
+                const currentIndexPattern = frame.indexPatterns[localLayer.indexPatternId];
+                // @TODO: refactor this to group fields by type
+                const options = currentIndexPattern.fields
+                  .filter(({ displayName }) => displayName)
+                  .map(
+                    (field) =>
+                      ({
+                        label: field.displayName,
+                        value: {
+                          type: 'field',
+                          field: field.name,
+                          dataType: field.type,
+                        },
+                        // @TODO: add the existing check here
+                        exists: true,
+                        compatible: true,
+                        'data-test-subj': `lns-fieldOption-${field.name}`,
+                      } as FieldOption<FieldOptionValue>)
+                  );
+                const selectedField = (currentAnnotation as PointInTimeQueryEventAnnotationConfig)
+                  .textField;
                 return (
                   <>
                     <EuiSpacer size="xs" />
                     <FieldPicker
-                      options={[]}
+                      selectedOptions={
+                        selectedField
+                          ? [
+                              {
+                                label: selectedField,
+                                value: { type: 'field', field: selectedField },
+                              },
+                            ]
+                          : []
+                      }
+                      options={options}
                       onChoose={function (choice: FieldOptionValue | undefined): void {
-                        throw new Error('Function not implemented.');
+                        if (choice) {
+                          setAnnotations({ textField: choice.field });
+                        }
                       }}
                       fieldIsInvalid={false}
                     />
@@ -372,6 +411,34 @@ export const AnnotationsPanel = (
           onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
         />
       </DimensionEditorSection>
+      {isQueryBased && (
+        <DimensionEditorSection
+          title={i18n.translate('xpack.lens.xyChart.tooltip', {
+            defaultMessage: 'Tooltip',
+          })}
+        >
+          <EuiFormRow
+            display="rowCompressed"
+            className="lnsRowCompressedMargin"
+            fullWidth
+            label={i18n.translate('xpack.lens.xyChart.annotation.tooltip', {
+              defaultMessage: 'Show additional fields',
+            })}
+          >
+            <EuiButtonEmpty
+              data-test-subj={'lns-annotation-tooltip-addField'}
+              size="xs"
+              iconType="plusInCircle"
+              onClick={() => {}}
+              isDisabled={false}
+            >
+              {i18n.translate('xpack.lens.xyChart.annotation.addField', {
+                defaultMessage: 'Add field',
+              })}
+            </EuiButtonEmpty>
+          </EuiFormRow>
+        </DimensionEditorSection>
+      )}
     </>
   );
 };
@@ -407,10 +474,11 @@ const ConfigPanelQueryAnnotation = ({
           field: field.name,
           dataType: field.type,
         },
+        // @TODO: add the existing check here
         exists: true,
         compatible: true,
         'data-test-subj': `lns-fieldOption-${field.name}`,
-      };
+      } as FieldOption<FieldOptionValue>;
     });
 
   const selectedField = annotation?.key.field;
@@ -437,7 +505,9 @@ const ConfigPanelQueryAnnotation = ({
               : []
           }
           onChoose={function (choice: FieldOptionValue | undefined): void {
-            throw new Error('Function not implemented.');
+            if (choice) {
+              onChange({ key: { type: 'point_in_time', field: choice.field } });
+            }
           }}
           fieldIsInvalid={false}
         />
@@ -453,7 +523,7 @@ const ConfigPanelQueryAnnotation = ({
         <QueryInput
           value={inputQuery}
           onChange={function (input: Query): void {
-            throw new Error('Function not implemented.');
+            onChange({ query: input });
           }}
           indexPatternTitle={frame.indexPatterns[layer.indexPatternId].title}
           isInvalid={false}

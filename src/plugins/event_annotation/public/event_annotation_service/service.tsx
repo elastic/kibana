@@ -7,6 +7,7 @@
  */
 
 import { partition } from 'lodash';
+import { queryToAst } from '@kbn/data-plugin/common';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
@@ -87,6 +88,8 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
           icon,
           key,
           textVisibility,
+          textField,
+          textSource,
           query,
           additionalFields,
         } = annotation;
@@ -104,6 +107,8 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
+                textSource: textVisibility ? [textSource || 'name'] : [],
+                textField: textVisibility && textSource === 'field' && textField ? [textField] : [],
                 isHidden: [Boolean(isHidden)],
                 query: query ? [queryToAst(query)] : [],
                 additionalFields: additionalFields || [],

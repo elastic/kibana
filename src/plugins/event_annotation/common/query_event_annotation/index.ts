@@ -70,6 +70,19 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
         defaultMessage: 'Visibility of the label on the annotation line',
       }),
     },
+    textSource: {
+      types: ['string'],
+      options: ['name', 'field'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.textSource', {
+        defaultMessage: `Source of annotation label`,
+      }),
+    },
+    textField: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.textField', {
+        defaultMessage: `Field name used for the annotation label`,
+      }),
+    },
     isHidden: {
       types: ['boolean'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.isHidden', {
