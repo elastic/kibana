@@ -14,10 +14,11 @@ const MAX_CASES_TO_SHOW = 3;
 const RecentCasesComponent = () => {
   const { cases } = useKibana().services;
 
-  const userCanCrud = useGetUserCasesPermissions()?.crud ?? false;
+  const permissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: permissions.crud, read: permissions.read };
 
   return cases.ui.getRecentCases({
-    userCanCrud,
+    permissions: casesPermissions,
     maxCasesToShow: MAX_CASES_TO_SHOW,
     owner: [APP_ID],
   });

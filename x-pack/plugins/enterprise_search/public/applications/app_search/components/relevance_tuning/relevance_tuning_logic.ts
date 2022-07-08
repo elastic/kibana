@@ -8,6 +8,8 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
+import type { SearchResult } from '@elastic/search-ui';
+
 import {
   flashSuccessToast,
   flashAPIErrors,
@@ -17,7 +19,6 @@ import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/schema/types';
 
 import { EngineLogic } from '../engine';
-import { Result } from '../result/types';
 
 import {
   UPDATE_SUCCESS_MESSAGE,
@@ -47,7 +48,7 @@ interface RelevanceTuningActions {
   setSearchSettings(searchSettings: SearchSettings): { searchSettings: SearchSettings };
   setFilterValue(value: string): string;
   setSearchQuery(value: string): string;
-  setSearchResults(searchResults: Result[]): Result[];
+  setSearchResults(searchResults: SearchResult[]): SearchResult[];
   setResultsLoading(resultsLoading: boolean): boolean;
   clearSearchResults(): void;
   resetSearchSettingsState(): void;
@@ -104,7 +105,7 @@ interface RelevanceTuningValues {
   query: string;
   unsavedChanges: boolean;
   dataLoading: boolean;
-  searchResults: Result[] | null;
+  searchResults: SearchResult[] | null;
   resultsLoading: boolean;
 }
 
@@ -278,7 +279,7 @@ export const RelevanceTuningLogic = kea<
       const filteredBoosts = removeEmptyValueBoosts(boosts);
 
       try {
-        const response = await http.post<{ results: Result[] }>(url, {
+        const response = await http.post<{ results: SearchResult[] }>(url, {
           query: {
             query,
           },
