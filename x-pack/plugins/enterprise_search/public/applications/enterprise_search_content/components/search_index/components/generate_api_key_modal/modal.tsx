@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues, useActions } from 'kea';
+
 import {
   EuiModal,
   EuiModalHeader,
@@ -25,7 +27,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import { GenerateApiKeyLogic } from '../../../../api/generate_api_key/generate_api_key_logic';
+
 export const GenerateApiKeyModal: React.FC = () => {
+  const { data } = useValues(GenerateApiKeyLogic);
+  const { makeRequest } = useActions(GenerateApiKeyLogic);
+
+  console.log(data);
   return (
     <EuiModal onClose={() => {}}>
       <EuiModalHeader>
@@ -59,7 +67,14 @@ export const GenerateApiKeyModal: React.FC = () => {
                     <EuiButtonIcon display="base" iconType="download" disabled />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton iconSide="left" iconType="plusInCircle" fill>
+                    <EuiButton
+                      iconSide="left"
+                      iconType="plusInCircle"
+                      fill
+                      onClick={() => {
+                        makeRequest({ indexName: ".ds-logs-enterprise_search.api-default-2022.07.06-000001", keyName: "test1" });
+                      }}
+                    >
                       Generate API Key
                     </EuiButton>
                   </EuiFlexItem>
