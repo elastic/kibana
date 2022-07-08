@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
@@ -20,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid pagination', function describeIndexTests() {
     before(async () => {
+      await browser.setWindowSize(1200, 2000);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
     });
@@ -27,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
     });
 
     beforeEach(async function () {
@@ -79,19 +82,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverTableFooter');
     });
 
-    it('should render exact number of rows which where configured in settings', async () => {
+    it('should render exact number of rows which where configured in the saved search or in settings', async () => {
       await kibanaServer.uiSettings.update({
         ...defaultSettings,
-        'discover:sampleSize': '4',
-        'discover:sampleRowsPerPage': '2',
+        'discover:sampleSize': 12,
+        'discover:sampleRowsPerPage': '6',
         hideAnnouncements: true,
       });
+
+      // first render is based on settings value
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      const rows = await dataGrid.getDocTableRows();
-      expect(rows.length).to.be(2);
+      expect((await dataGrid.getDocTableRows()).length).to.be(6);
       await testSubjects.existOrFail('pagination-button-1');
       await testSubjects.missingOrFail('pagination-button-2');
+
+      // now we change to 10 via popover
+      await testSubjects.click('tablePaginationPopoverButton');
+      await retry.try(async function () {
+        return testSubjects.exists('tablePagination-10-rows');
+      });
+      await testSubjects.click('tablePagination-10-rows');
+      await retry.try(async function () {
+        return (await dataGrid.getDocTableRows()).length === 10;
+      });
+
+      // save as a new search
+      const savedSearchTitle = 'search with saved rowsPerPage';
+      await PageObjects.discover.saveSearch(savedSearchTitle);
+
+      // start a new search session
+      await testSubjects.click('discoverNewButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
+
+      // open the saved search
+      await PageObjects.discover.loadSavedSearch(savedSearchTitle);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
     });
   });
 }
