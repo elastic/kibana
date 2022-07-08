@@ -15,10 +15,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiInMemoryTable,
   Pagination,
-  CriteriaWithPagination,
-  PropertySort,
   Direction,
   EuiLink,
   EuiSpacer,
@@ -31,7 +28,7 @@ import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from
 import { keyBy, uniq, get } from 'lodash';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
-import { ConfirmDeleteModal } from './components';
+import { Table, ConfirmDeleteModal } from './components';
 import type { Action } from './actions';
 import { reducer } from './reducer';
 
@@ -79,7 +76,7 @@ export interface State<T = unknown> {
   showDeleteModal: boolean;
   showLimitError: boolean;
   fetchError?: HttpFetchError;
-  filter: string;
+  searchQuery: string;
   selectedIds: string[];
   totalItems: number;
   tableColumns: Array<EuiBasicTableColumn<T>> | null;
@@ -95,7 +92,7 @@ function TableListView<T>({
   createItem,
   editItem,
   deleteItems,
-  initialFilter,
+  initialFilter: initialQuery,
   tableListTitle,
   entityName,
   entityNamePlural,
@@ -125,7 +122,7 @@ function TableListView<T>({
     showLimitError: false,
     selectedIds: [],
     tableColumns: null,
-    filter: initialFilter,
+    searchQuery: initialQuery,
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
@@ -135,7 +132,7 @@ function TableListView<T>({
   });
 
   const {
-    filter,
+    searchQuery,
     hasInitialFetchReturned,
     isFetchingItems,
     items,
@@ -149,7 +146,7 @@ function TableListView<T>({
     pagination,
     tableSort,
   } = state;
-  const hasNoItems = !isFetchingItems && items.length === 0 && !filter;
+  const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
 
   const tableColumns = useMemo(() => {
@@ -206,7 +203,7 @@ function TableListView<T>({
 
     try {
       const idx = ++fetchIdx.current;
-      const response = await findItems(filter);
+      const response = await findItems(searchQuery);
 
       if (!isMounted.current) {
         return;
@@ -227,7 +224,7 @@ function TableListView<T>({
         data: err,
       });
     }
-  }, [filter, findItems, listingLimit]);
+  }, [searchQuery, findItems, listingLimit]);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -399,93 +396,6 @@ function TableListView<T>({
     }
   }, [entityName, fetchError]);
 
-  const renderToolsLeft = useCallback(() => {
-    if (!deleteItems || selectedIds.length === 0) {
-      return;
-    }
-
-    return (
-      <EuiButton
-        color="danger"
-        iconType="trash"
-        onClick={() => dispatch({ type: 'onClickDeleteItems' })}
-        data-test-subj="deleteSelectedItems"
-      >
-        <FormattedMessage
-          id="kibana-react.tableListView.listing.deleteButtonMessage"
-          defaultMessage="Delete {itemCount} {entityName}"
-          values={{
-            itemCount: selectedIds.length,
-            entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
-          }}
-        />
-      </EuiButton>
-    );
-  }, [deleteItems, entityName, entityNamePlural, selectedIds]);
-
-  const renderTable = useCallback(() => {
-    const selection = deleteItems
-      ? {
-          onSelectionChange: (obj: T[]) => {
-            dispatch({ type: 'onSelectionChange', data: obj });
-          },
-        }
-      : undefined;
-
-    const search = {
-      onChange: ({ queryText }: { queryText: string }) =>
-        dispatch({ type: 'onFilterChange', data: queryText }),
-      toolsLeft: renderToolsLeft(),
-      defaultQuery: filter,
-      box: {
-        incremental: true,
-        'data-test-subj': 'tableListSearchBox',
-      },
-      filters: searchFilters ?? [],
-    };
-
-    const noItemsMessage = (
-      <FormattedMessage
-        id="kibana-react.tableListView.listing.noMatchedItemsMessage"
-        defaultMessage="No {entityNamePlural} matched your search."
-        values={{ entityNamePlural }}
-      />
-    );
-
-    return (
-      <EuiInMemoryTable
-        itemId="id"
-        items={items}
-        columns={tableColumns}
-        pagination={pagination}
-        loading={isFetchingItems}
-        message={noItemsMessage}
-        selection={selection}
-        search={search}
-        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
-        onChange={(criteria: CriteriaWithPagination<T>) =>
-          dispatch({ type: 'onTableChange', data: criteria })
-        }
-        data-test-subj="itemsInMemTable"
-        rowHeader={rowHeader}
-        tableCaption={tableCaption}
-      />
-    );
-  }, [
-    deleteItems,
-    entityNamePlural,
-    filter,
-    isFetchingItems,
-    items,
-    pagination,
-    renderToolsLeft,
-    rowHeader,
-    searchFilters,
-    tableCaption,
-    tableSort,
-    tableColumns,
-  ]);
-
   // ------------
   // Effects
   // ------------
@@ -542,7 +452,22 @@ function TableListView<T>({
       {children}
       {renderListingLimitWarning()}
       {renderFetchError()}
-      {renderTable()}
+      <Table
+        dispatch={dispatch}
+        items={items}
+        isFetchingItems={isFetchingItems}
+        searchQuery={searchQuery}
+        tableColumns={tableColumns}
+        tableSort={tableSort}
+        pagination={pagination}
+        selectedIds={selectedIds}
+        entityName={entityName}
+        entityNamePlural={entityNamePlural}
+        deleteItems={deleteItems}
+        searchFilters={searchFilters}
+        tableCaption={tableCaption}
+        rowHeader={rowHeader}
+      />
     </KibanaPageTemplate>
   );
 }

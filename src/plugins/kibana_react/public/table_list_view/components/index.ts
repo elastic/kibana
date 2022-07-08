@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export { Table } from './table';
 export { UpdatedAtField } from './updated_at_field';
 export { ConfirmDeleteModal } from './confirm_delete_modal';

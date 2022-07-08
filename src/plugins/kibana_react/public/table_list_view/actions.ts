@@ -47,7 +47,7 @@ export interface OnClickDeleteItemsAction {
 }
 
 export interface OnFilterChangeAction {
-  type: 'onFilterChange';
+  type: 'onSearchQueryChange';
   data: string;
 }
 

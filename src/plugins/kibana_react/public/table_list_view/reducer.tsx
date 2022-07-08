@@ -74,7 +74,7 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         ...state,
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: !state.filter ? sortBy<T>(items, 'title') : items,
+        items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
         totalItems: action.data.response.total,
         showLimitError: action.data.response.total > action.data.listingLimit,
         ...tableColumnState,
@@ -95,10 +95,10 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         fetchError: action.data,
       };
     }
-    case 'onFilterChange': {
+    case 'onSearchQueryChange': {
       return {
         ...state,
-        filter: action.data,
+        searchQuery: action.data,
         isFetchingItems: true,
       };
     }
