@@ -6,8 +6,15 @@
  */
 
 import type { EuiSwitchEvent, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu, EuiContextMenuPanel, EuiSwitch } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiSwitch,
+  EuiTextColor,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   UtilityBar,
@@ -54,6 +61,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
   }) => {
     const { timelines } = useKibana().services;
     const rulesTableContext = useRulesTableContextOptional();
+    const isAnyRuleSelected = numberSelectedItems > 0;
 
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -91,12 +99,26 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
               checked={isAutoRefreshOn ?? false}
               onChange={handleAutoRefreshSwitch(closePopover)}
               compressed
+              disabled={isAnyRuleSelected}
               data-test-subj="refreshSettingsSwitch"
             />,
+            ...(isAnyRuleSelected
+              ? [
+                  <div key="refreshSettingsSelectionNote">
+                    <EuiSpacer size="s" />
+                    <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
+                      <FormattedMessage
+                        id="xpack.securitySolution.detectionEngine.rules.refreshRulePopoverSelectionHelpText"
+                        defaultMessage="Note: Refresh is disabled while there is an active selection."
+                      />
+                    </EuiTextColor>
+                  </div>,
+                ]
+              : []),
           ]}
         />
       ),
-      [isAutoRefreshOn, handleAutoRefreshSwitch]
+      [isAutoRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
     );
 
     return (
@@ -181,7 +203,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
           )}
         </UtilityBarSection>
         {rulesTableContext && (
-          <UtilityBarSection>
+          <UtilityBarSection dataTestSubj="refreshRulesStatus">
             {timelines.getLastUpdated({
               showUpdating: rulesTableContext.state.isFetching,
               updatedAt: rulesTableContext.state.lastUpdated,

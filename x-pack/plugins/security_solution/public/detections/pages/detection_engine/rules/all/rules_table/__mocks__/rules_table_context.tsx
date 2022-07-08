@@ -51,6 +51,7 @@ export const useRulesTableContextMock = {
       setPerPage: jest.fn(),
       setSelectedRuleIds: jest.fn(),
       setSortingOptions: jest.fn(),
+      clearRulesSelection: jest.fn(),
     },
   }),
 };
