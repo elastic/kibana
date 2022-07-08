@@ -188,7 +188,9 @@ describe('execute()', () => {
               Object {
                 "body": Array [
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "jim": "bob",
@@ -228,7 +230,9 @@ describe('execute()', () => {
             Object {
               "body": Array [
                 Object {
-                  "index": Object {},
+                  "index": Object {
+                    "op_type": "create",
+                  },
                 },
                 Object {
                   "jimbob": "jr",
@@ -262,7 +266,9 @@ describe('execute()', () => {
           Object {
             "body": Array [
               Object {
-                "index": Object {},
+                "index": Object {
+                  "op_type": "create",
+                },
               },
               Object {
                 "jim": "bob",
@@ -295,13 +301,17 @@ describe('execute()', () => {
               Object {
                 "body": Array [
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "a": 1,
                   },
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "b": 2,
