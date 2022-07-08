@@ -691,12 +691,14 @@ export const LensTopNavMenu = ({
                       {}
                     ),
                     datasourceStates,
-                    indexPatternId: dataView.id,
+                    dataView,
                     setDatasourceState,
                   });
+                  setCurrentIndexPattern(dataView);
                   refreshFieldList();
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
@@ -733,7 +735,7 @@ export const LensTopNavMenu = ({
           {}
         ),
         datasourceStates,
-        indexPatternId: newIndexPatternId,
+        dataView: newIndexPatternId,
         setDatasourceState,
       });
     },

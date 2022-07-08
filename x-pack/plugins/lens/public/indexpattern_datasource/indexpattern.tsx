@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -146,12 +147,12 @@ export function getIndexPatternDatasource({
   const indexPatternsService = dataViews;
 
   const handleChangeIndexPattern = (
-    id: string,
+    dataView: string | DataView,
     state: IndexPatternPrivateState,
     setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
   ) => {
     changeIndexPattern({
-      id,
+      id: dataView,
       state,
       setState,
       onError: onIndexPatternLoadError,
@@ -453,8 +454,8 @@ export function getIndexPatternDatasource({
         : undefined;
     },
 
-    updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
-      handleChangeIndexPattern(indexPatternId, state, setState);
+    updateCurrentIndexPatternId: ({ state, dataView, setState }) => {
+      handleChangeIndexPattern(dataView, state, setState);
     },
 
     refreshIndexPatternsList: async ({ indexPatternId, setState }) => {

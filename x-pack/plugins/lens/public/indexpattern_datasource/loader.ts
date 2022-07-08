@@ -108,11 +108,11 @@ export async function loadIndexPatterns({
   cache,
 }: {
   indexPatternsService: IndexPatternsService;
-  patterns: string[];
+  patterns: Array<string | DataView>;
   notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
 }) {
-  const missingIds = patterns.filter((id) => !cache[id]);
+  const missingIds = patterns.filter((id) => !cache[typeof id === 'string' ? id : id.id!]);
 
   if (missingIds.length === 0) {
     return cache;
@@ -124,7 +124,7 @@ export async function loadIndexPatterns({
   }
 
   const allIndexPatterns = await Promise.allSettled(
-    missingIds.map((id) => indexPatternsService.get(id))
+    missingIds.map((id) => (typeof id === 'string' ? indexPatternsService.get(id) : id))
   );
   // ignore rejected indexpatterns here, they're already handled at the app level
   let indexPatterns = allIndexPatterns
@@ -284,24 +284,25 @@ export async function loadInitialState({
 }
 
 export async function changeIndexPattern({
-  id,
+  id: idOrDataView,
   state,
   setState,
   onError,
   storage,
   indexPatternsService,
 }: {
-  id: string;
+  id: string | DataView;
   state: IndexPatternPrivateState;
   setState: SetState;
   onError: ErrorHandler;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
+  const id = typeof idOrDataView === 'string' ? idOrDataView : idOrDataView.id!;
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: state.indexPatterns,
-    patterns: [id],
+    patterns: [idOrDataView],
   });
 
   if (indexPatterns[id] == null) {

@@ -23,6 +23,7 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -283,7 +284,7 @@ export interface Datasource<T = unknown, P = unknown> {
   }) => T | undefined;
 
   updateCurrentIndexPatternId?: (props: {
-    indexPatternId: string;
+    dataView: DataView | string;
     state: T;
     setState: StateSetter<T>;
   }) => void;

@@ -61,18 +61,18 @@ export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Docum
 export function handleIndexPatternChange({
   activeDatasources,
   datasourceStates,
-  indexPatternId,
+  dataView,
   setDatasourceState,
 }: {
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
-  indexPatternId: string;
+  dataView: DataView | string;
   setDatasourceState: StateSetter<unknown>;
 }): void {
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     datasource?.updateCurrentIndexPatternId?.({
       state: datasourceStates[id].state,
-      indexPatternId,
+      dataView,
       setState: setDatasourceState,
     });
   });
