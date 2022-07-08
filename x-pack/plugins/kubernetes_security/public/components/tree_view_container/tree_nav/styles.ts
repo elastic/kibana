@@ -26,9 +26,14 @@ export const useStyles = () => {
       overflowY: 'auto',
     };
 
+    const treeViewLegend: CSSObject = {
+      textTransform: 'capitalize',
+    };
+
     return {
       treeViewSwitcher,
       treeViewContainer,
+      treeViewLegend,
     };
   }, [euiTheme]);
 
