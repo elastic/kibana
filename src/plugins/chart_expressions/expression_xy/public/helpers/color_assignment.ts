@@ -61,10 +61,12 @@ export const getAllSeries = (
 
   const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
 
-  return formattedDatatable.table.rows.reduce<string[]>((acc, row) => {
+  const allSeries: string[] = [];
+
+  formattedDatatable.table.rows.forEach((row) => {
     const splitName = getSplitName(splitAccessors, formattedDatatable, row, fieldFormats);
 
-    const allRowSeries = accessors.reduce<string[]>((names, accessor) => {
+    accessors.forEach((accessor) => {
       const yAccessor = getAccessorByDimension(accessor, formattedDatatable.table.columns);
       const yTitle = columnToLabelMap[yAccessor] ?? titles?.yTitles?.[yAccessor] ?? null;
       let name = yTitle;
@@ -72,12 +74,13 @@ export const getAllSeries = (
         name = accessors.length > 1 ? `${splitName} - ${yTitle}` : splitName;
       }
 
-      return names.includes(name) ? names : [...names, name];
-    }, []);
+      if (!allSeries.includes(name)) {
+        allSeries.push(name);
+      }
+    });
+  });
 
-    // need only uniq values
-    return [...new Set([...acc, ...allRowSeries])];
-  }, []);
+  return allSeries;
 };
 
 export function getColorAssignments(

@@ -509,30 +509,22 @@ export function XYChart({
       },
     ];
 
-    let splitPoints: FilterEvent['data']['data'] = [];
+    const splitPoints: FilterEvent['data']['data'] = [];
 
     if (xySeries.seriesKeys.length > 1) {
-      splitPoints = [...xySeries.splitAccessors].reduce<FilterEvent['data']['data']>(
-        (acc, [accessor, value]) => {
-          const splitPointRowIndex = table.rows.findIndex((row) => {
-            return row[accessor] === value;
+      xySeries.splitAccessors.forEach((value, accessor) => {
+        const splitPointRowIndex = table.rows.findIndex((row) => {
+          return row[accessor] === value;
+        });
+        if (splitPointRowIndex !== -1) {
+          splitPoints.push({
+            row: splitPointRowIndex,
+            column: table.columns.findIndex((column) => column.id === accessor),
+            value: table.rows[splitPointRowIndex][accessor],
+            table,
           });
-          if (splitPointRowIndex !== -1) {
-            return [
-              ...acc,
-              {
-                row: splitPointRowIndex,
-                column: table.columns.findIndex((column) => column.id === accessor),
-                value: table.rows[splitPointRowIndex][accessor],
-                table,
-              },
-            ];
-          }
-
-          return acc;
-        },
-        []
-      );
+        }
+      });
     }
     const context: FilterEvent['data'] = {
       data: [...points, ...splitPoints],
