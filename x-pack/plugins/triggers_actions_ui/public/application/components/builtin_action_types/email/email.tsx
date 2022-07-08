@@ -105,6 +105,7 @@ export function getActionType(
         bcc: new Array<string>(),
         message: new Array<string>(),
         subject: new Array<string>(),
+        isSummary: new Array<string>(),
       };
       const validationResult = { errors };
 

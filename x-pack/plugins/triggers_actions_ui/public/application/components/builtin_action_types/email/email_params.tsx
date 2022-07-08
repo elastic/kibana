@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { EmailActionParams } from '../types';
@@ -21,11 +21,12 @@ export const EmailParamsFields = ({
   errors,
   messageVariables,
   defaultMessage,
+  defaultSummaryMessage,
   isLoading,
   isDisabled,
   showEmailSubjectAndMessage = true,
 }: ActionParamsProps<EmailActionParams>) => {
-  const { to, cc, bcc, subject, message } = actionParams;
+  const { to, cc, bcc, subject, message, isSummary } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
   const bccOptions = bcc ? bcc.map((label: string) => ({ label })) : [];
@@ -35,6 +36,7 @@ export const EmailParamsFields = ({
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]
   >([false, defaultMessage]);
+
   useEffect(() => {
     if (
       !actionParams?.message ||
@@ -47,12 +49,25 @@ export const EmailParamsFields = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
+
+  useEffect(() => {
+    if (isSummary) {
+      setDefaultMessageUsage([true, defaultSummaryMessage]);
+      editAction('message', defaultSummaryMessage, index);
+    } else {
+      setDefaultMessageUsage([true, defaultMessage]);
+      editAction('message', defaultMessage, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSummary]);
+
   const isToInvalid: boolean = to !== undefined && errors.to !== undefined && errors.to.length > 0;
   const isSubjectInvalid: boolean =
     subject !== undefined && errors.subject !== undefined && errors.subject.length > 0;
   const isCCInvalid: boolean = errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
+
   return (
     <>
       <EuiFormRow
@@ -226,6 +241,16 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       )}
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label="Summarize messages of multiple alerts in one email"
+          onChange={(e) => {
+            editAction('isSummary', e.target.checked, index);
+          }}
+          checked={isSummary!}
+        />
+      </EuiFormRow>
       {showEmailSubjectAndMessage && (
         <TextAreaWithMessageVariables
           index={index}

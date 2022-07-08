@@ -45,6 +45,7 @@ import { OmitMessageVariablesType } from '../../lib/action_variables';
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitMessageVariables?: OmitMessageVariablesType;
   defaultActionMessage?: string;
+  defaultSummaryActionMessage?: string;
 }
 
 export interface ActionAccordionFormProps {
@@ -52,6 +53,7 @@ export interface ActionAccordionFormProps {
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
+  defaultSummaryActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
@@ -81,6 +83,7 @@ export const ActionForm = ({
   messageVariables,
   actionGroups,
   defaultActionMessage,
+  defaultSummaryActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
@@ -362,6 +365,7 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
+              defaultSummaryActionMessage={defaultSummaryActionMessage}
               defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}

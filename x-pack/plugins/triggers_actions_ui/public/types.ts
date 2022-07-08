@@ -141,6 +141,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  defaultSummaryMessage?: string;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -304,6 +305,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  defaultSummaryActionMessage?: string;
   defaultRecoveryMessage?: string;
 }
 

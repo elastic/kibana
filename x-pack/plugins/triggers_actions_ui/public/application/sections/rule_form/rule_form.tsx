@@ -563,7 +563,11 @@ export const RuleForm = ({
                     defaultActionMessage:
                       ruleTypeModel?.defaultRecoveryMessage || recoveredActionGroupMessage,
                   }
-                : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
+                : {
+                    ...actionGroup,
+                    defaultActionMessage: ruleTypeModel?.defaultActionMessage,
+                    defaultSummaryActionMessage: ruleTypeModel?.defaultSummaryActionMessage,
+                  }
             )}
             getDefaultActionParams={getDefaultActionParams}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}

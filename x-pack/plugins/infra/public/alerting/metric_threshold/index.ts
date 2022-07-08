@@ -42,6 +42,12 @@ Reason:
 `,
       }
     ),
+    defaultSummaryActionMessage: i18n.translate(
+      'xpack.infra.metrics.alerting.threshold.defaultSummaryActionMessage',
+      {
+        defaultMessage: `Summary \\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}`,
+      }
+    ),
     requiresAppContext: false,
     format: formatReason,
   };

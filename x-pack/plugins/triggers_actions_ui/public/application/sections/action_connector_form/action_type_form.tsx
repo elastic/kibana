@@ -63,6 +63,7 @@ export type ActionTypeFormProps = {
   | 'setActionParamsProperty'
   | 'messageVariables'
   | 'defaultActionMessage'
+  | 'defaultSummaryActionMessage'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -84,6 +85,7 @@ export const ActionTypeForm = ({
   connectors,
   defaultActionGroupId,
   defaultActionMessage,
+  defaultSummaryActionMessage,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
@@ -252,6 +254,9 @@ export const ActionTypeForm = ({
               editAction={setActionParamsProperty}
               messageVariables={availableActionVariables}
               defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
+              defaultSummaryMessage={
+                selectedActionGroup?.defaultSummaryActionMessage ?? defaultSummaryActionMessage
+              }
               actionConnector={actionConnector}
             />
           </Suspense>
