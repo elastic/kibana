@@ -12,9 +12,8 @@ import {
   CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationResultChange,
   CrawlerDomainValidationStepName,
+  CrawlerDomainValidationStepState,
 } from '../../../../../api/crawler/types';
-
-import { CrawlerDomainValidationStepState } from './validation_step_panel';
 
 export const extractDomainAndEntryPointFromUrl = (
   url: string

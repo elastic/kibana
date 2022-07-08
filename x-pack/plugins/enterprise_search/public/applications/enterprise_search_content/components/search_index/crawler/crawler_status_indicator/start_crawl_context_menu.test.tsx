@@ -25,11 +25,10 @@ import { StartCrawlContextMenu } from './start_crawl_context_menu';
 
 const MOCK_ACTIONS = {
   // CrawlerLogic
+  reApplyCrawlRules: jest.fn(),
   startCrawl: jest.fn(),
   // CrawlCustomSettingsFlyoutLogic
   showFlyout: jest.fn(),
-  // CrawlSelectDomainsModalLogic
-  showModal: jest.fn(),
 };
 
 describe('StartCrawlContextMenu', () => {
@@ -71,16 +70,16 @@ describe('StartCrawlContextMenu', () => {
       expect(MOCK_ACTIONS.startCrawl).toHaveBeenCalled();
     });
 
-    it('can open a modal to start a crawl with selected domains', () => {
+    it('can open a modal to start a crawl with custom settings', () => {
       menuItems.at(1).simulate('click');
 
-      expect(MOCK_ACTIONS.showModal).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.showFlyout).toHaveBeenCalled();
     });
 
-    it('can open a modal to start a crawl with custom settings', () => {
+    it('can reapply crawl rules', () => {
       menuItems.at(2).simulate('click');
 
-      expect(MOCK_ACTIONS.showFlyout).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.reApplyCrawlRules).toHaveBeenCalled();
     });
   });
 });

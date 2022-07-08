@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -24,31 +24,9 @@ const MOCK_VALUES = {
   mostRecentCrawlRequestStatus: CrawlerStatus.Success,
 };
 
-const MOCK_ACTIONS = {
-  startCrawl: jest.fn(),
-  stopCrawl: jest.fn(),
-};
-
 describe('CrawlerStatusIndicator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockActions(MOCK_ACTIONS);
-  });
-
-  describe('when status is not a valid status', () => {
-    it('is disabled', () => {
-      // this tests a codepath that should be impossible to reach, status should always be a CrawlerStatus
-      // but we use a switch statement and need to test the default case for this to receive 100% coverage
-      setMockValues({
-        ...MOCK_VALUES,
-        mostRecentCrawlRequestStatus: null,
-      });
-
-      const wrapper = shallow(<CrawlerStatusIndicator />);
-      expect(wrapper.is(EuiButton)).toEqual(true);
-      expect(wrapper.render().text()).toContain('Start a crawl');
-      expect(wrapper.prop('disabled')).toEqual(true);
-    });
   });
 
   describe('when there are no domains', () => {
@@ -60,26 +38,13 @@ describe('CrawlerStatusIndicator', () => {
 
       const wrapper = shallow(<CrawlerStatusIndicator />);
       expect(wrapper.is(EuiButton)).toEqual(true);
-      expect(wrapper.render().text()).toContain('Start a crawl');
       expect(wrapper.prop('disabled')).toEqual(true);
     });
   });
 
-  describe('when the status is success', () => {
-    it('renders an CrawlerStatusIndicator with a start crawl button', () => {
-      setMockValues({
-        ...MOCK_VALUES,
-        mostRecentCrawlRequestStatus: CrawlerStatus.Success,
-      });
-
-      const wrapper = shallow(<CrawlerStatusIndicator />);
-      expect(wrapper.is(StartCrawlContextMenu)).toEqual(true);
-    });
-  });
-
-  [CrawlerStatus.Failed, CrawlerStatus.Canceled].forEach((status) => {
+  [CrawlerStatus.Success, CrawlerStatus.Failed, CrawlerStatus.Canceled].forEach((status) => {
     describe(`when the status is ready for retry: ${status}`, () => {
-      it('renders an CrawlerStatusIndicator with a retry crawl button', () => {
+      it('renders an CrawlerStatusIndicator with start crawl button', () => {
         setMockValues({
           ...MOCK_VALUES,
           mostRecentCrawlRequestStatus: status,
@@ -102,7 +67,6 @@ describe('CrawlerStatusIndicator', () => {
         const wrapper = shallow(<CrawlerStatusIndicator />);
         expect(wrapper.is(EuiButton)).toEqual(true);
         expect(wrapper.render().text()).toContain('Pending...');
-        expect(wrapper.prop('disabled')).toEqual(true);
         expect(wrapper.prop('isLoading')).toEqual(true);
       });
     });
@@ -131,7 +95,6 @@ describe('CrawlerStatusIndicator', () => {
 
       const wrapper = shallow(<CrawlerStatusIndicator />);
       expect(wrapper.is(StopCrawlPopoverContextMenu)).toEqual(true);
-      expect(wrapper.prop('stopCrawl')).toEqual(MOCK_ACTIONS.stopCrawl);
     });
   });
 
@@ -148,6 +111,20 @@ describe('CrawlerStatusIndicator', () => {
         expect(wrapper.render().text()).toContain('Stopping...');
         expect(wrapper.prop('isLoading')).toEqual(true);
       });
+    });
+  });
+
+  describe('when status is not a valid status', () => {
+    it('renders an CrawlerStatusIndicator with start crawl button', () => {
+      // this tests a codepath that should be impossible to reach, status should always be a CrawlerStatus
+      // but we use a switch statement and need to test the default case for this to receive 100% coverage
+      setMockValues({
+        ...MOCK_VALUES,
+        mostRecentCrawlRequestStatus: null,
+      });
+
+      const wrapper = shallow(<CrawlerStatusIndicator />);
+      expect(wrapper.is(StartCrawlContextMenu)).toEqual(true);
     });
   });
 });

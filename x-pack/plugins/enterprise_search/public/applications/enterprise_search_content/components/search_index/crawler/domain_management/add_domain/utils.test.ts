@@ -57,7 +57,7 @@ describe('getDomainWithProtocol', () => {
 
     expect(result).toEqual('https://elastic.co');
     expect(http.post).toHaveBeenCalledTimes(1);
-    expect(http.post).toHaveBeenCalledWith('/internal/app_search/crawler/validate_url', {
+    expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/crawler/validate_url', {
       body: JSON.stringify({ url: 'https://elastic.co', checks: ['tcp', 'url_request'] }),
     });
   });
@@ -70,7 +70,7 @@ describe('getDomainWithProtocol', () => {
 
     expect(result).toEqual('http://elastic.co');
     expect(http.post).toHaveBeenCalledTimes(2);
-    expect(http.post).toHaveBeenLastCalledWith('/internal/app_search/crawler/validate_url', {
+    expect(http.post).toHaveBeenLastCalledWith('/internal/enterprise_search/crawler/validate_url', {
       body: JSON.stringify({ url: 'http://elastic.co', checks: ['tcp', 'url_request'] }),
     });
   });

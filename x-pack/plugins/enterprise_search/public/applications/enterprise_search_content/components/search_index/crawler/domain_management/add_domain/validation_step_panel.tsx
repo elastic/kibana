@@ -16,16 +16,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { CrawlerDomainValidationStep } from '../../../../../api/crawler/types';
+
 import { domainValidationStateToPanelColor } from './utils';
 import { ValidationStateIcon } from './validation_state_icon';
-
-export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'warning' | 'invalid';
-
-export interface CrawlerDomainValidationStep {
-  blockingFailure?: boolean;
-  message?: string;
-  state: CrawlerDomainValidationStepState;
-}
 
 interface ValidationStepPanelProps {
   action?: React.ReactNode;

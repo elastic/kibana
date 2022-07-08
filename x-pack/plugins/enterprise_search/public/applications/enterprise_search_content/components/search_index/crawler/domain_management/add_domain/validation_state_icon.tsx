@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
-import { CrawlerDomainValidationStepState } from './types';
+import { CrawlerDomainValidationStepState } from '../../../../../api/crawler/types';
 
 export const ValidationStateIcon: React.FC<{ state: CrawlerDomainValidationStepState }> = ({
   state,
