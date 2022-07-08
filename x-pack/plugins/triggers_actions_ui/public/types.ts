@@ -66,6 +66,7 @@ import type {
   FieldBrowserProps,
   BrowserFieldItem,
 } from './application/sections/field_browser/types';
+import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -112,6 +113,7 @@ export type {
   CreateFieldComponent,
   GetFieldTableColumns,
   BrowserFieldItem,
+  RulesListVisibleColumns,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -362,6 +364,7 @@ export interface RuleDefinitionProps {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
+  filteredRuleTypes?: string[];
 }
 
 export enum Percentiles {

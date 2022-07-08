@@ -971,7 +971,10 @@ describe('rules_list component with props', () => {
           name: 'Test2',
         },
       ]);
-      loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+      loadRuleTypes.mockResolvedValue([
+        ruleTypeFromApi,
+        { ...ruleTypeFromApi, id: 'test_rule_type2' },
+      ]);
       loadAllActions.mockResolvedValue([]);
       loadRuleAggregations.mockResolvedValue({
         ruleEnabledStatus: { enabled: 2, disabled: 0 },

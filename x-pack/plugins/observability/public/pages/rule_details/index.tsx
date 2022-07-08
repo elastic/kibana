@@ -332,7 +332,11 @@ export function RuleDetailsPage() {
         })}
 
         {/* Right side of Rule Summary */}
-        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
+        {getRuleDefinition({
+          filteredRuleTypes,
+          rule,
+          onEditRule: () => reloadRule(),
+        } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

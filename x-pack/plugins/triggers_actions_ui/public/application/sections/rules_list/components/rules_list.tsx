@@ -87,6 +87,7 @@ import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregatio
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { RulesListVisibleColumns } from './rules_list_column_selector';
 
 const ENTER_KEY = 13;
 
@@ -106,6 +107,7 @@ export interface RulesListProps {
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
+  visibleColumns?: RulesListVisibleColumns[];
 }
 
 interface RuleTypeState {
@@ -137,6 +139,7 @@ export const RulesList = ({
   onLastResponseFilterChange,
   refresh,
   rulesListKey,
+  visibleColumns,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -805,6 +808,7 @@ export const RulesList = ({
         }}
         rulesListKey={rulesListKey}
         config={config}
+        visibleColumns={visibleColumns}
       />
       {manageLicenseModalOpts && (
         <ManageLicenseModal
