@@ -11,6 +11,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import { BoolQuery } from '@kbn/es-query';
+import { EuiIconProps } from '@elastic/eui';
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -61,3 +62,11 @@ export interface TreeNavSelection {
   [KubernetesCollection.pod]?: string;
   [KubernetesCollection.containerImage]?: string;
 }
+
+export type DynamicTree = {
+  key: string;
+  type: KubernetesCollection;
+  iconProps: EuiIconProps;
+  name: string;
+  namePlural: string;
+};
