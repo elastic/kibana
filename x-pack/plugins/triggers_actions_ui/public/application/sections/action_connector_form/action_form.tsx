@@ -35,7 +35,11 @@ import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
+import {
+  VIEW_LICENSE_OPTIONS_LINK,
+  DEFAULT_HIDDEN_ACTION_TYPES,
+  RULES_HIDDEN_ACTION_TYPES,
+} from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
@@ -237,6 +241,7 @@ export const ActionForm = ({
        * If actionTypes are set, hidden connectors are filtered out. Otherwise, they are not.
        */
       .filter(({ id }) => actionTypes ?? !DEFAULT_HIDDEN_ACTION_TYPES.includes(id))
+      .filter(({ id }) => actionTypes ?? !RULES_HIDDEN_ACTION_TYPES.includes(id))
       .filter((item) => actionTypesIndex[item.id])
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
