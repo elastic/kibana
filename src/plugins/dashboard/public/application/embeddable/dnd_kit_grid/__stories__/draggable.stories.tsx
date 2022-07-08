@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { DndContext, DragMoveEvent, DragOverlay } from '@dnd-kit/core';
 import { createSnapModifier } from '@dnd-kit/modifiers';
 import { debounce } from 'lodash';
@@ -78,7 +78,7 @@ export const BasicExample = () => {
       newPanelState.deltaPos = newPanelState.initPos;
     }
     setGridState({ ...gridState, [id]: newPanelState });
-  }, 10);
+  }, 200);
 
   return (
     <DndContext
