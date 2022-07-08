@@ -209,6 +209,7 @@ describe('SecurityNavControl', () => {
                   }
                 }
               />,
+              "onClick": [Function],
             },
             Object {
               "data-test-subj": "userMenuLink__link1",
@@ -326,6 +327,7 @@ describe('SecurityNavControl', () => {
                   }
                 }
               />,
+              "onClick": [Function],
             },
             Object {
               "data-test-subj": "logoutLink",
