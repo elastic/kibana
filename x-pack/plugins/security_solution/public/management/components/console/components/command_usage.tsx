@@ -130,7 +130,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   }, [commandDef.args, hasArgs]);
 
   const parametersDescriptionList = (title: string, parameters: CommandDetails) => {
-    const description = parameters.map((item, index) => (
+    const description = parameters.map((item) => (
       <div>
         <ConsoleCodeBlock bold inline>
           {item.title}

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { HostStatus } from '../../../../common/endpoint/types';
 
-export const agentStatusText = (hostStatus: HostStatus) => {
+export const getAgentStatusText = (hostStatus: HostStatus) => {
   return i18n.translate('xpack.securitySolution.endpoint.list.hostStatusValue', {
     defaultMessage:
       '{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} unenrolled {Unenrolled} other {Unhealthy}}',

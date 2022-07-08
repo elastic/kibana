@@ -56,15 +56,17 @@ const StyledFacetButton = euiStyled(EuiFacetButton)`
 `;
 
 const customDescriptionListCss = css`
-  dt,
-  dd {
-    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
-    font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
-    margin-top: ${(props) => props.theme.eui.euiSizeS} !important;
-  }
-  dt {
-    font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
-    margin-top: ${(props) => props.theme.eui.euiSizeS} !important;
+  &.euiDescriptionList {
+    > .euiDescriptionList__title {
+      color: ${(props) => props.theme.eui.euiColorDarkShade};
+      font-size: ${(props) => props.theme.eui.euiFontSizeXS};
+      margin-top: ${(props) => props.theme.eui.euiSizeS};
+    }
+
+    > .euiDescriptionList__description {
+      font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+      margin-top: ${(props) => props.theme.eui.euiSizeS};
+    }
   }
 `;
 
@@ -97,7 +99,7 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
   transparentBackground: true,
   paddingSize: 'none',
 })`
-  code: {
+  code {
     color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
   }
 `;

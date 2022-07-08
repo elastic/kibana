@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
-import { agentStatusText } from './agent_status_text';
+import { getAgentStatusText } from './agent_status_text';
 
 export const AgentStatus = React.memo(({ hostStatus }: { hostStatus: HostStatus }) => {
   return (
@@ -18,7 +18,7 @@ export const AgentStatus = React.memo(({ hostStatus }: { hostStatus: HostStatus 
       data-test-subj="rowHostStatus"
       className="eui-textTruncate"
     >
-      {agentStatusText(hostStatus)}
+      {getAgentStatusText(hostStatus)}
     </EuiBadge>
   );
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useCallback } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpFetchError } from '@kbn/core/public';
@@ -20,7 +20,7 @@ import type { CommandExecutionComponentProps } from '../console/types';
 import { FormattedError } from '../formatted_error';
 import { ConsoleCodeBlock } from '../console/components/console_code_block';
 import { POLICY_STATUS_TO_TEXT } from '../../pages/endpoint_hosts/view/host_constants';
-import { agentStatusText } from '../../../common/components/endpoint/agent_status_text';
+import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<
@@ -115,19 +115,11 @@ export const EndpointStatusActionResult = memo<
     }
   }, [fetchedPendingActionsSummary, setStore]);
 
-  if (detailsFetchError) {
-    return (
-      <ResultComponent showAs="failure">
-        <FormattedError error={detailsFetchError} />
-      </ResultComponent>
-    );
-  }
+  const getStatusDescriptionList = useCallback(() => {
+    if (!endpointDetails) {
+      return undefined;
+    }
 
-  if (isFetching || !endpointDetails) {
-    return <ResultComponent showAs="pending" />;
-  }
-
-  const statusDescriptionList = () => {
     const agentStatus = () => {
       let isolateStatus = '';
 
@@ -145,7 +137,7 @@ export const EndpointStatusActionResult = memo<
             defaultMessage: 'Releasing',
           }
         );
-      } else if (endpointDetails.metadata.Endpoint.state?.isolation) {
+      } else if (endpointDetails?.metadata.Endpoint.state?.isolation) {
         isolateStatus = i18n.translate(
           'xpack.securitySolution.endpointResponseActions.status.isolated',
           {
@@ -154,7 +146,7 @@ export const EndpointStatusActionResult = memo<
         );
       }
 
-      return `${agentStatusText(endpointDetails.host_status)}${
+      return `${getAgentStatusText(endpointDetails.host_status)}${
         isolateStatus.length > 0 ? ` - ${isolateStatus}` : ''
       }`;
     };
@@ -225,8 +217,24 @@ export const EndpointStatusActionResult = memo<
         data-test-subj={'agent-status-console-output'}
       />
     );
-  };
+  }, [
+    pendingIsolationActions.pendingIsolate,
+    pendingIsolationActions.pendingUnIsolate,
+    endpointDetails,
+  ]);
 
-  return <ResultComponent showTitle={false}>{statusDescriptionList()}</ResultComponent>;
+  if (detailsFetchError) {
+    return (
+      <ResultComponent showAs="failure">
+        <FormattedError error={detailsFetchError} />
+      </ResultComponent>
+    );
+  }
+
+  if (isFetching || !endpointDetails) {
+    return <ResultComponent showAs="pending" />;
+  }
+
+  return <ResultComponent showTitle={false}>{getStatusDescriptionList()}</ResultComponent>;
 });
 EndpointStatusActionResult.displayName = 'EndpointStatusActionResult';
