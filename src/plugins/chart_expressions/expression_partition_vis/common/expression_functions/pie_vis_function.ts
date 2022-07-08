@@ -163,10 +163,6 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       },
     };
 
-    if (!Object.values(Position).includes(args.legendPosition)) {
-      throw new Error(errors.invalidLegendPositionError(args.legendPosition));
-    }
-
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.reset();
       handlers.inspectorAdapters.tables.allowCsvExport = true;

@@ -113,10 +113,6 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       throw new Error(errors.moreThanNBucketsAreNotSupportedError(maxSupportedBuckets));
     }
 
-    if (!Object.values(Position).includes(args.legendPosition)) {
-      throw new Error(errors.invalidLegendPositionError(args.legendPosition));
-    }
-
     if (args.splitColumn && args.splitRow) {
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }

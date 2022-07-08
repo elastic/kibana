@@ -269,6 +269,10 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.valuesLabel', {
         defaultMessage: 'Values',
       }),
+    getValuesToggle: () =>
+      i18n.translate('xpack.canvas.uis.arguments.valuesToggle', {
+        defaultMessage: 'Show values',
+      }),
     getValuesFormatLabel: () =>
       i18n.translate('xpack.canvas.uis.arguments.valuesFormatLabel', {
         defaultMessage: 'Values format',

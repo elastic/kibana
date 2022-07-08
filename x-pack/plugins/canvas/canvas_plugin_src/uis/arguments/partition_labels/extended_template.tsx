@@ -111,7 +111,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
           compressed
           checked={showValues}
           onChange={onToggleFieldChange(VALUES_FIELD)}
-          label="Show"
+          label={strings.getValuesToggle()}
         />
       </EuiFormRow>
       {showValues && (

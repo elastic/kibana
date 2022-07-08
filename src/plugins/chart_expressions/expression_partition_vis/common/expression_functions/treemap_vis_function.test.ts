@@ -108,15 +108,6 @@ describe('interpreter/functions#treemapVis', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  it('throws error if provided not valid legend position', async () => {
-    expect(() =>
-      fn(context, {
-        ...visConfig,
-        legendPosition: 'some not valid position',
-      } as any)
-    ).toThrowErrorMatchingSnapshot();
-  });
-
   it('throws error if provided split row and split column at once', async () => {
     const splitDimension: ExpressionValueVisDimension = {
       type: 'vis_dimension',
