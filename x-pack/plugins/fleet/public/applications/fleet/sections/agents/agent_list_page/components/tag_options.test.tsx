@@ -6,16 +6,11 @@
  */
 
 import React from 'react';
-import { debounce } from 'lodash';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import { useUpdateTags } from '../hooks';
 
 import { TagOptions } from './tag_options';
-
-jest.mock('lodash', () => ({
-  debounce: jest.fn(),
-}));
 
 jest.mock('../hooks', () => ({
   useUpdateTags: jest.fn().mockReturnValue({
@@ -33,10 +28,6 @@ describe('TagOptions', () => {
     mockBulkUpdateTags.mockReset();
     mockBulkUpdateTags.mockResolvedValue({});
     isTagHovered = true;
-    (debounce as jest.Mock).mockImplementationOnce((fn) => (newName: string) => {
-      fn(newName);
-      onTagsUpdated();
-    });
   });
 
   const renderComponent = () => {
@@ -58,17 +49,24 @@ describe('TagOptions', () => {
     });
   });
 
-  it('should delete tag when button is clicked', () => {
+  it('should delete tag when delete button is clicked', () => {
     const result = renderComponent();
 
     fireEvent.click(result.getByRole('button'));
 
     fireEvent.click(result.getByText('Delete tag'));
 
-    expect(mockBulkUpdateTags).toHaveBeenCalledWith('tags:agent', [], ['agent'], expect.anything());
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'tags:agent',
+      [],
+      ['agent'],
+      expect.anything(),
+      'Tag deleted',
+      'Tag delete failed'
+    );
   });
 
-  it('should rename tag when name input is changed', async () => {
+  it('should rename tag when enter key is pressed', async () => {
     const result = renderComponent();
 
     fireEvent.click(result.getByRole('button'));
@@ -77,13 +75,17 @@ describe('TagOptions', () => {
     fireEvent.input(nameInput, {
       target: { value: 'newName' },
     });
+    fireEvent.keyDown(nameInput, {
+      key: 'Enter',
+    });
 
-    expect(onTagsUpdated).toHaveBeenCalled();
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
       'tags:agent',
       ['newName'],
       ['agent'],
-      expect.anything()
+      expect.anything(),
+      'Tag renamed',
+      'Tag rename failed'
     );
   });
 });
