@@ -149,6 +149,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
+        skipArchive: true,
       });
 
       let pkgInfo: PackageInfo;
