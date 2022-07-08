@@ -59,7 +59,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             // @ts-expect-error update types
-            delete draft.version;
+            draft.version = '';
           } else {
             draft.version = draft.version[0];
           }
