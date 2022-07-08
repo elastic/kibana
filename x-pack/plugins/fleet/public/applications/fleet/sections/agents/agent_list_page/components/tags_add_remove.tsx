@@ -64,15 +64,29 @@ export const TagsAddRemove: React.FC<Props> = ({
     setLabels(labelsFromTags(allTags));
   }, [allTags, labelsFromTags]);
 
-  const updateTags = async (tagsToAdd: string[], tagsToRemove: string[]) => {
+  const updateTags = async (
+    tagsToAdd: string[],
+    tagsToRemove: string[],
+    successMessage?: string,
+    errorMessage?: string
+  ) => {
     if (agentId) {
       updateTagsHook.updateTags(
         agentId,
         difference(selectedTags, tagsToRemove).concat(tagsToAdd),
-        () => onTagsUpdated()
+        () => onTagsUpdated(),
+        successMessage,
+        errorMessage
       );
     } else {
-      updateTagsHook.bulkUpdateTags(agents!, tagsToAdd, tagsToRemove, () => onTagsUpdated());
+      updateTagsHook.bulkUpdateTags(
+        agents!,
+        tagsToAdd,
+        tagsToRemove,
+        () => onTagsUpdated(),
+        successMessage,
+        errorMessage
+      );
     }
   };
 
@@ -136,7 +150,16 @@ export const TagsAddRemove: React.FC<Props> = ({
                 if (!searchValue) {
                   return;
                 }
-                updateTags([searchValue], []);
+                updateTags(
+                  [searchValue],
+                  [],
+                  i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
+                    defaultMessage: 'Tag created',
+                  }),
+                  i18n.translate('xpack.fleet.createAgentTags.errorNotificationTitle', {
+                    defaultMessage: 'Tag creation failed',
+                  })
+                );
               }}
             >
               <EuiIcon type="plus" />{' '}
