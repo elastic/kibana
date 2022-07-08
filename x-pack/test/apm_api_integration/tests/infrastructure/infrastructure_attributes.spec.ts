@@ -13,8 +13,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  const goServiceName = 'synth-go';
-  const javaServiceName = 'synth-java';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
@@ -41,7 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await callApi(goServiceName);
+        const response = await callApi('synth-go');
         expect(response.status).to.be(200);
         expect(response.body.containerIds.length).to.be(0);
         expect(response.body.hostNames.length).to.be(0);
@@ -63,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('when service runs in container', () => {
           it('returns arrays of container ids and pod names', async () => {
-            const response = await callApi(goServiceName);
+            const response = await callApi('synth-go');
             expect(response.status).to.be(200);
             expect(response.body.containerIds.length).to.be(1);
             // hostNames is always returning empty
@@ -73,9 +71,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('when service NOT runs in container', () => {
+        describe('when service does NOT run in container', () => {
           it('returns array of host names', async () => {
-            const response = await callApi(javaServiceName);
+            const response = await callApi('synth-java');
             expect(response.status).to.be(200);
             expect(response.body.containerIds.length).to.be(0);
             expect(response.body.hostNames.length).to.be(1);
