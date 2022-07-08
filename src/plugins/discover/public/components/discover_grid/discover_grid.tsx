@@ -172,6 +172,10 @@ export interface DiscoverGridProps {
    * Update rows per page state
    */
   onUpdateRowsPerPage?: (rowsPerPage: number) => void;
+  /**
+   * Callback to execute on edit runtime field
+   */
+  onFieldEdited?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -207,6 +211,7 @@ export const DiscoverGrid = ({
   onUpdateRowHeight,
   rowsPerPageState,
   onUpdateRowsPerPage,
+  onFieldEdited,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -345,6 +350,33 @@ export const DiscoverGrid = ({
    */
   const showDisclaimer = rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
+  const closeFieldEditor = useRef<() => void | undefined>();
+
+  useEffect(() => {
+    return () => {
+      if (closeFieldEditor?.current) {
+        closeFieldEditor?.current();
+      }
+    };
+  }, []);
+
+  const editField = useMemo(
+    () =>
+      onFieldEdited
+        ? (fieldName: string) => {
+            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView: indexPattern,
+              },
+              fieldName,
+              onSave: async () => {
+                onFieldEdited();
+              },
+            });
+          }
+        : undefined,
+    [indexPattern, onFieldEdited, services.dataViewFieldEditor]
+  );
 
   const euiGridColumns = useMemo(
     () =>
@@ -358,6 +390,7 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
+        editField,
       }),
     [
       displayedColumns,
@@ -369,6 +402,7 @@ export const DiscoverGrid = ({
       isSortEnabled,
       services,
       valueToStringConverter,
+      editField,
     ]
   );
 
