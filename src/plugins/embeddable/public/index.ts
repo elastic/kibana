@@ -43,6 +43,7 @@ export type {
   EmbeddableContainerSettings,
 } from './lib';
 export {
+  actions,
   ACTION_ADD_PANEL,
   ACTION_EDIT_PANEL,
   AddPanelAction,

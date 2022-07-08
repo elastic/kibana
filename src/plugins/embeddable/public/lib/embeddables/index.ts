@@ -11,6 +11,7 @@ export { isEmbeddable } from './is_embeddable';
 export { Embeddable } from './embeddable';
 export * from './embeddable_factory';
 export * from './embeddable_factory_definition';
+export { actions } from './embeddable_store';
 export * from './default_embeddable_factory_provider';
 export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 export { withEmbeddableSubscription } from './with_subscription';
