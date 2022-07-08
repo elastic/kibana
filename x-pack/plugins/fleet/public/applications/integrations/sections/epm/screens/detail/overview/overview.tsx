@@ -7,15 +7,11 @@
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFleetStatus } from '../../../../../../../hooks';
-
 import { isPackageUnverified } from '../../../../../../../services';
-
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import { Screenshots } from './screenshots';

@@ -117,13 +117,8 @@ export const EPMHomePage: React.FC = () => {
     [allPackages?.response]
   );
 
-  const atLeastOneUnverifiedPackageInstalled = useMemo(
-    () =>
-      installedPackages.some(
-        (pkg) =>
-          'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
-      ),
-    [installedPackages]
+  const atLeastOneUnverifiedPackageInstalled = installedPackages.some(
+    (pkg) => 'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
   );
 
   const sectionsWithWarning = (atLeastOneUnverifiedPackageInstalled ? ['manage'] : []) as Section[];
