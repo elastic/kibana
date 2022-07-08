@@ -5,32 +5,66 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { css } from '@emotion/react';
 import { PanelState } from '../../types';
 interface Props {
-  state: PanelState;
+  id: string;
+  initPosition: { x: number; y: number };
+  deltaPosition: { x: number; y: number };
   element?: React.ElementType | string;
   children?: JSX.Element | JSX.Element[];
 }
 
-export const Draggable = ({ state, element, children }: Props) => {
+export const Draggable = ({ id, initPosition, deltaPosition, element, children }: Props) => {
   const Element = element || 'div';
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: state.id,
+  const { attributes, listeners, setNodeRef, isDragging, node } = useDraggable({
+    id,
   });
 
-  const transform = {
-    transform: `translate(${state.initPos.x}px, ${state.initPos.y}px)`,
-  };
+  // const transform = {
+  //   transform: `translate(${x}px, ${y}px)`,
+  // };
+
+  const w = 3;
+  const h = 3;
+
+  const columnStart = Math.ceil((initPosition.x + deltaPosition.x) / 30) + 1;
+  const columnEnd = columnStart + w;
+  const rowStart = Math.ceil((initPosition.y + deltaPosition.y) / 26) + 1;
+  const rowEnd = rowStart + h;
+  // const columnStart = x + 1;
+  // const columnEnd = columnStart + w;
+  // const rowStart = x + 1;
+  // const rowEnd = rowStart + w;
+
+  console.log({ top, initPosition, deltaPosition, columnStart, columnEnd, rowStart, rowEnd });
+
+  const positionStyles = useMemo(
+    () => css`
+      grid-column-start: ${columnStart};
+      grid-column-end: ${columnEnd};
+      grid-row-start: ${rowStart};
+      grid-row-end: ${rowEnd};
+      opacity: ${isDragging ? '0.5' : ''};
+    `,
+    [columnStart, columnEnd, rowStart, rowEnd, isDragging]
+  );
 
   const style = {
     opacity: isDragging ? '0.5' : '',
-    ...transform,
+    // ...transform,
   };
 
   return (
-    <Element ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <Element
+      ref={setNodeRef}
+      // style={style}
+      {...listeners}
+      {...attributes}
+      css={positionStyles}
+    >
       {children}
     </Element>
   );

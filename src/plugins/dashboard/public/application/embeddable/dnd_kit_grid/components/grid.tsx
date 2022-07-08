@@ -29,37 +29,36 @@ export const Grid: FC<Props> = ({
 }) => {
   const engineRef = useRef<GridStackEngine>();
   const [items, setItems] = useState<GridItemProps[]>(gridData);
-  const engine = useMemo(
-    () =>
-      new GridStackEngine({
-        column: columns,
-        float: false,
-        nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
-      }),
-    [columns, items]
-  );
+  // const engine = useMemo(
+  //   () =>
+  //     new GridStackEngine({
+  //       column: columns,
+  //       float: false,
+  //       nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
+  //     }),
+  //   [columns, items]
+  // );
 
-  useEffect(() => {
-    engineRef.current =
-      engineRef.current ||
-      new GridStackEngine({
-        column: columns,
-        float: false,
-        nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
-      });
-  }, [columns, items]);
+  // useEffect(() => {
+  //   engineRef.current =
+  //     engineRef.current ||
+  //     new GridStackEngine({
+  //       column: columns,
+  //       float: false,
+  //       nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
+  //     });
+  // }, [columns, items]);
 
-  engine.compact();
+  // engine.compact();
 
+  // console.log({ engine });
   let maxRow = 1;
-  engine.nodes.forEach(({ y, h }) => {
+  items.forEach(({ y, h }) => {
     const endRow = y + 1 + h;
     if (maxRow < endRow) {
       maxRow = endRow;
     }
   });
-
-  console.log({ engine });
 
   const gridStyles = useMemo(
     () =>
@@ -80,7 +79,7 @@ export const Grid: FC<Props> = ({
 
   return (
     <div className="dshGrid dshLayout--editing" css={gridStyles}>
-      {engine.nodes.map((item) =>
+      {items.map((item) =>
         item.subGrid ? (
           <StyledGridItem
             {...item}
