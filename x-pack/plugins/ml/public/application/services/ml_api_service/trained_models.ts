@@ -48,7 +48,7 @@ export interface InferenceStatsResponse {
 }
 
 export interface MlInferTrainedModelDeploymentResponse {
-  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
+  inference_results: estypes.MlInferenceResponseResult[];
 }
 
 /**
