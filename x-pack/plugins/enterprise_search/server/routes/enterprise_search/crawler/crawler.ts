@@ -240,7 +240,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
 
   router.get(
     {
-      path: '/internal/enterprise_search/engines/{indexName}/crawler/crawl_schedule',
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -254,7 +254,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
 
   router.put(
     {
-      path: '/internal/enterprise_search/engines/{indexName}/crawler/crawl_schedule',
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
       validate: {
         params: schema.object({
           indexName: schema.string(),

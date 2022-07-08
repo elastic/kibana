@@ -80,7 +80,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     dataLoading: [
       true,
       {
-        fetchCrawlerData: () => true,
         apiError: () => false,
         apiSuccess: () => false,
       },
