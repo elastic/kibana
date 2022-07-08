@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AnalysisTokenFilter } from '@elastic/elasticsearch/lib/api/types';
+
 interface LanguageDataEntry {
   name: string;
   stemmer: string;
@@ -14,7 +16,7 @@ interface LanguageDataEntry {
   postpended_filters?: string[];
 }
 
-const LanguageData: Record<string, LanguageDataEntry> = {
+const languageData: Record<string, LanguageDataEntry> = {
   da: {
     name: 'Danish',
     stemmer: 'danish',
@@ -41,7 +43,7 @@ const LanguageData: Record<string, LanguageDataEntry> = {
     stop_words: '_french_',
     custom_filter_definitions: {
       'fr-elision': {
-        type: 'elision',
+        type: 'elision' as const,
         articles: [
           'l',
           'm',
@@ -68,7 +70,7 @@ const LanguageData: Record<string, LanguageDataEntry> = {
     stop_words: '_italian_',
     custom_filter_definitions: {
       'it-elision': {
-        type: 'elision',
+        type: 'elision' as const,
         articles: [
           'c',
           'l',
@@ -144,19 +146,14 @@ const LanguageData: Record<string, LanguageDataEntry> = {
 
 const FRONT_NGRAM_MAX_GRAM = 12;
 
-const edgeEndgramType = 'edge_ngram' as 'edge_ngram';
-const wordDelimiterGraphType = 'word_delimiter_graph' as 'word_delimiter_graph';
-const shingleType = 'shingle' as 'shingle';
-const lengthType = 'length' as 'length';
-
-const GenericFilters = {
+const genericFilters:Record<string, AnalysisTokenFilter> = {
   front_ngram: {
-    type: edgeEndgramType,
+    type: 'edge_ngram' as const,
     min_gram: 1,
     max_gram: FRONT_NGRAM_MAX_GRAM,
   },
   delimiter: {
-    type: wordDelimiterGraphType,
+    type: 'word_delimiter_graph' as const,
     generate_word_parts: true,
     generate_number_parts: true,
     catenate_words: true,
@@ -168,19 +165,19 @@ const GenericFilters = {
     stem_english_possessive: true,
   },
   bigram_joiner: {
-    type: shingleType,
+    type: 'shingle' as const,
     token_separator: '',
     max_shingle_size: 2,
     output_unigrams: false,
   },
   bigram_joiner_unigrams: {
-    type: shingleType,
+    type: 'shingle' as const,
     token_separator: '',
     max_shingle_size: 2,
     output_unigrams: true,
   },
   bigram_max_size: {
-    type: lengthType,
+    type: 'length' as const,
     min: 0,
     max: 16,
   },
@@ -204,28 +201,27 @@ const stopWordsFilterName = (languageCode: string) => {
 };
 
 const analyzerDefinitions = (language: string) => {
-  const prependedFilters = LanguageData[language].prepended_filters || [];
-  const postpendedFilters = LanguageData[language].postpended_filters || [];
-  const customType = 'custom' as 'custom';
+  const prependedFilters = languageData[language].prepended_filters || [];
+  const postpendedFilters = languageData[language].postpended_filters || [];
 
   return {
     i_prefix: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'standard',
       filter: ['cjk_width', 'lowercase', 'asciifolding', 'front_ngram'],
     },
     q_prefix: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'standard',
       filter: ['cjk_width', 'lowercase', 'asciifolding'],
     },
     iq_text_base: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'standard',
       filter: ['cjk_width', 'lowercase', 'asciifolding', stopWordsFilterName(language)],
     },
     iq_text_stem: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'standard',
       filter: [
         ...prependedFilters,
@@ -238,7 +234,7 @@ const analyzerDefinitions = (language: string) => {
       ],
     },
     iq_text_delimiter: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'whitespace',
       filter: [
         ...prependedFilters,
@@ -252,7 +248,7 @@ const analyzerDefinitions = (language: string) => {
       ],
     },
     i_text_bigram: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'standard',
       filter: [
         'cjk_width',
@@ -264,7 +260,7 @@ const analyzerDefinitions = (language: string) => {
       ],
     },
     q_text_bigram: {
-      type: customType,
+      type: 'custom' as const,
       tokenizer: 'standard',
       filter: [
         'cjk_width',
@@ -279,18 +275,19 @@ const analyzerDefinitions = (language: string) => {
 };
 
 const filterDefinitions = (language: string) => {
-  const stemmerName = LanguageData[language].stemmer;
-  const stopWordsName = LanguageData[language].stop_words;
-  const customFilterDefinitions = LanguageData[language].custom_filter_definitions || {};
+  const stemmerName = languageData[language].stemmer;
+  const stopWordsName = languageData[language].stop_words;
+  const customFilterDefinitions = languageData[language].custom_filter_definitions || {};
 
   return {
-    ...GenericFilters,
+    ...genericFilters,
     [stemFilterName(language)]: {
-      type: 'stemmer',
+      type: 'stemmer' as const,
       name: stemmerName,
+      language: stemmerName,
     },
     [stopWordsFilterName(language)]: {
-      type: 'stop',
+      type: 'stop' as const,
       stopwords: stopWordsName,
     },
     ...customFilterDefinitions,
