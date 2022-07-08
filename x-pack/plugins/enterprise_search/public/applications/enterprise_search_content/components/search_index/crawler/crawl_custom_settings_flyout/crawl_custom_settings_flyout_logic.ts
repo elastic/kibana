@@ -69,7 +69,6 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_logic'],
   connect: {
     actions: [GetCrawlerApiLogic, ['apiSuccess', 'apiError', 'makeRequest']],
-    values: [GetCrawlerApiLogic, ['status']],
   },
   actions: () => ({
     fetchDomainConfigData: true,

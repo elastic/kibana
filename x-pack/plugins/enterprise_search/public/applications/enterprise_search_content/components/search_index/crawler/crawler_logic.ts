@@ -64,8 +64,8 @@ export type CrawlerActions = Pick<
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   path: ['enterprise_search', 'crawler_logic'],
   connect: {
-    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
-    values: [GetCrawlerApiLogic, ['status']],
+    // actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
+    // values: [GetCrawlerApiLogic, ['status']],
   },
   actions: {
     clearTimeoutId: true,

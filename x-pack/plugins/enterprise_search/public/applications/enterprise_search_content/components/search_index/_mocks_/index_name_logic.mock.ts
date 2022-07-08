@@ -6,7 +6,7 @@
  */
 
 export const mockIndexNameValues = {
-  engineName: 'index-name',
+  indexName: 'index-name',
 };
 
 jest.mock('../index_name_logic', () => ({
