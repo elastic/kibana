@@ -12,7 +12,7 @@ import {
   EuiTableFieldDataColumnType,
   useDataGridColumnSelector,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTableItem } from '../../../../types';
 
@@ -72,38 +72,51 @@ export const useRulesListColumnSelector = ({
     storageVisibleColumns ?? visibleColumns
   );
 
+  const ruleColumnsWithId = useMemo(
+    () => allRuleColumns.filter((col) => col.id != null),
+    [allRuleColumns]
+  );
+  const ruleColumnsWithoutId = useMemo(
+    () => allRuleColumns.filter((col) => col.id === undefined),
+    [allRuleColumns]
+  );
+
   const rulesColumns = useMemo(() => {
-    const columnsToAddAtTheEnd = allRuleColumns.filter((col) => col.id === undefined);
     const columns = localVisibleColumns.map((coldId) => {
-      const { id, selectorName, ...colAttr } = allRuleColumns.find((col) => col.id === coldId) ?? {
-        id: '',
-        selectorName: '',
-      };
+      const {
+        id = '',
+        selectorName = '',
+        ...colAttr
+      } = ruleColumnsWithId.find((col) => col.id === coldId) ?? {};
       return colAttr as RulesListTableColumns;
     });
-    columns.push(...columnsToAddAtTheEnd);
+    columns.push(...ruleColumnsWithoutId);
     return columns;
-  }, [allRuleColumns, localVisibleColumns]);
+  }, [ruleColumnsWithId, localVisibleColumns, ruleColumnsWithoutId]);
 
   const rulesListColumnSelector = useMemo(
-    () =>
-      allRuleColumns
-        .filter((col) => col.id != null)
-        .map((col) => ({ id: col.id })) as EuiDataGridColumn[],
-    [allRuleColumns]
+    () => ruleColumnsWithId.map((col) => ({ id: col.id })) as EuiDataGridColumn[],
+    [ruleColumnsWithId]
+  );
+
+  const persistColumnVisibilityInStorage = useCallback(
+    (col: string[]) => {
+      if (rulesListKey) {
+        storage?.set(rulesListKey, col);
+      }
+    },
+    [rulesListKey, storage]
   );
 
   const rulesListColumnVisibility = useMemo(
     () => ({
       visibleColumns: localVisibleColumns,
       setVisibleColumns: (col: string[]) => {
-        if (rulesListKey) {
-          storage?.set(rulesListKey, col);
-        }
+        persistColumnVisibilityInStorage(col);
         setLocalVisibleColumns(col);
       },
     }),
-    [localVisibleColumns, rulesListKey, storage]
+    [localVisibleColumns, persistColumnVisibilityInStorage]
   );
 
   const rulesListColumnsSelectorDisplayValues = useMemo(
