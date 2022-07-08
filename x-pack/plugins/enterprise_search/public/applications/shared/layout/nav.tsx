@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 import {
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { generateNavLink } from './';
 
-import { ROOT_PATH, SEARCH_INDICES_PATH, SETTINGS_PATH } from '../routes';
+import { SEARCH_INDICES_PATH } from '../routes';
+
+import { generateNavLink } from '.';
 
 export const useEnterpriseSearchNav = () => {
   const navItems: Array<EuiSideNavItemType<unknown>> = [
@@ -66,7 +66,7 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             to: ELASTICSEARCH_PLUGIN.URL,
             shouldNotCreateHref: true,
-          })
+          }),
         },
         {
           id: 'app_search',
@@ -88,8 +88,8 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
           }),
         },
-      ]
-    }
+      ],
+    },
   ];
 
   return navItems;

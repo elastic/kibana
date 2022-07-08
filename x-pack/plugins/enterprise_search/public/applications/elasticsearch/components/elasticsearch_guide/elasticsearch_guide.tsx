@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
 
 import {
-  EuiPageTemplate,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,

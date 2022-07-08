@@ -10,9 +10,8 @@ import React from 'react';
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
-import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
-
 import { useEnterpriseSearchNav } from '../../../shared/layout';
+import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = ({
   children,

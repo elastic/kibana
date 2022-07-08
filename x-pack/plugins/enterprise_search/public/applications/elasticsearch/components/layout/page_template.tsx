@@ -10,9 +10,8 @@ import React from 'react';
 import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
-import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
-
 import { useEnterpriseSearchNav } from '../../../shared/layout';
+import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplateProps> = ({
   children,

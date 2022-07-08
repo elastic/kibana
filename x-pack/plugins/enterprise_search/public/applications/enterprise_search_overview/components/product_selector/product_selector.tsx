@@ -24,7 +24,6 @@ import { Chat } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
-  KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
   NO_DATA_PAGE_TEMPLATE_PROPS,
 } from '@kbn/kibana-react-plugin/public';
