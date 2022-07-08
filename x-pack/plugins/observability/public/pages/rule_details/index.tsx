@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,10 +19,8 @@ import {
   EuiPanel,
   EuiTitle,
   EuiPopover,
-  EuiHorizontalRule,
   EuiTabbedContent,
   EuiEmptyPrompt,
-  EuiLoadingSpinner,
   EuiSuperSelectOption,
 } from '@elastic/eui';
 
@@ -39,8 +36,7 @@ import {
   RuleEventLogListProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-
+import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
@@ -51,13 +47,13 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
-import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary } from './components';
+import { PageTitle } from './components';
 import { useKibana } from '../../utils/kibana_react';
-import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
-import { useFetchLast24hRuleExecutionLog } from '../../hooks/use_fetch_last24h_rule_execution_log';
+import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
+import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 
 export function RuleDetailsPage() {
   const {
@@ -69,6 +65,7 @@ export function RuleDetailsPage() {
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable,
+      getRuleStatusPanel,
       getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
@@ -78,21 +75,13 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
-  const { isLoadingExecutionLog, executionLog } = useFetchLast24hRuleExecutionLog({ http, ruleId });
   const { ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
-
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const { isLoadingLast24hAlerts, last24hAlerts } = useFetchLast24hAlerts({
-    http,
-    features,
-    ruleId,
-  });
-
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
 
@@ -146,6 +135,7 @@ export function RuleDetailsPage() {
   ]);
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
+
   const canSaveRule =
     rule &&
     hasAllPrivilege(rule, ruleType) &&
@@ -231,12 +221,20 @@ export function RuleDetailsPage() {
       </EuiPanel>
     );
 
+  const isLicenseError =
+    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+
+  const statusMessage = isLicenseError
+    ? ALERT_STATUS_LICENSE_ERROR
+    : rulesStatusesTranslationsMapping[rule.executionStatus.status];
+
   const getRuleStatusComponent = () =>
     getRuleStatusDropdown({
       rule,
       enableRule: async () => await enableRule({ http, id: rule.id }),
       disableRule: async () => await disableRule({ http, id: rule.id }),
       onRuleChanged: () => reloadRule(),
+      hideSnoozeOption: true,
       isEditable: hasEditButton,
       snoozeRule: async (snoozeSchedule) => {
         await snoozeRule({ http, id: rule.id, snoozeSchedule });
@@ -320,82 +318,15 @@ export function RuleDetailsPage() {
     >
       <EuiFlexGroup wrap={true} gutterSize="m">
         {/* Left side of Rule Summary */}
-        <EuiFlexItem data-test-subj="ruleSummaryRuleStatus" grow={1}>
-          <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary>
-                  {i18n.translate('xpack.observability.ruleDetails.lastRun', {
-                    defaultMessage: 'Last Run',
-                  })}
-                </ItemTitleRuleSummary>
-                <ItemValueRuleSummary
-                  extraSpace={false}
-                  itemValue={moment(rule.executionStatus.lastExecutionDate).fromNow()}
-                />
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary>
-                  {i18n.translate('xpack.observability.ruleDetails.ruleIs', {
-                    defaultMessage: 'Rule is',
-                  })}
-                </ItemTitleRuleSummary>
-                <EuiFlexItem>{getRuleStatusComponent()}</EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary>
-                  {i18n.translate('xpack.observability.ruleDetails.alerts', {
-                    defaultMessage: 'Alerts',
-                  })}
-                </ItemTitleRuleSummary>
-                {isLoadingLast24hAlerts ? (
-                  <EuiFlexItem>
-                    <EuiLoadingSpinner size="s" />
-                  </EuiFlexItem>
-                ) : (
-                  <ItemValueRuleSummary
-                    extraSpace={false}
-                    itemValue={`
-                    ${String(last24hAlerts)} ${i18n.translate(
-                      'xpack.observability.ruleDetails.last24h',
-                      {
-                        defaultMessage: '(last 24 h)',
-                      }
-                    )}`}
-                  />
-                )}
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
+        {getRuleStatusPanel({
+          rule,
+          isEditable: hasEditButton,
+          requestRefresh: reloadRule,
+          healthColor: getHealthColor(rule.executionStatus.status),
+          statusMessage,
+        })}
 
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary>
-                  {i18n.translate('xpack.observability.ruleDetails.execution', {
-                    defaultMessage: 'Executions',
-                  })}
-                </ItemTitleRuleSummary>
-
-                {isLoadingExecutionLog ? (
-                  <EuiFlexItem>
-                    <EuiLoadingSpinner size="s" />
-                  </EuiFlexItem>
-                ) : (
-                  <ItemValueRuleSummary
-                    extraSpace={false}
-                    itemValue={`
-                        ${String(executionLog.total)} ${i18n.translate(
-                      'xpack.observability.ruleDetails.last24h',
-                      {
-                        defaultMessage: '(last 24 h)',
-                      }
-                    )}`}
-                  />
-                )}
-              </EuiFlexGroup>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
+        {/* Right side of Rule Summary */}
         {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 

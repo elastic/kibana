@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('shows the rule status section in the rule summary', async () => {
-        await testSubjects.existOrFail('ruleSummaryRuleStatus');
+        await testSubjects.existOrFail('ruleStatusPanel');
       });
 
       it('shows the rule definition section in the rule summary', async () => {
