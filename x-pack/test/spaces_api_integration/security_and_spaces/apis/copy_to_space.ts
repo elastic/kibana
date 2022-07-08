@@ -29,7 +29,8 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: FtrPro
     createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
-  describe('copy to spaces', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/86544
+  describe.skip('copy to spaces', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
