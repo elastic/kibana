@@ -11,21 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
+import { CrawlSchedule, CrawlUnits } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
-
-export interface CrawlSchedule {
-  frequency: number;
-  unit: CrawlUnits;
-}
-
-// The BE uses a singular form of each unit
-// See shared_togo/app/models/shared_togo/crawler/crawl_schedule.rb
-export enum CrawlUnits {
-  hours = 'hour',
-  days = 'day',
-  weeks = 'week',
-  months = 'month',
-}
 
 export interface AutomaticCrawlSchedulerLogicValues {
   crawlAutomatically: boolean;
@@ -150,7 +137,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
       } catch (e) {
         // A 404 is expected and means the user does not have crawl schedule
         // for this index. We continue to use the defaults.
-        if (e.response.status === 404) {
+        if (e.response?.status === 404) {
           actions.clearCrawlSchedule();
         } else {
           flashAPIErrors(e);

@@ -37,7 +37,9 @@ import {
 } from '../../../../../shared/constants';
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 
-import { AutomaticCrawlSchedulerLogic, CrawlUnits } from './automatic_crawl_scheduler_logic';
+import { CrawlUnits } from '../../../../api/crawler/types';
+
+import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
 
 export const AutomaticCrawlScheduler: React.FC = () => {
   const { setCrawlFrequency, setCrawlUnit, saveChanges, toggleCrawlAutomatically } = useActions(
