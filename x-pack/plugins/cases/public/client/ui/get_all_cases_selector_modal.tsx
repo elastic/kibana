@@ -22,12 +22,12 @@ const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
 export const getAllCasesSelectorModalLazy = ({
   externalReferenceAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   hiddenStatuses,
   onRowClick,
   onClose,
 }: GetAllCasesSelectorModalPropsInternal) => (
-  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud }}>
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, permissions }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy
         hiddenStatuses={hiddenStatuses}

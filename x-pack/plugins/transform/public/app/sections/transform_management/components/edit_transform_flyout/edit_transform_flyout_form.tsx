@@ -110,7 +110,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
           defaultMessage:
-            'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
+            'The interval to check for changes in source indices when the transformation runs continuously.',
         })}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
           defaultMessage: 'Frequency',
@@ -323,7 +323,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutDocsPerSecondInput"
             errorMessages={formFields.docsPerSecond.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
               {
                 defaultMessage:
                   'To enable throttling, set a limit of documents to input per second.',
@@ -343,10 +343,10 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
             errorMessages={formFields.maxPageSearchSize.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
               {
                 defaultMessage:
-                  'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+                  'The initial page size to use for the composite aggregation for each checkpoint.',
               }
             )}
             label={i18n.translate(
@@ -364,6 +364,22 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                 values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
               }
             )}
+          />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutNumFailureRetriesInput"
+            errorMessages={formFields.numFailureRetries.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',
+              {
+                defaultMessage:
+                  'The number of retries on a recoverable failure before the transform task is marked as failed. Set it to -1 for infinite retries.',
+              }
+            )}
+            label={i18n.translate('xpack.transform.transformList.numFailureRetriesLabel', {
+              defaultMessage: 'Number of failure retries',
+            })}
+            onChange={(value) => dispatch({ field: 'numFailureRetries', value })}
+            value={formFields.numFailureRetries.value}
           />
         </div>
       </EuiAccordion>

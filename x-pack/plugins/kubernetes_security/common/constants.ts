@@ -6,6 +6,8 @@
  */
 
 export const KUBERNETES_PATH = '/kubernetes' as const;
+export const KUBERNETES_TITLE = 'Kubernetes';
+export const LOCAL_STORAGE_HIDE_WIDGETS_KEY = 'kubernetesSecurity:shouldHideWidgets';
 
 export const PROCESS_EVENTS_ROUTE = '/internal/kubernetes_security/process_events_route';
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TestProviders } from '../../../common/mock';
+import { readCasesPermissions, TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
 
 jest.mock('../../../common/navigation/hooks');
@@ -27,7 +27,7 @@ describe('NoCases', () => {
 
   it('displays a message without a link to create a case when the user does not have write permissions', () => {
     const wrapper = mount(
-      <TestProviders userCanCrud={false}>
+      <TestProviders permissions={readCasesPermissions()}>
         <NoCases />
       </TestProviders>
     );
