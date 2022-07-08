@@ -21,17 +21,19 @@ import { logsDashboardGridData } from '../../gridstack_grid/constants';
 export default {
   title: 'POC - dnd-kit/Grid',
   component: Grid,
+  args: {
+    columns: 24,
+    guttersize: 4,
+  },
   argTypes: {
     columns: {
       label: 'Number of columns',
       control: { type: 'select' },
       options: [12, 24, 48],
-      defaultValue: 48,
     },
     guttersize: {
       control: { type: 'select' },
       options: [0, 4, 8, 16],
-      defaultValue: 4,
     },
   },
 };
