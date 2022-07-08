@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { numberValidator, timeIntervalInputValidator } from '../../common/util/validators';
-
+import { numberValidator } from '@kbn/ml-agg-utils';
+import { timeIntervalInputValidator } from '../../common/util/validators';
 export const validateLookbackInterval = timeIntervalInputValidator();
 export const validateTopNBucket = numberValidator({ min: 1 });

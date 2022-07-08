@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { addConnector } from '../../lib/connectors/add_connector';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
+import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
 
 import { RouteDependencies } from '../../plugin';
 
@@ -40,21 +41,46 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
   );
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{indexId}/configuration',
+      path: '/internal/enterprise_search/connectors/{connectorId}/configuration',
       validate: {
         body: schema.recordOf(
           schema.string(),
           schema.object({ label: schema.string(), value: schema.nullable(schema.string()) })
         ),
         params: schema.object({
-          indexId: schema.string(),
+          connectorId: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        await updateConnectorConfiguration(client, request.params.indexId, request.body);
+        await updateConnectorConfiguration(client, request.params.connectorId, request.body);
+        return response.ok();
+      } catch (error) {
+        return response.customError({
+          body: i18n.translate('xpack.enterpriseSearch.server.routes.updateConnector.error', {
+            defaultMessage: 'Error fetching data from Enterprise Search',
+          }),
+          statusCode: 502,
+        });
+      }
+    }
+  );
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
+      validate: {
+        body: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        await updateConnectorScheduling(client, request.params.connectorId, request.body);
         return response.ok();
       } catch (error) {
         return response.customError({
