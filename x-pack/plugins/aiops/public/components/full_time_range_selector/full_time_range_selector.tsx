@@ -49,7 +49,9 @@ export const FullTimeRangeSelector: FC<Props> = ({
   callback,
 }) => {
   const {
-    services: { notifications: toasts },
+    services: {
+      notifications: { toasts },
+    },
   } = useAiOpsKibana();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
@@ -61,7 +63,6 @@ export const FullTimeRangeSelector: FC<Props> = ({
           callback(fullTimeRange);
         }
       } catch (e) {
-        // @ts-ignore // FIX
         toasts.addDanger(
           i18n.translate(
             'xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',

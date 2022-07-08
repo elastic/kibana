@@ -154,7 +154,6 @@ export function TimeBuckets(timeBucketsConfig, fieldFormats) {
  *
  * @returns {undefined}
  */
-// @ts-ignore TODO: FIX
 TimeBuckets.prototype.setBarTarget = function (bt) {
   this.barTarget = bt;
 };
@@ -181,7 +180,6 @@ TimeBuckets.prototype.setMaxBars = function (mb) {
  *
  * @returns {undefined}
  */
-// @ts-ignore TODO: FIX
 TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
@@ -269,7 +267,6 @@ TimeBuckets.prototype.getDuration = function () {
  *
  * @param {string|moment.duration} input - see desc
  */
-// @ts-ignore -- TODO FIX
 TimeBuckets.prototype.setInterval = function (input) {
   // Preserve the original units because they're lost when the interval is converted to a
   // moment duration object.

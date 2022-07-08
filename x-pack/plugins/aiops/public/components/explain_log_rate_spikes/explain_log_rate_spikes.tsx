@@ -55,7 +55,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
 
   const { overallStats, timefilter } = useData(dataView, setGlobalState);
 
-  const { cancel, start, data, isRunning } = useFetchStream<
+  const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,
     typeof basePath
   >(
@@ -160,7 +160,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
             </EuiFlexItem>
             {data?.changePoints ? (
               <EuiFlexItem>
-                <SpikeAnalysisTable changePointData={data.changePoints} />
+                <SpikeAnalysisTable
+                  changePointData={data.changePoints}
+                  loading={isRunning}
+                  error={error}
+                />
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
