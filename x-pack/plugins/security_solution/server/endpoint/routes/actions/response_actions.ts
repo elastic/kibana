@@ -358,7 +358,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     }
 
     const body = returnActionIdCommands.includes(command) ? { action: actionID } : {};
-    const data = await getActionDetailsById(esClient, actionID);
+    const data = await getActionDetailsById(
+      esClient,
+      actionID,
+      endpointContext.service.getEndpointMetadataService()
+    );
 
     return res.ok({
       body: {

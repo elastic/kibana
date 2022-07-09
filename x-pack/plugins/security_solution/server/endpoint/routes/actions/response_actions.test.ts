@@ -310,7 +310,10 @@ describe('Response actions', () => {
 
     it('creates an action and returns its ID + ActionDetails', async () => {
       const endpointIds = ['XYZ'];
-      const actionDetails = { agents: endpointIds, command: 'isolate' } as ActionDetails;
+      const actionDetails = {
+        agents: [{ id: endpointIds[0], name: endpointIds[0] }],
+        command: 'isolate',
+      } as ActionDetails;
       getActionDetailsByIdSpy.mockResolvedValue(actionDetails);
 
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {

@@ -27,10 +27,12 @@ import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
-  actionId: string
+  actionId: string,
+  metadataService: EndpointMetadataService
 ): Promise<ActionDetails> => {
   let actionRequestsLogEntries: EndpointActivityLogAction[];
 
@@ -111,9 +113,16 @@ export const getActionDetailsById = async (
     actionResponses
   );
 
+  // meta data for given agent id
+  const metaDataDocs = await metadataService.getHostMetadata(
+    esClient,
+    normalizedActionRequest.agents[0]
+  );
+  const agents = [{ id: metaDataDocs.agent.id, name: metaDataDocs.host.hostname }];
+
   const actionDetails: ActionDetails = {
     id: actionId,
-    agents: normalizedActionRequest.agents,
+    agents,
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
     isCompleted,

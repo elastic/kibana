@@ -449,7 +449,7 @@ const getActionListMock = async ({
 
     const actionDetails: ActionDetails[] = actionIds.map((actionId) => {
       return endpointActionGenerator.generateActionDetails({
-        agents: [id],
+        agents: [{ id, name: `Host-${id.slice(0, 8)}` }],
         id: actionId,
         isCompleted,
         isExpired,

@@ -116,7 +116,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   generateActionDetails(overrides: DeepPartial<ActionDetails> = {}): ActionDetails {
     const details: ActionDetails = {
-      agents: ['agent-a'],
+      agents: [{ id: 'agent-a', name: 'agent-a' }], //
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
       id: '123',

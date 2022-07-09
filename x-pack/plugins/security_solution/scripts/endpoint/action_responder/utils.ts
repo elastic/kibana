@@ -54,7 +54,7 @@ export const sendFleetActionResponse = async (
 ): Promise<EndpointActionResponse> => {
   const fleetResponse = fleetActionGenerator.generateResponse({
     action_id: action.id,
-    agent_id: action.agents[0],
+    agent_id: action.agents[0].id,
     action_response: {
       endpoint: {
         ack: true,
@@ -89,7 +89,7 @@ export const sendEndpointActionResponse = async (
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
   const endpointResponse = endpointActionGenerator.generateResponse({
-    agent: { id: action.agents[0] },
+    agent: { id: action.agents[0].id },
     EndpointActions: {
       action_id: action.id,
       data: {
@@ -120,8 +120,8 @@ export const sendEndpointActionResponse = async (
 
   // For isolate, If the response is not an error, then also send a metadata update
   if (action.command === 'isolate' && !endpointResponse.error) {
-    for (const agentId of action.agents) {
-      await sendEndpointMetadataUpdate(esClient, agentId, {
+    for (const agentInfo of action.agents) {
+      await sendEndpointMetadataUpdate(esClient, agentInfo.id, {
         Endpoint: {
           state: {
             isolation: true,
@@ -133,8 +133,8 @@ export const sendEndpointActionResponse = async (
 
   // For UnIsolate, if response is not an Error, then also send metadata update
   if (action.command === 'unisolate' && !endpointResponse.error) {
-    for (const agentId of action.agents) {
-      await sendEndpointMetadataUpdate(esClient, agentId, {
+    for (const agentInfo of action.agents) {
+      await sendEndpointMetadataUpdate(esClient, agentInfo.id, {
         Endpoint: {
           state: {
             isolation: false,

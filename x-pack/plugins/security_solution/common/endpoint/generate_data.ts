@@ -439,7 +439,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * when the `.generateHostMetadata()` is subsequently called
    */
   public updateCommonInfo() {
-    this.commonInfo = this.createHostData();
+    this.commonInfo = this.createHostData(); //
   }
 
   /**
@@ -458,7 +458,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   private createHostData(): HostInfo {
-    const hostName = this.randomHostname();
+    const hostName = this.randomHostname(); //
     const isIsolated = this.randomBoolean(0.3);
     const agentVersion = this.randomVersion();
     const minCapabilitiesVersion = '7.15.0';
@@ -478,8 +478,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       host: {
         id: this.seededUUIDv4(),
-        hostname: hostName,
-        name: hostName,
+        hostname: hostName, //
+        name: hostName, //
         architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),

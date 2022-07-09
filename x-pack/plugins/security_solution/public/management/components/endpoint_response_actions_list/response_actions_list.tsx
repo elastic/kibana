@@ -142,6 +142,14 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
       }
     }, [dateRangePickerState.autoRefreshOptions.enabled, reFetchEndpointActionList]);
 
+    // handle onChange agentIds
+    const onChangeAgentIds = useCallback(
+      (selectedAgentIds: string[]) => {
+        setQueryParams((prevState) => ({ ...prevState, agentIds: selectedAgentIds }));
+      },
+      [setQueryParams]
+    );
+
     // handle on change command filter
     const onChangeCommands = useCallback(
       (selectedCommands: string[]) => {
@@ -262,10 +270,9 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
       [toggleDetails]
     );
 
+    const hideHostColumn = useMemo(() => typeof agentIds === 'string', [agentIds]);
     // table column
     const responseActionListColumns = useMemo(() => {
-      const hideHostColumn = typeof agentIds === 'string';
-
       const columns = [
         {
           field: 'startedAt',
@@ -336,8 +343,7 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
           width: '20%',
           truncateText: true,
           render: (agents: ActionDetails['agents']) => {
-            // TODO: compute host names later with hostMetadata? (using agent Ids for now)
-            const hostname = agents?.[0] ?? '';
+            const hostname = agents[0].name.length ? agents[0].name : emptyValue;
             return (
               <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
                 <EuiText
@@ -434,7 +440,7 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
         return columns.filter((column) => column.field !== 'agents');
       }
       return columns;
-    }, [agentIds, getTestId, itemIdToExpandedRowMap, onClickCallback]);
+    }, [getTestId, hideHostColumn, itemIdToExpandedRowMap, onClickCallback]);
 
     // table pagination
     const tablePagination = useMemo(() => {
@@ -505,8 +511,10 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
       <>
         <ActionListFilters
           dateRangePickerState={dateRangePickerState}
+          hideHostColumn={hideHostColumn}
           isDataLoading={isFetching}
           onClick={reFetchEndpointActionList}
+          onChangeAgentIds={onChangeAgentIds}
           onChangeCommands={onChangeCommands}
           onChangeUserIds={onChangeUserIds}
           onRefresh={onRefresh}

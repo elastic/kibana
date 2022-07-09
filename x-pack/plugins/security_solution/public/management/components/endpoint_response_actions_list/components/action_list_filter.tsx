@@ -20,10 +20,12 @@ const getFilterName = (name: string) =>
 export const ActionListFilter = memo(
   ({
     filterName,
+    onChangeAgentIds,
     onChangeCommands,
     onChangeUserIds,
   }: {
     filterName: FilterName;
+    onChangeAgentIds: (selectedAgentIds: string[]) => void;
     onChangeCommands: (selectedCommands: string[]) => void;
     onChangeUserIds: (selectedUsers: string[]) => void;
   }) => {
@@ -46,11 +48,13 @@ export const ActionListFilter = memo(
         // update query state
         if (filterName === 'Commands') {
           onChangeCommands(selectedItems);
+        } else if (filterName === 'Hosts') {
+          onChangeAgentIds(selectedItems);
         } else if (filterName === 'Users') {
           onChangeUserIds(selectedItems);
         }
       },
-      [filterName, onChangeCommands, onChangeUserIds, setItems]
+      [filterName, onChangeAgentIds, onChangeCommands, onChangeUserIds, setItems]
     );
 
     return (

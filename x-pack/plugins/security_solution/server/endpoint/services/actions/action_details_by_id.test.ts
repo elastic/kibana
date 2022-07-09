@@ -21,15 +21,24 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
+import {
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 describe('When using `getActionDetailsById()', () => {
   let esClient: ElasticsearchClientMock;
   let endpointActionGenerator: EndpointActionGenerator;
   let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
+  let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    endpointAppContextService = new EndpointAppContextService();
+    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     endpointActionGenerator = new EndpointActionGenerator('seed');
 
     actionRequests = createActionRequestsEsSearchResultsMock();
@@ -38,10 +47,16 @@ describe('When using `getActionDetailsById()', () => {
     applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
   });
 
+  afterEach(() => {
+    endpointAppContextService.stop();
+  });
+
   it('should return expected output', async () => {
     const doc = actionRequests.hits.hits[0]._source;
-    await expect(getActionDetailsById(esClient, '123')).resolves.toEqual({
-      agents: ['agent-a'],
+    await expect(
+      getActionDetailsById(esClient, '123', endpointAppContextService.getEndpointMetadataService())
+    ).resolves.toEqual({
+      agents: ['-a'],
       command: 'unisolate',
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
@@ -58,7 +73,11 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should use expected filters when querying for Action Request', async () => {
-    await getActionDetailsById(esClient, '123');
+    await getActionDetailsById(
+      esClient,
+      '123',
+      endpointAppContextService.getEndpointMetadataService()
+    );
 
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
@@ -84,7 +103,9 @@ describe('When using `getActionDetailsById()', () => {
     (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
-    await expect(getActionDetailsById(esClient, '123')).rejects.toBeInstanceOf(NotFoundError);
+    await expect(
+      getActionDetailsById(esClient, '123', endpointAppContextService.getEndpointMetadataService())
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('should have `isExpired` of `true` if NOT complete and expiration is in the past', async () => {
@@ -93,7 +114,9 @@ describe('When using `getActionDetailsById()', () => {
     ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
-    await expect(getActionDetailsById(esClient, '123')).resolves.toEqual(
+    await expect(
+      getActionDetailsById(esClient, '123', endpointAppContextService.getEndpointMetadataService())
+    ).resolves.toEqual(
       expect.objectContaining({
         isExpired: true,
         isCompleted: false,
@@ -106,7 +129,9 @@ describe('When using `getActionDetailsById()', () => {
       actionRequests.hits.hits[0]._source as LogsEndpointAction
     ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
 
-    await expect(getActionDetailsById(esClient, '123')).resolves.toEqual(
+    await expect(
+      getActionDetailsById(esClient, '123', endpointAppContextService.getEndpointMetadataService())
+    ).resolves.toEqual(
       expect.objectContaining({
         isExpired: false,
         isCompleted: true,

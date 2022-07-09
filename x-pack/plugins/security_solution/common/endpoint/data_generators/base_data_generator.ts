@@ -179,7 +179,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomHostname(): string {
-    return `Host-${this.randomString(10)}`;
+    return `Host-${this.seededUUIDv4().slice(0, 8)}`;
   }
 
   /**

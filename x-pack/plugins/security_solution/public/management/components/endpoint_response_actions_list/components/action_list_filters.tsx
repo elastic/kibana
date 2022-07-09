@@ -20,7 +20,9 @@ export const ActionListFilters = memo(
   ({
     dateRangePickerState,
     isDataLoading,
+    hideHostColumn,
     onClick,
+    onChangeAgentIds,
     onChangeCommands,
     onChangeUserIds,
     onRefresh,
@@ -29,6 +31,8 @@ export const ActionListFilters = memo(
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
+    hideHostColumn: boolean;
+    onChangeAgentIds: (selectedAgentIds: string[]) => void;
     onChangeCommands: (selectedCommands: string[]) => void;
     onChangeUserIds: (selectedUserIds: string[]) => void;
     onRefresh: () => void;
@@ -38,16 +42,21 @@ export const ActionListFilters = memo(
   }) => {
     const filters = useMemo(
       () =>
-        ['Commands', 'Users'].map((filterName) => (
+        ['Commands', 'Hosts', 'Users'].map((filterName) => (
           <ActionListFilter
             key={filterName}
             filterName={filterName as FilterName}
+            onChangeAgentIds={onChangeAgentIds}
             onChangeCommands={onChangeCommands}
             onChangeUserIds={onChangeUserIds}
           />
         )),
-      [onChangeCommands, onChangeUserIds]
+      [onChangeCommands, onChangeAgentIds, onChangeUserIds]
     );
+
+    if (hideHostColumn) {
+      filters.splice(1, 1);
+    }
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem>

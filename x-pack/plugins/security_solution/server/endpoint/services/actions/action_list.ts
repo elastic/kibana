@@ -20,6 +20,7 @@ import {
   mapToNormalizedActionRequest,
 } from './utils';
 
+import type { EndpointMetadataService } from '../metadata';
 interface OptionalFilterParams {
   commands?: string[];
   elasticAgentIds?: string[];
@@ -36,6 +37,7 @@ export const getActionList = async ({
   esClient,
   endDate,
   logger,
+  metadataService,
   page: _page,
   pageSize,
   startDate,
@@ -43,6 +45,7 @@ export const getActionList = async ({
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
+  metadataService: EndpointMetadataService;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -56,6 +59,7 @@ export const getActionList = async ({
     endDate,
     from,
     logger,
+    metadataService,
     size,
     startDate,
     userIds,
@@ -87,10 +91,11 @@ const getActionDetailsList = async ({
   endDate,
   from,
   logger,
+  metadataService,
   size,
   startDate,
   userIds,
-}: GetActionDetailsListParam): Promise<{
+}: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionDetails[];
   totalRecords: number;
 }> => {
@@ -157,6 +162,12 @@ const getActionDetailsList = async ({
     results: actionResponses?.body?.hits?.hits,
   });
 
+  // get host metadata docs with queried agents
+  const searchedAgentIds = normalizedActionRequests.map((action) => action.agents).flat();
+  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents(esClient, [
+    ...new Set(searchedAgentIds),
+  ]);
+
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
@@ -172,9 +183,17 @@ const getActionDetailsList = async ({
       matchedResponses
     );
 
+    // match hostnames with agent id
+    const agents = metaDataDocs.reduce<Array<{ id: string; name: string }>>((acc, metaDataDoc) => {
+      if (metaDataDoc.agent.id === action.agents[0]) {
+        acc.push({ id: action.agents[0], name: metaDataDoc.host.hostname });
+      }
+      return acc;
+    }, []);
+
     return {
       id: action.id,
-      agents: action.agents,
+      agents,
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,

@@ -22,6 +22,11 @@ import {
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import {
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -29,11 +34,15 @@ describe('When using `getActionList()', () => {
   let endpointActionGenerator: EndpointActionGenerator;
   let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
+  let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
     endpointActionGenerator = new EndpointActionGenerator('seed');
+    endpointAppContextService = new EndpointAppContextService();
+    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
     actionRequests = createActionRequestsEsSearchResultsMock();
     actionResponses = createActionResponsesEsSearchResultsMock();
@@ -41,9 +50,21 @@ describe('When using `getActionList()', () => {
     applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
   });
 
+  afterEach(() => {
+    endpointAppContextService.stop();
+  });
+
   it('should return expected output', async () => {
     const doc = actionRequests.hits.hits[0]._source;
-    await expect(getActionList({ esClient, logger, page: 1, pageSize: 10 })).resolves.toEqual({
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        page: 1,
+        pageSize: 10,
+      })
+    ).resolves.toEqual({
       page: 1,
       pageSize: 10,
       commands: undefined,
@@ -75,6 +96,7 @@ describe('When using `getActionList()', () => {
     await getActionList({
       esClient,
       logger,
+      metadataService: endpointAppContextService.getEndpointMetadataService(),
       elasticAgentIds: ['123'],
       pageSize: 20,
       startDate: 'now-10d',
@@ -157,7 +179,13 @@ describe('When using `getActionList()', () => {
     (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
-    await expect(getActionList({ esClient, logger })).resolves.toEqual(
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+      })
+    ).resolves.toEqual(
       expect.objectContaining({
         commands: undefined,
         data: [],
@@ -180,7 +208,12 @@ describe('When using `getActionList()', () => {
 
     await expect(
       await (
-        await getActionList({ esClient, logger, elasticAgentIds: ['123'] })
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
       ).data[0]
     ).toEqual(
       expect.objectContaining({
@@ -197,7 +230,12 @@ describe('When using `getActionList()', () => {
 
     await expect(
       await (
-        await getActionList({ esClient, logger, elasticAgentIds: ['123'] })
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
       ).data[0]
     ).toEqual(
       expect.objectContaining({
@@ -213,7 +251,11 @@ describe('When using `getActionList()', () => {
     esClient.search.mockImplementation(async () => {
       return Promise.reject(error);
     });
-    const getActionListPromise = getActionList({ esClient, logger });
+    const getActionListPromise = getActionList({
+      esClient,
+      logger,
+      metadataService: endpointAppContextService.getEndpointMetadataService(),
+    });
 
     await expect(getActionListPromise).rejects.toThrowError(
       'Unknown error while fetching action requests'

@@ -12,6 +12,7 @@ import type {
 } from '@elastic/eui/src/components/date_picker/types';
 import type { DateRangePickerValues } from './action_list_date_range_picker';
 import { useGetKibanaUsers } from '../../../hooks/endpoint/use_get_kibana_users';
+import { useGetEndpointsMetadata } from '../../../hooks';
 import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
 
 const defaultDateRangeOptions = Object.freeze({
@@ -94,22 +95,38 @@ export type FilterItems = Array<{
   checked: 'on' | undefined;
 }>;
 
-export type FilterName = 'Commands' | 'Users';
+export type FilterName = 'Commands' | 'Hosts' | 'Users';
 export const useActionListFilter = (filterName: FilterName) => {
+  const isHostsFilter = filterName === 'Hosts';
   const isUsersFilter = filterName === 'Users';
   const { data: users } = useGetKibanaUsers({ enabled: isUsersFilter });
+  const { data: hostsMetaData } = useGetEndpointsMetadata({ enabled: isHostsFilter });
+
   const [items, setItems] = useState<FilterItems>(
-    isUsersFilter
+    (isUsersFilter || isHostsFilter
       ? []
       : RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
           key: filter,
           label: filter === 'unisolate' ? 'release' : filter,
           checked: undefined,
         }))
+    ).sort((a, b) => a.label.localeCompare(b.label))
   );
 
   useEffect(() => {
-    if (isUsersFilter && users) {
+    if (isHostsFilter && typeof hostsMetaData !== 'undefined' && hostsMetaData.data?.length) {
+      setItems(
+        hostsMetaData.data.map((filter) => ({
+          key: filter.metadata.agent.id,
+          label: filter.metadata.host.name,
+          checked: undefined,
+        }))
+      );
+    }
+  }, [filterName, isHostsFilter, setItems, hostsMetaData]);
+
+  useEffect(() => {
+    if (isUsersFilter && users?.length) {
       setItems(
         users.map((filter) => ({
           key: filter.username,
