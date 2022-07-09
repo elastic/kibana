@@ -166,6 +166,7 @@ describe('createApiIndex lib function', () => {
               },
               'en-stem-filter': {
                 name: 'light_english',
+                language: 'light_english',
                 type: 'stemmer',
               },
               'en-stop-words-filter': {

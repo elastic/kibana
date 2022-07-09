@@ -107,6 +107,7 @@ describe('textAnalysisSettings lib function', () => {
           },
           'en-stem-filter': {
             name: 'light_english',
+            language: 'light_english',
             type: 'stemmer',
           },
           'en-stop-words-filter': {
@@ -243,6 +244,7 @@ describe('textAnalysisSettings lib function', () => {
           },
           'fr-stem-filter': {
             name: 'light_french',
+            language: 'light_french',
             type: 'stemmer',
           },
           'fr-stop-words-filter': {
