@@ -10,5 +10,4 @@ export { prebootServiceMock } from './preboot_service.mock';
 export type {
   InternalPrebootServicePrebootMock,
   PrebootServicePrebootMock,
-  PrebootServiceContract,
 } from './preboot_service.mock';

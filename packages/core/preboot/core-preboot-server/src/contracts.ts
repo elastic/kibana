@@ -52,6 +52,7 @@ export interface PrebootServicePreboot {
 }
 
 /**
+ * public version of InternalPrebootServicePreboot that is exposed in the public service contract
  * @public
  */
 export interface KibanaPrebootServicePreboot
