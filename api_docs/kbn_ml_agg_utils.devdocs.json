@@ -198,9 +198,131 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.numberValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "numberValidator",
+        "description": [
+          "\nValidate if a number is greater than a specified minimum & lesser than specified maximum"
+        ],
+        "signature": [
+          "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => (value: number) => ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "server",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-server.NumberValidationResult",
+            "text": "NumberValidationResult"
+          },
+          " | null"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.numberValidator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "conditions",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-agg-utils",
+                "id": "def-server.numberValidator.$1.min",
+                "type": "number",
+                "tags": [],
+                "label": "min",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-agg-utils",
+                "id": "def-server.numberValidator.$1.max",
+                "type": "number",
+                "tags": [],
+                "label": "max",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-agg-utils",
+                "id": "def-server.numberValidator.$1.integerOnly",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "integerOnly",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.NumberValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumberValidationResult",
+        "description": [],
+        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumberValidationResult.min",
+            "type": "boolean",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumberValidationResult.max",
+            "type": "boolean",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.NumberValidationResult.integerOnly",
+            "type": "boolean",
+            "tags": [],
+            "label": "integerOnly",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

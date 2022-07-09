@@ -10324,6 +10324,19 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.Agent.default_api_key_history",
+            "type": "Array",
+            "tags": [],
+            "label": "default_api_key_history",
+            "description": [],
+            "signature": [
+              "{ id: string; retired_at: string; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.Agent.status",
             "type": "CompoundType",
             "tags": [],
@@ -12270,6 +12283,52 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FleetErrorResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetErrorResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetErrorResponse.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetErrorResponse.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetErrorResponse.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ type?: \"verification_failed\" | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FleetServerAgent",
         "type": "Interface",
         "tags": [],
@@ -12662,6 +12721,21 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.default_api_key_history",
+            "type": "Array",
+            "tags": [],
+            "label": "default_api_key_history",
+            "description": [
+              "\nDefault API Key History"
+            ],
+            "signature": [
+              "{ id: string; retired_at: string; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false
@@ -14067,6 +14141,19 @@
             "description": [],
             "signature": [
               "\"encrypted_saved_object_encryption_key_required\"[]"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/fleet_setup.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetFleetStatusResponse.package_verification_key_id",
+            "type": "string",
+            "tags": [],
+            "label": "package_verification_key_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/fleet_setup.ts",
             "deprecated": false
@@ -15671,6 +15758,32 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.isUnverified",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isUnverified",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.showLabels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showLabels",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -19131,7 +19244,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"yaml\" | \"password\" | \"integer\" | \"bool\""
+              "\"string\" | \"text\" | \"yaml\" | \"textarea\" | \"password\" | \"integer\" | \"bool\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -21128,6 +21241,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FleetErrorType",
+        "type": "Type",
+        "tags": [],
+        "label": "FleetErrorType",
+        "description": [],
+        "signature": [
+          "\"verification_failed\""
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FullAgentPolicyOutput",
         "type": "Type",
         "tags": [],
@@ -22618,7 +22745,7 @@
         "label": "RegistryVarType",
         "description": [],
         "signature": [
-          "\"string\" | \"text\" | \"yaml\" | \"password\" | \"integer\" | \"bool\""
+          "\"string\" | \"text\" | \"yaml\" | \"textarea\" | \"password\" | \"integer\" | \"bool\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
