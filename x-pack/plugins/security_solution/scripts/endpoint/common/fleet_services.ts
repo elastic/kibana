@@ -35,6 +35,14 @@ export const checkInFleetAgent = async (
     ]
   );
 
+  // Ensure any `undefined` value is set to `null` for the update
+  Object.entries(update).forEach(([key, value]) => {
+    if (value === undefined) {
+      // @ts-expect-error
+      update[key] = null;
+    }
+  });
+
   await esClient.update({
     index: AGENTS_INDEX,
     id: agentId,
