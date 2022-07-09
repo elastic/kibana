@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HttpFetchError } from '@kbn/core/public';
+import type { HttpFetchError } from '@kbn/core/public';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
   /** The page number for the list. Must be 1 based. */

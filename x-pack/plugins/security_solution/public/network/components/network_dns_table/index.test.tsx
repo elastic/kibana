@@ -18,7 +18,8 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { State, createStore } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 

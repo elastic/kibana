@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { SessionsComponentsProps } from './types';
-import { ESBoolQuery } from '../../../../common/typed_json';
+import type { SessionsComponentsProps } from './types';
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
 import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';

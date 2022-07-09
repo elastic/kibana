@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { StartServices } from '../../../types';
-import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
+import type { StartServices } from '../../../types';
+import type { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
 
 /**
  * Fetches Configured Index Patterns from the Kibana saved objects API

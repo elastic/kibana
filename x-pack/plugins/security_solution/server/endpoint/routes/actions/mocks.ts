@@ -12,7 +12,7 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import moment from 'moment';
 import uuid from 'uuid';
-import {
+import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   EndpointAction,

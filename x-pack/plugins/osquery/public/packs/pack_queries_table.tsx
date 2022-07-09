@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PlatformIcons } from './queries/platforms';
-import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
+import type { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 
 export interface PackQueriesTableProps {
   data: OsqueryManagerPackagePolicyInputStream[];

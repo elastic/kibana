@@ -37,7 +37,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   author,
   buildingBlockTypeOrUndefined,

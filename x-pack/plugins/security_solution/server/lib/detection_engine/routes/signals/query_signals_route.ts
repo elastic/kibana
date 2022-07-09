@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-import {
-  querySignalsSchema,
-  QuerySignalsSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import { querySignalsSchema } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 
 export const querySignalsRoute = (
   router: SecuritySolutionPluginRouter,

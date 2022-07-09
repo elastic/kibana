@@ -6,9 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
-import { SelectedDataViewPayload } from './actions';
-import { sourcererModel } from '../model';
+import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
+import { SourcererScopeName } from './model';
+import type { SelectedDataViewPayload } from './actions';
+import type { sourcererModel } from '../model';
 
 export const sortWithExcludesAtEnd = (indices: string[]) => {
   const allSorted = indices.reduce(

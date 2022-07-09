@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EndpointResponderExtensionComponentProps } from './types';
+import type { EndpointResponderExtensionComponentProps } from './types';
 import { ResponseActionsList } from '../endpoint_response_actions_list/response_actions_list';
 import { UX_MESSAGES } from '../endpoint_response_actions_list/translations';
 

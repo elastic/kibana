@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiHealth, EuiToolTip, EuiHealthProps } from '@elastic/eui';
+import type { EuiHealthProps } from '@elastic/eui';
+import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 const StatusTextWrapper = styled.div`

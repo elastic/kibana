@@ -6,15 +6,16 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import {
+import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
 } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
-import { OsqueryFactory } from './factory/types';
+import type { OsqueryFactory } from './factory/types';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart

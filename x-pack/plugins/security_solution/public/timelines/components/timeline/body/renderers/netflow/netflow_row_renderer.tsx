@@ -9,7 +9,8 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/types/timeline';
 import { asArrayIfExists } from '../../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,

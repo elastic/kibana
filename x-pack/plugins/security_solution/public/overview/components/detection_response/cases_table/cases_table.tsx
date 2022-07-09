@@ -7,16 +7,16 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
+import type { CaseStatuses } from '@kbn/cases-plugin/common';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -26,11 +26,13 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import type { NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import { useNavigation } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { LastUpdatedAt } from '../utils';
 import { StatusBadge } from './status_badge';
-import { CaseItem, useCaseItems } from './use_case_items';
+import type { CaseItem } from './use_case_items';
+import { useCaseItems } from './use_case_items';
 
 type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;

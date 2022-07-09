@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
-import { SignalSource } from '../../types';
+import type { SignalSource } from '../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
 import type { FieldsType, MergeStrategyFunction } from '../types';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';

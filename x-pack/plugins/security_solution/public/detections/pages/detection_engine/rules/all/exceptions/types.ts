@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListInfo } from './use_all_exception_lists';
+import type { ExceptionListInfo } from './use_all_exception_lists';
 
 export interface ExceptionsTableItem extends ExceptionListInfo {
   isDeleting: boolean;

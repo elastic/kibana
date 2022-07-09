@@ -6,9 +6,10 @@
  */
 
 import * as yaml from 'js-yaml';
-import Url, { UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import Url from 'url';
 
-import { ROLES } from '../../common/test';
+import type { ROLES } from '../../common/test';
 import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';

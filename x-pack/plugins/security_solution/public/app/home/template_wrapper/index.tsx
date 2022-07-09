@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPanel, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { AppLeaveHandler } from '@kbn/core/public';
+import type { AppLeaveHandler } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';

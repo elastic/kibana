@@ -13,7 +13,8 @@ import {
   useSyncGlobalQueryString,
   useUpdateUrlParam,
 } from '.';
-import { GlobalUrlParam, globalUrlParamActions } from '../../store/global_url_param';
+import type { GlobalUrlParam } from '../../store/global_url_param';
+import { globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
 import {
   createSecuritySolutionStorageMock,
@@ -23,7 +24,7 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
-import { LinkInfo } from '../../links';
+import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
 
 const mockDispatch = jest.fn();

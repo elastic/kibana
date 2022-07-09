@@ -9,7 +9,7 @@ import { difference, fromPairs, identity, intersection, isEqual } from 'lodash/f
 import { useCallback, useEffect } from 'react';
 import useMap from 'react-use/lib/useMap';
 import { useMessagesStorage } from '../../containers/local_storage/use_messages_storage';
-import { CallOutMessage } from './callout_types';
+import type { CallOutMessage } from './callout_types';
 
 export interface CallOutStorage {
   getVisibleMessageIds: () => string[];

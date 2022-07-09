@@ -13,7 +13,7 @@ import {
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
 } from '../../common/constants';
-import { SecuritySubPluginRoutes } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
 
 import { LandingPage } from './pages/landing';
 import { StatefulOverview } from './pages/overview';

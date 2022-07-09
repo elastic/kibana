@@ -13,25 +13,27 @@ import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import {
+import type {
   RiskScoreStrategyResponse,
-  getHostRiskIndex,
   HostsRiskScore,
   UsersRiskScore,
   RiskScoreSortField,
   RiskScoreRequestOptions,
+} from '../../../../common/search_strategy';
+import {
+  getHostRiskIndex,
   RiskQueries,
   getUserRiskIndex,
 } from '../../../../common/search_strategy';
-import { ESQuery } from '../../../../common/typed_json';
+import type { ESQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { inputsModel } from '../../../common/store';
+import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../common';
 
 export interface RiskScoreState<RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]> {

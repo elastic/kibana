@@ -21,10 +21,14 @@ import {
   severity_mapping,
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  SortOrder,
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../common/detection_engine/schemas/common';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
   outcome as savedObjectResolveOutcome,
-  SortOrder,
   author,
   building_block_type,
   license,
@@ -35,15 +39,13 @@ import {
   event_category_override,
   tiebreaker_field,
   threshold,
-  BulkAction,
-  BulkActionEditPayload,
   ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
 } from '../../../../../common/detection_engine/schemas/common';
 
-import {
+import type {
   CreateRulesSchema,
   PatchRulesSchema,
   UpdateRulesSchema,

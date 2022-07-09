@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -21,7 +21,7 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;

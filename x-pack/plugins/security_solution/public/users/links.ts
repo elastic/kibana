@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName, USERS_PATH } from '../../common/constants';
 import { USERS } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import userPageImg from '../common/images/users_page.png';
 
 export const links: LinkItem = {

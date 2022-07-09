@@ -18,7 +18,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../mock';
 import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
-import { createStore, State } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';

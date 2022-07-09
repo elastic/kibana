@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
-import { shallow, ShallowWrapper, mount } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { SortFieldTimeline, TimelineType } from '../../../../../common/types/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';

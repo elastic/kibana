@@ -20,16 +20,17 @@ import {
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../common/components/search_bar';

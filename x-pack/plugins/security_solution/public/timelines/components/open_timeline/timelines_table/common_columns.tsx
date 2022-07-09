@@ -13,7 +13,7 @@ import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
 import * as i18n from '../translations';
-import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
+import type { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { TimelineType } from '../../../../../common/types/timeline';

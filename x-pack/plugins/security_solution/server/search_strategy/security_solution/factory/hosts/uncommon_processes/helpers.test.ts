@@ -7,12 +7,13 @@
 
 import { processFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 
-import {
+import type {
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy';
 
-import { formatUncommonProcessesData, getHosts, UncommonProcessBucket } from './helpers';
+import type { UncommonProcessBucket } from './helpers';
+import { formatUncommonProcessesData, getHosts } from './helpers';
 
 describe('helpers', () => {
   describe('#getHosts', () => {

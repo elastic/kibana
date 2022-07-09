@@ -7,10 +7,10 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import { ConfigType } from '../../../../..';
+import type { ConfigType } from '../../../../..';
 import { deleteTimelinesSchema } from '../../../schemas/timelines/delete_timelines_schema';
-import { SecuritySolutionPluginRouter } from '../../../../../types';
-import { SetupPlugins } from '../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 

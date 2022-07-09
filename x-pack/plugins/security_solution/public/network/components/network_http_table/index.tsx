@@ -9,9 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import { NetworkHttpEdges, NetworkHttpFields } from '../../../../common/search_strategy';
+import type { NetworkHttpEdges } from '../../../../common/search_strategy';
+import { NetworkHttpFields } from '../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import type { Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getNetworkHttpColumns } from './columns';
 import * as i18n from './translations';

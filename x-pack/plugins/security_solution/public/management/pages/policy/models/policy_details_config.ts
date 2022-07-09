@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { UIPolicyConfig } from '../../../../../common/endpoint/types';
+import type { UIPolicyConfig } from '../../../../../common/endpoint/types';
 
 /**
  * Returns value from `configuration`

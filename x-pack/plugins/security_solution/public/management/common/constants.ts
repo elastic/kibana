@@ -6,7 +6,8 @@
  */
 
 import { MANAGEMENT_PATH } from '../../../common/constants';
-import { ManagementStoreGlobalNamespace, AdministrationSubTab } from '../types';
+import type { ManagementStoreGlobalNamespace } from '../types';
+import { AdministrationSubTab } from '../types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
 export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.endpoints})`;

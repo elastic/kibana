@@ -6,7 +6,7 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
-import { CommandInputProps } from '../command_input';
+import type { CommandInputProps } from '../command_input';
 import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
 export interface ConsoleDataState {

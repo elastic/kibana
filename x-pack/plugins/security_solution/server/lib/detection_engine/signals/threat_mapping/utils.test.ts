@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { sampleSignalHit } from '../__mocks__/es_results';
-import { ThreatMatchNamedQuery } from './types';
+import type { ThreatMatchNamedQuery } from './types';
 
 import {
   buildExecutionIntervalValidator,

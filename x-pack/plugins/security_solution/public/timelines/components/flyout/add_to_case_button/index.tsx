@@ -10,7 +10,7 @@ import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { Case } from '@kbn/cases-plugin/common';
+import type { Case } from '@kbn/cases-plugin/common';
 import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';

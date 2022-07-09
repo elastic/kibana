@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, {
-  useReducer,
-  memo,
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useCallback,
-} from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useReducer, memo, createContext, useContext, useEffect, useCallback } from 'react';
 import { useWithManagedConsoleState } from '../console_manager/console_manager';
-import { InitialStateInterface, initiateState, stateDataReducer } from './state_reducer';
+import type { InitialStateInterface } from './state_reducer';
+import { initiateState, stateDataReducer } from './state_reducer';
 import type { ConsoleDataState, ConsoleStore } from './types';
 
 const ConsoleStateContext = createContext<null | ConsoleStore>(null);

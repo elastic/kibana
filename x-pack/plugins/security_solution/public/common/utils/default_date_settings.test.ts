@@ -7,11 +7,10 @@
 
 import moment from 'moment';
 
+import type { DefaultTimeRangeSetting, DefaultIntervalSetting } from './default_date_settings';
 import {
   getTimeRangeSettings,
   getIntervalSettings,
-  DefaultTimeRangeSetting,
-  DefaultIntervalSetting,
   parseDateWithDefault,
 } from './default_date_settings';
 import {
@@ -24,7 +23,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
 } from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
-import { Policy } from '../store/inputs/model';
+import type { Policy } from '../store/inputs/model';
 
 // Change the constants to be static values so we can test against those instead of
 // relative sliding date times. Jest cannot access these outer scoped variables so

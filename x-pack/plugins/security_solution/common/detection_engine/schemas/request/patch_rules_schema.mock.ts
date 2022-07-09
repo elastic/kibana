@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatchRulesSchema, ThresholdPatchSchema } from './patch_rules_schema';
+import type { PatchRulesSchema, ThresholdPatchSchema } from './patch_rules_schema';
 
 export const getPatchRulesSchemaMock = (): PatchRulesSchema => ({
   description: 'some description',

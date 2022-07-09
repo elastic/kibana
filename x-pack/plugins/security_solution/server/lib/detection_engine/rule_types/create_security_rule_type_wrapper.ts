@@ -23,12 +23,10 @@ import {
   isMachineLearningParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { CreateSecurityRuleTypeWrapper } from './types';
+import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
-import {
-  NotificationRuleTypeParams,
-  scheduleNotificationActions,
-} from '../notifications/schedule_notification_actions';
+import type { NotificationRuleTypeParams } from '../notifications/schedule_notification_actions';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';

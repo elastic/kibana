@@ -11,10 +11,10 @@ import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { KqlMode } from '../../../store/timeline/model';
-import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
-import { KueryFilterQuery } from '../../../../../common/types/timeline';
-import { DataProvider } from '../data_providers/data_provider';
+import type { KqlMode } from '../../../store/timeline/model';
+import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import type { KueryFilterQuery } from '../../../../../common/types/timeline';
+import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
 import { EuiSuperSelect } from './super_select';

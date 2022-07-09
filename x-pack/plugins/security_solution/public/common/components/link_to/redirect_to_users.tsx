@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsersTableType } from '../../../users/store/model';
+import type { UsersTableType } from '../../../users/store/model';
 import { USERS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 

@@ -6,7 +6,7 @@
  */
 
 import { has, isEmpty } from 'lodash/fp';
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
@@ -15,7 +15,7 @@ import type {
   NamespaceType,
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   ThreatMapping,
   Threats,
   ThreatSubtechnique,
@@ -26,8 +26,8 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { Rule } from '../../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../../containers/detection_engine/rules';
+import type {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
@@ -39,13 +39,13 @@ import {
   RuleStepsFormData,
   RuleStep,
 } from '../types';
-import { FieldValueQueryBar } from '../../../../components/rules/query_bar';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
 import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
-import { FieldValueThreshold } from '../../../../components/rules/threshold_input';
-import { EqlOptionsSelected } from '../../../../../../common/search_strategy';
+import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
+import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {

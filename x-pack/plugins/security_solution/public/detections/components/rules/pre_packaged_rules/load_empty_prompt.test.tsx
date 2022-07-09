@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { shallow, mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import '../../../../common/mock/match_media';
 import { PrePackagedRulesPrompt } from './load_empty_prompt';

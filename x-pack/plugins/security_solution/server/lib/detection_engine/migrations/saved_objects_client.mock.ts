@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SignalsMigrationSOClient } from './saved_objects_client';
+import type { SignalsMigrationSOClient } from './saved_objects_client';
 
 const create = () =>
   ({

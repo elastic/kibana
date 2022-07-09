@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
 import { NotFoundError } from '../errors';
 import { EndpointHostUnEnrolledError } from '../services/metadata';

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
-import { NetworkComponentQueryProps } from './types';
+import type { NetworkComponentQueryProps } from './types';
 import { filterNetworkExternalAlertData } from '../../../common/components/visualization_actions/utils';
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (

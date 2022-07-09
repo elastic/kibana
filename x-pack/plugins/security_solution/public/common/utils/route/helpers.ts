@@ -6,10 +6,11 @@
  */
 
 import { noop } from 'lodash/fp';
-import { createContext, Dispatch } from 'react';
+import type { Dispatch } from 'react';
+import { createContext } from 'react';
 import { SecurityPageName } from '../../../app/types';
 
-import { RouteSpyState, RouteSpyAction } from './types';
+import type { RouteSpyState, RouteSpyAction } from './types';
 
 export const initRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.noPage,

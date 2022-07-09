@@ -11,7 +11,7 @@ import {
   dispatchUpdateTimeline,
   queryTimelineById,
 } from '../../../timelines/components/open_timeline/helpers';
-import { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
+import type { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
 
 export const useTimelineClick = () => {

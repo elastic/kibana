@@ -14,9 +14,9 @@ import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
-import {
+import type {
   InternalArtifactCompleteSchema,
   InternalArtifactSchema,
   InternalManifestSchema,
@@ -39,7 +39,7 @@ import {
 } from './manifest_manager.mock';
 
 import { ManifestManager } from './manifest_manager';
-import { EndpointArtifactClientInterface } from '../artifact_client';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 

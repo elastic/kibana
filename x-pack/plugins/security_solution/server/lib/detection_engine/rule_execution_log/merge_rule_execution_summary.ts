@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
 import {
   RuleExecutionStatus,
   ruleExecutionStatusOrderByStatus,
-  RuleExecutionSummary,
 } from '../../../../common/detection_engine/schemas/common';
-import { RuleAlertType } from '../rules/types';
+import type { RuleAlertType } from '../rules/types';
 
 export const mergeRuleExecutionSummary = (
   rule: RuleAlertType,

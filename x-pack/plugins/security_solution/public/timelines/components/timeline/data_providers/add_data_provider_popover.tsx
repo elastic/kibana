@@ -7,6 +7,7 @@
 
 import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,12 +15,11 @@ import {
   EuiText,
   EuiPopover,
   EuiIcon,
-  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import uuid from 'uuid';
 import { useDispatch } from 'react-redux';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';

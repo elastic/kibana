@@ -12,8 +12,8 @@ import { CONSTANTS } from '../url_state/constants';
 import { TabNavigationComponent } from '.';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
-import { RouteSpyState } from '../../utils/route/types';
-import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
+import type { RouteSpyState } from '../../utils/route/types';
+import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesBulkSchema } from './rules_bulk_schema';
+import type { RulesBulkSchema } from './rules_bulk_schema';
 import { getRulesSchemaMock } from './rules_schema.mocks';
 
 export const getRulesBulkSchemaMock = (): RulesBulkSchema => [getRulesSchemaMock()];

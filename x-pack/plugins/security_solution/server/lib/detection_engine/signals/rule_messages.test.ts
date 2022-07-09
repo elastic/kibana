@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BuildRuleMessageFactoryParams, buildRuleMessageFactory } from './rule_messages';
+import type { BuildRuleMessageFactoryParams } from './rule_messages';
+import { buildRuleMessageFactory } from './rule_messages';
 
 describe('buildRuleMessageFactory', () => {
   let factoryParams: BuildRuleMessageFactoryParams;

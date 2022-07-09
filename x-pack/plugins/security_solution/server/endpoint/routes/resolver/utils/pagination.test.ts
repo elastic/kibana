@@ -7,7 +7,7 @@
 
 import { PaginationBuilder } from './pagination';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { SafeEndpointEvent } from '../../../../../common/endpoint/types';
+import type { SafeEndpointEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,
   timestampSafeVersion,

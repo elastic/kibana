@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import {
   QUERY_RULE_TYPE_ID,
@@ -16,16 +16,18 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { Logger, SavedObjectsClient } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
-import { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import type { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
-import { IRuleDataClient, Dataset } from '@kbn/rule-registry-plugin/server';
-import { ListPluginSetup } from '@kbn/lists-plugin/server';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
+import type { ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
   createEqlAlertType,
@@ -41,7 +43,8 @@ import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
-import { createConfig, ConfigType } from './config';
+import type { ConfigType } from './config';
+import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
@@ -55,12 +58,14 @@ import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
-import { EndpointAppContext } from './endpoint/types';
+import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import { ITelemetryEventsSender, TelemetryEventsSender } from './lib/telemetry/sender';
-import { ITelemetryReceiver, TelemetryReceiver } from './lib/telemetry/receiver';
+import type { ITelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import type { ITelemetryReceiver } from './lib/telemetry/receiver';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
@@ -72,7 +77,7 @@ import {
 } from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports

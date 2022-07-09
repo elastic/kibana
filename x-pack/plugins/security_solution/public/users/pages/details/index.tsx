@@ -28,7 +28,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
-import { UsersDetailsProps } from './types';
+import type { UsersDetailsProps } from './types';
 import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';

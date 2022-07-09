@@ -17,7 +17,7 @@ import { TopRiskScoreContributors } from '../../../common/components/top_risk_sc
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { UsersComponentsQueryProps } from './types';
+import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 

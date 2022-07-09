@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
-import { UsersKpiProps } from './types';
+import type { UsersKpiProps } from './types';
 
 import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';

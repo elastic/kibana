@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryRulesSchema } from './query_rules_schema';
+import type { QueryRulesSchema } from './query_rules_schema';
 
 export const validateId = (rule: QueryRulesSchema): string[] => {
   if (rule.id != null && rule.rule_id != null) {

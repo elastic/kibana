@@ -20,7 +20,8 @@ import {
 import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';

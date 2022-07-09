@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { ResolverSchema } from '../../../../../../common/endpoint/types';
+import type { ResolverSchema } from '../../../../../../common/endpoint/types';
 
 interface SupportedSchema {
   /**

@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { RecursivePartial } from '@elastic/eui/src/components/common';
+import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -34,10 +34,10 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
 } from '../../../../common/constants';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';

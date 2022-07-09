@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   NetworkTopCountriesStrategyResponse,
   NetworkQueries,
   NetworkTopCountriesRequestOptions,
@@ -18,7 +18,7 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 
 import { getTopCountriesEdges } from './helpers';
 import { buildTopCountriesQuery } from './query.top_countries_network.dsl';

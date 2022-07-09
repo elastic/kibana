@@ -8,10 +8,10 @@
 import { createSelector } from 'reselect';
 
 export { getManageTimelineById } from '@kbn/timelines-plugin/public';
-import { State } from '../../../common/store/types';
+import type { State } from '../../../common/store/types';
 
-import { TimelineModel } from './model';
-import { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
+import type { TimelineModel } from './model';
+import type { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 

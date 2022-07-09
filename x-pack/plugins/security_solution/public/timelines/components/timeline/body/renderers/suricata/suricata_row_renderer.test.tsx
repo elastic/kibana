@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
 import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';

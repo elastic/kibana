@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  ArtifactEntryCardMinified,
-  ArtifactEntryCardMinifiedProps,
-} from './artifact_entry_card_minified';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ArtifactEntryCardMinifiedProps } from './artifact_entry_card_minified';
+import { ArtifactEntryCardMinified } from './artifact_entry_card_minified';
 import { act, fireEvent } from '@testing-library/react';
-import { AnyArtifact } from './types';
+import type { AnyArtifact } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([

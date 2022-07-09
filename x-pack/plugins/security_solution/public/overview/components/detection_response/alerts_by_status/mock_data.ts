@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertsByStatusResponse, AlertsByStatusAgg, ParsedAlertsData } from './types';
+import type { AlertsByStatusResponse, AlertsByStatusAgg, ParsedAlertsData } from './types';
 
 export const from = '2022-04-05T12:00:00.000Z';
 export const to = '2022-04-08T12:00:00.000Z';

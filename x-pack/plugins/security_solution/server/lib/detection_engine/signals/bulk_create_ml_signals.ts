@@ -8,19 +8,19 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { GenericBulkCreateResponse } from '../rule_types/factories';
-import { Anomaly } from '../../machine_learning';
-import { BuildRuleMessage } from './rule_messages';
-import { BulkCreate, WrapHits } from './types';
-import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { Anomaly } from '../../machine_learning';
+import type { BuildRuleMessage } from './rule_messages';
+import type { BulkCreate, WrapHits } from './types';
+import type { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
-import { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateMlSignalsParams {
   anomalyHits: Array<estypes.SearchHit<Anomaly>>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useState, useEffect } from 'react';
-import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../lib/kibana';
 
 export const dashboardRequestBody = (title: string) => ({

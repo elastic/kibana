@@ -9,25 +9,24 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
 import React, { useCallback, useMemo, useRef } from 'react';
+import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
 import {
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
-  OnRefreshProps,
-  OnRefreshChangeProps,
   EuiSpacer,
   EuiSwitch,
   EuiBasicTable,
   EuiButton,
 } from '@elastic/eui';
-import { buildFilter, Filter, FILTERS, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { mountReactNode } from '@kbn/core/public/utils';
 import { RuleDetailTabs } from '..';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
-import {
+import type {
   AggregateRuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/schemas/common';
@@ -48,11 +47,13 @@ import {
   setFilterQuery,
   setRelativeRangeDatePicker,
 } from '../../../../../../common/store/inputs/actions';
-import {
+import type {
   AbsoluteTimeRange,
+  RelativeTimeRange,
+} from '../../../../../../common/store/inputs/model';
+import {
   isAbsoluteTimeRange,
   isRelativeTimeRange,
-  RelativeTimeRange,
 } from '../../../../../../common/store/inputs/model';
 import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { useRuleExecutionEvents } from '../../../../../containers/detection_engine/rules';

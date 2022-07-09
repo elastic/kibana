@@ -6,7 +6,7 @@
  */
 
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 import { isEndpointHostIsolated } from './is_endpoint_host_isolated';
 
 describe('When using isEndpointHostIsolated()', () => {

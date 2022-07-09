@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Store, createStore } from 'redux';
+import type { Store } from 'redux';
+import { createStore } from 'redux';
 import { cameraReducer } from './reducer';
-import { CameraState, Vector2 } from '../../types';
-import { CameraAction } from './action';
+import type { CameraState, Vector2 } from '../../types';
+import type { CameraAction } from './action';
 import { translation } from './selectors';
 
 describe('panning interaction', () => {

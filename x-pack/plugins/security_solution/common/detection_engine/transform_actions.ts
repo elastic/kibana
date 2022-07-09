@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleAction } from '@kbn/alerting-plugin/common';
-import { RuleAlertAction } from './types';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
   group,

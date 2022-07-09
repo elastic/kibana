@@ -6,11 +6,11 @@
  */
 
 import { find, reduce } from 'lodash';
-import { KibanaAssetReference } from '@kbn/fleet-plugin/common';
+import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 const getInstallation = async (osqueryContext: OsqueryAppContext) =>
   await osqueryContext.service

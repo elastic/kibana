@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Timeline, TimelineFilter } from '../objects/timeline';
+import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';

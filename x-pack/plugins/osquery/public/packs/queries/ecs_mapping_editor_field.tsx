@@ -19,6 +19,7 @@ import {
   get,
 } from 'lodash';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormLabel,
   EuiButtonIcon,
@@ -26,8 +27,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption,
   EuiSpacer,
   EuiTitle,
   EuiText,
@@ -45,19 +44,16 @@ import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
+import type { FieldHook, ValidationFuncArg, ArrayItem, FormArrayField } from '../../shared_imports';
 import {
   FIELD_TYPES,
-  FieldHook,
   getFieldValidityAndErrorMessage,
   useFormData,
   Field,
   getUseField,
   fieldValidators,
-  ValidationFuncArg,
   UseMultiFields,
   UseArray,
-  ArrayItem,
-  FormArrayField,
   useFormContext,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';

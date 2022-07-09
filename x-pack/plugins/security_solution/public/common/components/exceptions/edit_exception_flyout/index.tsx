@@ -32,7 +32,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 
 import {
   hasEqlSequenceQuery,
@@ -58,7 +58,8 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 interface EditExceptionFlyoutProps {

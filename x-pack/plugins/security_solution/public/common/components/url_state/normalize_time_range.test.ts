@@ -6,13 +6,8 @@
  */
 
 import { normalizeTimeRange } from './normalize_time_range';
-import {
-  URLTimeRange,
-  AbsoluteTimeRange,
-  isAbsoluteTimeRange,
-  RelativeTimeRange,
-  isRelativeTimeRange,
-} from '../../store/inputs/model';
+import type { URLTimeRange, AbsoluteTimeRange, RelativeTimeRange } from '../../store/inputs/model';
+import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../store/inputs/model';
 import DateMath from '@kbn/datemath';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 

@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
-import {
+import type {
   BrowserField,
   BrowserFields,
   DocValueFields,

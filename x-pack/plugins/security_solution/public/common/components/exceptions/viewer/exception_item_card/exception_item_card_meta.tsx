@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import styled from 'styled-components';
 
 import * as i18n from './translations';

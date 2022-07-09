@@ -12,10 +12,10 @@ import {
   EuiLoadingSpinner,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { Geometry } from 'geojson';
+import type { Geometry } from 'geojson';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
-import { MapToolTipProps } from '../types';
+import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import type { MapToolTipProps } from '../types';
 import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
 import { PointToolTipContent } from './point_tool_tip_content';

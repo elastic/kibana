@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';

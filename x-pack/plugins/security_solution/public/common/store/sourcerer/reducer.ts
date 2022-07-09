@@ -16,7 +16,8 @@ import {
   setDataViewLoading,
   updateSourcererDataViews,
 } from './actions';
-import { initDataView, initialSourcererState, SourcererModel, SourcererScopeName } from './model';
+import type { SourcererModel } from './model';
+import { initDataView, initialSourcererState, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;

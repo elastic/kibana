@@ -13,7 +13,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import * as i18n from './translations';
 import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
 import { Loader } from '../../loader';
-import { AnomaliesNetworkTableProps } from '../types';
+import type { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';

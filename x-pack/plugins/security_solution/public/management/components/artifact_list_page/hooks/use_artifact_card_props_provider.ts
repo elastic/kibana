@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useCallback, useMemo } from 'react';
-import {
-  AnyArtifact,
-  ArtifactEntryCardProps,
-  useEndpointPoliciesToArtifactPolicies,
-} from '../../artifact_entry_card';
+import type { AnyArtifact, ArtifactEntryCardProps } from '../../artifact_entry_card';
+import { useEndpointPoliciesToArtifactPolicies } from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../common/translations';

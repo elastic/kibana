@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { Ecs } from '../../../../common/ecs';
 import type { CodeSignature } from '../../../../common/ecs/file';

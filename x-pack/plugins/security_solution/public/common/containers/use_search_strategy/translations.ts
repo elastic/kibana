@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FactoryQueryTypes } from '../../../../common/search_strategy';
+import type { FactoryQueryTypes } from '../../../../common/search_strategy';
 
 export const DEFAULT_ERROR_SEARCH_STRATEGY = (factoryQueryType: FactoryQueryTypes) =>
   i18n.translate('xpack.securitySolution.searchStrategy.error', {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiHealth, EuiLink, EuiText } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiHealth, EuiLink, EuiText } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
 import React from 'react';
-import {
+import type {
   AggregateRuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/schemas/common';

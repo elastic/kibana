@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSearchBar, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
 
 import * as i18n from './translations';
 

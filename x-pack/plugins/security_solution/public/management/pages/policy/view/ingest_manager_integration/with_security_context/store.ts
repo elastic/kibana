@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  applyMiddleware,
-  combineReducers,
-  compose,
-  createStore,
-  Dispatch,
-  Middleware,
-  PreloadedState,
-  ReducersMapObject,
-} from 'redux';
-import { CoreStart } from '@kbn/core/public';
+import type { Dispatch, Middleware, PreloadedState, ReducersMapObject } from 'redux';
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
+import type { CoreStart } from '@kbn/core/public';
 import { managementReducer } from '../../../../../store/reducer';
 import { appReducer } from '../../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';

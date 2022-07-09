@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiContextMenuPanelProps,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +16,7 @@ import {
   EuiTitle,
   EuiContextMenuItem,
 } from '@elastic/eui';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface ExceptionItemCardHeaderProps {
   item: ExceptionListItemSchema;

@@ -20,7 +20,10 @@ import {
 } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
-import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import type {
+  PolicyOperatingSystem,
+  UIPolicyConfig,
+} from '../../../../../../../common/endpoint/types';
 import { ConfigForm, ConfigFormHeading } from '../config_form';
 
 const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {

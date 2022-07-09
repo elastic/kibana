@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { run, RunFn } from '@kbn/dev-cli-runner';
+import type { RunFn } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type {
   CreateExceptionListItemSchema,

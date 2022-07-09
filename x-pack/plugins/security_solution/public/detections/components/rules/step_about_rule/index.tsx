@@ -6,19 +6,21 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { DataViewBase } from '@kbn/es-query';
-import {
+import type { DataViewBase } from '@kbn/es-query';
+import type {
   RuleStepProps,
-  RuleStep,
   AboutStepRule,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
+import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
   Form,
@@ -26,7 +28,6 @@ import {
   UseField,
   useForm,
   useFormData,
-  FieldHook,
 } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions } from './data';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsOverviewStrategyResponse } from '../../../../common/search_strategy';
+import type { HostsOverviewStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockData: HostsOverviewStrategyResponse['overviewHost'] = {
   auditbeatAuditd: 73847,

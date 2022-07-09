@@ -9,16 +9,18 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
+import type {
   Direction,
   GeoItem,
   SortField,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
   NetworkTopNFlowRequestOptions,
+  AutonomousSystemItem,
+} from '../../../../../../common/search_strategy';
+import {
   NetworkTopTablesFields,
   FlowTargetSourceDest,
-  AutonomousSystemItem,
 } from '../../../../../../common/search_strategy';
 import { getOppositeField } from '../helpers';
 import {

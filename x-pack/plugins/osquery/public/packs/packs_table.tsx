@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiText,
   EuiPopover,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiToolTip,
   EuiLoadingContent,
@@ -24,7 +24,7 @@ import { useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
-import { PackSavedObject } from './types';
+import type { PackSavedObject } from './types';
 
 const UpdatedBy = styled.span`
   white-space: nowrap;

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
-import { OsqueryTelemetryTaskConfig } from '../task';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
+import type { OsqueryTelemetryTaskConfig } from '../task';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean

@@ -34,7 +34,7 @@ import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
 import { PARTICIPANTS } from '../translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
-import { TimelineResultNote } from '../../open_timeline/types';
+import type { TimelineResultNote } from '../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../side_panel';
 import { getScrollToTopSelector } from '../tabs_content/selectors';

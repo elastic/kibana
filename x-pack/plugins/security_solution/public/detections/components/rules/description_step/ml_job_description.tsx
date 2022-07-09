@@ -9,11 +9,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
-import { ML_PAGES, MlSummaryJob, useMlHref } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ListItems } from './types';
+import type { ListItems } from './types';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
 
 enum MessageLevels {

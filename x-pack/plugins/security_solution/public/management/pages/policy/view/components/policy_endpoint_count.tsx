@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiLinkAnchorProps, EuiText } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { useAppUrl } from '../../../../../common/lib/kibana';

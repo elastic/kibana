@@ -6,17 +6,18 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { KibanaRequest } from '@kbn/core/server';
-import {
+import type { KibanaRequest } from '@kbn/core/server';
+import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
-import { SecuritySolutionFactory } from './factory/types';
-import { EndpointAppContext } from '../../endpoint/types';
+import type { SecuritySolutionFactory } from './factory/types';
+import type { EndpointAppContext } from '../../endpoint/types';
 
 function isObj(req: unknown): req is Record<string, unknown> {
   return typeof req === 'object' && req !== null;

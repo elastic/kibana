@@ -6,9 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
-import {
+import type { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
+import type {
   GeoItem,
   FlowTargetSourceDest,
   NetworkTopTablesFields,

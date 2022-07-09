@@ -7,15 +7,15 @@
 
 import { get } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { usersModel } from '../../store';
 import { UsersTableType } from '../../store/model';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 
 import * as i18n from '../translations';
-import { UsersRouteSpyState } from '../../../common/utils/route/types';
+import type { UsersRouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
-import { GetSecuritySolutionUrl } from '../../../common/components/link_to';
+import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 export const type = usersModel.UsersType.details;
 

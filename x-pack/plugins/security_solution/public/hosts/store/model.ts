@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Direction } from '../../../common/search_strategy';
-import {
+import type { Direction } from '../../../common/search_strategy';
+import type {
   HostsFields,
   RiskScoreSortField,
   RiskSeverity,

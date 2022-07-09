@@ -6,9 +6,9 @@
  */
 
 import { relativeDownloadUrlFromArtifact } from '@kbn/fleet-plugin/server';
-import { InternalArtifactSchema } from '../../schemas/artifacts';
-import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
-import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
+import type { InternalArtifactSchema } from '../../schemas/artifacts';
+import type { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
+import type { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 import { getArtifactId } from './common';
 
 export class ManifestEntry {

@@ -12,7 +12,7 @@ import {
   processFieldsMap,
   userFieldsMap,
 } from '../../../../../../../common/ecs/ecs_fields';
-import { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
+import type { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
 import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
 
 export const buildQuery = ({

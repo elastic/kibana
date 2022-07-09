@@ -17,7 +17,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';

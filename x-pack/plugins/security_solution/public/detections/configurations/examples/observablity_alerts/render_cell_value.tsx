@@ -8,13 +8,14 @@ import { random } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_REASON, ALERT_SEVERITY, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
 import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { Status } from '../../../components/status';
 

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from '@kbn/core/public';
-import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { HttpFetchError } from '@kbn/core/public';
+import type { UseMutationOptions, UseMutationResult } from 'react-query';
+import { useMutation } from 'react-query';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 

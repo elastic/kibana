@@ -8,7 +8,7 @@
 import { getOr, noop } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { UsersComponentsQueryProps } from './types';
+import type { UsersComponentsQueryProps } from './types';
 
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { UsersTable } from '../../components/all_users';

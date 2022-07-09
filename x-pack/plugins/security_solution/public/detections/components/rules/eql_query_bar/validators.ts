@@ -7,12 +7,12 @@
 
 import { isEmpty } from 'lodash';
 
-import { FieldHook, ValidationError, ValidationFunc } from '../../../../shared_imports';
+import type { FieldHook, ValidationError, ValidationFunc } from '../../../../shared_imports';
 import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { validateEql } from '../../../../common/hooks/eql/api';
-import { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 
 export enum ERROR_CODES {

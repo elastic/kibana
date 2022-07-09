@@ -6,20 +6,12 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiContextMenuPanelProps,
-  EuiIconProps,
-} from '@elastic/eui';
+import type { EuiPopoverProps, EuiContextMenuPanelProps, EuiIconProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
-import {
-  ContextMenuItemNavByRouter,
-  ContextMenuItemNavByRouterProps,
-} from '../context_menu_with_router_support';
+import type { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support';
+import { ContextMenuItemNavByRouter } from '../context_menu_with_router_support';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ActionsContextMenuProps {

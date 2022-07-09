@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import type { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildIndicatorShouldClauses } from './helpers';
 
 export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.eventEnrichment>['buildDsl'] =

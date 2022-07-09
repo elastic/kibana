@@ -11,7 +11,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
 import * as i18n from './translations';
-import { Rule } from './types';
+import type { Rule } from './types';
 
 export type ReturnRule = [boolean, Rule | null];
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { validateTree } from '../../../../../common/endpoint/schema/resolver';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { validateTree } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 
 export function handleTree(): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {

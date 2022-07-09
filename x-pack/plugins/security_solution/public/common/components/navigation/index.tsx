@@ -11,12 +11,12 @@ import { compose } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { makeMapStateToProps } from '../url_state/helpers';
 import { useSetBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
+import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 
 /**
  * @description - This component handels all of the tab navigation seen within a Security Soluton application page, not the Security Solution primary side navigation

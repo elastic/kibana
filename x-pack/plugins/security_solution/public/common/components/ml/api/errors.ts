@@ -7,7 +7,7 @@
 
 import { has } from 'lodash/fp';
 
-import { MlError } from '../types';
+import type { MlError } from '../types';
 
 export interface MlStartJobError {
   error: MlError;

@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import {
+import type {
   Immutable,
   ImmutableArray,
-  ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection } from '../../../types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection } from '../../../types';
 import { ConfigFormHeading } from '../../components/config_form';
 import { ProtectionRadio } from './protection_radio';
 

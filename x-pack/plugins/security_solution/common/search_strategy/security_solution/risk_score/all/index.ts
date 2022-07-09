@@ -6,10 +6,10 @@
  */
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import { FactoryQueryTypes } from '../..';
+import type { FactoryQueryTypes } from '../..';
 
-import { ESQuery } from '../../../../typed_json';
-import { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
+import type { ESQuery } from '../../../../typed_json';
+import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
 
 export interface RiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];

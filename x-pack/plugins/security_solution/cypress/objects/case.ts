@@ -6,7 +6,8 @@
  */
 
 import { flatten } from 'lodash';
-import { CompleteTimeline, getTimeline } from './timeline';
+import type { CompleteTimeline } from './timeline';
+import { getTimeline } from './timeline';
 
 export interface TestCase extends TestCaseWithoutTimeline {
   timeline: CompleteTimeline;

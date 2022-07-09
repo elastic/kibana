@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
-import { SignalSourceHit } from './types';
+import type { SignalSourceHit } from './types';
 
 export interface BuildReasonMessageArgs {
   name: string;

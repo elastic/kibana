@@ -8,15 +8,15 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import { parse } from 'querystring';
 import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
-import {
+import type {
   Immutable,
   PolicyConfig,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { ImmutableReducer } from '../../../../../../common/store';
-import { AppAction } from '../../../../../../common/store/actions';
-import { PolicyDetailsState } from '../../../types';
+import type { ImmutableReducer } from '../../../../../../common/store';
+import type { AppAction } from '../../../../../../common/store/actions';
+import type { PolicyDetailsState } from '../../../types';
 import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../../common/routing';
 import { initialPolicyDetailsState } from './initial_policy_details_state';
 

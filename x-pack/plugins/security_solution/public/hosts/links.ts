@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { HOSTS_PATH, SecurityPageName } from '../../common/constants';
 import { HOSTS } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import hostsPageImg from '../common/images/hosts_page.png';
 
 export const links: LinkItem = {

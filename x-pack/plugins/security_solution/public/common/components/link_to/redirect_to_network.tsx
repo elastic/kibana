@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy/security_solution/network';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 
 import { appendSearch } from './helpers';
 

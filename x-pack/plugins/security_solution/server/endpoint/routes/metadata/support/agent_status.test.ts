@@ -6,9 +6,9 @@
  */
 
 import { buildStatusesKuery, findAgentIdsByStatus } from './agent_status';
-import { AgentClient } from '@kbn/fleet-plugin/server/services';
+import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { createMockAgentClient } from '@kbn/fleet-plugin/server/mocks';
-import { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
 
 describe('test filtering endpoint hosts by agent status', () => {

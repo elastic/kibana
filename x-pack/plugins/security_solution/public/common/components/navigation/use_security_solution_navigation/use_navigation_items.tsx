@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
+import type React from 'react';
+import { useCallback, useMemo } from 'react';
+import type { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
 
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
-import { PrimaryNavigationItemsProps } from './types';
+import type { PrimaryNavigationItemsProps } from './types';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
-import { NavTab, SecurityNavGroupKey } from '../types';
+import type { NavTab } from '../types';
+import { SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';

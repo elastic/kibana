@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import {
-  AGENTS_SETUP_API_ROUTES,
+import type { AxiosResponse } from 'axios';
+import type { KbnClient } from '@kbn/test';
+import type {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  EPM_API_ROUTES,
   IBulkInstallPackageHTTPError,
   PostFleetSetupResponse,
-  SETUP_API_ROUTE,
 } from '@kbn/fleet-plugin/common';
+import { AGENTS_SETUP_API_ROUTES, EPM_API_ROUTES, SETUP_API_ROUTE } from '@kbn/fleet-plugin/common';
 import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 export interface SetupFleetForEndpointResponse {

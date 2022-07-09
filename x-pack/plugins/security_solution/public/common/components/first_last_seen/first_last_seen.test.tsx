@@ -11,7 +11,8 @@ import { render, waitFor } from '@testing-library/react';
 
 import { useFirstLastSeen } from '../../containers/use_first_last_seen';
 import { TestProviders } from '../../mock';
-import { FirstLastSeen, FirstLastSeenProps, FirstLastSeenType } from './first_last_seen';
+import type { FirstLastSeenProps } from './first_last_seen';
+import { FirstLastSeen, FirstLastSeenType } from './first_last_seen';
 
 const MOCKED_RESPONSE = {
   firstSeen: '2019-04-08T16:09:40.692Z',

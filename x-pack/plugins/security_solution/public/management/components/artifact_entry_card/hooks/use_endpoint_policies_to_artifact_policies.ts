@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { MenuItemPropsByPolicyId } from '..';
-import { PolicyData } from '../../../../../common/endpoint/types';
+import type { MenuItemPropsByPolicyId } from '..';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../common/lib/kibana';
 import { getPolicyDetailPath } from '../../../common/routing';
 

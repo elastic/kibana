@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
-import { TimelineItem } from '../../../common/search_strategy/timeline';
+import type { Ecs } from '../../../common/ecs';
+import type { TimelineItem } from '../../../common/search_strategy/timeline';
 
 export const mockTimelineData: TimelineItem[] = [
   {

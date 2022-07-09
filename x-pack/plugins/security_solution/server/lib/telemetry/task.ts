@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { ITelemetryReceiver } from './receiver';
-import { ITelemetryEventsSender } from './sender';
+import type { ITelemetryReceiver } from './receiver';
+import type { ITelemetryEventsSender } from './sender';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;

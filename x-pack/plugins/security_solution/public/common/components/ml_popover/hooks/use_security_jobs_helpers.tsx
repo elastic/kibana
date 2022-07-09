@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '@kbn/ml-plugin/public';
-import {
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type {
   AugmentedSecurityJobFields,
   Module,
   ModuleJob,

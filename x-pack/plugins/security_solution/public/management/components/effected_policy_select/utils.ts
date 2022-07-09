@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PolicyData } from '../../../../common/endpoint/types';
-import { EffectedPolicySelection } from './effected_policy_select';
+import type { PolicyData } from '../../../../common/endpoint/types';
+import type { EffectedPolicySelection } from './effected_policy_select';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 
 /**

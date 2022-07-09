@@ -6,11 +6,9 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-import { ConfigType } from './config';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
   const enableExperimental: string[] = [];

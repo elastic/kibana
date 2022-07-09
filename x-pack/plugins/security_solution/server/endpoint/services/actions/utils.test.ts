@@ -29,7 +29,8 @@ import type {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import uuid from 'uuid';
-import { mockAuditLogSearchResult, Results } from '../../routes/actions/mocks';
+import type { Results } from '../../routes/actions/mocks';
+import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Action } from 'typescript-fsa';
-import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
+import type { Action } from 'typescript-fsa';
+import type { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import {
@@ -14,7 +14,7 @@ import {
   getQueryStringFromLocation,
   getParamFromQueryString,
 } from './helpers';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
 
 const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>

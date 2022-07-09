@@ -13,7 +13,8 @@ import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { useUserRiskScore } from '../../../risk_score/containers/all';
-import { UserOverview, UserSummaryProps } from '.';
+import type { UserSummaryProps } from '.';
+import { UserOverview } from '.';
 
 jest.mock('../../../risk_score/containers/all', () => ({
   useUserRiskScore: jest.fn().mockReturnValue([

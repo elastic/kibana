@@ -8,19 +8,19 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 
-import { inputsModel } from '../../../../../common/store';
-import {
+import type { inputsModel } from '../../../../../common/store';
+import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import {
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   ControlColumnProps,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { OnRowSelected } from '../../events';
+import type { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';

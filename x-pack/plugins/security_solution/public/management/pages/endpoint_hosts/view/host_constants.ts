@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/endpoint/types';
+import type { HostPolicyResponseActionStatus } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
 
 export const HOST_STATUS_TO_BADGE_COLOR = Object.freeze<{
   [key in HostStatus]: string;

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  FactoryQueryTypes,
-  NetworkKpiQueries,
-} from '../../../../../../common/search_strategy/security_solution';
+import type { FactoryQueryTypes } from '../../../../../../common/search_strategy/security_solution';
+import { NetworkKpiQueries } from '../../../../../../common/search_strategy/security_solution';
 
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { networkKpiDns } from './dns';
 import { networkKpiNetworkEvents } from './network_events';
 import { networkKpiTlsHandshakes } from './tls_handshakes';

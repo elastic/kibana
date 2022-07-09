@@ -12,18 +12,18 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
-import {
+import type { InspectResponse } from '../../../../types';
+import type {
   UserDetailsRequestOptions,
   UserDetailsStrategyResponse,
 } from '../../../../../common/search_strategy/security_solution/users/details';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
-import { UserItem } from '../../../../../common/search_strategy/security_solution/users/common';
+import type { UserItem } from '../../../../../common/search_strategy/security_solution/users/common';
 
 export const ID = 'usersDetailsQuery';
 

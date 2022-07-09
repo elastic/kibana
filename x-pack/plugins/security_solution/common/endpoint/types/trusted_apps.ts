@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ConditionEntryField,
   OperatingSystem,
   TrustedAppEntryTypes,
 } from '@kbn/securitysolution-utils';
-import {
+import type {
   DeleteTrustedAppsRequestSchema,
   GetOneTrustedAppRequestSchema,
   GetTrustedAppsRequestSchema,
@@ -19,7 +19,7 @@ import {
   PutTrustedAppUpdateRequestSchema,
   GetTrustedAppsSummaryRequestSchema,
 } from '../schema/trusted_apps';
-import { ConditionEntry } from './exception_list_items';
+import type { ConditionEntry } from './exception_list_items';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;

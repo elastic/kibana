@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isAtLeast } from './license';
-import { PolicyConfig } from '../endpoint/types';
+import type { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,

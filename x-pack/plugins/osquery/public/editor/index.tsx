@@ -9,7 +9,8 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
 
-import { EuiCodeEditor, EuiCodeEditorProps } from '../shared_imports';
+import type { EuiCodeEditorProps } from '../shared_imports';
+import { EuiCodeEditor } from '../shared_imports';
 
 import './osquery_mode';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InternalArtifactSchema } from '../../schemas';
+import type { InternalArtifactSchema } from '../../schemas';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { ManifestEntry } from './manifest_entry';
 

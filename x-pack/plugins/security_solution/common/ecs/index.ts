@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { AgentEcs } from './agent';
-import { AuditdEcs } from './auditd';
-import { DestinationEcs } from './destination';
-import { DnsEcs } from './dns';
-import { DllEcs } from './dll';
-import { EndgameEcs } from './endgame';
-import { EventEcs } from './event';
-import { FileEcs } from './file';
-import { GeoEcs } from './geo';
-import { HostEcs } from './host';
-import { NetworkEcs } from './network';
-import { RegistryEcs } from './registry';
-import { RuleEcs } from './rule';
-import { SignalEcs, SignalEcsAAD } from './signal';
-import { SourceEcs } from './source';
-import { SuricataEcs } from './suricata';
-import { TlsEcs } from './tls';
-import { ZeekEcs } from './zeek';
-import { HttpEcs } from './http';
-import { UrlEcs } from './url';
-import { UserEcs } from './user';
-import { WinlogEcs } from './winlog';
-import { ProcessEcs } from './process';
-import { SystemEcs } from './system';
-import { ThreatEcs } from './threat';
-import { Ransomware } from './ransomware';
-import { MemoryProtection } from './memory_protection';
-import { Target } from './target_type';
+import type { AgentEcs } from './agent';
+import type { AuditdEcs } from './auditd';
+import type { DestinationEcs } from './destination';
+import type { DnsEcs } from './dns';
+import type { DllEcs } from './dll';
+import type { EndgameEcs } from './endgame';
+import type { EventEcs } from './event';
+import type { FileEcs } from './file';
+import type { GeoEcs } from './geo';
+import type { HostEcs } from './host';
+import type { NetworkEcs } from './network';
+import type { RegistryEcs } from './registry';
+import type { RuleEcs } from './rule';
+import type { SignalEcs, SignalEcsAAD } from './signal';
+import type { SourceEcs } from './source';
+import type { SuricataEcs } from './suricata';
+import type { TlsEcs } from './tls';
+import type { ZeekEcs } from './zeek';
+import type { HttpEcs } from './http';
+import type { UrlEcs } from './url';
+import type { UserEcs } from './user';
+import type { WinlogEcs } from './winlog';
+import type { ProcessEcs } from './process';
+import type { SystemEcs } from './system';
+import type { ThreatEcs } from './threat';
+import type { Ransomware } from './ransomware';
+import type { MemoryProtection } from './memory_protection';
+import type { Target } from './target_type';
 
 export interface Ecs {
   _id: string;

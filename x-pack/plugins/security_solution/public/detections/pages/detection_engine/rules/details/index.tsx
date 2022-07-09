@@ -25,23 +25,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import {
-  ExceptionListTypeEnum,
-  ExceptionListIdentifiers,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListIdentifiers } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import { UpdateDateRange } from '../../../../../common/components/charts/common';
+import type { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import {
@@ -51,7 +50,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
@@ -114,9 +113,9 @@ import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
-import { BadgeOptions } from '../../../../../common/components/header_page/types';
-import { AlertsStackByField } from '../../../../components/alerts_kpis/common/types';
-import { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BadgeOptions } from '../../../../../common/components/header_page/types';
+import type { AlertsStackByField } from '../../../../components/alerts_kpis/common/types';
+import type { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertsTableFilterGroup,
   FILTER_OPEN,

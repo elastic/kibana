@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { NetworkNavTab, NetworkRouteType } from './types';
+import type { NetworkNavTab } from './types';
+import { NetworkRouteType } from './types';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `${NETWORK_PATH}/${tabName}`;

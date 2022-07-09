@@ -8,9 +8,10 @@
 import React, { memo, useMemo, useCallback } from 'react';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 
 export interface FilterBarComponentProps {
   dataTestSubj?: string;

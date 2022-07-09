@@ -7,7 +7,7 @@
 
 import { buildArtifact, ArtifactConstants } from '../../lib/artifacts';
 import { getTranslatedExceptionListMock } from './lists.mock';
-import { InternalManifestSchema, InternalArtifactCompleteSchema } from './saved_objects';
+import type { InternalManifestSchema, InternalArtifactCompleteSchema } from './saved_objects';
 
 export const getInternalArtifactMock = async (
   os: string,

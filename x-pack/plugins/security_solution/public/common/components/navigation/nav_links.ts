@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 import { useAppLinks } from '../../links';
 import type { SecurityPageName } from '../../../app/types';
-import { NavLinkItem } from './types';
-import { AppLinkItems } from '../../links/types';
+import type { NavLinkItem } from './types';
+import type { AppLinkItems } from '../../links/types';
 
 export const useAppNavLinks = (): NavLinkItem[] => {
   const appLinks = useAppLinks();

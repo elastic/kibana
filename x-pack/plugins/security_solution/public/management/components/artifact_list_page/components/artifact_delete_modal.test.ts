@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../../mocks';
-import {
-  ArtifactListPageRenderingSetup,
-  getArtifactListPageRenderingSetup,
-  getDeferred,
-} from '../mocks';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import type { trustedAppsAllHttpMocks } from '../../../mocks';
+import type { ArtifactListPageRenderingSetup } from '../mocks';
+import { getArtifactListPageRenderingSetup, getDeferred } from '../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

@@ -7,14 +7,14 @@
 
 import { useEffect, useState } from 'react';
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import {
   RULE_PREVIEW_FROM,
   RULE_PREVIEW_INTERVAL,
   RULE_PREVIEW_INVOCATION_COUNT,
 } from '../../../../../common/detection_engine/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import {
+import type {
   PreviewResponse,
   CreateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';

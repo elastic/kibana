@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Maybe } from '../../../../common';
+import type { Maybe } from '../../../../common';
 
 export interface HostsKpiHistogramData {
   x?: Maybe<number>;

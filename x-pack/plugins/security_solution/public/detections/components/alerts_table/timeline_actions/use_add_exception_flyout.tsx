@@ -10,7 +10,7 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 
 interface UseExceptionFlyoutProps {
   ruleIndex: string[] | null | undefined;

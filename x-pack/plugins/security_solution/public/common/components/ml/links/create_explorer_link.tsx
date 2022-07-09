@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useMlHref } from '@kbn/ml-plugin/public';
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 import { useKibana } from '../../../lib/kibana';
 
 interface ExplorerLinkProps {

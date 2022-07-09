@@ -8,7 +8,7 @@
 import { navTabs } from '../../../app/home/home_navigations';
 import { getTitle, isQueryStateEmpty } from './helpers';
 import { CONSTANTS } from './constants';
-import { ValueUrlState } from './types';
+import type { ValueUrlState } from './types';
 
 describe('Helpers Url_State', () => {
   describe('getTitle', () => {

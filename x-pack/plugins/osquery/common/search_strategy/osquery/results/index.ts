@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, PageInfoPaginated, SortField } from '../../common';
-import { RequestOptionsPaginated } from '../..';
+import type { Inspect, Maybe, PageInfoPaginated, SortField } from '../../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
 

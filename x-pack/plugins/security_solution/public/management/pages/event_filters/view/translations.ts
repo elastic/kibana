@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpFetchError } from '@kbn/core/public';
+import type { HttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ArtifactFormComponentProps } from '../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../components/artifact_list_page';
 
 export const getCreationSuccessMessage = (item: ArtifactFormComponentProps['item']) => {
   return i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.creationSuccessToastTitle', {

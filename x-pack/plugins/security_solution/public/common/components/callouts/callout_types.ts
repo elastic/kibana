@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOutProps } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
 
 export type CallOutType = NonNullable<EuiCallOutProps['color']>;
 

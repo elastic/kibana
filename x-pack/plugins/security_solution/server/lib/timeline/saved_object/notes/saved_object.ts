@@ -13,12 +13,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindOptions } from '@kbn/core/server';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { SavedObjectsFindOptions } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import {
+import type {
   SavedNote,
-  NoteSavedObjectRuntimeType,
   NoteSavedObject,
   PageInfoNote,
   SortNote,
@@ -27,7 +26,8 @@ import {
   ResponseNote,
   NoteWithoutExternalRefs,
 } from '../../../../../common/types/timeline/note';
-import { FrameworkRequest } from '../../../framework';
+import { NoteSavedObjectRuntimeType } from '../../../../../common/types/timeline/note';
+import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { createTimeline } from '../timelines';
 import { timelineSavedObjectType } from '../../saved_object_mappings';

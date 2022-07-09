@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PartialRule } from '@kbn/alerting-plugin/server';
-import { RuleParams } from '../schemas/rule_schemas';
-import { PatchRulesOptions } from './types';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { PatchRulesOptions } from './types';
 import { maybeMute } from './utils';
 import { convertPatchAPIToInternalSchema } from '../schemas/rule_converters';
 

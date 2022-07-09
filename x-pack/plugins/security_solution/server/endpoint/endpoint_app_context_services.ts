@@ -5,45 +5,44 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import {
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,
 } from '@kbn/cases-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   AgentService,
   FleetStartContract,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
-import type { ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
   getPackagePolicyDeleteCallback,
 } from '../fleet_integration/fleet_integration';
-import { ManifestManager } from './services/artifacts';
-import { ConfigType } from '../config';
-import { IRequestContextFactory } from '../request_context_factory';
-import { LicenseService } from '../../common/license';
-import { ExperimentalFeatures } from '../../common/experimental_features';
-import { EndpointMetadataService } from './services/metadata';
+import type { ManifestManager } from './services/artifacts';
+import type { ConfigType } from '../config';
+import type { IRequestContextFactory } from '../request_context_factory';
+import type { LicenseService } from '../../common/license';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { EndpointMetadataService } from './services/metadata';
 import {
   EndpointAppContentServicesNotSetUpError,
   EndpointAppContentServicesNotStartedError,
 } from './errors';
-import {
+import type {
   EndpointFleetServicesFactoryInterface,
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
-import { EndpointAuthz } from '../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
-import { FeatureUsageService } from './services/feature_usage/service';
+import type { FeatureUsageService } from './services/feature_usage/service';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;

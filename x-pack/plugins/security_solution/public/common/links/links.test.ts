@@ -6,10 +6,10 @@
  */
 
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
-import { Capabilities } from '@kbn/core/types';
+import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { AppLinkItems } from './types';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { AppLinkItems } from './types';
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
   useAppLinks,

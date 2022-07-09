@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiHighlight,
@@ -12,8 +13,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiTextColor,
-  EuiSelectableOption,
-  EuiSelectableProps,
   EuiFilterButton,
   EuiToolTip,
 } from '@elastic/eui';
@@ -21,16 +20,16 @@ import { isEmpty, debounce } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import {
+import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
-  SortFieldTimeline,
 } from '../../../../../common/types/timeline';
+import { SortFieldTimeline } from '../../../../../common/types/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
-import { OpenTimelineResult } from '../../open_timeline/types';
+import type { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
 import { Direction } from '../../../../../common/search_strategy';

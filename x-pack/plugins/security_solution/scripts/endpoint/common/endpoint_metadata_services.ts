@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { KbnClient } from '@kbn/test';
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import { HOST_METADATA_GET_ROUTE, METADATA_DATASTREAM } from '../../../common/endpoint/constants';
-import { HostInfo, HostMetadata } from '../../../common/endpoint/types';
+import type { HostInfo, HostMetadata } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 import { checkInFleetAgent } from './fleet_services';
 

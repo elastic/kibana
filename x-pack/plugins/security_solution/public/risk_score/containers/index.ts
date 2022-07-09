@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsRiskScore } from '../../../common/search_strategy/security_solution/risk_score';
+import type { HostsRiskScore } from '../../../common/search_strategy/security_solution/risk_score';
 
 export * from './all';
 export * from './kpi';

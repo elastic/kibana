@@ -6,10 +6,11 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
-import { EndpointApiNeededAuthz, withEndpointAuthz } from './with_endpoint_authz';
-import { EndpointAuthz } from '../../../common/endpoint/types/authz';
+import type { EndpointApiNeededAuthz } from './with_endpoint_authz';
+import { withEndpointAuthz } from './with_endpoint_authz';
+import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { EndpointAuthorizationError } from '../errors';
 
 describe('When using `withEndpointAuthz()`', () => {

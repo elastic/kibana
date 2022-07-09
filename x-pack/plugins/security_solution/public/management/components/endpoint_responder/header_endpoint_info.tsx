@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent, EuiToolTip } fro
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
-import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
 
 interface HeaderEndpointInfoProps {

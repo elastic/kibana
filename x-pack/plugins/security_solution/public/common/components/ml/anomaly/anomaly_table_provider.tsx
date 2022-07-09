@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
+import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { useAnomaliesTableData } from './use_anomalies_table_data';
 
 interface ChildrenArgs {

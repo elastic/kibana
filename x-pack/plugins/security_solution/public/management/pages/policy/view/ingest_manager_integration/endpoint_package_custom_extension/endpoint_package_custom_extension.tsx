@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../../common/lib/kibana';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
-import {
+import type { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
+import type {
   Id,
   IdOrUndefined,
   RuleIdOrUndefined,
@@ -25,10 +25,10 @@ import {
   SortOrderOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
-import { CreateRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
-import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import type { CreateRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
+import type { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;
 

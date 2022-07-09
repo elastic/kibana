@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { FormEvent } from 'react';
+import React from 'react';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';

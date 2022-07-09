@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import {
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
 } from '../../../services/policies/ingest';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { GetPolicyListResponse } from '../types';
+import type { GetPolicyListResponse } from '../types';
 
 const generator = new EndpointDocGenerator('policy-list');
 

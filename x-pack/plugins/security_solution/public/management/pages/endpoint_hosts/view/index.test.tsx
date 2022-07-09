@@ -17,14 +17,14 @@ import {
   mockEndpointResultList,
   setEndpointListApiMockImplementation,
 } from '../store/mock_endpoint_result_list';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import {
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type {
   HostInfo,
   HostPolicyResponse,
-  HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
-  HostStatus,
 } from '../../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus, HostStatus } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
@@ -45,7 +45,7 @@ import {
   MANAGEMENT_PATH,
   TRANSFORM_STATES,
 } from '../../../../../common/constants';
-import { TransformStats } from '../types';
+import type { TransformStats } from '../types';
 import {
   HOST_METADATA_LIST_ROUTE,
   metadataTransformPrefix,

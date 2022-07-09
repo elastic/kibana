@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { ReturnPrePackagedRulesAndTimelines, usePrePackagedRules } from './use_pre_packaged_rules';
+import type { ReturnPrePackagedRulesAndTimelines } from './use_pre_packaged_rules';
+import { usePrePackagedRules } from './use_pre_packaged_rules';
 import * as api from './api';
 import { shallow } from 'enzyme';
 import * as i18n from './translations';

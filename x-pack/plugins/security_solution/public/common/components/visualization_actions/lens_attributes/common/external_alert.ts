@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetLensAttributes, LensAttributes } from '../../types';
+import type { GetLensAttributes, LensAttributes } from '../../types';
 
 export const getExternalAlertLensAttributes: GetLensAttributes = (
   stackByField = 'event.module'

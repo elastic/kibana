@@ -8,7 +8,7 @@
 import { encode } from 'rison-node';
 
 import { createSelector } from 'reselect';
-import { PanelViewAndParameters, ResolverUIState } from '../../types';
+import type { PanelViewAndParameters, ResolverUIState } from '../../types';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import { parameterName } from '../parameter_name';
 

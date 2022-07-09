@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldAsString, supportedSchemas } from './supported_schemas';
-import { ResolverEntityIndex } from '../../../../../../common/endpoint/types';
+import type { ResolverEntityIndex } from '../../../../../../common/endpoint/types';
 
 export function resolverEntity(hits: Array<estypes.SearchHit<unknown>>) {
   const responseBody: ResolverEntityIndex = [];

@@ -8,18 +8,19 @@
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { Matrix3, ResolverStore, SideEffectors, SideEffectSimulator } from '../types';
-import { ResolverNode } from '../../../common/endpoint/types';
+import type { Matrix3, ResolverStore, SideEffectors, SideEffectSimulator } from '../types';
+import type { ResolverNode } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
 import { mock as mockResolverTree } from '../models/resolver_tree';
-import { ResolverAction } from '../store/actions';
+import type { ResolverAction } from '../store/actions';
 import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';

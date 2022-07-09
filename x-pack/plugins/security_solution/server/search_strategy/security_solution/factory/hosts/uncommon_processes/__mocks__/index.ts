@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { HostsQueries, SortField } from '../../../../../../../common/search_strategy';
+import type { SortField } from '../../../../../../../common/search_strategy';
+import { HostsQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions = {
   defaultIndex: [

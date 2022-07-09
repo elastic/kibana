@@ -19,11 +19,11 @@ import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/li
 import type { IRuleDataService } from '@kbn/rule-registry-plugin/server';
 
 import { AppClient } from './client';
-import { ConfigType } from './config';
-import { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
-import { FrameworkRequest } from './lib/framework';
-import { EndpointAuthz } from '../common/endpoint/types/authz';
-import {
+import type { ConfigType } from './config';
+import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
+import type { FrameworkRequest } from './lib/framework';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type {
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './endpoint/services/fleet';

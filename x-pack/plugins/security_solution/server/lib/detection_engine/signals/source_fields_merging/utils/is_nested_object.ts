@@ -7,7 +7,7 @@
 
 import { isObjectLike } from 'lodash/fp';
 import { isTypeObject } from './is_type_object';
-import { FieldsType } from '../types';
+import type { FieldsType } from '../types';
 
 /**
  * Returns true if the first value is object-like but does not contain the shape of

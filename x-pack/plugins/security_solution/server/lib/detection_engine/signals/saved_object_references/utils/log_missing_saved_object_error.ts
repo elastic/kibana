@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { RuleParams } from '../../../schemas/rule_schemas';
+import type { Logger } from '@kbn/core/server';
+import type { RuleParams } from '../../../schemas/rule_schemas';
 
 type Keys = keyof RuleParams;
 type PossibleRuleParamValues = RuleParams[Keys];

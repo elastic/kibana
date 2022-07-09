@@ -6,12 +6,8 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import {
-  getIndexPatterns,
-  getNewRule,
-  getNewThresholdRule,
-  ThresholdRule,
-} from '../../objects/rule';
+import type { ThresholdRule } from '../../objects/rule';
+import { getIndexPatterns, getNewRule, getNewThresholdRule } from '../../objects/rule';
 
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 

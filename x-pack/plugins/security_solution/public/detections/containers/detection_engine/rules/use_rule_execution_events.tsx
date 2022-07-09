@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useQuery } from 'react-query';
-import {
+import type {
   AggregateRuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';

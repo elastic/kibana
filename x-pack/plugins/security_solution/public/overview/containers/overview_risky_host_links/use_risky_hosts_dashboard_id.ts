@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
 
 const DASHBOARD_REQUEST_BODY_SEARCH = '"Drilldown of Host Risk Score"';

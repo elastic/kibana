@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from '@kbn/core/public';
-import { applyMiddleware, createStore, Store } from 'redux';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { Store } from 'redux';
+import { applyMiddleware, createStore } from 'redux';
 import { coreMock } from '@kbn/core/public/mocks';
-import { History, createBrowserHistory } from 'history';
-import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
-import {
-  createSpyMiddleware,
-  MiddlewareActionSpyHelper,
-} from '../../../../common/store/test_utils';
-import {
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
+import type { DepsStartMock } from '../../../../common/mock/endpoint';
+import { depsStartMock } from '../../../../common/mock/endpoint';
+import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
+import { createSpyMiddleware } from '../../../../common/store/test_utils';
+import type {
   Immutable,
   HostIsolationResponse,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { AppAction } from '../../../../common/store/actions';
+import type { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { listData } from './selectors';
-import { EndpointState, TransformStats } from '../types';
+import type { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import type { FailedResourceState, LoadedResourceState } from '../../../state';
 import {
-  FailedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
-  LoadedResourceState,
 } from '../../../state';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryRulesSchema } from './query_rules_schema';
+import type { QueryRulesSchema } from './query_rules_schema';
 import { queryRuleValidateTypeDependents } from './query_rules_type_dependents';
 
 describe('query_rules_type_dependents', () => {

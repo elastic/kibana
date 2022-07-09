@@ -9,7 +9,8 @@ import React from 'react';
 
 import { ActionCell } from './action_cell';
 import { FieldValueCell } from './field_value_cell';
-import { AlertSummaryRow, hasHoverOrRowActions } from '../helpers';
+import type { AlertSummaryRow } from '../helpers';
+import { hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
 
 const style = { flexGrow: 0 };

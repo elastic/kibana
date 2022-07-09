@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiPanel,
   EuiFlexGroup,
-  EuiCommentProps,
   EuiCommentList,
   EuiAccordion,
   EuiFlexItem,

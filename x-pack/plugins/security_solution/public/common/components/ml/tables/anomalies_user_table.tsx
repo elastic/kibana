@@ -14,7 +14,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import * as i18n from './translations';
 
 import { Loader } from '../../loader';
-import { AnomaliesUserTableProps } from '../types';
+import type { AnomaliesUserTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 

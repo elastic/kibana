@@ -12,16 +12,16 @@ import deepEqual from 'fast-deep-equal';
 import type { DataViewBase } from '@kbn/es-query';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
+import type { NetworkTopCountriesEdges, SortField } from '../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
-  NetworkTopCountriesEdges,
   NetworkTopTablesFields,
-  SortField,
 } from '../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
-import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import type { Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getCountriesColumnsCurated } from './columns';
 import * as i18n from './translations';

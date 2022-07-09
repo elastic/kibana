@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterOptions } from './types';
+import type { FilterOptions } from './types';
 import { convertRulesFilterToKQL } from './utils';
 
 describe('convertRulesFilterToKQL', () => {

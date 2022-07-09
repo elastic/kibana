@@ -15,7 +15,8 @@ import {
 } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useSignalHelpers } from './use_signal_helpers';
-import { createStore, State } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 
 describe('useSignalHelpers', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (

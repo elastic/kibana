@@ -8,13 +8,13 @@
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
-import { Logger } from '@kbn/core/server';
-import { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
-import { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import { BuildRuleMessage } from '../../signals/rule_messages';
+import type { Logger } from '@kbn/core/server';
+import type { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
+import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { BuildRuleMessage } from '../../signals/rule_messages';
 import { makeFloatString } from '../../signals/utils';
-import { RefreshTypes } from '../../types';
-import {
+import type { RefreshTypes } from '../../types';
+import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';

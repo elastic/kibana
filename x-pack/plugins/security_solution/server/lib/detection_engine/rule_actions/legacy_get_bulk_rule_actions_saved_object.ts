@@ -6,17 +6,17 @@
  */
 
 import { chunk } from 'lodash';
-import { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
+import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
+import type { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 import { initPromisePool } from '../../../utils/promise_pool';
 
 /**

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetchDetectionEnginePrivileges } from './use_fetch_detection_engine_privileges';
+import type { useFetchDetectionEnginePrivileges } from './use_fetch_detection_engine_privileges';
 
 export const useFetchDetectionEnginePrivilegesMock: () => jest.Mocked<
   ReturnType<typeof useFetchDetectionEnginePrivileges>

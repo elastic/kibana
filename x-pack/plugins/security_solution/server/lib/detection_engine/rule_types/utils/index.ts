@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
-import { SecurityAlertTypeReturnValue } from '../types';
+import type { RuleTypeState } from '@kbn/alerting-plugin/server';
+import type { SecurityAlertTypeReturnValue } from '../types';
 
 export const createResultObject = <TState extends RuleTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {

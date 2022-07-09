@@ -11,7 +11,7 @@ import { render, waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
-import { SecurityJob } from '../types';
+import type { SecurityJob } from '../types';
 
 jest.mock('../../../lib/kibana');
 

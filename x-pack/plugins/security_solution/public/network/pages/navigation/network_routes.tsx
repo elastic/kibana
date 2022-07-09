@@ -24,9 +24,10 @@ import {
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { ConditionalFlexGroup } from './conditional_flex_group';
-import { NetworkRoutesProps, NetworkRouteType } from './types';
-import { Anomaly } from '../../../common/components/ml/types';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { NetworkRoutesProps } from './types';
+import { NetworkRouteType } from './types';
+import type { Anomaly } from '../../../common/components/ml/types';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(

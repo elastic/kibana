@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Query } from '@elastic/eui';
-import { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
-import { BulkActionSummary } from '../../../../containers/detection_engine/rules';
+import type { Query } from '@elastic/eui';
+import type { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
+import type { BulkActionSummary } from '../../../../containers/detection_engine/rules';
 
 export const showRulesTable = ({
   rulesCustomInstalled,

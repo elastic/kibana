@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { MatrixHistogramRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   MatrixHistogramQuery,
-  MatrixHistogramRequestOptions,
   MatrixHistogramType,
 } from '../../../../../../../common/search_strategy';
 

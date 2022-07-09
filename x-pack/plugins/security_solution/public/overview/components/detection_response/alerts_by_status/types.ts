@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 interface StatusBySeverity {
   doc_count_error_upper_bound: number;

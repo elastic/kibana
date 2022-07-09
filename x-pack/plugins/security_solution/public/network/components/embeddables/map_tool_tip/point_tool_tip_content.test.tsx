@@ -13,10 +13,8 @@ import { getRenderedFieldValue, PointToolTipContentComponent } from './point_too
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
-import {
-  TooltipProperty,
-  ITooltipProperty,
-} from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { TooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('PointToolTipContent', () => {

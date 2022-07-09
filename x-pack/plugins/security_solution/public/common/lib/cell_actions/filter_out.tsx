@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';

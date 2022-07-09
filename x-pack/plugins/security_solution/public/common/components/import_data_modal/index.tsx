@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import {
+import type {
   ImportDataResponse,
   ImportDataProps,
 } from '../../../detections/containers/detection_engine/rules';

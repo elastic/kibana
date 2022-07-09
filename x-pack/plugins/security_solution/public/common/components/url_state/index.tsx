@@ -12,7 +12,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-import { UrlStateContainerPropTypes, UrlStateProps, UrlStateStateToPropsType } from './types';
+import type { UrlStateContainerPropTypes, UrlStateProps, UrlStateStateToPropsType } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { makeMapStateToProps } from './helpers';
 

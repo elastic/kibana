@@ -7,22 +7,19 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { PartialRule } from '@kbn/alerting-plugin/server';
-import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
-import {
-  FullResponseSchema,
-  fullResponseSchema,
-} from '../../../../../common/detection_engine/schemas/request';
-import {
-  RulesSchema,
-  rulesSchema,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import { fullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { rulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isAlertType } from '../../rules/types';
-import { createBulkErrorObject, BulkError } from '../utils';
+import type { BulkError } from '../utils';
+import { createBulkErrorObject } from '../utils';
 import { transform } from './utils';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (

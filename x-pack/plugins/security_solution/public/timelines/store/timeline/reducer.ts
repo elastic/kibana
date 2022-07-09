@@ -81,7 +81,8 @@ import {
   updateSessionViewConfig,
 } from './helpers';
 
-import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import type { TimelineState } from './types';
+import { EMPTY_TIMELINE_BY_ID } from './types';
 import { TimelineType } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {

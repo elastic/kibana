@@ -26,8 +26,9 @@ import {
   MoreContainer,
 } from './field_renderers';
 import { mockData } from '../../../network/components/details/mock';
-import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
-import { HostEcs } from '../../../../common/ecs/host';
+import type { AutonomousSystem } from '../../../../common/search_strategy';
+import { FlowTarget } from '../../../../common/search_strategy';
+import type { HostEcs } from '../../../../common/ecs/host';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/lib/kibana/kibana_react', () => {

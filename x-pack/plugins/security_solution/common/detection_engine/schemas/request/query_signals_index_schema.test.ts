@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { QuerySignalsSchema, querySignalsSchema } from './query_signals_index_schema';
+import type { QuerySignalsSchema } from './query_signals_index_schema';
+import { querySignalsSchema } from './query_signals_index_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';

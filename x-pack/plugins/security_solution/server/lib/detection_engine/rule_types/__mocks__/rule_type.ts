@@ -8,19 +8,19 @@
 import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { Logger, SavedObject } from '@kbn/core/server';
+import type { Logger, SavedObject } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
-import { ConfigType } from '../../../../config';
-import { AlertAttributes } from '../../signals/types';
+import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { ConfigType } from '../../../../config';
+import type { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
+import type { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
 // this is only used in tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor_test_utils';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core/types';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { IconType } from '@elastic/eui';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { SecurityPageName } from '../../../common/constants';
+import type { Capabilities } from '@kbn/core/types';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { IconType } from '@elastic/eui';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { SecurityPageName } from '../../../common/constants';
 
 /**
  * Permissions related parameters needed for the links to be filtered

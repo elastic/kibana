@@ -24,7 +24,7 @@ import { PopoverItems } from '../../popover_items';
 import { useBasePath, useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
-import { SecurityJob } from '../types';
+import type { SecurityJob } from '../types';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;

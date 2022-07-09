@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   OsType,
@@ -13,7 +13,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import {
+import type {
   EffectScope,
   NewTrustedApp,
   TrustedApp,

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IndexField } from '../../../../common/search_strategy/index_fields';
+import type { IndexField } from '../../../../common/search_strategy/index_fields';
 import { getBrowserFields, getAllBrowserFields } from '.';
-import { IndexFieldSearch, useDataView } from './use_data_view';
+import type { IndexFieldSearch } from './use_data_view';
+import { useDataView } from './use_data_view';
 import { mockBrowserFields, mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';

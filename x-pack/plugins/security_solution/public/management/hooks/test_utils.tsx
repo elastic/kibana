@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { HttpSetup } from '@kbn/core/public';
-import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ReactQueryClientProvider } from '../../common/containers/query_client/query_client_provider';
 

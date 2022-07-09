@@ -11,18 +11,14 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../../common/search_strategy';
-import {
-  StatItemsComponent,
-  StatItemsProps,
-  useKpiMatrixStatus,
-  StatItems,
-} from '../../../../common/components/stat_items';
-import { UpdateDateRange } from '../../../../common/components/charts/common';
-import { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
+import type { StatItemsProps, StatItems } from '../../../../common/components/stat_items';
+import { StatItemsComponent, useKpiMatrixStatus } from '../../../../common/components/stat_items';
+import type { UpdateDateRange } from '../../../../common/components/charts/common';
+import type { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
 
 const kpiWidgetHeight = 247;
 

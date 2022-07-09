@@ -7,11 +7,13 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { PolicyResponseWrapper, PolicyResponseWrapperProps } from './policy_response_wrapper';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { PolicyResponseWrapperProps } from './policy_response_wrapper';
+import { PolicyResponseWrapper } from './policy_response_wrapper';
 import { HostPolicyResponseActionStatus } from '../../../../common/search_strategy';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
-import {
+import type {
   HostPolicyResponse,
   HostPolicyResponseAppliedAction,
 } from '../../../../common/endpoint/types';

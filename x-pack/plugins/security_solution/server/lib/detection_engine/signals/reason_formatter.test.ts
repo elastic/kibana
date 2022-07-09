@@ -6,7 +6,7 @@
  */
 
 import { buildReasonMessageUtil } from './reason_formatters';
-import { SignalSourceHit } from './types';
+import type { SignalSourceHit } from './types';
 
 describe('reason_formatter', () => {
   let name: string;

@@ -12,24 +12,25 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
-import { inputsModel, State } from '../../../common/store';
+import type { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { createFilter } from '../../../common/containers/helpers';
-import { hostsModel, hostsSelectors } from '../../store';
-import {
+import type { hostsModel } from '../../store';
+import { hostsSelectors } from '../../store';
+import type {
   SortField,
   PageInfoPaginated,
   HostsUncommonProcessesEdges,
-  HostsQueries,
   HostsUncommonProcessesRequestOptions,
   HostsUncommonProcessesStrategyResponse,
 } from '../../../../common/search_strategy';
+import { HostsQueries } from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 

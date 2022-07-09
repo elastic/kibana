@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ExpandedCellValueActions } from './expanded_cell_value_actions';
-import { ColumnHeaderType } from '@kbn/timelines-plugin/common/types';
+import type { ColumnHeaderType } from '@kbn/timelines-plugin/common/types';
 
 jest.mock('../kibana');
 

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { RouteSpyState } from '../../../common/utils/route/types';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { RouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
-import {
-  getKubernetesDetailsUrl,
-  GetSecuritySolutionUrl,
-} from '../../../common/components/link_to';
+import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
+import { getKubernetesDetailsUrl } from '../../../common/components/link_to';
 
 export const getTrailingBreadcrumbs = (
   params: RouteSpyState,

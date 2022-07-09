@@ -11,13 +11,13 @@ import numeral from '@elastic/numeral';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 
-import { AlertsComponentsProps } from './types';
+import type { AlertsComponentsProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../lib/kibana';
 import { MatrixHistogram } from '../matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
-import { MatrixHistogramConfigs } from '../matrix_histogram/types';
+import type { MatrixHistogramConfigs } from '../matrix_histogram/types';
 
 const ID = 'alertsHistogramQuery';
 

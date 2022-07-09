@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { CallOutMessage } from './callout_types';
+import type { CallOutMessage } from './callout_types';
 import { CallOut } from './callout';
 import { useCallOutStorage } from './use_callout_storage';
 

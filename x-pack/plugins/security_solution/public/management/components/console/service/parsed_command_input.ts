@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CommandDefinition } from '..';
+import type { CommandDefinition } from '..';
 import type { EndpointActionDataParameterTypes } from '../../../../../common/endpoint/types';
 
 export type ParsedArgData = string[];

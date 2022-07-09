@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { StartServices } from '../../types';
-import { DataAccessLayer, TimeRange } from '../types';
-import {
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { StartServices } from '../../types';
+import type { DataAccessLayer, TimeRange } from '../types';
+import type {
   ResolverNode,
   ResolverRelatedEvents,
   ResolverEntityIndex,

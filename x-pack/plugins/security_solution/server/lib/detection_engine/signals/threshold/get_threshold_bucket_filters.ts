@@ -6,8 +6,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
-import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
+import type { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
 /*
  * Returns a filter to exclude events that have already been included in a

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ReactNode, useMemo } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { EuiPanelProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
   EuiPanel,
-  EuiPanelProps,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import classnames from 'classnames';
-import { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
+import type { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const EuiPanelStyled = styled(EuiPanel)`

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
+import type { UseQueryOptions, UseQueryResult } from 'react-query';
+import { useQuery } from 'react-query';
 import type { HttpFetchError } from '@kbn/core/public';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { useHttp } from '../../../common/lib/kibana';

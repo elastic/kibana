@@ -11,10 +11,10 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
-import { RouteSpyState } from '../../../utils/route/types';
+import type { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from '.';
-import { TabNavigationProps } from './types';
+import type { TabNavigationProps } from './types';
 import { SecurityPageName } from '../../../../app/types';
 
 jest.mock('../../link_to');

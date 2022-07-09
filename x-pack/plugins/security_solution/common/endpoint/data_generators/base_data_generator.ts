@@ -7,7 +7,7 @@
 
 import seedrandom from 'seedrandom';
 import uuid from 'uuid';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 /** Array of 14 day offsets */

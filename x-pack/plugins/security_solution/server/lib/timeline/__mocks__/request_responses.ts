@@ -6,7 +6,7 @@
  */
 
 import path, { join, resolve } from 'path';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 
 import {
   TIMELINE_DRAFT_URL,
@@ -15,11 +15,16 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { SavedTimeline } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 
-import { patchTimelineSchema, createTimelineSchema, GetTimelineQuery } from '../schemas/timelines';
+import type {
+  patchTimelineSchema,
+  createTimelineSchema,
+  GetTimelineQuery,
+} from '../schemas/timelines';
 
 import { getReadables } from '../utils/common';
 

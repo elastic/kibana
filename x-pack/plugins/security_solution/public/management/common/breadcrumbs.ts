@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, EVENT_FILTERS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from './translations';
-import { AdministrationRouteSpyState } from '../../common/utils/route/types';
+import type { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import { HOST_ISOLATION_EXCEPTIONS, BLOCKLIST, RESPONSE_ACTIONS } from '../../app/translations';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {

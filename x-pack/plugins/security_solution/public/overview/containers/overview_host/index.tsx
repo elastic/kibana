@@ -11,17 +11,17 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
-  HostsQueries,
+import type {
   HostOverviewRequestOptions,
   HostsOverviewStrategyResponse,
 } from '../../../../common/search_strategy/security_solution';
+import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import { useKibana } from '../../../common/lib/kibana';
-import { inputsModel } from '../../../common/store/inputs';
+import type { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
-import { ESQuery } from '../../../../common/typed_json';
+import type { ESQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 

@@ -9,7 +9,7 @@ import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DataProvider } from '../../timeline/data_providers/data_provider';
+import type { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
 import { FLYOUT_BUTTON_BAR_CLASS_NAME } from '../../timeline/helpers';

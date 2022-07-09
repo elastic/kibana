@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { NETWORK_PATH, SecurityPageName } from '../../common/constants';
 import { NETWORK } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import networkPageImg from '../common/images/network_page.png';
 
 export const links: LinkItem = {

@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import type { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export enum NetworkDnsFields {
   dnsName = 'dnsName',

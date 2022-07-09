@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 
 export interface TestItem {
   name: string;

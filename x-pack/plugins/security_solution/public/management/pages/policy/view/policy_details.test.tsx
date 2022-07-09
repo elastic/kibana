@@ -11,8 +11,8 @@ import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import {
-  AppContextTestRender,
   createAppRootMockRenderer,
   resetReactDomCreatePortalMock,
 } from '../../../../common/mock/endpoint';

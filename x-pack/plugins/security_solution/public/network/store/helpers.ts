@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  NetworkModel,
-  NetworkType,
-  NetworkTableType,
-  NetworkDetailsTableType,
-  NetworkQueries,
-  NetworkDetailsQueries,
-} from './model';
+import type { NetworkModel, NetworkQueries, NetworkDetailsQueries } from './model';
+import { NetworkType, NetworkTableType, NetworkDetailsTableType } from './model';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
 export const setNetworkPageQueriesActivePageToZero = (state: NetworkModel): NetworkQueries => ({

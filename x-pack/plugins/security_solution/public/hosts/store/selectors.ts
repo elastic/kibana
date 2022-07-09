@@ -8,9 +8,10 @@
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
-import { State } from '../../common/store/types';
+import type { State } from '../../common/store/types';
 
-import { GenericHostsModel, HostsType, HostsTableType } from './model';
+import type { GenericHostsModel, HostsType } from './model';
+import { HostsTableType } from './model';
 
 const selectHosts = (state: State, hostsType: HostsType): GenericHostsModel =>
   get(hostsType, state.hosts);

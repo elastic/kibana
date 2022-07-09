@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { useGlobalTime } from '../use_global_time';
-import { GenericBuckets } from '../../../../common/search_strategy';
+import type { GenericBuckets } from '../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';

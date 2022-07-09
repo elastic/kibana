@@ -7,7 +7,7 @@
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { RuleAlertType } from '../types';
+import type { RuleAlertType } from '../types';
 
 describe('addItemsToArray', () => {
   test('should add single item to array', () => {

@@ -7,14 +7,15 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_area';
 import { kpiUniqueIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_bar';
 import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';
 import { kpiUniqueIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_source_metric';
 import { useHostsKpiUniqueIps, ID } from '../../../containers/kpi_hosts/unique_ips';
 import { KpiBaseComponentManage } from '../common';
-import { HostsKpiProps, HostsKpiChartColors } from '../types';
+import type { HostsKpiProps } from '../types';
+import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 

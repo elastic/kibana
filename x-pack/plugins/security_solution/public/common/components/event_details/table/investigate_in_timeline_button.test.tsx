@@ -8,10 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { BrowserField } from '../../../containers/source';
+import type { BrowserField } from '../../../containers/source';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 import { TestProviders } from '../../../mock';
-import { EventFieldsData } from '../types';
+import type { EventFieldsData } from '../types';
 import { TimelineId } from '../../../../../common/types';
 
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';

@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -13,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiBasicTableColumn,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
-import { SavedObject } from '@kbn/core/public';
-import { ECSMapping } from '../../../../common/schemas/common';
+import type { SavedObject } from '@kbn/core/public';
+import type { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { AnyArtifact, ArtifactInfo } from '../types';
-import { EffectScope, MaybeImmutable } from '../../../../../common/endpoint/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { AnyArtifact, ArtifactInfo } from '../types';
+import type { EffectScope, MaybeImmutable } from '../../../../../common/endpoint/types';
 import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
 import { isTrustedApp } from './is_trusted_app';
 

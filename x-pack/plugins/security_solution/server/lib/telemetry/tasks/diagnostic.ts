@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getPreviousDiagTaskTimestamp } from '../helpers';
-import { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
-import { ITelemetryReceiver } from '../receiver';
-import { TaskExecutionPeriod } from '../task';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
 
 export function createTelemetryDiagnosticsTaskConfig() {
   return {

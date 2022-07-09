@@ -7,15 +7,15 @@
 
 import { isString } from 'lodash/fp';
 
-import {
+import type {
   PaginationInputPaginated,
   FactoryQueryTypes,
   StrategyResponseType,
   Inspect,
 } from '../../common/search_strategy';
 
-import { ESQuery } from '../../common/typed_json';
-import { ArrayItem } from '../shared_imports';
+import type { ESQuery } from '../../common/typed_json';
+import type { ArrayItem } from '../shared_imports';
 
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);

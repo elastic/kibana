@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
+import type { Ecs } from '../../../common/ecs';
 
 export const mockEndgameDnsRequest: Ecs = {
   _id: 'S8jPcG0BOpWiDweSou3g',

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { getCommandNameFromTextInput } from '../../../service/parsed_command_input';
-import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',

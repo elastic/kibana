@@ -8,10 +8,10 @@
 import { omit } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 import { registerProvider, unRegisterProvider } from './actions';
-import { DragAndDropModel, IdToDataProvider } from './model';
+import type { DragAndDropModel, IdToDataProvider } from './model';
 
 export type DragAndDropState = DragAndDropModel;
 

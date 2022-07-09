@@ -14,7 +14,7 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { BrowserField, BrowserFields } from '../../containers/source';
+import type { BrowserField, BrowserFields } from '../../containers/source';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -23,7 +23,7 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 /**

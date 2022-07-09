@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,

@@ -10,7 +10,8 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
+import type { LegendItem } from './draggable_legend_item';
+import { DraggableLegendItem } from './draggable_legend_item';
 
 export const MIN_LEGEND_HEIGHT = 175;
 

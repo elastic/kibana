@@ -9,18 +9,16 @@ import { createSelector } from 'reselect';
 import { get } from 'lodash/fp';
 
 import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import { State } from '../../common/store/types';
+import type { State } from '../../common/store/types';
 import { initialNetworkState } from './reducer';
-import {
-  NetworkDetailsTableType,
+import type {
   NetworkDetailsModel,
   NetworkPageModel,
-  NetworkTableType,
-  NetworkType,
   TopCountriesQuery,
   TlsQuery,
   HttpQuery,
 } from './model';
+import { NetworkDetailsTableType, NetworkTableType, NetworkType } from './model';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 

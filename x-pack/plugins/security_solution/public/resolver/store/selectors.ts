@@ -9,8 +9,8 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
-import { EventStats } from '../../../common/endpoint/types';
+import type { ResolverState, IsometricTaxiLayout, DataState } from '../types';
+import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**

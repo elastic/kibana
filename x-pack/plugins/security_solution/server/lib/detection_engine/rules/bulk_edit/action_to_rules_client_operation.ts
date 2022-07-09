@@ -7,10 +7,8 @@
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 
-import {
-  BulkActionEditForRuleAttributes,
-  BulkActionEditType,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditForRuleAttributes } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { assertUnreachable } from '../../../../../common/utility_types';
 
 /**

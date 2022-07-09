@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { ConsoleDataState } from '../console_state/types';
 import { ConsolePageOverlay } from './components/console_page_overlay';
-import {
+import type {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
   RegisteredConsoleClient,

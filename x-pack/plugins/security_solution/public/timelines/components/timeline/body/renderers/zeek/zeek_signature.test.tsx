@@ -11,7 +11,7 @@ import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import '../../../../../../common/mock/match_media';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {

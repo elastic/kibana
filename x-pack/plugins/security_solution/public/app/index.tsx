@@ -12,7 +12,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
-import { RenderAppProps } from './types';
+import type { RenderAppProps } from './types';
 
 export const renderApp = ({
   element,

@@ -6,8 +6,8 @@
  */
 
 import { registerActionDetailsRoutes } from './details';
-import { SecuritySolutionPluginRouter } from '../../../types';
-import { EndpointAppContext } from '../../types';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { EndpointAppContext } from '../../types';
 import { registerActionStatusRoutes } from './status';
 import { registerActionAuditLogRoutes } from './audit_log';
 import { registerActionListRoutes } from './list';

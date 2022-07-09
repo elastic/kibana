@@ -6,7 +6,7 @@
  */
 
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
-import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
+import type { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 
 export const sequenceResponse = {
   rawResponse: {

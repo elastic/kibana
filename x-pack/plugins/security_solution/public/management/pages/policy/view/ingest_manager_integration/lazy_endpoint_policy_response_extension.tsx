@@ -6,12 +6,12 @@
  */
 
 import { lazy } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type {
   PackagePolicyResponseExtensionComponent,
   PackagePolicyResponseExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import { StartPlugins } from '../../../../../types';
+import type { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPolicyResponseExtension = (
   coreStart: CoreStart,

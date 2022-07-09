@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, memo, useCallback } from 'react';
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { memo, useCallback } from 'react';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import type { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 const SUMMARY_KEYS: Readonly<Array<keyof GetExceptionSummaryResponse>> = [
   'windows',

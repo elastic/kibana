@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { act, renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
+import type { RenderHookResult, RenderResult } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { licenseService } from '../../../hooks/use_license';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
-import { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { getEndpointPrivilegesInitialState } from './utils';
 
 jest.mock('../../../lib/kibana');

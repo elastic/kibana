@@ -22,7 +22,7 @@ import {
   templateExceptionList,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
-import { PolicyData } from '../../../common/endpoint/types';
+import type { PolicyData } from '../../../common/endpoint/types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {

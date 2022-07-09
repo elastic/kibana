@@ -9,31 +9,33 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
+import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { AdministrationListPage } from '../administration_list_page';
 
-import { PaginatedContent, PaginatedContentProps } from '../paginated_content';
+import type { PaginatedContentProps } from '../paginated_content';
+import { PaginatedContent } from '../paginated_content';
 
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
-import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
+import type { ArtifactListPageLabels } from './translations';
+import { artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
-import { SearchExceptions, SearchExceptionsProps } from '../search_exceptions';
-import {
-  useArtifactCardPropsProvider,
-  UseArtifactCardPropsProviderProps,
-} from './hooks/use_artifact_card_props_provider';
+import type { SearchExceptionsProps } from '../search_exceptions';
+import { SearchExceptions } from '../search_exceptions';
+import type { UseArtifactCardPropsProviderProps } from './hooks/use_artifact_card_props_provider';
+import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
 import { NoDataEmptyState } from './components/no_data_empty_state';
-import { ArtifactFlyoutProps, ArtifactFlyout } from './components/artifact_flyout';
+import type { ArtifactFlyoutProps } from './components/artifact_flyout';
+import { ArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-import { ArtifactListPageUrlParams } from './types';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from '../../hooks/use_url_params';
-import { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useGetEndpointSpecificPolicies } from '../../services/policies/hooks';

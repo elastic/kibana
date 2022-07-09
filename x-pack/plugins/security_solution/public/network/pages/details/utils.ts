@@ -7,15 +7,15 @@
 
 import { get } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { decodeIpv6 } from '../../../common/lib/helpers';
 import { getNetworkDetailsUrl } from '../../../common/components/link_to/redirect_to_network';
 import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
-import { NetworkRouteSpyState } from '../../../common/utils/route/types';
+import type { NetworkRouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
-import { GetSecuritySolutionUrl } from '../../../common/components/link_to';
+import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 export const type = networkModel.NetworkType.details;
 const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsStrategyResponse } from '../../../../common/search_strategy';
+import type { HostsStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockData: { Hosts: HostsStrategyResponse; DateFields: string[] } = {
   Hosts: {

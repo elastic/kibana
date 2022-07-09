@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { useImportAssets } from '../../../assets/use_import_assets';
 import { useAssetsStatus } from '../../../assets/use_assets_status';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkKpiDnsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiDnsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 const getDnsQueryFilter = () => [

@@ -7,7 +7,7 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
-import { EventHit, EventSource, TimelineEventsDetailsItem } from '../search_strategy';
+import type { EventHit, EventSource, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];

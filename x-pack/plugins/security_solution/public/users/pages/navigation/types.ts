@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DocValueFields } from '@kbn/timelines-plugin/common';
-import { UsersTableType, UsersType } from '../../store/model';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { NavTab } from '../../../common/components/navigation/types';
+import type { DocValueFields } from '@kbn/timelines-plugin/common';
+import type { UsersTableType, UsersType } from '../../store/model';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { NavTab } from '../../../common/components/navigation/types';
 
 type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers &
   UsersTableType.risk &

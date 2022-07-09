@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SignalSearchResponse, SignalSourceHit } from '../types';
-import { ThreatMatchNamedQuery } from './types';
+import type { SignalSearchResponse, SignalSourceHit } from '../types';
+import type { ThreatMatchNamedQuery } from './types';
 
 export const getNamedQueryMock = (
   overrides: Partial<ThreatMatchNamedQuery> = {}

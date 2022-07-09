@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
@@ -14,7 +14,7 @@ import { useSecuritySolutionNavigation } from '.';
 import { CONSTANTS } from '../../url_state/constants';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { UrlInputsModel } from '../../../store/inputs/model';
+import type { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';

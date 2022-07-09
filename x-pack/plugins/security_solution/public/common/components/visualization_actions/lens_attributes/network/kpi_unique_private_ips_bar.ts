@@ -6,7 +6,7 @@
  */
 
 import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL } from '../../translations';
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
   title: '[Network] Unique private IPs - bar chart',

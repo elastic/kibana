@@ -13,7 +13,7 @@ import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
 import { useKibana } from '../lib/kibana';
-import { TimelineUrl } from '../../timelines/store/timeline/model';
+import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { CONSTANTS } from '../components/url_state/constants';
 
 /**

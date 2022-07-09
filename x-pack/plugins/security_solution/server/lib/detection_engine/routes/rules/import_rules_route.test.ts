@@ -14,7 +14,8 @@ import {
   getFindResultWithSingleHit,
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
-import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
+import type { requestMock } from '../__mocks__';
+import { createMockConfig, requestContextMock, serverMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';

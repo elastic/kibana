@@ -14,7 +14,7 @@ import { StepAboutRuleToggleDetails } from '.';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../step_about_rule';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana');

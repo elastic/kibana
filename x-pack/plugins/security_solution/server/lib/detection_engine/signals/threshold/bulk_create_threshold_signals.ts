@@ -9,16 +9,16 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BaseHit } from '../../../../../common/detection_engine/types';
-import { TermAggregationBucket } from '../../../types';
-import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { BaseHit } from '../../../../../common/detection_engine/types';
+import type { TermAggregationBucket } from '../../../types';
+import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
@@ -29,8 +29,8 @@ import type {
   BulkCreate,
   WrapHits,
 } from '../types';
-import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
-import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
