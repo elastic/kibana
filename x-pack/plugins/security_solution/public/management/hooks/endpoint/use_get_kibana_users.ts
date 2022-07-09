@@ -35,10 +35,14 @@ export const useGetKibanaUsers = (
     ...options,
     queryFn: async () => {
       const users = await http.get<UsersInfo>(INTERNAL_USERS_ROUTE);
-      // pick only superusers and non-reserved users
+      // pick non-`kibana_system` `superusers`
+      // that are also not reserved and not deprecated
       const filteredUsers = users?.filter(
         (user) =>
-          (!user.roles.includes('system_indices_superuser') && !user.metadata._reserved) ||
+          (!user.roles.includes('system_indices_superuser') &&
+            !user.metadata._reserved &&
+            !user.metadata._deprecated &&
+            !user.roles.includes('kibana_system')) ||
           user.roles.includes('superuser')
       );
       return filteredUsers;
