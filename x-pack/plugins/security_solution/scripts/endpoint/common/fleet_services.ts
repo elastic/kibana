@@ -5,11 +5,35 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { Client } from '@elastic/elasticsearch';
+import { AGENTS_INDEX, AgentStatus } from '@kbn/fleet-plugin/common';
+import { pick } from 'lodash';
+import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
-export const checkInFleetAgent = async (esClient: Client, agentId: string) => {
-  const checkinNow = new Date().toISOString();
+const fleetGenerator = new FleetAgentGenerator();
+
+export const checkInFleetAgent = async (
+  esClient: Client,
+  agentId: string,
+  /**
+   * The agent status to be sent. If set to `random`, then one will be randomly generated
+   */
+  agentStatus: AgentStatus | 'random' = 'online'
+) => {
+  const update = pick(
+    fleetGenerator.generateEsHitWithStatus(
+      agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus
+    )._source,
+    [
+      'last_checkin_status',
+      'last_checkin',
+      'active',
+      'unenrollment_started_at',
+      'unenrolled_at',
+      'upgrade_started_at',
+      'upgraded_at',
+    ]
+  );
 
   await esClient.update({
     index: AGENTS_INDEX,
@@ -17,11 +41,7 @@ export const checkInFleetAgent = async (esClient: Client, agentId: string) => {
     refresh: 'wait_for',
     retry_on_conflict: 5,
     body: {
-      doc: {
-        active: true,
-        last_checkin: checkinNow,
-        updated_at: checkinNow,
-      },
+      doc: update,
     },
   });
 };

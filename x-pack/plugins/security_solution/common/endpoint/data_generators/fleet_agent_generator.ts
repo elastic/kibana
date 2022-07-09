@@ -202,6 +202,9 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fleetServerAgent = esHit._source!;
 
+    // Reset the `last_checkin_status since we're controlling the agent status here
+    fleetServerAgent.last_checkin_status = undefined;
+
     switch (status) {
       case 'degraded':
         fleetServerAgent.last_checkin_status = 'degraded';
@@ -245,7 +248,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     return esHit;
   }
 
-  private randomAgentStatus() {
+  public randomAgentStatus() {
     return this.randomChoice(agentStatusList);
   }
 }
