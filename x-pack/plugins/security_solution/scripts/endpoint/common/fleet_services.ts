@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, estypes } from '@elastic/elasticsearch';
 import { AGENTS_INDEX, AgentStatus } from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -15,11 +16,15 @@ const fleetGenerator = new FleetAgentGenerator();
 export const checkInFleetAgent = async (
   esClient: Client,
   agentId: string,
-  /**
-   * The agent status to be sent. If set to `random`, then one will be randomly generated
-   */
-  agentStatus: AgentStatus | 'random' = 'online'
-) => {
+  {
+    agentStatus = 'online',
+    log = new ToolingLog(),
+  }: Partial<{
+    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
+    agentStatus: AgentStatus | 'random';
+    log: ToolingLog;
+  }>
+): Promise<estypes.UpdateResponse> => {
   const update = pick(
     fleetGenerator.generateEsHitWithStatus(
       agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus
@@ -43,7 +48,9 @@ export const checkInFleetAgent = async (
     }
   });
 
-  await esClient.update({
+  log.verbose(`update to fleet agent [${agentId}][${agentStatus}]: `, update);
+
+  return esClient.update({
     index: AGENTS_INDEX,
     id: agentId,
     refresh: 'wait_for',
