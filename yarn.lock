@@ -3228,6 +3228,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -6776,6 +6780,10 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server/npm_module_types":
   version "0.0.0"
   uid ""
 

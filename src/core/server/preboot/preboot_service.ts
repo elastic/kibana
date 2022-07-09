@@ -8,7 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { InternalPrebootServicePreboot } from './types';
+import type { KibanaPrebootServicePreboot } from '@kbn/core-preboot-server';
 
 /** @internal */
 export class PrebootService {
@@ -21,7 +21,7 @@ export class PrebootService {
     this.log = this.core.logger.get('preboot');
   }
 
-  public preboot(): InternalPrebootServicePreboot {
+  public preboot(): KibanaPrebootServicePreboot {
     return {
       isSetupOnHold: () => this.isSetupOnHold,
       holdSetupUntilResolved: (pluginName, reason, promise) => {

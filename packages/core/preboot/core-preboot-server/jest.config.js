@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PrebootService } from './preboot_service';
-export type { InternalPrebootServicePreboot } from './types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/preboot/core-preboot-server'],
+};

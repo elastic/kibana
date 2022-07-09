@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PrebootService } from './preboot_service';
-export type { InternalPrebootServicePreboot } from './types';
+export type {
+  PrebootServicePreboot,
+  KibanaPrebootServicePreboot,
+  KibanaPrebootServiceContract,
+} from './contracts';

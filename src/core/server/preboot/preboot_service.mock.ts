@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InternalPrebootServicePreboot, PrebootServicePreboot } from './types';
-import { PrebootService } from './preboot_service';
+import type { InternalPrebootServicePreboot } from './types';
+import type { PrebootServicePreboot, KibanaPrebootServiceContract } from '@kbn/core-preboot-server';
 
 export type InternalPrebootServicePrebootMock = jest.Mocked<InternalPrebootServicePreboot>;
 export type PrebootServicePrebootMock = jest.Mocked<PrebootServicePreboot>;
-
+export type PrebootServiceContract = jest.Mocked<KibanaPrebootServiceContract>;
 const createInternalPrebootContractMock = () => {
   const mock: InternalPrebootServicePrebootMock = {
     isSetupOnHold: jest.fn(),
@@ -30,8 +29,6 @@ const createPrebootContractMock = () => {
 
   return mock;
 };
-
-type PrebootServiceContract = PublicMethodsOf<PrebootService>;
 
 const createPrebootServiceMock = () => {
   const mocked: jest.Mocked<PrebootServiceContract> = {
