@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
-import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../hooks/use_index_pattern';
-import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useContextMainRouteBreadcrumb } from './hooks/use_context_main_route_breadcrumb';
 
 export interface ContextUrlParams {
   indexPatternId: string;
@@ -24,25 +22,12 @@ export interface ContextUrlParams {
 
 export function ContextAppRoute() {
   const services = useDiscoverServices();
-  const { chrome } = services;
-
   const { indexPatternId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
   const dataViewId = decodeURIComponent(indexPatternId);
-  const breadcrumb = useMainRouteBreadcrumb();
-
-  useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(breadcrumb),
-      {
-        text: i18n.translate('discover.context.breadcrumb', {
-          defaultMessage: 'Surrounding documents',
-        }),
-      },
-    ]);
-  }, [chrome, breadcrumb]);
-
   const { indexPattern, error } = useIndexPattern(services.indexPatterns, dataViewId);
+
+  useContextMainRouteBreadcrumb(services);
 
   if (error) {
     return (
