@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useQueryAlerts, ReturnQueryAlerts } from './use_query';
+import type { ReturnQueryAlerts } from './use_query';
+import { useQueryAlerts } from './use_query';
 import * as api from './api';
 import { mockAlertsQuery, alertsMock } from './mock';
 
