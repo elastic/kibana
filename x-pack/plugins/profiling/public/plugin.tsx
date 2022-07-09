@@ -24,11 +24,18 @@ export class ProfilingPlugin implements Plugin {
 
     const links = [
       {
+        id: 'stacktraces',
+        title: i18n.translate('xpack.profiling.navigation.stacktracesLinkLabel', {
+          defaultMessage: 'Stacktraces',
+        }),
+        path: '/stacktraces/containers',
+      },
+      {
         id: 'flamegraphs',
-        title: i18n.translate('xpack.profiling.navigation.flamegraphLinkLabel', {
+        title: i18n.translate('xpack.profiling.navigation.flameGraphsLinkLabel', {
           defaultMessage: 'Flamegraphs',
         }),
-        path: '/',
+        path: '/flamegraphs/flamegraph',
       },
     ];
 
@@ -36,6 +43,7 @@ export class ProfilingPlugin implements Plugin {
       map(() => {
         const sections: NavigationSection[] = [
           {
+            // TODO: add beta badge to section label, needs support in Observability plugin
             label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
               defaultMessage: 'Profiling',
             }),

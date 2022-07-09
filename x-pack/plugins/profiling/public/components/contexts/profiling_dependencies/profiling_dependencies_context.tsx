@@ -10,16 +10,21 @@ import {
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from '@kbn/observability-plugin/public';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { Services } from '../../../services';
 
 export interface ProfilingDependencies {
   start: {
     core: CoreStart;
+    data: DataPublicPluginStart;
     observability: ObservabilityPublicStart;
   };
   setup: {
     core: CoreSetup;
+    data: DataPublicPluginSetup;
     observability: ObservabilityPublicSetup;
   };
+  services: Services;
 }
 
 export const ProfilingDependenciesContext = createContext<ProfilingDependencies | undefined>(

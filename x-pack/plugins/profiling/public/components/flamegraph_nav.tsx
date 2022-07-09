@@ -26,10 +26,16 @@ interface Props {
 
 export const FlameGraphNavigation = ({ index, projectID, n, timeRange, getter, setter }: Props) => {
   useEffect(() => {
-    getter(index, projectID, timeRange.unixStart, timeRange.unixEnd, n).then((response) => {
+    getter(
+      index,
+      projectID,
+      new Date(timeRange.start).getTime() / 1000,
+      new Date(timeRange.end).getTime() / 1000,
+      n
+    ).then((response) => {
       setter(response);
     });
-  }, [index, projectID, n, timeRange, getter, setter]);
+  }, [index, projectID, n, timeRange.start, timeRange.end, getter, setter]);
 
   return <></>;
 };

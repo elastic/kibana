@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -22,33 +22,25 @@ import {
   EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
 interface SettingsFlyoutProps {
   title: string;
-
-  defaultIndex: string;
-  updateIndex: (idx: string) => void;
-
-  defaultProjectID: number;
-  updateProjectID: (n: number) => void;
-
-  defaultN: number;
-  updateN: (n: number) => void;
+  values: {
+    index: string;
+    projectID: number;
+    n: number;
+  };
+  onChange: (nextValues: { index: string; projectID: number; n: number }) => void;
 }
 
-export function SettingsFlyout({
-  title,
-  defaultIndex,
-  updateIndex,
-  defaultProjectID,
-  updateProjectID,
-  defaultN,
-  updateN,
-}: SettingsFlyoutProps) {
-  const [index, setIndex] = useState(defaultIndex);
-  const [projectID, setProjectID] = useState(defaultProjectID);
-  const [n, setN] = useState(defaultN);
+export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps) {
+  const [formValues, setFormValues] = useState({
+    index: values.index.toString(),
+    projectID: values.projectID.toString(),
+    n: values.n.toString(),
+  });
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const flyoutTitleId = useGeneratedHtmlId({
@@ -60,15 +52,21 @@ export function SettingsFlyout({
   const closeFlyout = () => setIsFlyoutVisible(false);
 
   const saveFlyout = () => {
-    updateIndex(index);
-    updateProjectID(projectID);
-    updateN(n);
+    onChange({
+      index: formValues.index,
+      projectID: Number(formValues.projectID),
+      n: Number(formValues.n),
+    });
     setIsFlyoutVisible(false);
   };
 
-  const onIndexChange = (e: any) => setIndex(e.target.value);
-  const onProjectIDChange = (e: any) => setProjectID(e.target.value);
-  const onNChange = (e: any) => setN(e.target.value);
+  useEffect(() => {
+    setFormValues({
+      index: values.index.toString(),
+      projectID: values.projectID.toString(),
+      n: values.n.toString(),
+    });
+  }, [values.index, values.projectID, values.n]);
 
   return (
     <div>
@@ -87,19 +85,46 @@ export function SettingsFlyout({
                 label="Index"
                 helpText="This is the primary Elasticsearch index used before sampling."
               >
-                <EuiFieldText name="index" value={index} onChange={onIndexChange} />
+                <EuiFieldText
+                  name="index"
+                  value={formValues.index}
+                  onChange={(e) => {
+                    setFormValues((nextValues) => ({
+                      ...nextValues,
+                      index: e.target.value,
+                    }));
+                  }}
+                />
               </EuiFormRow>
               <EuiFormRow
                 label="Project ID"
                 helpText="This is the project ID as defined by the host agent."
               >
-                <EuiFieldText name="projectID" value={projectID} onChange={onProjectIDChange} />
+                <EuiFieldNumber
+                  name="projectID"
+                  value={formValues.projectID}
+                  onChange={(e) => {
+                    setFormValues((nextValues) => ({
+                      ...nextValues,
+                      projectID: e.target.value,
+                    }));
+                  }}
+                />
               </EuiFormRow>
               <EuiFormRow
                 label="N"
                 helpText="This is the maximum number of items per histogram bucket (Stack Traces) or is currently ignored (FlameGraph)."
               >
-                <EuiFieldText name="n" value={n} onChange={onNChange} />
+                <EuiFieldNumber
+                  name="n"
+                  value={formValues.n}
+                  onChange={(e) => {
+                    setFormValues((nextValues) => ({
+                      ...nextValues,
+                      n: e.target.value,
+                    }));
+                  }}
+                />
               </EuiFormRow>
             </EuiForm>
           </EuiFlyoutBody>

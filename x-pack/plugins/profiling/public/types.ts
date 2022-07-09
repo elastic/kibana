@@ -8,11 +8,14 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
+  data: DataPublicPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
   observability: ObservabilityPublicStart;
+  data: DataPublicPluginStart;
 }
