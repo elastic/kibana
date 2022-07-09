@@ -113,7 +113,7 @@ jest.doMock('./i18n/i18n_service', () => ({
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 
 export const mockPrebootService = prebootServiceMock.create();
-jest.doMock('./preboot/preboot_service', () => ({
+jest.doMock('@kbn/core-preboot-server-internal', () => ({
   PrebootService: jest.fn(() => mockPrebootService),
 }));
 
