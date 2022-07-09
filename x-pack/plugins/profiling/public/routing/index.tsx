@@ -9,36 +9,99 @@ import * as t from 'io-ts';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { Redirect } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { StackTracesView } from '../components/stack_traces_view';
 import { FlameGraphsView } from '../components/flame_graphs_view';
+import { RouteBreadcrumb } from '../components/route_breadcrumb';
 
 const routes = {
   '/': {
-    element: <Outlet />,
+    element: (
+      <RouteBreadcrumb
+        title={i18n.translate('xpack.profiling.breadcrumb.profiling', {
+          defaultMessage: 'Profiling',
+        })}
+        href="/"
+      >
+        <Outlet />
+      </RouteBreadcrumb>
+    ),
     children: {
       '/': {
         children: {
           '/stacktraces': {
             element: (
-              <StackTracesView>
-                <Outlet />
-              </StackTracesView>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.stackTraces', {
+                  defaultMessage: 'Stacktraces',
+                })}
+                href="/stacktraces"
+              >
+                <StackTracesView>
+                  <Outlet />
+                </StackTracesView>
+              </RouteBreadcrumb>
             ),
             children: {
               '/stacktraces/containers': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.containers', {
+                      defaultMessage: 'Containers',
+                    })}
+                    href="/stacktraces/containers"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/stacktraces/deployments': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.deployments', {
+                      defaultMessage: 'Deployments',
+                    })}
+                    href="/stacktraces/deployments"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/stacktraces/threads': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.threads', {
+                      defaultMessage: 'Threads',
+                    })}
+                    href="/stacktraces/threads"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/stacktraces/hosts': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.hosts', {
+                      defaultMessage: 'Hosts',
+                    })}
+                    href="/stacktraces/hosts"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/stacktraces/traces': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.traces', {
+                      defaultMessage: 'Traces',
+                    })}
+                    href="/stacktraces/traces"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/stacktraces': {
                 element: <Redirect to="/stacktraces/containers" />,
@@ -47,16 +110,41 @@ const routes = {
           },
           '/flamegraphs': {
             element: (
-              <FlameGraphsView>
-                <Outlet />
-              </FlameGraphsView>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.flamegraphs', {
+                  defaultMessage: 'Flamegraphs',
+                })}
+                href="/flamegraphs/flamegraph"
+              >
+                <FlameGraphsView>
+                  <Outlet />
+                </FlameGraphsView>
+              </RouteBreadcrumb>
             ),
             children: {
               '/flamegraphs/flamegraph': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.flamegraph', {
+                      defaultMessage: 'Flamegraph',
+                    })}
+                    href="/flamegraphs/flamegraph"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/flamegraphs/differential': {
-                element: <></>,
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.differentialFlamegraph', {
+                      defaultMessage: 'Differential flamegraph',
+                    })}
+                    href="/flamegraphs/differential"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
               },
               '/': {
                 element: <Redirect to="/flamegraphs/flamegraph" />,
