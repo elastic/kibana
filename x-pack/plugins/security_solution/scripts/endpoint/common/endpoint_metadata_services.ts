@@ -19,7 +19,6 @@ import {
 } from '../../../common/endpoint/constants';
 import { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { checkInFleetAgent } from './fleet_services';
 
 const endpointGenerator = new EndpointDocGenerator();
 
@@ -55,18 +54,12 @@ export const fetchEndpointMetadataList = async (
 export const sendEndpointMetadataUpdate = async (
   esClient: Client,
   agentId: string,
-  overrides: DeepPartial<HostMetadata> = {},
-  { checkInAgent = true }: Partial<{ checkInAgent: boolean }> = {}
+  overrides: DeepPartial<HostMetadata> = {}
 ): Promise<WriteResponseBase> => {
   const lastStreamedDoc = await fetchLastStreamedEndpointUpdate(esClient, agentId);
 
   if (!lastStreamedDoc) {
     throw new Error(`An endpoint with agent.id of [${agentId}] not found!`);
-  }
-
-  if (checkInAgent) {
-    // Trigger an agent checkin and just let it run
-    checkInFleetAgent(esClient, agentId);
   }
 
   const generatedHostMetadataDoc = clone(endpointGenerator.generateHostMetadata());
