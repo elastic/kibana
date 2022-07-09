@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from 'react-query';
-import type { CreateActionRequestBodySchema } from '../../common/schemas/routes/action';
+import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/routes/live_query';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -14,15 +14,15 @@ interface UseLiveQueryActionProps {
   onSuccess?: () => void;
 }
 
-export const useLiveQueryAction = ({ onSuccess }: UseLiveQueryActionProps) => {
+export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryActionProps) => {
   const setErrorToast = useErrorToast();
 
   const { executionContext, http } = useKibana().services;
   const queryExecutionContext = executionContext?.get();
 
   return useMutation(
-    (payload: CreateActionRequestBodySchema) =>
-      http.post<any>('/internal/osquery/action', {
+    (payload: CreateLiveQueryRequestBodySchema) =>
+      http.post<any>('/api/osquery/live_queries', {
         body: JSON.stringify({ ...payload, execution_context: queryExecutionContext }),
       }),
     {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -15,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
@@ -29,10 +28,12 @@ const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   useBreadcrumbs('live_query_details', { liveQueryId: actionId });
   const liveQueryListProps = useRouterNavigate('live_queries');
+  const [isLive, setIsLive] = useState(false);
+  const { data } = useActionDetails({ actionId, isLive });
 
-  const { data } = useActionDetails({ actionId });
+  console.error('data', data);
 
-  const isPackResults = useMemo(() => !!data?.actionDetails._source.queries.length, [data]);
+  const isPackResults = useMemo(() => !!data?.queries.length, [data]);
 
   const LeftColumn = useMemo(
     () => (
@@ -60,29 +61,32 @@ const LiveQueryDetailsPageComponent = () => {
     [liveQueryListProps]
   );
 
+  useLayoutEffect(() => {
+    setIsLive(() => !(data?.status === 'completed'));
+  }, [data?.status]);
+
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
       {isPackResults ? (
         <PackQueriesStatusTable
           actionId={actionId}
-          data={data?.actionDetails._source?.queries}
-          startDate={data?.actionDetails._source?.['@timestamp']}
-          expirationDate={data?.actionDetails._source?.expiration}
-          agentIds={data?.actionDetails?.fields?.agents}
+          data={data?.queries}
+          startDate={data?.['@timestamp']}
+          expirationDate={data?.expiration}
+          agentIds={data?.agents}
         />
       ) : (
         <>
           <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {data?.actionDetails._source?.queries?.[0]?.query ??
-              data?.actionDetails._source?.data?.query}
+            {data?.queries?.[0]?.query}
           </EuiCodeBlock>
           <EuiSpacer />
 
           <ResultTabs
             actionId={actionId}
-            agentIds={data?.actionDetails?.fields?.agents}
-            startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
-            endDate={get(data, 'actionDetails.fields.expiration[0]')}
+            agentIds={data?.agents}
+            startDate={data?.['@timestamp']}
+            endDate={data?.expiration}
           />
         </>
       )}

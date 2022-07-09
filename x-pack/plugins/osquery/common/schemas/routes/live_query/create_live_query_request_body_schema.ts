@@ -16,7 +16,7 @@ import {
   executionContextOrUndefined,
 } from '../../common/schemas';
 
-export const createActionRequestBodySchema = t.type({
+export const createLiveQueryRequestBodySchema = t.type({
   agentSelection,
   query: queryOrUndefined,
   saved_query_id: savedQueryIdOrUndefined,
@@ -25,4 +25,4 @@ export const createActionRequestBodySchema = t.type({
   execution_context: executionContextOrUndefined,
 });
 
-export type CreateActionRequestBodySchema = t.OutputOf<typeof createActionRequestBodySchema>;
+export type CreateLiveQueryRequestBodySchema = t.OutputOf<typeof createLiveQueryRequestBodySchema>;

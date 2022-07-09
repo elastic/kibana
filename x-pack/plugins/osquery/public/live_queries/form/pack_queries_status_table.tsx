@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
@@ -33,7 +33,6 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
-import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../../common/lib/kibana';
@@ -506,7 +505,6 @@ interface PackQueriesStatusTableProps {
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
   agentIds,
-  actionId,
   data,
   startDate,
   expirationDate,
@@ -514,14 +512,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
 
   const {
-    http,
     data: { dataViews },
   } = useKibana().services;
   const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
-
-  const { data: actionStatus } = useQuery(['liveQueryActionStatus', { actionId }], () =>
-    http.get(`/api/osquery/live_queries/${actionId}/status`)
-  );
 
   useEffect(() => {
     const fetchLogsDataView = async () => {
@@ -549,30 +542,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderDocsColumn = useCallback(
     (item) => (
       <DocsColumnResults
-        count={actionStatus?.responses[item.action_id]?.totalRowCount ?? 0}
-        isLive={
-          actionStatus?.status !== 'completed' &&
-          actionStatus?.responses[item.action_id]?.pending === 0
-        }
+        count={item?.docs ?? 0}
+        isLive={data?.status === 'running' && item?.pending !== 0}
       />
     ),
-    [actionStatus?.responses, actionStatus?.status]
+    [data?.status]
   );
 
-  const renderAgentsColumn = useCallback(
-    (item) => {
-      if (!item.action_id) return;
+  const renderAgentsColumn = useCallback((item) => {
+    if (!item.action_id) return;
 
-      return (
-        <AgentsColumnResults
-          successful={actionStatus?.responses[item.action_id]?.successful ?? 0}
-          pending={actionStatus?.responses[item.action_id]?.pending ?? 0}
-          failed={actionStatus?.responses[item.action_id]?.failed ?? 0}
-        />
-      );
-    },
-    [actionStatus?.responses]
-  );
+    return (
+      <AgentsColumnResults
+        successful={item?.successful ?? 0}
+        pending={item?.pending ?? 0}
+        failed={item?.failed ?? 0}
+      />
+    );
+  }, []);
 
   const renderDiscoverResultsAction = useCallback(
     (item) => (
@@ -602,7 +589,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   ecsMapping={item.ecs_mapping}
                   endDate={expirationDate}
                   agentIds={agentIds}
-                  failedAgentsCount={actionStatus?.responses[item.action_id]?.failed ?? 0}
+                  failedAgentsCount={item?.failed ?? 0}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -612,7 +599,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionStatus?.responses, agentIds, expirationDate, startDate]
+    [agentIds, expirationDate, startDate]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -626,7 +613,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const getItemId = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => get('id', item),
+    (item: OsqueryManagerPackagePolicyInputStream) => get(item, 'id'),
     []
   );
 

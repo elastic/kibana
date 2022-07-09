@@ -7,29 +7,30 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { every, map, mapKeys } from 'lodash';
+import { map } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { getActionResponses } from './utils';
 import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
+import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { getActionResponses } from './utils';
 
-export const getActionStatusRoute = (
+export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
   osqueryContext: OsqueryAppContext
 ) => {
   router.get(
     {
-      path: '/api/osquery/live_queries/{id}/status',
+      path: '/api/osquery/live_queries/{id}/results',
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
-        params: schema.object({ id: schema.string() }, { unknowns: 'allow' }),
+        params: schema.object({}, { unknowns: 'allow' }),
       },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
@@ -54,27 +55,35 @@ export const getActionStatusRoute = (
 
         const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
-        const responseData = await lastValueFrom(
+        await lastValueFrom(
           zip(
-            ...map(actionIds, (actionId) =>
-              getActionResponses(
-                search,
-                actionId,
-                queriedAgentIds,
-                expired ? true : request.query.partial_data || true
-              )
-            )
+            ...map(actionIds, (actionId) => getActionResponses(search, actionId, queriedAgentIds))
           )
         );
 
-        const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
+        const res = await lastValueFrom(
+          search.search(
+            {
+              actionId: actionIds[0],
+              factoryQueryType: OsqueryQueries.results,
+              filterQuery: createFilter(request.params.filterQuery),
+              pagination: generateTablePaginationOptions(
+                request.params.activePage ?? 0,
+                request.params.limit ?? 100
+              ),
+              sort: [
+                {
+                  direction: request.params.direction ?? 'desc',
+                  field: request.params.sortField ?? '@timestamp',
+                },
+              ],
+            },
+            { abortSignal, strategy: 'osquerySearchStrategy' }
+          )
+        );
 
-        return response.custom({
-          statusCode: isCompleted ? 200 : 408,
-          body: {
-            status: isCompleted ? 'completed' : 'running',
-            responses: mapKeys(responseData, 'actionId'),
-          },
+        return response.ok({
+          body: res,
         });
       } catch (e) {
         return response.customError({

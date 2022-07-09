@@ -16,8 +16,8 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { AgentSelection } from '../../lib/parse_agent_groups';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import type { CreateActionRequestBodySchema } from '../../../common/schemas/routes/action/create_action_request_body_schema';
-import { createActionRequestBodySchema } from '../../../common/schemas/routes/action/create_action_request_body_schema';
+import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
+import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
@@ -27,15 +27,15 @@ import { convertSOQueriesToPack } from '../pack/utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 import { TELEMETRY_CHANNEL_LIVE_QUERIES } from '../../lib/telemetry/constants';
 
-export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
-      path: '/internal/osquery/action',
+      path: '/api/osquery/live_queries',
       validate: {
         body: buildRouteValidation<
-          typeof createActionRequestBodySchema,
-          CreateActionRequestBodySchema
-        >(createActionRequestBodySchema),
+          typeof createLiveQueryRequestBodySchema,
+          CreateLiveQuerynRequestBodySchema
+        >(createLiveQueryRequestBodySchema),
       },
     },
     async (context, request, response) => {
@@ -106,6 +106,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           event_ids: request.body.event_ids,
           case_ids: request.body.case_ids,
           agent_selection: agentSelection,
+          agents: selectedAgents,
           execution_context: request.body.execution_context,
           user_id: currentUser,
           saved_query_id: savedQueryId,

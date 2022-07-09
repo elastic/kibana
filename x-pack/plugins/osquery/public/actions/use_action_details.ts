@@ -26,36 +26,26 @@ export interface ActionDetailsArgs {
 
 interface UseActionDetails {
   actionId: string;
+  isLive?: boolean;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
 
-export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
-  const { data } = useKibana().services;
+export const useActionDetails = ({
+  actionId,
+  filterQuery,
+  isLive = false,
+  skip = false,
+}: UseActionDetails) => {
+  const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],
-    async () => {
-      const responseData = await lastValueFrom(
-        data.search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-          {
-            actionId,
-            factoryQueryType: OsqueryQueries.actionDetails,
-            filterQuery: createFilter(filterQuery),
-          },
-          {
-            strategy: 'osquerySearchStrategy',
-          }
-        )
-      );
-
-      if (!responseData.actionDetails) throw new Error();
-
-      return responseData;
-    },
+    () => http.get(`/api/osquery/live_queries/${actionId}`),
     {
       enabled: !skip,
+      refetchInterval: isLive ? 5000 : false,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {

@@ -1,0 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IRouter } from '@kbn/core/server';
+import { createLiveQueryRoute } from './create_live_query_route';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
+import { getLiveQueryResultsRoute } from './get_live_query_results_route';
+
+export const initLiveQueryRoutes = (router: IRouter, context: OsqueryAppContext) => {
+  createLiveQueryRoute(router, context);
+  getLiveQueryDetailsRoute(router, context);
+  getLiveQueryResultsRoute(router, context);
+};

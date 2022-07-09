@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { initActionRoutes } from './action';
+import { initLiveQueryRoutes } from './live_query';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { initSavedQueryRoutes } from './saved_query';
 import { initStatusRoutes } from './status';
@@ -16,7 +16,7 @@ import { initPrivilegesCheckRoutes } from './privileges_check';
 import { initAssetRoutes } from './asset';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
-  initActionRoutes(router, context);
+  initLiveQueryRoutes(router, context);
   initStatusRoutes(router, context);
   initPackRoutes(router, context);
   initFleetWrapperRoutes(router, context);

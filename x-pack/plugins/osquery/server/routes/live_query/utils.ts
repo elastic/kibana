@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { of, throwError } from 'rxjs';
+import { mapKeys, snakeCase } from 'lodash';
+import { of } from 'rxjs';
 import { mergeMap, retry, catchError } from 'rxjs/operators';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type {
@@ -14,7 +15,7 @@ import type {
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
 
-export const getActionResponses = (search, actionId, queriedAgentIds, partialResults = false) =>
+export const getActionResponses = (search, actionId, queriedAgentIds) =>
   search
     .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
       {
@@ -33,10 +34,10 @@ export const getActionResponses = (search, actionId, queriedAgentIds, partialRes
     )
     .pipe(
       mergeMap((val) => {
-        const totalResponded =
+        const responded =
           // @ts-expect-error update types
           val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-        const totalRowCount =
+        const docs =
           // @ts-expect-error update types
           val.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
         const aggsBuckets =
@@ -45,23 +46,24 @@ export const getActionResponses = (search, actionId, queriedAgentIds, partialRes
         const successful = aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
         // @ts-expect-error update types
         const failed = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
-        const pending = queriedAgentIds.length - totalResponded;
+        const pending = queriedAgentIds.length - responded;
 
-        const returnData = of({
-          actionId,
-          totalResponded,
-          totalRowCount,
-          successful,
-          failed,
-          pending,
-        });
-
-        if (!partialResults && pending) {
-          return throwError(() => returnData);
-        }
+        const returnData = of(
+          mapKeys(
+            {
+              actionId,
+              docs,
+              failed,
+              pending,
+              responded,
+              successful,
+            },
+            (_, key) => snakeCase(key)
+          )
+        );
 
         return returnData;
       }),
-      retry({ count: !partialResults ? 3 : 0, delay: 4000 })
+      retry({ count: 5, delay: 4000 })
     )
     .pipe(catchError((e) => e));

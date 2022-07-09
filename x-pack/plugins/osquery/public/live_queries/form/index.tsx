@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiAccordionProps, EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
