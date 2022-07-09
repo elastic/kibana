@@ -5,16 +5,52 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import { Client } from '@elastic/elasticsearch';
+import { KbnClient } from '@kbn/test';
+import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
-import type { DeepPartial } from 'utility-types';
-import { METADATA_DATASTREAM } from '../../../common/endpoint/constants';
-import type { HostMetadata } from '../../../common/endpoint/types';
+import { DeepPartial } from 'utility-types';
+import { GetMetadataListRequestQuery } from '../../../common/endpoint/schema/metadata';
+import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
+import {
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_DATASTREAM,
+} from '../../../common/endpoint/constants';
+import { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 import { checkInFleetAgent } from './fleet_services';
 
 const endpointGenerator = new EndpointDocGenerator();
+
+export const fetchEndpointMetadata = async (
+  kbnClient: KbnClient,
+  agentId: string
+): Promise<HostInfo> => {
+  return (
+    await kbnClient.request<HostInfo>({
+      method: 'GET',
+      path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
+    })
+  ).data;
+};
+
+export const fetchEndpointMetadataList = async (
+  kbnClient: KbnClient,
+  { page = 0, pageSize = 100, ...otherOptions }: Partial<GetMetadataListRequestQuery> = {}
+): Promise<MetadataListResponse> => {
+  return (
+    await kbnClient.request<MetadataListResponse>({
+      method: 'GET',
+      path: HOST_METADATA_LIST_ROUTE,
+      query: {
+        page,
+        pageSize,
+        ...otherOptions,
+      },
+    })
+  ).data;
+};
 
 export const sendEndpointMetadataUpdate = async (
   esClient: Client,
