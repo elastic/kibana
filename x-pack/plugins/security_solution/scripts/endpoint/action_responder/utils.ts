@@ -9,6 +9,7 @@ import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { UploadedFile } from '../../../common/endpoint/types/file_storage';
+import { checkInFleetAgent } from '../common/fleet_services';
 import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import {
@@ -124,26 +125,34 @@ export const sendEndpointActionResponse = async (
   // For isolate, If the response is not an error, then also send a metadata update
   if (action.command === 'isolate' && !endpointResponse.error) {
     for (const agentId of action.agents) {
-      await sendEndpointMetadataUpdate(esClient, agentId, {
-        Endpoint: {
-          state: {
-            isolation: true,
+      await Promise.all([
+        sendEndpointMetadataUpdate(esClient, agentId, {
+          Endpoint: {
+            state: {
+              isolation: true,
+            },
           },
-        },
-      });
+        }),
+
+        checkInFleetAgent(esClient, agentId),
+      ]);
     }
   }
 
   // For UnIsolate, if response is not an Error, then also send metadata update
   if (action.command === 'unisolate' && !endpointResponse.error) {
     for (const agentId of action.agents) {
-      await sendEndpointMetadataUpdate(esClient, agentId, {
-        Endpoint: {
-          state: {
-            isolation: false,
+      await Promise.all([
+        sendEndpointMetadataUpdate(esClient, agentId, {
+          Endpoint: {
+            state: {
+              isolation: false,
+            },
           },
-        },
-      });
+        }),
+
+        checkInFleetAgent(esClient, agentId),
+      ]);
     }
   }
 
