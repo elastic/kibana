@@ -59,7 +59,7 @@ ${HORIZONTAL_LINE}
         --username          User name to be used for auth against elasticsearch and
                             kibana (Default: elastic).
                             **IMPORTANT:** if 'asSuperuser' option is not used, then the
-                            user defined here MUST have 'superuser' and 'kibana_system' roles
+                            user defined here MUST have 'superuser' AND 'kibana_system' roles
         --password          User name Password (Default: changeme)
         --asSuperuser       If defined, then a Security super user will be created using the
                             the credentials defined via 'username' and 'password' options. This

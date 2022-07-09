@@ -104,7 +104,10 @@ export class AgentKeepAliveService {
 
           for (const endpoint of endpoints.data) {
             await Promise.all([
-              checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id, 'random'),
+              checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id, {
+                agentStatus: 'random',
+                log,
+              }),
               sendEndpointMetadataUpdate(esClient, endpoint.metadata.agent.id),
             ]);
           }
