@@ -146,7 +146,7 @@ const routes = {
                   </RouteBreadcrumb>
                 ),
               },
-              '/': {
+              '/flamegraphs': {
                 element: <Redirect to="/flamegraphs/flamegraph" />,
               },
             },
