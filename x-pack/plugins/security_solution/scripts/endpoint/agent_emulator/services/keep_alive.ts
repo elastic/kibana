@@ -8,11 +8,11 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
-import { checkInFleetAgent } from '../common/fleet_services';
+import { checkInFleetAgent } from '../../common/fleet_services';
 import {
   fetchEndpointMetadataList,
   sendEndpointMetadataUpdate,
-} from '../common/endpoint_metadata_services';
+} from '../../common/endpoint_metadata_services';
 
 export class AgentKeepAliveService {
   private isRunning = false;

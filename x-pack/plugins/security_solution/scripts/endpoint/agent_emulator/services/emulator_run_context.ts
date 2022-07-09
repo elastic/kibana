@@ -10,7 +10,7 @@
 import { KbnClient } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { createRuntimeServices } from '../common/stack_services';
+import { createRuntimeServices } from '../../common/stack_services';
 
 export class EmulatorRunContext {
   private esClient: Client | undefined = undefined;
