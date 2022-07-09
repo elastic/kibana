@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
 
 /**

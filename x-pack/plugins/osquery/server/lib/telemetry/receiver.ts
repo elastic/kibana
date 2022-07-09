@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   CoreStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import {
+import type {
   AgentClient,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
@@ -21,7 +21,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import type { ESLicense, ESClusterInfo } from './types';
-import { OsqueryAppContextService } from '../osquery_app_context_services';
+import type { OsqueryAppContextService } from '../osquery_app_context_services';
 
 export class TelemetryReceiver {
   private readonly logger: Logger;

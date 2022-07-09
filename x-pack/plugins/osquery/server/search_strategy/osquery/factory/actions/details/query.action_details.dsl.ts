@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
-import { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
+import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionDetailsQuery = ({

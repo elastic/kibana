@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
-import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
+import type { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 // import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({

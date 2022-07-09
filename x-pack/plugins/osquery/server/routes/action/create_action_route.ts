@@ -9,23 +9,22 @@ import { some, flatten, map, pick, pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
+import type { AgentSelection } from '../../lib/parse_agent_groups';
+import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import {
-  createActionRequestBodySchema,
-  CreateActionRequestBodySchema,
-} from '../../../common/schemas/routes/action/create_action_request_body_schema';
+import type { CreateActionRequestBodySchema } from '../../../common/schemas/routes/action/create_action_request_body_schema';
+import { createActionRequestBodySchema } from '../../../common/schemas/routes/action/create_action_request_body_schema';
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { convertSOQueriesToPack } from '../pack/utils';
-import { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObjectAttributes } from '../../common/types';
 import { TELEMETRY_CHANNEL_LIVE_QUERIES } from '../../lib/telemetry/constants';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

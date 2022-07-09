@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { run, RunContext } from '@kbn/dev-cli-runner';
+import type { RunContext } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 import { HORIZONTAL_LINE, SUPPORTED_TOKENS } from './constants';
 import { runInAutoMode } from './run_in_auto_mode';
 

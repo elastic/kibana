@@ -6,8 +6,8 @@
  */
 
 import { isEmpty, isString } from 'lodash/fp';
-import { PaginationInputPaginated, Inspect } from '../../search_strategy';
-import { ESQuery } from '../../typed_json';
+import type { PaginationInputPaginated, Inspect } from '../../search_strategy';
+import type { ESQuery } from '../../typed_json';
 
 export const createQueryFilterClauses = (filterQuery: ESQuery | string | undefined) =>
   !isEmpty(filterQuery) ? [isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery] : [];

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiAccordionProps, EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -12,9 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiAccordion,
-  EuiAccordionProps,
   EuiCard,
-  EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,14 +22,8 @@ import styled from 'styled-components';
 
 import { pickBy, isEmpty, map, find } from 'lodash';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import {
-  UseField,
-  Form,
-  FormData,
-  useForm,
-  useFormData,
-  SuperSelectField,
-} from '../../shared_imports';
+import type { FormData } from '../../shared_imports';
+import { UseField, Form, useForm, useFormData, SuperSelectField } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';

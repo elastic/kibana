@@ -13,7 +13,8 @@ import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
-import { QueryBar, QueryBarComponentProps } from '.';
+import type { QueryBarComponentProps } from '.';
+import { QueryBar } from '.';
 import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 

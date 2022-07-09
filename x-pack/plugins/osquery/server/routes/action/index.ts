@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { createActionRoute } from './create_action_route';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getActionDetailsRoute } from './get_action_details_route';
 import { getActionResultsRoute } from './get_action_results_route';
 import { getActionStatusRoute } from './get_action_status_route';
