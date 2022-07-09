@@ -29,7 +29,11 @@ ${HORIZONTAL_LINE}
       );
       await emulatorContext.start();
 
-      const keepAliveService = new AgentKeepAliveService(emulatorContext);
+      const keepAliveService = new AgentKeepAliveService(
+        emulatorContext.getEsClient(),
+        emulatorContext.getKbnClient(),
+        emulatorContext.getLogger()
+      );
       keepAliveService.start();
 
       await keepAliveService.whileRunning;

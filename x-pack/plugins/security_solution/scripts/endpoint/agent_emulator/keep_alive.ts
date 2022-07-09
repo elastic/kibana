@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EmulatorRunContext } from './emulator_run_context';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
+import { checkInFleetAgent } from '../common/fleet_services';
+import {
+  fetchEndpointMetadataList,
+  sendEndpointMetadataUpdate,
+} from '../common/endpoint_metadata_services';
 
 export class AgentKeepAliveService {
   private isRunning = false;
@@ -15,8 +22,10 @@ export class AgentKeepAliveService {
   private markRunComplete: (() => void) | undefined;
 
   constructor(
-    private readonly runContext: EmulatorRunContext,
-    private readonly intervalMs: number = 10_000
+    private readonly esClient: Client,
+    private readonly kbnClient: KbnClient,
+    private readonly logger: ToolingLog = new ToolingLog(),
+    private readonly intervalMs: number = 3 * 60_000 // 3 minutes (fleet considers an agent offline at 5 minutes)
   ) {}
 
   private loggerPrefix(append: string = '') {
@@ -33,11 +42,9 @@ export class AgentKeepAliveService {
       this.markRunComplete = () => resolve();
     });
 
-    await this.runKeepAlive();
+    this.logger.verbose(`${this.loggerPrefix()}: started at ${new Date().toISOString()}`);
 
-    this.runContext
-      .getLogger()
-      .verbose(`${this.loggerPrefix()}: started at ${new Date().toISOString()}`);
+    await this.runKeepAlive();
   }
 
   async stop(): Promise<void> {
@@ -50,9 +57,7 @@ export class AgentKeepAliveService {
         this.markRunComplete = undefined;
       }
 
-      this.runContext
-        .getLogger()
-        .verbose(`${this.loggerPrefix()}: stopped at ${new Date().toISOString()}`);
+      this.logger.verbose(`${this.loggerPrefix()}: stopped at ${new Date().toISOString()}`);
     }
   }
 
@@ -72,19 +77,40 @@ export class AgentKeepAliveService {
   }
 
   private async runKeepAlive() {
-    const log = this.runContext.getLogger();
+    const { logger: log, kbnClient, esClient } = this;
 
     log.verbose(`${this.loggerPrefix('runKeepAlive()')} started: ${new Date().toISOString()}`);
 
-    // FIXME: process here
+    let hasMore = true;
+    let page = 0;
 
-    // 1. Retrieve endpoints
-    // 2. for each Endpoint:
-    //    a. send a checkin message to fleet
-    //    b. send a metadata update
+    try {
+      do {
+        const endpoints = await fetchEndpointMetadataList(kbnClient, {
+          page: page++,
+          pageSize: 100,
+        });
 
-    // INFO:
-    // How Fleet calculates different types of Agent status: https://github.com/elastic/kibana/blob/14c640573c18d0c47ad397662a68a330f12cfcd1/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
+        if (endpoints.data.length === 0) {
+          hasMore = false;
+        } else {
+          for (const endpoint of endpoints.data) {
+            await Promise.all([
+              checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id),
+              sendEndpointMetadataUpdate(esClient, endpoint.metadata.agent.id),
+            ]);
+          }
+        }
+      } while (hasMore);
+    } catch (err) {
+      log.error(
+        `${this.loggerPrefix('runKeepAlive()')} Error: ${
+          err.message
+        }. Use the '--verbose' option to see more.`
+      );
+
+      log.verbose(err);
+    }
 
     log.verbose(`${this.loggerPrefix('runKeepAlive()')}   ended: ${new Date().toISOString()}`);
 
