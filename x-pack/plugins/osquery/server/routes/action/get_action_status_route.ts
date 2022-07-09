@@ -6,18 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { every, map, mapKeys } from 'lodash';
-import { lastValueFrom, Observable, zip } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getActionResponses } from './utils';
-import {
+import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
-  OsqueryQueries,
 } from '../../../common/search_strategy';
+import { OsqueryQueries } from '../../../common/search_strategy';
 
 export const getActionStatusRoute = (
   router: IRouter<DataRequestHandlerContext>,

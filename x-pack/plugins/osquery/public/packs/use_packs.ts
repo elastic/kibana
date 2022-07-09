@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponsePublic } from '@kbn/core/public';
+import type { SavedObjectsFindResponsePublic } from '@kbn/core/public';
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
-import { PackSavedObject } from './types';
+import type { PackSavedObject } from './types';
 
 export const usePacks = ({
   isLive = false,

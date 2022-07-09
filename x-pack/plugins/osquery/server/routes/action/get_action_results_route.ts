@@ -6,17 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { map } from 'lodash';
-import { lastValueFrom, Observable, zip } from 'rxjs';
-import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { Observable } from 'rxjs';
+import { lastValueFrom, zip } from 'rxjs';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import {
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
-  OsqueryQueries,
 } from '../../../common/search_strategy';
+import { OsqueryQueries } from '../../../common/search_strategy';
 import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
 

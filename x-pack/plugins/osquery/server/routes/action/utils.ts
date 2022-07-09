@@ -8,11 +8,11 @@
 import { of, throwError } from 'rxjs';
 import { mergeMap, retry, catchError } from 'rxjs/operators';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
-import {
+import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
-  OsqueryQueries,
 } from '../../../common/search_strategy';
+import { OsqueryQueries } from '../../../common/search_strategy';
 
 export const getActionResponses = (search, actionId, queriedAgentIds, partialResults = false) =>
   search

@@ -32,12 +32,12 @@ import type {
 } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
-import { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../../common/lib/kibana';
-import { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
+import type { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
 import { usePackQueryLastResults } from '../../packs/use_pack_query_last_results';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 

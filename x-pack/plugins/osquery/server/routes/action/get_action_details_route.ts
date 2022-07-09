@@ -6,10 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import { lastValueFrom, Observable } from 'rxjs';
+import type { IRouter } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID } from '../../../common';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OsqueryQueries } from '../../../common/search_strategy';
 
 export const getActionDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

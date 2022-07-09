@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from 'react-query';
-import { CreateActionRequestBodySchema } from '../../common/schemas/routes/action';
+import type { CreateActionRequestBodySchema } from '../../common/schemas/routes/action';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { TELEMETRY_CHANNEL_CONFIGS } from '../constants';
 import { templateConfigs } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense } from '../types';
 
 export function createTelemetryConfigsTaskConfig() {

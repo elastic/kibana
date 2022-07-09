@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { actionsMapping } from './actions_mapping';
 import { actionResponsesMapping } from './action_responses_mapping';

@@ -14,7 +14,7 @@ import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryIcon } from '../components/osquery_icon';
-import { AgentSelection } from '../agents/types';
+import type { AgentSelection } from '../agents/types';
 
 interface LiveQueryProps {
   agentId?: string;
