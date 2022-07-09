@@ -84,8 +84,6 @@ export const EngineCreation: React.FC = () => {
         />
       )}
       {currentEngineCreationStep === EngineCreationSteps.ConfigureStep && engineType === 'appSearch' && (
-        <p> Elasticsearch engine configure step</p>
-        /*
         <ConfigureAppSearchEngine
           name={name}
           rawName={rawName}
@@ -96,7 +94,6 @@ export const EngineCreation: React.FC = () => {
           setRawName={setRawName}
           setLanguage={setLanguage}
         />
-        */
       )}
       {currentEngineCreationStep === EngineCreationSteps.ConfigureStep && engineType === 'elasticsearch' && (
         <> Elasticsearch engine configure step</>
