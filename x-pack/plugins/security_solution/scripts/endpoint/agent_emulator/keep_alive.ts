@@ -94,9 +94,17 @@ export class AgentKeepAliveService {
         if (endpoints.data.length === 0) {
           hasMore = false;
         } else {
+          if (endpoints.page === 0) {
+            log.verbose(
+              `${this.loggerPrefix('runKeepAlive()')} Number of endpoints to process: ${
+                endpoints.total
+              }`
+            );
+          }
+
           for (const endpoint of endpoints.data) {
             await Promise.all([
-              checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id),
+              checkInFleetAgent(esClient, endpoint.metadata.elastic.agent.id, 'random'),
               sendEndpointMetadataUpdate(esClient, endpoint.metadata.agent.id),
             ]);
           }
@@ -112,7 +120,7 @@ export class AgentKeepAliveService {
       log.verbose(err);
     }
 
-    log.verbose(`${this.loggerPrefix('runKeepAlive()')}   ended: ${new Date().toISOString()}`);
+    log.verbose(`${this.loggerPrefix('runKeepAlive()')} ended: ${new Date().toISOString()}`);
 
     this.setNextRun();
   }
