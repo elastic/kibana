@@ -27,12 +27,14 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/core/preboot/core-preboot-server-internal"
+  "//packages/kbn-utility-types",
+  "//packages/core/preboot/core-preboot-server-internal",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/kbn-utility-types:npm_module_types",
   "//packages/core/preboot/core-preboot-server-internal:npm_module_types",
   "//packages/core/preboot/core-preboot-server:npm_module_types"
 ]
