@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { InternalPrebootServicePreboot } from './types';
+import type { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
 import type { PrebootServicePreboot, KibanaPrebootServiceContract } from '@kbn/core-preboot-server';
 
 export type InternalPrebootServicePrebootMock = jest.Mocked<InternalPrebootServicePreboot>;
