@@ -223,7 +223,7 @@ export class ConsolePageObject extends FtrService {
   }
   
   public async getResponseStatus() {
-    const statusBadge = await this.testSubjects.find('consoleRequestStatusBadge');
+    const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
     const text = await statusBadge.getVisibleText();
     return text.replace(/[^\d.]+/, '');
   }
