@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { SecuritySideNav } from './security_side_nav';
-import { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
-import { NavLinkItem } from '../types';
+import type { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
+import type { NavLinkItem } from '../types';
 import { bottomNavOffset } from '../../../lib/helpers';
 
 const manageNavLink: NavLinkItem = {

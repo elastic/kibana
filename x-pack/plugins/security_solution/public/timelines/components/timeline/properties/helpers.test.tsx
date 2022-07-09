@@ -9,7 +9,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
+import type { NewTimelineProps } from './helpers';
+import { AddToFavoritesButton, NewTimeline } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
 import { timelineActions } from '../../../store/timeline';

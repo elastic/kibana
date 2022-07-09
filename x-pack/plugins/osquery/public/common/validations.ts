@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ValidationFunc, fieldValidators } from '../shared_imports';
+import type { ValidationFunc } from '../shared_imports';
+import { fieldValidators } from '../shared_imports';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const queryFieldValidation: ValidationFunc<any, string, string> = fieldValidators.emptyField(

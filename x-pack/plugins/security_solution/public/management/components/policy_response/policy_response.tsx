@@ -8,17 +8,17 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  HostPolicyResponseActionStatus,
+import type {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 

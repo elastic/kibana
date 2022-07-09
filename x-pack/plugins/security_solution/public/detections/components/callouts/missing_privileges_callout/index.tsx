@@ -7,7 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import hash from 'object-hash';
-import { CallOutMessage, CallOutSwitcher } from '../../../../common/components/callouts';
+import type { CallOutMessage } from '../../../../common/components/callouts';
+import { CallOutSwitcher } from '../../../../common/components/callouts';
 import * as i18n from './translations';
 import { useMissingPrivileges } from './use_missing_privileges';
 
