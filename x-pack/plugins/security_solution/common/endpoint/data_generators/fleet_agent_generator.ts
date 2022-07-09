@@ -203,7 +203,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     const fleetServerAgent = esHit._source!;
 
     // Reset the `last_checkin_status since we're controlling the agent status here
-    fleetServerAgent.last_checkin_status = undefined;
+    fleetServerAgent.last_checkin_status = 'online';
 
     switch (status) {
       case 'degraded':
