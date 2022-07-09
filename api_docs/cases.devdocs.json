@@ -97,7 +97,8 @@
               },
               "<object, unknown>, plugins: ",
               "CasesPluginSetup",
-              ") => {}"
+              ") => ",
+              "CasesUiSetup"
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
@@ -487,9 +488,21 @@
         "label": "GetAllCasesSelectorModalProps",
         "description": [],
         "signature": [
-          "AllCasesSelectorModalProps",
-          " & ",
-          "CasesContextProps"
+          "{ features?: Partial<",
+          "CasesContextFeatures",
+          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
+          "ReleasePhase",
+          " | undefined; hiddenStatuses?: ",
+          "CaseStatusWithAllStatus",
+          "[] | undefined; onRowClick?: ((theCase?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.Case",
+            "text": "Case"
+          },
+          " | undefined) => void) | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
@@ -503,9 +516,27 @@
         "label": "GetCasesProps",
         "description": [],
         "signature": [
-          "CasesRoutesProps",
-          " & ",
-          "CasesContextProps"
+          "{ features?: Partial<",
+          "CasesContextFeatures",
+          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; onComponentInitialized?: (() => void) | undefined; actionsNavigation?: ",
+          "CasesNavigation",
+          "<string, \"configurable\"> | undefined; ruleDetailsNavigation?: ",
+          "CasesNavigation",
+          "<string | null | undefined, \"configurable\"> | undefined; showAlertDetails?: ((alertId: string, index: string) => void) | undefined; useFetchAlertData: ",
+          "UseFetchAlertData",
+          "; refreshRef?: React.MutableRefObject<",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseViewRefreshPropInterface",
+            "text": "CaseViewRefreshPropInterface"
+          },
+          "> | undefined; timelineIntegration?: ",
+          "CasesTimelineIntegration",
+          " | undefined; releasePhase?: ",
+          "ReleasePhase",
+          " | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_cases.tsx",
         "deprecated": false,
@@ -519,9 +550,37 @@
         "label": "GetCreateCaseFlyoutProps",
         "description": [],
         "signature": [
-          "CreateCaseFlyoutProps",
-          " & ",
-          "CasesContextProps"
+          "{ features?: Partial<",
+          "CasesContextFeatures",
+          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
+          "ReleasePhase",
+          " | undefined; afterCaseCreated?: ((theCase: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.Case",
+            "text": "Case"
+          },
+          ", createAttachments: (args: ",
+          "PostComment",
+          ") => Promise<void>) => Promise<void>) | undefined; onSuccess?: ((theCase: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.Case",
+            "text": "Case"
+          },
+          ") => Promise<void>) | undefined; attachments?: ",
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.CaseAttachments",
+            "text": "CaseAttachments"
+          },
+          " | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -535,9 +594,11 @@
         "label": "GetRecentCasesProps",
         "description": [],
         "signature": [
-          "RecentCasesProps",
-          " & ",
-          "CasesContextProps"
+          "{ features?: Partial<",
+          "CasesContextFeatures",
+          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
+          "ReleasePhase",
+          " | undefined; maxCasesToShow: number; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_recent_cases.tsx",
         "deprecated": false,
@@ -663,11 +724,9 @@
               "section": "def-public.GetCasesProps",
               "text": "GetCasesProps"
             },
-            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => (props: ",
-            "CasesContextProps",
-            " & { children: React.ReactNode; }) => React.ReactElement<",
-            "CasesContextProps",
-            ", string | React.JSXElementConstructor<any>>; getAllCasesSelectorModal: (props: ",
+            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<",
+            "GetCasesContextProps",
+            ">; getAllCasesSelectorModal: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -904,6 +963,32 @@
     "interfaces": [
       {
         "parentPluginId": "cases",
+        "id": "def-server.PluginSetupContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginSetupContract",
+        "description": [],
+        "path": "x-pack/plugins/cases/server/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.PluginSetupContract.attachmentFramework",
+            "type": "Object",
+            "tags": [],
+            "label": "attachmentFramework",
+            "description": [],
+            "signature": [
+              "AttachmentFramework"
+            ],
+            "path": "x-pack/plugins/cases/server/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-server.PluginStartContract",
         "type": "Interface",
         "tags": [],
@@ -911,7 +996,7 @@
         "description": [
           "\nCases server exposed contract for interacting with cases entities."
         ],
-        "path": "x-pack/plugins/cases/server/plugin.ts",
+        "path": "x-pack/plugins/cases/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -942,7 +1027,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/cases/server/plugin.ts",
+            "path": "x-pack/plugins/cases/server/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -964,7 +1049,7 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/cases/server/plugin.ts",
+                "path": "x-pack/plugins/cases/server/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1247,9 +1332,9 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".externalReference; owner: string; } | { externalReferenceStorage: { type: ",
+          ".externalReference; owner: string; } | { externalReferenceId: string; externalReferenceStorage: { type: ",
           "ExternalReferenceStorageType",
-          ".savedObject; soType: string; }; externalReferenceId: string; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
+          ".savedObject; soType: string; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
           "JsonValue",
           "; } | null; type: ",
           {
@@ -1259,7 +1344,17 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
+          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: ",
+          "JsonValue",
+          "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
           "Comment",
           "[]; }"
         ],

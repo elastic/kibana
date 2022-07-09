@@ -7,11 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import {
+import type {
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,
   ThreatListItem,
+  GetSortForThreatList,
 } from './types';
 
 /**
@@ -34,6 +35,7 @@ export const getThreatList = async ({
   reassignPitId,
   perPage,
   runtimeMappings,
+  listClient,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -62,7 +64,10 @@ export const getThreatList = async ({
       query: queryFilter,
       search_after: searchAfter,
       runtime_mappings: runtimeMappings,
-      sort: ['_shard_doc', { '@timestamp': 'asc' }],
+      sort: getSortForThreatList({
+        index,
+        listItemIndex: listClient.getListItemIndex(),
+      }),
     },
     track_total_hits: false,
     size: calculatedPerPage,
@@ -74,6 +79,18 @@ export const getThreatList = async ({
   reassignPitId(response.pit_id);
 
   return response;
+};
+
+export const getSortForThreatList = ({
+  index,
+  listItemIndex,
+}: GetSortForThreatList): estypes.Sort => {
+  const defaultSort = ['_shard_doc'];
+  if (index.length === 1 && index[0] === listItemIndex) {
+    return defaultSort;
+  }
+
+  return [...defaultSort, { '@timestamp': 'asc' }];
 };
 
 export const getThreatListCount = async ({

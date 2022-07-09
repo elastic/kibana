@@ -18,24 +18,24 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ListClient } from '@kbn/lists-plugin/server';
-import {
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { BuildRuleMessage } from '../rule_messages';
+import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
   WrapHits,
 } from '../types';
-import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -194,6 +194,7 @@ export interface GetThreatListOptions {
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  listClient: ListClient;
 }
 
 export interface ThreatListCountOptions {
@@ -246,6 +247,7 @@ export interface BuildThreatEnrichmentOptions {
   threatQuery: ThreatQuery;
   pitId: string;
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  listClient: ListClient;
 }
 
 export interface EventsOptions {
@@ -292,3 +294,8 @@ export type GetDocumentListInterface = (params: {
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
+
+export interface GetSortForThreatList {
+  index: string[];
+  listItemIndex: string;
+}

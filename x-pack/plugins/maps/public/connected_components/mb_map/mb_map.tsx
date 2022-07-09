@@ -20,15 +20,8 @@ import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearc
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
-import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
-import {
-  CustomIcon,
-  Goto,
-  MapCenterAndZoom,
-  TileMetaFeature,
-  Timeslice,
-} from '../../../common/descriptor_types';
+import { CustomIcon, Goto, MapCenterAndZoom, Timeslice } from '../../../common/descriptor_types';
 import {
   CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,
@@ -39,7 +32,7 @@ import {
 import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
-import { getTileMetaFeatures, removeOrphanedSourcesAndLayers } from './utils';
+import { removeOrphanedSourcesAndLayers } from './utils';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
@@ -47,6 +40,7 @@ import type { MapExtentState } from '../../reducers/map/types';
 // @ts-expect-error
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
+import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 
 export interface Props {
   isMapReady: boolean;
@@ -57,7 +51,6 @@ export interface Props {
   goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
-  scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
   onMapDestroyed: () => void;
@@ -70,13 +63,9 @@ export interface Props {
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
-  setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   timeslice?: Timeslice;
-  updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
-  setTileLoadError(layerId: string, errorMessage: string): void;
-  clearTileLoadError(layerId: string): void;
   onMapMove?: (lat: number, lon: number, zoom: number) => void;
 }
 
@@ -93,7 +82,6 @@ export class MbMap extends Component<Props, State> {
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
   private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
-  private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
     mbMap: undefined,
@@ -114,30 +102,12 @@ export class MbMap extends Component<Props, State> {
     if (this._checker) {
       this._checker.destroy();
     }
-    if (this._tileStatusTracker) {
-      this._tileStatusTracker.destroy();
-    }
     if (this.state.mbMap) {
       this.state.mbMap.remove();
       this.state.mbMap = undefined;
     }
     this.props.onMapDestroyed();
   }
-
-  // This keeps track of the latest update calls, per layerId
-  _queryForMeta = (layer: ILayer) => {
-    const source = layer.getSource();
-    if (
-      this.state.mbMap &&
-      layer.isVisible() &&
-      source.isESSource() &&
-      typeof (source as IVectorSource).isMvt === 'function' &&
-      (source as IVectorSource).isMvt()
-    ) {
-      const features = getTileMetaFeatures(this.state.mbMap, layer.getMbSourceId());
-      this.props.updateMetaFromTiles(layer.getId(), features);
-    }
-  };
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
@@ -186,7 +156,6 @@ export class MbMap extends Component<Props, State> {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
-        scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
@@ -203,22 +172,6 @@ export class MbMap extends Component<Props, State> {
       const mbMap = new maplibregl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-
-      this._tileStatusTracker = new TileStatusTracker({
-        mbMap,
-        getCurrentLayerList: () => this.props.layerList,
-        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
-          this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
-
-          if (errorMessage) {
-            this.props.setTileLoadError(layer.getId(), errorMessage);
-          } else {
-            this.props.clearTileLoadError(layer.getId());
-          }
-
-          this._queryForMeta(layer);
-        },
-      });
 
       let emptyImage: HTMLImageElement;
       mbMap.on('styleimagemissing', (e: unknown) => {
@@ -472,6 +425,8 @@ export class MbMap extends Component<Props, State> {
     let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
+    let keydownScrollZoomControl;
+    let tileStatusTrackerControl;
     if (this.state.mbMap) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
@@ -493,6 +448,10 @@ export class MbMap extends Component<Props, State> {
       scaleControl = this.props.settings.showScaleControl ? (
         <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
+      keydownScrollZoomControl = this.props.settings.keydownScrollZoom ? (
+        <KeydownScrollZoom mbMap={this.state.mbMap} />
+      ) : null;
+      tileStatusTrackerControl = <TileStatusTracker mbMap={this.state.mbMap} />;
     }
     return (
       <div
@@ -503,8 +462,10 @@ export class MbMap extends Component<Props, State> {
       >
         {drawFilterControl}
         {drawFeatureControl}
+        {keydownScrollZoomControl}
         {scaleControl}
         {tooltipControl}
+        {tileStatusTrackerControl}
       </div>
     );
   }

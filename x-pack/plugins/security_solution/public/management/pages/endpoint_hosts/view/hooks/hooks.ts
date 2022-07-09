@@ -8,8 +8,8 @@
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { EndpointState } from '../../types';
-import { State } from '../../../../../common/store';
+import type { EndpointState } from '../../types';
+import type { State } from '../../../../../common/store';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,

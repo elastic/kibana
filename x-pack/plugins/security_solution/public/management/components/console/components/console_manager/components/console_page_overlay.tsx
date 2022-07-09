@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, MouseEventHandler, useMemo } from 'react';
+import type { ReactNode, MouseEventHandler } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PageLayout, PageLayoutProps } from './page_layout';
+import type { PageLayoutProps } from './page_layout';
+import { PageLayout } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
@@ -79,7 +81,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         isHidden={isHidden}
         data-test-subj="consolePageOverlay"
         onHide={onHide}
-        paddingSize="xl"
+        paddingSize="l"
         enableScrolling={false}
       >
         <PageLayout {...layoutProps}>
