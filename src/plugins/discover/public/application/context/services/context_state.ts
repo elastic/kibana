@@ -142,7 +142,7 @@ export function getState({
   });
 
   const globalStateFromUrl = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) as GlobalState;
-  const globalStateInitial = createInitialGloblalState(globalStateFromUrl);
+  const globalStateInitial = createInitialGlobalState(globalStateFromUrl);
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
@@ -208,6 +208,7 @@ export function getState({
       startSyncingStates();
     },
     stopSync: () => {
+      data.query.filterManager.setAppFilters([]);
       stopSyncingFilters();
       stopSyncingFilters = () => {};
       stopSyncingStates();
@@ -318,7 +319,7 @@ function createInitialAppState(
  * Helper function to return the initial global state, which is a merged object of url state and
  * default state
  */
-function createInitialGloblalState(urlState: GlobalState): GlobalState {
+function createInitialGlobalState(urlState: GlobalState): GlobalState {
   const defaultState: GlobalState = {
     filters: [],
   };
