@@ -6,8 +6,8 @@
  */
 
 import { run, RunContext } from '@kbn/dev-cli-runner';
-import { AgentKeepAliveService } from './keep_alive';
-import { EmulatorRunContext } from './emulator_run_context';
+import { AgentKeepAliveService } from './services/keep_alive';
+import { EmulatorRunContext } from './services/emulator_run_context';
 import { HORIZONTAL_LINE } from '../common/constants';
 
 export const cli = () => {
@@ -37,6 +37,8 @@ ${HORIZONTAL_LINE}
       keepAliveService.start();
 
       await keepAliveService.whileRunning;
+
+      // TODO:PT Start Action responder
 
       cliContext.log.write(`
 ${HORIZONTAL_LINE}
