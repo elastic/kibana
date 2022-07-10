@@ -33,11 +33,15 @@ export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
 const isFindingsIndexExists = async (esClient: ElasticsearchClient): Promise<boolean> => {
   try {
-    const latestFindingsIndexExists = await esClient.indices.exists({
+    const queryResult = await esClient.search({
       index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      query: {
+        match_all: {},
+      },
+      size: 1,
     });
 
-    return latestFindingsIndexExists;
+    return !!queryResult.hits.hits.length;
   } catch (e) {
     return false;
   }
@@ -75,16 +79,26 @@ const getCspSetupStatus = async (
   agentPolicyService: AgentPolicyServiceInterface,
   agentService: AgentService
 ): Promise<CspSetupStatus> => {
-  const [findingsIndexExists, installedPackageInfo, latestPackageInfo, installedIntegrations] =
-    await Promise.all([
-      isFindingsIndexExists(esClient),
-      packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
-      packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
-      getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
-        per_page: 10000,
-      }),
-    ]);
-  if (!installedPackageInfo) throw new Error('package installation info could not be found');
+  console.log('start');
+  const installedPackageInfo = await packageService.asInternalUser.getInstallation(
+    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+  );
+
+  const [findingsIndexExists, latestPackageInfo, installedIntegrations] = await Promise.all([
+    isFindingsIndexExists(esClient),
+    packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+    getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
+      per_page: 10000,
+    }),
+  ]);
+
+  // if (!installedPackageInfo) throw new Error('package installation info could not be found');
+  console.log({
+    findingsIndexExists,
+    installedPackageInfo,
+    latestPackageInfo,
+    installedIntegrations,
+  });
 
   const agentPolicies = await getCspAgentPolicies(
     soClient,
@@ -101,7 +115,7 @@ const getCspSetupStatus = async (
     findingsIndexExists,
     installedIntegrationsTotal,
     healthyAgents,
-    getTimePassedSinceDate(installedPackageInfo.install_started_at)
+    getTimePassedSinceDate(installedPackageInfo?.install_started_at || 'test')
   );
 
   if (status === 'not-installed')
@@ -117,7 +131,7 @@ const getCspSetupStatus = async (
     latestPackageVersion,
     healthyAgents,
     installedIntegrations: installedIntegrationsTotal,
-    installedPackageVersion: installedPackageInfo.install_version,
+    installedPackageVersion: installedPackageInfo?.install_version || 'test',
   };
 };
 

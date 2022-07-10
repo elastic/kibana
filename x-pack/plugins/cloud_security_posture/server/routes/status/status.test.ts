@@ -102,19 +102,17 @@ describe('CspSetupStatus route', () => {
 
   it('validate the API route path', async () => {
     defineGetCspSetupStatusRoute(router, cspContext);
-
     const [config, _] = router.get.mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_security_posture/status');
   });
 
   it('Verify the API result when there are findings and no installed policies', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [{ Findings: 'foo' }],
       },
     } as unknown as ESSearchResponse);
-
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
@@ -126,15 +124,12 @@ describe('CspSetupStatus route', () => {
 
     // Act
     defineGetCspSetupStatusRoute(router, cspContext);
-
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+    await handler(mockContext, mockRequest, mockResponse);
 
-    await handler(context, req, res);
-    console.log(mockResponse.ok);
     // Assert
     const [call] = mockResponse.ok.mock.calls;
     const body = call[0]?.body;
@@ -150,16 +145,14 @@ describe('CspSetupStatus route', () => {
   });
 
   it('Verify the API result when there are findings, installed policies, no running agents', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [{ Findings: 'foo' }],
       },
     } as unknown as ESSearchResponse);
 
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
-
-    const mockPackageInfo = mockCspPackageInfo;
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -170,14 +163,11 @@ describe('CspSetupStatus route', () => {
 
     // Act
     defineGetCspSetupStatusRoute(router, cspContext);
-
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
-
-    await handler(context, req, res);
+    await handler(mockContext, mockRequest, mockResponse);
 
     // Assert
     const [call] = mockResponse.ok.mock.calls;
@@ -195,16 +185,14 @@ describe('CspSetupStatus route', () => {
   });
 
   it('Verify the API result when there are findings, installed policies, running agents', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [{ Findings: 'foo' }],
       },
     } as unknown as ESSearchResponse);
 
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
-
-    const mockPackageInfo = mockCspPackageInfo;
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -213,12 +201,8 @@ describe('CspSetupStatus route', () => {
       perPage: 100,
     });
 
-    const mockPackagePolicy = createPackagePolicyMock();
-
     mockAgentPolicyService.getByIds.mockResolvedValue([
-      {
-        package_policies: mockPackagePolicy,
-      },
+      { package_policies: createPackagePolicyMock() },
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
@@ -227,14 +211,11 @@ describe('CspSetupStatus route', () => {
 
     // Act
     defineGetCspSetupStatusRoute(router, cspContext);
-
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
-
-    await handler(context, req, res);
+    await handler(mockContext, mockRequest, mockResponse);
 
     // Assert
     const [call] = mockResponse.ok.mock.calls;
@@ -252,12 +233,11 @@ describe('CspSetupStatus route', () => {
   });
 
   it('Verify the API result when there are no findings and no installed policies', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
-
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
@@ -269,14 +249,11 @@ describe('CspSetupStatus route', () => {
 
     // Act
     defineGetCspSetupStatusRoute(router, cspContext);
-
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
-
-    await handler(context, req, res);
+    await handler(mockContext, mockRequest, mockResponse);
 
     // Assert
     const [call] = mockResponse.ok.mock.calls;
@@ -294,16 +271,14 @@ describe('CspSetupStatus route', () => {
   });
 
   it('Verify the API result when there are no findings, installed agent but no deployed agent', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
 
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
-
-    const mockPackageInfo = mockCspPackageInfo;
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -312,11 +287,8 @@ describe('CspSetupStatus route', () => {
       perPage: 100,
     });
 
-    const mockPackagePolicy = createPackagePolicyMock();
     mockAgentPolicyService.getByIds.mockResolvedValue([
-      {
-        package_policies: mockPackagePolicy,
-      },
+      { package_policies: createPackagePolicyMock() },
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
@@ -330,9 +302,7 @@ describe('CspSetupStatus route', () => {
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
-
-    await handler(context, req, res);
+    await handler(mockContext, mockRequest, mockResponse);
 
     // Assert
     const [call] = mockResponse.ok.mock.calls;
@@ -350,22 +320,19 @@ describe('CspSetupStatus route', () => {
   });
 
   it('Verify the API result when there are no findings, installed agent, deployed agent, before index timeout', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
-
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = mockCspPackageInfo;
-
     const currentTime = new Date();
-    mockPackageInfo.install_started_at = new Date(
+    mockCspPackageInfo.install_started_at = new Date(
       currentTime.setMinutes(currentTime.getMinutes() - INDEX_TIMEOUT_IN_MINUTES + 1)
     ).toUTCString();
 
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -374,11 +341,8 @@ describe('CspSetupStatus route', () => {
       perPage: 100,
     });
 
-    const mockPackagePolicy = createPackagePolicyMock();
     mockAgentPolicyService.getByIds.mockResolvedValue([
-      {
-        package_policies: mockPackagePolicy,
-      },
+      { package_policies: createPackagePolicyMock() },
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
@@ -412,22 +376,19 @@ describe('CspSetupStatus route', () => {
   });
 
   it('Verify the API result when there are no findings, installed agent, deployed agent, after index timeout', async () => {
-    (await mockContext.core).elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+    mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
-
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    const mockPackageInfo = mockCspPackageInfo;
-
     const currentTime = new Date();
-    mockPackageInfo.install_started_at = new Date(
+    mockCspPackageInfo.install_started_at = new Date(
       currentTime.setMinutes(currentTime.getMinutes() - INDEX_TIMEOUT_IN_MINUTES - 1)
     ).toUTCString();
 
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -436,12 +397,8 @@ describe('CspSetupStatus route', () => {
       perPage: 100,
     });
 
-    const mockPackagePolicy = createPackagePolicyMock();
-
     mockAgentPolicyService.getByIds.mockResolvedValue([
-      {
-        package_policies: mockPackagePolicy,
-      },
+      { package_policies: createPackagePolicyMock() },
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
@@ -455,9 +412,8 @@ describe('CspSetupStatus route', () => {
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
 
-    await handler(context, req, res);
+    await handler(mockContext, mockRequest, mockResponse);
 
     // Assert
     const [call] = mockResponse.ok.mock.calls;
