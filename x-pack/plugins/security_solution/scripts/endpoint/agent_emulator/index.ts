@@ -11,6 +11,9 @@ import { AgentKeepAliveService } from './services/keep_alive';
 import { EmulatorRunContext } from './services/emulator_run_context';
 import { HORIZONTAL_LINE } from '../common/constants';
 
+const DEFAULT_CHECKIN_INTERVAL = 60_000; // 1m
+const DEFAULT_ACTION_DELAY = 5_000; // 5s
+
 export const cli = () => {
   run(
     async (cliContext: RunContext) => {
@@ -30,8 +33,8 @@ ${HORIZONTAL_LINE}
       );
       await emulatorContext.start();
 
-      const actionDelay = Number(cliContext.flags.actionDelay) || 5_000;
-      const checkinInterval = Number(cliContext.flags.checkinInterval) || 60_000; // Default: 1 minute
+      const actionDelay = Number(cliContext.flags.actionDelay) || DEFAULT_ACTION_DELAY;
+      const checkinInterval = Number(cliContext.flags.checkinInterval) || DEFAULT_CHECKIN_INTERVAL;
 
       const esClient = emulatorContext.getEsClient();
       const kbnClient = emulatorContext.getKbnClient();
@@ -72,7 +75,8 @@ ${HORIZONTAL_LINE}
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
-          actionDelay: '',
+          actionDelay: DEFAULT_ACTION_DELAY,
+          checkinInterval: DEFAULT_CHECKIN_INTERVAL,
         },
         help: `
         --username          User name to be used for auth against elasticsearch and

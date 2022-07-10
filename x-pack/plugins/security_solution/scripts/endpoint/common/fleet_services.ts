@@ -25,20 +25,25 @@ export const checkInFleetAgent = async (
     log: ToolingLog;
   }> = {}
 ): Promise<estypes.UpdateResponse> => {
-  const update = pick(
-    fleetGenerator.generateEsHitWithStatus(
-      agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus
-    )._source,
-    [
-      'last_checkin_status',
-      'last_checkin',
-      'active',
-      'unenrollment_started_at',
-      'unenrolled_at',
-      'upgrade_started_at',
-      'upgraded_at',
-    ]
-  );
+  const fleetAgentStatus =
+    agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus;
+
+  const update = pick(fleetGenerator.generateEsHitWithStatus(fleetAgentStatus)._source, [
+    'last_checkin_status',
+    'last_checkin',
+    'active',
+    'unenrollment_started_at',
+    'unenrolled_at',
+    'upgrade_started_at',
+    'upgraded_at',
+  ]);
+
+  // WORKAROUND: Endpoint API will exclude metadata for any fleet agent whose status is `inactive`,
+  // which means once we update the Fleet agent with that status, the metadata api will no longer
+  // return the endpoint host info.'s. So - we avoid that here.
+  if (!update.active) {
+    update.active = true;
+  }
 
   // Ensure any `undefined` value is set to `null` for the update
   Object.entries(update).forEach(([key, value]) => {
@@ -48,7 +53,7 @@ export const checkInFleetAgent = async (
     }
   });
 
-  log.verbose(`update to fleet agent [${agentId}][${agentStatus}]: `, update);
+  log.verbose(`update to fleet agent [${agentId}][${agentStatus} / ${fleetAgentStatus}]: `, update);
 
   return esClient.update({
     index: AGENTS_INDEX,
