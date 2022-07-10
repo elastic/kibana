@@ -347,7 +347,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const resultsStepContent = useMemo(
     () =>
-      actionId ? (
+      singleQueryDetails?.action_id ? (
         <ResultTabs
           actionId={singleQueryDetails?.action_id}
           ecsMapping={serializedFormData.ecs_mapping}
@@ -357,7 +357,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         />
       ) : null,
     [
-      actionId,
       singleQueryDetails?.action_id,
       singleQueryDetails?.expiration,
       singleQueryDetails?.agents,

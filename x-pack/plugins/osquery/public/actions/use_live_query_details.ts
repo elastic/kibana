@@ -18,7 +18,7 @@ export interface LiveQueryDetailsArgs {
 }
 
 interface UseLiveQueryDetails {
-  actionId: string;
+  actionId?: string;
   isLive?: boolean;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
@@ -51,6 +51,7 @@ export const useLiveQueryDetails = ({
       pack_id?: string;
       pack_name?: string;
       pack_prebuilt?: boolean;
+      status?: string;
       queries: Array<{
         action_id: string;
         id: string;
@@ -60,6 +61,7 @@ export const useLiveQueryDetails = ({
         version?: string;
         platform?: string;
         saved_query_id?: string;
+        expiration?: string;
       }>;
     }
   >(

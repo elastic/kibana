@@ -20,9 +20,9 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
   const { executionContext, http } = useKibana().services;
   const queryExecutionContext = executionContext?.get();
 
-  return useMutation(
-    (payload: CreateLiveQueryRequestBodySchema) =>
-      http.post<any>('/api/osquery/live_queries', {
+  return useMutation<{ action_id: string }, Error, CreateLiveQueryRequestBodySchema>(
+    (payload) =>
+      http.post('/api/osquery/live_queries', {
         body: JSON.stringify({ ...payload, execution_context: queryExecutionContext }),
       }),
     {

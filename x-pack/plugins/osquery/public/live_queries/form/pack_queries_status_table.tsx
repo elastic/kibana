@@ -499,8 +499,19 @@ const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
 
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
-  actionId: string;
-  data: OsqueryManagerPackagePolicyInputStream[];
+  actionId?: string;
+  data?: Array<
+    Partial<{
+      action_id: string;
+      id: string;
+      query: string;
+      agents: string[];
+      ecs_mapping?: unknown;
+      version?: string;
+      platform?: string;
+      saved_query_id?: string;
+    }>
+  >;
   startDate?: string;
   expirationDate?: string;
 }

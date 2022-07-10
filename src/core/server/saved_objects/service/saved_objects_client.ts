@@ -143,7 +143,6 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  * @public
  */
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
-  policy_ids: string[];
   /**
    * The Elasticsearch `_score` of this result.
    */

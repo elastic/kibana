@@ -37,13 +37,13 @@ export class TelemetryReceiver {
     this.logger = logger.get('telemetry_events');
   }
 
-  public async start(core?: CoreStart, osqueryContextService?: OsqueryAppContextService) {
+  public async start(core: CoreStart, osqueryContextService?: OsqueryAppContextService) {
     this.agentClient = osqueryContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = osqueryContextService?.getAgentPolicyService();
     this.packagePolicyService = osqueryContextService?.getPackagePolicyService();
-    this.esClient = core?.elasticsearch.client.asInternalUser;
+    this.esClient = core.elasticsearch.client.asInternalUser;
     this.soClient =
-      core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+      core.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
   }
 
@@ -72,19 +72,19 @@ export class TelemetryReceiver {
   }
 
   public async fetchConfigs() {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
+    if (this.soClient) {
+      return this.packagePolicyService?.list(this.soClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+        perPage: 1000,
+        page: 1,
+      });
     }
 
-    return this.packagePolicyService?.list(this.soClient!, {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-      perPage: 1000,
-      page: 1,
-    });
+    throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
   }
 
   public async fetchFleetAgents() {
-    if (this.esClient === undefined || this.esClient === null) {
+    if (this.esClient === undefined || this.soClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
     }
 
