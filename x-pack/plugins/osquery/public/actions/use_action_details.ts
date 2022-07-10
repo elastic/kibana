@@ -8,14 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
-import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import type {
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
-} from '../../common/search_strategy';
-import { OsqueryQueries } from '../../common/search_strategy';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 

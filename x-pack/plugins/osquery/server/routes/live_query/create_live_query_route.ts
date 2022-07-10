@@ -16,7 +16,6 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { AgentSelection } from '../../lib/parse_agent_groups';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 
 import { incrementCount } from '../usage';
