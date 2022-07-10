@@ -215,7 +215,7 @@ const RemoveConfirmModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
             <EuiCheckbox
               id={'lnsLayerRemoveModalCheckbox'}
