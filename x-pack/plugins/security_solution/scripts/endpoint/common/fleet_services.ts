@@ -23,7 +23,7 @@ export const checkInFleetAgent = async (
     /** The agent status to be sent. If set to `random`, then one will be randomly generated */
     agentStatus: AgentStatus | 'random';
     log: ToolingLog;
-  }>
+  }> = {}
 ): Promise<estypes.UpdateResponse> => {
   const update = pick(
     fleetGenerator.generateEsHitWithStatus(

@@ -14,13 +14,7 @@ import { BaseRunningService } from './base_running_service';
 
 export class AgentKeepAliveService extends BaseRunningService {
   protected async run(): Promise<void> {
-    return this.runKeepAlive();
-  }
-
-  private async runKeepAlive() {
     const { logger: log, kbnClient, esClient } = this;
-
-    log.verbose(`${this.logPrefix}.runKeepAlive() started: ${new Date().toISOString()}`);
 
     let hasMore = true;
     let page = 0;
@@ -37,7 +31,7 @@ export class AgentKeepAliveService extends BaseRunningService {
         } else {
           if (endpoints.page === 0) {
             log.verbose(
-              `${this.logPrefix}.runKeepAlive() Number of endpoints to process: ${endpoints.total}`
+              `${this.logPrefix}.run() Number of endpoints to process: ${endpoints.total}`
             );
           }
 
@@ -54,14 +48,10 @@ export class AgentKeepAliveService extends BaseRunningService {
       } while (hasMore);
     } catch (err) {
       log.error(
-        `${this.logPrefix}.runKeepAlive() Error: ${err.message}. Use the '--verbose' option to see more.`
+        `${this.logPrefix}.run() Error: ${err.message}. Use the '--verbose' option to see more.`
       );
 
       log.verbose(err);
     }
-
-    log.verbose(`${this.logPrefix}.runKeepAlive() ended: ${new Date().toISOString()}`);
-
-    this.setNextRun();
   }
 }
