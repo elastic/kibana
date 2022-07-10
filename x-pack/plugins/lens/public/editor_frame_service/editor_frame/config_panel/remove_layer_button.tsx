@@ -227,7 +227,7 @@ const RemoveConfirmModal = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={closeModal}>
                   {i18n.translate('xpack.lens.layer.cancelDelete', {
