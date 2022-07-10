@@ -243,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('test');
         });
 
-        describe('when creating index pattern with existing title', () => {
+        describe('when creating index pattern with existing name', () => {
           it('returns error, by default', async () => {
             const title = `foo-${Date.now()}-${Math.random()}*`;
             const response1 = await supertest.post(config.path).send({
