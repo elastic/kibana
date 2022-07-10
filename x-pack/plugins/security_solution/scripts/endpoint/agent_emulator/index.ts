@@ -32,7 +32,8 @@ ${HORIZONTAL_LINE}
       const keepAliveService = new AgentKeepAliveService(
         emulatorContext.getEsClient(),
         emulatorContext.getKbnClient(),
-        emulatorContext.getLogger()
+        emulatorContext.getLogger(),
+        3 * 60_000 // 3 minutes (fleet considers an agent offline at 5 minutes)
       );
       keepAliveService.start();
 
