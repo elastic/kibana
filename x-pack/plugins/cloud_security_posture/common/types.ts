@@ -64,10 +64,10 @@ interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
   status: Extract<Status, 'not-installed'>;
 }
 
-// TODO: create better types which represent indexed but not installed better
 interface CspSetupInstalledStatus extends BaseCspSetupStatus {
   status: Exclude<Status, 'not-installed'>;
   // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
+  // status can be `indexed` but return with undefined package information in this case
   installedPackageVersion: string | undefined;
 }
 
