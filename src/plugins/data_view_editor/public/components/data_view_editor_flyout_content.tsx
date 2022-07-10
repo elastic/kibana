@@ -187,10 +187,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const indexPatternTitles = await dataViews.getTitles(editData ? true : false);
+      const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
+      const indexPatternNames = dataViewListItems.map((item) => item.name || item.title);
 
       setExistingIndexPatterns(
-        editData ? indexPatternTitles.filter((v) => v !== editData.title) : indexPatternTitles
+        editData ? indexPatternNames.filter((v) => v !== editData.name) : indexPatternNames
       );
       setIsLoadingIndexPatterns(false);
     };
@@ -220,9 +221,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
       let timestampOptions: TimestampOption[] = [];
       const isValidResult =
-        !existingIndexPatterns.includes(query) &&
-        matchedIndices.exactMatchedIndices.length > 0 &&
-        !isLoadingMatchedIndices;
+        matchedIndices.exactMatchedIndices.length > 0 && !isLoadingMatchedIndices;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -243,7 +242,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       return timestampOptions;
     },
     [
-      existingIndexPatterns,
       dataViews,
       requireTimestampField,
       rollupIndex,
@@ -373,7 +371,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <NameField editData={editData} />
+              <NameField editData={editData} existingDataViewNames={existingIndexPatterns} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
@@ -381,7 +379,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiFlexItem>
               <TitleField
                 isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                existingIndexPatterns={existingIndexPatterns}
                 refreshMatchedIndices={reloadMatchedIndices}
                 matchedIndices={matchedIndices.exactMatchedIndices}
                 rollupIndicesCapabilities={rollupIndicesCapabilities}
@@ -394,7 +391,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <TimestampField
                 options={timestampFieldOptions}
                 isLoadingOptions={isLoadingTimestampFields}
-                isExistingIndexPattern={existingIndexPatterns.includes(title)}
                 isLoadingMatchedIndices={isLoadingMatchedIndices}
                 hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
               />

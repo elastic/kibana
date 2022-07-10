@@ -50,6 +50,7 @@ export const schema = {
       defaultMessage: 'Name',
     }),
     defaultValue: '',
+    validations: [],
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {

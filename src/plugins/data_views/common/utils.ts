@@ -15,19 +15,19 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
  * Returns an object matching a given title
  *
  * @param client {SavedObjectsClientCommon}
- * @param title {string}
+ * @param name {string}
  * @returns {Promise<SavedObject|undefined>}
  */
-export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
-  if (title) {
+export async function findByName(client: SavedObjectsClientCommon, name: string) {
+  if (name) {
     const savedObjects = await client.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       perPage: 10,
-      search: `"${title}"`,
-      searchFields: ['title'],
-      fields: ['title'],
+      search: `"${name}"`,
+      searchFields: ['name'],
+      fields: ['name'],
     });
 
-    return savedObjects.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+    return savedObjects.find((obj) => obj.attributes.name === name);
   }
 }

@@ -33,7 +33,7 @@ import {
 } from '../types';
 import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
-import { findByTitle } from '../utils';
+import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -819,7 +819,7 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByTitle(this.savedObjectsClient, dataView.title);
+    const dupe = await findByName(this.savedObjectsClient, dataView.title);
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
