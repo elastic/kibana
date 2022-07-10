@@ -11,7 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline';
-import { TimelineUrl } from '../../timelines/store/timeline/model';
+import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
 import { useKibana } from '../lib/kibana';

@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { UsersDetailsNavTab } from './types';
+import type { UsersDetailsNavTab } from './types';
 import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../common/constants';
 

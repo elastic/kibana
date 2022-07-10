@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ActionsMenu } from './actions_menu';
 import React from 'react';
