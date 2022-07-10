@@ -122,6 +122,7 @@ function escapeMarkdown(value: unknown): string {
   if (value == null) return '';
 
   return `${value}`
+    .replace(/\|/g, '\\|')
     .replace(/\\/g, '\\\\')
     .replace(/`/g, '\\`')
     .replace(/\*/g, '\\*')
