@@ -119,6 +119,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           ],
         },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         discover_alert: {
           kibana: [
             {
