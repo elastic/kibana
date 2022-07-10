@@ -63,9 +63,7 @@ export const getCspPackagePolicies = (
   packageName: string,
   queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
-  const sortField = queryParams.sort_field?.startsWith(BENCHMARK_PACKAGE_POLICY_PREFIX)
-    ? queryParams.sort_field.substring(BENCHMARK_PACKAGE_POLICY_PREFIX.length)
-    : queryParams.sort_field;
+  const sortField = queryParams.sort_field?.replaceAll(BENCHMARK_PACKAGE_POLICY_PREFIX, '');
 
   return packagePolicyService.list(soClient, {
     kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
