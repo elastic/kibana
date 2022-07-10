@@ -6,6 +6,7 @@
  */
 
 import { run, RunContext } from '@kbn/dev-cli-runner';
+import { ActionResponderService } from './services/action_responder';
 import { AgentKeepAliveService } from './services/keep_alive';
 import { EmulatorRunContext } from './services/emulator_run_context';
 import { HORIZONTAL_LINE } from '../common/constants';
@@ -29,23 +30,37 @@ ${HORIZONTAL_LINE}
       );
       await emulatorContext.start();
 
-      const keepAliveService = new AgentKeepAliveService(
-        emulatorContext.getEsClient(),
-        emulatorContext.getKbnClient(),
-        emulatorContext.getLogger(),
-        3 * 60_000 // 3 minutes (fleet considers an agent offline at 5 minutes)
-      );
+      const actionDelay = Number(cliContext.flags.actionDelay) || 5_000;
+      const checkinInterval = Number(cliContext.flags.checkinInterval) || 60_000; // Default: 1 minute
+
+      const esClient = emulatorContext.getEsClient();
+      const kbnClient = emulatorContext.getKbnClient();
+      const log = emulatorContext.getLogger();
+
+      const keepAliveService = new AgentKeepAliveService(esClient, kbnClient, log, checkinInterval);
       keepAliveService.start();
 
-      await keepAliveService.whileRunning;
+      const actionResponderService = new ActionResponderService(
+        esClient,
+        kbnClient,
+        log,
+        5_000, // Check for actions every 5s
+        actionDelay
+      );
+      actionResponderService.start();
 
-      // TODO:PT Start Action responder
+      // TODO:PT check if any endpoints are loaded - if not, then load 5 now
+
+      // TODO:PT Show Main menu
+
+      await Promise.all([keepAliveService.whileRunning, actionResponderService.whileRunning]);
 
       cliContext.log.write(`
 ${HORIZONTAL_LINE}
 `);
     },
 
+    // Options
     {
       description: `Endpoint agent emulator.`,
       flags: {
@@ -57,6 +72,7 @@ ${HORIZONTAL_LINE}
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
+          actionDelay: '',
         },
         help: `
         --username          User name to be used for auth against elasticsearch and
@@ -69,6 +85,10 @@ ${HORIZONTAL_LINE}
                             new user will then be used to run this utility.
         --kibana            The url to Kibana (Default: http://localhost:5601)
         --elastic           The url to Elasticsearch (Default: http:localholst:9200)
+        --checkinInterval   The interval between how often the Agent is checked into fleet and a
+                            metadata document update is sent for the endpoint. Default is 1 minute
+        --actionDelay       The delay (in milliseconds) that should be applied before responding
+                            to an action. (Default: 5000 (5s))
       `,
       },
     }

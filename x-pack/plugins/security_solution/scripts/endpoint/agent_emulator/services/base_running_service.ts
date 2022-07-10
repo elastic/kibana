@@ -8,6 +8,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
+import moment from 'moment';
 
 export class BaseRunningService {
   private nextRunId: ReturnType<typeof setTimeout> | undefined;
@@ -26,6 +27,7 @@ export class BaseRunningService {
     protected readonly intervalMs: number = 30_000 // 30s
   ) {
     this.logPrefix = this.constructor.name ?? 'BaseRunningService';
+    this.logger.verbose(`${this.logPrefix} run interval: [ ${this.intervalMs} ]`);
   }
 
   start() {
@@ -40,7 +42,9 @@ export class BaseRunningService {
 
     this.logger.verbose(`${this.logPrefix}: started at ${new Date().toISOString()}`);
 
-    this.run();
+    this.run().finally(() => {
+      this.scheduleNextRun();
+    });
   }
 
   stop() {
@@ -57,11 +61,29 @@ export class BaseRunningService {
     }
   }
 
-  protected setNextRun() {
+  protected scheduleNextRun() {
     this.clearNextRun();
 
     if (this.isRunning) {
-      this.nextRunId = setTimeout(this.run.bind(this), this.intervalMs);
+      this.nextRunId = setTimeout(async () => {
+        const startedAt = new Date();
+
+        await this.run();
+
+        const endedAt = new Date();
+
+        this.logger.verbose(
+          `${this.logPrefix}.run(): completed in ${moment
+            .duration(moment(endedAt).diff(startedAt, 'seconds'))
+            .as('seconds')}s`
+        );
+        this.logger.indent(4, () => {
+          this.logger.verbose(`started at: ${startedAt.toISOString()}`);
+          this.logger.verbose(`ended at:   ${startedAt.toISOString()}`);
+        });
+
+        this.scheduleNextRun();
+      }, this.intervalMs);
     }
   }
 
