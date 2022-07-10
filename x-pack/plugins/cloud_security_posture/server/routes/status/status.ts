@@ -13,8 +13,8 @@ import type {
   PackagePolicyServiceInterface,
   PackageService,
 } from '@kbn/fleet-plugin/server';
-import type { GetAgentPoliciesResponseItem, Installation } from '@kbn/fleet-plugin/common';
-import moment from 'moment';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import moment, { MomentInput } from 'moment';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   INFO_ROUTE_PATH,
@@ -53,22 +53,18 @@ const getHealthyAgents = (enrichedAgentPolicies: GetAgentPoliciesResponseItem[])
     0
   );
 
-const getMinutesPassedSinceDate = (date: Date | string): number =>
-  moment().diff(moment(date), 'minutes');
+const getMinutesPassedSinceMoment = (momentInput: MomentInput): number =>
+  moment().diff(moment(momentInput), 'minutes');
 
 const getStatus = (
   findingsIndexExists: boolean,
   installedIntegrations: number,
   healthyAgents: number,
-  installationPackageInfo: Installation
+  minutesPassedSinceInstallation: number
 ): Status => {
   if (findingsIndexExists) return 'indexed';
   if (installedIntegrations === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
-
-  const minutesPassedSinceInstallation = getMinutesPassedSinceDate(
-    installationPackageInfo.install_started_at
-  );
   if (minutesPassedSinceInstallation <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (minutesPassedSinceInstallation > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
@@ -111,7 +107,7 @@ const getCspSetupStatus = async (
     findingsIndexExists,
     installedIntegrationsTotal,
     healthyAgents,
-    installationPackageInfo
+    getMinutesPassedSinceMoment(installationPackageInfo?.install_started_at || 0)
   );
 
   if (status === 'not-installed')
