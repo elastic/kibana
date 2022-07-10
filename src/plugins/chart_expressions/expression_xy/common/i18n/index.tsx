@@ -125,8 +125,8 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,
     }),
-  getPreviewMode: () =>
-    i18n.translate('expressionXY.dataLayer.previewMode.help', {
+  getSimpleView: () =>
+    i18n.translate('expressionXY.dataLayer.simpleView.help', {
       defaultMessage: 'Show / hide details',
     }),
   getXAccessorHelp: () =>
@@ -233,8 +233,8 @@ export const strings = {
     i18n.translate('expressionXY.annotationLayer.help', {
       defaultMessage: `Configure an annotation layer in the xy chart`,
     }),
-  getAnnotationLayerPreviewModeHelp: () =>
-    i18n.translate('expressionXY.annotationLayer.previewMode.help', {
+  getAnnotationLayerSimpleViewHelp: () =>
+    i18n.translate('expressionXY.annotationLayer.simpleView.help', {
       defaultMessage: 'Show / hide details',
     }),
   getAnnotationLayerAnnotationsHelp: () =>

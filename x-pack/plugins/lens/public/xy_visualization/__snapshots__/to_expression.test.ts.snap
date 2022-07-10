@@ -61,11 +61,11 @@ Object {
                       "type": "expression",
                     },
                   ],
-                  "previewMode": Array [
-                    false,
-                  ],
                   "seriesType": Array [
                     "area",
+                  ],
+                  "simpleView": Array [
+                    false,
                   ],
                   "splitAccessors": Array [
                     "d",

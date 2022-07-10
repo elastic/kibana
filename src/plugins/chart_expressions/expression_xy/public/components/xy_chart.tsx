@@ -360,7 +360,7 @@ export function XYChart({
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].previewMode : false;
+  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].simpleView : false;
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
@@ -740,7 +740,7 @@ export function XYChart({
         }
         title={xTitle}
         gridLine={gridLineStyle}
-        hide={xAxisConfig?.hide || dataLayers[0]?.previewMode || !dataLayers[0]?.xAccessor}
+        hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
         tickFormat={(d) => {
           let value = safeXAccessorLabelRenderer(d) || '';
           if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
@@ -773,7 +773,7 @@ export function XYChart({
             gridLine={{
               visible: axis.showGridLines,
             }}
-            hide={axis.hide || dataLayers[0]?.previewMode}
+            hide={axis.hide || dataLayers[0]?.simpleView}
             tickFormat={(d) => {
               let value = axis.formatter?.convert(d) || '';
               if (axis.truncate && value.length > axis.truncate) {
@@ -848,7 +848,7 @@ export function XYChart({
           paddingMap={linesPaddings}
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
-          previewMode={annotationsLayers?.[0].previewMode}
+          simpleView={annotationsLayers?.[0].simpleView}
           outsideDimension={
             rangeAnnotations.length && shouldHideDetails
               ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION

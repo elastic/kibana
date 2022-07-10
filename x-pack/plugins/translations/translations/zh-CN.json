@@ -3644,7 +3644,7 @@
     "expressionTagcloud.renderer.tagcloud.helpDescription": "呈现标签云图",
     "expressionXY.annotationLayer.annotations.help": "标注",
     "expressionXY.annotationLayer.help": "配置 xy 图表中的标注图层",
-    "expressionXY.annotationLayer.previewMode.help": "显示/隐藏详情",
+    "expressionXY.annotationLayer.simpleView.help": "显示/隐藏详情",
     "expressionXY.axisExtentConfig.extentMode.help": "范围模式",
     "expressionXY.axisExtentConfig.help": "配置 xy 图表的轴范围",
     "expressionXY.axisExtentConfig.lowerBound.help": "下边界",
