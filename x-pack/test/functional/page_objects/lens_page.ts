@@ -1218,8 +1218,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lnsLayerRemove');
         if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('confirmModalConfirmButton');
-          await testSubjects.click('confirmModalConfirmButton');
+          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+          await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
     },

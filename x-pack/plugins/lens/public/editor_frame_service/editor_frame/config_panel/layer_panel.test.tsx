@@ -166,7 +166,7 @@ describe('LayerPanel', () => {
       });
       instance.update();
       act(() => {
-        instance.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
       });
       expect(cb).toHaveBeenCalled();
     });

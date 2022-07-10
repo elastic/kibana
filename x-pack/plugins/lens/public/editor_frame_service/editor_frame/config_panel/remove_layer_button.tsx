@@ -60,14 +60,14 @@ const getButtonCopy = (
           defaultMessage: 'reference lines',
         });
 
-  let modalTitle = i18n.translate('xpack.lens.modalTitle.title', {
+  let modalTitle = i18n.translate('xpack.lens.modalTitle.title.delete', {
     defaultMessage: 'Delete {layerType} layer?',
     values: { layerType: layerTypeCopy },
   });
   let modalDesc = modalDescVis;
 
   if (!canBeRemoved || isOnlyLayer) {
-    modalTitle = i18n.translate('xpack.lens.modalTitle.title', {
+    modalTitle = i18n.translate('xpack.lens.modalTitle.title.clear', {
       defaultMessage: 'Clear {layerType} layer?',
       values: { layerType: layerTypeCopy },
     });
@@ -237,6 +237,7 @@ const RemoveConfirmModal = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="lnsLayerRemoveConfirmButton"
                   onClick={() => {
                     closeModal();
                     removeLayer();
