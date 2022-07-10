@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -20,7 +20,7 @@ import type {
 import { ACTIONS_SEARCH_PAGE_SIZE, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
 import { getDateFilters } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
-import { GetActionDetailsListParam } from '../services/actions/action_list';
+import type { GetActionDetailsListParam } from '../services/actions/action_list';
 
 const queryOptions = Object.freeze({
   ignore: [404],

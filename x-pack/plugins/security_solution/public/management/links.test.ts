@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SecurityPageName } from '../app/types';
 import { licenseService } from '../common/hooks/use_license';
-import { StartPlugins } from '../types';
+import type { StartPlugins } from '../types';
 import { links, getManagementFilteredLinks } from './links';
 
 jest.mock('../common/hooks/use_license', () => {

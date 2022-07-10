@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../../framework';
+import type { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
 import {
@@ -18,7 +18,7 @@ import {
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
-import {
+import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObject,
   SavedTimeline,
@@ -30,7 +30,7 @@ import {
 } from '../../__mocks__/resolve_timeline';
 import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
