@@ -88,12 +88,12 @@ export const usePackQueryLastResults = ({
         aggsSearchSource.setField('aggs', {
           unique_agents: { cardinality: { field: 'agent.id' } },
         });
-        const aggsResponse = await aggsSearchSource.fetch$().toPromise();
+        const aggsResponse = await lastValueFrom(aggsSearchSource.fetch$());
 
         return {
           '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
           // @ts-expect-error update types
-          uniqueAgentsCount: aggsResponse.rawResponse.aggregations?.unique_agents?.value,
+          uniqueAgentsCount: aggsResponse?.rawResponse.aggregations?.unique_agents?.value,
           docCount: aggsResponse?.rawResponse?.hits?.total,
         };
       }

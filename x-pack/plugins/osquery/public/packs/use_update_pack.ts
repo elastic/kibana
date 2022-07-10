@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseMutationOptions } from 'react-query';
 import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
@@ -13,12 +14,15 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import type { IQueryPayload } from './types';
+import type { PackSavedObject } from './types';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options?: any;
+  options?: UseMutationOptions<
+    PackSavedObject,
+    { body: { message: string; error: string } },
+    Partial<PackSavedObject['attributes']> & { id: string }
+  >;
 }
 
 export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => {
@@ -30,15 +34,17 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(
-    // @ts-expect-error update types
+  return useMutation<
+    PackSavedObject,
+    { body: { message: string; error: string } },
+    Partial<PackSavedObject['attributes']> & { id: string }
+  >(
     ({ id, ...payload }) =>
-      http.put<IQueryPayload>(`/internal/osquery/packs/${id}`, {
+      http.put(`/api/osquery/packs/${id}`, {
         body: JSON.stringify(payload),
       }),
     {
       onError: (error) => {
-        // @ts-expect-error update types
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
       onSuccess: (payload) => {

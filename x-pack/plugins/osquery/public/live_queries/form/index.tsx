@@ -34,7 +34,8 @@ import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown
 import { liveQueryFormSchema } from './schema';
 import { usePacks } from '../../packs/use_packs';
 import { PackQueriesStatusTable } from './pack_queries_status_table';
-import { useLiveQueryAction } from '../use_create_live_query_action';
+import { useCreateLiveQuery } from '../use_create_live_query_action';
+import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -77,11 +78,17 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const [queryType, setQueryType] = useState<string>(() =>
     defaultValue?.packId ? 'pack' : 'query'
   );
+  const [isLive, setIsLive] = useState(false);
 
   const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
-  const { data, isLoading, mutateAsync, isError, isSuccess } = useLiveQueryAction({ onSuccess });
+  const { data, isLoading, mutateAsync, isError, isSuccess } = useCreateLiveQuery({ onSuccess });
+
+  const { data: liveQueryDetails } = useLiveQueryDetails({
+    actionId: data?.action_id,
+    isLive,
+  });
 
   const { form } = useForm({
     id: FORM_ID,
@@ -117,8 +124,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
 
-  const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
-  const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
+  const actionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails?.action_id]);
+  const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
   const [
     { agentSelection, ecs_mapping: ecsMapping, query, savedQueryId, packId },
     formDataSerializer,
@@ -336,18 +343,27 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ]
   );
 
+  const singleQueryDetails = useMemo(() => liveQueryDetails?.queries[0], [liveQueryDetails]);
+
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
         <ResultTabs
-          actionId={actionId}
+          actionId={singleQueryDetails?.action_id}
           ecsMapping={serializedFormData.ecs_mapping}
-          endDate={data?.actions[0].expiration}
-          agentIds={agentIds}
+          endDate={singleQueryDetails?.expiration}
+          agentIds={singleQueryDetails?.agents}
           addToTimeline={addToTimeline}
         />
       ) : null,
-    [actionId, serializedFormData.ecs_mapping, data?.actions, agentIds, addToTimeline]
+    [
+      actionId,
+      singleQueryDetails?.action_id,
+      singleQueryDetails?.expiration,
+      singleQueryDetails?.agents,
+      serializedFormData.ecs_mapping,
+      addToTimeline,
+    ]
   );
 
   useEffect(() => {
@@ -421,16 +437,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [defaultValue, packOptions, updateFieldValues]);
 
+  useLayoutEffect(() => {
+    setIsLive(() => !(liveQueryDetails?.status === 'completed'));
+  }, [liveQueryDetails?.status]);
+
   return (
     <>
       <Form form={form}>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <UseField
-              path="agentSelection"
-              component={!hideAgentsField ? AgentsTableField : GhostFormField}
-            />
-          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="l">
               <EuiFlexItem>
@@ -449,6 +463,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          <EuiFlexItem>
+            <UseField
+              path="agentSelection"
+              component={!hideAgentsField ? AgentsTableField : GhostFormField}
+            />
+          </EuiFlexItem>
           {queryType === 'pack' ? (
             <>
               <EuiFlexItem>
@@ -465,13 +485,17 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               <EuiSpacer />
               {submitButtonContent}
               <EuiSpacer />
-              <EuiFlexItem>
-                <PackQueriesStatusTable
-                  actionId={actionId}
-                  agentIds={agentIds}
-                  data={data?.actions[0].queries ?? selectedPackData?.attributes?.queries ?? []}
-                />
-              </EuiFlexItem>
+              {(liveQueryDetails?.queries.length || selectedPackData?.attributes?.queries) && (
+                <>
+                  <EuiFlexItem>
+                    <PackQueriesStatusTable
+                      actionId={actionId}
+                      agentIds={agentIds}
+                      data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
+                    />
+                  </EuiFlexItem>
+                </>
+              )}
             </>
           ) : (
             <>

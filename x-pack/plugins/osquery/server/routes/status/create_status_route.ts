@@ -8,6 +8,7 @@
 import { produce } from 'immer';
 import { satisfies } from 'semver';
 import { filter, reduce, mapKeys, each, set, unset, uniq, map, has } from 'lodash';
+import type { PackagePolicyInputStream } from '@kbn/fleet-plugin/common';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -72,7 +73,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     enabled: !packName.startsWith(OSQUERY_INTEGRATION_NAME),
                     name: packName,
                     description: policy.description,
-                    queries: reduce(
+                    queries: reduce<PackagePolicyInputStream, Record<string, unknown>>(
                       policy.inputs[0].streams,
                       (queries, stream) => {
                         if (stream.compiled_stream?.id) {
@@ -82,11 +83,10 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
                         return queries;
                       },
-                      {} as Record<string, unknown>
+                      {}
                     ),
                   };
                 } else {
-                  // @ts-expect-error update types
                   acc.packs[packName].policy_ids.push(policy.policy_id);
                 }
               }
@@ -94,7 +94,16 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               return acc;
             },
             {
-              packs: {} as Record<string, unknown>,
+              packs: {} as Record<
+                string,
+                {
+                  policy_ids: string[];
+                  enabled: boolean;
+                  name: string;
+                  description?: string;
+                  queries: Record<string, unknown>;
+                }
+              >,
               agentPolicyToPackage: {} as Record<string, string>,
               packagePoliciesToDelete: [] as string[],
             }
@@ -115,13 +124,9 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               await internalSavedObjectsClient.create(
                 packSavedObjectType,
                 {
-                  // @ts-expect-error update types
                   name: packObject.name,
-                  // @ts-expect-error update types
                   description: packObject.description,
-                  // @ts-expect-error update types
                   queries: convertPackQueriesToSO(packObject.queries),
-                  // @ts-expect-error update types
                   enabled: packObject.enabled,
                   created_at: new Date().toISOString(),
                   created_by: 'system',
@@ -129,7 +134,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   updated_by: 'system',
                 },
                 {
-                  // @ts-expect-error update types
                   references: packObject.policy_ids.map((policyId: string) => ({
                     id: policyId,
                     name: agentPolicies[policyId].name,
@@ -152,7 +156,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           await Promise.all(
             map(migrationObject.agentPolicyToPackage, async (value, key) => {
               const agentPacks = filter(migrationObject.packs, (pack) =>
-                // @ts-expect-error update types
                 pack.policy_ids.includes(key)
               );
               await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, [value]);
@@ -179,9 +182,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     });
 
                     each(agentPacks, (agentPack) => {
-                      // @ts-expect-error update types
                       set(draft, `inputs[0].config.osquery.value.packs.${agentPack.name}`, {
-                        // @ts-expect-error update types
                         queries: agentPack.queries,
                       });
                     });

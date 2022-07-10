@@ -20,12 +20,6 @@ export interface Inspect {
   dsl: string[];
 }
 
-export interface PageInfoPaginated {
-  activePage: number;
-  fakeTotalCount: number;
-  showMorePagesIndicator: boolean;
-}
-
 export interface CursorType {
   value?: Maybe<string>;
   tiebreaker?: Maybe<string>;

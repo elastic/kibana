@@ -28,4 +28,4 @@ export type PackSavedObject = SavedObject<{
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
-}>;
+}> & { policy_ids: string[] };

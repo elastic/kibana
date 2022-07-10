@@ -28,7 +28,6 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
     options: ResultsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<ResultsStrategyResponse> => {
-    const { activePage } = options.pagination;
     const inspect = {
       dsl: [inspectStringifyObject(buildResultsQuery(options))],
     };
@@ -37,13 +36,6 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
-      // @ts-expect-error doesn't handle case when total TotalHits
-      totalCount: response.rawResponse.hits.total,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
     };
   },
 };

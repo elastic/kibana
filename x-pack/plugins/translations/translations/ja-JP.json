@@ -22611,7 +22611,6 @@
     "xpack.osquery.liveQuery.permissionDeniedPromptBody": "クエリ結果を表示するには、ユーザーロールを更新して、{logs}インデックスに対する{read}権限を付与するように、管理者に依頼してください。",
     "xpack.osquery.liveQuery.permissionDeniedPromptTitle": "パーミッションが拒否されました",
     "xpack.osquery.liveQuery.queryForm.largeQueryError": "クエリが大きすぎます（最大{maxLength}文字）",
-    "xpack.osquery.liveQueryActionResults.summary.agentsQueriedLabelText": "{count, plural, other  {#個のエージェント}}をクエリしました",
     "xpack.osquery.liveQueryActionResults.summary.expiredLabelText": "期限切れ",
     "xpack.osquery.liveQueryActionResults.summary.failedLabelText": "失敗",
     "xpack.osquery.liveQueryActionResults.summary.pendingLabelText": "未応答",

@@ -29,8 +29,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      http.post<any>('/internal/osquery/saved_query', {
+      http.post('/api/osquery/saved_query', {
         body: JSON.stringify(payload),
       }),
     {
@@ -40,7 +39,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
           toastMessage: error.body.message,
         });
       },
-      onSuccess: (payload) => {
+      onSuccess: (payload: { attributes: { id: string } }) => {
         queryClient.invalidateQueries(SAVED_QUERIES_ID);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });

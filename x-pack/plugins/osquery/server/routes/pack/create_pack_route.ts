@@ -21,11 +21,12 @@ import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
+import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
-      path: '/internal/osquery/packs',
+      path: '/api/osquery/packs',
       validate: {
         body: schema.object(
           {
@@ -104,7 +105,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }))
         : [];
 
-      const packSO = await savedObjectsClient.create(
+      const packSO = await savedObjectsClient.create<PackSavedObjectAttributes>(
         packSavedObjectType,
         {
           name,
@@ -149,7 +150,6 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      // @ts-expect-error update types
       packSO.attributes.queries = queries;
 
       return response.ok({ body: packSO });

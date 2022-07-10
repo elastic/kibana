@@ -6,10 +6,8 @@
  */
 
 import { useQuery } from 'react-query';
-
-import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
-import type { OsqueryManagerPackagePolicy } from '../../common/types';
+import type { PackSavedObject } from './types';
 
 interface UsePack {
   packId: string;
@@ -19,12 +17,12 @@ interface UsePack {
 export const usePack = ({ packId, skip = false }: UsePack) => {
   const { http } = useKibana().services;
 
-  return useQuery<
-    Omit<GetOnePackagePolicyResponse, 'item'> & { item: OsqueryManagerPackagePolicy },
-    unknown,
-    OsqueryManagerPackagePolicy
-  >(['pack', { packId }], () => http.get(`/internal/osquery/packs/${packId}`), {
-    keepPreviousData: true,
-    enabled: !skip || !packId,
-  });
+  return useQuery<PackSavedObject>(
+    ['pack', { packId }],
+    () => http.get(`/api/osquery/packs/${packId}`),
+    {
+      keepPreviousData: true,
+      enabled: !skip || !packId,
+    }
+  );
 };

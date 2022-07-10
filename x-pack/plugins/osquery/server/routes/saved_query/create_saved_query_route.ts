@@ -18,7 +18,7 @@ import { convertECSMappingToArray } from '../utils';
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/api/osquery/saved_query',
       validate: {
         body: buildRouteValidation<
           typeof createSavedQueryRequestSchema,

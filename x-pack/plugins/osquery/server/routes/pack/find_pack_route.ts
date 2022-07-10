@@ -11,15 +11,13 @@ import { schema } from '@kbn/config-schema';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import { packSavedObjectType } from '../../../common/types';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const findPackRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/osquery/packs',
+      path: '/api/osquery/packs',
       validate: {
         query: schema.object(
           {
@@ -52,7 +50,6 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           'id'
         );
 
-        // @ts-expect-error update types
         pack.policy_ids = policyIds;
 
         return pack;

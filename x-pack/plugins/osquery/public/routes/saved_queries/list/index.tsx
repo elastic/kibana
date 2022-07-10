@@ -28,9 +28,10 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
-type SavedQuerySO = SavedObject<{
+export type SavedQuerySO = SavedObject<{
   name: string;
   id: string;
+  description?: string;
   query: string;
   ecs_mapping: ECSMapping;
   updated_at: string;

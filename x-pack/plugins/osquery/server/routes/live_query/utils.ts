@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import { mapKeys, snakeCase } from 'lodash';
+import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { mergeMap, retry, catchError } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
 } from '../../../common/search_strategy';
-import { OsqueryQueries } from '../../../common/search_strategy';
+import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 
-export const getActionResponses = (search, actionId, queriedAgentIds) =>
+export const getActionResponses = (
+  search: IScopedSearchClient,
+  actionId: string,
+  agentsCount: number
+): Observable<{
+  action_id: string;
+  docs: number;
+  failed: number;
+  pending: number;
+  responded: number;
+  successful: number;
+}> =>
   search
     .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
       {
@@ -24,7 +36,7 @@ export const getActionResponses = (search, actionId, queriedAgentIds) =>
         filterQuery: '',
         pagination: generateTablePaginationOptions(0, 1000),
         sort: {
-          direction: 'desc',
+          direction: Direction.desc,
           field: '@timestamp',
         },
       },
@@ -35,35 +47,22 @@ export const getActionResponses = (search, actionId, queriedAgentIds) =>
     .pipe(
       mergeMap((val) => {
         const responded =
-          // @ts-expect-error update types
           val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
         const docs =
-          // @ts-expect-error update types
           val.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
         const aggsBuckets =
-          // @ts-expect-error update types
           val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
         const successful = aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
-        // @ts-expect-error update types
         const failed = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
-        const pending = queriedAgentIds.length - responded;
+        const pending = agentsCount - responded;
 
-        const returnData = of(
-          mapKeys(
-            {
-              actionId,
-              docs,
-              failed,
-              pending,
-              responded,
-              successful,
-            },
-            (_, key) => snakeCase(key)
-          )
-        );
-
-        return returnData;
-      }),
-      retry({ count: 5, delay: 4000 })
-    )
-    .pipe(catchError((e) => e));
+        return of({
+          action_id: actionId,
+          docs,
+          failed,
+          pending,
+          responded,
+          successful,
+        });
+      })
+    );

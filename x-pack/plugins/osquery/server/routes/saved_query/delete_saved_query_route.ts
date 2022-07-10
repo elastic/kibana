@@ -15,7 +15,7 @@ import { isSavedQueryPrebuilt } from './utils';
 export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.delete(
     {
-      path: '/internal/osquery/saved_query/{id}',
+      path: '/api/osquery/saved_query/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),

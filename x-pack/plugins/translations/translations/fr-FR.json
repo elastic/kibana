@@ -22626,7 +22626,6 @@
     "xpack.osquery.liveQuery.permissionDeniedPromptBody": "Pour pouvoir consulter les résultats de requête, demandez à votre administrateur de mettre à jour votre rôle utilisateur de sorte à disposer des privilèges de {read} pour les index {logs}.",
     "xpack.osquery.liveQuery.permissionDeniedPromptTitle": "Autorisation refusée",
     "xpack.osquery.liveQuery.queryForm.largeQueryError": "La recherche est trop volumineuse ({maxLength} caractères maxi)",
-    "xpack.osquery.liveQueryActionResults.summary.agentsQueriedLabelText": "Recherche effectuée pour {count, plural, one {# agent} other {# agents}}",
     "xpack.osquery.liveQueryActionResults.summary.expiredLabelText": "Expiré",
     "xpack.osquery.liveQueryActionResults.summary.failedLabelText": "Échoué",
     "xpack.osquery.liveQueryActionResults.summary.pendingLabelText": "Pas encore répondu",

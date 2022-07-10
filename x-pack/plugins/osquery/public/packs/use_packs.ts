@@ -15,7 +15,7 @@ import type { PackSavedObject } from './types';
 export const usePacks = ({
   isLive = false,
   pageIndex = 0,
-  pageSize = 1000,
+  pageSize = 100,
   sortField = 'updated_at',
   sortDirection = 'desc',
 }) => {
@@ -28,7 +28,7 @@ export const usePacks = ({
         Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
           saved_objects: PackSavedObject[];
         }
-      >('/internal/osquery/packs', {
+      >('/api/osquery/packs', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {

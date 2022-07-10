@@ -8,7 +8,6 @@
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
-  ActionResultsStrategyResponse,
   ActionResultsRequestOptions,
   OsqueryQueries,
 } from '../../../../../../common/search_strategy/osquery';
@@ -25,11 +24,7 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
 
     return buildActionResultsQuery(options);
   },
-  parse: async (
-    options: ActionResultsRequestOptions,
-    response: IEsSearchResponse<object>
-  ): Promise<ActionResultsStrategyResponse> => {
-    const { activePage } = options.pagination;
+  parse: async (options: ActionResultsRequestOptions, response: IEsSearchResponse<object>) => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],
     };
@@ -38,13 +33,6 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
-      // @ts-expect-error doesn't handle case when total TotalHits
-      totalCount: response.rawResponse.hits.total,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
     };
   },
 };

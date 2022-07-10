@@ -27,7 +27,7 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/internal/osquery/saved_query/${savedQueryId}`), {
+  return useMutation(() => http.delete(`/api/osquery/saved_query/${savedQueryId}`), {
     onError: (error: { body: { error: string; message: string } }) => {
       setErrorToast(error, {
         title: error.body.error,

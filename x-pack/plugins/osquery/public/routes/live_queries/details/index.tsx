@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { useActionDetails } from '../../../actions/use_action_details';
+import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { ResultTabs } from '../../saved_queries/edit/tabs';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
@@ -29,11 +29,9 @@ const LiveQueryDetailsPageComponent = () => {
   useBreadcrumbs('live_query_details', { liveQueryId: actionId });
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [isLive, setIsLive] = useState(false);
-  const { data } = useActionDetails({ actionId, isLive });
-
-  console.error('data', data);
-
-  const isPackResults = useMemo(() => !!data?.queries.length, [data]);
+  const { data } = useLiveQueryDetails({ actionId, isLive });
+  const isPackResults = useMemo(() => data?.queries.length > 1, [data]);
+  const singleQueryDetails = useMemo(() => data?.queries[0], [data]);
 
   const LeftColumn = useMemo(
     () => (
@@ -78,15 +76,15 @@ const LiveQueryDetailsPageComponent = () => {
       ) : (
         <>
           <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {data?.queries?.[0]?.query}
+            {singleQueryDetails?.query}
           </EuiCodeBlock>
           <EuiSpacer />
 
           <ResultTabs
-            actionId={actionId}
-            agentIds={data?.agents}
-            startDate={data?.['@timestamp']}
-            endDate={data?.expiration}
+            actionId={singleQueryDetails?.action_id}
+            agentIds={singleQueryDetails?.agents}
+            startDate={singleQueryDetails?.['@timestamp']}
+            endDate={singleQueryDetails?.expiration}
           />
         </>
       )}

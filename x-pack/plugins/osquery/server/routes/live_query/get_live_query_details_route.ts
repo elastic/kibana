@@ -10,18 +10,28 @@ import type { IRouter } from '@kbn/core/server';
 import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getActionResponses } from './utils';
 
+import type {
+  ActionDetailsRequestOptions,
+  ActionDetailsStrategyResponse,
+} from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
 
-export const getLiveQueryDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.get(
     {
       path: '/api/osquery/live_queries/{id}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object(
+          {
+            id: schema.string(),
+          },
+          { unknowns: 'allow' }
+        ),
+        query: schema.object({}, { unknowns: 'allow' }),
       },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
@@ -30,23 +40,28 @@ export const getLiveQueryDetailsRoute = (router: IRouter, osqueryContext: Osquer
 
       try {
         const search = await context.search;
-        const actionDetailsResponse = await lastValueFrom(
-          search.search(
+        const { actionDetails } = await lastValueFrom(
+          search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
             {
               actionId: request.params.id,
+              filterQuery: request.query,
               factoryQueryType: OsqueryQueries.actionDetails,
             },
             { abortSignal, strategy: 'osquerySearchStrategy' }
           )
         );
 
-        const queries = actionDetailsResponse?.actionDetails?._source.queries;
-        const expirationDate = actionDetailsResponse?.actionDetails?.fields.expiration[0];
+        const queries = actionDetails?._source?.queries;
+        const expirationDate = actionDetails?.fields?.expiration[0];
 
         const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
         const responseData = await lastValueFrom(
-          zip(...map(queries, (query) => getActionResponses(search, query.action_id, query.agents)))
+          zip(
+            ...map(queries, (query) =>
+              getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+            )
+          )
         );
 
         const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
@@ -55,7 +70,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter, osqueryContext: Osquer
         return response.ok({
           body: {
             ...pick(
-              actionDetailsResponse?.actionDetails._source,
+              actionDetails._source,
               'action_id',
               'expiration',
               '@timestamp',
@@ -66,8 +81,20 @@ export const getLiveQueryDetailsRoute = (router: IRouter, osqueryContext: Osquer
               'pack_name',
               'prebuilt_pack'
             ),
-            queries: reduce(
-              actionDetailsResponse?.actionDetails._source.queries,
+            queries: reduce<
+              {
+                action_id: string;
+                id: string;
+                query: string;
+                agents: string[];
+                ecs_mapping?: unknown;
+                version?: string;
+                platform?: string;
+                saved_query_id?: string;
+              },
+              Array<Record<string, unknown>>
+            >(
+              actionDetails._source?.queries,
               (acc, query) => {
                 acc.push({
                   ...query,
@@ -76,7 +103,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter, osqueryContext: Osquer
 
                 return acc;
               },
-              []
+              [] as Array<Record<string, unknown>>
             ),
             status: isCompleted ? 'completed' : 'running',
           },

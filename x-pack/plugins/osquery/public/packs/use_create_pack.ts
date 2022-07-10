@@ -13,7 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import type { IQueryPayload } from './types';
+import type { PackSavedObject } from './types';
 
 interface UseCreatePackProps {
   withRedirect?: boolean;
@@ -28,9 +28,9 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(
+  return useMutation<PackSavedObject>(
     (payload) =>
-      http.post<IQueryPayload>('/internal/osquery/packs', {
+      http.post('/api/osquery/packs', {
         body: JSON.stringify(payload),
       }),
     {

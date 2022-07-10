@@ -361,8 +361,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
-          allResultsData?.totalCount !== aggregations?.totalRowCount ||
-          (allResultsData?.totalCount && !allResultsData?.edges.length)
+          allResultsData?.total !== aggregations?.totalRowCount ||
+          (allResultsData?.total && !allResultsData?.edges.length)
         );
       }),
     [
@@ -370,7 +370,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations.totalResponded,
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
-      allResultsData?.totalCount,
+      allResultsData?.total,
       expired,
     ]
   );
@@ -421,7 +421,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}
-            rowCount={allResultsData?.totalCount ?? 0}
+            rowCount={allResultsData?.total ?? 0}
             renderCellValue={renderCellValue}
             leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}

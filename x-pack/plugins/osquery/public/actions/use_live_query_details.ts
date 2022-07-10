@@ -12,35 +12,64 @@ import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export interface ActionDetailsArgs {
+export interface LiveQueryDetailsArgs {
   actionDetails: Record<string, string>;
   id: string;
 }
 
-interface UseActionDetails {
+interface UseLiveQueryDetails {
   actionId: string;
   isLive?: boolean;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
 
-export const useActionDetails = ({
+export const useLiveQueryDetails = ({
   actionId,
   filterQuery,
   isLive = false,
   skip = false,
-}: UseActionDetails) => {
+}: UseLiveQueryDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
-    ['actionDetails', { actionId, filterQuery }],
+  return useQuery<
+    {},
+    Error,
+    {
+      action_id: string;
+      expiration: string;
+      '@timestamp': string;
+      agent_selection: {
+        agents: string[];
+        allAgentsSelected: boolean;
+        platformsSelected: string[];
+        policiesSelected: string[];
+      };
+      agents: string[];
+      user_id?: string;
+      pack_id?: string;
+      pack_name?: string;
+      pack_prebuilt?: boolean;
+      queries: Array<{
+        action_id: string;
+        id: string;
+        query: string;
+        agents: string[];
+        ecs_mapping?: unknown;
+        version?: string;
+        platform?: string;
+        saved_query_id?: string;
+      }>;
+    }
+  >(
+    ['liveQueries', { actionId, filterQuery }],
     () => http.get(`/api/osquery/live_queries/${actionId}`),
     {
-      enabled: !skip,
+      enabled: !skip && !!actionId,
       refetchInterval: isLive ? 5000 : false,
       onSuccess: () => setErrorToast(),
-      onError: (error: Error) =>
+      onError: (error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_details.fetchError', {
             defaultMessage: 'Error while fetching action details',

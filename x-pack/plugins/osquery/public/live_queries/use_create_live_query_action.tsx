@@ -10,11 +10,11 @@ import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/rout
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-interface UseLiveQueryActionProps {
+interface UseLiveQueryProps {
   onSuccess?: () => void;
 }
 
-export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryActionProps) => {
+export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
   const setErrorToast = useErrorToast();
 
   const { executionContext, http } = useKibana().services;

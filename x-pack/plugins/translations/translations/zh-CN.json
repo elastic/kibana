@@ -22635,7 +22635,6 @@
     "xpack.osquery.liveQuery.permissionDeniedPromptBody": "要查看查询结果，请要求管理员将您的角色更新为具有 {logs} 索引的索引 {read} 权限。",
     "xpack.osquery.liveQuery.permissionDeniedPromptTitle": "权限被拒绝",
     "xpack.osquery.liveQuery.queryForm.largeQueryError": "查询过大（最多 {maxLength} 个字符）",
-    "xpack.osquery.liveQueryActionResults.summary.agentsQueriedLabelText": "已查询 {count, plural, other {# 个代理}}",
     "xpack.osquery.liveQueryActionResults.summary.expiredLabelText": "已过期",
     "xpack.osquery.liveQueryActionResults.summary.failedLabelText": "失败",
     "xpack.osquery.liveQueryActionResults.summary.pendingLabelText": "尚未响应",

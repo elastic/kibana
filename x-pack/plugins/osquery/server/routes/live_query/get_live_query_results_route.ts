@@ -12,7 +12,6 @@ import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
@@ -21,16 +20,19 @@ import { OsqueryQueries } from '../../../common/search_strategy';
 import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
 
-export const getLiveQueryResultsRoute = (
-  router: IRouter<DataRequestHandlerContext>,
-  osqueryContext: OsqueryAppContext
-) => {
+export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.get(
     {
-      path: '/api/osquery/live_queries/{id}/results',
+      path: '/api/osquery/live_queries/{id}/results/{actionId}',
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object(
+          {
+            id: schema.string(),
+            actionId: schema.string(),
+          },
+          { unknowns: 'allow' }
+        ),
       },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
@@ -39,32 +41,31 @@ export const getLiveQueryResultsRoute = (
 
       try {
         const search = await context.search;
-        const actionDetailsResponse = await lastValueFrom(
+        const { actionDetails } = await lastValueFrom(
           search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
             {
               actionId: request.params.id,
+              filterQuery: createFilter(request.params.query),
               factoryQueryType: OsqueryQueries.actionDetails,
             },
             { abortSignal, strategy: 'osquerySearchStrategy' }
           )
         );
 
-        const actionIds = actionDetailsResponse?.actionDetails?.fields['queries.action_id'];
-        const queriedAgentIds = actionDetailsResponse?.actionDetails?.fields.agents;
-        const expirationDate = actionDetailsResponse?.actionDetails?.fields.expiration[0];
-
-        const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
+        const queries = actionDetails?._source?.queries;
 
         await lastValueFrom(
           zip(
-            ...map(actionIds, (actionId) => getActionResponses(search, actionId, queriedAgentIds))
+            ...map(queries, (query) =>
+              getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+            )
           )
         );
 
         const res = await lastValueFrom(
-          search.search(
+          search.search<{}>(
             {
-              actionId: actionIds[0],
+              actionId: request.params.actionId,
               factoryQueryType: OsqueryQueries.results,
               filterQuery: createFilter(request.params.filterQuery),
               pagination: generateTablePaginationOptions(

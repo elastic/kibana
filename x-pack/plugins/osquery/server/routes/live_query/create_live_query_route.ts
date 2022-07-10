@@ -33,7 +33,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       validate: {
         body: buildRouteValidation<
           typeof createLiveQueryRequestBodySchema,
-          CreateLiveQuerynRequestBodySchema
+          CreateLiveQueryRequestBodySchema
         >(createLiveQueryRequestBodySchema),
       },
     },
@@ -157,7 +157,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         }));
 
-        let actionResponse = await esClient.bulk({
+        await esClient.bulk({
           refresh: 'wait_for',
           body: flatten(
             fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
@@ -169,7 +169,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         });
 
         if (actionsComponentTemplateExists) {
-          actionResponse = await esClient.bulk({
+          await esClient.bulk({
             refresh: 'wait_for',
             body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
           });
@@ -184,10 +184,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         return response.ok({
-          body: {
-            response: actionResponse,
-            actions: [osqueryAction],
-          },
+          body: osqueryAction,
         });
       } catch (error) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');

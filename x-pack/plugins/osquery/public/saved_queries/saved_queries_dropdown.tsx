@@ -8,13 +8,13 @@
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SimpleSavedObject } from '@kbn/core/public';
 import styled from 'styled-components';
 import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
 import { OsquerySchemaLink } from '../components/osquery_schema_link';
 
 import { useSavedQueries } from './use_saved_queries';
 import { useFormData } from '../shared_imports';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 const TextTruncate = styled.div`
   overflow: hidden;
@@ -31,23 +31,17 @@ interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | SimpleSavedObject<{
-          id: string;
-          description?: string | undefined;
-          query: string;
-        }>['attributes']
+      | (Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+          savedQueryId: string;
+        })
       | null
   ) => void;
 }
 
 interface SelectedOption {
   label: string;
-  value: {
+  value: Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
     savedQueryId: string;
-    id: string;
-    description: string;
-    query: string;
-    ecs_mapping: Record<string, unknown>;
   };
 }
 
@@ -63,7 +57,6 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   const queryOptions = useMemo(
     () =>
-      // @ts-expect-error update types
       data?.saved_objects?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {

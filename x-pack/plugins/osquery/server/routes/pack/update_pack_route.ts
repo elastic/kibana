@@ -27,7 +27,7 @@ import type { PackSavedObjectAttributes } from '../../common/types';
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object(
           {

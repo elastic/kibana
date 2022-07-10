@@ -127,12 +127,14 @@ function getLensAttributes(
     ],
   };
 
-  const agentIdsQuery = {
-    bool: {
-      minimum_should_match: 1,
-      should: agentIds?.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
-    },
-  };
+  const agentIdsQuery = agentIds?.length
+    ? {
+        bool: {
+          minimum_should_match: 1,
+          should: agentIds?.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
+        },
+      }
+    : undefined;
 
   return {
     visualizationType: 'lnsPie',

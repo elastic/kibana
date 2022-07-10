@@ -16,6 +16,7 @@ import type {
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -217,7 +218,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     registerFeatures(plugins.features);
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     const osqueryContext: OsqueryAppContext = {
       logFactory: this.context.logger,

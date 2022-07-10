@@ -24,10 +24,17 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
+  return useQuery<
+    {
+      error?: {
+        error: string;
+        message: string;
+      };
+    },
+    { body: { error: string; message: string } }
+  >(
     [SAVED_QUERY_ID, { savedQueryId }],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    () => http.get<any>(`/internal/osquery/saved_query/${savedQueryId}`),
+    () => http.get(`/api/osquery/saved_query/${savedQueryId}`),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,

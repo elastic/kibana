@@ -7,11 +7,11 @@
 
 import { pick, reduce } from 'lodash';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
+import type { PackSavedObjectAttributes } from '../../common/types';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
-// @ts-expect-error update types
 export const convertPackQueriesToSO = (queries) =>
-  reduce(
+  reduce<PackSavedObjectAttributes['queries']>(
     queries,
     (acc, value, key) => {
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
@@ -23,12 +23,13 @@ export const convertPackQueriesToSO = (queries) =>
 
       return acc;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [] as Array<Record<string, any>>
+    []
   );
 
-// @ts-expect-error update types
-export const convertSOQueriesToPack = (queries, options?: { removeMultiLines?: boolean }) =>
+export const convertSOQueriesToPack = (
+  queries: PackSavedObjectAttributes['queries'],
+  options?: { removeMultiLines?: boolean }
+) =>
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention

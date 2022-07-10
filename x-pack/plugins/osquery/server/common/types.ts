@@ -29,6 +29,7 @@ export interface PackSavedObjectAttributes {
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
+  policy_ids?: string[];
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;

@@ -10,6 +10,7 @@ import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 export const useSavedQueries = ({
   isLive = false,
@@ -21,17 +22,16 @@ export const useSavedQueries = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
+  return useQuery<{ saved_objects: SavedQuerySO[] }, { body: { error: string; message: string } }>(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
     () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      http.get<any>('/internal/osquery/saved_query', {
+      http.get('/api/osquery/saved_query', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {
       keepPreviousData: true,
       refetchInterval: isLive ? 10000 : false,
-      onError: (error: { body: { error: string; message: string } }) => {
+      onError: (error) => {
         setErrorToast(error, {
           title: error.body.error,
           toastMessage: error.body.message,

@@ -18,7 +18,7 @@ import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
     {
-      path: '/internal/osquery/saved_query/{id}',
+      path: '/api/osquery/saved_query/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),

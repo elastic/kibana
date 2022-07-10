@@ -189,10 +189,10 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: actionsData?.totalCount ?? 0,
+      totalItemCount: actionsData?.total ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
-    [actionsData?.totalCount, pageIndex, pageSize]
+    [actionsData?.total, pageIndex, pageSize]
   );
 
   return (

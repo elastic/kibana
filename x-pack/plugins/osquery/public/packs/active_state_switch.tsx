@@ -11,13 +11,13 @@ import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
+import type { PackSavedObject } from './types';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
@@ -25,7 +25,7 @@ const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
 
 interface ActiveStateSwitchProps {
   disabled?: boolean;
-  item: PackagePolicy & { policy_ids: string[] };
+  item: PackSavedObject;
 }
 
 const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) => {
@@ -54,7 +54,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   const { isLoading, mutateAsync } = useUpdatePack({
     options: {
-      // @ts-expect-error update types
       onSuccess: (response) => {
         queryClient.invalidateQueries(PACKS_ID);
         setErrorToast();
@@ -74,7 +73,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
               })
         );
       },
-      // @ts-expect-error update types
       onError: (error) => {
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
@@ -82,7 +80,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   });
 
   const handleToggleActive = useCallback(() => {
-    // @ts-expect-error update types
     mutateAsync({ id: item.id, enabled: !item.attributes.enabled });
     hideConfirmationModal();
   }, [hideConfirmationModal, item, mutateAsync]);
@@ -99,8 +96,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     <>
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
-        // @ts-expect-error update types
-        checked={item.attributes.enabled}
+        checked={!!item.attributes.enabled}
         disabled={!permissions.writePacks || isLoading}
         showLabel={false}
         label=""

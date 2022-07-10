@@ -52,7 +52,7 @@ export class TelemetryReceiver {
   }
 
   public async fetchPacks() {
-    return await this.soClient?.find({
+    return this.soClient?.find({
       type: packSavedObjectType,
       page: 1,
       perPage: this.max_records,
@@ -62,7 +62,7 @@ export class TelemetryReceiver {
   }
 
   public async fetchSavedQueries() {
-    return await this.soClient?.find({
+    return this.soClient?.find({
       type: savedQuerySavedObjectType,
       page: 1,
       perPage: this.max_records,
@@ -78,7 +78,7 @@ export class TelemetryReceiver {
 
     return this.packagePolicyService?.list(this.soClient!, {
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-      perPage: 10000,
+      perPage: 1000,
       page: 1,
     });
   }
@@ -120,15 +120,15 @@ export class TelemetryReceiver {
     }
 
     try {
-      const ret = (await this.esClient.transport.request({
+      const ret = await this.esClient.transport.request<{ license: ESLicense }>({
         method: 'GET',
         path: '/_license',
         querystring: {
           local: true,
         },
-      })) as { license: ESLicense };
+      });
 
-      return (await ret).license;
+      return ret.license;
     } catch (err) {
       this.logger.debug(`failed retrieving license: ${err}`);
 

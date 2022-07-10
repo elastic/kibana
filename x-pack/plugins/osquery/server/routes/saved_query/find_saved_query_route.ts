@@ -17,17 +17,14 @@ import { getInstalledSavedQueriesMap } from './utils';
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/api/osquery/saved_query',
       validate: {
-        query: schema.object(
-          {
-            pageIndex: schema.maybe(schema.string()),
-            pageSize: schema.maybe(schema.number()),
-            sortField: schema.maybe(schema.string()),
-            sortOrder: schema.maybe(schema.string()),
-          },
-          { unknowns: 'allow' }
-        ),
+        query: schema.object({
+          pageIndex: schema.maybe(schema.string()),
+          pageSize: schema.maybe(schema.number()),
+          sortField: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.string()),
+        }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
