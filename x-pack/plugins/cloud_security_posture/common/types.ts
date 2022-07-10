@@ -66,7 +66,7 @@ interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
 
 interface CspSetupInstalledStatus extends BaseCspSetupStatus {
   status: Exclude<Status, 'not-installed'>;
-  installedPackageVersion: string;
+  installedPackageVersion: string | undefined;
 }
 
 export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;

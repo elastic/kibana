@@ -13,7 +13,7 @@ import type {
   PackagePolicyServiceInterface,
   PackageService,
 } from '@kbn/fleet-plugin/server';
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { GetAgentPoliciesResponseItem, Installation } from '@kbn/fleet-plugin/common';
 import moment from 'moment';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -53,18 +53,22 @@ const getHealthyAgents = (enrichedAgentPolicies: GetAgentPoliciesResponseItem[])
     0
   );
 
-const getTimePassedSinceDate = (date: Date | string): number =>
+const getMinutesPassedSinceDate = (date: Date | string): number =>
   moment().diff(moment(date), 'minutes');
 
 const getStatus = (
   findingsIndexExists: boolean,
   installedIntegrations: number,
   healthyAgents: number,
-  minutesPassedSinceInstallation: number
+  installationPackageInfo: Installation
 ): Status => {
   if (findingsIndexExists) return 'indexed';
   if (installedIntegrations === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
+
+  const minutesPassedSinceInstallation = getMinutesPassedSinceDate(
+    installationPackageInfo.install_started_at
+  );
   if (minutesPassedSinceInstallation <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (minutesPassedSinceInstallation > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
@@ -79,26 +83,15 @@ const getCspSetupStatus = async (
   agentPolicyService: AgentPolicyServiceInterface,
   agentService: AgentService
 ): Promise<CspSetupStatus> => {
-  console.log('start');
-  const installedPackageInfo = await packageService.asInternalUser.getInstallation(
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-  );
-
-  const [findingsIndexExists, latestPackageInfo, installedIntegrations] = await Promise.all([
-    isFindingsIndexExists(esClient),
-    packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
-    getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
-      per_page: 10000,
-    }),
-  ]);
-
-  // if (!installedPackageInfo) throw new Error('package installation info could not be found');
-  console.log({
-    findingsIndexExists,
-    installedPackageInfo,
-    latestPackageInfo,
-    installedIntegrations,
-  });
+  const [findingsIndexExists, installationPackageInfo, latestPackageInfo, installedIntegrations] =
+    await Promise.all([
+      isFindingsIndexExists(esClient),
+      packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+      packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+      getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
+        per_page: 10000,
+      }),
+    ]);
 
   const agentPolicies = await getCspAgentPolicies(
     soClient,
@@ -106,7 +99,10 @@ const getCspSetupStatus = async (
     agentPolicyService
   );
 
-  const enrichedAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
+  const enrichedAgentPolicies = await addRunningAgentToAgentPolicy(
+    agentService,
+    agentPolicies || []
+  );
   const healthyAgents = getHealthyAgents(enrichedAgentPolicies);
   const installedIntegrationsTotal = installedIntegrations.total;
   const latestPackageVersion = latestPackageInfo.version;
@@ -115,7 +111,7 @@ const getCspSetupStatus = async (
     findingsIndexExists,
     installedIntegrationsTotal,
     healthyAgents,
-    getTimePassedSinceDate(installedPackageInfo?.install_started_at || 'test')
+    installationPackageInfo
   );
 
   if (status === 'not-installed')
@@ -131,7 +127,7 @@ const getCspSetupStatus = async (
     latestPackageVersion,
     healthyAgents,
     installedIntegrations: installedIntegrationsTotal,
-    installedPackageVersion: installedPackageInfo?.install_version || 'test',
+    installedPackageVersion: installationPackageInfo?.install_version,
   };
 };
 

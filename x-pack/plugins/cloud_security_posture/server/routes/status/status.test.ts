@@ -266,7 +266,6 @@ describe('CspSetupStatus route', () => {
       latestPackageVersion: '0.0.14',
       installedIntegrations: 0,
       healthyAgents: 0,
-      installedPackageVersion: undefined,
     });
   });
 
