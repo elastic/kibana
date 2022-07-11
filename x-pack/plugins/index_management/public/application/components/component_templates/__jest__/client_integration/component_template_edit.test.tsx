@@ -86,7 +86,7 @@ describe('<ComponentTemplateEdit />', () => {
 
   describe('form payload', () => {
     it('should send the correct payload with changed values', async () => {
-      const { actions, component, form } = testBed;
+      const { actions, component, form, coreStart } = testBed;
 
       await act(async () => {
         form.setInputValue('versionField.input', '1');
@@ -120,6 +120,60 @@ describe('<ComponentTemplateEdit />', () => {
           }),
         })
       );
+      // Mapping rollout modal should not be opened
+      expect(coreStart.overlays.openModal).not.toBeCalled();
+    });
+  });
+
+  describe('managed by fleet', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_TO_EDIT.name,
+        Object.assign({}, COMPONENT_TEMPLATE_TO_EDIT, {
+          _meta: { managed_by: 'fleet' },
+        })
+      );
+
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+        data_streams: ['logs-test-default'],
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
+      testBed.component.update();
+    });
+
+    it('should show mappings rollover modal on save', async () => {
+      const { actions, component, form, coreStart } = testBed;
+
+      await act(async () => {
+        form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      await actions.completeStepSettings();
+      await actions.completeStepMappings();
+      await actions.completeStepAliases();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        expect.anything()
+      );
+
+      expect(coreStart.overlays.openModal).toBeCalled();
     });
   });
 });

@@ -55,6 +55,18 @@ const registerHttpRequestMockHelpers = (
       .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
+  const setGetComponentTemplateDatastream = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/component_templates/${templateId}/datastreams`,
+      response,
+      error
+    );
+
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
@@ -79,6 +91,7 @@ const registerHttpRequestMockHelpers = (
     setDeleteComponentTemplateResponse,
     setLoadComponentTemplateResponse,
     setCreateComponentTemplateResponse,
+    setGetComponentTemplateDatastream,
   };
 };
 

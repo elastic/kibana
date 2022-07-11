@@ -45,6 +45,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
 
   return (
     <EuiConfirmModal
+      data-test-subj="mappingDatastreamRolloverModal"
       isLoading={isLoading}
       title={
         <FormattedMessage

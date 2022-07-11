@@ -52,6 +52,7 @@ export const renderApp = (
 
   const componentTemplateProviderValues = {
     httpClient: services.httpService.httpClient,
+    overlays,
     apiBasePath: API_BASE_PATH,
     trackMetric: services.uiMetricService.trackMetric.bind(services.uiMetricService),
     docLinks,
