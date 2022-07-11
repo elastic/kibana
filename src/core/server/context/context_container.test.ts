@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ContextContainer } from './context';
-import type { PluginOpaqueId, RequestHandlerContextBase } from '../..';
-import { httpServerMock } from '../../http/http_server.mocks';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { RequestHandlerContextBase } from '@kbn/core-http-server';
+import { ContextContainer } from './context_container';
+import { httpServerMock } from '../http/http_server.mocks';
 
 const pluginA = Symbol('pluginA');
 const pluginB = Symbol('pluginB');
