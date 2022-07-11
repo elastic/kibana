@@ -115,6 +115,7 @@
 /x-pack/plugins/monitoring/ @elastic/infra-monitoring-ui
 /x-pack/test/functional/apps/monitoring @elastic/infra-monitoring-ui
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
+/x-pack/test/api_integration/apis/monitoring-collection @elastic/infra-monitoring-ui
 
 # Fleet
 /fleet_packages.json @elastic/fleet
