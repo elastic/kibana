@@ -16,10 +16,8 @@ import {
   SUM_OF_SERVER_BYTES,
   SUM_OF_SOURCE_BYTES,
 } from '../map_config';
-import {
-  ITooltipProperty,
-  TooltipProperty,
-} from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { TooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 
 describe('LineToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [
