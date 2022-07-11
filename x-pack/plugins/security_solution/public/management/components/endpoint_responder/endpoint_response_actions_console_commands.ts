@@ -23,14 +23,14 @@ const emptyArgumentValidator = (argData: ParsedArgData) => {
   }
 };
 
-const HELP_GROUPS = {
+const HELP_GROUPS = Object.freeze({
   responseActions: {
     position: 0,
     label: i18n.translate('xpack.securitySolution.endpointConsoleCommands.groups.responseActions', {
       defaultMessage: 'Response actions',
     }),
   },
-};
+});
 
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string

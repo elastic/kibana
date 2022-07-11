@@ -10,13 +10,13 @@ import { ClearCommand } from '../components/builtin_commands/clear_command';
 import { HelpCommand } from '../components/builtin_commands/help_command';
 import { CommandDefinition } from '../types';
 
-export const HELP_GROUPS = {
+export const HELP_GROUPS = Object.freeze({
   supporting: {
     label: i18n.translate('xpack.securitySolution.console.builtInCommands.groups.supporting', {
       defaultMessage: 'Supporting commands & syntaxes',
     }),
   },
-};
+});
 
 export const getBuiltinCommands = (): CommandDefinition[] => {
   return [

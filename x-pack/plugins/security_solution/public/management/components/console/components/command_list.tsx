@@ -59,7 +59,7 @@ export interface CommandListProps {
   display?: 'default' | 'table';
 }
 
-const COMMON_ARGS = [
+const COMMON_ARGS = Object.freeze([
   {
     name: '--comment',
     about: i18n.translate('xpack.securitySolution.console.commandList.commonArgs.comment', {
@@ -72,7 +72,7 @@ const COMMON_ARGS = [
       defaultMessage: 'Command assistance Ex: isolate --help',
     }),
   },
-];
+]);
 
 export const CommandList = memo<CommandListProps>(({ commands, display = 'default' }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
