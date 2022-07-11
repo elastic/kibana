@@ -11,12 +11,13 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFocusTrap,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
 } from '@elastic/eui';
-import React, { Component, memo } from 'react';
+import React, { Component, memo, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,14 +31,12 @@ interface Props {
 }
 
 interface State {
-  searchTerm: string;
   allowSpacesListFocus: boolean;
   isPopoverOpen: boolean;
 }
 
 export class SpacesPopoverList extends Component<Props, State> {
   public state = {
-    searchTerm: '',
     allowSpacesListFocus: false,
     isPopoverOpen: false,
   };
@@ -57,6 +56,7 @@ export class SpacesPopoverList extends Component<Props, State> {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        ownFocus={false}
       >
         <EuiFocusTrap>{this.getMenuPanel()}</EuiFocusTrap>
       </EuiPopover>
@@ -64,9 +64,7 @@ export class SpacesPopoverList extends Component<Props, State> {
   }
 
   private getMenuPanel = () => {
-    const { searchTerm } = this.state;
-
-    const options = this.getSpaceOptions(); // this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
+    const options = this.getSpaceOptions();
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -130,14 +128,12 @@ export class SpacesPopoverList extends Component<Props, State> {
   private onButtonClick = () => {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
-      searchTerm: '',
     });
   };
 
   private closePopover = () => {
     this.setState({
       isPopoverOpen: false,
-      searchTerm: '',
     });
   };
 
@@ -145,8 +141,11 @@ export class SpacesPopoverList extends Component<Props, State> {
     const LazySpaceAvatar = memo(this.props.spacesApiUi.components.getSpaceAvatar);
 
     return this.props.spaces.map((space) => {
-      const icon = <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />; // wrapped in a Suspense above
-
+      const icon = (
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />;
+        </Suspense>
+      );
       return {
         'aria-label': space.name,
         'aria-roledescription': 'space',

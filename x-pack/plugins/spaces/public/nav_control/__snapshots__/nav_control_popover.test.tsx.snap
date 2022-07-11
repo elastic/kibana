@@ -6,16 +6,23 @@ exports[`NavControlPopover renders without crashing 1`] = `
   button={
     <EuiHeaderSectionItemButton
       aria-controls="headerSpacesMenuContent"
+      aria-describedby="spacesNavDetails"
       aria-expanded={false}
       aria-haspopup="true"
-      aria-label="loading"
+      aria-label="Spaces navigation"
       data-test-subj="spacesNavSelector"
       onClick={[Function]}
-      title="loading"
+      title="loading spaces navigation"
     >
       <EuiLoadingSpinner
         size="m"
       />
+      <p
+        hidden={true}
+        id="spacesNavDetails"
+      >
+        loading spaces navigation is the currently selected space. Click this button to open a popover that allows you to select the active space.
+      </p>
     </EuiHeaderSectionItemButton>
   }
   closePopover={[Function]}
@@ -23,24 +30,26 @@ exports[`NavControlPopover renders without crashing 1`] = `
   hasArrow={true}
   id="spcMenuPopover"
   isOpen={false}
-  ownFocus={true}
+  ownFocus={false}
   panelPaddingSize="none"
   repositionOnScroll={true}
 >
-  <SpacesDescription
-    capabilities={
-      Object {
-        "catalogue": Object {},
-        "management": Object {},
-        "navLinks": Object {},
-        "spaces": Object {
-          "manage": true,
-        },
+  <EuiFocusTrap>
+    <SpacesDescription
+      capabilities={
+        Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "spaces": Object {
+            "manage": true,
+          },
+        }
       }
-    }
-    id="headerSpacesMenuContent"
-    navigateToApp={[MockFunction]}
-    onManageSpacesClick={[Function]}
-  />
+      id="headerSpacesMenuContent"
+      navigateToApp={[MockFunction]}
+      onManageSpacesClick={[Function]}
+    />
+  </EuiFocusTrap>
 </EuiPopover>
 `;

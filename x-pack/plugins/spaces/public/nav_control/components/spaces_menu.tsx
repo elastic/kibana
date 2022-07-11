@@ -7,11 +7,16 @@
 
 import './spaces_menu.scss';
 
-import { EuiPopoverFooter, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+} from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-// import type { EuiSelectableSearchProps } from '@elastic/eui/src/components/selectable/selectable_search';
-import React, { Component, lazy } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -39,17 +44,18 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
-interface State {
-  searchTerm: string;
-  allowSpacesListFocus: boolean;
-}
+// interface State {
+//   searchTerm: string;
+//   allowSpacesListFocus: boolean;
+// }
 
-class SpacesMenuUI extends Component<Props, State> {
+// class SpacesMenuUI extends Component<Props, State> {
+class SpacesMenuUI extends Component<Props> {
   // ToDo: removed unused state members
-  public state = {
-    searchTerm: '',
-    allowSpacesListFocus: false,
-  };
+  // public state = {
+  //   searchTerm: '',
+  //   allowSpacesListFocus: false,
+  // };
 
   public render() {
     // const { intl, spaces, serverBasePath, navigateToUrl } = this.props;
@@ -127,7 +133,11 @@ class SpacesMenuUI extends Component<Props, State> {
         'aria-label': space.name,
         label: space.name,
         key: space.id,
-        prepend: <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />,
+        prepend: (
+          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+            <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
+          </Suspense>
+        ),
         checked: undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',
@@ -159,7 +169,7 @@ class SpacesMenuUI extends Component<Props, State> {
       } else if (event.ctrlKey || event.metaKey) {
         // Open in new tab - either a ctrl click or middle mouse button
         // console.log(`**** CTRL/CMD CLICK`);
-        // window.open(urlToSelectedSpace); // ToDo: replace with new tab
+        window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
       } else {
         // Force full page reload (usually not a good idea, but we need to in order to change spaces)
         // console.log(`**** URL: ${urlToSelectedSpace}`);
