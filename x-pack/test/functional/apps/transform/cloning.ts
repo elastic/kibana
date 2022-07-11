@@ -23,6 +23,11 @@ interface TestData {
   expected: any;
 }
 
+function getNumFailureRetriesStr(value: number | null | undefined) {
+  if (value === null || value === undefined) return '';
+  return value.toString();
+}
+
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
@@ -38,6 +43,7 @@ function getTransformConfig(): TransformPivotConfig {
     retention_policy: { time: { field: 'order_date', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
+      num_failure_retries: 0,
     },
     dest: { index: `user-ec_2_${date}` },
   };
@@ -76,6 +82,7 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
     retention_policy: { time: { field: 'order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
+      num_failure_retries: 5,
     },
     dest: { index: `user-ec_2_${date}` },
   };
@@ -161,6 +168,9 @@ export default function ({ getService }: FtrProviderContext) {
           retentionPolicySwitchEnabled: true,
           retentionPolicyField: 'order_date',
           retentionPolicyMaxAge: '1d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithPivot.settings?.num_failure_retries
+          ),
         },
       },
       {
@@ -193,6 +203,9 @@ export default function ({ getService }: FtrProviderContext) {
           retentionPolicySwitchEnabled: true,
           retentionPolicyField: 'order_date',
           retentionPolicyMaxAge: '3d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithRuntimeMapping.settings?.num_failure_retries
+          ),
         },
       },
       {
@@ -366,9 +379,22 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertTransformMaxPageSearchSizeValue(
             testData.originalConfig.settings!.max_page_search_size!
           );
+          if (testData.expected.numFailureRetries !== undefined) {
+            await transform.wizard.assertNumFailureRetriesValue(
+              testData.expected.numFailureRetries
+            );
+          }
 
           await transform.testExecution.logTestStep('should load the create step');
           await transform.wizard.advanceToCreateStep();
+
+          if (testData.expected.numFailureRetries !== undefined) {
+            await transform.testExecution.logTestStep('displays the summary details');
+            await transform.wizard.openTransformAdvancedSettingsSummaryAccordion();
+            await transform.wizard.assertTransformNumFailureRetriesSummaryValue(
+              testData.expected.numFailureRetries
+            );
+          }
 
           await transform.testExecution.logTestStep('should display the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();

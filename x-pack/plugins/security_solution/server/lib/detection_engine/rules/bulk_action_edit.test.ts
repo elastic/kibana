@@ -11,7 +11,7 @@ import {
   applyBulkActionEditToRule,
 } from './bulk_action_edit';
 import { BulkActionEditType } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RuleAlertType } from './types';
+import type { RuleAlertType } from './types';
 describe('bulk_action_edit', () => {
   describe('addItemsToArray', () => {
     test('should add single item to array', () => {

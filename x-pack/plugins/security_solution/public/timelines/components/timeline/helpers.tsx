@@ -18,13 +18,9 @@ import {
 } from '@kbn/timelines-plugin/public';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
-import {
-  DataProvider,
-  DataProviderType,
-  DataProvidersAnd,
-  EXISTS_OPERATOR,
-} from './data_providers/data_provider';
-import { BrowserFields } from '../../../common/containers/source';
+import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
+import { DataProviderType, EXISTS_OPERATOR } from './data_providers/data_provider';
+import type { BrowserFields } from '../../../common/containers/source';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 

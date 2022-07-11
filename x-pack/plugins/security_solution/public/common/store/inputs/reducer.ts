@@ -42,7 +42,7 @@ import {
   deleteOneQuery as helperDeleteOneQuery,
   updateInputFullScreen,
 } from './helpers';
-import { InputsModel, TimeRange } from './model';
+import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 

@@ -8,22 +8,17 @@
 
 import React, { useCallback } from 'react';
 import { useQueryClient } from 'react-query';
-import {
-  EuiTextColor,
-  EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { mountReactNode } from '@kbn/core/public/utils';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
@@ -88,8 +83,8 @@ export const useBulkActions = ({
   );
 
   const {
-    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds, isRefreshOn },
-    actions: { setLoadingRules, setIsRefreshOn },
+    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
+    actions: { setLoadingRules, clearRulesSelection },
   } = rulesTableContext;
 
   return useCallback(
@@ -107,7 +102,6 @@ export const useBulkActions = ({
 
       const handleEnableAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
-        setIsRefreshOn(false);
         closePopover();
 
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
@@ -130,12 +124,10 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDisableActions = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
-        setIsRefreshOn(false);
         closePopover();
 
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
@@ -148,12 +140,10 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDuplicateAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
-        setIsRefreshOn(false);
         closePopover();
 
         await executeRulesBulkAction({
@@ -164,17 +154,15 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
-        setIsRefreshOn(isRefreshOn);
+        clearRulesSelection();
       };
 
       const handleDeleteAction = async () => {
-        setIsRefreshOn(false);
         closePopover();
 
         if (isAllSelected) {
           // User has cancelled deletion
           if ((await confirmDeletion()) === false) {
-            setIsRefreshOn(isRefreshOn);
             return;
           }
         }
@@ -188,11 +176,9 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleExportAction = async () => {
-        setIsRefreshOn(false);
         closePopover();
 
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
@@ -203,7 +189,6 @@ export const useBulkActions = ({
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -211,7 +196,6 @@ export const useBulkActions = ({
         let isBulkEditFinished = false;
 
         // disabling auto-refresh so user's selected rules won't disappear after table refresh
-        setIsRefreshOn(false);
         closePopover();
 
         const customSelectedRuleIds = selectedRules
@@ -220,13 +204,11 @@ export const useBulkActions = ({
 
         // User has cancelled edit action or there are no custom rules to proceed
         if ((await confirmBulkEdit()) === false) {
-          setIsRefreshOn(isRefreshOn);
           return;
         }
 
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
-          setIsRefreshOn(isRefreshOn);
           return;
         }
 
@@ -288,7 +270,6 @@ export const useBulkActions = ({
 
         isBulkEditFinished = true;
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(isRefreshOn);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
@@ -453,7 +434,6 @@ export const useBulkActions = ({
       filterQuery,
       invalidateRules,
       confirmDeletion,
-      setIsRefreshOn,
       confirmBulkEdit,
       completeBulkEditForm,
       queryClient,
@@ -461,7 +441,7 @@ export const useBulkActions = ({
       getIsMounted,
       resolveTagsRefetch,
       updateRulesCache,
-      isRefreshOn,
+      clearRulesSelection,
     ]
   );
 };

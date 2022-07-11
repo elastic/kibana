@@ -5,8 +5,8 @@
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-# Virtual teams
-/x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
+# Alerting commmunal ownership
+/x-pack/plugins/rule_registry/ @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
@@ -57,6 +57,7 @@
 /examples/search_examples/ @elastic/kibana-app-services
 /packages/kbn-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
+/packages/kbn-monaco/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
 /packages/kbn-es-query/ @elastic/kibana-app-services
 /packages/kbn-field-types/ @elastic/kibana-app-services
@@ -240,7 +241,7 @@
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-type-summarizer/ @elastic/kibana-operations
+/packages/kbn-type-summarizer*/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
@@ -394,7 +395,6 @@
 /x-pack/plugins/watcher/  @elastic/platform-deployment-management
 /x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
 /packages/kbn-ace/ @elastic/platform-deployment-management
-/packages/kbn-monaco/ @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution

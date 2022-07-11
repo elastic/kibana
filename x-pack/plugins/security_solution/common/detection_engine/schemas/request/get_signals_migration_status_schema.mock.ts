@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetSignalsMigrationStatusSchema } from './get_signals_migration_status_schema';
+import type { GetSignalsMigrationStatusSchema } from './get_signals_migration_status_schema';
 
 export const getSignalsMigrationStatusSchemaMock = (): GetSignalsMigrationStatusSchema => ({
   from: 'now-30d',

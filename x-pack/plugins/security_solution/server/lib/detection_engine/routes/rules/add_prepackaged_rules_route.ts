@@ -8,17 +8,15 @@
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../../types';
 
-import {
-  PrePackagedRulesAndTimelinesSchema,
-  prePackagedRulesAndTimelinesSchema,
-} from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
+import type { PrePackagedRulesAndTimelinesSchema } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
+import { prePackagedRulesAndTimelinesSchema } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
 import { importTimelineResultSchema } from '../../../../../common/types/timeline';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 
@@ -118,9 +116,8 @@ export const createPrepackagedRules = async (
   });
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
-  const signalsIndex = siemClient.getSignalsIndex();
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, signalsIndex));
+  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall));
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -134,7 +131,6 @@ export const createPrepackagedRules = async (
     rulesClient,
     savedObjectsClient,
     rulesToUpdate,
-    signalsIndex,
     context.getRuleExecutionLog()
   );
 
