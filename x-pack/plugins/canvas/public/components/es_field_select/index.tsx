@@ -19,9 +19,7 @@ export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = (props
   useEffect(() => {
     loadingFields.current = true;
     getFields(index)
-      .then((newFields) => {
-        setFields(newFields || []);
-      })
+      .then((newFields) => setFields(newFields || []))
       .finally(() => {
         loadingFields.current = false;
       });
