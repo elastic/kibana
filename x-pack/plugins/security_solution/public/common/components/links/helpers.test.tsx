@@ -9,11 +9,8 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { DEFAULT_MORE_MAX_HEIGHT } from '.';
 import { TestProviders } from '../../mock';
-import {
-  MoreReputationLinksContainer,
-  ReputationLinkSetting,
-  ReputationLinksOverflow,
-} from './helpers';
+import type { ReputationLinkSetting } from './helpers';
+import { MoreReputationLinksContainer, ReputationLinksOverflow } from './helpers';
 
 const rowItems = [
   { name: 'item1', url_template: 'https://www.virustotal.com/gui/search/{{ip}' },
