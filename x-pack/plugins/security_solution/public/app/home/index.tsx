@@ -8,7 +8,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
@@ -23,7 +23,7 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
-
+import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
 interface HomePageProps {
   children: React.ReactNode;
   onAppLeave: (handler: AppLeaveHandler) => void;
@@ -36,7 +36,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   setHeaderActionMenu,
 }) => {
   const { pathname } = useLocation();
-
+  useSyncGlobalQueryString();
   useInitSourcerer(getScopeFromPath(pathname));
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));

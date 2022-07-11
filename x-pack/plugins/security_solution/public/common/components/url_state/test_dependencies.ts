@@ -11,7 +11,7 @@ import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
-import { UrlStateContainerPropTypes, LocationTypes } from './types';
+import type { UrlStateContainerPropTypes, LocationTypes } from './types';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
@@ -120,7 +120,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
       id: '',
       isOpen: false,
     },
-    [CONSTANTS.sourcerer]: {},
   },
   history: {
     ...mockHistory,
@@ -132,7 +131,7 @@ export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
   kqlQueryValue: Query | null,
-  pageName: string,
+  pageName: SecurityPageName,
   detailName: string | undefined
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
@@ -154,7 +153,7 @@ interface GetMockPropsObj {
   examplePath: string;
   namespaceLower: string;
   page: LocationTypes;
-  pageName: string;
+  pageName: SecurityPageName;
   detailName: string | undefined;
 }
 
@@ -270,7 +269,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
 // silly that this needs to be an array and not an object
 // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
 export const testCases: Array<
-  [LocationTypes, string, string, string, string | null, string, undefined | string]
+  [LocationTypes, string, string, string, string | null, SecurityPageName, undefined | string]
 > = [
   [
     /* page */ CONSTANTS.networkPage,

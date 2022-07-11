@@ -12,13 +12,14 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plug
 import type { CoreStart } from '@kbn/core/public';
 import type { Criteria, Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
-import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
@@ -56,12 +57,17 @@ const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
 const getSortKey = (key: string): string =>
   FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;
 
+const SEARCH_FAILED_TEXT = i18n.translate(
+  'xpack.csp.findings.findingsErrorToast.searchFailedTitle',
+  { defaultMessage: 'Search failed' }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
 ): void => {
-  if (error instanceof Error) toasts.addError(error, { title: TEXT.SEARCH_FAILED });
-  else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
+  if (error instanceof Error) toasts.addError(error, { title: SEARCH_FAILED_TEXT });
+  else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
 export const getFindingsQuery = ({
@@ -76,7 +82,7 @@ export const getFindingsQuery = ({
     sort: [{ [getSortKey(sort.field)]: sort.direction }],
     size,
     from,
-    aggs: { count: { terms: { field: 'result.evaluation.keyword' } } },
+    aggs: getFindingsCountAggQuery(),
   },
   pit: { id: pitId },
   ignore_unavailable: false,
@@ -125,14 +131,4 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       refetchIntervalInBackground: true,
     }
   );
-};
-
-const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
-  const passed = buckets.find((bucket) => bucket.key === 'passed');
-  const failed = buckets.find((bucket) => bucket.key === 'failed');
-
-  return {
-    passed: passed?.doc_count || 0,
-    failed: failed?.doc_count || 0,
-  };
 };

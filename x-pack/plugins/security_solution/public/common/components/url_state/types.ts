@@ -7,19 +7,18 @@
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { FilterManager, SavedQueryService } from '@kbn/data-plugin/public';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { RouteSpyState } from '../../utils/route/types';
-import { SecurityNav } from '../navigation/types';
+import type { UrlInputsModel } from '../../store/inputs/model';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { RouteSpyState } from '../../utils/route/types';
+import type { SecurityNav } from '../navigation/types';
 
-import { CONSTANTS, UrlStateType } from './constants';
-import { SourcererUrlState } from '../../store/sourcerer/model';
+import type { UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
   CONSTANTS.filters,
   CONSTANTS.savedQuery,
-  CONSTANTS.sourcerer,
   CONSTANTS.timerange,
   CONSTANTS.timeline,
 ];
@@ -43,7 +42,6 @@ export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
-  [CONSTANTS.sourcerer]: SourcererUrlState;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }

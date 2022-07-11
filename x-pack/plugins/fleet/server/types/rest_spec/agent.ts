@@ -18,6 +18,8 @@ export const GetAgentsRequestSchema = {
     kuery: schema.maybe(schema.string()),
     showInactive: schema.boolean({ defaultValue: false }),
     showUpgradeable: schema.boolean({ defaultValue: false }),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   }),
 };
 
@@ -132,6 +134,15 @@ export const UpdateAgentRequestSchema = {
   body: schema.object({
     user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     tags: schema.maybe(schema.arrayOf(schema.string())),
+  }),
+};
+
+export const PostBulkUpdateAgentTagsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
+    tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 

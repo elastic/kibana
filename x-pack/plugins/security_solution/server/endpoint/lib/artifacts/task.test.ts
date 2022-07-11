@@ -14,7 +14,7 @@ import { ManifestTaskConstants, ManifestTask } from './task';
 import { MockManifestTask } from './task.mock';
 import { ManifestManager } from '../../services/artifacts/manifest_manager';
 import { buildManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { getMockArtifacts } from './mocks';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -34,7 +34,7 @@ describe('task', () => {
     taskType: ManifestTaskConstants.TYPE,
   };
 
-  describe('Periodic task sanity checks', () => {
+  describe('Periodic task checks', () => {
     test('can create task', () => {
       const manifestTask = new ManifestTask({
         endpointAppContext: createMockEndpointAppContext(),

@@ -3290,6 +3290,50 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePanel.componentDidUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidUpdate",
+            "description": [],
+            "signature": [
+              "(prevProps: Props, prevState: State) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddablePanel.componentDidUpdate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "prevProps",
+                "description": [],
+                "signature": [
+                  "Props"
+                ],
+                "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddablePanel.componentDidUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "prevState",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePanel.UNSAFE_componentWillMount",
             "type": "Function",
             "tags": [],
@@ -8330,6 +8374,68 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.renderError",
+            "type": "Function",
+            "tags": [],
+            "label": "renderError",
+            "description": [
+              "\nRenders a custom embeddable error at the given node."
+            ],
+            "signature": [
+              "((domNode: Element | HTMLElement, error: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ErrorLike",
+                "text": "ErrorLike"
+              },
+              ") => () => void) | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IEmbeddable.renderError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "Element | HTMLElement"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IEmbeddable.renderError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ErrorLike",
+                    "text": "ErrorLike"
+                  }
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A callback that will be called on error destroy."
+            ]
           },
           {
             "parentPluginId": "embeddable",

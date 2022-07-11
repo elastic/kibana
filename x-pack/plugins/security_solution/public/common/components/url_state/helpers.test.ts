@@ -8,6 +8,7 @@
 import { navTabs } from '../../../app/home/home_navigations';
 import { getTitle, isQueryStateEmpty } from './helpers';
 import { CONSTANTS } from './constants';
+import type { ValueUrlState } from './types';
 
 describe('Helpers Url_State', () => {
   describe('getTitle', () => {
@@ -45,7 +46,7 @@ describe('Helpers Url_State', () => {
     });
 
     test('returns true if url key is "query" and queryState is empty string', () => {
-      const result = isQueryStateEmpty({}, CONSTANTS.appQuery);
+      const result = isQueryStateEmpty('', CONSTANTS.appQuery);
       expect(result).toBeTruthy();
     });
 
@@ -72,7 +73,7 @@ describe('Helpers Url_State', () => {
 
     // TODO: Is this a bug, or intended?
     test('returns false if url key is "timeline" and queryState is empty', () => {
-      const result = isQueryStateEmpty({}, CONSTANTS.timeline);
+      const result = isQueryStateEmpty({} as ValueUrlState, CONSTANTS.timeline);
       expect(result).toBeFalsy();
     });
 

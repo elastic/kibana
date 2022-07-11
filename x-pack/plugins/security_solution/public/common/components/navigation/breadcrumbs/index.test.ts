@@ -7,16 +7,17 @@
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbsForRoute, ObjectWithNavTabs, useSetBreadcrumbs } from '.';
+import type { ObjectWithNavTabs } from '.';
+import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../hosts/store/model';
-import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
+import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
-import { GetSecuritySolutionUrl } from '../../link_to';
-import { APP_UI_ID } from '../../../../../common/constants';
+import type { GetSecuritySolutionUrl } from '../../link_to';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { navTabs } from '../../../../app/home/home_navigations';
@@ -55,7 +56,7 @@ const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
 };
 
 const getMockObject = (
-  pageName: string,
+  pageName: SecurityPageName,
   pathName: string,
   detailName: string | undefined
 ): RouteSpyState & ObjectWithNavTabs => ({
@@ -100,7 +101,6 @@ const getMockObject = (
           },
         },
       },
-      sourcerer: {},
     },
   };
 });
@@ -191,7 +191,7 @@ describe('Navigation Breadcrumbs', () => {
     describe('getBreadcrumbsForRoute', () => {
       test('should return Overview breadcrumbs when supplied overview pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('overview', '/', undefined),
+          getMockObject(SecurityPageName.overview, '/', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -206,7 +206,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Host breadcrumbs when supplied hosts pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('hosts', '/', undefined),
+          getMockObject(SecurityPageName.hosts, '/', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -222,7 +222,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Network breadcrumbs when supplied network pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('network', '/', undefined),
+          getMockObject(SecurityPageName.network, '/', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -238,7 +238,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Timelines breadcrumbs when supplied timelines pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('timelines', '/', undefined),
+          getMockObject(SecurityPageName.timelines, '/', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -253,7 +253,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('hosts', '/', hostName),
+          getMockObject(SecurityPageName.hosts, '/', hostName),
           getSecuritySolutionUrl,
           false
         );
@@ -270,7 +270,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return IP Details breadcrumbs when supplied pathname with ipv4', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('network', '/', ipv4),
+          getMockObject(SecurityPageName.network, '/', ipv4),
           getSecuritySolutionUrl,
           false
         );
@@ -287,7 +287,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return IP Details breadcrumbs when supplied pathname with ipv6', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('network', '/', ipv6Encoded),
+          getMockObject(SecurityPageName.network, '/', ipv6Encoded),
           getSecuritySolutionUrl,
           false
         );
@@ -304,7 +304,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Alerts breadcrumbs when supplied alerts pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('alerts', '/alerts', undefined),
+          getMockObject(SecurityPageName.alerts, '/alerts', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -319,7 +319,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Exceptions breadcrumbs when supplied exceptions pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('exceptions', '/exceptions', undefined),
+          getMockObject(SecurityPageName.exceptions, '/exceptions', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -334,7 +334,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Rules breadcrumbs when supplied rules pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('rules', '/rules', undefined),
+          getMockObject(SecurityPageName.rules, '/rules', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -349,7 +349,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Rules breadcrumbs when supplied rules Creation pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('rules', '/rules/create', undefined),
+          getMockObject(SecurityPageName.rules, '/rules/create', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -368,7 +368,7 @@ describe('Navigation Breadcrumbs', () => {
         const mockRuleName = 'ALERT_RULE_NAME';
         const breadcrumbs = getBreadcrumbsForRoute(
           {
-            ...getMockObject('rules', `/rules/id/${mockDetailName}`, undefined),
+            ...getMockObject(SecurityPageName.rules, `/rules/id/${mockDetailName}`, undefined),
             detailName: mockDetailName,
             state: {
               ruleName: mockRuleName,
@@ -392,7 +392,7 @@ describe('Navigation Breadcrumbs', () => {
         const mockRuleName = 'ALERT_RULE_NAME';
         const breadcrumbs = getBreadcrumbsForRoute(
           {
-            ...getMockObject('rules', `/rules/id/${mockDetailName}/edit`, undefined),
+            ...getMockObject(SecurityPageName.rules, `/rules/id/${mockDetailName}/edit`, undefined),
             detailName: mockDetailName,
             state: {
               ruleName: mockRuleName,
@@ -417,7 +417,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return null breadcrumbs when supplied Cases pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('cases', '/', undefined),
+          getMockObject(SecurityPageName.case, '/', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -431,7 +431,7 @@ describe('Navigation Breadcrumbs', () => {
         };
         const breadcrumbs = getBreadcrumbsForRoute(
           {
-            ...getMockObject('cases', `/${sampleCase.id}`, sampleCase.id),
+            ...getMockObject(SecurityPageName.case, `/${sampleCase.id}`, sampleCase.id),
             state: { caseTitle: sampleCase.name },
           },
           getSecuritySolutionUrl,
@@ -442,7 +442,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('administration', '/endpoints', undefined),
+          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -461,22 +461,26 @@ describe('Navigation Breadcrumbs', () => {
       test('should call chrome breadcrumb service with correct breadcrumbs', () => {
         const navigateToUrlMock = jest.fn();
         const { result } = renderHook(() => useSetBreadcrumbs(), { wrapper: TestProviders });
-        result.current(getMockObject('hosts', '/', hostName), chromeMock, navigateToUrlMock);
+        result.current(
+          getMockObject(SecurityPageName.hosts, '/', hostName),
+          chromeMock,
+          navigateToUrlMock
+        );
 
         expect(setBreadcrumbsMock).toBeCalledWith([
           expect.objectContaining({
             text: 'Security',
-            href: "securitySolutionUI/get_started?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: "securitySolutionUI/get_started?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Hosts',
-            href: "securitySolutionUI/hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: "securitySolutionUI/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: "securitySolutionUI/hosts/siem-kibana?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: "securitySolutionUI/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
             onClick: expect.any(Function),
           }),
           {
@@ -496,7 +500,7 @@ describe('Navigation Breadcrumbs', () => {
     describe('getBreadcrumbsForRoute', () => {
       test('should return Overview breadcrumbs when supplied overview pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('overview', '/', undefined),
+          getMockObject(SecurityPageName.overview, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -515,7 +519,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Host breadcrumbs when supplied hosts pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('hosts', '/', undefined),
+          getMockObject(SecurityPageName.hosts, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -532,7 +536,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Network breadcrumbs when supplied network pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('network', '/', undefined),
+          getMockObject(SecurityPageName.network, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -549,7 +553,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Timelines breadcrumbs when supplied timelines pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('timelines', '/', undefined),
+          getMockObject(SecurityPageName.timelines, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -564,7 +568,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('hosts', '/', hostName),
+          getMockObject(SecurityPageName.hosts, '/', hostName),
           getSecuritySolutionUrl,
           true
         );
@@ -582,7 +586,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return IP Details breadcrumbs when supplied pathname with ipv4', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('network', '/', ipv4),
+          getMockObject(SecurityPageName.network, '/', ipv4),
           getSecuritySolutionUrl,
           true
         );
@@ -600,7 +604,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return IP Details breadcrumbs when supplied pathname with ipv6', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('network', '/', ipv6Encoded),
+          getMockObject(SecurityPageName.network, '/', ipv6Encoded),
           getSecuritySolutionUrl,
           true
         );
@@ -618,7 +622,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Alerts breadcrumbs when supplied alerts pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('alerts', '/alerts', undefined),
+          getMockObject(SecurityPageName.alerts, '/alerts', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -633,7 +637,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Exceptions breadcrumbs when supplied exceptions pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('exceptions', '/exceptions', undefined),
+          getMockObject(SecurityPageName.exceptions, '/exceptions', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -649,7 +653,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Rules breadcrumbs when supplied rules pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('rules', '/rules', undefined),
+          getMockObject(SecurityPageName.rules, '/rules', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -665,7 +669,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Rules breadcrumbs when supplied rules Creation pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('rules', '/rules/create', undefined),
+          getMockObject(SecurityPageName.rules, '/rules/create', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -685,7 +689,7 @@ describe('Navigation Breadcrumbs', () => {
         const mockRuleName = 'ALERT_RULE_NAME';
         const breadcrumbs = getBreadcrumbsForRoute(
           {
-            ...getMockObject('rules', `/rules/id/${mockDetailName}`, undefined),
+            ...getMockObject(SecurityPageName.rules, `/rules/id/${mockDetailName}`, undefined),
             detailName: mockDetailName,
             state: {
               ruleName: mockRuleName,
@@ -710,7 +714,7 @@ describe('Navigation Breadcrumbs', () => {
         const mockRuleName = 'ALERT_RULE_NAME';
         const breadcrumbs = getBreadcrumbsForRoute(
           {
-            ...getMockObject('rules', `/rules/id/${mockDetailName}/edit`, undefined),
+            ...getMockObject(SecurityPageName.rules, `/rules/id/${mockDetailName}/edit`, undefined),
             detailName: mockDetailName,
             state: {
               ruleName: mockRuleName,
@@ -736,7 +740,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return null breadcrumbs when supplied Cases pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('cases', '/', undefined),
+          getMockObject(SecurityPageName.case, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -750,7 +754,7 @@ describe('Navigation Breadcrumbs', () => {
         };
         const breadcrumbs = getBreadcrumbsForRoute(
           {
-            ...getMockObject('cases', `/${sampleCase.id}`, sampleCase.id),
+            ...getMockObject(SecurityPageName.case, `/${sampleCase.id}`, sampleCase.id),
             state: { caseTitle: sampleCase.name },
           },
           getSecuritySolutionUrl,
@@ -761,7 +765,7 @@ describe('Navigation Breadcrumbs', () => {
 
       test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject('administration', '/endpoints', undefined),
+          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -781,9 +785,13 @@ describe('Navigation Breadcrumbs', () => {
       test('should call chrome breadcrumb service with correct breadcrumbs', () => {
         const navigateToUrlMock = jest.fn();
         const { result } = renderHook(() => useSetBreadcrumbs(), { wrapper: TestProviders });
-        result.current(getMockObject('hosts', '/', hostName), chromeMock, navigateToUrlMock);
+        result.current(
+          getMockObject(SecurityPageName.hosts, '/', hostName),
+          chromeMock,
+          navigateToUrlMock
+        );
         const searchString =
-          "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))";
+          "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))";
 
         expect(setBreadcrumbsMock).toBeCalledWith([
           expect.objectContaining({

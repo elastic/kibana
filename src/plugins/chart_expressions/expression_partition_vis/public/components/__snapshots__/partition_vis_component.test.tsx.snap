@@ -784,6 +784,9 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
             Array [
               Object {
                 "fillLabel": Object {
+                  "clipText": true,
+                  "maxFontSize": 14,
+                  "minFontSize": 14,
                   "valueFont": Object {
                     "fontWeight": 700,
                   },
@@ -1865,7 +1868,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
@@ -1901,7 +1904,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
-                  "outerSizeRatio": 1,
+                  "outerSizeRatio": undefined,
                   "sectorLineStroke": undefined,
                   "sectorLineWidth": 1.5,
                 },
@@ -1975,7 +1978,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
             ]
           }
-          id="mosaic"
+          id="waffle"
           layers={
             Array [
               Object {
@@ -1994,7 +1997,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
             ]
           }
-          layout="mosaic"
+          layout="waffle"
           percentFormatter={[Function]}
           smallMultiples="__pie_chart_sm__"
           valueAccessor={[Function]}

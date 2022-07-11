@@ -29,13 +29,8 @@ import {
   AGENT_SELECTION_LABEL,
 } from './translations';
 
-import {
-  AGENT_GROUP_KEY,
-  SelectedGroups,
-  AgentOptionValue,
-  GroupOption,
-  AgentSelection,
-} from './types';
+import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 interface AgentsTableProps {
   agentSelection: AgentSelection;

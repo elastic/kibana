@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
-import { ConsoleProps } from '..';
+import type { ConsoleProps } from '..';
 
 const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
   defaultMessage: 'Show help',
@@ -31,12 +31,18 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
   }, [dispatch, isHelpOpen]);
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
-      <EuiFlexItem grow className="eui-textTruncate">
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="center"
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
+      <EuiFlexItem grow={1} className="eui-textTruncate">
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         <EuiButtonIcon
+          style={{ marginLeft: 'auto' }}
           onClick={handleHelpButtonOnClick}
           iconType="help"
           title={HELP_LABEL}

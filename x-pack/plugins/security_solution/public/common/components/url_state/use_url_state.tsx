@@ -13,7 +13,8 @@ import { useLocation } from 'react-router-dom';
 import { useSetInitialStateFromUrl } from './initialize_redux_by_url';
 
 import { useKibana } from '../../lib/kibana';
-import { CONSTANTS, UrlStateType } from './constants';
+import type { UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
 import {
   getQueryStringFromLocation,
   getParamFromQueryString,
@@ -26,22 +27,20 @@ import {
   isQueryStateEmpty,
   updateTimerangeUrl,
 } from './helpers';
-import {
+import type {
   UrlStateContainerPropTypes,
   ReplaceStateInLocation,
   PreviousLocationUrlState,
   KeyUrlState,
-  ALL_URL_STATE_KEYS,
   UrlStateToRedux,
   UrlState,
-  isAdministration,
   ValueUrlState,
 } from './types';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { UrlInputsModel } from '../../store/inputs/model';
+import { ALL_URL_STATE_KEYS, isAdministration } from './types';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { UrlInputsModel } from '../../store/inputs/model';
 import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
 import { getLinkInfo } from '../../links';
-import { SecurityPageName } from '../../../app/types';
 import { useIsGroupedNavigationEnabled } from '../navigation/helpers';
 
 function usePrevious(value: PreviousLocationUrlState) {
@@ -57,17 +56,16 @@ export const useUrlStateHooks = ({
   navTabs,
   pageName,
   urlState,
-  search,
   pathName,
   history,
 }: UrlStateContainerPropTypes) => {
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
-  const { pathname: browserPathName } = useLocation();
+  const { pathname: browserPathName, search } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState, search });
   const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
 
-  const linkInfo = pageName ? getLinkInfo(pageName as SecurityPageName) : undefined;
+  const linkInfo = pageName ? getLinkInfo(pageName) : undefined;
   const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
     useSetInitialStateFromUrl();
 

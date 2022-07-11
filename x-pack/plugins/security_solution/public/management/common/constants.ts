@@ -6,7 +6,8 @@
  */
 
 import { MANAGEMENT_PATH } from '../../../common/constants';
-import { ManagementStoreGlobalNamespace, AdministrationSubTab } from '../types';
+import type { ManagementStoreGlobalNamespace } from '../types';
+import { AdministrationSubTab } from '../types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
 export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.endpoints})`;
@@ -22,6 +23,7 @@ export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName
 export const MANAGEMENT_ROUTING_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.eventFilters})`;
 export const MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.hostIsolationExceptions})`;
 export const MANAGEMENT_ROUTING_BLOCKLIST_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.blocklist})`;
+export const MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.responseActions})`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */
