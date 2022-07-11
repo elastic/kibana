@@ -67,18 +67,19 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
         if (argName !== argNameAndValueTrimmedString && firstSpaceOrEqualSign) {
           let newArgValue = argNameAndValueTrimmedString
             .substring(firstSpaceOrEqualSign.index + 1)
-            .trim()
-            .replace(/\\/g, '');
+            .trim();
 
           const firstChar = newArgValue.charAt(0);
           const lastChar = newArgValue.charAt(newArgValue.length - 1);
+          const isLastCharEscaped = newArgValue.charAt(newArgValue.length - 2) === '\\';
+          const hasSpaces = newArgValue.includes(' ');
           const validQuotes = ['"', "'"];
           const isEnclosedInQuotes =
             validQuotes.includes(firstChar) && validQuotes.includes(lastChar);
 
           // If the argument value has spaces and it is not enclosed in quotes (single or double),
-          // then generate an error for it
-          if (newArgValue.includes(' ') && !isEnclosedInQuotes) {
+          // Or the quotes surrounding the value are not the same type, then generate an error for it
+          if (hasSpaces && (!isEnclosedInQuotes || firstChar !== lastChar || isLastCharEscaped)) {
             errors.push(
               i18n.translate(
                 'xpack.securitySolution.parsedCommandInput.argValueWithSpacesMustBeInQuotes',
@@ -100,6 +101,40 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           if (validQuotes.includes(lastChar)) {
             newArgValue = newArgValue.substring(0, newArgValue.length - 1);
           }
+
+          if (hasSpaces) {
+            // Any quote in the value that matches the quote that the string was wrapped with must be escaped
+            let hasUnEscapedQuotes = false;
+            let position = 0;
+            const findNextQuote = () => newArgValue.indexOf(firstChar, position);
+            let foundQuoteAt = findNextQuote();
+
+            while (!hasUnEscapedQuotes && foundQuoteAt !== -1) {
+              position = foundQuoteAt + 1;
+
+              if (newArgValue.charAt(foundQuoteAt - 1) !== '\\') {
+                hasUnEscapedQuotes = true;
+                errors.push(
+                  i18n.translate(
+                    'xpack.securitySolution.parsedCommandInput.argValueWithSpacesMustEscapeQuotes',
+                    {
+                      defaultMessage:
+                        'value for {argName} contains quotes ({quoteUsed}) that are not escaped using a backslash (\\\\)',
+                      values: {
+                        argName: `--${argName}`,
+                        quoteUsed: firstChar,
+                      },
+                    }
+                  )
+                );
+              }
+
+              foundQuoteAt = findNextQuote();
+            }
+          }
+
+          // Un-escape all characters
+          newArgValue = newArgValue.replace(/\\/g, '');
 
           response.args[argName].push(newArgValue);
         }

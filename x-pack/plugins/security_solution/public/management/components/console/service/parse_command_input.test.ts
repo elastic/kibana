@@ -70,24 +70,44 @@ describe('when using parsed command input utils', () => {
       );
     });
 
-    it('should report error for unquoted arg values that have spaces', () => {
-      const input = 'foo --one value for one here --two=some more strings for 2';
+    it.each([
+      ['no quotes', '"mixed quotes\''],
+      ['mixed quotes at start/end', '"mixed quotes\''],
+      ['escaped the end quote', "'last quote is escaped\\'"],
+    ])('should report error for input with argument values that have %s', (_, argValue) => {
+      const input = `foo --one ${argValue}`;
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand).toEqual(
         parsedCommandWith({
           input,
-          args: {
-            one: ['value for one here'],
-            two: ['some more strings for 2'],
-          },
+          args: expect.anything(),
+          errors: ['value for --one contains spaces and must be enclosed in quotes.'],
+        })
+      );
+    });
+
+    it.each([
+      ['un-escaped quotes', "'It's 'magic'"],
+      ['miss-matched quotes', '"one" two"'],
+    ])('should error for input with arguments values that have %s', (_, argValue) => {
+      const input = `foo --one ${argValue}`;
+      const parsedCommand = parseCommandInput(input);
+
+      expect(parsedCommand).toEqual(
+        parsedCommandWith({
+          input,
+          args: expect.anything(),
           errors: [
-            'value for --one contains spaces and must be enclosed in quotes.',
-            'value for --two contains spaces and must be enclosed in quotes.',
+            expect.stringMatching(
+              /value for --one contains quotes \(['"]\) that are not escaped using a backslash \(\\\)/
+            ),
           ],
         })
       );
     });
+
+    it.todo('should parse argument shose value have escaped quotes');
 
     it.each([
       ['single quotes', "'"],
