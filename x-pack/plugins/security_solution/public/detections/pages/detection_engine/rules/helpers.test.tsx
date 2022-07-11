@@ -507,9 +507,9 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const rulesInstalled = null;
-      const rulesNotInstalled = null;
-      const rulesNotUpdated = null;
+      const rulesInstalled = undefined;
+      const rulesNotInstalled = undefined;
+      const rulesNotUpdated = undefined;
       const result: string = getPrePackagedRuleStatus(
         rulesInstalled,
         rulesNotInstalled,
@@ -574,9 +574,9 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const timelinesInstalled = null;
-      const timelinesNotInstalled = null;
-      const timelinesNotUpdated = null;
+      const timelinesInstalled = undefined;
+      const timelinesNotInstalled = undefined;
+      const timelinesNotUpdated = undefined;
       const result: string = getPrePackagedTimelineStatus(
         timelinesInstalled,
         timelinesNotInstalled,

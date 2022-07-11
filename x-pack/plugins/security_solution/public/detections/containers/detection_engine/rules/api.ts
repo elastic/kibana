@@ -42,7 +42,6 @@ import type {
   FetchRulesResponse,
   Rule,
   FetchRuleProps,
-  BasicFetchProps,
   ImportDataProps,
   ExportDocumentsProps,
   ImportDataResponse,
@@ -237,9 +236,7 @@ export const performBulkAction = async <Action extends BulkAction>({
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({
-  signal,
-}: BasicFetchProps): Promise<{
+export const createPrepackagedRules = async (): Promise<{
   rules_installed: number;
   rules_updated: number;
   timelines_installed: number;
@@ -252,7 +249,6 @@ export const createPrepackagedRules = async ({
     timelines_updated: number;
   }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
-    signal,
   });
 
   return result;
@@ -401,7 +397,7 @@ export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<st
 export const getPrePackagedRulesStatus = async ({
   signal,
 }: {
-  signal: AbortSignal;
+  signal: AbortSignal | undefined;
 }): Promise<PrePackagedRulesStatusResponse> =>
   KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,

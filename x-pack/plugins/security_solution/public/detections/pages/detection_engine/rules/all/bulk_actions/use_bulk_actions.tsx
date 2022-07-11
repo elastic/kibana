@@ -39,6 +39,7 @@ import {
 } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -62,6 +63,7 @@ export const useBulkActions = ({
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
   const updateRulesCache = useUpdateRulesCache();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
@@ -154,6 +156,10 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
         clearRulesSelection();
       };
 
@@ -176,6 +182,10 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
       };
 
       const handleExportAction = async () => {
@@ -433,6 +443,7 @@ export const useBulkActions = ({
       toasts,
       filterQuery,
       invalidateRules,
+      invalidatePrePackagedRulesStatus,
       confirmDeletion,
       confirmBulkEdit,
       completeBulkEditForm,

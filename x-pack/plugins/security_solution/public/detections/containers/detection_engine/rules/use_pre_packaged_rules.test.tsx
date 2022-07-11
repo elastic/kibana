@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { act, renderHook } from '@testing-library/react-hooks';
+import { shallow } from 'enzyme';
 import type { ReactElement } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { useToasts } from '../../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
+import * as api from './api';
+import * as i18n from './translations';
 import type { ReturnPrePackagedRulesAndTimelines } from './use_pre_packaged_rules';
 import { usePrePackagedRules } from './use_pre_packaged_rules';
-import * as api from './api';
-import { shallow } from 'enzyme';
-import * as i18n from './translations';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -30,10 +32,10 @@ jest.mock('./api', () => ({
 
 describe('usePrePackagedRules', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
-  test('init', async () => {
+  test('initial state', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
         () =>
@@ -43,27 +45,18 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: null,
             hasEncryptionKey: null,
             isSignalIndexExists: null,
-          })
+          }),
+        { wrapper: TestProviders }
       );
 
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
-        getLoadPrebuiltRulesAndTemplatesButton:
-          result.current.getLoadPrebuiltRulesAndTemplatesButton,
-        getReloadPrebuiltRulesAndTemplatesButton:
-          result.current.getReloadPrebuiltRulesAndTemplatesButton,
-        createPrePackagedRules: null,
+        getLoadPrebuiltRulesAndTemplatesButton: expect.any(Function),
+        getReloadPrebuiltRulesAndTemplatesButton: expect.any(Function),
+        createPrePackagedRules: expect.any(Function),
         loading: true,
         loadingCreatePrePackagedRules: false,
-        refetchPrePackagedRulesStatus: null,
-        rulesCustomInstalled: null,
-        rulesInstalled: null,
-        rulesNotInstalled: null,
-        rulesNotUpdated: null,
-        timelinesInstalled: null,
-        timelinesNotInstalled: null,
-        timelinesNotUpdated: null,
       });
     });
   });
@@ -93,7 +86,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: null,
             hasEncryptionKey: null,
             isSignalIndexExists: null,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -106,7 +100,6 @@ describe('usePrePackagedRules', () => {
         createPrePackagedRules: result.current.createPrePackagedRules,
         loading: false,
         loadingCreatePrePackagedRules: false,
-        refetchPrePackagedRulesStatus: result.current.refetchPrePackagedRulesStatus,
         rulesCustomInstalled: 33,
         rulesInstalled: 12,
         rulesNotInstalled: 0,
@@ -119,6 +112,22 @@ describe('usePrePackagedRules', () => {
   });
 
   test('happy path to createPrePackagedRules', async () => {
+    (api.getPrePackagedRulesStatus as jest.Mock).mockResolvedValue({
+      rules_custom_installed: 33,
+      rules_installed: 12,
+      rules_not_installed: 0,
+      rules_not_updated: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
+    });
+    (api.createPrepackagedRules as jest.Mock).mockResolvedValue({
+      rules_installed: 0,
+      rules_updated: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    });
+
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
         () =>
@@ -128,15 +137,12 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(true);
       expect(api.createPrepackagedRules).toHaveBeenCalled();
       expect(result.current).toEqual({
         getLoadPrebuiltRulesAndTemplatesButton:
@@ -146,7 +152,6 @@ describe('usePrePackagedRules', () => {
         createPrePackagedRules: result.current.createPrePackagedRules,
         loading: false,
         loadingCreatePrePackagedRules: false,
-        refetchPrePackagedRulesStatus: result.current.refetchPrePackagedRulesStatus,
         rulesCustomInstalled: 33,
         rulesInstalled: 12,
         rulesNotInstalled: 0,
@@ -183,7 +188,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -223,7 +229,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -265,7 +272,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -307,7 +315,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -348,7 +357,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -389,7 +399,8 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -406,10 +417,7 @@ describe('usePrePackagedRules', () => {
   });
 
   test('unhappy path to createPrePackagedRules', async () => {
-    const spyOnCreatePrepackagedRules = jest.spyOn(api, 'createPrepackagedRules');
-    spyOnCreatePrepackagedRules.mockImplementation(() => {
-      throw new Error('Something went wrong');
-    });
+    (api.createPrepackagedRules as jest.Mock).mockRejectedValue(new Error('Something went wrong'));
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRulesAndTimelines>(
         () =>
@@ -419,16 +427,14 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
-      expect(spyOnCreatePrepackagedRules).toHaveBeenCalled();
+      expect(api.createPrepackagedRules).toHaveBeenCalled();
+      expect(useToasts().addError).toHaveBeenCalled();
     });
   });
 
@@ -442,15 +448,13 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
+      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
     });
   });
 
@@ -464,15 +468,13 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
+      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
     });
   });
 
@@ -486,15 +488,13 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: false,
             hasEncryptionKey: true,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
+      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
     });
   });
 
@@ -508,15 +508,13 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: false,
             isSignalIndexExists: true,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
+      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
     });
   });
 
@@ -530,15 +528,13 @@ describe('usePrePackagedRules', () => {
             isAuthenticated: true,
             hasEncryptionKey: true,
             isSignalIndexExists: false,
-          })
+          }),
+        { wrapper: TestProviders }
       );
       await waitForNextUpdate();
+      result.current.createPrePackagedRules();
       await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
+      expect(api.createPrepackagedRules).not.toHaveBeenCalled();
     });
   });
 });

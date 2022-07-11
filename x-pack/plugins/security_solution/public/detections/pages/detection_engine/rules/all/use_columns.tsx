@@ -42,6 +42,8 @@ import type {
 } from '../../../../../../common/detection_engine/schemas/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidateRules } from '../../../../containers/detection_engine/rules/use_find_rules_query';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -172,22 +174,33 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
-  const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
+  const { setLoadingRules } = useRulesTableContext().actions;
   const { startTransaction } = useStartTransaction();
+  const invalidateRules = useInvalidateRules();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
 
   return useMemo(
     () => ({
-      actions: getRulesTableActions(
+      actions: getRulesTableActions({
         toasts,
         navigateToApp,
-        reFetchRules,
-        hasActionsPrivileges,
+        invalidateRules,
+        invalidatePrePackagedRulesStatus,
+        actionsPrivileges: hasActionsPrivileges,
         setLoadingRules,
-        startTransaction
-      ),
+        startTransaction,
+      }),
       width: '40px',
     }),
-    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, startTransaction, toasts]
+    [
+      hasActionsPrivileges,
+      invalidatePrePackagedRulesStatus,
+      invalidateRules,
+      navigateToApp,
+      setLoadingRules,
+      startTransaction,
+      toasts,
+    ]
   );
 };
 

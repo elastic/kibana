@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
-import { shallow, mount } from 'enzyme';
-
-import '../../../../common/mock/match_media';
-import { PrePackagedRulesPrompt } from './load_empty_prompt';
-import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
-import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { mount } from 'enzyme';
+import React from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { TestProviders } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
+import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
+import { PrePackagedRulesPrompt } from './load_empty_prompt';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -76,7 +76,9 @@ describe('PrePackagedRulesPrompt', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = shallow(<PrePackagedRulesPrompt {...props} />);
+    const wrapper = mount(<PrePackagedRulesPrompt {...props} />, {
+      wrappingComponent: TestProviders,
+    });
 
     expect(wrapper.find('EmptyPrompt')).toHaveLength(1);
   });
@@ -93,7 +95,9 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       timelines_not_updated: 0,
     });
 
-    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
+    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />, {
+      wrappingComponent: TestProviders,
+    });
     await waitFor(() => {
       wrapper.update();
 
@@ -114,7 +118,9 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       timelines_not_updated: 0,
     });
 
-    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
+    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />, {
+      wrappingComponent: TestProviders,
+    });
     await waitFor(() => {
       wrapper.update();
 
@@ -135,7 +141,9 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       timelines_not_updated: 0,
     });
 
-    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
+    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />, {
+      wrappingComponent: TestProviders,
+    });
     await waitFor(() => {
       wrapper.update();
 
@@ -157,7 +165,10 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
     });
 
     const wrapper: ReactWrapper = mount(
-      <PrePackagedRulesPrompt {...{ ...props, loading: true }} />
+      <PrePackagedRulesPrompt {...{ ...props, loading: true }} />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
     await waitFor(() => {
       wrapper.update();

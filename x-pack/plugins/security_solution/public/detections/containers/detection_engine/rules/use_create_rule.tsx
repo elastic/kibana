@@ -15,6 +15,7 @@ import { createRule } from './api';
 import * as i18n from './translations';
 import { transformOutput } from './transforms';
 import { useInvalidateRules } from './use_find_rules_query';
+import { useInvalidatePrePackagedRulesStatus } from './use_pre_packaged_rules_status';
 
 interface CreateRuleReturn {
   isLoading: boolean;
@@ -29,6 +30,7 @@ export const useCreateRule = (): ReturnCreateRule => {
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   const invalidateRules = useInvalidateRules();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -43,6 +45,7 @@ export const useCreateRule = (): ReturnCreateRule => {
             signal: abortCtrl.signal,
           });
           invalidateRules();
+          invalidatePrePackagedRulesStatus();
           if (isSubscribed) {
             setRuleId(createRuleResponse.id);
           }
@@ -62,7 +65,7 @@ export const useCreateRule = (): ReturnCreateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invalidateRules]);
+  }, [rule, addError, invalidateRules, invalidatePrePackagedRulesStatus]);
 
   return [{ isLoading, ruleId }, setRule];
 };

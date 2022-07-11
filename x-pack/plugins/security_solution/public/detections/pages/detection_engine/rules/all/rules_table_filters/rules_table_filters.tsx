@@ -35,8 +35,8 @@ const SearchBarWrapper = styled(EuiFlexItem)`
 `;
 
 interface RulesTableFiltersProps {
-  rulesCustomInstalled: number | null;
-  rulesInstalled: number | null;
+  rulesCustomInstalled?: number;
+  rulesInstalled?: number;
   allTags: string[];
 }
 

@@ -26,6 +26,7 @@ import {
   checkTimelinesStatus,
   checkTimelineStatusRt,
 } from '../../../timeline/utils/check_timelines_status';
+import { rulesToMap } from '../../rules/utils';
 
 export const getPrepackagedRulesStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -63,27 +64,27 @@ export const getPrepackagedRulesStatusRoute = (
           fields: undefined,
         });
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const prepackagedRules = await getExistingPrepackagedRules({
-          rulesClient,
-        });
+        const installedPrePackagedRules = rulesToMap(
+          await getExistingPrepackagedRules({ rulesClient })
+        );
 
-        const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
-        const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
+        const rulesToInstall = getRulesToInstall(latestPrepackagedRules, installedPrePackagedRules);
+        const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, installedPrePackagedRules);
         const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-        const [validatedprepackagedTimelineStatus] = validate(
+        const [validatedPrepackagedTimelineStatus] = validate(
           prepackagedTimelineStatus,
           checkTimelineStatusRt
         );
 
         const prepackagedRulesStatus: PrePackagedRulesAndTimelinesStatusSchema = {
           rules_custom_installed: customRules.total,
-          rules_installed: prepackagedRules.length,
+          rules_installed: installedPrePackagedRules.size,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
-          timelines_installed: validatedprepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
+          timelines_installed: validatedPrepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
           timelines_not_installed:
-            validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0,
-          timelines_not_updated: validatedprepackagedTimelineStatus?.timelinesToUpdate.length ?? 0,
+            validatedPrepackagedTimelineStatus?.timelinesToInstall.length ?? 0,
+          timelines_not_updated: validatedPrepackagedTimelineStatus?.timelinesToUpdate.length ?? 0,
         };
         const [validated, errors] = validate(
           prepackagedRulesStatus,
