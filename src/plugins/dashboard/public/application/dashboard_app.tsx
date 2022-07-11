@@ -67,7 +67,6 @@ export function DashboardApp({
     page: 'app',
     id: savedDashboardId || 'new',
   });
-
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,

@@ -50,6 +50,8 @@ export interface EmbeddablePackageState {
    * Editors could use it continue previous search session
    */
   searchSessionId?: string;
+
+  filters?: Filter[];
 }
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {

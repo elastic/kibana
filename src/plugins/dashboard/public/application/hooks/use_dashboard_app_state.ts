@@ -11,6 +11,7 @@ import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
+import { cloneDeep } from 'lodash';
 import { DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
@@ -113,13 +114,14 @@ export const useDashboardAppState = ({
       DashboardConstants.DASHBOARDS_ID,
       true
     );
+    const filters = incomingEmbeddable?.filters;
 
     let canceled = false;
     let onDestroy: () => void;
 
     /**
      * The dashboard build context is a collection of all of the services and props required in subsequent steps to build the dashboard
-     * from the dashboardId. This build context doesn't contain any extrenuous services.
+     * from the dashboardId. This build context doesn't contain any extraneous services.
      */
     const dashboardBuildContext: DashboardBuildContext = {
       query,
@@ -217,6 +219,9 @@ export const useDashboardAppState = ({
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
+      if (filters) {
+        initialDashboardState.filters = cloneDeep(filters);
+      }
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
       /**

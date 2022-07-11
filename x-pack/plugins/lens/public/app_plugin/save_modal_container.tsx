@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { isFilterPinned } from '@kbn/es-query';
+import { Filter, isFilterPinned } from '@kbn/es-query';
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
@@ -143,11 +143,13 @@ const redirectToDashboard = ({
   dashboardFeatureFlag,
   dashboardId,
   stateTransfer,
+  filters,
 }: {
   embeddableInput: LensEmbeddableInput;
   dashboardId: string;
   dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
   stateTransfer: LensAppServices['stateTransfer'];
+  filters?: Filter[];
 }) => {
   if (!dashboardFeatureFlag.allowByValueEmbeddables) {
     throw new Error('redirectToDashboard called with by-value embeddables disabled');
@@ -156,6 +158,7 @@ const redirectToDashboard = ({
   const state = {
     input: embeddableInput,
     type: LENS_EMBEDDABLE_TYPE,
+    filters,
   };
 
   const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
@@ -216,6 +219,7 @@ export const runSaveLensVisualization = async (
     onAppLeave,
     redirectTo,
     dashboardFeatureFlag,
+    data,
   } = props;
 
   if (!lastKnownDoc) {
@@ -308,6 +312,7 @@ export const runSaveLensVisualization = async (
         dashboardId: saveProps.dashboardId,
         stateTransfer,
         dashboardFeatureFlag,
+        filters: data.query.filterManager.getAppFilters(),
       });
       return;
     }
