@@ -3176,6 +3176,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
@@ -3225,6 +3229,18 @@
   uid ""
 
 "@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-preboot-server-mocks@link:bazel-bin/packages/core/preboot/core-preboot-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server":
   version "0.0.0"
   uid ""
 
@@ -3321,6 +3337,10 @@
   uid ""
 
 "@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
+  version "0.0.0"
+  uid ""
+
+"@kbn/hapi-mocks@link:bazel-bin/packages/kbn-hapi-mocks":
   version "0.0.0"
   uid ""
 
@@ -6727,6 +6747,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6776,6 +6800,18 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server-mocks@link:bazel-bin/packages/core/preboot/core-preboot-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6860,6 +6896,10 @@
   uid ""
 
 "@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__hapi-mocks@link:bazel-bin/packages/kbn-hapi-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 

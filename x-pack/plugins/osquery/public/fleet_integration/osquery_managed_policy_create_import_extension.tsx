@@ -21,21 +21,18 @@ import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import styled from 'styled-components';
 
-import {
-  agentRouteService,
-  agentPolicyRouteService,
-  AgentPolicy,
-  PLUGIN_ID,
-} from '@kbn/fleet-plugin/common';
-import {
-  pagePathGetters,
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { agentRouteService, agentPolicyRouteService, PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
 import { ConfigUploader } from './config_uploader';
+import type { ValidationFunc } from '../shared_imports';
 import {
   Form,
   useForm,
@@ -44,7 +41,6 @@ import {
   getUseField,
   FIELD_TYPES,
   fieldValidators,
-  ValidationFunc,
 } from '../shared_imports';
 import { useFetchStatus } from './use_fetch_status';
 

@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiHealth,
   EuiLink,
@@ -27,7 +27,8 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
 import { ITEMS_PER_PAGE, LastUpdatedAt, SEVERITY_COLOR } from '../utils';
-import { HostAlertsItem, useHostAlertsItems } from './use_host_alerts_items';
+import type { HostAlertsItem } from './use_host_alerts_items';
+import { useHostAlertsItems } from './use_host_alerts_items';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
