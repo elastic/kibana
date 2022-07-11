@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { AnyArtifact, ArtifactInfo } from '../types';
+import type { AnyArtifact, ArtifactInfo } from '../types';
 import { mapToArtifactInfo } from '../utils';
-import { MaybeImmutable } from '../../../../../common/endpoint/types';
+import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 
 /**
  * Takes in any artifact and return back a new data structure used internally with by the card's components

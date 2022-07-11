@@ -358,6 +358,23 @@ export const MonitorManagementListResultCodec = t.type({
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
+export const MonitorOverviewResultCodec = t.type({
+  total: t.number,
+  allMonitorIds: t.array(t.string),
+  pages: t.record(
+    t.number,
+    t.array(
+      t.interface({
+        name: t.string,
+        id: t.string,
+        location: MonitorServiceLocationsCodec,
+      })
+    )
+  ),
+});
+
+export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
+
 export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({
