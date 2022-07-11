@@ -691,7 +691,7 @@ export default ({ getService }: FtrProviderContext) => {
               field: 'keyword',
               operator: 'excluded',
               type: 'wildcard',
-              // Filter out all 4 words
+              // Filter out everything except things matching 'word *'
               value: 'word *',
             },
           ],
@@ -703,7 +703,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
       });
 
-      it('should filter in 3 keyword if using both wildcard exceptions', async () => {
+      it('should filter in 2 keywords if using a wildcard exception', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
         const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
@@ -711,24 +711,16 @@ export default ({ getService }: FtrProviderContext) => {
               field: 'keyword',
               operator: 'excluded',
               type: 'wildcard',
-              value: 'word one',
-            },
-          ],
-          [
-            {
-              field: 'keyword',
-              operator: 'excluded',
-              type: 'wildcard',
-              // Filter in both "word two" and "word three"
+              // Filter out everything except things matching 'word t*'
               value: 'word t*',
             },
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql(['word one', 'word three', 'word two']);
+        expect(hits).to.eql(['word three', 'word two']);
       });
 
       it('should return 1 alert if "word one" is excluded', async () => {
