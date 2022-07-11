@@ -38,5 +38,5 @@ export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [match]);
 }
