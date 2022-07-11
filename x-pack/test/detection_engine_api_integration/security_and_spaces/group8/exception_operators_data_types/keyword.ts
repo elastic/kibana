@@ -593,5 +593,181 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
       });
     });
+
+    describe('"matches wildcard" operator', () => {
+      it('should return 0 alerts if wildcard matches all words', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              // Filter out all 4 words
+              value: 'word *',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([]);
+      });
+
+      it('should return 1 alert if wildcard exceptions match one, two, and three', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'word one',
+            },
+          ],
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              // Filter out both "word two" and "word three"
+              value: 'word t*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql(['word four']);
+      });
+
+      it('should return 3 alerts if one is set as an exception', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              // Without * or ? in the value, it should work the same as the "is" operator
+              value: 'word one',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql(['word four', 'word three', 'word two']);
+      });
+
+      it('should return 4 alerts if the wildcard matches nothing', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'word a*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
+      });
+    });
+
+    describe('"does not match wildcard" operator', () => {
+      it('should return 4 results if excluded wildcard matches all 4 words', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              // Filter out all 4 words
+              value: 'word *',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
+      });
+
+      it('should filter in 3 keyword if using both wildcard exceptions', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: 'word one',
+            },
+          ],
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              // Filter in both "word two" and "word three"
+              value: 'word t*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql(['word one', 'word three', 'word two']);
+      });
+
+      it('should return 1 alert if "word one" is excluded', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              // Without * or ? in the value, it should work the same as the "is not" operator
+              value: 'word one',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql(['word one']);
+      });
+
+      it('should return 0 alerts if it cannot find what it is excluding', async () => {
+        const rule = getRuleForSignalTesting(['keyword']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: 'word a*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([]);
+      });
+    });
   });
 };

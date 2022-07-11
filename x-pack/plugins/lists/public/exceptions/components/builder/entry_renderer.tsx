@@ -228,6 +228,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     // show extra operators for wildcards when field is `file.path.text`
     const isFilePathTextField = entry.field !== undefined && entry.field.name === 'file.path.text';
     const isEventFilterList = listType === 'endpoint_events';
+    // Detection rules exception usage does not pass in operators list
     const augmentedOperatorsList =
       operatorsList && isFilePathTextField && isEventFilterList
         ? operatorsList
@@ -338,13 +339,16 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
-        let os: OperatingSystem = OperatingSystem.WINDOWS;
-        if (osTypes) {
-          [os] = osTypes as OperatingSystem[];
+        let actualWarning: React.ReactNode | string | undefined;
+        if (listType !== 'detection') {
+          let os: OperatingSystem = OperatingSystem.WINDOWS;
+          if (osTypes) {
+            [os] = osTypes as OperatingSystem[];
+          }
+          const warning = validateFilePathInput({ os, value: wildcardValue });
+          actualWarning =
+            warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
         }
-        const warning = validateFilePathInput({ os, value: wildcardValue });
-        const actualWarning =
-          warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
 
         return (
           <AutocompleteFieldWildcardComponent

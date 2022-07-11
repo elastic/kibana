@@ -121,6 +121,7 @@ export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
   isNotOneOfOperator,
   existsOperator,
   doesNotExistOperator,
+  matchesOperator,
 ];
 
 export const EXCEPTION_OPERATORS_ONLY_LISTS: OperatorOption[] = [
