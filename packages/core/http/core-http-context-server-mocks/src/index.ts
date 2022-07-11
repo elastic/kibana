@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type { ContextContainerMock } from './context_container.mock';
+export { contextMock } from './context_container.mock';
+export { contextServiceMock } from './context_service.mock';

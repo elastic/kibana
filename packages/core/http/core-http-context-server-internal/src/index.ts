@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { ContextService } from './context_service';
+export type { InternalContextPreboot, InternalContextSetup } from './context_service';

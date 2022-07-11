@@ -7,9 +7,12 @@
  */
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { RequestHandlerContextBase } from '@kbn/core-http-server';
+import type {
+  RequestHandlerContextBase,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core-http-server';
 import { ContextContainer } from './context_container';
-import { httpServerMock } from '../http/http_server.mocks';
 
 const pluginA = Symbol('pluginA');
 const pluginB = Symbol('pluginB');
@@ -34,6 +37,13 @@ interface MyContext extends RequestHandlerContextBase {
 }
 
 type TestContext<T> = T & RequestHandlerContextBase;
+
+const createKibanaRequest = (): KibanaRequest => {
+  return {} as unknown as KibanaRequest;
+};
+const createKibanaResponseFactory = (): KibanaResponseFactory => {
+  return {} as unknown as KibanaResponseFactory;
+};
 
 describe('ContextContainer', () => {
   describe('registerContext', () => {
@@ -145,8 +155,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       await handler1(request, response);
 
       expect(core1provider).not.toHaveBeenCalled();
@@ -188,8 +198,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       await handler1(request, response);
 
       expect(core1provider).not.toHaveBeenCalled();
@@ -229,8 +239,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       await handler1(request, response);
 
       expect(core1provider).not.toHaveBeenCalled();
@@ -271,8 +281,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       await handler1(request, response);
 
       expect(core1provider).not.toHaveBeenCalled();
@@ -356,8 +366,8 @@ describe('ContextContainer', () => {
 
       const handler2 = contextContainer.createHandler(pluginD, rawHandler2);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
 
       await handler1(request, response);
       await handler2(request, response);
@@ -400,8 +410,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginB, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       expect(await handler1(request, response)).toEqual('handler1');
 
       expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
@@ -430,8 +440,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       expect(await handler1(request, response)).toEqual('handler1');
 
       // If no context is registered for pluginA, only core contexts should be exposed
@@ -454,8 +464,8 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(coreId, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       expect(await handler1(request, response)).toEqual('handler1');
 
       expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
@@ -465,8 +475,8 @@ describe('ContextContainer', () => {
       expect.assertions(7);
       const contextContainer = new ContextContainer(plugins, coreId);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       contextContainer.registerContext<MyContext, 'core1'>(coreId, 'core1', (context, req, res) => {
         expect(req).toBe(request);
         expect(res).toBe(response);
@@ -567,8 +577,8 @@ describe('ContextContainer', () => {
 
         const handler2 = contextContainer.createHandler(pluginD, rawHandler2);
 
-        const request = httpServerMock.createKibanaRequest();
-        const response = httpServerMock.createResponseFactory();
+        const request = createKibanaRequest();
+        const response = createKibanaResponseFactory();
 
         await handler1(request, response);
         await handler2(request, response);
@@ -597,8 +607,8 @@ describe('ContextContainer', () => {
       const rawHandler1 = jest.fn(() => 'handler1' as any);
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       expect(await handler1(request, response)).toEqual('handler1');
     });
 
@@ -608,8 +618,8 @@ describe('ContextContainer', () => {
       const rawHandler1 = jest.fn(() => 'handler1' as any);
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
-      const request = httpServerMock.createKibanaRequest();
-      const response = httpServerMock.createResponseFactory();
+      const request = createKibanaRequest();
+      const response = createKibanaResponseFactory();
       await handler1(request, response);
       expect(rawHandler1).toHaveBeenCalledWith(
         { resolve: expect.any(Function) },

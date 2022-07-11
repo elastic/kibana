@@ -7,8 +7,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import { ContextService, InternalContextSetup, InternalContextPreboot } from './context_service';
+import type {
+  ContextService,
+  InternalContextSetup,
+  InternalContextPreboot,
+} from '@kbn/core-http-context-server-internal';
 import { contextMock } from './context_container.mock';
 
 const createPrebootContractMock = (mockContext = {}) => {
