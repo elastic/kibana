@@ -9,9 +9,10 @@ import React, { useMemo } from 'react';
 import { generatePath, Link, RouteComponentProps } from 'react-router-dom';
 import { EuiTextColor, EuiEmptyPrompt, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import * as t from 'io-ts';
-import type { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { css } from '@emotion/react';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
@@ -20,6 +21,7 @@ import { extractErrorMessage } from '../../../common/utils/helpers';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { SetupStatus } from '../../components/setup_status';
 
 const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
@@ -93,12 +95,13 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   );
 
   return (
-    <CspPageTemplate
-      {...pageProps}
-      query={integrationInfo}
-      errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
-    >
-      <RulesContainer />
+    <CspPageTemplate {...pageProps}>
+      <SetupStatus
+        query={integrationInfo}
+        errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
+      >
+        <RulesContainer />
+      </SetupStatus>
     </CspPageTemplate>
   );
 };
@@ -117,10 +120,11 @@ const extractErrorBodyMessage = (err: unknown) => {
 
 const RulesErrorPrompt = ({ error }: { error: string }) => (
   <EuiEmptyPrompt
-    {...{
-      color: 'danger',
-      iconType: 'alert',
-      title: <h2>{error}</h2>,
-    }}
+    css={css`
+      margin-top: 50px;
+    `}
+    color={'danger'}
+    iconType={'alert'}
+    title={<h2>{error}</h2>}
   />
 );
