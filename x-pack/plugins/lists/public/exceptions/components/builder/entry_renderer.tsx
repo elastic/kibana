@@ -228,7 +228,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     // show extra operators for wildcards when field is `file.path.text`
     const isFilePathTextField = entry.field !== undefined && entry.field.name === 'file.path.text';
     const isEventFilterList = listType === 'endpoint_events';
-    // Detection rules exception usage does not pass in operators list
     const augmentedOperatorsList =
       operatorsList && isFilePathTextField && isEventFilterList
         ? operatorsList
@@ -293,6 +292,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     );
   };
 
+  // eslint-disable-next-line complexity
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
