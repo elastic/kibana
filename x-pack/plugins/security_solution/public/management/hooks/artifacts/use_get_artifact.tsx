@@ -6,8 +6,9 @@
  */
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { QueryObserverResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 export function useGetArtifact(
   exceptionListApiClient: ExceptionsListApiClient,

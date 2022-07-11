@@ -7,18 +7,23 @@
 
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { BaseHit } from '../../../../../../common/detection_engine/types';
+import type { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
-import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import { BaseSignalHit, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
+import type {
+  BaseSignalHit,
+  SignalSource,
+  SignalSourceHit,
+  SimpleHit,
+} from '../../../signals/types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
-import { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 
 const isSourceDoc = (
   hit: SignalSourceHit

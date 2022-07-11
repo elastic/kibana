@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMutation, type UseMutationOptions, type UseMutationResult } from 'react-query';
+import type { UseMutationOptions, UseMutationResult } from 'react-query';
+import { useMutation } from 'react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   ProcessesRequestBody,

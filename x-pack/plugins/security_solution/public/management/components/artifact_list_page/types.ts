@@ -10,7 +10,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
   /** The page number for the list. Must be 1 based. */

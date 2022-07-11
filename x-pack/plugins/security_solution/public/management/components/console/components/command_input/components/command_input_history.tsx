@@ -6,9 +6,10 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiSelectable, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InputHistoryItem } from '../../console_state/types';
+import type { InputHistoryItem } from '../../console_state/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { UserCommandInput } from '../../user_command_input';

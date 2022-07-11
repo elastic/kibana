@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
+import type { QueryObserverResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  type GetAgentPoliciesResponse,
-  type GetPackagesResponse,
-} from '@kbn/fleet-plugin/common';
+import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';

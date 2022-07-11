@@ -6,8 +6,9 @@
  */
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { UseMutationOptions, UseMutationResult } from 'react-query';
+import { useMutation } from 'react-query';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 

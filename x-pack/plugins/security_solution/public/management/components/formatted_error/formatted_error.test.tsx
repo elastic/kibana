@@ -7,7 +7,8 @@
 
 import React from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { FormattedError } from './formatted_error';
 
 describe('When using the `FormattedError` component', () => {
