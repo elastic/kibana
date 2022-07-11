@@ -19,7 +19,7 @@ import {
   mergeSearchResults,
   getSafeSortIds,
 } from './utils';
-import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 // search_after through documents and re-index using bulk endpoint.

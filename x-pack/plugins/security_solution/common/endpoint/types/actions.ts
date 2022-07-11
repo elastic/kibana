@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
@@ -218,7 +218,7 @@ export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.b
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
-export type KillProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
+export type KillOrSuspendProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
 
 export interface HostIsolationResponse {
   action: string;

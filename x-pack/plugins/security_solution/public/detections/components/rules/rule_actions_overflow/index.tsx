@@ -24,7 +24,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getToolTipContent } from '../../../../common/utils/privileges';
-import { Rule } from '../../../containers/detection_engine/rules';
+import type { Rule } from '../../../containers/detection_engine/rules';
 import {
   executeRulesBulkAction,
   goToRuleEditPage,
