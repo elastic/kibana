@@ -99,8 +99,6 @@ export class SavedSearchEmbeddable
 
   private node?: HTMLElement;
 
-  reportsEmbeddableLoad = true;
-
   constructor(
     {
       savedSearch,
@@ -145,6 +143,10 @@ export class SavedSearchEmbeddable
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
+  }
+
+  protected reportsEmbeddableLoad() {
+    return true;
   }
 
   private fetch = async () => {

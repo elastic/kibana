@@ -68,13 +68,6 @@ export interface IEmbeddable<
   readonly deferEmbeddableLoad: boolean;
 
   /**
-   * This should be set to true for any embeddable type that utilizes the `loading` and `rendered`
-   * output variables to notify a container of their loading progress. If set to false, a container should assume
-   * the embeddable is loaded immediately.
-   */
-  readonly reportsEmbeddableLoad: boolean;
-
-  /**
    * Unique ID an embeddable is assigned each time it is initialized. This ID
    * is different for different instances of the same embeddable. For example,
    * if the same dashboard is rendered twice on the screen, all embeddable
@@ -91,6 +84,14 @@ export interface IEmbeddable<
    * If this embeddable has encountered a fatal error, that error will be stored here
    **/
   fatalError?: Error;
+
+  /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): () => boolean;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

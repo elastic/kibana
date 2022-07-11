@@ -215,7 +215,6 @@ export class Embeddable
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
-  reportsEmbeddableLoad = true;
 
   private expressionRenderer: ReactExpressionRendererType;
   private savedVis: Document | undefined;
@@ -349,6 +348,10 @@ export class Embeddable
           this.onContainerStateChanged(input);
         })
     );
+  }
+
+  protected reportsEmbeddableLoad() {
+    return true;
   }
 
   public supportedTriggers() {

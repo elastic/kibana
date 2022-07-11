@@ -120,8 +120,6 @@ export class VisualizeEmbeddable
     VisualizeByReferenceInput
   >;
 
-  reportsEmbeddableLoad = true;
-
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
@@ -181,6 +179,11 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
+
+  protected reportsEmbeddableLoad() {
+    return true;
+  }
+
   public getDescription() {
     return this.vis.description;
   }

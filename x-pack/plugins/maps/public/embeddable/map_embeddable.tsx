@@ -107,7 +107,6 @@ export class MapEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
-  reportsEmbeddableLoad = true;
 
   private _isActive: boolean;
   private _savedMap: SavedMap;
@@ -146,6 +145,10 @@ export class MapEmbeddable
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
     this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
+  }
+
+  protected reportsEmbeddableLoad() {
+    return true;
   }
 
   private async _initializeSaveMap() {
@@ -708,29 +711,38 @@ export class MapEmbeddable
       });
     }
 
-    const layers = getLayerList(this._savedMap.getStore().getState());
-    const isLoading = layers.some((layer) => {
-      return layer.isLayerLoading();
-    });
-    const firstLayerWithError = layers.find((layer) => {
-      return layer.hasErrors();
-    });
-    const output = this.getOutput();
-    if (
-      output.loading !== isLoading ||
-      firstLayerWithError?.getErrors() !== output.error?.message
-    ) {
-      this.updateOutput({
-        ...output,
-        loading: isLoading,
-        rendered: !isLoading && firstLayerWithError === undefined,
-        error: firstLayerWithError
-          ? {
-              name: 'EmbeddableError',
-              message: firstLayerWithError.getErrors(),
-            }
-          : undefined,
+    if (areLayersLoaded(this._savedMap.getStore().getState())) {
+      const layers = getLayerList(this._savedMap.getStore().getState());
+      const isLoading =
+        layers.length === 0 ||
+        layers.some((layer) => {
+          return layer.isLayerLoading();
+        });
+      const firstLayerWithError = layers.find((layer) => {
+        return layer.hasErrors();
       });
+      const output = this.getOutput();
+      if (
+        output.loading !== isLoading ||
+        firstLayerWithError?.getErrors() !== output.error?.message
+      ) {
+        /**
+         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+         * This means that the dashboard-loaded event might be fired while a map is still rendering in some cases.
+         * For more details please contact the maps team.
+         */
+        this.updateOutput({
+          ...output,
+          loading: isLoading,
+          rendered: !isLoading && firstLayerWithError === undefined,
+          error: firstLayerWithError
+            ? {
+                name: 'EmbeddableError',
+                message: firstLayerWithError.getErrors(),
+              }
+            : undefined,
+        });
+      }
     }
   }
 }
