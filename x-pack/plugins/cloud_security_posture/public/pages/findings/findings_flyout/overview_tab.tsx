@@ -128,11 +128,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     try {
       // both cases should not happen, data view is loaded beforehand on findings page, this is mainly to discriminate and as a precaution
       if (!discover.locator || !latestFindingsDataView.data) {
-        throw new Error(
-          i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorMessage', {
-            defaultMessage: 'Index link not found',
-          })
-        );
+        throw new Error();
       }
 
       return await discover.locator.navigate({
@@ -148,7 +144,10 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
         title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorTitle', {
           defaultMessage: 'Error',
         }),
-        body: err.message,
+        body: i18n.translate(
+          'xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorMessage',
+          { defaultMessage: 'Index link not found' }
+        ),
       });
     }
   }, [discover.locator, latestFindingsDataView.data, toasts]);
