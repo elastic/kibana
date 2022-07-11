@@ -2173,6 +2173,31 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/cases/status:
+    get:
+      summary: Returns the number of cases that are open, closed, and in progress.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      tags:
+        - cases
+        - kibana
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags.
@@ -4996,6 +5021,32 @@ paths:
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/status:
+    get:
+      summary: Returns the number of cases that are open, closed, and in progress.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      deprecated: true
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
       servers:
         - url: https://localhost:5601
     servers:
