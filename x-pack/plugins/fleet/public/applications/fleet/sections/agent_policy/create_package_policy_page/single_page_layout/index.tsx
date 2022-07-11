@@ -24,10 +24,7 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
 import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
-import type {
-  CreatePackagePolicyRequest,
-  FleetPackageErrorResponse,
-} from '../../../../../../../common';
+import type { CreatePackagePolicyRequest } from '../../../../../../../common';
 import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
 import type {
   AgentPolicy,
@@ -109,7 +106,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
-  const [verificationError, setVerificationError] = useState<FleetPackageErrorResponse>();
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
@@ -395,7 +391,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         });
       } else {
         if (isVerificationError(error)) {
-          setVerificationError(error);
           setFormState('CONFIRM_FAILED_VERIFICATION');
           return;
         }
@@ -573,7 +568,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <UnverifiedPackageModal
             onConfirm={() => onSubmit({ force: true })}
             onCancel={() => setFormState('VALID')}
-            pkg={verificationError?.attributes?.package}
+            pkg={packageInfo}
           />
         )}
         {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
