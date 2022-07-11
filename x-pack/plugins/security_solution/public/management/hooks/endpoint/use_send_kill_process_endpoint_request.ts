@@ -36,3 +36,7 @@ export const useSendKillProcessRequest = (
     customOptions
   );
 };
+
+
+node scripts/generate package --dir ./packages/core/http/core-http-context-server-internal @kbn/core-http-context-server-internal
+node scripts/generate package --dir ./packages/core/http/core-http-context-server-mocks @kbn/core-http-context-server-mocks
