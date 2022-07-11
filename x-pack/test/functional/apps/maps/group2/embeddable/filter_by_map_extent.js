@@ -8,6 +8,7 @@
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'lens', 'maps']);
 
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const security = getService('security');
@@ -35,7 +36,12 @@ export default function ({ getPageObjects, getService }) {
     it('should filter dashboard by map extent when "filter by map extent" is enabled', async () => {
       const mapPanelHeader = await dashboardPanelActions.getPanelHeading('document example');
       await dashboardPanelActions.openContextMenuMorePanel(mapPanelHeader);
-      await await testSubjects.click('embeddablePanelAction-FILTER_BY_MAP_EXTENT');
+      await testSubjects.click('embeddablePanelAction-FILTER_BY_MAP_EXTENT');
+      await testSubjects.setEuiSwitch(
+        'filterByMapExtentSwitch24ade730-afe4-42b6-919a-c4e0a98c94f2',
+        'check'
+      );
+      await browser.pressKeys(browser.keys.ESCAPE);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.assertMetric('Count of records', '1');
@@ -50,7 +56,12 @@ export default function ({ getPageObjects, getService }) {
     it('should remove map extent filter dashboard when "filter by map extent" is disabled', async () => {
       const mapPanelHeader = await dashboardPanelActions.getPanelHeading('document example');
       await dashboardPanelActions.openContextMenuMorePanel(mapPanelHeader);
-      await await testSubjects.click('embeddablePanelAction-FILTER_BY_MAP_EXTENT');
+      await testSubjects.click('embeddablePanelAction-FILTER_BY_MAP_EXTENT');
+      await testSubjects.setEuiSwitch(
+        'filterByMapExtentSwitch24ade730-afe4-42b6-919a-c4e0a98c94f2',
+        'uncheck'
+      );
+      await browser.pressKeys(browser.keys.ESCAPE);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.assertMetric('Count of records', '6');
     });

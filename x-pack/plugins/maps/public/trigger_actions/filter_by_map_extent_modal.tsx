@@ -45,6 +45,7 @@ export class FilterByMapExtentModal extends Component<Props> {
               this.forceUpdate();
             }}
             compressed
+            data-test-subj={`filterByMapExtentSwitch${mapPanel.id}`}
           />
         </EuiFormRow>
       );
