@@ -17,7 +17,7 @@ import {
   translationTransformation,
 } from '../../lib/transformation';
 import * as scalingConstants from './scaling_constants';
-import { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
+import type { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
 
 export interface ClippingPlanes {
   renderWidth: number;

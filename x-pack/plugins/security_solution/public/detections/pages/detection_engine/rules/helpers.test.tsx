@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import type { GetStepsData } from './helpers';
 import {
-  GetStepsData,
   getDefineStepsData,
   getScheduleStepsData,
   getStepsData,
@@ -24,8 +24,8 @@ import {
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
 
-import { Rule } from '../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../containers/detection_engine/rules';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
