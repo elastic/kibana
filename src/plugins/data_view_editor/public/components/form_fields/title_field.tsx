@@ -15,7 +15,7 @@ import {
   ValidationConfig,
   FieldConfig,
 } from '../../shared_imports';
-import { canAppendWildcard } from '../../lib';
+import { canAppendWildcard, removeSpaces } from '../../lib';
 import { schema } from '../form_schema';
 import {
   MatchedItem,
@@ -81,7 +81,9 @@ const createMatchesIndicesValidator = ({
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
-    const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(value);
+    const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(
+      removeSpaces(value)
+    );
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
     if (matchedIndicesResult.exactMatchedIndices.length === 0) {
