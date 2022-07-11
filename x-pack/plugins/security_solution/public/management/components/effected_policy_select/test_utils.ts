@@ -6,7 +6,7 @@
  */
 
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
 
 /**
  * Forces the `offsetWidth` of `HTMLElement` to a given value. Needed due to the use of

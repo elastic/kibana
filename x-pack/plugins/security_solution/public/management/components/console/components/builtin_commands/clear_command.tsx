@@ -7,7 +7,7 @@
 
 import { memo, useEffect } from 'react';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
-import { CommandExecutionComponentProps } from '../../types';
+import type { CommandExecutionComponentProps } from '../../types';
 
 export const ClearCommand = memo<CommandExecutionComponentProps>(({ status, setStatus }) => {
   const dispatch = useConsoleStateDispatch();
