@@ -12,7 +12,7 @@ import { getSupportedActions, RuleActionsField } from '.';
 import { useForm, Form } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormFieldMock } from '../../../../common/mock';
-import { ActionType } from '@kbn/actions-plugin/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleActionsField', () => {

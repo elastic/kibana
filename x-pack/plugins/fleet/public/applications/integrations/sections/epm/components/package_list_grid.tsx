@@ -39,6 +39,7 @@ export interface Props {
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
+  showCardLabels?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<Props> = ({
@@ -52,6 +53,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   showMissingIntegrationMessage = false,
   featuredList = null,
   callout,
+  showCardLabels = true,
 }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
@@ -104,6 +106,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       <GridColumn
         list={filteredList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
+        showCardLabels={showCardLabels}
       />
     );
   }
@@ -180,16 +183,21 @@ function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
 interface GridColumnProps {
   list: IntegrationCardItem[];
   showMissingIntegrationMessage?: boolean;
+  showCardLabels?: boolean;
 }
 
-function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
+function GridColumn({
+  list,
+  showMissingIntegrationMessage = false,
+  showCardLabels = false,
+}: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
         list.map((item) => {
           return (
             <EuiFlexItem key={item.id}>
-              <PackageCard {...item} />
+              <PackageCard {...item} showLabels={showCardLabels} />
             </EuiFlexItem>
           );
         })

@@ -87,12 +87,29 @@ async function updateTagsBatch(
 ): Promise<{ items: BulkActionResult[] }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
+  const getNewTags = (agent: Agent): string[] => {
+    const existingTags = agent.tags ?? [];
+
+    if (tagsToAdd.length === 1 && tagsToRemove.length === 1) {
+      const removableTagIndex = existingTags.indexOf(tagsToRemove[0]);
+      if (removableTagIndex > -1) {
+        const newTags = uniq([
+          ...existingTags.slice(0, removableTagIndex),
+          tagsToAdd[0],
+          ...existingTags.slice(removableTagIndex + 1),
+        ]);
+        return newTags;
+      }
+    }
+    return uniq(difference(existingTags, tagsToRemove).concat(tagsToAdd));
+  };
+
   await bulkUpdateAgents(
     esClient,
     givenAgents.map((agent) => ({
       agentId: agent.id,
       data: {
-        tags: uniq(difference(agent.tags ?? [], tagsToRemove).concat(tagsToAdd)),
+        tags: getNewTags(agent),
       },
     }))
   );
