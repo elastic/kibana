@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { UsersTableType } from '../store/model';
-import { UsersNavTab } from './navigation/types';
+import type { UsersNavTab } from './navigation/types';
 import { USERS_PATH } from '../../../common/constants';
 
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;

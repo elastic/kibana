@@ -12,9 +12,9 @@ import { NetworkDnsTable } from '../../components/network_dns_table';
 import { useNetworkDns, ID } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
-import { NetworkComponentQueryProps } from './types';
+import type { NetworkComponentQueryProps } from './types';
 
-import {
+import type {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';

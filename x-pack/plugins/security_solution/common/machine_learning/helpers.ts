@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
 const enabledStates = ['started', 'opened'];

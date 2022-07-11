@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   GetAggregateRuleExecutionEventsResponse,
   GetInstalledIntegrationsResponse,
   RulesSchema,
@@ -14,7 +14,7 @@ import {
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { savedRuleMock, rulesMock } from '../mock';
 
-import {
+import type {
   PatchRuleProps,
   CreateRulesProps,
   UpdateRulesProps,
