@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { StartServicesAccessor, Logger } from '@kbn/core/server';
-import { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import type { StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
-import { SecuritySolutionPluginRouter } from '../types';
+import type { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -55,19 +55,19 @@ import { persistNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
-import { SetupPlugins, StartPlugins } from '../plugin';
-import { ConfigType } from '../config';
-import { ITelemetryEventsSender } from '../lib/telemetry/sender';
+import type { SetupPlugins, StartPlugins } from '../plugin';
+import type { ConfigType } from '../config';
+import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
-import {
+import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
 } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
-import { ITelemetryReceiver } from '../lib/telemetry/receiver';
+import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 

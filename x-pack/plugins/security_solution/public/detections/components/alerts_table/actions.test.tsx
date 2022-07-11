@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import moment from 'moment';
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
 import {
@@ -19,8 +19,8 @@ import {
   mockTimelineResult,
   mockAADEcsDataWithAlert,
 } from '../../../common/mock';
-import { CreateTimeline, UpdateTimelineLoading } from './types';
-import { Ecs } from '../../../../common/ecs';
+import type { CreateTimeline, UpdateTimelineLoading } from './types';
+import type { Ecs } from '../../../../common/ecs';
 import {
   TimelineId,
   TimelineType,

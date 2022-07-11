@@ -6,8 +6,8 @@
  */
 
 import uuid from 'uuid';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleParams } from '../schemas/rule_schemas';
 import { duplicateRule } from './duplicate_rule';
 
 jest.mock('uuid', () => ({

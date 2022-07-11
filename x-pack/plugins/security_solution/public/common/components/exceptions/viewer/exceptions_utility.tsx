@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
-import { ExceptionsPagination } from '../types';
+import type { ExceptionsPagination } from '../types';
 import {
   UtilityBar,
   UtilityBarSection,

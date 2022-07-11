@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Store, createStore } from 'redux';
-import { CameraAction } from './action';
-import { CameraState } from '../../types';
+import type { Store } from 'redux';
+import { createStore } from 'redux';
+import type { CameraAction } from './action';
+import type { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { projectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../models/vector2';

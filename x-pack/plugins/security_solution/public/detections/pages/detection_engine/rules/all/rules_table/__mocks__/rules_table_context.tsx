@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RulesTableContextType } from '../rules_table_context';
+import type { RulesTableContextType } from '../rules_table_context';
 
 export const useRulesTableContextMock = {
   create: (): jest.Mocked<RulesTableContextType> => ({
@@ -51,6 +51,7 @@ export const useRulesTableContextMock = {
       setPerPage: jest.fn(),
       setSelectedRuleIds: jest.fn(),
       setSortingOptions: jest.fn(),
+      clearRulesSelection: jest.fn(),
     },
   }),
 };

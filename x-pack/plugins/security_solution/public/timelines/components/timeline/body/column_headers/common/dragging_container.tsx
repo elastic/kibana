@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FC, memo, useEffect } from 'react';
+import type { FC } from 'react';
+import { memo, useEffect } from 'react';
 
 interface DraggingContainerProps {
   children: JSX.Element;

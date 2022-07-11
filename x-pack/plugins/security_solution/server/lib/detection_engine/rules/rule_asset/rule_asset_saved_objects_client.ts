@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { ruleAssetSavedObjectType } from './rule_asset_saved_object_mappings';
-import { IRuleAssetSavedObject } from '../types';
+import type { IRuleAssetSavedObject } from '../types';
 
 const DEFAULT_PAGE_SIZE = 100;
 

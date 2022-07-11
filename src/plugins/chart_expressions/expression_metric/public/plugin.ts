@@ -15,6 +15,8 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { metricVisFunction } from '../common';
 import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
+import { setThemeService } from './services/theme_service';
+import { setUiSettingsService } from './services/ui_settings';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -34,15 +36,17 @@ export class ExpressionMetricPlugin implements Plugin {
     core: CoreSetup<ExpressionMetricPluginStart, void>,
     { expressions, charts }: ExpressionMetricPluginSetup
   ) {
-    charts.palettes.getPalettes().then((palettes) => {
-      setPaletteService(palettes);
-    });
     const getStartDeps = createStartServicesGetter<ExpressionMetricPluginStart, void>(
       core.getStartServices
     );
 
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer({ getStartDeps }));
+
+    setUiSettingsService(core.uiSettings);
+    setThemeService(charts.theme);
+    const palettes = await charts.palettes.getPalettes();
+    setPaletteService(palettes);
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {

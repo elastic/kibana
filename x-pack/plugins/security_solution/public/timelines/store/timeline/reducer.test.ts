@@ -6,19 +6,21 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import {
-  ColumnHeaderOptions,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
   TimelineId,
 } from '../../../../common/types/timeline';
 
+import type {
+  DataProvider,
+  DataProvidersAnd,
+} from '../../components/timeline/data_providers/data_provider';
 import {
   IS_OPERATOR,
-  DataProvider,
   DataProviderType,
-  DataProvidersAnd,
 } from '../../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
@@ -48,9 +50,9 @@ import {
   upsertTimelineColumn,
   updateGraphEventId,
 } from './helpers';
-import { TimelineModel } from './model';
+import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
-import { TimelineById } from './types';
+import type { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
