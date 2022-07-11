@@ -89,7 +89,7 @@ Review the following information about the {kib} 8.3.1 release.
 
 [discrete]
 [[known-issue-133965]]
-.URL arguments cause API requests to fail
+.URL arguments cause API requests in Dev Tools to fail
 [%collapsible]
 ====
 *Details* +
