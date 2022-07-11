@@ -45,7 +45,6 @@ const getTestUtils = (
         params: {},
         created_by: null,
         scheduled_task_id: response.body.scheduled_task_id,
-        snooze_schedule: response.body.snooze_schedule,
         updated_by: null,
         api_key_owner: null,
         throttle: '1m',

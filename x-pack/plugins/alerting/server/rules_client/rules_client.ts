@@ -2661,7 +2661,7 @@ export class RulesClient {
         ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
       },
     }));
-    const includeSnoozeSchedule = snoozeSchedule !== undefined;
+    const includeSnoozeSchedule = snoozeSchedule !== undefined && excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,

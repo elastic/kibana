@@ -64,7 +64,6 @@ const findTestUtils = (
         created_by: null,
         api_key_owner: null,
         scheduled_task_id: match.scheduled_task_id,
-        snooze_schedule: match.snooze_schedule,
         updated_by: null,
         throttle: '1m',
         notify_when: 'onThrottleInterval',
