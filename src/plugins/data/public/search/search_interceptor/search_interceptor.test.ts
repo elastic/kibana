@@ -548,6 +548,7 @@ describe('SearchInterceptor', () => {
               sessionId,
               isStored: true,
               isRestore: true,
+              isSearchStored: false,
               strategy: 'ese',
             },
           })
@@ -736,7 +737,7 @@ describe('SearchInterceptor', () => {
         sessionService.trackSearch.mockImplementation(() => ({
           complete: trackSearchComplete,
           error: () => {},
-          polled: () => {},
+          beforePoll: () => [{ isSearchStored: false }, () => {}],
         }));
 
         const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });

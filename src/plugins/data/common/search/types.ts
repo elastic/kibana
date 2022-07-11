@@ -131,6 +131,11 @@ export interface ISearchOptions {
   isStored?: boolean;
 
   /**
+   * Whether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended.
+   */
+  isSearchStored?: boolean;
+
+  /**
    * Whether the session is restored (i.e. search requests should re-use the stored search IDs,
    * rather than starting from scratch)
    */
@@ -155,5 +160,11 @@ export interface ISearchOptions {
  */
 export type ISearchOptionsSerializable = Pick<
   ISearchOptions,
-  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore' | 'executionContext'
+  | 'strategy'
+  | 'legacyHitsTotal'
+  | 'sessionId'
+  | 'isStored'
+  | 'isSearchStored'
+  | 'isRestore'
+  | 'executionContext'
 >;

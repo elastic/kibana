@@ -392,19 +392,6 @@ export class SearchSessionService
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
 
-    let isIdTracked = false;
-    try {
-      const hasId = await this.checkId(deps, user, searchRequest, options);
-      isIdTracked = hasId;
-    } catch (e) {
-      this.logger.warn(
-        `trackId | Error while checking if search is already tracked by a session object: "${e?.message}". Continue assuming not tracked.`
-      );
-    }
-
-    // no need to update search saved object if id is already tracked in a session object
-    if (isIdTracked) return;
-
     let idMapping: Record<string, SearchSessionRequestInfo> = {};
 
     if (searchRequest.params) {
@@ -463,30 +450,6 @@ export class SearchSessionService
     this.logger.debug(`getId | ${sessionId} | ${requestHash}`);
 
     return session.attributes.idMapping[requestHash].id;
-  };
-
-  /**
-   * Look up an existing search ID that matches the given request in the given session
-   * @internal
-   */
-  public checkId = async (
-    deps: SearchSessionDependencies,
-    user: AuthenticatedUser | null,
-    searchRequest: IKibanaSearchRequest,
-    { sessionId, isStored }: ISearchOptions
-  ): Promise<boolean> => {
-    if (!this.sessionConfig.enabled) {
-      throw new Error('Search sessions are disabled');
-    } else if (!sessionId) {
-      throw new Error('Session ID is required');
-    } else if (!isStored) {
-      throw new Error('Cannot check search ID from a session that is not stored');
-    }
-
-    const session = await this.get(deps, user, sessionId);
-    const requestHash = createRequestHash(searchRequest.params);
-
-    return session.attributes.idMapping.hasOwnProperty(requestHash);
   };
 
   public asScopedProvider = ({ savedObjects, elasticsearch }: CoreStart) => {

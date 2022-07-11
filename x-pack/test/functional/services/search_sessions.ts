@@ -31,6 +31,7 @@ export class SearchSessionsService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly supertest = this.ctx.getService('supertest');
+  private readonly es = this.ctx.getService('es');
 
   public async find(): Promise<WebElementWrapper> {
     return this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
@@ -173,5 +174,15 @@ export class SearchSessionsService extends FtrService {
       this.browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
       this.browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
     ]);
+  }
+
+  public async getAsyncSearchStatus(asyncSearchId: string) {
+    const asyncSearchStatus = await this.es.asyncSearch.status({ id: asyncSearchId });
+    return asyncSearchStatus;
+  }
+
+  public async getAsyncSearchExpirationTime(asyncSearchId: string): Promise<number> {
+    const asyncSearchStatus = await this.getAsyncSearchStatus(asyncSearchId);
+    return Number(asyncSearchStatus.expiration_time_in_millis);
   }
 }

@@ -392,18 +392,29 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 !(options.isRestore && searchRequest.id) // and not restoring already tracked search
               ) {
                 // then track this search inside the search-session saved object
-                return from(deps.searchSessionsClient.trackId(request, response.id, options)).pipe(
-                  map(() => ({
+
+                // check if search was already tracked and extended, don't track again in this case
+                if (options.isSearchStored) {
+                  return of({
                     ...response,
                     isStored: true,
-                  })),
-                  catchError((e) => {
-                    this.logger.error(
-                      `Error while trying to track search id: ${e?.message}. This might lead to untracked long-running search.`
-                    );
-                    return of(response);
-                  })
-                );
+                  });
+                } else {
+                  return from(
+                    deps.searchSessionsClient.trackId(request, response.id, options)
+                  ).pipe(
+                    map(() => ({
+                      ...response,
+                      isStored: true,
+                    })),
+                    catchError((e) => {
+                      this.logger.error(
+                        `Error while trying to track search id: ${e?.message}. This might lead to untracked long-running search.`
+                      );
+                      return of(response);
+                    })
+                  );
+                }
               } else {
                 return of(response);
               }

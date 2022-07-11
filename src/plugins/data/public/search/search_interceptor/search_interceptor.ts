@@ -210,6 +210,8 @@ export class SearchInterceptor {
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
     if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
+    if (combined.isSearchStored !== undefined)
+      serializableOptions.isSearchStored = combined.isSearchStored;
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
@@ -229,15 +231,27 @@ export class SearchInterceptor {
     const { sessionId, strategy } = options;
 
     const search = () => {
-      searchTracker?.polled();
+      const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
+        { isSearchStored: false },
+        ({ isSearchStored: boolean }) => {},
+      ];
       return this.runSearch(
         { id, ...request },
         {
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal: searchAbortController.getSignal(),
+          isSearchStored,
         }
-      );
+      )
+        .then((result) => {
+          afterPoll({ isSearchStored: result.isStored ?? false });
+          return result;
+        })
+        .catch((err) => {
+          afterPoll({ isSearchStored: false });
+          throw err;
+        });
     };
 
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
