@@ -55,8 +55,7 @@ type PossibleStepNumbers = 1 | 2 | 3 | 4;
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const context = useFormContext();
-  const { isValid, validateFields } = context;
+  const { isValid, validateFields } = useFormContext();
   const [currentStep, setCurrentStep] = useState<PossibleStepNumbers>(1);
   const [stati, setStati] = useState<Record<string, EuiStepStatus>>({
     step1: 'incomplete',
