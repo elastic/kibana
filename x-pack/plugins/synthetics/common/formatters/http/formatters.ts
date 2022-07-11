@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { HTTPFields, ConfigKey } from '../types';
+import { tlsFormatters } from '../tls/formatters';
+import { HTTPFields, ConfigKey } from '../../runtime_types/monitor_management';
+
 import {
   Formatter,
   commonFormatters,
   objectToJsonFormatter,
   arrayToJsonFormatter,
 } from '../common/formatters';
-import { tlsFormatters } from '../tls/formatters';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 

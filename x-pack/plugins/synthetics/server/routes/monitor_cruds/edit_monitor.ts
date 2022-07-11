@@ -127,15 +127,12 @@ export const syncEditedMonitor = async ({
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
   server: UptimeServerSetup;
 }) => {
-  const errors = await server.syntheticsService.pushConfigs(
-    [
-      formatHeartbeatRequest({
-        monitor: editedMonitor,
-        monitorId: editedMonitorSavedObject.id,
-        customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
-      }),
-    ],
-    true
+  const errors = await server.syntheticsService.editConfig(
+    formatHeartbeatRequest({
+      monitor: editedMonitor,
+      monitorId: editedMonitorSavedObject.id,
+      customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+    })
   );
 
   sendTelemetryEvents(

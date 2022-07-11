@@ -53,14 +53,19 @@ export const ManifestLocationCodec = t.interface({
   status: LocationStatusCodec,
 });
 
-export const ServiceLocationCodec = t.interface({
-  id: t.string,
-  label: t.string,
-  geo: LocationGeoCodec,
-  url: t.string,
-  isServiceManaged: t.boolean,
-  status: LocationStatusCodec,
-});
+export const ServiceLocationCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    label: t.string,
+    geo: LocationGeoCodec,
+    url: t.string,
+    isServiceManaged: t.boolean,
+    status: LocationStatusCodec,
+  }),
+  t.partial({
+    isInvalid: t.boolean,
+  }),
+]);
 
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
@@ -71,6 +76,7 @@ export const MonitorServiceLocationCodec = t.intersection([
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
+    isInvalid: t.boolean,
   }),
 ]);
 

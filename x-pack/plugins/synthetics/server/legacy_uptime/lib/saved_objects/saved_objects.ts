@@ -8,6 +8,7 @@
 import { SavedObjectsErrorHelpers, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { privateLocationsSavedObject } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { secretKeys } from '../../../../common/constants/monitor_management';
 import { DynamicSettings } from '../../../../common/runtime_types';
@@ -23,6 +24,7 @@ export const registerUptimeSavedObjects = (
   isServiceEnabled: boolean
 ) => {
   savedObjectsService.registerType(umDynamicSettings);
+  savedObjectsService.registerType(privateLocationsSavedObject);
 
   if (isServiceEnabled) {
     savedObjectsService.registerType(syntheticsMonitor);

@@ -41,7 +41,7 @@ export function AddIntegrationButton(props: AddIntegrationButtonProps) {
   return (
     <EuiButtonWithTooltip
       fill
-      isDisabled={!userCanInstallPackages}
+      isDisabled={!userCanInstallPackages || packageName !== 'Elastic Synthetics'}
       iconType="plusInCircle"
       href={href}
       onClick={(e) => onClick(e)}

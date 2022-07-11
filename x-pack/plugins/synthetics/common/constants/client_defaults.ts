@@ -44,7 +44,7 @@ export const CLIENT_DEFAULTS = {
   STATUS_FILTER: '',
 };
 
-export const EXCLUDE_RUN_ONCE_FILTER = { bool: { must_not: { exists: { field: 'run_once' } } } };
+export const EXCLUDE_RUN_ONCE_FILTER = { bool: { must_not: { term: { run_once: true } } } };
 export const SUMMARY_FILTER = {
   exists: {
     field: 'summary',

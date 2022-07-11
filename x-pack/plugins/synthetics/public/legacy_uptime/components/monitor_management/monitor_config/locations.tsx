@@ -65,18 +65,25 @@ export const ServiceLocations = ({
     <EuiFormRow label={LOCATIONS_LABEL} error={errorMessage} isInvalid={errorMessage !== null}>
       <EuiCheckboxGroup
         options={locations.map((location) => {
-          const badge =
+          let badge =
             location.status !== LocationStatus.GA ? (
               <EuiBadge color="warning">Tech Preview</EuiBadge>
             ) : null;
+          if (!location.isServiceManaged) {
+            badge = <EuiBadge color="primary">Private</EuiBadge>;
+          }
+          const invalidBadge = location.isInvalid ? (
+            <EuiBadge color="danger">Invalid</EuiBadge>
+          ) : null;
           const label = (
             <EuiText size="s" data-test-subj={`syntheticsServiceLocationText--${location.id}`}>
-              {location.label} {badge}
+              {location.label} {badge} {invalidBadge}
             </EuiText>
           );
           return {
             ...location,
             label,
+            disabled: Boolean(location.isInvalid),
             'data-test-subj': `syntheticsServiceLocation--${location.id}`,
           };
         })}

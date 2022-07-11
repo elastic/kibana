@@ -56,6 +56,7 @@ describe('validateMonitor', () => {
     testCommonFields = {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
+      [ConfigKey.CONFIG_ID]: 'test-monitor-id',
       [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
@@ -173,7 +174,7 @@ describe('validateMonitor', () => {
       [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
       [ConfigKey.SOURCE_ZIP_PROXY_URL]: 'http://proxy-url.com',
       [ConfigKey.PARAMS]: '',
-      [ConfigKey.URLS]: null,
+      [ConfigKey.URLS]: undefined,
       [ConfigKey.PORT]: null,
     };
 

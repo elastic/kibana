@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommonFields, MonitorFields, ConfigKey } from '../types';
+import { CommonFields, ConfigKey, MonitorFields } from '../../runtime_types/monitor_management';
 
 export type Formatter = null | ((fields: Partial<MonitorFields>) => string | null);
 
@@ -16,6 +16,8 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,
+  [ConfigKey.CONFIG_ID]: null,
+  [ConfigKey.RUN_ONCE]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`

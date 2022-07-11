@@ -49,6 +49,7 @@ import { hydrateSavedObjects } from './hydrate_saved_object';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 
 import { normalizeSecrets } from './utils/secrets';
+import { SyntheticsPrivateLocation } from './private_location/synthetics_private_location';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -59,6 +60,8 @@ export class SyntheticsService {
   private logger: Logger;
   private readonly server: UptimeServerSetup;
   public apiClient: ServiceAPIClient;
+
+  public privateLocationAPI: SyntheticsPrivateLocation;
 
   private readonly config: ServiceConfig;
   private readonly esHosts: string[];
@@ -88,9 +91,11 @@ export class SyntheticsService {
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
     this.locations = [];
+    this.privateLocationAPI = new SyntheticsPrivateLocation(this.server);
   }
 
   public async init() {
+    await this.privateLocationAPI.init();
     await this.registerServiceLocations();
 
     const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
@@ -116,7 +121,8 @@ export class SyntheticsService {
             this.indexTemplateExists = false;
           }
         },
-        () => {
+        (e) => {
+          this.logger.error(e);
           this.indexTemplateInstalling = false;
           this.logger.warn(new IndexTemplateInstallationError());
         }
@@ -251,6 +257,14 @@ export class SyntheticsService {
   async addConfig(config: SyntheticsConfig) {
     const monitors = this.formatConfigs([config]);
 
+    if (monitors.length > 0) {
+      try {
+        await this.privateLocationAPI.createMonitor(config);
+      } catch (e) {
+        this.logger.error(e);
+      }
+    }
+
     this.apiKey = await this.getApiKey();
 
     if (!this.apiKey) {
@@ -266,6 +280,36 @@ export class SyntheticsService {
 
     try {
       this.syncErrors = await this.apiClient.post(data);
+      return this.syncErrors;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async editConfig(monitorConfig: SyntheticsConfig) {
+    const monitors = this.formatConfigs([monitorConfig]);
+
+    try {
+      await this.privateLocationAPI.editMonitor(monitorConfig);
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
+    const data = {
+      monitors,
+      output: await this.getOutput(this.apiKey),
+      isEdit: true,
+    };
+
+    try {
+      this.syncErrors = await this.apiClient.put(data);
       return this.syncErrors;
     } catch (e) {
       this.logger.error(e);
@@ -315,6 +359,7 @@ export class SyntheticsService {
     if (monitors.length === 0) {
       return;
     }
+
     this.apiKey = await this.getApiKey();
 
     if (!this.apiKey) {
@@ -360,6 +405,14 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
+    if (configs.length > 0) {
+      try {
+        await this.privateLocationAPI.deleteMonitor(configs[0]);
+      } catch (e) {
+        this.logger.error(e);
+      }
+    }
+
     this.apiKey = await this.getApiKey();
 
     if (!this.apiKey) {

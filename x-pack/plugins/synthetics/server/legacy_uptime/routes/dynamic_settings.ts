@@ -62,6 +62,14 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMS
           bcc: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      fleetLocations: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            policyHostId: schema.string(),
+          })
+        )
+      ),
     }),
   },
   writeAccess: true,

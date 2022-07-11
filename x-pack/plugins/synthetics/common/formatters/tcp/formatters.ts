@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TCPFields, ConfigKey } from '../types';
+import { TCPFields, ConfigKey } from '../../runtime_types/monitor_management';
+
 import { Formatter, commonFormatters, objectToJsonFormatter } from '../common/formatters';
 import { tlsFormatters } from '../tls/formatters';
 

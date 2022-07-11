@@ -71,6 +71,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
+    [ConfigKey.CONFIG_ID]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
@@ -78,6 +79,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
+    [ConfigKey.RUN_ONCE]: t.boolean,
   }),
 ]);
 
@@ -229,7 +231,7 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.PARAMS]: t.string,
-    [ConfigKey.URLS]: t.union([t.string, t.null]),
+    [ConfigKey.URLS]: t.union([t.string, t.undefined]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   ZipUrlTLSFieldsCodec,

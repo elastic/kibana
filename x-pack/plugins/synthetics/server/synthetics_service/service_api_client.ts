@@ -165,9 +165,8 @@ export class ServiceAPIClient {
     const promises: Array<Observable<unknown>> = [];
 
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = allMonitors.filter(
-        ({ locations }) =>
-          !locations || locations.length === 0 || locations?.find((loc) => loc.id === id)
+      const locMonitors = allMonitors.filter(({ locations }) =>
+        locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
         promises.push(

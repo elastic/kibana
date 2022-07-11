@@ -65,6 +65,7 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.NAME]: (fields) => fields?.[ConfigKey.NAME]?.value ?? '',
   [ConfigKey.LOCATIONS]: getCommonNormalizer(ConfigKey.LOCATIONS),
   [ConfigKey.ENABLED]: getCommonNormalizer(ConfigKey.ENABLED),
+  [ConfigKey.RUN_ONCE]: getCommonNormalizer(ConfigKey.RUN_ONCE),
   [ConfigKey.MONITOR_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_TYPE),
   [ConfigKey.LOCATIONS]: getCommonNormalizer(ConfigKey.LOCATIONS),
   [ConfigKey.SCHEDULE]: (fields) => {
@@ -84,6 +85,7 @@ export const commonNormalizers: CommonNormalizerMap = {
     }
   },
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
+  [ConfigKey.CONFIG_ID]: getCommonNormalizer(ConfigKey.CONFIG_ID),
   [ConfigKey.TAGS]: getCommonjsonToJavascriptNormalizer(ConfigKey.TAGS),
   [ConfigKey.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKey.TIMEOUT),
   [ConfigKey.NAMESPACE]: (fields) =>
