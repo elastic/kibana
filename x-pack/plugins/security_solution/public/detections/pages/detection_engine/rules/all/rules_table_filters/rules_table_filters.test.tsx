@@ -15,10 +15,7 @@ jest.mock('../rules_table/rules_table_context');
 
 describe('RulesTableFilters', () => {
   it('renders no numbers next to rule type button filter if none exist', async () => {
-    const wrapper = mount(
-      <RulesTableFilters rulesCustomInstalled={null} rulesInstalled={null} allTags={[]} />,
-      { wrappingComponent: TestProviders }
-    );
+    const wrapper = mount(<RulesTableFilters allTags={[]} />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('[data-test-subj="showElasticRulesFilterButton"]').at(0).text()).toEqual(
       'Elastic rules'

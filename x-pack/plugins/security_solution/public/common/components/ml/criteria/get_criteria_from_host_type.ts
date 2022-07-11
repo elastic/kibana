@@ -6,7 +6,7 @@
  */
 
 import { HostsType } from '../../../../hosts/store/model';
-import { CriteriaFields } from '../types';
+import type { CriteriaFields } from '../types';
 
 export const getCriteriaFromHostType = (
   type: HostsType,

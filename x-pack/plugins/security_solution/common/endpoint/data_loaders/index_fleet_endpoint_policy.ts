@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
-import {
-  AGENT_POLICY_API_ROUTES,
+import type { KbnClient } from '@kbn/test';
+import type { AxiosResponse } from 'axios';
+import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -17,9 +15,9 @@ import {
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
   DeletePackagePoliciesResponse,
-  PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
-import { PolicyData } from '../types';
+import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
 import { wrapErrorAndRejectPromise } from './utils';
 
