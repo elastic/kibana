@@ -6,7 +6,8 @@
  */
 
 import { AgentGrouper } from './agent_grouper';
-import { AGENT_GROUP_KEY, Group, GroupedAgent, GroupOptionValue } from './types';
+import type { Group, GroupedAgent, GroupOptionValue } from './types';
+import { AGENT_GROUP_KEY } from './types';
 import uuid from 'uuid';
 import { ALL_AGENTS_LABEL } from './translations';
 

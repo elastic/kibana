@@ -7,8 +7,8 @@
 
 import '../../../mock/match_media';
 import * as i18n from './translations';
-import { AnomaliesBy, Anomaly } from '../types';
-import { Columns } from '../../paginated_table';
+import type { AnomaliesBy, Anomaly } from '../types';
+import type { Columns } from '../../paginated_table';
 import React from 'react';
 import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';

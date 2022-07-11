@@ -9,18 +9,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { flatMap, get } from 'lodash';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
-import {
-  AggregateRuleExecutionEvent,
-  RuleExecutionStatus,
-} from '../../../../../../common/detection_engine/schemas/common';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/schemas/response';
-import {
+import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { AggregateRuleExecutionEvent } from '../../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/schemas/response';
+import type {
   ExecutionEventAggregationOptions,
   ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
-  EXECUTION_UUID_FIELD,
 } from './types';
+import { EXECUTION_UUID_FIELD } from './types';
 
 // Base ECS fields
 const ACTION_FIELD = 'event.action';

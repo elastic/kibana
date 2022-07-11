@@ -31,6 +31,8 @@ import {
   XYState,
   FormulaPublicApi,
   YAxisMode,
+  MinIndexPatternColumn,
+  MaxIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -51,6 +53,7 @@ import {
   MetricOption,
   ParamFilter,
   SeriesConfig,
+  SupportedOperations,
   UrlFilter,
   URLReportDefinition,
 } from '../types';
@@ -287,20 +290,18 @@ export class LensAttributes {
     sourceField: string;
     columnType?: string;
     columnFilter?: ColumnFilter;
-    operationType?: string;
+    operationType?: SupportedOperations | 'last_value';
     label?: string;
     seriesConfig: SeriesConfig;
   }) {
     if (columnType === 'operation' || operationType) {
       if (
-        operationType === 'median' ||
-        operationType === 'average' ||
-        operationType === 'sum' ||
-        operationType === 'unique_count'
+        operationType &&
+        ['median', 'average', 'sum', 'min', 'max', 'unique_count'].includes(operationType)
       ) {
         return this.getNumberOperationColumn({
           sourceField,
-          operationType,
+          operationType: operationType as SupportedOperations,
           label,
           seriesConfig,
           columnFilter,
@@ -361,11 +362,13 @@ export class LensAttributes {
     columnFilter,
   }: {
     sourceField: string;
-    operationType: 'average' | 'median' | 'sum' | 'unique_count';
+    operationType: SupportedOperations;
     label?: string;
     seriesConfig: SeriesConfig;
     columnFilter?: ColumnFilter;
   }):
+    | MinIndexPatternColumn
+    | MaxIndexPatternColumn
     | AvgIndexPatternColumn
     | MedianIndexPatternColumn
     | SumIndexPatternColumn
@@ -398,7 +401,7 @@ export class LensAttributes {
       lensColumns[`y-axis-column-${i}`] = {
         ...this.getColumnBasedOnType({
           sourceField: mainSourceField!,
-          operationType: PERCENTILE_RANKS[i],
+          operationType: PERCENTILE_RANKS[i] as SupportedOperations,
           label: mainLabel,
           layerConfig,
           layerId,
@@ -499,7 +502,7 @@ export class LensAttributes {
     layerId,
   }: {
     sourceField: string;
-    operationType?: OperationType;
+    operationType?: SupportedOperations;
     label?: string;
     layerId: string;
     layerConfig: LayerConfig;
@@ -584,6 +587,7 @@ export class LensAttributes {
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
     if (sourceField === REPORT_METRIC_FIELD) {
       const {
+        palette,
         fieldName,
         columnType,
         columnLabel,
@@ -594,6 +598,7 @@ export class LensAttributes {
       } = parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
       return {
+        palette,
         fieldMeta,
         fieldName,
         columnType,
@@ -635,7 +640,9 @@ export class LensAttributes {
       label,
       layerConfig,
       colIndex: 0,
-      operationType: breakdown === PERCENTILE ? PERCENTILE_RANKS[0] : operationType,
+      operationType: (breakdown === PERCENTILE
+        ? PERCENTILE_RANKS[0]
+        : operationType) as SupportedOperations,
       layerId,
     });
   }
@@ -675,7 +682,7 @@ export class LensAttributes {
 
       lensColumns[`y-axis-column-${i}`] = this.getColumnBasedOnType({
         sourceField: sourceField!,
-        operationType,
+        operationType: operationType as SupportedOperations,
         label,
         layerConfig,
         colIndex: i,
@@ -891,40 +898,53 @@ export class LensAttributes {
   }
 
   getDataLayers(): XYState['layers'] {
-    const dataLayers = this.layerConfigs.map((layerConfig, index) => ({
-      accessors: [
-        `y-axis-column-layer${index}`,
-        ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
-      ],
-      layerId: `layer${index}`,
-      layerType: 'data' as any,
-      seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
-      palette: layerConfig.seriesConfig.palette,
-      yConfig: layerConfig.seriesConfig.yConfig || [
-        {
-          forAccessor: `y-axis-column-layer${index}`,
-          color: layerConfig.color,
-          /* if the fields format matches the field format of the first layer, use the default y axis (right)
-           * if not, use the secondary y axis (left) */
-          axisMode:
-            layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
-            this.layerConfigs[0].indexPattern.fieldFormatMap[
-              this.layerConfigs[0].selectedMetricField
-            ]?.id
-              ? ('left' as YAxisMode)
-              : ('right' as YAxisMode),
-        },
-      ],
-      xAccessor: `x-axis-column-layer${index}`,
-      ...(layerConfig.breakdown &&
-      layerConfig.breakdown !== PERCENTILE &&
-      layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-        ? { splitAccessor: `breakdown-column-layer${index}` }
-        : {}),
-      ...(this.layerConfigs[0].seriesConfig.yTitle
-        ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
-        : {}),
-    }));
+    const dataLayers = this.layerConfigs.map((layerConfig, index) => {
+      const { sourceField } = layerConfig.seriesConfig.yAxisColumns[0];
+
+      let palette = layerConfig.seriesConfig.palette;
+
+      if (sourceField) {
+        const fieldMeta = this.getFieldMeta(sourceField, layerConfig);
+        if (fieldMeta.palette) {
+          palette = fieldMeta.palette;
+        }
+      }
+
+      return {
+        accessors: [
+          `y-axis-column-layer${index}`,
+          ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
+        ],
+        layerId: `layer${index}`,
+        layerType: 'data' as any,
+        seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
+        palette: palette ?? layerConfig.seriesConfig.palette,
+        yConfig: layerConfig.seriesConfig.yConfig || [
+          {
+            forAccessor: `y-axis-column-layer${index}`,
+            color: layerConfig.color,
+            /* if the fields format matches the field format of the first layer, use the default y axis (right)
+             * if not, use the secondary y axis (left) */
+            axisMode:
+              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+              this.layerConfigs[0].indexPattern.fieldFormatMap[
+                this.layerConfigs[0].selectedMetricField
+              ]?.id
+                ? ('left' as YAxisMode)
+                : ('right' as YAxisMode),
+          },
+        ],
+        xAccessor: `x-axis-column-layer${index}`,
+        ...(layerConfig.breakdown &&
+        layerConfig.breakdown !== PERCENTILE &&
+        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+          ? { splitAccessor: `breakdown-column-layer${index}` }
+          : {}),
+        ...(this.layerConfigs[0].seriesConfig.yTitle
+          ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
+          : {}),
+      };
+    });
 
     const referenceLineLayers: XYState['layers'] = [];
 
