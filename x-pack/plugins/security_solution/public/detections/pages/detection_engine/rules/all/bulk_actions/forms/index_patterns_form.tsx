@@ -14,11 +14,10 @@ import * as i18n from '../../../translations';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../../common/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
-import {
-  BulkActionEditType,
-  BulkActionEditPayload,
-} from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
+import type { FormSchema } from '../../../../../../../shared_imports';
 import {
   Field,
   getUseField,
@@ -26,7 +25,6 @@ import {
   useForm,
   FIELD_TYPES,
   fieldValidators,
-  FormSchema,
 } from '../../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

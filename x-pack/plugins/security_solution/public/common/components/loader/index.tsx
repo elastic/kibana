@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
+import type {
   // @ts-expect-error
   EuiLoadingSpinnerSize,
-  EuiText,
 } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
 import styled, { css } from 'styled-components';
