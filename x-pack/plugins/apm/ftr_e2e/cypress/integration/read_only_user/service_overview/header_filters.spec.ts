@@ -89,7 +89,7 @@ describe('Service overview - header filters', () => {
       );
     });
 
-    it('calls APIs with correct transaction type', () => {
+    it.skip('calls APIs with correct transaction type', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
