@@ -15,7 +15,6 @@ import { API_BASE_PATH } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   const {
     createComponentTemplate,
