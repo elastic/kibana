@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchNews, getNewsFeedUrl, getNewsItemsFromApiResponse } from './helpers';
 import { useKibana, useUiSetting$, KibanaServices } from '../../lib/kibana';
 import { NewsFeed } from './news_feed';
-import { NewsItem } from './types';
+import type { NewsItem } from './types';
 
 export const StatefulNewsFeed = React.memo<{
   enableNewsFeedSetting: string;

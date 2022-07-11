@@ -21,12 +21,8 @@ import { buildGlobalQuery } from '../helpers';
 import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
-import {
-  QueryBarTimeline,
-  QueryBarTimelineComponentProps,
-  getDataProviderFilter,
-  TIMELINE_FILTER_DROP_AREA,
-} from '.';
+import type { QueryBarTimelineComponentProps } from '.';
+import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from '.';
 import { waitFor } from '@testing-library/dom';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;

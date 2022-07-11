@@ -8,11 +8,12 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { Direction } from '../../../../common/search_strategy';
-import { FirstLastSeenProps } from '../../components/first_last_seen/first_last_seen';
+import type { FirstLastSeenProps } from '../../components/first_last_seen/first_last_seen';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
-import { UseFirstLastSeen, useFirstLastSeen } from './use_first_last_seen';
+import type { UseFirstLastSeen } from './use_first_last_seen';
+import { useFirstLastSeen } from './use_first_last_seen';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_app_toasts');

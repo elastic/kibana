@@ -11,7 +11,7 @@ import { buildRouteValidationNonExact } from '../../../../utils/build_validation
 import { patchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';

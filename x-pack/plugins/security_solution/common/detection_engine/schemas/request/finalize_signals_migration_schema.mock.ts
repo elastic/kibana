@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FinalizeSignalsMigrationSchema } from './finalize_signals_migration_schema';
+import type { FinalizeSignalsMigrationSchema } from './finalize_signals_migration_schema';
 
 export const getFinalizeSignalsMigrationSchemaMock = (): FinalizeSignalsMigrationSchema => ({
   migration_ids: ['migrationSOIdentifier'],

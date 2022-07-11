@@ -6,7 +6,8 @@
  */
 
 import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { migrateSavedQueryIdToReferences, SavedQueryId } from './timelines';
+import type { SavedQueryId } from './timelines';
+import { migrateSavedQueryIdToReferences } from './timelines';
 
 describe('timeline migrations', () => {
   describe('7.16.0 savedQueryId', () => {

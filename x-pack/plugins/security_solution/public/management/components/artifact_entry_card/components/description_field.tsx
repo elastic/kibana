@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
-import { CommonProps } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { memo } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { TextValueDisplay, TextValueDisplayProps } from './text_value_display';
+import type { TextValueDisplayProps } from './text_value_display';
+import { TextValueDisplay } from './text_value_display';
 
 export type DescriptionFieldProps = PropsWithChildren<{}> &
   Pick<CommonProps, 'data-test-subj'> &

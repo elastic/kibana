@@ -61,6 +61,7 @@ export enum FIELD_FORMAT_IDS {
   BOOLEAN = 'boolean',
   BYTES = 'bytes',
   COLOR = 'color',
+  CURRENCY = 'currency',
   CUSTOM = 'custom',
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
