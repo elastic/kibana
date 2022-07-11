@@ -8,6 +8,7 @@
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsTable, IndicatorsTableProps } from './indicators_table';
+import { TestProvidersComponent } from '../../../../common/test_providers';
 
 const stub = () => {};
 
@@ -37,7 +38,11 @@ const indicatorsFixture = [
 describe('<IndicatorsTable />', () => {
   it('should render loading spinner on first load', async () => {
     await act(async () => {
-      render(<IndicatorsTable {...tableProps} firstLoad={true} />);
+      render(
+        <TestProvidersComponent>
+          <IndicatorsTable {...tableProps} firstLoad={true} />
+        </TestProvidersComponent>
+      );
     });
 
     expect(screen.queryByRole('progressbar')).toBeInTheDocument();
@@ -46,12 +51,14 @@ describe('<IndicatorsTable />', () => {
   it('should render datagrid when first load is done', async () => {
     await act(async () => {
       render(
-        <IndicatorsTable
-          {...tableProps}
-          firstLoad={false}
-          indicatorCount={indicatorsFixture.length}
-          indicators={indicatorsFixture}
-        />
+        <TestProvidersComponent>
+          <IndicatorsTable
+            {...tableProps}
+            firstLoad={false}
+            indicatorCount={indicatorsFixture.length}
+            indicators={indicatorsFixture}
+          />
+        </TestProvidersComponent>
       );
     });
 
