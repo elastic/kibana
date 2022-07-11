@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  NetworkTopNFlowStrategyResponse,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy';
+import type { NetworkTopNFlowStrategyResponse } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 export const mockData: NetworkTopNFlowStrategyResponse = {
   totalCount: 524,

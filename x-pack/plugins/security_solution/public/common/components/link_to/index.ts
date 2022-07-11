@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import { useGetUrlSearch, useGetUrlStateQueryString } from '../navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 import { useAppUrl } from '../../lib/kibana/hooks';
-import { SecurityNavKey } from '../navigation/types';
+import type { SecurityNavKey } from '../navigation/types';
 import { SecurityPageName } from '../../../app/types';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';

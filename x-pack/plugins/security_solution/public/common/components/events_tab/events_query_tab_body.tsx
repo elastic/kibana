@@ -8,8 +8,8 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { Filter } from '@kbn/es-query';
-import { TimelineId } from '../../../../common/types/timeline';
+import type { Filter } from '@kbn/es-query';
+import type { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { eventsDefaultModel } from '../events_viewer/default_model';
@@ -26,10 +26,10 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/hosts/events';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
-import { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
-import { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
-import { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
+import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
+import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
