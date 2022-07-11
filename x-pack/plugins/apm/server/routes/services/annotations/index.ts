@@ -7,8 +7,8 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup } from '../../../lib/helpers/setup_request';
+import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
@@ -32,6 +32,9 @@ export async function getServiceAnnotations({
   start: number;
   end: number;
 }) {
+  // Variable to store any error happened on getDerivedServiceAnnotations other than RequestAborted
+  let derivedAnnotationError: Error | undefined;
+
   // start fetching derived annotations (based on transactions), but don't wait on it
   // it will likely be significantly slower than the stored annotations
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
@@ -41,6 +44,10 @@ export async function getServiceAnnotations({
     searchAggregatedTransactions,
     start,
     end,
+  }).catch((error) => {
+    // Save Error and wait for Stored annotations before re-throwing it
+    derivedAnnotationError = error;
+    return [];
   });
 
   const storedAnnotations = annotationsClient
@@ -56,10 +63,14 @@ export async function getServiceAnnotations({
     : [];
 
   if (storedAnnotations.length) {
-    derivedAnnotationsPromise.catch(() => {
-      // handle error silently to prevent Kibana from crashing
-    });
     return { annotations: storedAnnotations };
+  }
+
+  // At this point storedAnnotations returned an empty array,
+  // so if derivedAnnotationError is not undefined throws the error reported by getDerivedServiceAnnotations
+  // and there's no reason to await the function anymore
+  if (derivedAnnotationError) {
+    throw derivedAnnotationError;
   }
 
   return {
