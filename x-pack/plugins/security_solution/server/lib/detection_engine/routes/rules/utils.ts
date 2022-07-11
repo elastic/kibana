@@ -7,23 +7,25 @@
 
 import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
-import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Action } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
-import { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
-import { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
-import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { RuleAlertType, isAlertType } from '../../rules/types';
-import { createBulkErrorObject, BulkError, OutputError } from '../utils';
+import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
+import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import type { RuleAlertType } from '../../rules/types';
+import { isAlertType } from '../../rules/types';
+import type { BulkError, OutputError } from '../utils';
+import { createBulkErrorObject } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import type { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
 
 type PromiseFromStreams = ImportRulesSchema | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
