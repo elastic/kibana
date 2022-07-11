@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RulesTableContextType } from '../rules_table_context';
+import type { RulesTableContextType } from '../rules_table_context';
 
 export const useRulesTableContextMock = {
   create: (): jest.Mocked<RulesTableContextType> => ({

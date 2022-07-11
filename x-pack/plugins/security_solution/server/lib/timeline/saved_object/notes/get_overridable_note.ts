@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NoteResult, SavedNote } from '../../../../../common/types/timeline/note';
-import { FrameworkRequest } from '../../../framework';
+import type { NoteResult, SavedNote } from '../../../../../common/types/timeline/note';
+import type { FrameworkRequest } from '../../../framework';
 import { getNote } from './saved_object';
 
 /**

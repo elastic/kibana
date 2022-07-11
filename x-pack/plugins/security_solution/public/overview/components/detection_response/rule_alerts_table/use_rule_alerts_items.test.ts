@@ -14,11 +14,8 @@ import {
   severityRuleAlertsResponseParsed,
   to,
 } from './mock_data';
-import {
-  useRuleAlertsItems,
-  UseRuleAlertsItems,
-  UseRuleAlertsItemsProps,
-} from './use_rule_alerts_items';
+import type { UseRuleAlertsItems, UseRuleAlertsItemsProps } from './use_rule_alerts_items';
+import { useRuleAlertsItems } from './use_rule_alerts_items';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);

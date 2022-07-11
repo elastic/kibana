@@ -11,8 +11,8 @@ import { mount } from 'enzyme';
 import { PolicyFormLayout } from './policy_form_layout';
 import '../../../../../../common/mock/match_media';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import {
-  AppContextTestRender,
   createAppRootMockRenderer,
   resetReactDomCreatePortalMock,
 } from '../../../../../../common/mock/endpoint';

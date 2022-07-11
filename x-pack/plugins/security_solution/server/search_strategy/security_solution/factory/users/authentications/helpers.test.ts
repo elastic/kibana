@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticationsEdges } from '../../../../../../common/search_strategy';
+import type { AuthenticationsEdges } from '../../../../../../common/search_strategy';
 import { formatAuthenticationData } from './helpers';
 import { mockHit } from './__mocks__';
 

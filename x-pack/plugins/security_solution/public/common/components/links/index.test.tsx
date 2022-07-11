@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
+import type { ReactWrapper, ShallowWrapper } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
