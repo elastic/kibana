@@ -6,7 +6,7 @@
  */
 
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
@@ -64,6 +64,7 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
+  spec?: DataViewSpec;
 }
 
 export type IndexPatternField = FieldSpec & {
@@ -83,10 +84,13 @@ export interface IndexPatternLayer {
 }
 
 export interface IndexPatternPersistedState {
-  layers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>>;
+  layers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'> & { adHocDataViewId?: string }>;
+  adHocIndexPatterns?: Record<string, DataViewSpec>;
 }
 
-export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId'>;
+export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId'> & {
+  adHocDataViewId?: string;
+};
 
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
@@ -109,6 +113,7 @@ export interface IndexPatternRef {
   id: string;
   title: string;
   name?: string;
+  adHoc?: boolean;
 }
 
 export interface DataViewDragDropOperation extends DragDropOperation {

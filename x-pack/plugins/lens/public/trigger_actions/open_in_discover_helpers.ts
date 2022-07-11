@@ -55,7 +55,11 @@ export async function execute({
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
-  const dataView = await dataViews.get(args.indexPatternId);
+  const dataView = await dataViews.get(
+    typeof args.indexPatternIdOrSpec === 'string'
+      ? args.indexPatternIdOrSpec
+      : args.indexPatternIdOrSpec.id!
+  );
   let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters
@@ -69,6 +73,7 @@ export async function execute({
   }
   const discoverUrl = discover.locator?.getRedirectUrl({
     ...args,
+    indexPatternId: args.indexPatternIdOrSpec,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
   });

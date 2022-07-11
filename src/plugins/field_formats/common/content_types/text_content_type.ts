@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isFunction } from 'lodash';
 import { IFieldFormat, TextContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString } from '../utils';
 
@@ -17,7 +16,7 @@ export const setup = (
   convert: TextContextTypeConvert = asPrettyString
 ): TextContextTypeConvert => {
   const recurse: TextContextTypeConvert = (value, options) => {
-    if (!value || !isFunction(value.map)) {
+    if (!value || typeof value.map !== 'function') {
       return convert.call(format, value, options);
     }
 

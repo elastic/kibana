@@ -43,7 +43,7 @@ export interface LensEmbeddableStartServices {
   usageCollection?: UsageCollectionSetup;
   documentToExpression: (
     doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined; dataViewIds: string[] }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;

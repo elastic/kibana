@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
@@ -15,7 +16,7 @@ export type TriggerToActionsRegistry = Map<string, string[]>;
 
 export interface VisualizeFieldContext {
   fieldName: string;
-  indexPatternId: string;
+  dataView: DataViewSpec;
   contextualFields?: string[];
   originatingApp?: string;
 }

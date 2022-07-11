@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _, { each, reject } from 'lodash';
+import _, { cloneDeep, each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
@@ -297,7 +297,9 @@ export class DataView implements DataViewBase {
     };
 
     // Filter any undefined values from the spec
-    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+    return cloneDeep(
+      Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'))
+    );
   }
 
   /**

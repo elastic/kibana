@@ -84,7 +84,7 @@ export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
   doc: Document
-): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
+): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined; dataViewIds: string[] }> {
   const {
     state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
     visualizationType,
@@ -95,12 +95,14 @@ export async function persistedStateToExpression(
   if (!visualizationType) {
     return {
       ast: null,
+      dataViewIds: [],
       errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
     };
   }
   if (!visualizations[visualizationType]) {
     return {
       ast: null,
+      dataViewIds: [],
       errors: [getUnknownVisualizationTypeError(visualizationType)],
     };
   }
@@ -124,6 +126,7 @@ export async function persistedStateToExpression(
   if (datasourceId == null) {
     return {
       ast: null,
+      dataViewIds: [],
       errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
     };
   }
@@ -136,6 +139,7 @@ export async function persistedStateToExpression(
   if (indexPatternValidation) {
     return {
       ast: null,
+      dataViewIds: [],
       errors: indexPatternValidation,
     };
   }
@@ -148,6 +152,12 @@ export async function persistedStateToExpression(
     { datasourceLayers }
   );
 
+  const dataViewIds = new Set<string>();
+
+  Object.entries(datasourceStates).forEach(([dId, datasourceState]) => {
+    dataViewIds.add(datasourceMap[dId].getCurrentIndexPatternId(datasourceState.state));
+  });
+
   return {
     ast: buildExpression({
       title,
@@ -159,6 +169,7 @@ export async function persistedStateToExpression(
       datasourceLayers,
     }),
     errors: validationResult,
+    dataViewIds: [...dataViewIds],
   };
 }
 

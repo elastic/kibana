@@ -41,7 +41,7 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
       trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-      triggerVisualizeActions(visualizeInfo.field, indexPattern.id, details.columns);
+      triggerVisualizeActions(visualizeInfo.field, indexPattern, details.columns);
     };
 
     return (

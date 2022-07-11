@@ -112,8 +112,15 @@ export const selectSavedObjectFormat = createSelector(
       references.push(...savedObjectReferences);
     });
 
+    const adHocFilters = filters
+      .filter((f) => !references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index))
+      .map((f) => ({ ...f, meta: { ...f.meta, value: undefined } }));
+    const referencedFilters = filters.filter((f) =>
+      references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index)
+    );
+
     const { state: persistableFilters, references: filterReferences } =
-      extractFilterReferences(filters);
+      extractFilterReferences(referencedFilters);
 
     references.push(...filterReferences);
 
@@ -127,7 +134,7 @@ export const selectSavedObjectFormat = createSelector(
       state: {
         visualization: visualization.state,
         query,
-        filters: persistableFilters,
+        filters: [...persistableFilters, ...adHocFilters],
         datasourceStates: persistibleDatasourceStates,
       },
     };

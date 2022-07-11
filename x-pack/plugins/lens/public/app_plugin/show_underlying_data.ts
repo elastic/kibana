@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
 
@@ -46,7 +47,7 @@ function joinQueries(queries: Query[][]) {
 }
 
 interface LayerMetaInfo {
-  id: string;
+  idOrSpec: string | DataViewSpec;
   columns: string[];
   filters: Record<
     'enabled' | 'disabled',
@@ -132,7 +133,7 @@ export function getLayerMetaInfo(
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
   return {
     meta: {
-      id: datasourceAPI.getSourceId()!,
+      idOrSpec: datasourceAPI.getSourceId()!,
       columns: uniqueFields,
       filters: filtersOrError,
     },
@@ -189,7 +190,9 @@ export function combineQueryAndFilters(
   // make a copy as the original filters are readonly
   const newFilters = [...filters];
 
-  const dataView = dataViews?.find(({ id }) => id === meta.id);
+  const dataView = dataViews?.find(
+    ({ id }) => id === (typeof meta.idOrSpec === 'string' ? meta.idOrSpec : meta.idOrSpec.id!)
+  );
 
   const hasQueriesInFiltersLanguage = Boolean(
     meta.filters.enabled[filtersLanguage]?.length || queries[filtersLanguage].length
@@ -204,7 +207,7 @@ export function combineQueryAndFilters(
     // Create new filter to encode the rest of the query information
     newFilters.push(
       buildCustomFilter(
-        meta.id!,
+        typeof meta.idOrSpec === 'string' ? meta.idOrSpec : meta.idOrSpec.id!,
         buildEsQuery(
           dataView,
           { language: filtersLanguage, query: queryExpression },
@@ -233,7 +236,7 @@ export function combineQueryAndFilters(
       }
       newFilters.push(
         buildCustomFilter(
-          meta.id!,
+          typeof meta.idOrSpec === 'string' ? meta.idOrSpec : meta.idOrSpec.id!,
           buildEsQuery(dataView, disabledQuery, [], esQueryConfig),
           true,
           false,

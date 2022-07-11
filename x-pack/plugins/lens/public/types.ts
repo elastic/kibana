@@ -23,7 +23,7 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -32,6 +32,7 @@ import type {
 import { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
+import type { Document } from './persistence/saved_object_store';
 import type {
   LensSortActionData,
   LensResizeActionData,
@@ -287,7 +288,7 @@ export interface Datasource<T = unknown, P = unknown> {
     dataView: DataView | string;
     state: T;
     setState: StateSetter<T>;
-  }) => void;
+  }) => Promise<void>;
 
   refreshIndexPatternsList?: (props: { indexPatternId: string; setState: StateSetter<T> }) => void;
 
@@ -375,7 +376,7 @@ export interface DatasourcePublicAPI {
   /**
    * Retrieve the specific source id for the current state
    */
-  getSourceId: () => string | undefined;
+  getSourceId: () => string | DataViewSpec | undefined;
   /**
    * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */
@@ -1036,4 +1037,5 @@ export type LensTopNavMenuEntryGenerator = (props: {
   query: Query;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;

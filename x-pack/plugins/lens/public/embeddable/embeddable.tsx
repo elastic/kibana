@@ -43,7 +43,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
   IBasePath,
@@ -116,7 +116,7 @@ export interface LensEmbeddableDeps {
   data: DataPublicPluginStart;
   documentToExpression: (
     doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined; dataViewIds: string[] }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -140,7 +140,7 @@ export interface LensEmbeddableDeps {
 }
 
 export interface ViewUnderlyingDataArgs {
-  indexPatternId: string;
+  indexPatternIdOrSpec: string | DataViewSpec;
   timeRange: TimeRange;
   filters: Filter[];
   query: Query | undefined;
@@ -151,10 +151,11 @@ const getExpressionFromDocument = async (
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
-  const { ast, errors } = await documentToExpression(document);
+  const { ast, errors, dataViewIds } = await documentToExpression(document);
   return {
     expression: ast ? toExpression(ast) : null,
     errors,
+    dataViewIds,
   };
 };
 
@@ -200,7 +201,7 @@ function getViewUnderlyingDataArgs({
   );
 
   return {
-    indexPatternId: meta.id,
+    indexPatternIdOrSpec: meta.idOrSpec,
     timeRange,
     filters: newFilters,
     query: newQuery,
@@ -429,14 +430,15 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    const { expression, errors } = await getExpressionFromDocument(
+    const { expression, errors, dataViewIds } = await getExpressionFromDocument(
       this.savedVis,
       this.deps.documentToExpression
     );
     this.expression = expression;
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
-    await this.initializeOutput();
+    await this.initializeOutput(dataViewIds);
+
     this.isInitialized = true;
   }
 
@@ -743,13 +745,17 @@ export class Embeddable
     return this.loadViewUnderlyingDataArgs();
   }
 
-  async initializeOutput() {
+  async initializeOutput(dataViewIds: string[]) {
     if (!this.savedVis) {
       return;
     }
+    const allDataViewIds = new Set([
+      ...(this.savedVis?.references.map(({ id }) => id) || []),
+      ...dataViewIds,
+    ]);
 
     const { indexPatterns } = await getIndexPatternsObjects(
-      this.savedVis?.references.map(({ id }) => id) || [],
+      [...allDataViewIds],
       this.deps.indexPatternService
     );
 

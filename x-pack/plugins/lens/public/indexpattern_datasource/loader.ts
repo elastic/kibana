@@ -9,7 +9,7 @@ import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import { isNestedField } from '@kbn/data-views-plugin/common';
+import { DataViewSpec, isNestedField } from '@kbn/data-views-plugin/common';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -34,7 +34,7 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
-type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
+type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
 type ErrorHandler = (err: Error) => void;
 
 export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
@@ -98,6 +98,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
     fields: newFields,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
+    spec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
   };
 }
 
@@ -170,18 +171,28 @@ function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
 }
 
-export function extractReferences({ layers }: IndexPatternPrivateState) {
+export function extractReferences({ layers, indexPatterns }: IndexPatternPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  const persistableLayers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>> = {};
+  const persistableState: IndexPatternPersistedState = {
+    layers: {},
+    adHocIndexPatterns: {},
+  };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
-    savedObjectReferences.push({
-      type: 'index-pattern',
-      id: indexPatternId,
-      name: getLayerReferenceName(layerId),
-    });
-    persistableLayers[layerId] = persistableLayer;
+    persistableState.layers[layerId] = persistableLayer;
+    if (indexPatterns[indexPatternId].spec) {
+      if (!persistableState.adHocIndexPatterns![indexPatternId]) {
+        persistableState.adHocIndexPatterns![indexPatternId] = indexPatterns[indexPatternId].spec!;
+      }
+      persistableState.layers[layerId].adHocDataViewId = indexPatternId;
+    } else {
+      savedObjectReferences.push({
+        type: 'index-pattern',
+        id: indexPatternId,
+        name: getLayerReferenceName(layerId),
+      });
+    }
   });
-  return { savedObjectReferences, state: { layers: persistableLayers } };
+  return { savedObjectReferences, state: persistableState };
 }
 
 export function injectReferences(
@@ -192,7 +203,9 @@ export function injectReferences(
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     layers[layerId] = {
       ...persistedLayer,
-      indexPatternId: references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
+      indexPatternId:
+        persistedLayer.adHocDataViewId ||
+        references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
     };
   });
   return {
@@ -218,10 +231,28 @@ export async function loadInitialState({
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
+  const adHocDataViews: Record<string, DataView> = Object.fromEntries(
+    await Promise.all(
+      [
+        ...Object.entries(persistedState?.adHocIndexPatterns || {}),
+        ...(initialContext && !('isVisualizeAction' in initialContext)
+          ? ([[initialContext.dataView.id!, initialContext.dataView]] as Array<
+              [string, DataViewSpec]
+            >)
+          : []),
+      ].map(async ([id, spec]) => {
+        return [id, await indexPatternsService.create(spec)];
+      })
+    )
+  );
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
     ? loadIndexPatternRefs(indexPatternsService)
     : []);
+
+  Object.entries(adHocDataViews).forEach(([id, { name, title }]) => {
+    indexPatternRefs.push({ id, name, title, adHoc: true });
+  });
 
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
@@ -232,21 +263,27 @@ export async function loadInitialState({
       indexPatternIds.push(layerContext.indexPatternId);
     }
   } else if (initialContext) {
-    indexPatternIds.push(initialContext.indexPatternId);
+    indexPatternIds.push(initialContext.dataView.id!);
   }
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
   const usedPatterns = (
     initialContext
       ? indexPatternIds
-      : uniq(state ? Object.values(state.layers).map((l) => l.indexPatternId) : [fallbackId])
+      : uniq(
+          state
+            ? Object.values(state.layers).map((l) =>
+                l.adHocDataViewId ? adHocDataViews[l.adHocDataViewId] : l.indexPatternId
+              )
+            : [fallbackId]
+        )
   )
     // take out the undefined from the list
     .filter(Boolean);
 
   const notUsedPatterns: string[] = difference(
     uniq(indexPatternRefs.map(({ id }) => id)),
-    usedPatterns
+    usedPatterns.filter((p) => typeof p === 'string')
   );
 
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
@@ -262,9 +299,9 @@ export async function loadInitialState({
   // * start with the indexPattern in context
   // * then fallback to the used ones
   // * then as last resort use a first one from not used refs
-  const availableIndexPatternIds = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns].filter(
-    (id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]
-  );
+  const availableIndexPatternIds = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns]
+    .map((p) => (typeof p !== 'string' ? p.id : p))
+    .filter((id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]);
 
   const currentIndexPatternId = availableIndexPatternIds[0];
 
@@ -309,6 +346,8 @@ export async function changeIndexPattern({
     return onError(Error('Missing indexpatterns'));
   }
 
+  const hasRefAlready = state.indexPatternRefs.some((r) => r.id === id);
+
   try {
     setState(
       (s) => ({
@@ -320,6 +359,17 @@ export async function changeIndexPattern({
           ...s.indexPatterns,
           [id]: indexPatterns[id],
         },
+        indexPatternRefs: hasRefAlready
+          ? s.indexPatternRefs
+          : [
+              ...s.indexPatternRefs,
+              {
+                title: indexPatterns[id].title,
+                name: indexPatterns[id].name,
+                id,
+                adHoc: typeof idOrDataView !== 'string' && !idOrDataView.isPersisted(),
+              },
+            ],
         currentIndexPatternId: id,
       }),
       { applyImmediately: true }

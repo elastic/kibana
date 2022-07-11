@@ -146,12 +146,12 @@ export function getIndexPatternDatasource({
 
   const indexPatternsService = dataViews;
 
-  const handleChangeIndexPattern = (
+  const handleChangeIndexPattern = async (
     dataView: string | DataView,
     state: IndexPatternPrivateState,
     setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
   ) => {
-    changeIndexPattern({
+    await changeIndexPattern({
       id: dataView,
       state,
       setState,
@@ -454,8 +454,8 @@ export function getIndexPatternDatasource({
         : undefined;
     },
 
-    updateCurrentIndexPatternId: ({ state, dataView, setState }) => {
-      handleChangeIndexPattern(dataView, state, setState);
+    updateCurrentIndexPatternId: async ({ state, dataView, setState }) => {
+      await handleChangeIndexPattern(dataView, state, setState);
     },
 
     refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
@@ -473,7 +473,7 @@ export function getIndexPatternDatasource({
             ...s.indexPatterns,
             [indexPattern.id]: indexPattern,
           },
-          indexPatternRefs,
+          indexPatternRefs: [...indexPatternRefs, ...s.indexPatternRefs.filter((r) => r.adHoc)],
         };
       });
     },
@@ -534,7 +534,7 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getSourceId: () => layer.indexPatternId,
+        getSourceId: () => state.indexPatterns[layer.indexPatternId].spec || layer.indexPatternId,
         getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
           getFiltersInLayer(
             layer,

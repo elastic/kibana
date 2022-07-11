@@ -374,6 +374,7 @@ export function App({
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
+          currentDoc={currentDoc}
           lensInspector={lensInspector}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}

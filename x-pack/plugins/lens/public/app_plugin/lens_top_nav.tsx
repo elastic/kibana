@@ -220,6 +220,7 @@ export const LensTopNavMenu = ({
   topNavMenuEntryGenerators,
   initialContext,
   theme$,
+  currentDoc,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -343,6 +344,7 @@ export const LensTopNavMenu = ({
         query,
         filters,
         initialContext,
+        currentDoc,
       });
       return menuEntry ? [menuEntry] : [];
     });
@@ -357,6 +359,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     initialContext,
+    currentDoc,
   ]);
 
   const layerMetaInfo = useMemo(() => {
@@ -504,7 +507,7 @@ export const LensTopNavMenu = ({
           );
 
           return discover.locator!.getRedirectUrl({
-            indexPatternId: meta.id,
+            indexPatternId: meta.idOrSpec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
             query: newQuery,
@@ -682,7 +685,7 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  handleIndexPatternChange({
+                  await handleIndexPatternChange({
                     activeDatasources: Object.keys(datasourceStates).reduce(
                       (acc, datasourceId) => ({
                         ...acc,
@@ -695,6 +698,9 @@ export const LensTopNavMenu = ({
                     setDatasourceState,
                   });
                   setCurrentIndexPattern(dataView);
+                  if (!dataView.isPersisted()) {
+                    setIndexPatterns([...indexPatterns, dataView]);
+                  }
                   refreshFieldList();
                 }
               },
@@ -703,12 +709,13 @@ export const LensTopNavMenu = ({
           }
         : undefined,
     [
-      dataViewEditor,
       canEditDataView,
-      datasourceMap,
+      dataViewEditor,
       datasourceStates,
-      refreshFieldList,
       setDatasourceState,
+      refreshFieldList,
+      datasourceMap,
+      indexPatterns,
     ]
   );
 

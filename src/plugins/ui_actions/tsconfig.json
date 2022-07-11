@@ -10,6 +10,7 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
   ]

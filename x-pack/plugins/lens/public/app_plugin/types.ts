@@ -47,6 +47,7 @@ import type {
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
+import { Document } from '../persistence/saved_object_store';
 
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -106,6 +107,7 @@ export interface LensTopNavMenuProps {
   initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  currentDoc: Document | undefined;
   theme$: Observable<CoreTheme>;
 }
 

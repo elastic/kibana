@@ -12,7 +12,7 @@ import {
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from '@kbn/ui-actions-plugin/public';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
 
@@ -44,13 +44,13 @@ async function getCompatibleActions(
 
 export function triggerVisualizeActions(
   field: DataViewField,
-  indexPatternId: string | undefined,
+  dataView: DataView,
   contextualFields: string[]
 ) {
-  if (!indexPatternId) return;
+  if (!dataView.id) return;
   const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
-    indexPatternId,
+    dataView: dataView.toSpec(),
     fieldName: field.name,
     contextualFields,
   };

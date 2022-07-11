@@ -58,7 +58,7 @@ export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Docum
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 
-export function handleIndexPatternChange({
+export async function handleIndexPatternChange({
   activeDatasources,
   datasourceStates,
   dataView,
@@ -68,14 +68,15 @@ export function handleIndexPatternChange({
   datasourceStates: DatasourceStates;
   dataView: DataView | string;
   setDatasourceState: StateSetter<unknown>;
-}): void {
-  Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    datasource?.updateCurrentIndexPatternId?.({
+}): Promise<void> {
+  const entries = Object.entries(activeDatasources);
+  for (const [id, datasource] of entries) {
+    await datasource?.updateCurrentIndexPatternId?.({
       state: datasourceStates[id].state,
       dataView,
       setState: setDatasourceState,
     });
-  });
+  }
 }
 
 export function refreshIndexPatternsList({
