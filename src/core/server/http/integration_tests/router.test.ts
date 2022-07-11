@@ -14,9 +14,9 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { Router } from '@kbn/core-http-router-server-internal';
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
-import { Router } from '../router';
 import { loggerMock } from '@kbn/logging-mocks';
 
 let server: HttpService;

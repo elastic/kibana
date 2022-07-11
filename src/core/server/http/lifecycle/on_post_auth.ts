@@ -20,7 +20,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
   isKibanaResponse,
-} from '../router';
+} from '@kbn/core-http-router-server-internal';
 
 const postAuthResult = {
   next(): OnPostAuthResult {

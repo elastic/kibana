@@ -22,7 +22,7 @@ import {
   CoreKibanaRequest,
   isKibanaResponse,
   lifecycleResponseFactory,
-} from '../router';
+} from '@kbn/core-http-router-server-internal';
 
 const preRoutingResult = {
   next(): OnPreRoutingResult {

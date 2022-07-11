@@ -22,8 +22,8 @@ import type {
   RouteValidationFunction,
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
+import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';

@@ -8,8 +8,8 @@
 
 import { Env } from '@kbn/config';
 import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
+import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import { HttpConfig } from './http_config';
-import { isSafeMethod } from './router';
 import { LifecycleRegistrar } from './http_server';
 
 const VERSION_HEADER = 'kbn-version';

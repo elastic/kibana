@@ -25,9 +25,9 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
+import { Router } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
-import { Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';

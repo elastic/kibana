@@ -8,7 +8,7 @@
 import { Request } from '@hapi/hapi';
 import type { KibanaRequest, IsAuthenticated } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
-import { ensureRawRequest } from './router';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 /** @internal */
 export class AuthStateStorage {

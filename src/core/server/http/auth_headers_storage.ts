@@ -13,7 +13,7 @@ import type {
   IAuthHeadersStorage,
   GetAuthHeaders,
 } from '@kbn/core-http-server';
-import { ensureRawRequest } from './router';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 /** @internal */
 export class AuthHeadersStorage implements IAuthHeadersStorage {

@@ -24,7 +24,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
   isKibanaResponse,
-} from '../router';
+} from '@kbn/core-http-router-server-internal';
 
 const authResult = {
   authenticated(data: AuthResultParams = {}): AuthResult {

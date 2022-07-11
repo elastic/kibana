@@ -9,7 +9,7 @@
 import { modifyUrl } from '@kbn/std';
 import { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import { ensureRawRequest } from './router';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 /**
  * Core internal implementation of {@link IBasePath}

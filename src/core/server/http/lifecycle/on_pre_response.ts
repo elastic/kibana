@@ -25,7 +25,7 @@ import type {
   OnPreResponseHandler,
 } from '@kbn/core-http-server';
 import { OnPreResponseResultType } from '@kbn/core-http-server';
-import { HapiResponseAdapter, CoreKibanaRequest } from '../router';
+import { HapiResponseAdapter, CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 const preResponseResult = {
   render(responseRender: OnPreResponseRender): OnPreResponseResult {

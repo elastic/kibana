@@ -16,7 +16,7 @@ import type {
   SessionStorage,
   SessionStorageCookieOptions,
 } from '@kbn/core-http-server';
-import { ensureRawRequest } from './router';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
   constructor(

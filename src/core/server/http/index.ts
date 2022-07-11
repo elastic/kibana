@@ -9,7 +9,6 @@
 export { config, HttpConfig } from './http_config';
 export type { HttpConfigType } from './http_config';
 export { HttpService } from './http_service';
-export { isKibanaRequest, isRealRequest, CoreKibanaRequest, kibanaResponseFactory } from './router';
 export type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
