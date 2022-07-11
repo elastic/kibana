@@ -115,7 +115,7 @@ export const getDocumentCountStats = async (
   };
 
   // First make a query with very low probability
-  const probability = 0.00001;
+  const initialDefaultProbability = 0.0001;
 
   const aggsWithRandomSampling = (p: number) => ({
     sampler: {
@@ -138,7 +138,7 @@ export const getDocumentCountStats = async (
             timeFieldName !== undefined &&
             intervalMs !== undefined &&
             intervalMs > 0
-              ? { aggs: aggsWithRandomSampling(0.000001) } // @todo: correct to 0.000001
+              ? { aggs: aggsWithRandomSampling(initialDefaultProbability) } // @todo: correct to 0.000001
               : {}),
             ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
           },
@@ -154,7 +154,8 @@ export const getDocumentCountStats = async (
   const numSampled = firstResp.rawResponse.aggregations?.sampler?.doc_count;
   const numDocs = 100000;
   if (numSampled < numDocs) {
-    const newProbability = (probability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
+    const newProbability =
+      (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
     // @todo: if newProbability < 0
     if (numSampled === 0 || newProbability === Infinity) {

@@ -52,6 +52,7 @@ import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
+import { isDefined } from '../../../common/util/is_defined';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -103,6 +104,7 @@ export const getDefaultDataVisualizerListState = (
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
+  probability: null,
   ...overrides,
 });
 
@@ -248,6 +250,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     progress,
     extendedColumns,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
+
+  const probability = isDefined(dataVisualizerListState.probability)
+    ? dataVisualizerListState.probability
+    : documentCountStats?.probability;
+  const setSamplingProbability = (value: number) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
+  };
 
   useEffect(() => {
     return () => {
@@ -441,6 +450,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     <DocumentCountContent
                       documentCountStats={documentCountStats}
                       totalCount={overallStats.totalCount}
+                      setSamplingProbability={setSamplingProbability}
+                      samplingProbability={probability}
                     />
                   </EuiFlexItem>
                 )}
