@@ -8,7 +8,8 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { HomePage } from '.';
-import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { CONSTANTS } from '../../common/components/url_state/constants';
 
 import {
@@ -21,7 +22,7 @@ import {
 import { inputsActions } from '../../common/store/inputs';
 import { setSearchBarFilter } from '../../common/store/inputs/actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { createStore } from '../../common/store';
 
 jest.mock('../../common/store/inputs/actions');
