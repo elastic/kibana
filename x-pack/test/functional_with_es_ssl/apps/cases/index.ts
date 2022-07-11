@@ -14,5 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./configure'));
     loadTestFile(require.resolve('./attachment_framework'));
+    loadTestFile(require.resolve('./deletion'));
   });
 };

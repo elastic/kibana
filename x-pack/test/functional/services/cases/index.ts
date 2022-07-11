@@ -11,6 +11,7 @@ import { CasesCommonServiceProvider } from './common';
 import { CasesCreateViewServiceProvider } from './create';
 import { CasesTableServiceProvider } from './list';
 import { CasesNavigationProvider } from './navigation';
+import { CasesSingleViewServiceProvider } from './single_case_view';
 
 export function CasesServiceProvider(context: FtrProviderContext) {
   return {
@@ -19,5 +20,6 @@ export function CasesServiceProvider(context: FtrProviderContext) {
     casesTable: CasesTableServiceProvider(context),
     create: CasesCreateViewServiceProvider(context),
     navigation: CasesNavigationProvider(context),
+    singleCase: CasesSingleViewServiceProvider(context),
   };
 }
