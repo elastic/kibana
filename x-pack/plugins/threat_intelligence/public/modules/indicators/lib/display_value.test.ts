@@ -18,7 +18,7 @@ type ExpectedIndicatorValue = string | null;
 const cases: Array<[Indicator, ExpectedIndicatorValue]> = [
   [generateMockIndicator(), '12.68.554.87'],
   [generateMockUrlIndicator(), 'https://google.com'],
-  [generateMockFileIndicator(), 'sample_md5_hash'],
+  [generateMockFileIndicator(), 'sample_sha256_hash'],
 
   // Indicator with no fields should yield null as a display value
   [{ fields: {} }, null],

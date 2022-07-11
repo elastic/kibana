@@ -17,6 +17,7 @@ export enum RawIndicatorFieldId {
   UrlOriginal = 'threat.indicator.url.original',
   UrlDomain = 'threat.indicator.url.domain',
   FileMd5 = 'threat.indicator.file.hash.md5',
+  FileSha256 = 'threat.indicator.file.hash.sha256',
 }
 
 export interface Indicator {
@@ -25,7 +26,7 @@ export interface Indicator {
 
 export const generateMockIndicator = (): Indicator => ({
   fields: {
-    'threat.indicator.type': ['ip'],
+    'threat.indicator.type': ['ipv4-addr'],
     'threat.indicator.ip': ['12.68.554.87'],
     'threat.indicator.first_seen': ['2022-01-01T01:01:01.000Z'],
     'threat.feed.name': ['Abuse_CH'],
@@ -45,7 +46,7 @@ export const generateMockFileIndicator = (): Indicator => {
   const indicator = generateMockIndicator();
 
   indicator.fields['threat.indicator.type'] = ['file'];
-  indicator.fields['threat.indicator.file.hash.md5'] = ['sample_md5_hash'];
+  indicator.fields['threat.indicator.file.hash.sha256'] = ['sample_sha256_hash'];
 
   return indicator;
 };

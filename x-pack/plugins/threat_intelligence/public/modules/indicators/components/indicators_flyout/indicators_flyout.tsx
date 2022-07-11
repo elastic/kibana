@@ -16,12 +16,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
-import { EMPTY_VALUE } from '@kbn/threat-intelligence-plugin/common/constants';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';

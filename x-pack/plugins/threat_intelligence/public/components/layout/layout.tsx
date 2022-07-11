@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 
 interface LayoutProps {

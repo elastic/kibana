@@ -16,10 +16,6 @@ describe('<Layout />', () => {
       render(<DefaultPageLayout />);
     });
 
-    it('should render primary heading', () => {
-      expect(screen.queryByText('Threat intelligence')).toBeInTheDocument();
-    });
-
     it('should not render secondary heading', () => {
       expect(screen.queryByTestId(`${displayName}-subheader`)).not.toBeInTheDocument();
     });

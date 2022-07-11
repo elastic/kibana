@@ -17,7 +17,7 @@ type MapperRule = [predicate: IndicatorTypePredicate, extract: IndicatorValueExt
  * Predicates to help identify identicator by type
  */
 const isIpIndicator: IndicatorTypePredicate = (indicatorType) =>
-  !!indicatorType && indicatorType.startsWith('ip');
+  !!indicatorType && ['ipv4-addr', 'ipv6-addr'].includes(indicatorType);
 
 const isFileIndicator: IndicatorTypePredicate = (indicatorType) => indicatorType === 'file';
 const isUrlIndicator: IndicatorTypePredicate = (indicatorType) => indicatorType === 'url';
@@ -31,7 +31,8 @@ const extractIp = (indicator: Indicator) => unwrapValue(indicator, RawIndicatorF
 
 const extractUrl = (indicator: Indicator) => unwrapValue(indicator, RawIndicatorFieldId.UrlFull);
 
-const extractFile = (indicator: Indicator) => unwrapValue(indicator, RawIndicatorFieldId.FileMd5);
+const extractFile = (indicator: Indicator) =>
+  unwrapValue(indicator, RawIndicatorFieldId.FileSha256);
 
 /**
  * Pairs rule condition with display value extraction logic

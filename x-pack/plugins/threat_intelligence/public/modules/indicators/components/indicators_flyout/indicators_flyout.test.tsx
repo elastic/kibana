@@ -43,14 +43,12 @@ describe('IndicatorsFlyout', () => {
   it(`should render ${EMPTY_VALUE} in title and subtitle on invalid indicator`, () => {
     const { getByTestId } = render(
       <IndicatorsFlyout
-        indicator={{ fields: { ...mockIndicator.fields, 'threat.indicator.first_seen': ['abc'] } }}
+        indicator={{ fields: { 'threat.indicator.first_seen': ['abc'] } }}
         closeFlyout={() => {}}
       />
     );
 
-    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(
-      `Indicator: ${displayValue(mockIndicator)}`
-    );
+    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${EMPTY_VALUE}`);
     expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(`First seen: ${EMPTY_VALUE}`);
   });
 });
