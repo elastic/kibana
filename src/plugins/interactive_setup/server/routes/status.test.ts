@@ -7,7 +7,7 @@
  */
 
 import type { IRouter, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from './index.mock';
