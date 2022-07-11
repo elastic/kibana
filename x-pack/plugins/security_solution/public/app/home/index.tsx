@@ -27,6 +27,7 @@ import { ConsoleManager } from '../../management/components/console/components/c
 import { TourContextProvider } from '../../common/components/guided_onboarding';
 
 import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
+import { useInitSearchBarUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -42,6 +43,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   const { pathname } = useLocation();
   useSyncGlobalQueryString();
   useInitSourcerer(getScopeFromPath(pathname));
+  useInitSearchBarUrlParams();
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
