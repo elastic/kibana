@@ -205,7 +205,6 @@ export type {
   OnPreResponseInfo,
   ICspConfig,
   IExternalUrlConfig,
-  IExternalUrlPolicy,
   IBasePath,
   SessionStorage,
   SessionStorageCookieOptions,
@@ -221,6 +220,7 @@ export type {
   HttpServicePreboot,
   HttpServiceStart,
 } from '@kbn/core-http-server';
+export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
 export { validBodyOutput } from '@kbn/core-http-server';
 
