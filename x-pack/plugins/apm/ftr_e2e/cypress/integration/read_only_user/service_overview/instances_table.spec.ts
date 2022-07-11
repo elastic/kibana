@@ -90,7 +90,8 @@ describe('Instances table', () => {
         cy.contains('Service');
       });
     });
-    it('shows actions available', () => {
+
+    it.skip('shows actions available', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
