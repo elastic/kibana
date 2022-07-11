@@ -7,7 +7,7 @@
 
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 
 export const getCasesLinkItems = (): LinkItem => {
   const casesLinks = getCasesDeepLinks<LinkItem>({

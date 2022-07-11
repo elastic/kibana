@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -17,7 +17,7 @@ import {
   RedirectRoute,
   getField,
 } from './helpers';
-import { StartedSubPlugins } from './types';
+import type { StartedSubPlugins } from './types';
 
 describe('public helpers parseRoute', () => {
   it('should properly parse hash route', () => {

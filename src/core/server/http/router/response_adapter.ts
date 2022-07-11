@@ -17,13 +17,8 @@ import {
   ElasticsearchErrorDetails,
   isResponseError as isElasticsearchResponseError,
 } from '@kbn/es-errors';
-
-import {
-  HttpResponsePayload,
-  KibanaResponse,
-  ResponseError,
-  ResponseErrorAttributes,
-} from './response';
+import { HttpResponsePayload, ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
+import { KibanaResponse } from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
