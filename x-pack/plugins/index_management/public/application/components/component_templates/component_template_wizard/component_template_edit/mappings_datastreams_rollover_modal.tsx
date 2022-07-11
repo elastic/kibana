@@ -89,7 +89,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
       <EuiText>
         <FormattedMessage
           id="xpack.idxMgmt.componentTemplateMappingsRollover.modalDescription"
-          defaultMessage="New mappings for {templateName} component template require a rollover for the following data streams: {datastreams} You can apply the new mappings to incoming data now and force a rollover, or wait until the next rollover. Rollover timing is defined by your index lifecycle policy."
+          defaultMessage="New mappings for the {templateName} component template require a rollover for the following data streams: {datastreams} You can apply the new mappings to incoming data now and force a rollover, or wait until the next rollover. Rollover timing is defined by your index lifecycle policy."
           values={{
             templateName: <EuiCode>{componentTemplatename}</EuiCode>,
             datastreams: (
