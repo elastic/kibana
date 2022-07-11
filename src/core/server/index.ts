@@ -142,7 +142,7 @@ export type {
 } from './elasticsearch';
 
 export { CspConfig } from './http';
-export { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
