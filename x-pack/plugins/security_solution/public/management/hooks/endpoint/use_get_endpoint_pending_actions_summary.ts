@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { QueryObserverResult, UseQueryOptions, useQuery } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import { PendingActionsResponse } from '../../../../common/endpoint/types';
+import type { QueryObserverResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
+import type { HttpFetchError } from '@kbn/core/public';
+import type { PendingActionsResponse } from '../../../../common/endpoint/types';
 import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint_pending_actions';
 
 /**

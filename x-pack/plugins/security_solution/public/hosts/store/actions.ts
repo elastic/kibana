@@ -6,10 +6,10 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
-import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
+import type { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+import type { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
 
-import { HostsTableType, HostsType } from './model';
+import type { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/hosts');
 
 export const updateTableActivePage = actionCreator<{
