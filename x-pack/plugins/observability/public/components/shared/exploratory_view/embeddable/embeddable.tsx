@@ -161,6 +161,9 @@ export default function Embeddable({
             withDefaultActions={Boolean(withActions)}
             extraActions={actions}
             viewMode={ViewMode.VIEW}
+            executionContext={{
+              type: 'observability_exploratory_view_single_metric',
+            }}
           />
         </SingleMetric>
       )}

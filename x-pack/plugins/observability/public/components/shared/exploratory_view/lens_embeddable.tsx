@@ -92,6 +92,9 @@ export function LensEmbeddable(props: Props) {
         attributes={lensAttributes}
         onLoad={onLensLoad}
         onBrushEnd={onBrushEnd}
+        executionContext={{
+          type: 'observability_embeddable_exploratory_view',
+        }}
       />
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent
