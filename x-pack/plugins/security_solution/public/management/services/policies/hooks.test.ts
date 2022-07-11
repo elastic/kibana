@@ -11,8 +11,6 @@ import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useGetEndpointSecurityPackage } from './hooks';
 import { getFakeHttpService, renderQuery } from '../../hooks/test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import type { UseQueryOptions } from 'react-query';
-import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');
