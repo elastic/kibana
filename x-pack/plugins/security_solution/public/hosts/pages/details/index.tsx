@@ -99,7 +99,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { docValueFields, indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
+  const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,

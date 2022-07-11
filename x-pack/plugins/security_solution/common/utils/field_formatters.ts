@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { isEmpty } from 'lodash/fp';
 
 import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
@@ -60,13 +63,19 @@ export const getDataFromFieldsHits = (
         },
       ];
     }
+
     const objArrStr = toObjectArrayOfStrings(item);
     const strArr = objArrStr.map(({ str }) => str);
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
     const dotField = prependField ? `${prependField}.${field}` : field;
 
-    // return simple field value (non-object, non-array)
-    if (!isObjectArray) {
+    // return simple field value (non-esc object, non-array)
+    if (
+      !isObjectArray ||
+      Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
+        (ecsField) => ecsField === field
+      ) === undefined
+    ) {
       return [
         ...accumulator,
         {
