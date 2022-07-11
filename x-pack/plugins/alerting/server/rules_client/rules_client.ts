@@ -2295,7 +2295,14 @@ export class RulesClient {
     );
 
     const snoozeSchedule = attributes.snoozeSchedule
-      ? attributes.snoozeSchedule.filter((s) => !isSnoozeExpired(s))
+      ? attributes.snoozeSchedule.filter((s) => {
+          try {
+            return !isSnoozeExpired(s);
+          } catch (e) {
+            this.logger.error(`Error checking for expiration of snooze ${s.id}: ${e}`);
+            return true;
+          }
+        })
       : [];
 
     if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
