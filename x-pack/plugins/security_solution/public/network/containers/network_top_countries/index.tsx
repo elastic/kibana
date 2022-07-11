@@ -11,23 +11,24 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel } from '../../../common/store';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { networkModel, networkSelectors } from '../../store';
-import {
+import type { networkModel } from '../../store';
+import { networkSelectors } from '../../store';
+import type {
   FlowTargetSourceDest,
-  NetworkQueries,
   NetworkTopCountriesEdges,
   NetworkTopCountriesRequestOptions,
   NetworkTopCountriesStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
+import { NetworkQueries } from '../../../../common/search_strategy';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
@@ -38,27 +39,29 @@ export interface NetworkTopCountriesArgs {
   inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
+  networkTopCountries: NetworkTopCountriesEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  networkTopCountries: NetworkTopCountriesEdges[];
   totalCount: number;
 }
 
 interface UseNetworkTopCountries {
-  flowTarget: FlowTargetSourceDest;
-  ip?: string;
-  indexNames: string[];
-  type: networkModel.NetworkType;
-  filterQuery?: ESTermQuery | string;
   endDate: string;
-  startDate: string;
+  filterQuery?: ESTermQuery | string;
+  flowTarget: FlowTargetSourceDest;
+  id: string;
+  indexNames: string[];
+  ip?: string;
   skip: boolean;
+  startDate: string;
+  type: networkModel.NetworkType;
 }
 
 export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
+  id,
   indexNames,
   ip,
   skip,
@@ -74,7 +77,6 @@ export const useNetworkTopCountries = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
 
   const [networkTopCountriesRequest, setHostRequest] =
     useState<NetworkTopCountriesRequestOptions | null>(null);
@@ -99,7 +101,7 @@ export const useNetworkTopCountries = ({
   const [networkTopCountriesResponse, setNetworkTopCountriesResponse] =
     useState<NetworkTopCountriesArgs>({
       networkTopCountries: [],
-      id: queryId,
+      id,
       inspect: {
         dsl: [],
         response: [],

@@ -7,7 +7,11 @@
     "bfetch": "src/plugins/bfetch",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
-    "core": "src/core",
+    "core": [
+      "src/core",
+      "packages/core/i18n/core-i18n-browser-internal",
+      "packages/core/fatal-errors/core-fatal-errors-browser-internal"
+    ],
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
     "controls": "src/plugins/controls",
@@ -25,6 +29,7 @@
     "expressionImage": "src/plugins/expression_image",
     "expressionMetric": "src/plugins/expression_metric",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
+    "expressionLegacyMetricVis": "src/plugins/chart_expressions/expression_legacy_metric",
     "expressionPartitionVis": "src/plugins/chart_expressions/expression_partition_vis",
     "expressionXY": "src/plugins/chart_expressions/expression_xy",
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
@@ -36,6 +41,7 @@
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "home": "src/plugins/home",
+    "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
     "indexPatternFieldEditor": "src/plugins/data_view_field_editor",
     "indexPatternManagement": "src/plugins/data_view_management",
@@ -52,10 +58,7 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lists": "packages/kbn-securitysolution-list-utils/src",
-    "management": [
-      "src/legacy/core_plugins/management",
-      "src/plugins/management"
-    ],
+    "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
@@ -69,14 +72,10 @@
     "sharedUXPackages": "packages/shared-ux",
     "coloring": "packages/kbn-coloring/src",
     "statusPage": "src/legacy/core_plugins/status_page",
-    "telemetry": [
-      "src/plugins/telemetry",
-      "src/plugins/telemetry_management_section"
-    ],
-    "timelion": [
-      "src/plugins/vis_types/timelion"
-    ],
+    "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
+    "timelion": ["src/plugins/vis_types/timelion"],
     "uiActions": "src/plugins/ui_actions",
+    "uiActionsEnhanced": "src/plugins/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
     "utils": "packages/kbn-securitysolution-utils/src",

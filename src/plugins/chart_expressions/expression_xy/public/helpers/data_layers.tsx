@@ -18,12 +18,7 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  FieldFormat,
-  FieldFormatParams,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
+import { FieldFormat, IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
 import {
   getFormatByAccessor,
@@ -32,6 +27,7 @@ import {
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { CommonXYDataLayerConfig, XScaleType } from '../../common';
+import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
@@ -64,7 +60,7 @@ type GetSeriesNameFn = (
   config: {
     splitColumnId?: string;
     accessorsCount: number;
-    splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
+    splitHint: SerializedFieldFormat | undefined;
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
@@ -155,28 +151,27 @@ export const getFormattedTable = (
     {}
   );
 
-  const formattedTableInfo = table.rows.reduce<{
+  const formattedTableInfo: {
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
-  }>(
-    ({ rows: formattedRows, formattedColumns }, row) => {
-      const formattedRowInfo = getFormattedRow(
-        row,
-        table.columns,
-        columnsFormatters,
-        xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-        xScaleType
-      );
-      return {
-        rows: [...formattedRows, formattedRowInfo.row],
-        formattedColumns: { ...formattedColumns, ...formattedRowInfo.formattedColumns },
-      };
-    },
-    {
-      rows: [],
-      formattedColumns: {},
-    }
-  );
+  } = {
+    rows: [],
+    formattedColumns: {},
+  };
+  for (const row of table.rows) {
+    const formattedRowInfo = getFormattedRow(
+      row,
+      table.columns,
+      columnsFormatters,
+      xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
+      xScaleType
+    );
+    formattedTableInfo.rows.push(formattedRowInfo.row);
+    formattedTableInfo.formattedColumns = {
+      ...formattedTableInfo.formattedColumns,
+      ...formattedRowInfo.formattedColumns,
+    };
+  }
 
   return {
     table: { ...table, rows: formattedTableInfo.rows },
@@ -356,10 +351,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   formattedDatatableInfo,
   defaultXScaleType,
 }): SeriesSpec => {
-  const { table, markSizeAccessor } = layer;
-  const isStacked = layer.seriesType.includes('stacked');
-  const isPercentage = layer.seriesType.includes('percentage');
-  const isBarChart = layer.seriesType.includes('bar');
+  const { table, isStacked, markSizeAccessor } = layer;
+  const isPercentage = layer.isPercentage;
+  let stackMode: StackMode | undefined = isPercentage ? AxisModes.PERCENTAGE : undefined;
+  if (yAxis?.mode) {
+    stackMode = yAxis?.mode === AxisModes.NORMAL ? undefined : yAxis?.mode;
+  }
+  const scaleType = yAxis?.scaleType || ScaleType.Linear;
+  const isBarChart = layer.seriesType === SeriesTypes.BAR;
   const xColumnId = layer.xAccessor && getAccessorByDimension(layer.xAccessor, table.columns);
   const splitColumnId =
     layer.splitAccessor && getAccessorByDimension(layer.splitAccessor, table.columns);
@@ -419,9 +418,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
-      formatter?.id === 'bytes' && yAxis?.scale === ScaleType.Linear
+      formatter?.id === 'bytes' && scaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
-        : yAxis?.scale || ScaleType.Linear,
+        : scaleType,
     color: (series) =>
       getColor(
         series,
@@ -437,7 +436,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       ),
     groupId: yAxis?.groupId,
     enableHistogramMode,
-    stackMode: isPercentage ? StackMode.Percentage : undefined,
+    stackMode,
     timeZone,
     areaSeriesStyle: {
       point: getPointConfig({

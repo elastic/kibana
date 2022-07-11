@@ -134,6 +134,7 @@ type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'
 interface RegistryAdditionalProperties {
   assets?: string[];
   download: string;
+  signature_path?: string;
   path: string;
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
@@ -149,7 +150,7 @@ interface RegistryOverridePropertyValue {
   screenshots?: RegistryImage[];
 }
 
-export type RegistryRelease = PackageSpecManifest['release'];
+export type RegistryRelease = NonNullable<PackageSpecManifest['release']>;
 export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
@@ -334,7 +335,14 @@ export interface RegistryDataStreamPrivileges {
   indices?: string[];
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
+export type RegistryVarType =
+  | 'integer'
+  | 'bool'
+  | 'password'
+  | 'text'
+  | 'yaml'
+  | 'string'
+  | 'textarea';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -398,8 +406,11 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isUnverified?: boolean;
+  showLabels?: boolean;
 }
 
+export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
@@ -418,6 +429,9 @@ export interface Installation extends SavedObjectAttributes {
   install_source: InstallSource;
   installed_kibana_space_id?: string;
   keep_policies_up_to_date?: boolean;
+  install_format_schema_version?: string;
+  verification_status: PackageVerificationStatus;
+  verification_key_id?: string | null;
 }
 
 export interface PackageUsageStats {

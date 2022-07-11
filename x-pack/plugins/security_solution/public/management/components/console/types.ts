@@ -9,9 +9,29 @@
 
 import type { ComponentType } from 'react';
 import type { CommonProps } from '@elastic/eui';
+import type { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
-import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
+import type { ParsedArgData, ParsedCommandInterface } from './service/parsed_command_input';
+
+export interface CommandArgs {
+  [longName: string]: {
+    required: boolean;
+    allowMultiples: boolean;
+    exclusiveOr?: boolean;
+    about: string;
+    /**
+     * Validate the individual values given to this argument.
+     * Should return `true` if valid or a string with the error message
+     */
+    validate?: (argData: ParsedArgData) => true | string;
+
+    // Selector: Idea is that the schema can plugin in a rich component for the
+    // user to select something (ex. a file)
+    // FIXME: implement selector
+    selector?: ComponentType;
+  };
+}
 
 export interface CommandDefinition<TMeta = any> {
   name: string;
@@ -34,43 +54,47 @@ export interface CommandDefinition<TMeta = any> {
 
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
+
+  exampleUsage?: string;
+  exampleInstruction?: string;
+
+  /**
+   * Validate the command entered by the user. This is called only after the Console has ran
+   * through all of its builtin validations (based on `CommandDefinition`).
+   * Example: used it when there are multiple optional arguments but at least one of those
+   * must be defined.
+   */
+  validate?: (command: Command) => true | string;
+
   /** The list of arguments supported by this command */
-  args?: {
-    [longName: string]: {
-      required: boolean;
-      allowMultiples: boolean;
-      about: string;
-      /**
-       * Validate the individual values given to this argument.
-       * Should return `true` if valid or a string with the error message
-       */
-      validate?: (argData: ParsedArgData) => true | string;
-      // Selector: Idea is that the schema can plugin in a rich component for the
-      // user to select something (ex. a file)
-      // FIXME: implement selector
-      selector?: ComponentType;
-    };
-  };
+  args?: CommandArgs;
 }
 
 /**
  * A command to be executed (as entered by the user)
  */
-export interface Command<TDefinition extends CommandDefinition = CommandDefinition> {
+export interface Command<
+  TDefinition extends CommandDefinition = CommandDefinition,
+  TArgs extends object = any
+> {
   /** The raw input entered by the user */
   input: string;
   // FIXME:PT this should be a generic that allows for the arguments type to be used
   /** An object with the arguments entered by the user and their value */
-  args: ParsedCommandInput;
+  args: ParsedCommandInterface<TArgs>;
   /** The command definition associated with this user command */
   commandDefinition: TDefinition;
 }
 
 export interface CommandExecutionComponentProps<
+  /** The arguments that could have been entered by the user */
+  TArgs extends object = any,
+  /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
+  /** The metadata defined on the Command Definition */
   TMeta = any
 > {
-  command: Command<CommandDefinition<TMeta>>;
+  command: Command<CommandDefinition<TMeta>, TArgs>;
 
   /**
    * A data store for the command execution to store data in, if needed.
@@ -98,15 +122,24 @@ export interface CommandExecutionComponentProps<
 
   /** Set the status of the command execution  */
   setStatus: (status: CommandExecutionState['status']) => void;
+
+  /**
+   * A component that can be used to format the returned result from the command execution.
+   */
+  ResultComponent: CommandExecutionResultComponent;
 }
 
 /**
  * The component that will handle the Command execution and display the result.
  */
 export type CommandExecutionComponent<
+  /** The arguments that could have been entered by the user */
+  TArgs extends object = any,
+  /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
+  /** The metadata defined on the Command Definition */
   TMeta = any
-> = ComponentType<CommandExecutionComponentProps<TStore, TMeta>>;
+> = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
 
 export interface ConsoleProps extends CommonProps {
   /**

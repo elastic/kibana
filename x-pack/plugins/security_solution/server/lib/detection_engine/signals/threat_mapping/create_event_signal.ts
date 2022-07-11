@@ -9,8 +9,8 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import { CreateEventSignalOptions } from './types';
-import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
+import type { CreateEventSignalOptions } from './types';
+import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { getAllThreatListHits } from './get_threat_list';
 import {
   enrichSignalThreatMatches,
@@ -47,6 +47,7 @@ export const createEventSignal = async ({
   threatIndicatorPath,
   threatPitId,
   reassignThreatPitId,
+  runtimeMappings,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -79,6 +80,8 @@ export const createEventSignal = async ({
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
+      runtimeMappings,
+      listClient,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
@@ -139,6 +142,7 @@ export const createEventSignal = async ({
       trackTotalHits: false,
       tuple,
       wrapHits,
+      runtimeMappings,
     });
 
     logger.debug(

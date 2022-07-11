@@ -6,18 +6,21 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import {
+import type { DataViewBase } from '@kbn/es-query';
+import type {
   RuleStepProps,
-  RuleStep,
   AboutStepRule,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
+import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
   Form,
@@ -25,7 +28,6 @@ import {
   UseField,
   useForm,
   useFormData,
-  FieldHook,
 } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
@@ -42,6 +44,7 @@ import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -73,6 +76,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  const { data } = useKibana().services;
+
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineRuleData?.ruleType),
     [defineRuleData?.ruleType]
@@ -96,7 +101,38 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   );
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
-  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
+
+  /**
+   * 1. if not null, fetch data view from id saved on rule form
+   * 2. Create a state to set the indexPattern to be used
+   * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
+   */
+
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(
+    defineRuleData?.index ?? []
+  );
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
+
+  useEffect(() => {
+    if (
+      defineRuleData?.index != null &&
+      (defineRuleData?.dataViewId === '' || defineRuleData?.dataViewId == null)
+    ) {
+      setIndexPattern(indexIndexPattern);
+    }
+  }, [defineRuleData?.dataViewId, defineRuleData?.index, indexIndexPattern]);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
+        const dv = await data.dataViews.get(defineRuleData?.dataViewId);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, defineRuleData, indexIndexPattern, setIndexPattern]);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
@@ -190,7 +226,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -203,7 +239,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -345,7 +381,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                 fieldType: 'string',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
@@ -358,7 +394,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}

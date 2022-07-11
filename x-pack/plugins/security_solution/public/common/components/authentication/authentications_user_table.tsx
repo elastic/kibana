@@ -23,12 +23,11 @@ import { useQueryInspector } from '../page/manage_query';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { usersActions, usersModel, usersSelectors } from '../../../users/store';
-import { AuthenticationsUserTableProps } from './types';
+import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
 const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -53,7 +52,6 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     loading,
     { authentications, totalCount, pageInfo, loadPage, inspect, isInspected, refetch },
   ] = useAuthentications({
-    docValueFields,
     endDate,
     filterQuery,
     indexNames,

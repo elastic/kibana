@@ -5,24 +5,47 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import { ConsoleProps } from '../../types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export interface ConsoleRegistrationInterface<Meta extends object = Record<string, unknown>> {
+import type { ComponentType } from 'react';
+import type { ConsoleProps } from '../../types';
+
+export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   id: string;
-  /** The title for the console popup */
-  title: ReactNode;
   consoleProps: ConsoleProps;
-  onBeforeTerminate?: () => void;
   /**
    * Any additional metadata about the console. Helpful for when consuming Registered consoles
    * (ex. could hold the details data for the Host that the console is opened against)
    */
-  meta?: Meta;
+  meta?: TMeta;
+
+  /** An optional component used to render the Overlay page title where the console will be displayed */
+  PageTitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+
+  /**
+   * An optional component that will be rendered in the Responder page overlay, above the Console area
+   */
+  PageBodyComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+
+  /**
+   * An array of Action components (likely buttons) that will be rendered into the Responder page
+   * overlay header (next to the `Done` button).
+   *
+   * NOTE: this is an Array of `Component`'s - not `JSX`. These will be initialized/rendered when
+   * the Responder page overlay is shown.
+   */
+  ActionComponents?: Array<ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>>;
 }
 
-export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>
-  extends Pick<ConsoleRegistrationInterface<Meta>, 'id' | 'title' | 'meta'> {
+/**
+ * The Props that are provided to the component constructors provided in `ConsoleRegistrationInterface`
+ */
+export interface ManagedConsoleExtensionComponentProps<TMeta extends object = any> {
+  meta: { [key in keyof TMeta]: TMeta[key] };
+}
+
+export interface RegisteredConsoleClient<TMeta extends object = any>
+  extends Pick<ConsoleRegistrationInterface<TMeta>, 'id' | 'meta'> {
   show(): void;
 
   hide(): void;
@@ -34,7 +57,9 @@ export interface RegisteredConsoleClient<Meta extends object = Record<string, un
 
 export interface ConsoleManagerClient {
   /** Registers a new console */
-  register(console: ConsoleRegistrationInterface): Readonly<RegisteredConsoleClient>;
+  register<TMeta extends object = any>(
+    console: ConsoleRegistrationInterface<TMeta>
+  ): Readonly<RegisteredConsoleClient>;
 
   /** Opens console in a dialog */
   show(id: string): void;

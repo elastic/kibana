@@ -1,9 +1,9 @@
 [[console-kibana]]
-== Run {es} API requests
+== Run API requests
 
-Interact with the REST API of {es} with *Console*. You can:
+Interact with the REST APIs of {es} and {kib} with *Console*. With *Console*, you can:
 
-* Send requests to {es} and view the responses
+* Send requests and view the responses
 * View API documentation
 * Get your request history
 
@@ -11,8 +11,6 @@ To get started, open the main menu, click *Dev Tools*, then click *Console*.
 
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
-
-NOTE: **Console** supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with **Console** and must use curl or another HTTP tool instead.
 
 [float]
 [[console-api]]
@@ -42,6 +40,15 @@ curl -XGET "http://localhost:9200/_search" -d'
   }
 }'
 ----------------------------------
+
+Prepend requests to a {kib} API endpoint with `kbn:`
+
+[source,bash]
+--------------------------------------------------
+`GET kbn:/api/index_management/indices`
+--------------------------------------------------
+
+
 
 When you paste the command into *Console*, {kib} automatically converts it
 to *Console* syntax.  Alternatively, if you want to see *Console* syntax in cURL,

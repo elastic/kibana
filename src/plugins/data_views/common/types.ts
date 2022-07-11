@@ -36,7 +36,8 @@ export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
  * Runtime field definition
  * @public
  */
-export interface RuntimeFieldBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type RuntimeFieldBase = {
   /**
    * Type of runtime field
    */
@@ -50,12 +51,12 @@ export interface RuntimeFieldBase {
      */
     source: string;
   };
-}
+};
 
 /**
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  */
-export interface RuntimeFieldSpec extends RuntimeFieldBase {
+export type RuntimeFieldSpec = RuntimeFieldBase & {
   fields?: Record<
     string,
     {
@@ -63,7 +64,7 @@ export interface RuntimeFieldSpec extends RuntimeFieldBase {
       type: RuntimeTypeExceptComposite;
     }
   >;
-}
+};
 
 /**
  * Field attributes that are user configurable
@@ -152,6 +153,10 @@ export interface DataViewAttributes {
    * Prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  name?: string;
 }
 
 /**
@@ -159,15 +164,17 @@ export interface DataViewAttributes {
  * @public
  * Storage of field attributes. Necessary since the field list isn't saved.
  */
-export interface FieldAttrs {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FieldAttrs = {
   [key: string]: FieldAttrSet;
-}
+};
 
 /**
  * Field attributes that are stored on the data view
  * @public
  */
-export interface FieldAttrSet {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FieldAttrSet = {
   /**
    * Custom field label
    */
@@ -176,7 +183,7 @@ export interface FieldAttrSet {
    * Popularity count - used for discover
    */
   count?: number;
-}
+};
 
 /**
  * Handler for data view notifications
@@ -328,7 +335,8 @@ export type AggregationRestrictions = Record<
 /**
  * Interface for metadata about rollup indices
  */
-export interface TypeMeta {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TypeMeta = {
   /**
    * Aggregation restrictions for rollup fields
    */
@@ -342,7 +350,7 @@ export interface TypeMeta {
      */
     rollup_index: string;
   };
-}
+};
 
 /**
  * Data View type. Default or rollup
@@ -352,21 +360,13 @@ export enum DataViewType {
   ROLLUP = 'rollup',
 }
 
-/**
- * @deprecated Use DataViewType. All index pattern interfaces were renamed.
- */
-export enum IndexPatternType {
-  DEFAULT = DataViewType.DEFAULT,
-  ROLLUP = DataViewType.ROLLUP,
-}
-
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
 /**
  * Serialized version of DataViewField
  * @public
  */
-export interface FieldSpec extends DataViewFieldBase {
+export type FieldSpec = DataViewFieldBase & {
   /**
    * Popularity count is used by discover
    */
@@ -418,7 +418,7 @@ export interface FieldSpec extends DataViewFieldBase {
    * Is this field in the mapping? False if a scripted or runtime field defined on the data view.
    */
   isMapped?: boolean;
-}
+};
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
 
@@ -426,9 +426,10 @@ export type DataViewFieldMap = Record<string, FieldSpec>;
  * Static data view format
  * Serialized data object, representing data view attributes and state
  */
-export interface DataViewSpec {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewSpec = {
   /**
-   * Saved object id
+   * Saved object id (or generated id if in-memory only)
    */
   id?: string;
   /**
@@ -479,11 +480,16 @@ export interface DataViewSpec {
    * Array of namespace ids
    */
   namespaces?: string[];
-}
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  name?: string;
+};
 
-export interface SourceFilter {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SourceFilter = {
   value: string;
-}
+};
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;

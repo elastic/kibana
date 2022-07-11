@@ -32,6 +32,8 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
+
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -56,13 +58,15 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;
   ruleId: string;
   ruleIndices: string[];
+  dataViewId?: string;
   exceptionItem: ExceptionListItemSchema;
   exceptionListType: ExceptionListType;
   onCancel: () => void;
@@ -106,13 +110,14 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
+  dataViewId,
   exceptionItem,
   exceptionListType,
   onCancel,
   onConfirm,
   onRuleChange,
 }: EditExceptionFlyoutProps) {
-  const { http, unifiedSearch } = useKibana().services;
+  const { http, unifiedSearch, data } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -143,7 +148,20 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
     }
   }, [jobs, ruleIndices]);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(memoRuleIndices);
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (dataViewId != null && dataViewId !== '') {
+        const dv = await data.dataViews.get(dataViewId);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, dataViewId, setIndexPattern]);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
@@ -374,7 +392,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 dataTestSubj: 'edit-exception-builder',
                 idAria: 'edit-exception-builder',
                 onChange: handleBuilderOnChange,
-                indexPatterns,
+                indexPatterns: indexPattern,
               })}
 
               <EuiSpacer />

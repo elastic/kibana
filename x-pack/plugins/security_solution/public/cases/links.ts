@@ -7,7 +7,7 @@
 
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 
 export const getCasesLinkItems = (): LinkItem => {
   const casesLinks = getCasesDeepLinks<LinkItem>({
@@ -15,7 +15,7 @@ export const getCasesLinkItems = (): LinkItem => {
     extend: {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
-        globalNavOrder: 9007,
+        globalNavOrder: 5,
         capabilities: [`${CASES_FEATURE_ID}.read_cases`],
       },
       [SecurityPageName.caseConfigure]: {

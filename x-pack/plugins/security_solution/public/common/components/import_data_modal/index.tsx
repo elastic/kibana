@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import {
+import type {
   ImportDataResponse,
   ImportDataProps,
 } from '../../../detections/containers/detection_engine/rules';
@@ -149,6 +149,7 @@ export const ImportDataModalComponent = ({
 
             <EuiSpacer size="s" />
             <EuiFilePicker
+              accept=".ndjson"
               id="rule-file-picker"
               initialPromptText={subtitle}
               onChange={(files: FileList | null) => {

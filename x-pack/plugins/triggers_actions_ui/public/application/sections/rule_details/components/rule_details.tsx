@@ -44,7 +44,6 @@ import {
   ActionType,
   ActionConnector,
   TriggersActionsUiConfig,
-  RuleTableItem,
 } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -62,7 +61,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
-import { RuleStatusDropdown } from '../../rules_list/components/rule_status_dropdown';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -71,6 +69,10 @@ export type RuleDetailsProps = {
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+
+const ruleDetailStyle = {
+  minWidth: 0,
+};
 
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
@@ -317,34 +319,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.stateTitle"
-                        defaultMessage="State"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <RuleStatusDropdown
-                    disableRule={async () => await disableRule(rule)}
-                    enableRule={async () => await enableRule(rule)}
-                    snoozeRule={async (snoozeEndTime: string | -1) =>
-                      await snoozeRule(rule, snoozeEndTime)
-                    }
-                    unsnoozeRule={async () => await unsnoozeRule(rule)}
-                    rule={rule as RuleTableItem}
-                    onRuleChanged={requestRefresh}
-                    direction="row"
-                    isEditable={hasEditButton}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
                         id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
                         defaultMessage="Type"
                       />
@@ -537,7 +511,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </EuiFlexGroup>
         )}
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem style={ruleDetailStyle}>
             <RuleRouteWithApi
               requestRefresh={requestRefresh}
               refreshToken={refreshToken}

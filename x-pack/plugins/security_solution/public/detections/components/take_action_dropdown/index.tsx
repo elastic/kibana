@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import { useResponseActionsConsoleActionItem } from '../response_actions_console';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { useResponderActionItem } from '../endpoint_responder';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
@@ -19,7 +19,7 @@ import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -136,7 +136,7 @@ export const TakeActionDropdown = React.memo(
       isHostIsolationPanelOpen,
     });
 
-    const endpointResponseActionsConsoleItems = useResponseActionsConsoleActionItem(
+    const endpointResponseActionsConsoleItems = useResponderActionItem(
       detailsData,
       closePopoverHandler
     );

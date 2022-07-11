@@ -7,13 +7,15 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { KibanaNoDataPage } from '@kbn/shared-ux-components';
+import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 
 /**
  * Props for the pure component.
  */
 export interface Props {
+  /** A link to documentation. */
   kibanaGuideDocLink: string;
+  /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
 }
 

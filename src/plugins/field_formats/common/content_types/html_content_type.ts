@@ -36,7 +36,7 @@ export const setup = (
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
-      return asPrettyString(value);
+      return asPrettyString(value, options);
     }
 
     if (!value || !isFunction(value.map)) {

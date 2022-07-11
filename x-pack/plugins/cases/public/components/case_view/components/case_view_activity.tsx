@@ -39,7 +39,7 @@ export const CaseViewActivity = ({
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
-  const { userCanCrud } = useCasesContext();
+  const { permissions } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
@@ -133,7 +133,7 @@ export const CaseViewActivity = ({
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
-                  userCanCrud ? (
+                  permissions.all ? (
                     <StatusActionButton
                       status={caseData.status}
                       onStatusChanged={changeStatus}
@@ -142,7 +142,6 @@ export const CaseViewActivity = ({
                   ) : null
                 }
                 useFetchAlertData={useFetchAlertData}
-                userCanCrud={userCanCrud}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -150,7 +149,7 @@ export const CaseViewActivity = ({
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <SeveritySidebarSelector
-          isDisabled={!userCanCrud}
+          isDisabled={!permissions.all}
           isLoading={isLoading}
           selectedSeverity={caseData.severity}
           onSeverityChange={onUpdateSeverity}
@@ -171,8 +170,6 @@ export const CaseViewActivity = ({
           />
         ) : null}
         <TagList
-          data-test-subj="case-view-tag-list"
-          userCanCrud={userCanCrud}
           tags={caseData.tags}
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}
@@ -183,12 +180,11 @@ export const CaseViewActivity = ({
             caseServices={userActionsData.caseServices}
             connectorName={connectorName}
             connectors={connectors}
-            hasDataToPush={userActionsData.hasDataToPush && userCanCrud}
+            hasDataToPush={userActionsData.hasDataToPush}
             isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
             isValidConnector={isLoadingConnectors ? true : isValidConnector}
             onSubmit={onSubmitConnector}
             userActions={userActionsData.caseUserActions}
-            userCanCrud={userCanCrud}
           />
         ) : null}
       </EuiFlexItem>

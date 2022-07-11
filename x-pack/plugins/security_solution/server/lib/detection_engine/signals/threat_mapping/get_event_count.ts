@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EventCountOptions, EventsOptions, EventDoc } from './types';
+import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
@@ -26,6 +26,7 @@ export const getEventList = async ({
   logger,
   tuple,
   timestampOverride,
+  runtimeMappings,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -53,6 +54,7 @@ export const getEventList = async ({
     timestampOverride,
     sortOrder: 'desc',
     trackTotalHits: false,
+    runtimeMappings,
   });
 
   logger.debug(
@@ -80,6 +82,7 @@ export const getEventCount = async ({
     size: 0,
     timestampOverride,
     searchAfterSortIds: undefined,
+    runtimeMappings: undefined,
   }).body.query;
   const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },

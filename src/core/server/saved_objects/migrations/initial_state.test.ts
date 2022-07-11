@@ -8,9 +8,10 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
-import type { DocLinksServiceSetup } from '../../doc_links';
-import { docLinksServiceMock, loggingSystemMock } from '../../mocks';
-import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { loggingSystemMock } from '../../mocks';
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
 
@@ -25,11 +26,14 @@ describe('createInitialState', () => {
     docLinks = docLinksServiceMock.createSetupContract();
   });
 
+  afterEach(() => jest.clearAllMocks());
+
   const migrationsConfig = {
     retryAttempts: 15,
     batchSize: 1000,
     maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
   } as unknown as SavedObjectsMigrationConfigType;
+
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
       createInitialState({
@@ -50,6 +54,7 @@ describe('createInitialState', () => {
         "batchSize": 1000,
         "controlState": "INIT",
         "currentAlias": ".kibana_task_manager",
+        "discardCorruptObjects": false,
         "discardUnknownObjects": false,
         "excludeFromUpgradeFilterHooks": Object {},
         "excludeOnUpgradeQuery": Object {
@@ -58,6 +63,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "apm-services-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "application_usage_transactional",
                 },
               },
               Object {
@@ -399,7 +409,7 @@ describe('createInitialState', () => {
     expect(initialState.discardUnknownObjects).toEqual(false);
     expect(logger.warn).toBeCalledTimes(1);
     expect(logger.warn).toBeCalledWith(
-      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
     );
   });
 
@@ -422,5 +432,52 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardUnknownObjects).toEqual(true);
+  });
+
+  it('initializes the `discardCorruptObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
+    const logger = mockLogger.get();
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig: {
+        ...migrationsConfig,
+        discardCorruptObjects: '8.0.0',
+      },
+      typeRegistry,
+      docLinks,
+      logger,
+    });
+
+    expect(initialState.discardCorruptObjects).toEqual(false);
+    expect(logger.warn).toBeCalledTimes(1);
+    expect(logger.warn).toBeCalledWith(
+      'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
+    );
+  });
+
+  it('initializes the `discardCorruptObjects` flag to true if the value provided in the config matches the current kibana version', () => {
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig: {
+        ...migrationsConfig,
+        discardCorruptObjects: '8.1.0',
+      },
+      typeRegistry,
+      docLinks,
+      logger: mockLogger.get(),
+    });
+
+    expect(initialState.discardCorruptObjects).toEqual(true);
   });
 });

@@ -9,19 +9,20 @@ import axios from 'axios';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from '@kbn/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TelemetryReceiver } from './receiver';
+import type { TelemetryReceiver } from './receiver';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { OsqueryTelemetryTask, OsqueryTelemetryTaskConfig } from './task';
+import type { OsqueryTelemetryTaskConfig } from './task';
+import { OsqueryTelemetryTask } from './task';
 
 const usageLabelPrefix: string[] = ['osquery_telemetry', 'sender'];
 
@@ -272,6 +273,7 @@ export class TelemetryEventsSender {
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
+        timeout: 5000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),

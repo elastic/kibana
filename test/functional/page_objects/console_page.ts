@@ -14,6 +14,7 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  log = this.ctx.getService('log');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -162,5 +163,62 @@ export class ConsolePageObject extends FtrService {
       const text = await lines[lines.length - 1].getVisibleText();
       return lines.length === 1 && text.trim() === '';
     });
+  }
+
+  public async selectAllRequests() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
+  }
+
+  public async hasSuccessBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--success'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasWarningBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--warning'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasInvalidSyntax() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_invalid'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasErrorMarker() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_error'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async clickFoldWidget() {
+    const widget = await this.find.byCssSelector('.ace_fold-widget');
+    await widget.click();
+  }
+
+  public async hasFolds() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      const folds = await requestEditor.findAllByCssSelector('.ace_fold');
+      return folds.length > 0;
+    } catch (e) {
+      return false;
+    }
   }
 }

@@ -8,29 +8,26 @@
 import { has } from 'lodash/fp';
 import React from 'react';
 
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { Columns, ItemsPerRow } from '../paginated_table';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import type { Columns, ItemsPerRow } from '../paginated_table';
 import { getRowItemDraggables } from '../tables/helpers';
 
 import * as i18n from './translations';
 import { HostDetailsLink, NetworkDetailsLink, UserDetailsLink } from '../links';
-import { AuthenticationsEdges, MatrixHistogramType } from '../../../../common/search_strategy';
-import { AuthTableColumns } from './types';
-import {
+import type { AuthenticationsEdges } from '../../../../common/search_strategy';
+import { MatrixHistogramType } from '../../../../common/search_strategy';
+import type { AuthTableColumns } from './types';
+import type {
   MatrixHistogramConfigs,
   MatrixHistogramMappingTypes,
   MatrixHistogramOption,
 } from '../matrix_histogram/types';
-import { LensAttributes } from '../visualization_actions/types';
+import type { LensAttributes } from '../visualization_actions/types';
 import { authenticationLensAttributes } from '../visualization_actions/lens_attributes/common/authentication';
 
-export const getHostDetailsAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
-  getUserColumn(usersEnabled),
+export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
+  USER_COLUMN,
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
@@ -39,8 +36,8 @@ export const getHostDetailsAuthenticationColumns = (usersEnabled: boolean): Auth
   LAST_FAILED_SOURCE_COLUMN,
 ];
 
-export const getHostsPageAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
-  getUserColumn(usersEnabled),
+export const getHostsPageAuthenticationColumns = (): AuthTableColumns => [
+  USER_COLUMN,
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
@@ -52,7 +49,7 @@ export const getHostsPageAuthenticationColumns = (usersEnabled: boolean): AuthTa
 ];
 
 export const getUsersPageAuthenticationColumns = (): AuthTableColumns =>
-  getHostsPageAuthenticationColumns(true);
+  getHostsPageAuthenticationColumns();
 
 export const getUserDetailsAuthenticationColumns = (): AuthTableColumns => [
   HOST_COLUMN,
@@ -77,40 +74,9 @@ export const rowItems: ItemsPerRow[] = [
 
 const FAILURES_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.FAILURES,
+  field: 'node.failures',
   truncateText: false,
   mobileOptions: { show: true },
-  render: ({ node }) => {
-    const id = escapeDataProviderId(`authentications-table-${node._id}-failures-${node.failures}`);
-    return (
-      <DraggableWrapper
-        key={id}
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id,
-          name: 'authentication_failure',
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: 'event.type',
-            value: 'authentication_failure',
-            operator: IS_OPERATOR,
-          },
-        }}
-        isAggregatable={true}
-        fieldType={'keyword'}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            node.failures
-          )
-        }
-      />
-    );
-  },
   width: '8%',
 };
 const LAST_SUCCESSFUL_TIME_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
@@ -192,9 +158,7 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
     }),
 };
 
-const getUserColumn = (
-  usersEnabled: boolean
-): Columns<AuthenticationsEdges, AuthenticationsEdges> => ({
+const USER_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.USER,
   truncateText: false,
   mobileOptions: { show: true },
@@ -205,9 +169,9 @@ const getUserColumn = (
       isAggregatable: true,
       fieldType: 'keyword',
       idPrefix: `authentications-table-${node._id}-userName`,
-      render: (item) => (usersEnabled ? <UserDetailsLink userName={item} /> : <>{item}</>),
+      render: (item) => <UserDetailsLink userName={item} />,
     }),
-});
+};
 
 const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.HOST,
@@ -226,42 +190,9 @@ const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
 
 const SUCCESS_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.SUCCESSES,
+  field: 'node.successes',
   truncateText: false,
   mobileOptions: { show: true },
-  render: ({ node }) => {
-    const id = escapeDataProviderId(
-      `authentications-table-${node._id}-node-successes-${node.successes}`
-    );
-    return (
-      <DraggableWrapper
-        key={id}
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id,
-          name: 'authentication_success',
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: 'event.type',
-            value: 'authentication_success',
-            operator: IS_OPERATOR,
-          },
-        }}
-        isAggregatable={true}
-        fieldType="keyword"
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            node.successes
-          )
-        }
-      />
-    );
-  },
   width: '8%',
 };
 

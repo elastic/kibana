@@ -14,7 +14,7 @@ import {
   SERVER_APP_ID,
 } from '../../common/constants';
 import { DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 
@@ -26,21 +26,18 @@ export const overviewLinks: LinkItem = {
     defaultMessage: 'What is going on in your security environment.',
   }),
   path: OVERVIEW_PATH,
-  globalNavEnabled: true,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.overview', {
       defaultMessage: 'Overview',
     }),
   ],
-  globalNavOrder: 9000,
 };
 
 export const gettingStartedLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: LANDING_PATH,
-  globalNavEnabled: false,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.getStarted', {
@@ -60,7 +57,6 @@ export const detectionResponseLinks: LinkItem = {
       "Monitor the impact of application and device performance from the end user's point of view.",
   }),
   path: DETECTION_RESPONSE_PATH,
-  globalNavEnabled: false,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {

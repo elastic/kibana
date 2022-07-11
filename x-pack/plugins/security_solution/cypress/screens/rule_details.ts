@@ -39,11 +39,17 @@ export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
+export const DATA_VIEW_DETAILS = 'Data View';
+
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
 export const INDICATOR_INDEX_QUERY = 'Indicator index query';
 
 export const INDICATOR_MAPPING = 'Indicator mapping';
+
+export const INTEGRATIONS = '[data-test-subj="integrationLink"]';
+
+export const INTEGRATIONS_STATUS = '[data-test-subj="statusBadge"]';
 
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
@@ -72,7 +78,12 @@ export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 
-export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionsViewerDeleteBtn"]';
+export const EXCEPTION_ITEM_ACTIONS_BUTTON =
+  'button[data-test-subj="exceptionItemCardHeader-actionButton"]';
+
+export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-delete"]';
+
+export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 

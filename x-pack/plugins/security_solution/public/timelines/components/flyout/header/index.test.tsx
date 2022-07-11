@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../common/mock';
@@ -14,7 +15,6 @@ import { useTimelineKpis } from '../../../containers/kpis';
 import { FlyoutHeader } from '.';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockBrowserFields, mockDocValueFields } from '../../../../common/containers/source/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
@@ -58,8 +58,6 @@ const defaultMocks = {
   selectedPatterns: mockIndexNames,
 };
 describe('header', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     // Mocking these services is required for the header component to render.
     mockUseSourcererDataView.mockImplementation(() => defaultMocks);
@@ -86,13 +84,13 @@ describe('header', () => {
         read: false,
       });
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <FlyoutHeader timelineId={TimelineId.test} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="attach-timeline-case-button"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('attach-timeline-case-button')).toBeInTheDocument();
     });
 
     it('does not render the button when the user does not have write permissions', () => {
@@ -101,13 +99,13 @@ describe('header', () => {
         read: false,
       });
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <FlyoutHeader timelineId={TimelineId.test} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="attach-timeline-case-button"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('attach-timeline-case-button')).not.toBeInTheDocument();
     });
   });
 
@@ -116,21 +114,17 @@ describe('header', () => {
       beforeEach(() => {
         mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineKpiResponse]);
       });
-      it('renders the component, labels and values successfully', async () => {
-        const wrapper = mount(
+      it('renders the component, labels and values successfully', () => {
+        render(
           <TestProviders>
             <FlyoutHeader timelineId={TimelineId.test} />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="siem-timeline-kpis"]').exists()).toEqual(true);
+        expect(screen.getByTestId('siem-timeline-kpis')).toBeInTheDocument();
         // label
-        expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-          expect.stringContaining('Processes')
-        );
+        expect(screen.getByText('Processes')).toBeInTheDocument();
         // value
-        expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-          expect.stringContaining('1')
-        );
+        expect(screen.getByTestId('siem-timeline-process-kpi').textContent).toContain('1');
       });
     });
 
@@ -139,14 +133,12 @@ describe('header', () => {
         mockUseTimelineKpis.mockReturnValue([true, mockUseTimelineKpiResponse]);
       });
       it('renders a loading indicator for values', async () => {
-        const wrapper = mount(
+        render(
           <TestProviders>
             <FlyoutHeader timelineId={TimelineId.test} />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-          expect.stringContaining('--')
-        );
+        expect(screen.getAllByText('--')).not.toHaveLength(0);
       });
     });
 
@@ -154,19 +146,14 @@ describe('header', () => {
       beforeEach(() => {
         mockUseTimelineKpis.mockReturnValue([false, null]);
       });
-      it('renders labels and the default empty string', async () => {
-        const wrapper = mount(
+      it('renders labels and the default empty string', () => {
+        render(
           <TestProviders>
             <FlyoutHeader timelineId={TimelineId.test} />
           </TestProviders>
         );
-
-        expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-          expect.stringContaining('Processes')
-        );
-        expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-          expect.stringContaining(getEmptyValue())
-        );
+        expect(screen.getByText('Processes')).toBeInTheDocument();
+        expect(screen.getAllByText(getEmptyValue())).not.toHaveLength(0);
       });
     });
 
@@ -174,24 +161,16 @@ describe('header', () => {
       beforeEach(() => {
         mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineLargeKpiResponse]);
       });
-      it('formats the numbers correctly', async () => {
-        const wrapper = mount(
+      it('formats the numbers correctly', () => {
+        render(
           <TestProviders>
             <FlyoutHeader timelineId={TimelineId.test} />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-          expect.stringContaining('1k')
-        );
-        expect(wrapper.find('[data-test-subj="siem-timeline-user-kpi"]').first().text()).toEqual(
-          expect.stringContaining('1m')
-        );
-        expect(
-          wrapper.find('[data-test-subj="siem-timeline-source-ip-kpi"]').first().text()
-        ).toEqual(expect.stringContaining('1b'));
-        expect(wrapper.find('[data-test-subj="siem-timeline-host-kpi"]').first().text()).toEqual(
-          expect.stringContaining('999')
-        );
+        expect(screen.getByText('1k', { selector: '.euiTitle' })).toBeInTheDocument();
+        expect(screen.getByText('1m', { selector: '.euiTitle' })).toBeInTheDocument();
+        expect(screen.getByText('1b', { selector: '.euiTitle' })).toBeInTheDocument();
+        expect(screen.getByText('999', { selector: '.euiTitle' })).toBeInTheDocument();
       });
     });
   });

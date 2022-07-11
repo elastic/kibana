@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
+  ALERTS_IN_FIRST_PAGE,
 } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
@@ -54,7 +55,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
       expect(response.status).to.be(200);
       expect(response.body.total).to.be(504);
-      expect(response.body.events.length).to.be(PROCESS_EVENTS_PER_PAGE);
+      expect(response.body.events.length).to.be(PROCESS_EVENTS_PER_PAGE + ALERTS_IN_FIRST_PAGE);
     });
 
     it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging forward)`, async () => {

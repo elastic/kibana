@@ -11,6 +11,8 @@ import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import agent from 'elastic-apm-node';
 
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
@@ -21,12 +23,10 @@ import {
   isMachineLearningParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { CreateSecurityRuleTypeWrapper } from './types';
+import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
-import {
-  NotificationRuleTypeParams,
-  scheduleNotificationActions,
-} from '../notifications/schedule_notification_actions';
+import type { NotificationRuleTypeParams } from '../notifications/schedule_notification_actions';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
@@ -36,10 +36,19 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { getInputIndex } from '../signals/get_input_output_index';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLoggerFactory }) =>
+  ({
+    lists,
+    logger,
+    config,
+    ruleDataClient,
+    eventLogService,
+    ruleExecutionLoggerFactory,
+    version,
+  }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -67,6 +76,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             rule,
           } = options;
           let runState = state;
+          let hasError = false;
+          let inputIndex: string[] = [];
+          let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
           const {
             alertWithPersistence,
@@ -130,17 +142,47 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
+          /**
+           * Data Views Logic
+           * Use of data views is supported for all rules other than ML.
+           * Rules can define both a data view and index pattern, but on execution:
+           *  - Data view is used if it is defined
+           *    - Rule exits early if data view defined is not found (ie: it's been deleted)
+           *  - If no data view defined, falls to using existing index logic
+           */
+          if (!isMachineLearningParams(params)) {
+            try {
+              const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
+                index: params.index,
+                services,
+                version,
+                logger,
+                ruleId: params.ruleId,
+                dataViewId: params.dataViewId,
+              });
+
+              inputIndex = index ?? [];
+              runtimeMappings = dataViewRuntimeMappings;
+            } catch (exc) {
+              const errorMessage = buildRuleMessage(`Check for indices to search failed ${exc}`);
+              logger.error(errorMessage);
+              await ruleExecutionLogger.logStatusChange({
+                newStatus: RuleExecutionStatus.failed,
+                message: errorMessage,
+              });
+
+              return result.state;
+            }
+          }
+
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
           try {
             if (!isMachineLearningParams(params)) {
-              const index = params.index;
               const hasTimestampOverride = !!timestampOverride;
 
-              const inputIndices = params.index ?? [];
-
-              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
+              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
               wroteWarningStatus = await hasReadIndexPrivileges({
                 privileges,
@@ -154,19 +196,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                   services.scopedClusterClient.asCurrentUser.fieldCaps(
                     {
-                      index,
+                      index: inputIndex,
                       fields: hasTimestampOverride
                         ? ['@timestamp', timestampOverride]
                         : ['@timestamp'],
                       include_unmapped: true,
+                      runtime_mappings: runtimeMappings,
                     },
                     { meta: true }
                   )
                 );
+
                 wroteWarningStatus = await hasTimestampFields({
                   timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
                   timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices,
+                  inputIndices: inputIndex,
                   ruleExecutionLogger,
                   logger,
                   buildRuleMessage,
@@ -182,7 +226,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
             wroteWarningStatus = true;
           }
-          let hasError = false;
           const { tuples, remainingGap } = getRuleRangeTuples({
             logger,
             previousStartedAt,
@@ -236,6 +279,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               mergeStrategy,
               completeRule,
               spaceId,
+              indicesToQuery: inputIndex,
             });
 
             const wrapSequences = wrapSequencesFactory({
@@ -244,6 +288,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               mergeStrategy,
               completeRule,
               spaceId,
+              indicesToQuery: inputIndex,
             });
 
             for (const tuple of tuples) {
@@ -252,6 +297,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 services,
                 state: runState,
                 runOpts: {
+                  inputIndex,
+                  runtimeMappings,
                   buildRuleMessage,
                   bulkCreate,
                   exceptionItems,

@@ -7,12 +7,13 @@
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
 
@@ -82,7 +83,7 @@ const StyledHoverActionsContainer = styled.div<{
 
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
   min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+  padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
   position: relative;
 `;
 

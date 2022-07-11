@@ -55,6 +55,7 @@ import {
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
   RuleSnooze,
+  RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
 } from '../types';
 import {
@@ -106,9 +107,10 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { IExecutionLogWithErrorsResult } from '../../common';
-import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
+import { getActiveSnoozes } from '../lib/is_rule_snoozed';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -192,7 +194,7 @@ export interface MuteOptions extends IndexType {
 }
 
 export interface SnoozeOptions extends IndexType {
-  snoozeEndTime: string | -1;
+  snoozeSchedule: RuleSnoozeSchedule;
 }
 
 export interface FindOptions extends IndexType {
@@ -211,7 +213,10 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
+export type BulkEditFields = keyof Pick<
+  Rule,
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+>;
 
 export type BulkEditOperation =
   | {
@@ -223,24 +228,22 @@ export type BulkEditOperation =
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'schedule'>;
+      value: Rule['schedule'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'throttle'>;
+      value: Rule['throttle'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'notifyWhen'>;
+      value: Rule['notifyWhen'];
     };
-
-// schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'schedule'>;
-//     value: Rule['schedule'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'throttle'>;
-//     value: Rule['throttle'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'notifyWhen'>;
-//     value: Rule['notifyWhen'];
-//   };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
@@ -1244,20 +1247,23 @@ export class RulesClient {
       (async () => {
         if (
           updateResult.scheduledTaskId &&
+          updateResult.schedule &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
-          this.taskManager
-            .runNow(updateResult.scheduledTaskId)
-            .then(() => {
-              this.logger.debug(
-                `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
-              );
-            })
-            .catch((err: Error) => {
-              this.logger.error(
-                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-              );
-            });
+          try {
+            const { tasks } = await this.taskManager.bulkUpdateSchedules(
+              [updateResult.scheduledTaskId],
+              updateResult.schedule
+            );
+
+            this.logger.debug(
+              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId} to run at: ${tasks?.[0]?.runAt}`
+            );
+          } catch (err) {
+            this.logger.error(
+              `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: ${err.message}`
+            );
+          }
         }
       })(),
     ]);
@@ -1493,6 +1499,36 @@ export class RulesClient {
         false
       );
     });
+
+    // update schedules only if schedule operation is present
+    const scheduleOperation = options.operations.find(
+      (
+        operation
+      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        operation.field === 'schedule'
+    );
+
+    if (scheduleOperation?.value) {
+      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+        if (rule.scheduledTaskId) {
+          acc.push(rule.scheduledTaskId);
+        }
+        return acc;
+      }, []);
+
+      try {
+        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+        this.logger.debug(
+          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to update schedules for underlying tasks: ${taskIds.join(
+            ', '
+          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
+        );
+      }
+    }
 
     return { rules: updatedRules, errors, total };
   }
@@ -2065,29 +2101,35 @@ export class RulesClient {
 
   public async snooze({
     id,
-    snoozeEndTime,
+    snoozeSchedule,
   }: {
     id: string;
-    snoozeEndTime: string | -1;
+    snoozeSchedule: RuleSnoozeSchedule;
   }): Promise<void> {
-    if (typeof snoozeEndTime === 'string') {
-      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
-      if (snoozeDateValidationMsg) {
-        throw new RuleMutedError(snoozeDateValidationMsg);
-      }
+    const snoozeDateValidationMsg = validateSnoozeStartDate(snoozeSchedule.rRule.dtstart);
+    if (snoozeDateValidationMsg) {
+      throw new RuleMutedError(snoozeDateValidationMsg);
     }
+
     return await retryIfConflicts(
       this.logger,
-      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
-      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+      `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
+      async () => await this.snoozeWithOCC({ id, snoozeSchedule })
     );
   }
 
-  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+  private async snoozeWithOCC({
+    id,
+    snoozeSchedule,
+  }: {
+    id: string;
+    snoozeSchedule: RuleSnoozeSchedule;
+  }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
+    const { id: snoozeId, duration } = snoozeSchedule;
 
     try {
       await this.authorization.ensureAuthorized({
@@ -2121,22 +2163,18 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If snoozeEndTime is -1, instead mute all
+    // If duration is -1, instead mute all
     const newAttrs =
-      snoozeEndTime === -1
+      duration === -1
         ? {
             muteAll: true,
             snoozeSchedule: clearUnscheduledSnooze(attributes),
           }
         : {
-            snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
-              duration: Date.parse(snoozeEndTime) - Date.now(),
-              rRule: {
-                dtstart: new Date().toISOString(),
-                tzid: 'UTC',
-                count: 1,
-              },
-            }),
+            snoozeSchedule: (snoozeId
+              ? clearScheduledSnoozesById(attributes, [snoozeId])
+              : clearUnscheduledSnooze(attributes)
+            ).concat(snoozeSchedule),
             muteAll: false,
           };
 
@@ -2155,15 +2193,21 @@ export class RulesClient {
     ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
-  public async unsnooze({ id }: { id: string }): Promise<void> {
+  public async unsnooze({
+    id,
+    scheduleIds,
+  }: {
+    id: string;
+    scheduleIds?: string[];
+  }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.unsnooze('${id}')`,
-      async () => await this.unsnoozeWithOCC({ id })
+      async () => await this.unsnoozeWithOCC({ id, scheduleIds })
     );
   }
 
-  private async unsnoozeWithOCC({ id }: { id: string }) {
+  private async unsnoozeWithOCC({ id, scheduleIds }: { id: string; scheduleIds?: string[] }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
@@ -2202,10 +2246,12 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeSchedule: clearUnscheduledSnooze(attributes),
-      muteAll: false,
+      snoozeSchedule: scheduleIds
+        ? clearScheduledSnoozesById(attributes, scheduleIds)
+        : clearCurrentActiveSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
+      ...(!scheduleIds ? { muteAll: false } : {}),
     });
     const updateOptions = { version };
 
@@ -2847,7 +2893,28 @@ function parseDate(dateString: string | undefined, propertyName: string, default
 }
 
 function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+  // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
+}
+
+function clearScheduledSnoozesById(attributes: { snoozeSchedule?: RuleSnooze }, ids: string[]) {
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
+    : [];
+}
+
+function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; muteAll: boolean }) {
+  // First attempt to cancel a simple (unscheduled) snooze
+  const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
+  // Now clear any scheduled snoozes that are currently active and never recur
+  const activeSnoozes = getActiveSnoozes(attributes);
+  const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
+    if (!activeSnoozeIds.includes(s.id!)) return true;
+    // Check if this is a recurring snooze, and return true if so
+    if (s.rRule.freq && s.rRule.count !== 1) return true;
+  });
+  return clearedNonRecurringActiveSnoozes;
 }

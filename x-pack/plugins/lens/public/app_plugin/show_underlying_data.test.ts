@@ -17,7 +17,13 @@ describe('getLayerMetaInfo', () => {
   };
   it('should return error in case of no data', () => {
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, undefined, capabilities).error
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        undefined,
+        undefined,
+        capabilities
+      ).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -30,20 +36,27 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
+        undefined,
         capabilities
       ).error
     ).toBe('Cannot show underlying data for visualizations with multiple layers');
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, capabilities).error).toBe(
+    expect(getLayerMetaInfo(undefined, {}, undefined, undefined, capabilities).error).toBe(
       'Visualization has no data available to show'
     );
   });
 
   it('should return error in case of missing configuration/state', () => {
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), undefined, {}, capabilities).error
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        undefined,
+        {},
+        undefined,
+        capabilities
+      ).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -67,8 +80,33 @@ describe('getLayerMetaInfo', () => {
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, capabilities).error
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, undefined, capabilities)
+        .error
     ).toBe('Visualization has no data available to show');
+  });
+
+  it('should return error in case of getFilters returning errors', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'indexpattern',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getFilters: jest.fn(() => ({ error: 'filters error' })),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    expect(
+      getLayerMetaInfo(
+        mockDatasource,
+        {}, // the publicAPI has been mocked, so no need for a state here
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+        },
+        undefined,
+        capabilities
+      ).error
+    ).toBe('filters error');
   });
 
   it('should not be visible if discover is not available', () => {
@@ -80,6 +118,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        undefined,
         {
           navLinks: { discover: false },
           discover: { show: true },
@@ -93,6 +132,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        undefined,
         {
           navLinks: { discover: true },
           discover: { show: false },
@@ -124,6 +164,7 @@ describe('getLayerMetaInfo', () => {
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
+      undefined,
       capabilities
     );
     expect(error).toBeUndefined();
@@ -155,7 +196,8 @@ describe('combineQueryAndFilters', () => {
           columns: [],
           filters: { enabled: { kuery: [], lucene: [] }, disabled: { kuery: [], lucene: [] } },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({ query: { language: 'kuery', query: 'myfield: *' }, filters: [] });
   });
@@ -173,7 +215,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       query: { language: 'kuery', query: '( ( myfield: * ) AND ( otherField: * ) )' },
@@ -194,7 +237,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({ query: { language: 'kuery', query: 'otherField: *' }, filters: [] });
   });
@@ -225,7 +269,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       query: {
@@ -253,7 +298,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       query: { language: 'lucene', query: 'myField' },
@@ -341,7 +387,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       filters: [
@@ -424,7 +471,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       filters: [
@@ -486,7 +534,8 @@ describe('combineQueryAndFilters', () => {
           disabled: { kuery: [], lucene: [] },
         },
       },
-      undefined
+      undefined,
+      {}
     );
 
     expect(query).toEqual({
@@ -571,7 +620,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual(emptyQueryAndFilters);
 
@@ -590,7 +640,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual(emptyQueryAndFilters);
 
@@ -609,7 +660,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual(emptyQueryAndFilters);
   });
@@ -681,7 +733,8 @@ describe('combineQueryAndFilters', () => {
             disabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       filters: [
@@ -766,7 +819,8 @@ describe('combineQueryAndFilters', () => {
             enabled: { kuery: [], lucene: [] },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       filters: [
@@ -833,6 +887,69 @@ describe('combineQueryAndFilters', () => {
     });
   });
 
+  it('should work for prefix wildcard in disabled KQL filter', () => {
+    expect(
+      combineQueryAndFilters(
+        undefined,
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            disabled: {
+              lucene: [],
+              kuery: [[{ language: 'kuery', query: 'myfield: *abc*' }]],
+            },
+            enabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined,
+        {
+          allowLeadingWildcards: true,
+        }
+      )
+    ).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'appState',
+          },
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      query_string: {
+                        fields: ['myfield'],
+                        query: '*abc*',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+          meta: {
+            alias: 'myfield: *abc*',
+            disabled: true,
+            index: 'testDatasource',
+            negate: false,
+            type: 'custom',
+          },
+        },
+      ],
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+    });
+  });
+
   it('should work together with enabled and disabled filters', () => {
     expect(
       combineQueryAndFilters(
@@ -852,7 +969,8 @@ describe('combineQueryAndFilters', () => {
             },
           },
         },
-        undefined
+        undefined,
+        {}
       )
     ).toEqual({
       filters: [

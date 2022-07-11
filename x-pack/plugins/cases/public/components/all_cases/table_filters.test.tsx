@@ -11,18 +11,18 @@ import { mount } from 'enzyme';
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
 import userEvent from '@testing-library/user-event';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 
 const onFilterChanged = jest.fn();
 const fetchReporters = jest.fn();
-const fetchTags = jest.fn();
+const refetch = jest.fn();
 const setFilterRefetch = jest.fn();
 
 const props = {
@@ -40,7 +40,7 @@ describe('CasesTableFilters ', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],

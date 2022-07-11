@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
-import {
+import type {
   MachineLearningCreateSchema,
   MachineLearningUpdateSchema,
   QueryCreateSchema,
@@ -19,6 +19,18 @@ import {
 } from './rule_schemas';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'query',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+});
+
+export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  data_view_id: 'logs-*',
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -56,7 +68,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   language: 'kuery',
   rule_id: ruleId,
   threat_query: '*:*',
-  threat_index: ['list-index'],
+  threat_index: ['auditbeat-*'],
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
   interval: '5m',
   from: 'now-6m',

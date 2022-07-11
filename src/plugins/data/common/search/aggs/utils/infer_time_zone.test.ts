@@ -6,28 +6,17 @@
  * Side Public License, v 1.
  */
 
-jest.mock('moment', () => {
-  const moment: any = jest.fn(() => {
-    return {
-      format: jest.fn(() => '-1;00'),
-    };
-  });
-  moment.tz = {
-    guess: jest.fn(() => 'CET'),
-  };
-  return moment;
-});
-
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
 describe('inferTimeZone', () => {
   it('reads time zone from agg params', () => {
-    const params: AggParamsDateHistogram = {
+    const params = {
       time_zone: 'CEST',
     };
-    expect(inferTimeZone(params, {} as DataView, () => false, jest.fn())).toEqual('CEST');
+    expect(
+      inferTimeZone(params, {} as DataView, 'date_histogram', jest.fn().mockReturnValue('UTC'))
+    ).toEqual('CEST');
   });
 
   it('reads time zone from index pattern type meta if available', () => {
@@ -45,8 +34,8 @@ describe('inferTimeZone', () => {
             },
           },
         } as unknown as DataView,
-        () => false,
-        jest.fn()
+        'date_histogram',
+        jest.fn().mockReturnValue('CET')
       )
     ).toEqual('UTC');
   });
@@ -70,24 +59,15 @@ describe('inferTimeZone', () => {
             },
           },
         } as unknown as DataView,
-        () => false,
-        jest.fn()
+        'date_histogram',
+        jest.fn().mockReturnValue('CET')
       )
     ).toEqual('UTC');
   });
 
-  it('reads time zone from moment if set to default', () => {
-    expect(inferTimeZone({}, {} as DataView, () => true, jest.fn())).toEqual('CET');
-  });
-
   it('reads time zone from config if not set to default', () => {
     expect(
-      inferTimeZone(
-        {},
-        {} as DataView,
-        () => false,
-        () => 'CET' as any
-      )
+      inferTimeZone({}, {} as DataView, 'date_histogram', jest.fn().mockReturnValue('CET'))
     ).toEqual('CET');
   });
 });

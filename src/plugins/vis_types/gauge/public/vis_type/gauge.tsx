@@ -29,6 +29,7 @@ export const getGaugeVisTypeDefinition = (
     defaultMessage: 'Show the status of a metric.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {

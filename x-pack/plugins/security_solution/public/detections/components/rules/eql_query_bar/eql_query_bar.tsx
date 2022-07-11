@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, ChangeEvent, useEffect, useState, useRef } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -13,14 +14,14 @@ import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 
-import { FieldHook } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
 import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';
-import {
+import type {
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,

@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(API_URLS.SYNTHETICS_MONITORS)
-              .query({ query: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(API_URLS.SYNTHETICS_MONITORS)
-              .query({ query: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -258,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -306,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -381,7 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -501,7 +501,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -555,7 +555,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -574,6 +574,97 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await security.user.delete(username);
         await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors);
+
+        const response = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const { monitors } = response.body;
+
+        // add urls and ports to mimic hydration
+        const updates = {
+          [ConfigKey.URLS]: 'https://modified-host.com',
+          [ConfigKey.PORT]: 443,
+        };
+
+        const modifiedMonitor = { ...monitors[0]?.attributes, ...updates };
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
+          .set('kbn-xsrf', 'true')
+          .send(modifiedMonitor)
+          .expect(200);
+
+        // update project monitor via push api
+        const apiResponse = await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors)
+          .expect(200);
+        expect(apiResponse.body.updatedMonitors).eql([projectMonitors.monitors[0].id]);
+
+        // ensure that monitor can still be decrypted
+        await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, projectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - is able to enable and disable monitors', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors);
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                enabled: false,
+              },
+            ],
+          })
+          .expect(200);
+        const response = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = response.body;
+        expect(monitors[0].attributes.enabled).eql(false);
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, projectMonitors.project);
+          }),
+        ]);
       }
     });
   });

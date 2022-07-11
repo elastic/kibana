@@ -6,20 +6,22 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
+import type {
+  EuiDataGridSorting,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+} from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCode,
   EuiDataGrid,
-  EuiDataGridSorting,
-  EuiDataGridProps,
-  EuiDataGridColumn,
   EuiLink,
   EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
   EuiIconTip,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +29,8 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAllResults } from './use_all_results';
-import { Direction, ResultEdges } from '../../common/search_strategy';
+import type { ResultEdges } from '../../common/search_strategy';
+import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { useActionResults } from '../action_results/use_action_results';
 import { generateEmptyDataMessage } from './translations';
@@ -319,7 +322,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
               visibleRowIndex: number;
             };
-            const eventId = data[visibleRowIndex]._id;
+            const eventId = data[visibleRowIndex]?._id;
 
             return addToTimeline({ query: ['_id', eventId], isIcon: true });
           },

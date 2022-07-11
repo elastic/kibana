@@ -96,25 +96,21 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
           className="euiModalBody__overflow"
         >
           <div
-            className="euiText euiText--small"
+            className="euiText emotion-euiText-s-euiTextColor-subdued"
+            style={Object {}}
           >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-              style={Object {}}
-            >
-              <p>
-                Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
-              </p>
-            </div>
+            <p>
+              Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
+            </p>
           </div>
           <div
-            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <div
-            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAssetManager__emptyPanel"
+            className="euiPanel euiPanel--plain euiPanel--paddingMedium canvasAssetManager__emptyPanel emotion-euiPanel-grow-m-m-plain-hasShadow"
           >
             <div
-              className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+              className="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
             >
               <div
                 className="euiEmptyPrompt__main"
@@ -137,7 +133,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     className="euiEmptyPrompt__contentInner"
                   >
                     <h2
-                      className="euiTitle euiTitle--xsmall"
+                      className="euiTitle emotion-euiTitle-xs"
                     >
                       Import your assets to get started
                     </h2>
@@ -170,7 +166,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero eui-textNoWrap"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText emotion-euiText-m"
               id="CanvasAssetManagerLabel"
             >
               0% space used
@@ -300,19 +296,15 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
           className="euiModalBody__overflow"
         >
           <div
-            className="euiText euiText--small"
+            className="euiText emotion-euiText-s-euiTextColor-subdued"
+            style={Object {}}
           >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-              style={Object {}}
-            >
-              <p>
-                Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
-              </p>
-            </div>
+            <p>
+              Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
+            </p>
           </div>
           <div
-            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
@@ -321,7 +313,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+                className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset emotion-euiPanel-grow-m-s-plain-hasShadow"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
@@ -338,10 +330,10 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </figure>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                 />
                 <div
-                  className="euiText euiText--extraSmall eui-textBreakAll"
+                  className="euiText eui-textBreakAll emotion-euiText-xs"
                 >
                   <p
                     className="eui-textBreakAll"
@@ -351,7 +343,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     </strong>
                     <br />
                     <span
-                      className="euiTextColor euiTextColor--subdued"
+                      className="emotion-euiTextColor-subdued"
                       style={Object {}}
                     >
                       <small>
@@ -363,7 +355,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </p>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                 />
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -497,7 +489,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+                className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset emotion-euiPanel-grow-m-s-plain-hasShadow"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
@@ -514,10 +506,10 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </figure>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                 />
                 <div
-                  className="euiText euiText--extraSmall eui-textBreakAll"
+                  className="euiText eui-textBreakAll emotion-euiText-xs"
                 >
                   <p
                     className="eui-textBreakAll"
@@ -527,7 +519,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     </strong>
                     <br />
                     <span
-                      className="euiTextColor euiTextColor--subdued"
+                      className="emotion-euiTextColor-subdued"
                       style={Object {}}
                     >
                       <small>
@@ -539,7 +531,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </p>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                 />
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -694,7 +686,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero eui-textNoWrap"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText emotion-euiText-m"
               id="CanvasAssetManagerLabel"
             >
               0% space used

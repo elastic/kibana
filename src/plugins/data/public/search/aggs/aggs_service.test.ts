@@ -39,7 +39,6 @@ describe('AggsService - public', () => {
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
-      uiSettings,
     };
   });
 

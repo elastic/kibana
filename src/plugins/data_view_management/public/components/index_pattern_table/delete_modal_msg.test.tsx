@@ -9,20 +9,34 @@
 import { deleteModalMsg } from './delete_modal_msg';
 
 describe('delete modal content', () => {
-  const toDVProps = (title: string, namespaces: string[]) => {
+  const toDVProps = (title: string, name: string, namespaces: string[]) => {
     return {
       id: '1',
       title,
+      name,
       namespaces,
+      getName: () => title,
     };
   };
 
   test('render', () => {
-    expect(deleteModalMsg([toDVProps('logstash-*', ['a', 'b', 'c'])], true)).toMatchSnapshot();
-    expect(deleteModalMsg([toDVProps('logstash-*', ['a', 'b', 'c'])], false)).toMatchSnapshot();
-    expect(deleteModalMsg([toDVProps('logstash-*', ['*'])], true)).toMatchSnapshot();
     expect(
-      deleteModalMsg([toDVProps('logstash-*', ['*']), toDVProps('log*', ['a', 'b', 'c'])], true)
+      deleteModalMsg([toDVProps('logstash-*', 'Logstash Star', ['a', 'b', 'c'])], true)
+    ).toMatchSnapshot();
+    expect(
+      deleteModalMsg([toDVProps('logstash-*', 'Logstash Star', ['a', 'b', 'c'])], false)
+    ).toMatchSnapshot();
+    expect(
+      deleteModalMsg([toDVProps('logstash-*', 'Logstash Star', ['*'])], true)
+    ).toMatchSnapshot();
+    expect(
+      deleteModalMsg(
+        [
+          toDVProps('logstash-*', 'Logstash Star', ['*']),
+          toDVProps('log*', 'Log Star', ['a', 'b', 'c']),
+        ],
+        true
+      )
     ).toMatchSnapshot();
   });
 });

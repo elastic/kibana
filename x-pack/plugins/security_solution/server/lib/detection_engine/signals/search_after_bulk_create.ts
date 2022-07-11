@@ -19,7 +19,7 @@ import {
   mergeSearchResults,
   getSafeSortIds,
 } from './utils';
-import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 // search_after through documents and re-index using bulk endpoint.
@@ -41,6 +41,7 @@ export const searchAfterAndBulkCreate = async ({
   trackTotalHits,
   tuple,
   wrapHits,
+  runtimeMappings,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     const ruleParams = completeRule.ruleParams;
@@ -61,17 +62,18 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
+
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
-
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
+            runtimeMappings,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,

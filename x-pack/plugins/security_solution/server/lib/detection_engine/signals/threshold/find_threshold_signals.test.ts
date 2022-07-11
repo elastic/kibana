@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { mockLogger } from '../__mocks__/es_results';
 import { buildRuleMessageFactory } from '../rule_messages';
@@ -45,6 +46,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -89,6 +91,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -132,6 +135,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -189,6 +193,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -260,6 +265,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({

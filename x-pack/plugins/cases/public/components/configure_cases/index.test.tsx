@@ -10,7 +10,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { ConfigureCases } from '.';
-import { TestProviders } from '../../common/mock';
+import { noCasesPermissions, TestProviders } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
@@ -191,7 +191,7 @@ describe('ConfigureCases', () => {
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
-        wrappingComponentProps: { userCanCrud: false },
+        wrappingComponentProps: { permissions: noCasesPermissions() },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
@@ -553,7 +553,7 @@ describe('ConfigureCases', () => {
         expect(wrapper.find('[data-test-subj="add-connector-flyout"]').exists()).toBe(true);
         expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            actionTypes: [
+            supportedActionTypes: [
               expect.objectContaining({
                 id: '.servicenow',
               }),
@@ -575,9 +575,6 @@ describe('ConfigureCases', () => {
     test('it show the edit flyout when pressing the update connector button', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.resilient',
-        validateConnector: () => {
-          return Promise.resolve({});
-        },
         validateParams: () => {
           const validationResult = { errors: {} };
           return Promise.resolve(validationResult);
@@ -603,7 +600,7 @@ describe('ConfigureCases', () => {
         wrapper.update();
         expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(true);
         expect(getEditConnectorFlyoutMock).toHaveBeenCalledWith(
-          expect.objectContaining({ initialConnector: connectors[1] })
+          expect.objectContaining({ connector: connectors[1] })
         );
       });
 

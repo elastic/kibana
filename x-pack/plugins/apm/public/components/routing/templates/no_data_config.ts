@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 
 export function getNoDataConfig({
   docsLink,
@@ -48,7 +48,7 @@ export function getNoDataConfig({
     solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
       defaultMessage: 'Observability',
     }),
-    actions: {
+    action: {
       elasticAgent: {
         title: noDataConfigDetails.title,
         description: i18n.translate('xpack.apm.ux.overview.agent.description', {

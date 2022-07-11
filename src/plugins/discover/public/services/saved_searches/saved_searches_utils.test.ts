@@ -44,6 +44,9 @@ describe('saved_searches_utils', () => {
           "rowHeight": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
+              "aggs": Object {
+                "createAggConfigs": [MockFunction],
+              },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
               "search": [MockFunction],

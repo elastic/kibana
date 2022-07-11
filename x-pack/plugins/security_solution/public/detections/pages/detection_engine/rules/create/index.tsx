@@ -13,11 +13,12 @@ import {
   EuiSpacer,
   EuiFlexGroup,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -41,7 +42,8 @@ import {
   userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../helpers';
-import { RuleStep, RuleStepsFormData, RuleStepsFormHooks } from '../types';
+import type { RuleStepsFormData, RuleStepsFormHooks } from '../types';
+import { RuleStep } from '../types';
 import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
@@ -93,14 +95,19 @@ const CreateRulePageComponent: React.FC = () => {
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { navigateToApp } = useKibana().services.application;
+  const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const defineRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
@@ -136,6 +143,22 @@ const CreateRulePageComponent: React.FC = () => {
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [dataServices.dataViews]);
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -333,6 +356,7 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={submitStepDefineRule}
+                  kibanaDataViews={dataViewOptions}
                   descriptionColumns="singleSplit"
                   // We need a key to make this component remount when edit/view mode is toggled
                   // https://github.com/elastic/kibana/pull/132834#discussion_r881705566

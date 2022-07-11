@@ -5,42 +5,51 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import {
+  EuiCallOut,
+  EuiHealth,
+  EuiIconTip,
+  EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPanel,
-  EuiSpacer,
-  EuiLink,
-  EuiCallOut,
   EuiScreenReaderOnly,
+  EuiSpacer,
   EuiToolTip,
-  EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { capitalize, get } from 'lodash';
-// @ts-ignore
-import { ClusterStatus } from '../cluster_status';
-// @ts-ignore
-import { EuiMonitoringTable } from '../../table';
-import { STATUS_ICON_TYPES } from '../../status_icon';
+import React, { Fragment } from 'react';
+import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeFeature } from '../../../../common/enums';
+import { CommonAlertStatus } from '../../../../common/types/alerts';
+import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
+import { AlertsStatus } from '../../../alerts/status';
+import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 // @ts-ignore
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 // @ts-ignore
 import { SetupModeBadge } from '../../setup_mode/badge';
-import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
-import { CommonAlertStatus } from '../../../../common/types/alerts';
-import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
 // @ts-ignore
 import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { AlertsStatus } from '../../../alerts/status';
-import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeFeature } from '../../../../common/enums';
+import { STATUS_ICON_TYPES } from '../../status_icon';
+// @ts-ignore
+import { EuiMonitoringTable } from '../../table';
+// @ts-ignore
+import { ClusterStatus } from '../cluster_status';
+import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
 
-const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlertStatus[] }) => {
+const getColumns = (
+  setupMode: any,
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] },
+  dateFormat: string,
+  staleStatusThresholdSeconds: number
+) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -95,29 +104,57 @@ const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlert
       name: i18n.translate('xpack.monitoring.kibana.listing.alertsColumnTitle', {
         defaultMessage: 'Alerts',
       }),
-      field: 'isOnline',
+      field: 'alerts_column',
       width: '175px',
       sortable: true,
       render: () => <AlertsStatus showBadge={true} alerts={alerts} />,
     },
     {
-      name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
-        defaultMessage: 'Status',
+      name: i18n.translate('xpack.monitoring.kibana.listing.lastReportedStatusColumnTitle', {
+        defaultMessage: 'Last Reported Status',
       }),
       field: 'status',
-      render: (
-        status: string,
-        kibana: Pick<ElasticsearchSourceKibanaStats, 'kibana'> & { availability: boolean }
-      ) => {
+      render: (status: string) => {
         return (
-          <EuiToolTip content={status} position="bottom">
-            <EuiHealth
-              color={kibana.availability ? 'success' : 'subdued'}
-              data-test-subj="statusIcon"
-            >
-              {capitalize(status)}
-            </EuiHealth>
-          </EuiToolTip>
+          <EuiHealth color={statusIconColor(status)} data-test-subj="status">
+            {capitalize(status)}
+          </EuiHealth>
+        );
+      },
+    },
+    {
+      name: i18n.translate('xpack.monitoring.kibana.listing.lastSeenColumnTitle', {
+        defaultMessage: 'Last Seen',
+      }),
+      field: 'lastSeenTimestamp',
+      render: (
+        lastSeenTimestampRaw: string,
+        kibana: Pick<ElasticsearchSourceKibanaStats, 'kibana'> & { statusIsStale: boolean }
+      ) => {
+        const lastSeenTimestamp = prepareLastSeenTimestamp(lastSeenTimestampRaw, dateFormat);
+        const staleMessage = i18n.translate('xpack.monitoring.kibana.listing.staleStatusTooltip', {
+          defaultMessage:
+            "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from this instance.",
+          values: {
+            staleStatusThresholdSeconds,
+          },
+        });
+        return (
+          <span data-test-subj="lastSeen">
+            {lastSeenTimestamp}
+            {kibana.statusIsStale && (
+              <>
+                &nbsp;
+                <EuiIconTip
+                  aria-label={staleMessage}
+                  content={staleMessage}
+                  size="l"
+                  type="alert"
+                  color="warning"
+                />
+              </>
+            )}
+          </span>
         );
       },
     },
@@ -182,6 +219,9 @@ interface Props {
 
 export const KibanaInstances: React.FC<Props> = (props: Props) => {
   const { clusterStatus, alerts, setupMode, sorting, pagination, onTableChange } = props;
+
+  const { staleStatusThresholdSeconds } = React.useContext(ExternalConfigContext);
+  const dateFormat = useUiSetting<string>('dateFormat');
 
   let setupModeCallOut = null;
   // Merge the instances data with the setup data if enabled
@@ -286,7 +326,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
           <EuiMonitoringTable
             className="kibanaInstancesTable"
             rows={dataFlattened}
-            columns={getColumns(setupMode, alerts)}
+            columns={getColumns(setupMode, alerts, dateFormat, staleStatusThresholdSeconds)}
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}
@@ -312,3 +352,33 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
     </EuiPage>
   );
 };
+
+function statusIconColor(status: string) {
+  switch (status) {
+    case 'red':
+      return 'danger';
+    case 'yellow':
+      return 'warning';
+    case 'green':
+      return 'success';
+    default:
+      return 'subdued';
+  }
+}
+
+function prepareLastSeenTimestamp(lastSeenTimestampRaw: string, dateFormat: string) {
+  const { shouldShowRelativeTime, formattedTimestamp, relativeTime } = formatLastSeenTimestamp(
+    lastSeenTimestampRaw,
+    dateFormat
+  );
+
+  if (shouldShowRelativeTime) {
+    return (
+      <EuiToolTip position="top" content={formattedTimestamp}>
+        <span>{relativeTime}</span>
+      </EuiToolTip>
+    );
+  }
+
+  return formattedTimestamp;
+}

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { shallow, mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import '../../../../common/mock/match_media';
 import { RulesPage } from '.';
@@ -74,9 +75,9 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
   createPrepackagedRules: jest.fn(),
 }));
 
-jest.mock('../../../components/value_lists_management_modal', () => {
+jest.mock('../../../components/value_lists_management_flyout', () => {
   return {
-    ValueListsModal: jest.fn().mockReturnValue(<div />),
+    ValueListsFlyout: jest.fn().mockReturnValue(<div />),
   };
 });
 

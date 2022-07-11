@@ -10,7 +10,7 @@ import { AlertContextMenu } from './alert_context_menu';
 import { TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
@@ -29,6 +29,9 @@ const ecsRowData: Ecs = {
         uuid: ['testId'],
       },
     },
+  },
+  event: {
+    kind: ['signal'],
   },
 };
 

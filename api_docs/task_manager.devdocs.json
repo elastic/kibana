@@ -373,6 +373,66 @@
     "interfaces": [
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.BulkUpdateSchedulesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateSchedulesResult",
+        "description": [
+          "\nreturn type of TaskScheduling.bulkUpdateSchedules method"
+        ],
+        "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.BulkUpdateSchedulesResult.tasks",
+            "type": "Array",
+            "tags": [],
+            "label": "tasks",
+            "description": [
+              "\nlist of successfully updated tasks"
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.ConcreteTaskInstance",
+                "text": "ConcreteTaskInstance"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.BulkUpdateSchedulesResult.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [
+              "\nlist of failed tasks and errors caused failure"
+            ],
+            "signature": [
+              "{ task: ",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.ConcreteTaskInstance",
+                "text": "ConcreteTaskInstance"
+              },
+              "; error: Error; }[]"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.ConcreteTaskInstance",
         "type": "Interface",
         "tags": [],
@@ -1338,7 +1398,7 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\"> & Pick<",
         "TaskStore",
         ", \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],

@@ -8,19 +8,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
-  HostsUncommonProcessesEdges,
-  HostsUncommonProcessItem,
-} from '../../../../common/search_strategy';
+import type { HostsUncommonProcessesEdges } from '../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
-import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import type { Columns, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { HostsType } from '../../store/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import type { HostEcs } from '../../../../common/ecs/host';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {
@@ -180,7 +179,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems: getHostNames(node),
+        rowItems: getHostNames(node.hosts),
         attrName: 'host.name',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: (item) => <HostDetailsLink hostName={item} />,
@@ -219,9 +218,9 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
   },
 ];
 
-export const getHostNames = (node: HostsUncommonProcessItem): string[] => {
-  if (node.hosts != null) {
-    return node.hosts
+export const getHostNames = (hosts: HostEcs[]): string[] => {
+  if (hosts != null) {
+    return hosts
       .filter((host) => host.name != null && host.name[0] != null)
       .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
   } else {

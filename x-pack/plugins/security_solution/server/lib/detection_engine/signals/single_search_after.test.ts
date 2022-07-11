@@ -11,7 +11,8 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
@@ -44,6 +45,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
@@ -62,6 +64,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -112,6 +115,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
@@ -135,6 +139,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
@@ -155,6 +160,7 @@ describe('singleSearchAfter', () => {
         filter: {},
         timestampOverride: undefined,
         buildRuleMessage,
+        runtimeMappings: undefined,
       })
     ).rejects.toThrow('Fake Error');
   });

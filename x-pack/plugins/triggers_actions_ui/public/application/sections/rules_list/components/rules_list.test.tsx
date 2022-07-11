@@ -312,7 +312,10 @@ const mockedRulesData = [
 beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
-describe('Update Api Key', () => {
+
+// FLAKY: https://github.com/elastic/kibana/issues/134922
+// FLAKY: https://github.com/elastic/kibana/issues/134923
+describe.skip('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -398,7 +401,8 @@ describe('Update Api Key', () => {
   });
 });
 
-describe('rules_list component empty', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/134924
+describe.skip('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
     loadRules.mockResolvedValue({
@@ -998,7 +1002,7 @@ describe('rules_list component with items', () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
     hasExecuteActionsCapability.mockReturnValue(false);
     await setup();
-    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(5);
+    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(8);
     hasExecuteActionsCapability.mockReturnValue(true);
   });
 });
@@ -1156,6 +1160,7 @@ describe('rules_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
+    hasAllPrivilege.mockReturnValue(true);
   });
 
   it('renders table of rules with actions menu collapsedItemActions', async () => {
@@ -1286,7 +1291,6 @@ describe('rules_list with disabled items', () => {
 
   it('clicking the notify badge shows the snooze panel', async () => {
     await setup();
-
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeFalsy();
 
     wrapper
@@ -1296,7 +1300,7 @@ describe('rules_list with disabled items', () => {
 
     expect(wrapper.find('[data-test-subj="rulesListNotifyBadge"]').exists()).toBeTruthy();
 
-    wrapper.find('[data-test-subj="rulesListNotifyBadge"]').first().simulate('click');
+    wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
 
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
   });

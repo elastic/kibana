@@ -8,12 +8,13 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { AlertSummaryRow } from '../helpers';
-import { defaultToEmptyTag } from '../../empty_value';
+import type { AlertSummaryRow } from '../helpers';
+import { getEmptyTagValue } from '../../empty_value';
+import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 
 const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
-  ({ data, values, timelineId }) => {
+  ({ data, eventId, fieldFromBrowserField, linkValue, timelineId, values }) => {
     const { loading, count } = useAlertPrevalence({
       field: data.field,
       timelineId,
@@ -23,8 +24,21 @@ const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
 
     if (loading) {
       return <EuiLoadingSpinner />;
+    } else if (typeof count === 'number') {
+      return (
+        <InvestigateInTimelineButton
+          data={data}
+          eventId={eventId}
+          fieldFromBrowserField={fieldFromBrowserField}
+          linkValue={linkValue}
+          timelineId={timelineId}
+          values={values}
+        >
+          <span data-test-subj="alert-prevalence">{count}</span>
+        </InvestigateInTimelineButton>
+      );
     } else {
-      return <span data-test-subj="alert-prevalence">{defaultToEmptyTag(count)}</span>;
+      return getEmptyTagValue();
     }
   }
 );

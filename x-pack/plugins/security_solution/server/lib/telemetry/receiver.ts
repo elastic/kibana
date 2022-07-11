@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   CoreStart,
   IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import {
+import type {
   AggregationsAggregate,
   SearchRequest,
   SearchResponse,
@@ -27,11 +27,11 @@ import {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import { TransportResult } from '@elastic/elasticsearch';
-import { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
-import { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import {
   exceptionListItemToTelemetryEntry,
@@ -667,7 +667,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.alertsIndex}*`,
       ignore_unavailable: true,
-      size: 100,
+      size: 30,
       body: {
         query: {
           bool: {

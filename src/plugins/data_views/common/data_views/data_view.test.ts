@@ -48,7 +48,7 @@ function create(id: string) {
   const {
     type,
     version,
-    attributes: { timeFieldName, fields, title },
+    attributes: { timeFieldName, fields, title, name },
   } = stubbedSavedObjectIndexPattern(id);
 
   return new DataView({
@@ -59,6 +59,7 @@ function create(id: string) {
       timeFieldName,
       fields: { ...JSON.parse(fields), runtime_field: runtimeField },
       title,
+      name,
       runtimeFieldMap,
     },
     fieldFormats: fieldFormatsMock,
@@ -388,6 +389,10 @@ describe('IndexPattern', () => {
       } as unknown as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       expect(indexPattern.toSpec()).toMatchSnapshot();
+    });
+
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
     });
 
     test('can restore from spec', async () => {

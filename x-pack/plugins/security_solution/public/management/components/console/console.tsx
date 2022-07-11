@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
-import { CommandInput, CommandInputProps } from './components/command_input';
-import { ConsoleProps } from './types';
+import type { CommandInputProps } from './components/command_input';
+import { CommandInput } from './components/command_input';
+import type { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
@@ -20,6 +22,8 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 const ConsoleWindow = styled.div`
   height: 100%;
   background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
 
   .layout {
     height: 100%;
@@ -30,25 +34,29 @@ const ConsoleWindow = styled.div`
     }
 
     &-bottomBorder {
-      border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
+      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
         ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
     }
 
     &-container {
-      padding: ${({ theme: { eui } }) => eui.paddingSizes.l}
-        ${({ theme: { eui } }) => eui.paddingSizes.l} ${({ theme: { eui } }) => eui.paddingSizes.s}
-        ${({ theme: { eui } }) => eui.paddingSizes.l};
+      padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
+        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeL};
     }
 
     &-header {
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
     }
 
+    &-footer,
+    &-commandInput {
+      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
+    }
+
     &-rightPanel {
       width: 35%;
-      background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
-      border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
-        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
+      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
     }
 
     &-historyOutput {
@@ -59,20 +67,30 @@ const ConsoleWindow = styled.div`
       height: 100%;
       overflow-x: hidden;
     }
+  }
 
-    &-commandInput {
-      padding-top: ${({ theme: { eui } }) => eui.paddingSizes.xs};
-    }
+  //-----------------------------------------------------------
+  // 👇 Utility classnames for use anywhere inside of Console
+  //-----------------------------------------------------------
+
+  .font-family-code {
+    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
+  }
+
+  .font-style-italic {
+    font-style: italic;
   }
 
   .descriptionList-20_80 {
     &.euiDescriptionList {
       > .euiDescriptionList__title {
         width: 20%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
 
       > .euiDescriptionList__description {
         width: 80%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
     }
   }
@@ -98,67 +116,71 @@ export const Console = memo<ConsoleProps>(
       // it is stored in State and currently not updated if it changes
     }, []);
 
-    const handleConsoleClick = useCallback(() => {
+    const setFocusOnInput = useCallback(() => {
       if (inputFocusRef.current) {
-        inputFocusRef.current();
+        inputFocusRef.current.focus();
       }
     }, []);
+
+    // When the console is shown, set focus to it so that user can just start typing
+    useEffect(() => {
+      if (!managedConsole || managedConsole.isOpen) {
+        setTimeout(setFocusOnInput, 2);
+      }
+    }, [setFocusOnInput, managedConsole]);
 
     return (
       <ConsoleStateProvider
         commands={commands}
         scrollToBottom={scrollToBottom}
+        keyCapture={inputFocusRef}
+        managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        {/*
-          If this is a managed console, then we only show its content if it is open.
-          The state provider, however, continues to be rendered so that as updates to pending
-          commands are received, those will still make it to the console's state and be
-          shown when the console is eventually opened again.
-        */}
-        {!managedConsole || managedConsole.isOpen ? (
-          <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
-            <EuiFlexGroup
-              direction="column"
-              className="layout"
-              gutterSize="none"
-              responsive={false}
-              data-test-subj={getTestId('mainPanel')}
-            >
-              <EuiFlexItem grow={false} className="layout-container layout-header">
-                <ConsoleHeader TitleComponent={TitleComponent} />
-              </EuiFlexItem>
+        <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
+          <EuiFlexGroup
+            direction="column"
+            className="layout"
+            gutterSize="none"
+            responsive={false}
+            data-test-subj={getTestId('mainPanel')}
+          >
+            <EuiFlexItem grow={false} className="layout-container layout-header">
+              <ConsoleHeader TitleComponent={TitleComponent} />
+            </EuiFlexItem>
 
-              <EuiFlexItem grow className="layout-hideOverflow">
-                <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
-                  <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
-                    <EuiFlexGroup
-                      direction="column"
-                      gutterSize="none"
-                      responsive={false}
-                      className="layout-hideOverflow"
-                    >
-                      <EuiFlexItem grow className="layout-historyOutput">
-                        <div
-                          className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
-                          ref={scrollingViewport}
-                        >
-                          <HistoryOutput />
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} className="layout-container layout-commandInput">
-                        <CommandInput prompt={prompt} focusRef={inputFocusRef} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
+            <EuiFlexItem grow className="layout-hideOverflow">
+              <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
+                <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="none"
+                    responsive={false}
+                    className="layout-hideOverflow"
+                  >
+                    <EuiFlexItem grow className="layout-historyOutput">
+                      <div
+                        className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
+                        ref={scrollingViewport}
+                      >
+                        <HistoryOutput />
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                      <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-footer">
+                      <ConsoleFooter />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
-                  {<SidePanelFlexItem />}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ConsoleWindow>
-        ) : null}
+                {<SidePanelFlexItem />}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ConsoleWindow>
       </ConsoleStateProvider>
     );
   }

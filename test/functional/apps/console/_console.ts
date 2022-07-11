@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
 
   describe('console app', function describeIndexTests() {
@@ -120,6 +121,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug(actualResponse);
           expect(actualResponse).to.contain(expectedResponseContains);
         });
+      });
+    });
+
+    describe('multiple requests output', () => {
+      const sendMultipleRequests = async (requests: string[]) => {
+        await asyncForEach(requests, async (request) => {
+          await PageObjects.console.enterRequest(request);
+        });
+        await PageObjects.console.selectAllRequests();
+        await PageObjects.console.clickPlay();
+      };
+
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+
+      it('should contain comments starting with # symbol', async () => {
+        await sendMultipleRequests(['\n PUT test-index', '\n DELETE test-index']);
+        await retry.try(async () => {
+          const response = await PageObjects.console.getResponse();
+          log.debug(response);
+          expect(response).to.contain('# PUT test-index 200 OK');
+          expect(response).to.contain('# DELETE test-index 200 OK');
+        });
+      });
+
+      it('should display status badges', async () => {
+        await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasWarningBadge()).to.be(true);
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/135914
+    describe.skip('with folded/unfolded lines in request body', () => {
+      const enterRequestWithBody = async () => {
+        await PageObjects.console.enterRequest();
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.enterText('{\n\t\t"_source": []');
+      };
+
+      it('should save the state of folding/unfolding when navigating back to Console', async () => {
+        await PageObjects.console.clearTextArea();
+        await enterRequestWithBody();
+        await PageObjects.console.clickFoldWidget();
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.navigateToApp('console');
+        expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+
+      it('should save the state of folding/unfolding when the page reloads', async () => {
+        // blocks the close help button for several seconds so just retry until we can click it.
+        await retry.try(async () => {
+          await PageObjects.console.collapseHelp();
+        });
+        await PageObjects.console.clearTextArea();
+        await enterRequestWithBody();
+        await PageObjects.console.clickFoldWidget();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasFolds()).to.be(true);
       });
     });
   });

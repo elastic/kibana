@@ -11,7 +11,7 @@ import type { Store } from 'redux';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TGridProps } from '../types';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
+import type { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 import { initialTGridState } from '../store/t_grid/reducer';
 import { createStore } from '../store/t_grid';
 import { TGridLoading } from '../components/t_grid/shared';
@@ -69,15 +69,6 @@ export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LoadingPanelLazy {...props} />
-    </Suspense>
-  );
-};
-
-const FieldsBrowserLazy = lazy(() => import('../components/fields_browser'));
-export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { store: Store }) => {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <FieldsBrowserLazy {...props} store={store} />
     </Suspense>
   );
 };

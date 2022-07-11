@@ -11,13 +11,17 @@ import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import { AnalyticsServiceSetup } from '../analytics';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type {
+  InternalExecutionContextSetup,
+  IExecutionContext,
+} from '@kbn/core-execution-context-server-internal';
+import type { IAuthHeadersStorage } from '@kbn/core-http-server';
 
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import type { InternalHttpServiceSetup, IAuthHeadersStorage } from '../http';
-import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
+import type { InternalHttpServiceSetup } from '../http';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,

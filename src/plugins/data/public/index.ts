@@ -6,19 +6,14 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109904
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
-
-export * from './deprecated';
 
 /*
  * Filters:
  */
 
-export { getEsQueryConfig, FilterStateStore } from '../common';
+export { getEsQueryConfig } from '../common';
 export {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
@@ -57,8 +52,6 @@ import {
   ILLEGAL_CHARACTERS,
   validateDataView,
 } from './data_views';
-
-export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -117,13 +110,10 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
-  getNumberHistogramIntervalByDatatableColumn,
-  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -227,13 +217,10 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
-    getNumberHistogramIntervalByDatatableColumn,
-    getDateHistogramMetaDataByDatatableColumn,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 };
 
 /*
@@ -244,7 +231,7 @@ export const search = {
  * Types to be shared externally
  * @public
  */
-export type { RefreshInterval, TimeRange } from '../common';
+export type { RefreshInterval } from '../common';
 
 export {
   createSavedQueryService,

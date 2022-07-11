@@ -24,7 +24,7 @@ export interface KibanaContextStartDependencies {
 }
 
 interface Arguments {
-  q?: KibanaQueryOutput | null;
+  q?: KibanaQueryOutput[] | null;
   filters?: KibanaFilter[] | null;
   timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
@@ -62,8 +62,8 @@ export const getKibanaContextFn = (
     args: {
       q: {
         types: ['kibana_query', 'null'],
+        multi: true,
         aliases: ['query', '_'],
-        default: null,
         help: i18n.translate('data.search.functions.kibana_context.q.help', {
           defaultMessage: 'Specify Kibana free form text query',
         }),
@@ -123,7 +123,7 @@ export const getKibanaContextFn = (
       const { savedObjectsClient } = await getStartDependencies(getKibanaRequest);
 
       const timeRange = args.timeRange || input?.timeRange;
-      let queries = mergeQueries(input?.query, args?.q || []);
+      let queries = mergeQueries(input?.query, args?.q?.filter(Boolean) || []);
       let filters = [
         ...(input?.filters || []),
         ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),

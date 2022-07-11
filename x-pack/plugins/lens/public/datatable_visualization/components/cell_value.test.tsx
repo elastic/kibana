@@ -89,6 +89,63 @@ describe('datatable cell renderer', () => {
     expect(cell.find('.lnsTableCell--right').exists()).toBeTruthy();
   });
 
+  it('does not set multiline class for regular height tables', () => {
+    const cell = mountWithIntl(
+      <DataContext.Provider
+        value={{
+          table,
+          alignments: {
+            a: 'right',
+          },
+        }}
+      >
+        <CellRenderer
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={() => {}}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />
+      </DataContext.Provider>
+    );
+    expect(cell.find('.lnsTableCell--multiline').exists()).toBeFalsy();
+  });
+
+  it('set multiline class for auto height tables', () => {
+    const MultiLineCellRenderer = createGridCell(
+      {
+        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+      },
+      { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+      DataContext,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      true
+    );
+    const cell = mountWithIntl(
+      <DataContext.Provider
+        value={{
+          table,
+          alignments: {
+            a: 'right',
+          },
+        }}
+      >
+        <MultiLineCellRenderer
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={() => {}}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />
+      </DataContext.Provider>
+    );
+    expect(cell.find('.lnsTableCell--multiline').exists()).toBeTruthy();
+  });
+
   describe('dynamic coloring', () => {
     const paletteRegistry = chartPluginMock.createPaletteRegistry();
     const customPalette = paletteRegistry.get('custom');

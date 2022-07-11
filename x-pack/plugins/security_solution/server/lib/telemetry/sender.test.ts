@@ -86,6 +86,7 @@ describe('TelemetryEventsSender', () => {
             },
             something_else: 'nope',
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             nope: 'nope',
@@ -164,6 +165,7 @@ describe('TelemetryEventsSender', () => {
               name: 'windows',
             },
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
@@ -211,6 +213,7 @@ describe('TelemetryEventsSender', () => {
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
+      sender['isTelemetryServicesReachable'] = jest.fn(async () => true);
       sender['telemetryUsageCounter'] = telemetryUsageCounter;
       sender['sendEvents'] = jest.fn(async () => {
         sender['telemetryUsageCounter']?.incrementCounter({
@@ -241,6 +244,23 @@ describe('TelemetryEventsSender', () => {
         getIsOptedIn: jest.fn(async () => false),
       };
       sender['telemetryStart'] = telemetryStart;
+
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      expect(sender['queue'].length).toBe(2);
+      await sender['sendIfDue']();
+
+      expect(sender['queue'].length).toBe(0);
+      expect(sender['sendEvents']).toBeCalledTimes(0);
+    });
+
+    it("shouldn't send when telemetry when opted in but cannot connect to elastic telemetry services", async () => {
+      const sender = new TelemetryEventsSender(logger);
+      sender['sendEvents'] = jest.fn();
+      const telemetryStart = {
+        getIsOptedIn: jest.fn(async () => true),
+      };
+      sender['telemetryStart'] = telemetryStart;
+      sender['isTelemetryServicesReachable'] = jest.fn(async () => false);
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender['queue'].length).toBe(2);
