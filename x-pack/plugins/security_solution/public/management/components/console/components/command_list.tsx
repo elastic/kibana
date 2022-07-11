@@ -26,11 +26,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CommandArgs, CommandDefinition } from '../types';
+import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
-import { HELP_GROUPS } from '../service/builtin_commands';
+import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
+import { getCommandNameWithArgs } from '../utils';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -59,21 +60,6 @@ export interface CommandListProps {
   display?: 'default' | 'table';
 }
 
-const COMMON_ARGS = Object.freeze([
-  {
-    name: '--comment',
-    about: i18n.translate('xpack.securitySolution.console.commandList.commonArgs.comment', {
-      defaultMessage: 'Add comment to any action Ex: isolate --comment your comment',
-    }),
-  },
-  {
-    name: '--help',
-    about: i18n.translate('xpack.securitySolution.console.commandList.commonArgs.help', {
-      defaultMessage: 'Command assistance Ex: isolate --help',
-    }),
-  },
-]);
-
 export const CommandList = memo<CommandListProps>(({ commands, display = 'default' }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
@@ -96,6 +82,20 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     {
       defaultMessage: 'Other commands',
     }
+  );
+
+  const updateInputText = useCallback(
+    (text) => {
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: () => {
+          return {
+            textEntered: text,
+          };
+        },
+      });
+    },
+    [dispatch]
   );
 
   const commandsByGroups = useMemo(() => {
@@ -124,55 +124,15 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       [key: string]: { name: string; about: React.ElementType | string };
     }> => {
       if (commandsByGroup[0].helpGroupLabel === HELP_GROUPS.supporting.label) {
-        return [...COMMON_ARGS, ...commandsByGroup].map((command) => {
-          return {
-            [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
-          };
-        });
-      }
-      return commandsByGroup.map((command) => {
-        return {
+        return [...COMMON_ARGS, ...commandsByGroup].map((command) => ({
           [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
-        };
-      });
+        }));
+      }
+      return commandsByGroup.map((command) => ({
+        [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
+      }));
     },
     [otherCommandsGroupLabel]
-  );
-
-  const getCommandNameWithArgs = useCallback((command: Partial<CommandDefinition>) => {
-    if (!command.mustHaveArgs || !command.args) {
-      return command.name;
-    }
-
-    let hasAnExclusiveOrArg = false;
-    const primaryArgs = Object.entries(command.args).reduce<CommandArgs>((acc, [key, value]) => {
-      if (value.required) {
-        acc[key] = value;
-        return acc;
-      }
-      if (value.exclusiveOr && !hasAnExclusiveOrArg) {
-        hasAnExclusiveOrArg = true;
-        acc[key] = value;
-        return acc;
-      }
-      return acc;
-    }, {});
-
-    return `${command.name} --${Object.keys(primaryArgs).join(' --')}`;
-  }, []);
-
-  const updateInputText = useCallback(
-    (text) => {
-      dispatch({
-        type: 'updateInputTextEnteredState',
-        payload: () => {
-          return {
-            textEntered: text,
-          };
-        },
-      });
-    },
-    [dispatch]
   );
 
   const getTableColumns = useCallback(
@@ -220,10 +180,25 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         },
       ];
     },
-    [getCommandNameWithArgs, getTestId, otherCommandsGroupLabel, updateInputText]
+    [getTestId, otherCommandsGroupLabel, updateInputText]
   );
 
   if (display === 'table') {
+    const calloutItems = [
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandList.callout.multipleResponses"
+        defaultMessage="You may enter multiple response actions at the same time."
+      />,
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandList.callout.leavingResponder"
+        defaultMessage="Leaving the responder does not abort the actions."
+      />,
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandList.callout.visitSupportSections"
+        defaultMessage="Visit support section to read more about manual response actions."
+      />,
+    ];
+
     const callout = (
       <StyledEuiCallOut
         title={
@@ -233,25 +208,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
           />
         }
       >
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandList.callout.multipleResponses"
-            defaultMessage="1. You may enter multiple response actions at the same time."
-          />
-        </EuiText>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandList.callout.leavingResponder"
-            defaultMessage="2. Leaving the responder does not abort the actions."
-          />
-        </EuiText>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandList.callout.visitSupportSections"
-            defaultMessage="3. Visit support section to read more about manual response actions."
-          />
-        </EuiText>
-        <EuiSpacer />
+        <ol>
+          {calloutItems.map((item, index) => (
+            <li key={index}>
+              <EuiText size="s">{item}</EuiText>
+            </li>
+          ))}
+        </ol>
         {/* //TODO: Add link to the read more page */}
         <EuiLink>
           <FormattedMessage

@@ -18,6 +18,21 @@ export const HELP_GROUPS = Object.freeze({
   },
 });
 
+export const COMMON_ARGS = Object.freeze([
+  {
+    name: '--comment',
+    about: i18n.translate('xpack.securitySolution.console.commandList.commonArgs.comment', {
+      defaultMessage: 'Add comment to any action Ex: isolate --comment your comment',
+    }),
+  },
+  {
+    name: '--help',
+    about: i18n.translate('xpack.securitySolution.console.commandList.commonArgs.help', {
+      defaultMessage: 'Command assistance Ex: isolate --help',
+    }),
+  },
+]);
+
 export const getBuiltinCommands = (): CommandDefinition[] => {
   return [
     {
