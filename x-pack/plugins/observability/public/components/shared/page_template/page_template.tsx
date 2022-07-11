@@ -67,8 +67,6 @@ export function ObservabilityPageTemplate({
 
   const { services } = useKibana();
 
-  const kibanaAnnouncementsDisabled = Boolean(services.uiSettings?.get('hideAnnouncements'));
-
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
       sections.map(({ label, entries }, sectionIndex) => ({
@@ -138,8 +136,7 @@ export function ObservabilityPageTemplate({
         prependBasePath={services?.http?.basePath.prepend}
         isPageDataLoaded={isPageDataLoaded}
         // The tour is dependent on the solution nav, and should not render if it is not visible
-        // It should also not render if Kibana announcements are disabled in settings
-        showTour={showSolutionNav && kibanaAnnouncementsDisabled !== true}
+        showTour={showSolutionNav}
       >
         {({ isTourVisible }) => {
           return (
