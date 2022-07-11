@@ -11,8 +11,8 @@ import Os from 'os';
 
 import Uuid from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
+import { REPO_ROOT } from '@kbn/utils';
 
-import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_SCRIPT_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';
 import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
 import { parseRawFlags, getArgValue } from './kibana_cli_args';
@@ -47,11 +47,16 @@ export async function runKibanaServer({
 }) {
   const runOptions = config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
+  const devMode = !installDir;
   const useTaskRunner = config.get('kbnTestServer.useDedicatedTaskRunner');
 
   const procRunnerOpts = {
-    cwd: installDir || KIBANA_ROOT,
-    cmd: getKibanaCmd(installDir),
+    cwd: installDir || REPO_ROOT,
+    cmd: installDir
+      ? process.platform.startsWith('win')
+        ? Path.resolve(installDir, 'bin/kibana.bat')
+        : Path.resolve(installDir, 'bin/kibana')
+      : process.execPath,
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -62,7 +67,9 @@ export async function runKibanaServer({
     onEarlyExit,
   };
 
-  const prefixArgs = !installDir ? [KIBANA_SCRIPT_PATH] : [];
+  const prefixArgs = devMode
+    ? [Path.relative(process.cwd(), Path.resolve(REPO_ROOT, 'scripts/kibana'))]
+    : [];
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
@@ -114,20 +121,11 @@ export async function runKibanaServer({
           ...(typeof mainUuid === 'string' && mainUuid
             ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
             : []),
+          ...(devMode ? ['--no-optimizer'] : []),
         ]),
       ],
     });
   }
 
   await Promise.all(promises);
-}
-
-function getKibanaCmd(installDir?: string) {
-  if (installDir) {
-    return process.platform.startsWith('win')
-      ? Path.resolve(installDir, 'bin/kibana.bat')
-      : Path.resolve(installDir, 'bin/kibana');
-  }
-
-  return KIBANA_EXEC;
 }
