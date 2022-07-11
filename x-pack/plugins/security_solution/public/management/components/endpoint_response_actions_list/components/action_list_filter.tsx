@@ -25,8 +25,7 @@ export const ActionListFilter = memo(
 
     const onChange = useCallback(
       (newOptions: FilterItems) => {
-        // don't do the intermediate x state, either a check or none
-        setItems(newOptions.map((e) => (e.checked === 'off' ? { ...e, checked: undefined } : e)));
+        setItems(newOptions.map((e) => e));
 
         // update selected filter state
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
@@ -54,7 +53,6 @@ export const ActionListFilter = memo(
         numFilters={numFilters}
       >
         <EuiSelectable
-          allowExclusions
           aria-label={`${filterName}`}
           onChange={onChange}
           options={items}

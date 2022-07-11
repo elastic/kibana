@@ -91,7 +91,7 @@ export const useDateRangePicker = () => {
 export type FilterItems = Array<{
   key: string;
   label: string;
-  checked: 'on' | 'off' | undefined;
+  checked: 'on' | undefined;
 }>;
 
 export const useActionListFilter = (filterName: string) => {
