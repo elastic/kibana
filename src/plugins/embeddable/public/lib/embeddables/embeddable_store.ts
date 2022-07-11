@@ -66,15 +66,33 @@ export function createStore(
   embeddable: IEmbeddable,
   reducer: Reducer<EmbeddableInput>
 ): Store<EmbeddableInput> {
+  let isUpstreamUpdate = false;
+  let isDownstreamUpdate = false;
+
   const store = configureStore({
     reducer,
     preloadedState: embeddable.getInput(),
   });
 
-  const onUpdate = debounce(() => embeddable.updateInput(store.getState()));
-  const unsubscribe = store.subscribe(onUpdate);
+  const onUpdate = debounce(() => {
+    isDownstreamUpdate = true;
+    embeddable.updateInput(store.getState());
+    isDownstreamUpdate = false;
+  });
+  const unsubscribe = store.subscribe(() => !isUpstreamUpdate && onUpdate());
 
-  embeddable.getInput$().subscribe({ complete: unsubscribe });
+  embeddable.getInput$().subscribe({
+    next: () => {
+      if (isDownstreamUpdate) {
+        return;
+      }
+
+      isUpstreamUpdate = true;
+      store.dispatch(actions.set(embeddable.getInput()));
+      isUpstreamUpdate = false;
+    },
+    complete: unsubscribe,
+  });
 
   return store;
 }
