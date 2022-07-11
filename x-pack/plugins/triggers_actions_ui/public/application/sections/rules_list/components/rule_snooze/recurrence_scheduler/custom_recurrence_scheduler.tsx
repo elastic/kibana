@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import deepEqual from 'fast-deep-equal';
 import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -29,20 +28,6 @@ import {
   getWeekdayInfo,
 } from './helpers';
 import { i18nEndControlOptions, i18nNthWeekdayShort } from './translations';
-
-// FIXME https://github.com/elastic/eui/issues/5958 and https://github.com/elastic/eui/issues/6040
-const EuiFormRowWithDelimitedFixer = euiStyled(EuiFormRow)`
-  & .euiFormControlLayout__childrenWrapper {
-    height: 100%;
-    &:last-of-type {
-      position: relative;
-      & .euiFormControlLayoutIcons {
-        position: absolute;
-        padding: 0;
-      }
-    }
-  }
-`;
 
 interface CustomRecurrenceSchedulerProps {
   startDate: Moment | null;
