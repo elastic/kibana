@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { act, render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { IndicatorsPage } from './indicators_page';
 import { useIndicators } from './hooks/use_indicators';
-import { TestProvidersComponent } from '../../common/test_providers';
+import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
+import { TEST_ID_INDICATORS_TABLE } from './components/indicators_table/indicators_table';
+import { TEST_ID_EMPTY_PAGE } from '../../components/empty_page';
 
 jest.mock('./hooks/use_indicators');
+jest.mock('./hooks/use_indicators_total_count');
+jest.mock('../../hooks/use_integrations_page_link');
 
 const stub = () => {};
 
@@ -29,16 +34,53 @@ describe('<IndicatorsPage />', () => {
   });
 
   it('should render the contents without crashing', async () => {
-    await act(async () => {
-      render(
-        <TestProvidersComponent>
-          <IndicatorsPage
-            history={undefined as any}
-            location={undefined as any}
-            match={undefined as any}
-          />
-        </TestProvidersComponent>
-      );
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 10,
+      isLoading: false,
     });
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <IndicatorsPage />
+      </TestProvidersComponent>
+    );
+
+    expect(getByTestId(TEST_ID_INDICATORS_TABLE)).toBeInTheDocument();
+  });
+
+  it('should render empty page when no indicators are found', async () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: false,
+    });
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <IndicatorsPage />
+      </TestProvidersComponent>
+    );
+
+    expect(getByTestId(TEST_ID_EMPTY_PAGE)).toBeInTheDocument();
+  });
+
+  it('should render indicators table when count is being loaded', async () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: true,
+    });
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <IndicatorsPage />
+      </TestProvidersComponent>
+    );
+
+    expect(getByTestId(TEST_ID_INDICATORS_TABLE)).toBeInTheDocument();
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+moment.suppressDeprecationWarnings = true;
 import { EMPTY_VALUE } from '../../../common/constants';
 
 const FULL_DATE = 'MMMM Do YYYY @ HH:mm:ss';

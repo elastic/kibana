@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProvidersComponent } from '../../../../common/test_providers';
+import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import {
   generateMockIndicator,
   Indicator,

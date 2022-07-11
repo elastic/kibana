@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { fullDateFormatter } from './dates';
 import { EMPTY_VALUE } from '../../../common/constants';
 
-const mockValidStringDate = 'Sat Jan 01 2022 00:00:00 GMT-0600 (Central Standard Time)';
+const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
 const mockInvalidStringDate = 'invalid date';
+
+moment.suppressDeprecationWarnings = true;
+moment.tz.setDefault('UTC');
 
 describe('dates', () => {
   describe('fullDateFormatter', () => {

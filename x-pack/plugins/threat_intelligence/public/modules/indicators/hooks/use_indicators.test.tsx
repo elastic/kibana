@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import * as hook from '../../../hooks/use_kibana';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useIndicators, RawIndicatorsResponse } from './use_indicators';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { mockSearchService } from '../../../common/mocks/mock_kibana_search_service';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 
 jest.mock('../../../hooks/use_kibana');
-
-const mockSearchService = (subject: Observable<unknown>) => {
-  const search = jest.fn().mockReturnValue(subject);
-  const showError = jest.fn();
-  const getUiSetting = jest.fn();
-
-  (hook as jest.Mocked<typeof hook>).useKibana.mockReturnValue({
-    services: { data: { search: { search, showError } }, uiSettings: { get: getUiSetting } },
-  } as any);
-
-  return {
-    search,
-    showError,
-    getUiSetting,
-  };
-};
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
