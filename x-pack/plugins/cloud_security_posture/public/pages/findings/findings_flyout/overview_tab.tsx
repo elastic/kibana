@@ -127,10 +127,10 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const navigateToIndex = useCallback(async () => {
     try {
       // both cases should not happen, data view is loaded beforehand on findings page, this is mainly to discriminate and as a precaution
-      if (!discover.locator || !latestFindingsDataView.data) {
+      if (!discover.locator || !latestFindingsDataView.data || true) {
         throw new Error(
           i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorMessage', {
-            defaultMessage: "Index link wasn't found",
+            defaultMessage: 'Index link not found',
           })
         );
       }
@@ -146,7 +146,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     } catch (err) {
       toasts.danger({
         title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorTitle', {
-          defaultMessage: 'Index link error',
+          defaultMessage: 'Error',
         }),
         body: err.message,
       });

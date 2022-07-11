@@ -23,7 +23,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
