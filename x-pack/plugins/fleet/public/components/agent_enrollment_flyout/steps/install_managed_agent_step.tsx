@@ -23,6 +23,7 @@ export const InstallManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
   isK8s,
+  enrollToken,
   isComplete,
   fullCopyButton,
   onCopy,
@@ -30,6 +31,7 @@ export const InstallManagedAgentStep = ({
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   isK8s?: K8sMode;
+  enrollToken?: string;
   installCommand: CommandsByPlatform;
   isComplete?: boolean;
   fullCopyButton?: boolean;
@@ -46,6 +48,7 @@ export const InstallManagedAgentStep = ({
       <InstallSection
         installCommand={installCommand}
         isK8s={isK8s}
+        enrollToken={enrollToken}
         onCopy={onCopy}
         fullCopyButton={fullCopyButton}
       />

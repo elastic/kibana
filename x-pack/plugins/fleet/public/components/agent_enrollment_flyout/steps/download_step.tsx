@@ -14,17 +14,11 @@ import { DownloadInstructions } from '../download_instructions';
 
 export const DownloadStep = (
   hasFleetServer: boolean,
-  isK8s?: string,
   enrollmentAPIKey?: string
 ): EuiContainedStepProps => {
-  const altTitle =
-    isK8s === 'IS_KUBERNETES'
-      ? i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentForK8sTitle', {
-          defaultMessage: 'Download the Elastic Agent Manifest',
-        })
-      : i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
-          defaultMessage: 'Download the Elastic Agent to your host',
-        });
+  const altTitle = i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentForK8sTitle', {
+    defaultMessage: 'Download the Elastic Agent Manifest',
+  });
 
   const title = hasFleetServer
     ? i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentForFleetServerTitle', {
@@ -35,11 +29,7 @@ export const DownloadStep = (
   return {
     title,
     children: (
-      <DownloadInstructions
-        hasFleetServer={hasFleetServer}
-        isK8s={isK8s}
-        enrollmentAPIKey={enrollmentAPIKey}
-      />
+      <DownloadInstructions hasFleetServer={hasFleetServer} enrollmentAPIKey={enrollmentAPIKey} />
     ),
   };
 };

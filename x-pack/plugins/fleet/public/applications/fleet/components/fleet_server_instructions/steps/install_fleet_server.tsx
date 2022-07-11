@@ -107,7 +107,9 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         windowsCommand={installCommands.windows}
         linuxDebCommand={installCommands.deb}
         linuxRpmCommand={installCommands.rpm}
+        k8sCommand={installCommands.kubernetes}
         isK8s={false}
+        isFleet={true}
       />
     </>
   );
