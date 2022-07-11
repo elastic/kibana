@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 
@@ -25,7 +26,25 @@ export const SummaryTabContent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiPanel>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s">
+                      <h3>{DURATION_TREND_LABEL}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText color="subdued" size="s">
+                      {LAST_30_DAYS_LABEL}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <MonitorDurationTrend />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -45,4 +64,12 @@ export const SummaryTabContent = () => {
 
 const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
   defaultMessage: 'Monitor details',
+});
+
+const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.detailsPanel.durationTrends', {
+  defaultMessage: 'Duration trends',
+});
+
+const LAST_30_DAYS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.last30Days', {
+  defaultMessage: 'Last 30 days',
 });

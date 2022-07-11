@@ -6,7 +6,8 @@
  */
 
 import styled from 'styled-components';
-import { EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 
 type BasicTableType<T> = React.ComponentType<EuiInMemoryTableProps<T>>;
 export const BasicTable: typeof EuiInMemoryTable & { displayName: string } = styled(

@@ -11,8 +11,8 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import type { LogMeta, Logger } from '@kbn/logging';
+import type { KibanaRequestState } from '@kbn/core-http-server';
 import { getResponsePayloadBytes } from './get_payload_size';
-import type { KibanaRequestState } from '../router';
 
 // If you are updating these, consider whether they should also be updated in the
 // elasticsearch service `getEcsResponseLog`
