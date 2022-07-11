@@ -21,7 +21,7 @@ import {
   ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION,
   ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE,
   ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION,
-  ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL
+  ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL,
 } from './constants';
 
 import { EngineType } from './engine_creation_logic';
@@ -40,7 +40,8 @@ export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
   setConfigurationStep,
 }) => (
   <>
-    <EuiStepsHorizontal steps={[
+    <EuiStepsHorizontal
+      steps={[
         {
           title: 'Search engine type',
           status: 'current',
@@ -55,7 +56,8 @@ export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
           status: 'disabled',
           onClick: () => {},
         },
-    ]} />
+      ]}
+    />
     <EuiPanel hasBorder>
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
@@ -64,8 +66,7 @@ export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
             description={ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION}
             betaBadgeProps={{
               label: 'Beta',
-              tooltipContent:
-                'This module is not GA. Please help us by reporting any bugs.',
+              tooltipContent: 'This module is not GA. Please help us by reporting any bugs.',
             }}
             selectable={{
               onClick: setElasticsearchEngineType,
@@ -86,10 +87,9 @@ export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButton
-          fill
-          onClick={setConfigurationStep}
-          >{ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL}</EuiButton>
+          <EuiButton fill onClick={setConfigurationStep}>
+            {ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

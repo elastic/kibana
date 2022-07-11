@@ -30,7 +30,7 @@ import {
   ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
   ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
   SUPPORTED_LANGUAGES,
-  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL
+  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
 } from './constants';
 
 interface ConfigureAppSearchEngineProps {
@@ -42,6 +42,7 @@ interface ConfigureAppSearchEngineProps {
   submitEngine: () => void;
   setRawName: (rawName: string) => void;
   setLanguage: (language: string) => void;
+  setSelectStep(): void;
 }
 
 export const ConfigureAppSearchEngine: React.FC<ConfigureAppSearchEngineProps> = ({
@@ -53,71 +54,92 @@ export const ConfigureAppSearchEngine: React.FC<ConfigureAppSearchEngineProps> =
   submitEngine,
   setRawName,
   setLanguage,
+  setSelectStep,
 }) => (
-<EuiPanel hasBorder>
-        <EuiForm
-          component="form"
-          data-test-subj="EngineCreationForm"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submitEngine();
-          }}
-        >
-          <EuiTitle>
-            <h2>{ENGINE_CREATION_FORM_TITLE}</h2>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow
-                data-test-subj="EngineCreationNameFormRow"
-                label={ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
-                helpText={
-                  name.length > 0 && rawName !== name ? (
-                    <>
-                      {SANITIZED_NAME_NOTE} <strong>{name}</strong>
-                    </>
-                  ) : (
-                    ALLOWED_CHARS_NOTE
-                  )
-                }
+  <>
+    <EuiStepsHorizontal
+      steps={[
+        {
+          title: 'Search engine type',
+          onClick: setSelectStep,
+        },
+        {
+          title: 'Configuration',
+          status: 'current',
+          onClick: () => {},
+        },
+        {
+          title: 'Review',
+          status: 'disabled',
+          onClick: () => {},
+        },
+      ]}
+    />
+    <EuiPanel hasBorder>
+      <EuiForm
+        component="form"
+        data-test-subj="EngineCreationForm"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitEngine();
+        }}
+      >
+        <EuiTitle>
+          <h2>{ENGINE_CREATION_FORM_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="EngineCreationNameFormRow"
+              label={ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
+              helpText={
+                name.length > 0 && rawName !== name ? (
+                  <>
+                    {SANITIZED_NAME_NOTE} <strong>{name}</strong>
+                  </>
+                ) : (
+                  ALLOWED_CHARS_NOTE
+                )
+              }
+              fullWidth
+            >
+              <EuiFieldText
+                name="engine-name"
+                value={rawName}
+                onChange={(event) => setRawName(event.currentTarget.value)}
+                autoComplete="off"
                 fullWidth
-              >
-                <EuiFieldText
-                  name="engine-name"
-                  value={rawName}
-                  onChange={(event) => setRawName(event.currentTarget.value)}
-                  autoComplete="off"
-                  fullWidth
-                  data-test-subj="EngineCreationNameInput"
-                  placeholder={ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
-                  autoFocus
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow label={ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL}>
-                <EuiSelect
-                  name="engine-language"
-                  value={language}
-                  options={SUPPORTED_LANGUAGES}
-                  data-test-subj="EngineCreationLanguageInput"
-                  onChange={(event) => setLanguage(event.currentTarget.value)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup> 
-          <EuiSpacer />
-          <EuiButton
-            disabled={isSubmitDisabled}
-            isLoading={isLoading}
-            type="submit"
-            data-test-subj="NewEngineSubmitButton"
-            color="success"
-            fill
-          >
-            {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
-          </EuiButton>
-        </EuiForm>
-      </EuiPanel>
+                data-test-subj="EngineCreationNameInput"
+                placeholder={ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
+                autoFocus
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow label={ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL}>
+              <EuiSelect
+                name="engine-language"
+                value={language}
+                options={SUPPORTED_LANGUAGES}
+                data-test-subj="EngineCreationLanguageInput"
+                onChange={(event) => setLanguage(event.currentTarget.value)}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiButton
+          disabled={isSubmitDisabled}
+          isLoading={isLoading}
+          type="submit"
+          data-test-subj="NewEngineSubmitButton"
+          color="success"
+          fill
+        >
+          {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
+        </EuiButton>
+      </EuiForm>
+    </EuiPanel>
+  </>
 );

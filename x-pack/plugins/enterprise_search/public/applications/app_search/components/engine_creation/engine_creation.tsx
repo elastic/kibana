@@ -93,6 +93,7 @@ export const EngineCreation: React.FC = () => {
           submitEngine={submitEngine}
           setRawName={setRawName}
           setLanguage={setLanguage}
+          setSelectStep={ () => { setCreationStep(EngineCreationSteps.SelectStep)}}
         />
       )}
       {currentEngineCreationStep === EngineCreationSteps.ConfigureStep && engineType === 'elasticsearch' && (
