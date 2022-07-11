@@ -33,7 +33,11 @@ unset ELASTIC_APM_GLOBAL_LABELS
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
 
-sleep 120
+# Pings the es server every seconds 2 mins until it is status is green
+curl --retry 120 \
+  --retry-delay 1 \
+  --retry-all-errors \
+  -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow"
 
 journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
 

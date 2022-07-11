@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectMigration } from './legacy_migrations';
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CommandDefinition } from '../console';
+import type { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
 import { KillProcessActionResult } from './kill_process_action';
@@ -80,7 +80,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
-      exampleUsage: 'kill-process --pid 123',
+      exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: 'Enter a pid or an entity id to execute',
       mustHaveArgs: true,
       args: {
@@ -126,7 +126,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
-      exampleUsage: 'suspend-process --pid 123',
+      exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: 'Enter a pid or an entity id to execute',
       mustHaveArgs: true,
       args: {
