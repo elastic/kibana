@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { HostInfo, HostStatus } from '../../../../common/endpoint/types';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { HostInfo } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
 import { mockEndpointDetailsApiResult } from '../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { OfflineCallout } from './offline_callout';
