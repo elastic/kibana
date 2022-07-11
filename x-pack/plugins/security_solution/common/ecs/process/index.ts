@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CodeSignature, Ext } from '../file';
+import type { CodeSignature, Ext } from '../file';
 
 export interface ProcessEcs {
   Ext?: Ext;

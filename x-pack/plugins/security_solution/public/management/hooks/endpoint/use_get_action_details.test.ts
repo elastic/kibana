@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-  ReactQueryHookRenderer,
-} from '../../../common/mock/endpoint';
+import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetActionDetails } from './use_get_action_details';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';

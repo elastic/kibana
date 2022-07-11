@@ -8,13 +8,13 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   NetworkKpiQueries,
   NetworkKpiUniquePrivateIpsStrategyResponse,
   NetworkKpiUniquePrivateIpsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
+import type { SecuritySolutionFactory } from '../../../types';
 import { formatHistogramData } from '../common';
 import { buildUniquePrivateIpsQuery } from './query.network_kpi_unique_private_ips.dsl';
 
