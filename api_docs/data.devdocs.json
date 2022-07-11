@@ -7067,13 +7067,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -8295,6 +8289,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8306,6 +8303,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -16654,6 +16654,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -16665,6 +16668,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -21445,6 +21451,9 @@
         "tags": [],
         "label": "KbnFieldType",
         "description": [],
+        "signature": [
+          "KbnFieldType"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22670,6 +22679,9 @@
         "tags": [],
         "label": "KbnFieldTypeOptions",
         "description": [],
+        "signature": [
+          "KbnFieldTypeOptions"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -23069,6 +23081,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -23080,6 +23095,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false

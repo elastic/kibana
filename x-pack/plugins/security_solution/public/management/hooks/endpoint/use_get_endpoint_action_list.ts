@@ -6,7 +6,7 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from 'react-query';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { useHttp } from '../../../common/lib/kibana';
@@ -15,11 +15,11 @@ import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 
 export const useGetEndpointActionList = (
   query: EndpointActionListRequestQuery,
-  options: UseQueryOptions<ActionListApiResponse, HttpFetchError> = {}
-): UseQueryResult<ActionListApiResponse, HttpFetchError> => {
+  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError> = {}
+): UseQueryResult<ActionListApiResponse, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<ActionListApiResponse, HttpFetchError>({
+  return useQuery<ActionListApiResponse, IHttpFetchError>({
     queryKey: ['get-action-list', query],
     ...options,
     queryFn: async () => {

@@ -21,17 +21,18 @@ import {
   tap,
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+
 import {
   ApplicationStart,
   CoreStart,
   DocLinksStart,
-  HttpSetup,
-  IHttpFetchError,
+  ExecutionContextSetup,
   IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
-  ExecutionContextSetup,
 } from '@kbn/core/public';
+
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';

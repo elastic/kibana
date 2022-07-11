@@ -8,7 +8,7 @@
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useToasts } from '../../../../common/lib/kibana';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useDeleteArtifact } from '../../../hooks/artifacts';
@@ -61,7 +61,7 @@ export const useWithArtifactDeleteItem = (
 ): UseArtifactDeleteItemInterface => {
   const toasts = useToasts();
   const deleteArtifact = useDeleteArtifact(apiClient, {
-    onError: (error: HttpFetchError) => {
+    onError: (error: IHttpFetchError<Error>) => {
       toasts.addDanger(labels.deleteActionFailure(item.name, error.body?.message || error.message));
     },
     onSuccess: (response) => {

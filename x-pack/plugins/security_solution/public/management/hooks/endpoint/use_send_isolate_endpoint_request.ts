@@ -7,7 +7,7 @@
 
 import type { UseMutationOptions, UseMutationResult } from 'react-query';
 import { useMutation } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isolateHost } from '../../../common/lib/endpoint_isolation';
 import type {
   HostIsolationRequestBody,
@@ -21,11 +21,11 @@ import type {
 export const useSendIsolateEndpointRequest = (
   customOptions?: UseMutationOptions<
     HostIsolationResponse,
-    HttpFetchError,
+    IHttpFetchError,
     HostIsolationRequestBody
   >
-): UseMutationResult<HostIsolationResponse, HttpFetchError, HostIsolationRequestBody> => {
-  return useMutation<HostIsolationResponse, HttpFetchError, HostIsolationRequestBody>(
+): UseMutationResult<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody> => {
+  return useMutation<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody>(
     (isolateData: HostIsolationRequestBody) => {
       return isolateHost(isolateData);
     },

@@ -260,6 +260,9 @@
         "description": [
           "\nOptions for the Elastic V3 shipper"
         ],
+        "signature": [
+          "ElasticV3ShipperOptions"
+        ],
         "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
         "deprecated": false,
         "children": [

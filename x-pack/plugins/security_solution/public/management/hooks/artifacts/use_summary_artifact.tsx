@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { QueryObserverResult, UseQueryOptions } from 'react-query';
 import { useQuery } from 'react-query';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
@@ -22,11 +22,11 @@ export function useSummaryArtifact(
     policies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
-  customQueryOptions: Partial<UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>>
-): QueryObserverResult<ExceptionListSummarySchema, HttpFetchError> {
+  customQueryOptions: Partial<UseQueryOptions<ExceptionListSummarySchema, IHttpFetchError>>
+): QueryObserverResult<ExceptionListSummarySchema, IHttpFetchError> {
   const { filter = '', policies = [] } = options;
 
-  return useQuery<ExceptionListSummarySchema, HttpFetchError>(
+  return useQuery<ExceptionListSummarySchema, IHttpFetchError>(
     ['summary', exceptionListApiClient, filter, policies],
     () => {
       return exceptionListApiClient.summary(

@@ -48,7 +48,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
   const { error, isLoading, data: templates, resendRequest } = useLoadIndexTemplates(isLegacy);
 
   const renderTemplateHasPolicyWarning = () => {
-    const selectedTemplate = templates!.find((template) => template.name === templateName);
+    const selectedTemplate = templates?.find((template) => template.name === templateName);
     const existingPolicyName = selectedTemplate?.settings?.index?.lifecycle?.name;
     if (!existingPolicyName) {
       return;

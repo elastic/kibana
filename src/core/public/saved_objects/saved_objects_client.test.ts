@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
-import { httpServiceMock } from '../http/http_service.mock';
 
 describe('SavedObjectsClient', () => {
   const doc = {

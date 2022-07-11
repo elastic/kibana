@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -210,7 +210,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     // TODO:PT Refactor internal/external state into the `useEithArtifactSucmitData()` hook
     const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
-      HttpFetchError | undefined
+      IHttpFetchError | undefined
     >(undefined);
 
     const isEditFlow = urlParams.show === 'edit';

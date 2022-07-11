@@ -9,11 +9,11 @@
 import { omit, pick } from 'lodash';
 
 import {
-  MockedPluginInitializer,
+  type MockedPluginInitializer,
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName, PluginType } from '../../server';
+import { type PluginName, PluginType } from '../../server';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
@@ -24,8 +24,8 @@ import { coreMock } from '../mocks';
 
 import {
   PluginsService,
-  PluginsServiceStartDeps,
-  PluginsServiceSetupDeps,
+  type PluginsServiceStartDeps,
+  type PluginsServiceSetupDeps,
 } from './plugins_service';
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
@@ -35,8 +35,8 @@ import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 

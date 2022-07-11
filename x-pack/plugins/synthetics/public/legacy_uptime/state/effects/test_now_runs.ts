@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core/public';
 import { takeEvery } from 'redux-saga/effects';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { testNowMonitorAction } from '../actions';
-import { TestNowResponse, triggerTestNowMonitor } from '../api';
+import { type TestNowResponse, triggerTestNowMonitor } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchTestNowMonitorEffect() {

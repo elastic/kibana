@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '../http';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { DomainDeprecationDetails, DeprecationsGetResponse } from '../../server/types';
 
 /* @internal */

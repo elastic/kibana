@@ -5,7 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { UseMutationOptions, UseMutationResult } from 'react-query';
 import { useMutation } from 'react-query';
@@ -17,7 +17,7 @@ export function useBulkDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   customOptions: UseMutationOptions<
     ExceptionListItemSchema[],
-    HttpFetchError,
+    IHttpFetchError,
     Array<{ itemId?: string; id?: string }>,
     () => void
   > = DEFAULT_OPTIONS,
@@ -28,13 +28,13 @@ export function useBulkDeleteArtifact(
   }
 ): UseMutationResult<
   ExceptionListItemSchema[],
-  HttpFetchError,
+  IHttpFetchError,
   Array<{ itemId?: string; id?: string }>,
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema[],
-    HttpFetchError,
+    IHttpFetchError,
     Array<{ itemId?: string; id?: string }>,
     () => void
   >((exceptionIds: Array<{ itemId?: string; id?: string }>) => {

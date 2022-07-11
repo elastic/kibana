@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 
 import {
   DEBOUNCE_INTERVAL,

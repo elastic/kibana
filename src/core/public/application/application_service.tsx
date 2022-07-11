@@ -7,24 +7,22 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { MountPoint } from '../types';
-import { HttpSetup, HttpStart } from '../http';
-import { OverlayStart } from '../overlays';
+import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { MountPoint } from '../types';
+import type { OverlayStart } from '../overlays';
 import { AppRouter } from './ui';
-import { Capabilities, CapabilitiesService } from './capabilities';
-import {
+import { type Capabilities, CapabilitiesService } from './capabilities';
+import type {
   App,
   AppDeepLink,
   AppLeaveHandler,
   AppMount,
-  AppNavLinkStatus,
-  AppStatus,
   AppUpdatableFields,
   AppUpdater,
   InternalApplicationSetup,
@@ -33,6 +31,7 @@ import {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from './types';
+import { AppStatus, AppNavLinkStatus } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';

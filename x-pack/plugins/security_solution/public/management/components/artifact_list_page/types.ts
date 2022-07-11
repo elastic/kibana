@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -28,7 +28,7 @@ export interface ArtifactFormComponentProps {
   /** signals that the form should be made disabled (ex. while an update/create api call is in flight) */
   disabled: boolean;
   /** Error will be set if the submission of the form to the api results in an API error. Form can use it to provide feedback to the user */
-  error: HttpFetchError | undefined;
+  error: IHttpFetchError | undefined;
 
   policies: PolicyData[];
   policiesIsLoading: boolean;

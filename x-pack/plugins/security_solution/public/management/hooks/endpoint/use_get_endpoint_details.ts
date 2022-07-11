@@ -7,11 +7,15 @@
 
 import type { UseQueryOptions, UseQueryResult } from 'react-query';
 import { useQuery } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { useHttp } from '../../../common/lib/kibana';
 import type { HostInfo } from '../../../../common/endpoint/types';
 import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
+
+interface HttpResponse {
+  statusCode: number;
+}
 
 /**
  * Get info for a security solution endpoint host using the endpoint id (`agent.id`)
@@ -20,11 +24,11 @@ import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
  */
 export const useGetEndpointDetails = (
   endpointId: string,
-  options: UseQueryOptions<HostInfo, HttpFetchError> = {}
-): UseQueryResult<HostInfo, HttpFetchError> => {
+  options: UseQueryOptions<HostInfo, IHttpFetchError<HttpResponse>> = {}
+): UseQueryResult<HostInfo, IHttpFetchError<HttpResponse>> => {
   const http = useHttp();
 
-  return useQuery<HostInfo, HttpFetchError>({
+  return useQuery<HostInfo, IHttpFetchError<HttpResponse>>({
     queryKey: ['get-endpoint-host-info', endpointId],
     ...options,
     queryFn: () => {

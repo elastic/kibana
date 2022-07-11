@@ -22,11 +22,12 @@ import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
-import { AppCategory } from '../../../../types';
-import { InternalApplicationStart } from '../../../application/types';
-import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from '.';
+import type { HttpStart } from '@kbn/core-http-browser';
+
+import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
+import type { AppCategory } from '../../../../types';
+import type { InternalApplicationStart } from '../../../application/types';
+import type { OnIsLockedUpdate } from '.';
 import {
   createEuiListItem,
   createRecentNavLink,
@@ -34,6 +35,7 @@ import {
   createEuiButtonItem,
   createOverviewLink,
 } from './nav_link';
+
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 

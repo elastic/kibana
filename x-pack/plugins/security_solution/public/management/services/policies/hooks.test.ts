@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { UseQueryOptions } from 'react-query';
+import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
+import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useGetEndpointSecurityPackage } from './hooks';
-import type { HttpFetchError, HttpSetup } from '@kbn/core/public';
 import { getFakeHttpService, renderQuery } from '../../hooks/test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import type { UseQueryOptions } from 'react-query';
-import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');
@@ -19,7 +19,7 @@ describe('useGetEndpointSecurityPackage hook', () => {
   let result: ReturnType<typeof useGetEndpointSecurityPackage>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let generator: EndpointDocGenerator;
-  let options: UseQueryOptions<GetPackagesResponse['items'][number], HttpFetchError> | undefined;
+  let options: UseQueryOptions<GetPackagesResponse['items'][number], IHttpFetchError> | undefined;
 
   beforeEach(() => {
     fakeHttpServices = getFakeHttpService();

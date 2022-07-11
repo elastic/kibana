@@ -7,7 +7,7 @@
 
 import type { UseMutationOptions, UseMutationResult } from 'react-query';
 import { useMutation } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   KillOrSuspendProcessRequestBody,
   ResponseActionApiResponse,
@@ -21,15 +21,15 @@ import { killProcess } from '../../../common/lib/process_actions';
 export const useSendKillProcessRequest = (
   customOptions?: UseMutationOptions<
     ResponseActionApiResponse,
-    HttpFetchError,
+    IHttpFetchError,
     KillOrSuspendProcessRequestBody
   >
 ): UseMutationResult<
   ResponseActionApiResponse,
-  HttpFetchError,
+  IHttpFetchError,
   KillOrSuspendProcessRequestBody
 > => {
-  return useMutation<ResponseActionApiResponse, HttpFetchError, KillOrSuspendProcessRequestBody>(
+  return useMutation<ResponseActionApiResponse, IHttpFetchError, KillOrSuspendProcessRequestBody>(
     (processData: KillOrSuspendProcessRequestBody) => {
       return killProcess(processData);
     },

@@ -7,9 +7,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
-import { HttpSetup } from '../http';
-import { UiSettingsState } from './types';
+import type { UiSettingsState } from './types';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;

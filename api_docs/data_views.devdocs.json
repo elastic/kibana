@@ -2241,13 +2241,7 @@
                   "http dependency"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
                 "deprecated": false,
