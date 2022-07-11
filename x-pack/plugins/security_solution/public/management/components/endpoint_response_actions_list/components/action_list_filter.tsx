@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback } from 'react';
 import { EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import { ActionListFilterPopover } from './action_list_filter_popover';
-import { type FilterItems, useActionListFilter } from './hooks';
+import { type FilterItems, type FilterName, useActionListFilter } from './hooks';
+
+const getFilterName = (name: string) =>
+  i18n.translate('xpack.securitySolution.responseActionsList.list.filterName', {
+    defaultMessage: `{name}`,
+    values: { name },
+  });
 
 export const ActionListFilter = memo(
   ({
@@ -16,10 +23,11 @@ export const ActionListFilter = memo(
     onChangeCommands,
     onChangeUserIds,
   }: {
-    filterName: string;
+    filterName: FilterName;
     onChangeCommands: (selectedCommands: string[]) => void;
     onChangeUserIds: (selectedUsers: string[]) => void;
   }) => {
+    const translatedFilterName = getFilterName(filterName);
     const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
       useActionListFilter(filterName);
 
@@ -36,9 +44,9 @@ export const ActionListFilter = memo(
         }, []);
 
         // update query state
-        if (filterName === 'commands') {
+        if (filterName === 'Commands') {
           onChangeCommands(selectedItems);
-        } else if (filterName === 'users') {
+        } else if (filterName === 'Users') {
           onChangeUserIds(selectedItems);
         }
       },
@@ -47,18 +55,18 @@ export const ActionListFilter = memo(
 
     return (
       <ActionListFilterPopover
-        filterName={filterName}
+        filterName={translatedFilterName}
         hasActiveFilters={hasActiveFilters}
         numActiveFilters={numActiveFilters}
         numFilters={numFilters}
       >
         <EuiSelectable
-          aria-label={`${filterName}`}
+          aria-label={`${translatedFilterName}`}
           onChange={onChange}
           options={items}
           searchable
           searchProps={{
-            placeholder: `Filter ${filterName}`,
+            placeholder: `Filter ${translatedFilterName}`,
             compressed: true,
           }}
         >

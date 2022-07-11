@@ -94,8 +94,9 @@ export type FilterItems = Array<{
   checked: 'on' | undefined;
 }>;
 
-export const useActionListFilter = (filterName: string) => {
-  const isUsersFilter = filterName === 'users';
+export type FilterName = 'Commands' | 'Users';
+export const useActionListFilter = (filterName: FilterName) => {
+  const isUsersFilter = filterName === 'Users';
   const { data: users } = useGetKibanaUsers({ enabled: isUsersFilter });
   const [items, setItems] = useState<FilterItems>(
     isUsersFilter

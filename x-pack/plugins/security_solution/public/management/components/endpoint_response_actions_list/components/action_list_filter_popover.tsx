@@ -43,7 +43,7 @@ export const ActionListFilterPopover = memo(
           hasActiveFilters={hasActiveFilters}
           numActiveFilters={numActiveFilters}
         >
-          {filterName.charAt(0).toUpperCase() + filterName.slice(1, filterName.length)}
+          {filterName}
         </EuiFilterButton>
       ),
       [filterName, hasActiveFilters, isPopoverOpen, numActiveFilters, numFilters, onButtonClick]

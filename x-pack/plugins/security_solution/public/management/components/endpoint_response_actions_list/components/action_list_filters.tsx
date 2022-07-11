@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup } from '@elastic/eui';
 import type {
   DurationRange,
@@ -14,6 +14,7 @@ import type { useGetEndpointActionList } from '../../../hooks';
 import type { DateRangePickerValues } from './action_list_date_range_picker';
 import { ActionListDateRangePicker } from './action_list_date_range_picker';
 import { ActionListFilter } from './action_list_filter';
+import type { FilterName } from './hooks';
 
 export const ActionListFilters = memo(
   ({
@@ -35,7 +36,18 @@ export const ActionListFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
   }) => {
-    const filterNames = ['commands', 'users'];
+    const filters = useMemo(
+      () =>
+        ['Commands', 'Users'].map((filterName) => (
+          <ActionListFilter
+            key={filterName}
+            filterName={filterName as FilterName}
+            onChangeCommands={onChangeCommands}
+            onChangeUserIds={onChangeUserIds}
+          />
+        )),
+      [onChangeCommands, onChangeUserIds]
+    );
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem>
@@ -49,16 +61,7 @@ export const ActionListFilters = memo(
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFilterGroup>
-            {filterNames.map((filterName) => (
-              <ActionListFilter
-                key={filterName}
-                filterName={filterName}
-                onChangeCommands={onChangeCommands}
-                onChangeUserIds={onChangeUserIds}
-              />
-            ))}
-          </EuiFilterGroup>
+          <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
