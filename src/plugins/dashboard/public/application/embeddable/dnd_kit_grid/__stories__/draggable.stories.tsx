@@ -7,13 +7,11 @@
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import { DndContext, DragMoveEvent, DragOverlay } from '@dnd-kit/core';
-import { createSnapModifier, restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { debounce } from 'lodash';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { css } from '@emotion/react';
 
 import { Draggable } from '../components/container_components/draggable';
 import { PanelState } from '../types';
-import { StyledGridItem } from '../components/styled_grid_item';
-import { css } from '@emotion/react';
 
 export default {
   title: 'POC - dnd-kit/Draggable',
@@ -22,7 +20,7 @@ export default {
   argTypes: {},
 };
 
-export const BasicExample = () => {
+export const SnapToGrid = () => {
   const [gridState, setGridState] = useState<Record<string, PanelState>>({
     ['panel1']: {
       id: 'panel1',
@@ -35,46 +33,29 @@ export const BasicExample = () => {
   });
   const [draggingId, setDraggingId] = useState<string | undefined>(undefined);
 
-  const gridSize = 30; // pixels
-  const snapToGridModifier = createSnapModifier(gridSize);
-
   const handleDragStart = (event: DragMoveEvent) => {
     setDraggingId(event.active.id);
   };
 
-  const handleDragMove = (event: DragMoveEvent) => {
-    setElementPos(event, 'move');
-  };
-
   const handleDragEnd = (event: DragMoveEvent) => {
-    console.log('drag end:', event.active.id);
     setDraggingId(undefined);
-    setElementPos(event, 'stop');
-    console.log('After 2:', gridState[event.active.id]);
+    setElementPos(event);
   };
 
-  const handleDragCancel = (event: DragMoveEvent) => {
-    console.log('drag cancel:', event.active.id);
-    setElementPos(event, 'cancel');
-  };
-
-  const setElementPos = debounce((event: DragMoveEvent, type: string) => {
-    console.log({ event });
+  const setElementPos = (event: DragMoveEvent) => {
     const id = event.active.id;
     const newPanelState = gridState[id];
-    if (type === 'stop') {
-      newPanelState.pos.x += event.delta.x;
-      newPanelState.pos.y += event.delta.y;
-    }
+
+    newPanelState.pos.x = Math.max(newPanelState.pos.x + event.delta.x, 0);
+    newPanelState.pos.y = Math.max(newPanelState.pos.y + event.delta.y, 0);
+
     setGridState({ ...gridState, [id]: newPanelState });
-  }, 10);
+  };
 
   const guttersize = 0;
   const columns = 12;
   const maxRow = 30;
   const CELL_HEIGHT = 26;
-  const columnsize = (100 - guttersize * (columns - 1)) / columns;
-  console.log(columnsize);
 
   const gridStyles = useMemo(
     () =>
@@ -97,48 +78,18 @@ export const BasicExample = () => {
     <div id="gridContainer" className="dshGrid dshLayout--editing" css={gridStyles}>
       <DndContext
         onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
         modifiers={[restrictToWindowEdges]}
       >
         {Object.keys(gridState).map((id) => (
           <Draggable id={id} position={gridState[id].pos}>
             <div style={{ height: '100%', width: '100%', background: 'pink' }}>test</div>
-            {/* <StyledGridItem
-              id={gridState[id].id}
-              x={gridState[id].initPos.x}
-              y={gridState[id].initPos.y}
-              w={3}
-              h={3}
-              render={() => <p>{JSON.stringify(gridState[id])}</p>}
-            /> */}
           </Draggable>
         ))}
-        <DragOverlay
-          dropAnimation={null}
-          // style={
-          //   draggingId
-          //     ? {
-          //         transform: `translate(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px)`,
-          //       }
-          //     : {}
-          // }
-        >
+        <DragOverlay dropAnimation={null}>
           {draggingId ? (
             <div style={{ height: '100%', width: '100%', background: 'lightblue' }}>test</div>
           ) : null}
-
-          {/* {draggingId ? (
-            <StyledGridItem
-              id={gridState[draggingId].id}
-              x={gridState[draggingId].initPos.x}
-              y={gridState[draggingId].initPos.y}
-              w={3}
-              h={3}
-              render={() => <p>{JSON.stringify(gridState[draggingId])}</p>}
-            />
-          ) : null} */}
         </DragOverlay>
       </DndContext>
     </div>

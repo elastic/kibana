@@ -20,20 +20,37 @@ export const Draggable = ({ id, position, element, children }: Props) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
   });
+  const columnSize = useRef<number>(50);
 
-  const columnSize = useRef(100);
-  useEffect(() => {
+  const updateColumnWidth = () => {
     const gridEl = document.getElementById('gridContainer');
-    const cols = window.getComputedStyle(gridEl).gridTemplateColumns;
-    columnSize.current = parseFloat(cols.split(' ')[0].slice(0, -2));
+    if (gridEl) {
+      const cols = window.getComputedStyle(gridEl).gridTemplateColumns;
+      columnSize.current = parseFloat(cols.split('px')[0]);
+    }
+  };
+
+  window.addEventListener('resize', () => {
+    updateColumnWidth();
+  });
+
+  useEffect(() => {
+    updateColumnWidth();
   }, []);
 
-  const w = 3;
-  const h = 3;
-  const columnStart = Math.ceil(position.x / columnSize.current) + 1;
-  const columnEnd = columnStart + w;
-  const rowStart = Math.ceil(position.y / 26) + 1;
-  const rowEnd = rowStart + h;
+  const { columnStart, columnEnd, rowStart, rowEnd } = useMemo(() => {
+    const w = 3;
+    const h = 3;
+    const startC = Math.ceil(position.x / columnSize.current) + 1;
+    const startR = Math.ceil(position.y / 26) + 1;
+
+    return {
+      columnStart: startC,
+      columnEnd: startC + w,
+      rowStart: startR,
+      rowEnd: startR + h,
+    };
+  }, [position.x, position.y]);
 
   const positionStyles = useMemo(
     () => css`
