@@ -11,7 +11,7 @@ import React, { useState, useCallback, useMemo, useContext, useEffect } from 're
 // import styled from 'styled-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import * as i18n from '../translations';
-import { SelectionContext } from '../context';
+import { BulkActionsContext } from '../context';
 
 interface BulkActionsProps {
   totalItems: number;
@@ -21,7 +21,7 @@ interface BulkActionsProps {
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 
 const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActionItems }) => {
-  const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(SelectionContext);
+  const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showClearSelection, setShowClearSelectiong] = useState(false);

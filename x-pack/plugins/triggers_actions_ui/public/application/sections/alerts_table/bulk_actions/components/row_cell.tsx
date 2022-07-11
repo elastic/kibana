@@ -8,10 +8,10 @@
 import { EuiCheckbox } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { useContext } from 'react';
-import { SelectionContext } from '../context';
+import { BulkActionsContext } from '../context';
 
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
-  const [{ rowSelection }, updateSelectedRows] = useContext(SelectionContext);
+  const [{ rowSelection }, updateSelectedRows] = useContext(BulkActionsContext);
   const isChecked = rowSelection.has(rowIndex);
   return (
     <EuiCheckbox

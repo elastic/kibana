@@ -34,7 +34,7 @@ import { getLeadingControlColumn as getBulkActionsLeadingControlColumn } from '.
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
-import { SelectionContext } from './bulk_actions/context';
+import { BulkActionsContext } from './bulk_actions/context';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
@@ -60,7 +60,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
-  // const {toolbarVisibility, leadingControlColumn } = useBulkActions(alertsData, query, props.alertsTableConfiguration)
   const {
     useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }),
     useBulkActions = () => ({ render: undefined }),
@@ -68,7 +67,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
     useActionsColumn();
 
-  const [rowSelectionState, updateSelectionState] = useContext(SelectionContext);
+  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
   const { render: renderBulkActions } = useBulkActions();
 
   const isBulkActionsColumnActive = Boolean(renderBulkActions);
@@ -83,7 +82,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     pageIndex: activePage,
     pageSize: props.pageSize,
-    updateSelectionState,
+    updateBulkActionsState,
   });
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
@@ -228,7 +227,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   );
 
   const toolbarVisibility = useCallback(() => {
-    const { rowSelection, isAllSelected } = rowSelectionState;
+    const { rowSelection, isAllSelected } = bulkActionsState;
     return getToolbarVisibility({
       renderBulkActions,
       alertsCount,
@@ -236,7 +235,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       isAllSelected,
       alerts: alertsData.alerts,
     });
-  }, [alertsCount, alertsData.alerts, renderBulkActions, rowSelectionState])();
+  }, [alertsCount, alertsData.alerts, renderBulkActions, bulkActionsState])();
 
   return (
     <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>

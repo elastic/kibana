@@ -8,6 +8,9 @@
 import { createContext } from 'react';
 import { RowSelectionState, RowSelectionAction } from '../../../../types';
 
-export const SelectionContext = createContext<
+export const BulkActionsContext = createContext<
   [RowSelectionState, React.Dispatch<RowSelectionAction>]
->([{ rowSelection: new Set<string>(), isAllSelected: false, isPageSelected: false }, () => {}]);
+>([
+  { rowSelection: new Set<number>(), isAllSelected: false, isPageSelected: false, pageSize: 0 },
+  () => {},
+]);

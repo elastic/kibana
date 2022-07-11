@@ -10,7 +10,7 @@ import { RowSelectionAction } from '../../../../types';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  updateSelectionState: (action: RowSelectionAction) => void;
+  updateBulkActionsState: React.Dispatch<RowSelectionAction>;
 };
 
 export type UsePagination = (props: PaginationProps) => {
@@ -27,7 +27,7 @@ export function usePagination({
   onPageChange,
   pageIndex,
   pageSize,
-  updateSelectionState,
+  updateBulkActionsState,
 }: PaginationProps) {
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
@@ -41,17 +41,18 @@ export function usePagination({
         pageSize: _pageSize,
         pageIndex: 0,
       }));
+      updateBulkActionsState({ action: 'updatePageSize', pageSize: _pageSize });
       onPageChange({ pageIndex: 0, pageSize: _pageSize });
     },
-    [setPagination, onPageChange]
+    [updateBulkActionsState, onPageChange]
   );
   const onChangePageIndex = useCallback(
     (_pageIndex) => {
       setPagination((state) => ({ ...state, pageIndex: _pageIndex }));
-      updateSelectionState({ action: 'clear' });
+      updateBulkActionsState({ action: 'clear' });
       onPageChange({ pageIndex: _pageIndex, pageSize: pagination.pageSize });
     },
-    [updateSelectionState, onPageChange, pagination.pageSize]
+    [updateBulkActionsState, onPageChange, pagination.pageSize]
   );
 
   const onPaginateFlyout = useCallback(

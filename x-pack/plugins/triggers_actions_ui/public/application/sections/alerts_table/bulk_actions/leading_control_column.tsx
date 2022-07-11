@@ -22,7 +22,7 @@ export const getLeadingControlColumn = ({
   },
   rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
     const { visibleRowIndex: rowIndex } = cveProps as EuiDataGridCellValueElementProps & {
-      visibleRowIndex: string;
+      visibleRowIndex: number;
     };
     return <BulkActionsRowCell rowIndex={rowIndex} />;
   },

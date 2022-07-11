@@ -22,12 +22,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { SelectionContext as BulkActionsContext } from './bulk_actions/context';
+import { BulkActionsContext } from './bulk_actions/context';
 import { EmptyState } from './empty_state';
 import { AlertsTableConfigurationRegistry } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
-import { selectedRowsReducer } from './bulk_actions/selected_rows_reducer';
+import { bulkActionsReducer } from './bulk_actions/reducer';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -118,10 +118,11 @@ const AlertsTableState = ({
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
 
-  const initialSelectionContextState = useReducer(selectedRowsReducer, {
-    rowSelection: new Set<string>(),
+  const initialBulkActionsState = useReducer(bulkActionsReducer, {
+    rowSelection: new Set<number>(),
     isAllSelected: false,
     isPageSelected: false,
+    pageSize: pageSize || DefaultPagination.pageSize,
   });
 
   const [
@@ -237,7 +238,7 @@ const AlertsTableState = ({
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
       {alertsCount !== 0 && (
-        <BulkActionsContext.Provider value={initialSelectionContextState}>
+        <BulkActionsContext.Provider value={initialBulkActionsState}>
           <AlertsTable {...tableProps} />
         </BulkActionsContext.Provider>
       )}

@@ -7,14 +7,17 @@
 
 import { RowSelectionAction, RowSelectionState } from '../../../../types';
 
-export const selectedRowsReducer = (
-  { rowSelection }: RowSelectionState,
+const getAllRowsInPage = (pageSize: number) => new Set(Array.from(Array(pageSize).keys()));
+
+export const bulkActionsReducer = (
+  { rowSelection, pageSize: currentPageSize }: RowSelectionState,
   { action, rowIndex, pageSize }: RowSelectionAction
 ): RowSelectionState => {
   const nextState = {
     rowSelection,
     isAllSelected: false,
     isPageSelected: false,
+    pageSize: currentPageSize,
   };
 
   if (action === 'add' && rowIndex !== undefined) {
@@ -25,16 +28,20 @@ export const selectedRowsReducer = (
     const nextRowSelection = new Set(rowSelection);
     nextRowSelection.delete(rowIndex);
     nextState.rowSelection = nextRowSelection;
-  } else if (action === 'selectCurrentPage' && pageSize) {
-    nextState.rowSelection = new Set(Array.from(Array(pageSize).keys()));
+  } else if (action === 'selectCurrentPage') {
+    nextState.rowSelection = getAllRowsInPage(currentPageSize);
     nextState.isPageSelected = true;
   } else if (action === 'selectAll') {
-    nextState.isAllSelected = true;
+    nextState.rowSelection = getAllRowsInPage(currentPageSize);
     nextState.isPageSelected = true;
+    nextState.isAllSelected = true;
   } else if (action === 'clear') {
     nextState.rowSelection = new Set();
     nextState.isAllSelected = false;
     nextState.isPageSelected = false;
+  } else if (action === 'updatePageSize' && pageSize !== undefined) {
+    console.log('updating page size', pageSize);
+    nextState.pageSize = pageSize;
   }
   return nextState;
 };
