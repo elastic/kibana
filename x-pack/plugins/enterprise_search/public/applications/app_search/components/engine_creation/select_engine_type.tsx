@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
   EuiButton,
   EuiPanel,
@@ -24,74 +26,78 @@ import {
   ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL,
 } from './constants';
 
-import { EngineType } from './engine_creation_logic';
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
-interface SelectEngineTypeProps {
-  selectedEngineType: EngineType;
-  setAppSearchEngineType(): void;
-  setElasticsearchEngineType(): void;
-  setConfigurationStep(): void;
-}
+export const SelectEngineType: React.FC = () => {
+  const { engineType } = useValues(EngineCreationLogic);
+  const { setEngineType, setCreationStep } = useActions(EngineCreationLogic);
 
-export const SelectEngineType: React.FC<SelectEngineTypeProps> = ({
-  selectedEngineType,
-  setAppSearchEngineType,
-  setElasticsearchEngineType,
-  setConfigurationStep,
-}) => (
-  <>
-    <EuiStepsHorizontal
-      steps={[
-        {
-          title: 'Search engine type',
-          status: 'current',
-          onClick: () => {},
-        },
-        {
-          title: 'Configuration',
-          onClick: setConfigurationStep,
-        },
-        {
-          title: 'Review',
-          status: 'disabled',
-          onClick: () => {},
-        },
-      ]}
-    />
-    <EuiPanel hasBorder>
-      <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem>
-          <EuiCard
-            title={ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE}
-            description={ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION}
-            betaBadgeProps={{
-              label: 'Beta',
-              tooltipContent: 'This module is not GA. Please help us by reporting any bugs.',
-            }}
-            selectable={{
-              onClick: setElasticsearchEngineType,
-              isSelected: selectedEngineType === 'elasticsearch',
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            title={ENGINE_CREATION_SELECT_APP_SEARCH_TITLE}
-            description={ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION}
-            selectable={{
-              onClick: setAppSearchEngineType,
-              isSelected: selectedEngineType === 'appSearch',
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButton fill onClick={setConfigurationStep}>
-            {ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  </>
-);
+  return (
+    <>
+      <EuiStepsHorizontal
+        steps={[
+          {
+            title: 'Search engine type',
+            status: 'current',
+            onClick: () => {},
+          },
+          {
+            title: 'Configuration',
+            onClick: () => {
+              setCreationStep(EngineCreationSteps.ConfigureStep);
+            },
+          },
+          {
+            title: 'Review',
+            status: 'disabled',
+            onClick: () => {},
+          },
+        ]}
+      />
+      <EuiPanel hasBorder>
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem>
+            <EuiCard
+              title={ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE}
+              description={ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION}
+              betaBadgeProps={{
+                label: 'Beta',
+                tooltipContent: 'This module is not GA. Please help us by reporting any bugs.',
+              }}
+              selectable={{
+                onClick: () => {
+                  setEngineType('elasticsearch');
+                },
+                isSelected: engineType === 'elasticsearch',
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              title={ENGINE_CREATION_SELECT_APP_SEARCH_TITLE}
+              description={ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION}
+              selectable={{
+                onClick: () => {
+                  setEngineType('appSearch');
+                },
+                isSelected: engineType === 'appSearch',
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton
+              fill
+              onClick={() => {
+                setCreationStep(EngineCreationSteps.ConfigureStep);
+              }}
+            >
+              {ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
+  );
+};
