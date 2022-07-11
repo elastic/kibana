@@ -13,6 +13,7 @@ import type { TelemetryReceiver } from '../receiver';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
+import { stubEndpointMetricsResponse } from './metrics';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean,
@@ -82,7 +83,7 @@ export const createMockTelemetryReceiver = (
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
     fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
-    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
