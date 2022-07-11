@@ -220,13 +220,12 @@ export const RulesList = ({
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
 
-  const rulesTypesFilter = useMemo(
-    () =>
-      isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)
-        ? authorizedRuleTypes.map((art) => art.id)
-        : typesFilter,
-    [typesFilter, filteredRuleTypes, authorizedRuleTypes]
-  );
+  const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
+    if (isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)) {
+      return [authorizedRuleTypes.map((art) => art.id), true];
+    }
+    return [typesFilter, false];
+  }, [typesFilter, filteredRuleTypes, authorizedRuleTypes]);
 
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
@@ -239,6 +238,7 @@ export const RulesList = ({
     sort,
     onPage: setPage,
     onError,
+    hasDefaultRuleTypesFiltersOn,
   });
 
   const { tags, loadTags } = useLoadTags({
