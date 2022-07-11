@@ -9,10 +9,11 @@ import { filterInstalledRules, getRulesToUpdate, mergeExceptionLists } from './g
 import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getAddPrepackagedRulesSchemaMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { prepackagedRulesToMap, rulesToMap } from './utils';
 
 describe('get_rules_to_update', () => {
   test('should return empty array if both rule sets are empty', () => {
-    const update = getRulesToUpdate([], []);
+    const update = getRulesToUpdate(prepackagedRulesToMap([]), rulesToMap([]));
     expect(update).toEqual([]);
   });
 
@@ -24,7 +25,10 @@ describe('get_rules_to_update', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-2';
     installedRule.params.version = 1;
-    const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
+    const update = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([]);
   });
 
@@ -36,7 +40,10 @@ describe('get_rules_to_update', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 2;
-    const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
+    const update = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([]);
   });
 
@@ -48,7 +55,10 @@ describe('get_rules_to_update', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
-    const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
+    const update = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([]);
   });
 
@@ -62,7 +72,10 @@ describe('get_rules_to_update', () => {
     installedRule.params.version = 1;
     installedRule.params.exceptionsList = [];
 
-    const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
+    const update = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([ruleFromFileSystem]);
   });
 
@@ -81,7 +94,10 @@ describe('get_rules_to_update', () => {
     installedRule2.params.version = 1;
     installedRule2.params.exceptionsList = [];
 
-    const update = getRulesToUpdate([ruleFromFileSystem], [installedRule1, installedRule2]);
+    const update = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule1, installedRule2])
+    );
     expect(update).toEqual([ruleFromFileSystem]);
   });
 
@@ -105,8 +121,8 @@ describe('get_rules_to_update', () => {
     installedRule2.params.exceptionsList = [];
 
     const update = getRulesToUpdate(
-      [ruleFromFileSystem1, ruleFromFileSystem2],
-      [installedRule1, installedRule2]
+      prepackagedRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      rulesToMap([installedRule1, installedRule2])
     );
     expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
   });
@@ -129,7 +145,10 @@ describe('get_rules_to_update', () => {
     installedRule1.params.version = 1;
     installedRule1.params.exceptionsList = [];
 
-    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    const [update] = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem1]),
+      rulesToMap([installedRule1])
+    );
     expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
   });
 
@@ -158,7 +177,10 @@ describe('get_rules_to_update', () => {
       },
     ];
 
-    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    const [update] = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem1]),
+      rulesToMap([installedRule1])
+    );
     expect(update.exceptions_list).toEqual([
       ...ruleFromFileSystem1.exceptions_list,
       ...installedRule1.params.exceptionsList,
@@ -190,7 +212,10 @@ describe('get_rules_to_update', () => {
       },
     ];
 
-    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    const [update] = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem1]),
+      rulesToMap([installedRule1])
+    );
     expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
   });
 
@@ -212,7 +237,10 @@ describe('get_rules_to_update', () => {
       },
     ];
 
-    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    const [update] = getRulesToUpdate(
+      prepackagedRulesToMap([ruleFromFileSystem1]),
+      rulesToMap([installedRule1])
+    );
     expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
   });
 
@@ -251,8 +279,8 @@ describe('get_rules_to_update', () => {
     ];
 
     const [update1, update2] = getRulesToUpdate(
-      [ruleFromFileSystem1, ruleFromFileSystem2],
-      [installedRule1, installedRule2]
+      prepackagedRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      rulesToMap([installedRule1, installedRule2])
     );
     expect(update1.exceptions_list).toEqual(installedRule1.params.exceptionsList);
     expect(update2.exceptions_list).toEqual(installedRule2.params.exceptionsList);
@@ -302,8 +330,8 @@ describe('get_rules_to_update', () => {
     ];
 
     const [update1, update2] = getRulesToUpdate(
-      [ruleFromFileSystem1, ruleFromFileSystem2],
-      [installedRule1, installedRule2]
+      prepackagedRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      rulesToMap([installedRule1, installedRule2])
     );
     expect(update1.exceptions_list).toEqual(installedRule1.params.exceptionsList);
     expect(update2.exceptions_list).toEqual([
@@ -322,7 +350,7 @@ describe('filterInstalledRules', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-2';
     installedRule.params.version = 1;
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
+    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(false);
   });
 
@@ -334,7 +362,7 @@ describe('filterInstalledRules', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 2;
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
+    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(false);
   });
 
@@ -346,7 +374,7 @@ describe('filterInstalledRules', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
+    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(false);
   });
 
@@ -360,7 +388,7 @@ describe('filterInstalledRules', () => {
     installedRule.params.version = 1;
     installedRule.params.exceptionsList = [];
 
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, [installedRule]);
+    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(true);
   });
 });
@@ -384,7 +412,7 @@ describe('mergeExceptionLists', () => {
     installedRule1.params.version = 1;
     installedRule1.params.exceptionsList = [];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, [installedRule1]);
+    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
   });
 
@@ -413,7 +441,7 @@ describe('mergeExceptionLists', () => {
       },
     ];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, [installedRule1]);
+    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual([
       ...ruleFromFileSystem1.exceptions_list,
       ...installedRule1.params.exceptionsList,
@@ -445,7 +473,7 @@ describe('mergeExceptionLists', () => {
       },
     ];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, [installedRule1]);
+    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
   });
 
@@ -467,7 +495,7 @@ describe('mergeExceptionLists', () => {
       },
     ];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, [installedRule1]);
+    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
   });
 });
