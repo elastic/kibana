@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import { DataProvider } from '@kbn/timelines-plugin/common/types';
+import type { DataProvider } from '@kbn/timelines-plugin/common/types';
 import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
