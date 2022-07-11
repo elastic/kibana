@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { render } from '@testing-library/react';
 import { IndicatorsFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from './indicators_flyout';
 import { generateMockIndicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
@@ -14,6 +13,7 @@ import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/test_providers';
+import { fullDateFormatter } from '../../../../common/utils/dates';
 
 const mockIndicator = generateMockIndicator();
 
@@ -29,9 +29,9 @@ describe('IndicatorsFlyout', () => {
       `Indicator: ${displayValue(mockIndicator)}`
     );
     expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
-      `First seen: ${moment(
+      `First seen: ${fullDateFormatter(
         unwrapValue(mockIndicator, RawIndicatorFieldId.FirstSeen) as string
-      ).format('MMMM Do YYYY @ HH:mm:ss')}`
+      )}`
     );
   });
 

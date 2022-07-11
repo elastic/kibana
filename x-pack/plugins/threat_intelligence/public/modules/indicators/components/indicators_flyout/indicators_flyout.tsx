@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React, { useMemo, useState, VFC } from 'react';
 import {
   EuiFlyout,
@@ -18,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { fullDateFormatter } from '../../../../common/utils/dates';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
@@ -83,14 +83,7 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
 
   const firstSeen = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen);
   const value = displayValue(indicator) || EMPTY_VALUE;
-
-  let formattedFirstSeen: string;
-  if (firstSeen) {
-    const date = moment(firstSeen);
-    formattedFirstSeen = date.isValid() ? date.format('MMMM Do YYYY @ HH:mm:ss') : EMPTY_VALUE;
-  } else {
-    formattedFirstSeen = EMPTY_VALUE;
-  }
+  const formattedFirstSeen: string = firstSeen ? fullDateFormatter(firstSeen) : EMPTY_VALUE;
 
   return (
     <EuiFlyout onClose={closeFlyout}>
