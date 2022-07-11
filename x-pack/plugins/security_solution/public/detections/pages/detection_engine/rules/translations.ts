@@ -373,7 +373,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules' tags",
+    defaultMessage: "Overwrite all selected rules' tags",
   }
 );
 
