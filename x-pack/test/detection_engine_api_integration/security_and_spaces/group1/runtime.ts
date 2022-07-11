@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { performance } from 'perf_hooks';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -47,6 +48,15 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
+      });
+
+      it('should execute a rule to completion and not timeout when there are a lot of runtime fields', async () => {
+        const rule = getRuleForSignalTesting(['runtime']);
+        const { id } = await createRule(supertest, log, rule);
+        const start = performance.now();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const end = performance.now();
+        expect(end - start).to.be.lessThan(10000);
       });
 
       it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
