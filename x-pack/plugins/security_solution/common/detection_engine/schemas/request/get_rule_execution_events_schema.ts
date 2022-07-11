@@ -10,13 +10,9 @@ import * as t from 'io-ts';
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DefaultEmptyString, IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
-import { Either } from 'fp-ts/lib/Either';
-import {
-  ExecutionLogTableSortColumns,
-  executionLogTableSortColumns,
-  ruleExecutionStatus,
-  RuleExecutionStatus,
-} from '../common';
+import type { Either } from 'fp-ts/lib/Either';
+import type { ExecutionLogTableSortColumns, RuleExecutionStatus } from '../common';
+import { executionLogTableSortColumns, ruleExecutionStatus } from '../common';
 
 /**
  * Types the DefaultStatusFiltersStringArray as:
