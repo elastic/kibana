@@ -16,7 +16,8 @@ import {
 } from '.';
 
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -26,8 +27,8 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timelin
 import * as i18n from './translations';
 
 import { schema } from '../step_about_rule/schema';
-import { ListItems } from './types';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import type { ListItems } from './types';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/lib/kibana');
 

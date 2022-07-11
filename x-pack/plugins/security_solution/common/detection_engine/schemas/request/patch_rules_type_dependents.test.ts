@@ -9,7 +9,7 @@ import {
   getPatchRulesSchemaMock,
   getPatchThresholdRulesSchemaMock,
 } from './patch_rules_schema.mock';
-import { PatchRulesSchema, ThresholdPatchSchema } from './patch_rules_schema';
+import type { PatchRulesSchema, ThresholdPatchSchema } from './patch_rules_schema';
 import { patchRuleValidateTypeDependents } from './patch_rules_type_dependents';
 
 describe('patch_rules_type_dependents', () => {

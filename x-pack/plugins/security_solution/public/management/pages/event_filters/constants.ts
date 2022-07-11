@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListSchema,
   ExceptionListType,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
