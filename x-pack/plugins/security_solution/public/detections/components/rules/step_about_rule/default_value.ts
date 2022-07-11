@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AboutStepRule, DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { AboutStepRule, DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
 export const threatDefault = [

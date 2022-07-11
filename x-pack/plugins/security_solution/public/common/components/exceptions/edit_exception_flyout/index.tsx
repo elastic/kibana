@@ -59,7 +59,8 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;

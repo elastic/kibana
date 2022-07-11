@@ -35,7 +35,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {
   hasEqlSequenceQuery,
