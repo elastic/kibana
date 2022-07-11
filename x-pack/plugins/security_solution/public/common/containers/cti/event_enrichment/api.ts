@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
-  CtiQueries,
 } from '../../../../../common/search_strategy/security_solution/cti';
+import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';
 
 type GetEventEnrichmentProps = CtiEventEnrichmentRequestOptions & {
   data: DataPublicPluginStart;

@@ -51,6 +51,7 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
 } from '@kbn/core-http-server';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -78,11 +79,8 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
-import { PrebootServicePreboot } from './preboot';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
-
-export type { PrebootServicePreboot } from './preboot';
 
 export type {
   CoreUsageStats,
