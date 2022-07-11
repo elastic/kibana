@@ -8,7 +8,7 @@
 import ace from 'brace';
 import 'brace/mode/sql';
 import 'brace/ext/language_tools';
-import { AceInterface } from './ace_types';
+import type { AceInterface } from './ace_types';
 import './osquery_highlight_rules';
 
 (ace as unknown as AceInterface).define(

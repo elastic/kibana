@@ -14,13 +14,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { Dispatch, useCallback, useReducer, useState, useMemo } from 'react';
+import type { Dispatch } from 'react';
+import React, { useCallback, useReducer, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
-import { errorToToaster, useStateToaster, ActionToaster } from '../toasters';
+import type { ActionToaster } from '../toasters';
+import { errorToToaster, useStateToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
@@ -28,7 +30,7 @@ import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
-import { JobsFilters, SecurityJob } from './types';
+import type { JobsFilters, SecurityJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
 import { useSecurityJobs } from './hooks/use_security_jobs';
 

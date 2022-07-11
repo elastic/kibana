@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import type { History as HistoryPackageHistoryInterface } from 'history';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
