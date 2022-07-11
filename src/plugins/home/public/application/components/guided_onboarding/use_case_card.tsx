@@ -21,7 +21,6 @@ type UseCaseConstants = {
       description: string;
     };
     logo: {
-      name: string;
       altText: string;
     };
     navigateOptions: {
@@ -42,7 +41,6 @@ const constants: UseCaseConstants = {
       }),
     },
     logo: {
-      name: 'illustration-search',
       altText: i18n.translate('home.guidedOnboarding.gettingStarted.search.iconName', {
         defaultMessage: 'Enterprise Search logo',
       }),
@@ -66,7 +64,6 @@ const constants: UseCaseConstants = {
       ),
     },
     logo: {
-      name: 'illustration-observability',
       altText: i18n.translate('home.guidedOnboarding.gettingStarted.observability.iconName', {
         defaultMessage: 'Observability logo',
       }),
@@ -87,7 +84,6 @@ const constants: UseCaseConstants = {
       }),
     },
     logo: {
-      name: 'illustration-security',
       altText: i18n.translate('home.guidedOnboarding.gettingStarted.security.iconName', {
         defaultMessage: 'Security logo',
       }),
@@ -109,9 +105,9 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
 
   const isDarkTheme = uiSettings.get('theme:darkMode');
 
-  const getImageUrl = (imageName: string) => {
+  const getImageUrl = (imageName: UseCase) => {
     const imagePath = isDarkTheme
-      ? `/plugins/home/assets/solution_logos/${imageName}-dark.png`
+      ? `/plugins/home/assets/solution_logos/${imageName}_dark.png`
       : `/plugins/home/assets/solution_logos/${imageName}.png`;
 
     return http.basePath.prepend(imagePath);
@@ -142,12 +138,7 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
     <EuiCard
       display="subdued"
       textAlign="left"
-      image={
-        <img
-          src={getImageUrl(constants[useCase].logo.name)}
-          alt={constants[useCase].logo.altText}
-        />
-      }
+      image={<img src={getImageUrl(useCase)} alt={constants[useCase].logo.altText} />}
       title={title}
       description={description}
       // Used for FS tracking

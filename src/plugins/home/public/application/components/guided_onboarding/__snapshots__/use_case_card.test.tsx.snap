@@ -17,7 +17,7 @@ exports[`use case card should render use case card component for observability 1
   image={
     <img
       alt="Observability logo"
-      src="/plugins/home/assets/solution_logos/illustration-observability.png"
+      src="/plugins/home/assets/solution_logos/observability.png"
     />
   }
   onClick={[Function]}
@@ -53,7 +53,7 @@ exports[`use case card should render use case card component for search 1`] = `
   image={
     <img
       alt="Enterprise Search logo"
-      src="/plugins/home/assets/solution_logos/illustration-search.png"
+      src="/plugins/home/assets/solution_logos/search.png"
     />
   }
   onClick={[Function]}
@@ -89,7 +89,7 @@ exports[`use case card should render use case card component for security 1`] = 
   image={
     <img
       alt="Security logo"
-      src="/plugins/home/assets/solution_logos/illustration-security.png"
+      src="/plugins/home/assets/solution_logos/security.png"
     />
   }
   onClick={[Function]}
