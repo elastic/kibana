@@ -304,6 +304,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               },
             },
           },
+          endpoint_count: {
+            cardinality: {
+              field: 'agent.id',
+            },
+          },
         },
       },
     };
