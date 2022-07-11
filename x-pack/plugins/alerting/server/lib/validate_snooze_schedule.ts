@@ -6,11 +6,12 @@
  */
 
 import { Frequency } from 'rrule';
+import moment from 'moment';
 import { RuleSnoozeSchedule } from '../types';
 
 export const validateSnoozeSchedule = (schedule: RuleSnoozeSchedule) => {
   const intervalIsDaily = schedule.rRule.freq === Frequency.DAILY;
-  const durationInDays = Math.floor(schedule.duration / (1000 * 60 * 60 * 24));
+  const durationInDays = moment.duration(schedule.duration, 'milliseconds').asDays();
   if (intervalIsDaily && schedule.rRule.interval && durationInDays >= schedule.rRule.interval) {
     return 'Recurrence interval must be longer than the snooze duration';
   }
