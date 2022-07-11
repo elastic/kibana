@@ -457,9 +457,6 @@ export class TaskRunner<
     }
 
     const ruleIsSnoozed = isRuleSnoozed(rule);
-    if (ruleIsSnoozed) {
-      await this.markRuleAsSnoozed(rule.id, rulesClient);
-    }
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
@@ -537,10 +534,6 @@ export class TaskRunner<
     };
   }
 
-  private async markRuleAsSnoozed(id: string, rulesClient: RulesClientApi) {
-    await rulesClient.updateSnoozedUntilTime({ id });
-  }
-
   private async loadRuleAttributesAndRun(): Promise<Resultable<RuleRunResult, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
@@ -572,6 +565,7 @@ export class TaskRunner<
       stateWithMetrics: await promiseResult<RuleTaskStateAndMetrics, Error>(
         this.executeRule(fakeRequest, rulesClient, rule, apiKey, validatedParams, spaceId)
       ),
+      isRuleSnoozedUntil: asOk(rulesClient.calculateRuleIsSnoozedUntil(rule)),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
         // changed during the task execution
@@ -625,9 +619,8 @@ export class TaskRunner<
 
     this.alertingEventLogger.start();
 
-    const { stateWithMetrics, schedule, monitoring } = await errorAsRuleTaskRunResult(
-      this.loadRuleAttributesAndRun()
-    );
+    const { stateWithMetrics, schedule, monitoring, isRuleSnoozedUntil } =
+      await errorAsRuleTaskRunResult(this.loadRuleAttributesAndRun());
 
     const ruleMonitoring =
       resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
@@ -703,6 +696,11 @@ export class TaskRunner<
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         monitoring: ruleMonitoring,
+        ...(isRuleSnoozedUntil !== undefined
+          ? {
+              isSnoozedUntil: isRuleSnoozedUntil,
+            }
+          : {}),
       });
     }
 

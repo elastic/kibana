@@ -2176,8 +2176,15 @@ export class RulesClient {
             muteAll: false,
           };
 
+    const isRuleSnoozedUntil = this.calculateRuleIsSnoozedUntil(newAttrs);
+
     const updateAttributes = this.updateMeta({
       ...newAttrs,
+      ...(isRuleSnoozedUntil !== undefined
+        ? {
+            isSnoozedUntil: isRuleSnoozedUntil,
+          }
+        : {}),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2188,7 +2195,7 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    ).then(() => this.updateSnoozedUntilTime({ id }));
+    );
   }
 
   public async unsnooze({
@@ -2242,11 +2249,23 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+    const snoozeSchedule = scheduleIds
+      ? clearScheduledSnoozesById(attributes, scheduleIds)
+      : clearCurrentActiveSnooze(attributes);
+
+    const isRuleSnoozedUntil = this.calculateRuleIsSnoozedUntil({
+      ...attributes,
+      snoozeSchedule,
+      muteAll: !scheduleIds ? false : attributes.muteAll,
+    });
 
     const updateAttributes = this.updateMeta({
-      snoozeSchedule: scheduleIds
-        ? clearScheduledSnoozesById(attributes, scheduleIds)
-        : clearCurrentActiveSnooze(attributes),
+      snoozeSchedule,
+      ...(isRuleSnoozedUntil !== undefined
+        ? {
+            isSnoozedUntil: isRuleSnoozedUntil,
+          }
+        : {}),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
       ...(!scheduleIds ? { muteAll: false } : {}),
@@ -2258,31 +2277,19 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    ).then(() => this.updateSnoozedUntilTime({ id }));
+    );
   }
 
-  public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
-      'alert',
-      id
-    );
+  public calculateRuleIsSnoozedUntil(rule: {
+    muteAll: boolean;
+    snoozeSchedule?: RuleSnooze;
+    isSnoozedUntil?: Date | string | null;
+  }): string | null | undefined {
+    const isSnoozedUntil = getRuleSnoozeEndTime(rule);
 
-    const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
-    if (!isSnoozedUntil && !attributes.isSnoozedUntil) return;
+    if (!isSnoozedUntil && !rule.isSnoozedUntil) return;
 
-    const updateAttributes = this.updateMeta({
-      isSnoozedUntil: isSnoozedUntil ? isSnoozedUntil.toISOString() : null,
-      updatedBy: await this.getUserName(),
-      updatedAt: new Date().toISOString(),
-    });
-    const updateOptions = { version };
-
-    await partiallyUpdateAlert(
-      this.unsecuredSavedObjectsClient,
-      id,
-      updateAttributes,
-      updateOptions
-    );
+    return isSnoozedUntil ? isSnoozedUntil.toISOString() : null;
   }
 
   public async muteAll({ id }: { id: string }): Promise<void> {
