@@ -1024,10 +1024,8 @@ export class RulesClient {
           terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
         },
         snoozed: {
-          date_range: {
-            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
-            format: 'strict_date_time',
-            ranges: [{ from: 'now' }],
+          terms: {
+            field: 'alert.attributes.isSnoozedUntil',
           },
         },
       },
