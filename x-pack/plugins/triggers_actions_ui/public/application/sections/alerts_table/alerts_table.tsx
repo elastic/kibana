@@ -59,7 +59,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     sort: sortingFields,
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
-  console.log('alertsData j', alertsData);
 
   // const {toolbarVisibility, leadingControlColumn } = useBulkActions(alertsData, query, props.alertsTableConfiguration)
   const {

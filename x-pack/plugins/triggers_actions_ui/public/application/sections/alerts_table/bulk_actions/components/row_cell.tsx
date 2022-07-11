@@ -10,12 +10,12 @@ import React, { ChangeEvent } from 'react';
 import { useContext } from 'react';
 import { SelectionContext } from '../context';
 
-export const BulkActionsRowCell = ({ rowIndex }: { rowIndex: string }) => {
+const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
   const [{ rowSelection }, updateSelectedRows] = useContext(SelectionContext);
   const isChecked = rowSelection.has(rowIndex);
   return (
     <EuiCheckbox
-      id={rowIndex}
+      id={rowIndex.toString()}
       checked={isChecked}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
@@ -27,3 +27,5 @@ export const BulkActionsRowCell = ({ rowIndex }: { rowIndex: string }) => {
     />
   );
 };
+
+export const BulkActionsRowCell = React.memo(BulkActionsRowCellComponent);

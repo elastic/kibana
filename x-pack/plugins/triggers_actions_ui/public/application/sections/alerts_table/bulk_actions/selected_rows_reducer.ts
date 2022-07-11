@@ -8,15 +8,15 @@
 import { RowSelectionAction, RowSelectionState } from '../../../../types';
 
 export const selectedRowsReducer = (
-  { rowSelection, pageSize: currentPageSize }: RowSelectionState,
+  { rowSelection }: RowSelectionState,
   { action, rowIndex, pageSize }: RowSelectionAction
 ): RowSelectionState => {
   const nextState = {
     rowSelection,
     isAllSelected: false,
     isPageSelected: false,
-    pageSize: currentPageSize,
   };
+
   if (action === 'add' && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
     nextRowSelection.add(rowIndex);
@@ -30,6 +30,7 @@ export const selectedRowsReducer = (
     nextState.isPageSelected = true;
   } else if (action === 'selectAll') {
     nextState.isAllSelected = true;
+    nextState.isPageSelected = true;
   } else if (action === 'clear') {
     nextState.rowSelection = new Set();
     nextState.isAllSelected = false;

@@ -465,7 +465,6 @@ export interface RowSelectionState {
   rowSelection: Set<number>;
   isAllSelected: boolean;
   isPageSelected: boolean;
-  pageSize: number;
 }
 
 export interface AlertsTableFlyoutBaseProps {

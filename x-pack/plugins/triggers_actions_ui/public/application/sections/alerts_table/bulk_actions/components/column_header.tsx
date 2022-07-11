@@ -9,7 +9,9 @@ import { EuiCheckbox } from '@elastic/eui';
 import React, { ChangeEvent, useContext } from 'react';
 import { SelectionContext } from '../context';
 
-export const BulkActionsHeader: React.FunctionComponent<{ pageSize: number }> = ({ pageSize }) => {
+const BulkActionsHeaderComponent: React.FunctionComponent<{ pageSize: number }> = ({
+  pageSize,
+}) => {
   const [{ isAllSelected, isPageSelected }, updateSelectedRows] = useContext(SelectionContext);
 
   return (
@@ -27,3 +29,5 @@ export const BulkActionsHeader: React.FunctionComponent<{ pageSize: number }> = 
     />
   );
 };
+
+export const BulkActionsHeader = React.memo(BulkActionsHeaderComponent);
