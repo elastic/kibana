@@ -52,7 +52,7 @@ export const SnapToGrid = () => {
     setGridState({ ...gridState, [id]: newPanelState });
   };
 
-  const guttersize = 0;
+  const guttersize = 5;
   const columns = 12;
   const maxRow = 30;
   const CELL_HEIGHT = 26;
@@ -83,12 +83,26 @@ export const SnapToGrid = () => {
       >
         {Object.keys(gridState).map((id) => (
           <Draggable id={id} position={gridState[id].pos}>
-            <div style={{ height: '100%', width: '100%', background: 'pink' }}>test</div>
+            <div
+              style={{
+                height: '100%',
+                width: '100%',
+                border: 'dashed 1px red',
+                background: 'pink',
+                padding: '10px',
+              }}
+            >
+              I am {id}
+            </div>
           </Draggable>
         ))}
         <DragOverlay dropAnimation={null}>
           {draggingId ? (
-            <div style={{ height: '100%', width: '100%', background: 'lightblue' }}>test</div>
+            <div
+              style={{ height: '100%', width: '100%', background: 'lightblue', padding: '10px' }}
+            >
+              Dragging {draggingId}
+            </div>
           ) : null}
         </DragOverlay>
       </DndContext>

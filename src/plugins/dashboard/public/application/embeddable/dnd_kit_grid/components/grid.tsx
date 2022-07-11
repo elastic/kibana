@@ -29,15 +29,15 @@ export const Grid: FC<Props> = ({
 }) => {
   const engineRef = useRef<GridStackEngine>();
   const [items, setItems] = useState<GridItemProps[]>(gridData);
-  // const engine = useMemo(
-  //   () =>
-  //     new GridStackEngine({
-  //       column: columns,
-  //       float: false,
-  //       nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
-  //     }),
-  //   [columns, items]
-  // );
+  const engine = useMemo(
+    () =>
+      new GridStackEngine({
+        column: columns,
+        float: false,
+        nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
+      }),
+    [columns, items]
+  );
 
   // useEffect(() => {
   //   engineRef.current =
