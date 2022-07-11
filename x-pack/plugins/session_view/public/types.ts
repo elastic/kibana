@@ -118,6 +118,20 @@ export interface DetailPanelOrchestrator {
   };
 }
 
+export interface DetailPanelCloud {
+  instance: {
+    name:string;
+  };
+  account: {
+    id:string;
+  };
+  project: {
+    id:string;
+  }
+  provider:string;
+  region:string;
+}
+
 export interface SessionViewStart {
   getSessionView: (props: SessionViewDeps) => JSX.Element;
 }
