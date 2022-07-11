@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
-import { AwaitedProperties } from '@kbn/utility-types';
-import { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
-import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
@@ -21,13 +21,13 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { LicenseService, parseExperimentalConfigValue } from '@kbn/fleet-plugin/common';
 import { Subject } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { registerActionListRoutes } from './list';
 
