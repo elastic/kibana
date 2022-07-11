@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-function isFieldValueWrapper(object: [key: string]) {
+function isFieldValueWrapper(object) {
   return (
     object &&
-    (Object.prototype.hasOwnProperty.call(object, "raw") ||
-     Object.prototype.hasOwnProperty.call(object, "snippet"))
+    (Object.prototype.hasOwnProperty.call(object, 'raw') ||
+     Object.prototype.hasOwnProperty.call(object, 'snippet'))
   );
 }
 
@@ -20,29 +20,27 @@ function isFieldValueWrapper(object: [key: string]) {
 // }
 // And false for objects like this:
 // objectField: { raw: "one" }
-function isNestedField(result: any, field: string) {
-  return (
-    result &&
-    result[field] &&
-    field !== "_meta" &&
-    typeof result[field] === "object" &&
-    !isFieldValueWrapper(result[field])
-  );
+function isNestedFieldValue(fiedlValue) {
+  if (Array.isArray(fiedlValue)) {
+    fiedlValue.map(isNestedFieldValue).reduce((acc, current) => acc || current, false);
+  }
+
+  return typeof fiedlValue === "object" && !isFieldValueWrapper(fiedlValue);
 }
 
 // Takes any value and removes the wrapper around deepest values
 // (removes the wrapper Object with "raw" and/or "snippet" fields)
 // See tests for examples
-function cleanValueWrappers(value: any): object {
+function cleanValueWrappers(value) {
   if (isFieldValueWrapper(value) && value.raw) {
-    return value;
+    return value.raw;
   }
 
   if (Array.isArray(value)) {
     return value.map(cleanValueWrappers);
   }
 
-  if (typeof value === "object") {
+  if (typeof value === 'object') {
     return Object.entries(value).reduce((acc: any, [key, value]) => {
       acc[key] = cleanValueWrappers(value);
       return acc;
@@ -52,16 +50,15 @@ function cleanValueWrappers(value: any): object {
   return value;
 }
 
-
-export function formatResult(result: any): object {
-  return Object.keys(result).reduce((acc: any, field) => {
-    if (isNestedField(result, field)) {
+export function formatResult(result) {
+  return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
+    if (fieldName != '_meta' && isNestedFieldValue(fieldValue)) {
       return {
         ...acc,
-        [field]: { raw: cleanValueWrappers(result[field]) }
+        [fieldName]: { raw: cleanValueWrappers(fieldValue) }
       };
     }
 
-    return { ...acc, [field]: result[field] };
+    return { ...acc, [fieldName]: fieldValue };
   }, {});
 }

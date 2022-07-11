@@ -9,10 +9,10 @@ import React from 'react';
 
 import classNames from 'classnames';
 
+import { SchemaType } from '../../../shared/schema/types';
 import { FieldType, Raw, Snippet } from './types';
 
 import './result_field_value.scss';
-import { SchemaType } from '../../../shared/schema/types';
 
 const isNotNumeric = (raw: string | number): boolean => {
   if (typeof raw === 'number') return false;
@@ -20,7 +20,7 @@ const isNotNumeric = (raw: string | number): boolean => {
 };
 
 const getRawDisplay = (raw: Raw, type?: FieldType) => {
-  if (type == SchemaType.Nested) {
+  if (type === SchemaType.Nested) {
     return JSON.stringify(raw);
   }
 

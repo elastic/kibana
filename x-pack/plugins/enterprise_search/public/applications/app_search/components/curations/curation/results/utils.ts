@@ -30,13 +30,12 @@ const mergeMetas = (partialMeta: ResultMeta, secondPartialMeta: ResultMeta): Res
 
 export const convertToResultFormat = (document: CurationResult): SearchResult => {
   // Convert `key: 'value'` into `key: { raw: 'value' }`
-  const result = Object.entries(document).reduce((result ,[key, value]) => {
+  const result = Object.entries(document).reduce((acc, [key, value]) => {
     return {
-      ...result,
-      [key]: Object.prototype.hasOwnProperty.call(value, "raw") ? value : { raw: value }
+      ...acc,
+      [key]: Object.prototype.hasOwnProperty.call(value, 'raw') ? value : { raw: value },
     };
   }, {} as SearchResult);
-
 
   result._meta = mergeMetas(result._meta, convertIdToMeta(document.id));
 
