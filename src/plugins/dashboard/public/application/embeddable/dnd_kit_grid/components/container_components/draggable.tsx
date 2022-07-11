@@ -11,13 +11,12 @@ import { css } from '@emotion/react';
 import { PanelState } from '../../types';
 interface Props {
   id: string;
-  initPosition: { x: number; y: number };
-  deltaPosition: { x: number; y: number };
+  position: { x: number; y: number };
   element?: React.ElementType | string;
   children?: JSX.Element | JSX.Element[];
 }
 
-export const Draggable = ({ id, initPosition, deltaPosition, element, children }: Props) => {
+export const Draggable = ({ id, position, element, children }: Props) => {
   const Element = element || 'div';
   const { attributes, listeners, setNodeRef, isDragging, node } = useDraggable({
     id,
@@ -30,9 +29,9 @@ export const Draggable = ({ id, initPosition, deltaPosition, element, children }
   const w = 3;
   const h = 3;
 
-  const columnStart = Math.ceil((deltaPosition.x - initPosition.x) / 30) + 1;
+  const columnStart = Math.ceil(position.x / 30) + 1;
   const columnEnd = columnStart + w;
-  const rowStart = Math.ceil((deltaPosition.y - initPosition.y) / 26) + 1;
+  const rowStart = Math.ceil(position.y / 26) + 1;
   const rowEnd = rowStart + h;
   // const columnStart = x + 1;
   // const columnEnd = columnStart + w;
@@ -41,7 +40,7 @@ export const Draggable = ({ id, initPosition, deltaPosition, element, children }
 
   // console.log({ top, initPosition, deltaPosition, columnStart, columnEnd, rowStart, rowEnd });
 
-  console.log({ initPosition, deltaPosition });
+  console.log({ position });
 
   // const positionStyles = useMemo(
   //   () => css`
@@ -54,28 +53,31 @@ export const Draggable = ({ id, initPosition, deltaPosition, element, children }
   //   [columnStart, columnEnd, rowStart, rowEnd, isDragging]
   // );
 
-  const positionStyles = useMemo(
-    () => css`
-      position: absolute;
-      left: ${Math.abs(deltaPosition.x)}px;
-      top: ${Math.abs(deltaPosition.y)}px;
-      opacity: ${isDragging ? '0.5' : ''};
-    `,
-    [deltaPosition.x, deltaPosition.y, initPosition.x, initPosition.y, isDragging]
-  );
+  // const positionStyles = useMemo(
+  //   () => css`
+  // position: fixed;
+  // left: ${deltaPosition.x === 0 ? initPosition.x : deltaPosition.x}px;
+  // top: ${deltaPosition.y === 0 ? initPosition.y : deltaPosition.y}px;
+  // opacity: ${isDragging ? '0.5' : ''};
+  //   `,
+  //   [deltaPosition.x, deltaPosition.y, initPosition.x, initPosition.y, isDragging]
+  // );
 
   const style = {
     opacity: isDragging ? '0.5' : '',
+    position: 'fixed',
+    left: `${position.x}px`,
+    top: `${position.y}px`,
     // ...transform,
   };
 
   return (
     <Element
       ref={setNodeRef}
-      // style={style}
+      style={style}
       {...listeners}
       {...attributes}
-      css={positionStyles}
+      // css={positionStyles}
     >
       {children}
     </Element>

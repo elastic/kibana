@@ -26,13 +26,11 @@ export const BasicExample = () => {
   const [gridState, setGridState] = useState<Record<string, PanelState>>({
     ['panel1']: {
       id: 'panel1',
-      initPos: { x: 0, y: 0 },
-      deltaPos: { x: 0, y: 0 },
+      pos: { x: 0, y: 0 },
     },
     ['panel2']: {
       id: 'panel2',
-      initPos: { x: 50, y: 50 },
-      deltaPos: { x: 50, y: 50 },
+      pos: { x: 50, y: 50 },
     },
   });
   const [draggingId, setDraggingId] = useState<string | undefined>(undefined);
@@ -64,22 +62,9 @@ export const BasicExample = () => {
     console.log({ event });
     const id = event.active.id;
     const newPanelState = gridState[id];
-    if (type === 'move') {
-      // newPanelState.deltaPos.x = newPanelState.initPos.x + event.delta.x;
-      // newPanelState.deltaPos.y = newPanelState.initPos.y + event.delta.y;
-      // GRID MATH:
-      // newPanelState.deltaPos.x =
-      //   Math.ceil((newPanelState.initPos.x + event.delta.x) / gridSize) * gridSize;
-      // newPanelState.deltaPos.y =
-      //   Math.ceil((newPanelState.initPos.y + event.delta.y) / gridSize) * gridSize;
-    } else if (type === 'stop') {
-      newPanelState.deltaPos.x += event.delta.x;
-      newPanelState.deltaPos.y += event.delta.y;
-      if (newPanelState.deltaPos.x < 0) newPanelState.deltaPos.x = 0;
-      if (newPanelState.deltaPos.y < 0) newPanelState.deltaPos.y = 0;
-      newPanelState.initPos = newPanelState.deltaPos;
-    } else if (type === 'cancel') {
-      newPanelState.deltaPos = newPanelState.initPos;
+    if (type === 'stop') {
+      newPanelState.pos.x += event.delta.x;
+      newPanelState.pos.y += event.delta.y;
     }
     setGridState({ ...gridState, [id]: newPanelState });
   }, 10);
@@ -107,22 +92,18 @@ export const BasicExample = () => {
   );
 
   return (
-    <div className="dshGrid dshLayout--editing" css={gridStyles}>
-      <DndContext
-        onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-        modifiers={[restrictToWindowEdges]}
-      >
-        {Object.keys(gridState).map((id) => (
-          <Draggable
-            id={id}
-            initPosition={gridState[id].initPos}
-            deltaPosition={gridState[id].deltaPos}
-          >
-            <div style={{ height: '100%', width: '100%', background: 'pink' }}>test</div>
-            {/* <StyledGridItem
+    // <div className="dshGrid dshLayout--editing" css={gridStyles}>
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+      modifiers={[restrictToWindowEdges]}
+    >
+      {Object.keys(gridState).map((id) => (
+        <Draggable id={id} position={gridState[id].pos}>
+          <div style={{ height: '100%', width: '100%', background: 'pink' }}>test</div>
+          {/* <StyledGridItem
               id={gridState[id].id}
               x={gridState[id].initPos.x}
               y={gridState[id].initPos.y}
@@ -130,23 +111,23 @@ export const BasicExample = () => {
               h={3}
               render={() => <p>{JSON.stringify(gridState[id])}</p>}
             /> */}
-          </Draggable>
-        ))}
-        <DragOverlay
-          dropAnimation={null}
-          // style={
-          //   draggingId
-          //     ? {
-          //         transform: `translate(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px)`,
-          //       }
-          //     : {}
-          // }
-        >
-          {draggingId ? (
-            <div style={{ height: '100%', width: '100%', background: 'lightblue' }}>test</div>
-          ) : null}
+        </Draggable>
+      ))}
+      <DragOverlay
+        dropAnimation={null}
+        // style={
+        //   draggingId
+        //     ? {
+        //         transform: `translate(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px)`,
+        //       }
+        //     : {}
+        // }
+      >
+        {draggingId ? (
+          <div style={{ height: '100%', width: '100%', background: 'lightblue' }}>test</div>
+        ) : null}
 
-          {/* {draggingId ? (
+        {/* {draggingId ? (
             <StyledGridItem
               id={gridState[draggingId].id}
               x={gridState[draggingId].initPos.x}
@@ -156,8 +137,8 @@ export const BasicExample = () => {
               render={() => <p>{JSON.stringify(gridState[draggingId])}</p>}
             />
           ) : null} */}
-        </DragOverlay>
-      </DndContext>
-    </div>
+      </DragOverlay>
+    </DndContext>
+    // </div>
   );
 };
