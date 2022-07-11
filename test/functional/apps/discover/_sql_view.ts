@@ -57,9 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('fieldFilterSearchInput')).to.be(true);
         expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
+        expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
-        expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         expect(await testSubjects.exists('discoverChart')).to.be(false);
