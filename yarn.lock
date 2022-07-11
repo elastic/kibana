@@ -25651,11 +25651,6 @@ requires-port@^1.0.0:
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
 
-requires-regex@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/requires-regex/-/requires-regex-0.3.3.tgz#60309eaabbfd5ca8259e090b8b5a94b2144eb0dd"
-  integrity sha1-YDCeqrv9XKglngkLi1qUshROsN0=
-
 reselect@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/reselect/-/reselect-4.0.0.tgz#f2529830e5d3d0e021408b246a206ef4ea4437f7"
@@ -29043,13 +29038,6 @@ universalify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/universalify/-/universalify-2.0.0.tgz#75a4984efedc4b08975c5aeb73f530d02df25717"
   integrity sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==
-
-unlazy-loader@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/unlazy-loader/-/unlazy-loader-0.1.3.tgz#2efdf05c489da311055586bf3cfca0c541dd8fa5"
-  integrity sha512-INqQZxgx399Y8Eo5gihKBmlHvvcacaYMXI9HMtb2c6JbZLJkgdf0s/gkxqJbo2pl+rtxzPtmf7tj7vHlRx+K/g==
-  dependencies:
-    requires-regex "^0.3.3"
 
 unload@2.2.0:
   version "2.2.0"
