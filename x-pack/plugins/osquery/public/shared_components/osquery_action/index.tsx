@@ -8,7 +8,7 @@
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,
@@ -24,7 +24,8 @@ import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { KibanaThemeProvider } from '../../shared_imports';
 import { useIsOsqueryAvailable } from '../use_is_osquery_available';
-import { StartPlugins } from '../../types';
+import { useIsOsqueryAvailable } from './use_is_osquery_available';
+import type { StartPlugins } from '../../types';
 
 interface OsqueryActionProps {
   agentId?: string;

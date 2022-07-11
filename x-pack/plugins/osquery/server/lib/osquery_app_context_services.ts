@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   AgentService,
   FleetStartContract,
   PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import { ConfigType } from '../../common/config';
-import { TelemetryEventsSender } from './telemetry/sender';
+import type { ConfigType } from '../config';
+import type { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<

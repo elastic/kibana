@@ -10,7 +10,7 @@ import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { mockAlertDetailsData } from '../../../../common/components/event_details/__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import {

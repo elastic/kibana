@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiAccordionProps,
+  EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
+import styled from 'styled-components';
 
-import { pickBy, isEmpty } from 'lodash';
-import {
-  convertECSMappingToFormValue,
-  convertECSMappingToObject,
-} from '../../../common/schemas/common/utils';
-import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
+import { pickBy, isEmpty, map } from 'lodash';
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
+import type { FormData } from '../../shared_imports';
+import { UseField, Form, useForm, useFormData } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
@@ -32,9 +32,15 @@ import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { liveQueryFormSchema } from './schema';
-import { StyledEuiAccordion } from '../../components/accordion';
 
 const FORM_ID = 'liveQueryForm';
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
+  .euiAccordion__button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+`;
 
 const GhostFormField = () => <></>;
 
@@ -167,7 +173,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
           ecs_mapping: savedQuery.ecs_mapping
-            ? convertECSMappingToFormValue(savedQuery.ecs_mapping)
+            ? map(savedQuery.ecs_mapping, (value, key) => ({
+                key,
+                result: {
+                  type: Object.keys(value)[0],
+                  value: Object.values(value)[0],
+                },
+              }))
             : [],
         });
 
@@ -339,7 +351,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         query: defaultValue.query,
         savedQueryId: defaultValue.savedQueryId,
         ecs_mapping: defaultValue.ecs_mapping
-          ? convertECSMappingToFormValue(defaultValue.ecs_mapping)
+          ? map(defaultValue.ecs_mapping, (value, key) => ({
+              key,
+              result: {
+                type: Object.keys(value)[0],
+                value: Object.values(value)[0],
+              },
+            }))
           : undefined,
       });
     }

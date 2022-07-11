@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { ArtifactListPageProps } from '../artifact_list_page';
+import type { ArtifactListPageProps } from '../artifact_list_page';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getArtifactListPageRenderingSetup, getDeferred, getFormComponentMock } from '../mocks';
+import type { getFormComponentMock } from '../mocks';
+import { getArtifactListPageRenderingSetup, getDeferred } from '../mocks';
 import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
-import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../../mocks';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import type { trustedAppsAllHttpMocks } from '../../../mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { entriesToConditionEntries } from '../../../../common/utils/exception_list_items/mappers';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;

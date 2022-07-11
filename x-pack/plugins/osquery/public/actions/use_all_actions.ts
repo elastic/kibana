@@ -10,20 +10,23 @@ import { useInfiniteQuery, useQuery } from 'react-query';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { useState } from 'react';
+import type { InspectResponse } from '../common/helpers';
 import {
   createFilter,
   generateTablePaginationOptions,
   getInspectResponse,
-  InspectResponse,
 } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import {
+import type {
+  ActionEdges,
   OsqueryQueries,
+  PageInfoPaginated,
   ActionsRequestOptions,
   ActionsStrategyResponse,
   Direction,
 } from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
+import { OsqueryQueries } from '../../common/search_strategy';
+import type { ESTermQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 

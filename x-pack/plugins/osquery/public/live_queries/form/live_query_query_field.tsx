@@ -9,7 +9,7 @@ import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { EuiCodeEditorProps, FieldHook } from '../../shared_imports';
+import type { EuiCodeEditorProps, FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
 
