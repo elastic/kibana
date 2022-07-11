@@ -513,9 +513,11 @@ export function XYChart({
 
     if (xySeries.seriesKeys.length > 1) {
       xySeries.splitAccessors.forEach((value, accessor) => {
-        const splitPointRowIndex = table.rows.findIndex((row) => {
-          return row[accessor] === value;
-        });
+        const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
+          (row) => {
+            return row[accessor] === value;
+          }
+        );
         if (splitPointRowIndex !== -1) {
           splitPoints.push({
             row: splitPointRowIndex,

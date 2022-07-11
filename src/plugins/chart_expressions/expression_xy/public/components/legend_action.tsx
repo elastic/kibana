@@ -50,7 +50,7 @@ export const getLegendAction = (
     const data: FilterEvent['data']['data'] = [];
 
     series.splitAccessors.forEach((value, accessor) => {
-      const rowIndex = table.rows.findIndex((row) => {
+      const rowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
         return row[accessor] === value;
       });
       if (rowIndex !== -1) {
