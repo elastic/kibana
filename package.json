@@ -1055,7 +1055,7 @@
     "listr": "^0.14.1",
     "lmdb-store": "^1.6.11",
     "marge": "^1.0.1",
-    "micromatch": "3.1.10",
+    "micromatch": "^4.0.5",
     "mini-css-extract-plugin": "1.1.0",
     "minimist": "^1.2.6",
     "mocha": "^10.0.0",
