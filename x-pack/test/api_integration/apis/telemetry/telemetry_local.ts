@@ -99,6 +99,8 @@ export default function ({ getService }: FtrProviderContext) {
           ({ type }: { type: string }) => type === 'config'
         )
       ).to.eql({ type: 'config', count: 1 });
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.others).to.be(0); // Unless there's a bug/unexpected situation, it should be 0
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.non_registered_types).to.eql([]); // During tests, we shouldn't expect to list types that are not registered.
 
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');

@@ -39,7 +39,7 @@ describe('kibana_usage', () => {
   });
 
   test('fetch', async () => {
-    getSavedObjectsCountsMock.mockResolvedValueOnce({ per_type: [] });
+    getSavedObjectsCountsMock.mockResolvedValueOnce({ total: 0, per_type: [], others: 0 });
     expect(await collector.fetch(createCollectorFetchContextMock())).toStrictEqual({
       index: '.kibana-tests',
       dashboard: { total: 0 },
@@ -55,7 +55,12 @@ describe('getKibanaSavedObjectCounts', () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
   test('Get all the saved objects equal to 0 because no results were found', async () => {
-    getSavedObjectsCountsMock.mockResolvedValueOnce({ per_type: [] });
+    getSavedObjectsCountsMock.mockResolvedValueOnce({
+      total: 0,
+      per_type: [],
+      non_expected_types: [],
+      others: 0,
+    });
     const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
@@ -74,6 +79,8 @@ describe('getKibanaSavedObjectCounts', () => {
         { key: 'index-pattern', value: 2 }, // Malformed on purpose
         { key: 'graph_workspace', doc_count: 3 }, // already snake_cased
       ],
+      non_expected_types: [],
+      others: 0,
     });
 
     const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
@@ -84,5 +91,12 @@ describe('getKibanaSavedObjectCounts', () => {
       index_pattern: { total: 0 },
       graph_workspace: { total: 3 },
     });
+
+    expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
+      esClient,
+      '.kibana',
+      ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'],
+      true
+    );
   });
 });

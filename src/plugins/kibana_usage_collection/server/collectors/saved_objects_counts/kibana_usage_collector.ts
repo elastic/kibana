@@ -29,7 +29,7 @@ export async function getKibanaSavedObjectCounts(
   esClient: ElasticsearchClient,
   kibanaIndex: string
 ): Promise<KibanaSavedObjectCounts> {
-  const { per_type: buckets } = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES);
+  const { per_type: buckets } = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES, true);
 
   const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])
