@@ -1,5 +1,6 @@
 get:
-  summary: Retrieves information about connectors. 
+  summary: Retrieves information about connectors for cases in the default space.
+  operationId: getCaseConnectorsDefaultSpace
   description: >
     In particular, only the connectors that are supported for use in cases are 
     returned. You must have `read` privileges for the **Actions and Connectors**

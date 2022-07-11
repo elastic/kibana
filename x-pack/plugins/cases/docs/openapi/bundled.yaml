@@ -19,7 +19,8 @@ servers:
 paths:
   /api/cases:
     post:
-      summary: Creates a case.
+      summary: Creates a case in the default space.
+      operationId: createCaseDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -411,7 +412,8 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      summary: Deletes one or more cases.
+      summary: Deletes one or more cases from the default space.
+      operationId: deleteCaseDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -436,7 +438,8 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
-      summary: Updates one or more cases.
+      summary: Updates one or more cases in the default space.
+      operationId: updateCaseDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -839,7 +842,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/_find:
     get:
-      summary: Retrieves a paginated subset of cases.
+      summary: Retrieves a paginated subset of cases from the default space.
+      operationId: getCasesDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1230,7 +1234,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/alerts/{alertId}:
     get:
-      summary: Returns the cases associated with a specific alert.
+      summary: Returns the cases associated with a specific alert in the default space.
+      operationId: getCasesByAlertDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1269,7 +1274,8 @@ paths:
     get:
       summary: >-
         Retrieves external connection details, such as the closure type and
-        default connector for cases.
+        default connector for cases in the default space.
+      operationId: getCaseConfigurationDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1455,7 +1461,8 @@ paths:
     post:
       summary: >-
         Sets external connection details, such as the closure type and default
-        connector for cases.
+        connector for cases in the default space.
+      operationId: setCaseConfigurationDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1776,7 +1783,8 @@ paths:
     patch:
       summary: >-
         Updates external connection details, such as the closure type and
-        default connector for cases.
+        default connector for cases in the default space.
+      operationId: updateCaseConfigurationDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2086,7 +2094,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/configure/connectors/_find:
     get:
-      summary: Retrieves information about connectors.
+      summary: Retrieves information about connectors for cases in the default space.
+      operationId: getCaseConnectorsDefaultSpace
       description: >
         In particular, only the connectors that are supported for use in cases
         are  returned. You must have `read` privileges for the **Actions and
@@ -2136,7 +2145,10 @@ paths:
       - url: https://localhost:5601
   /api/cases/reporters:
     get:
-      summary: Returns information about the users who opened cases.
+      summary: >-
+        Returns information about the users who opened cases in the default
+        space.
+      operationId: getCaseReportersDefaultCase
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2175,7 +2187,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/tags:
     get:
-      summary: Aggregates and returns a list of case tags.
+      summary: Aggregates and returns a list of case tags in the default space.
+      operationId: getCaseTagsDefaultSpace
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2214,7 +2227,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
-      summary: Adds a comment or alert to a case.
+      summary: Adds a comment or alert to a case in the default space.
+      operationId: addCaseCommentDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2474,7 +2488,8 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      summary: Deletes all comments and alerts from a case.
+      summary: Deletes all comments and alerts from a case in the default space.
+      operationId: deleteCaseCommentsDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2491,7 +2506,8 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
-      summary: Updates a comment or alert in a case.
+      summary: Updates a comment or alert in a case in the default space.
+      operationId: updateCaseCommentDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2752,7 +2768,8 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      summary: Retrieves all the comments from a case.
+      summary: Retrieves all the comments from a case in the default space.
+      operationId: getAllCaseCommentsDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2782,7 +2799,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}/comments/{commentId}:
     delete:
-      summary: Deletes a comment or alert from a case.
+      summary: Deletes a comment or alert from a case in the default space.
+      operationId: deleteCaseCommentDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2800,7 +2818,8 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      summary: Retrieves a comment from a case.
+      summary: Retrieves a comment from a case in the default space.
+      operationId: getCaseCommentDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2831,6 +2850,7 @@ paths:
   /s/{spaceId}/api/cases:
     post:
       summary: Creates a case.
+      operationId: createCase
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the
@@ -3225,6 +3245,7 @@ paths:
         - url: https://localhost:5601
     delete:
       summary: Deletes one or more cases.
+      operationId: deleteCase
       description: >
         You must have `all` privileges for the **Cases** feature in the 
         **Management**, **Observability**, or **Security** section of the
@@ -3252,6 +3273,7 @@ paths:
         - url: https://localhost:5601
     patch:
       summary: Updates one or more cases.
+      operationId: updateCase
       description: >
         You must have `all` privileges for the **Cases** feature in the 
         **Management**, **Observability**, or **Security** section of the
@@ -3657,6 +3679,7 @@ paths:
   /s/{spaceId}/api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases.
+      operationId: getCases
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4051,6 +4074,7 @@ paths:
   /s/{spaceId}/api/cases/alerts/{alertId}:
     get:
       summary: Returns the cases associated with a specific alert.
+      operationId: getCasesByAlert
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4091,6 +4115,7 @@ paths:
       summary: >-
         Retrieves external connection details, such as the closure type and
         default connector for cases.
+      operationId: getCaseConfiguration
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4278,6 +4303,7 @@ paths:
       summary: >-
         Sets external connection details, such as the closure type and default
         connector for cases.
+      operationId: setCaseConfiguration
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4600,6 +4626,7 @@ paths:
       summary: >-
         Updates external connection details, such as the closure type and
         default connector for cases.
+      operationId: updateCaseConfiguration
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4911,6 +4938,7 @@ paths:
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors.
+      operationId: getCaseConnectors
       description: >
         In particular, only the connectors that are supported for use in cases
         are returned. You must have `read` privileges for the **Actions and
@@ -4963,6 +4991,7 @@ paths:
   /s/{spaceId}/api/cases/reporters:
     get:
       summary: Returns information about the users who opened cases.
+      operationId: getCaseReporters
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5003,6 +5032,7 @@ paths:
   /s/{spaceId}/api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags.
+      operationId: getCaseTags
       description: >
         You must have read privileges for the **Cases*** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5043,6 +5073,7 @@ paths:
   /s/{spaceId}/api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case.
+      operationId: addCaseComment
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5304,6 +5335,7 @@ paths:
         - url: https://localhost:5601
     delete:
       summary: Deletes all comments and alerts from a case.
+      operationId: deleteCaseComments
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5322,6 +5354,7 @@ paths:
         - url: https://localhost:5601
     patch:
       summary: Updates a comment or alert in a case.
+      operationId: updateCaseComment
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5584,6 +5617,7 @@ paths:
         - url: https://localhost:5601
     get:
       summary: Retrieves all the comments from a case.
+      operationId: getAllCaseComments
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5615,6 +5649,7 @@ paths:
   /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Deletes a comment or alert from a case.
+      operationId: deleteCaseComment
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5634,6 +5669,7 @@ paths:
         - url: https://localhost:5601
     get:
       summary: Retrieves a comment from a case.
+      operationId: getCaseComment
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security*** section of the

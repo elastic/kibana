@@ -1,5 +1,6 @@
 get:
-  summary: Retrieves external connection details, such as the closure type and default connector for cases.
+  summary: Retrieves external connection details, such as the closure type and default connector for cases in the default space.
+  operationId: getCaseConfigurationDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -24,7 +25,8 @@ get:
         - url: https://localhost:5601
 
 post:
-  summary: Sets external connection details, such as the closure type and default connector for cases.
+  summary: Sets external connection details, such as the closure type and default connector for cases in the default space.
+  operationId: setCaseConfigurationDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana

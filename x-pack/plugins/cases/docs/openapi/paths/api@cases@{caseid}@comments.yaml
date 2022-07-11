@@ -1,5 +1,6 @@
 post:
-  summary: Adds a comment or alert to a case.
+  summary: Adds a comment or alert to a case in the default space.
+  operationId: addCaseCommentDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -36,7 +37,8 @@ post:
      - url: https://localhost:5601
 
 delete:
-  summary: Deletes all comments and alerts from a case.
+  summary: Deletes all comments and alerts from a case in the default space.
+  operationId: deleteCaseCommentsDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -54,7 +56,8 @@ delete:
     - url: https://localhost:5601
 
 patch:
-  summary: Updates a comment or alert in a case.
+  summary: Updates a comment or alert in a case in the default space.
+  operationId: updateCaseCommentDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -92,7 +95,8 @@ patch:
         - url: https://localhost:5601
 
 get:
-  summary: Retrieves all the comments from a case.
+  summary: Retrieves all the comments from a case in the default space.
+  operationId: getAllCaseCommentsDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the **Management**,
     **Observability**, or **Security** section of the Kibana feature privileges,

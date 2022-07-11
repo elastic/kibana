@@ -1,5 +1,6 @@
 post:
-  summary: Creates a case.
+  summary: Creates a case in the default space.
+  operationId: createCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -73,7 +74,8 @@ post:
      - url: https://localhost:5601
 
 delete:
-  summary: Deletes one or more cases.
+  summary: Deletes one or more cases from the default space.
+  operationId: deleteCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -97,7 +99,8 @@ delete:
     - url: https://localhost:5601
 
 patch:
-  summary: Updates one or more cases.
+  summary: Updates one or more cases in the default space.
+  operationId: updateCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
