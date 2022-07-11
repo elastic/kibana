@@ -5,36 +5,35 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, setMockActions } from '../../../../__mocks__/kea_logic';
+import { mockFlashMessageHelpers, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldText } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
-
-import { mountWithIntl } from '../../../../test_helpers';
+import { GenericEndpointInlineEditableTable } from '../../../shared/tables/generic_endpoint_inline_editable_table';
 
 import { SitemapsTable } from './sitemaps_table';
 
 describe('SitemapsTable', () => {
   const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
-  const engineName = 'my-engine';
+  const indexName = 'index-name';
   const sitemaps = [
     { id: '1', url: 'http://www.example.com/sitemap.xml' },
     { id: '2', url: 'http://www.example.com/whatever/sitemaps.xml' },
   ];
   const domain = {
-    crawlRules: [],
     createdOn: '2018-01-01T00:00:00.000Z',
-    deduplicationEnabled: true,
-    entryPoints: [],
     documentCount: 10,
     id: '6113e1407a2f2e6f42489794',
     url: 'https://www.elastic.co',
+    crawlRules: [],
+    entryPoints: [],
     sitemaps,
+    deduplicationEnabled: true,
     deduplicationFields: ['title'],
     availableDeduplicationFields: ['title', 'description'],
   };
@@ -45,7 +44,7 @@ describe('SitemapsTable', () => {
 
   it('renders', () => {
     const wrapper = shallow(
-      <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+      <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
     );
 
     expect(wrapper.find(GenericEndpointInlineEditableTable).exists()).toBe(true);
@@ -56,7 +55,7 @@ describe('SitemapsTable', () => {
       const sitemap = { id: '1', url: 'http://www.example.com/sitemap.xml' };
 
       const wrapper = shallow(
-        <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+        <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
       );
 
       const columns = wrapper.find(GenericEndpointInlineEditableTable).prop('columns');
@@ -69,7 +68,7 @@ describe('SitemapsTable', () => {
       const onChange = jest.fn();
 
       const wrapper = shallow(
-        <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+        <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
       );
 
       const columns = wrapper.find(GenericEndpointInlineEditableTable).prop('columns');
@@ -96,24 +95,24 @@ describe('SitemapsTable', () => {
   describe('routes', () => {
     it('can calculate an update and delete route correctly', () => {
       const wrapper = shallow(
-        <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+        <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
       );
 
       const table = wrapper.find(GenericEndpointInlineEditableTable);
 
       const sitemap = { id: '1', url: '/whatever' };
       expect(table.prop('deleteRoute')(sitemap)).toEqual(
-        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
+        '/internal/enterprise_search/indices/index-name/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
       );
       expect(table.prop('updateRoute')(sitemap)).toEqual(
-        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
+        '/internal/enterprise_search/indices/index-name/crawler/domains/6113e1407a2f2e6f42489794/sitemaps/1'
       );
     });
   });
 
   it('shows a no items message whem there are no sitemaps to show', () => {
     const wrapper = shallow(
-      <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+      <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
     );
 
     const editNewItems = jest.fn();
@@ -129,7 +128,7 @@ describe('SitemapsTable', () => {
         updateSitemaps,
       });
       const wrapper = shallow(
-        <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+        <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
       );
       const table = wrapper.find(GenericEndpointInlineEditableTable);
 
@@ -151,7 +150,7 @@ describe('SitemapsTable', () => {
         updateSitemaps,
       });
       const wrapper = shallow(
-        <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+        <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
       );
       const table = wrapper.find(GenericEndpointInlineEditableTable);
 
@@ -173,7 +172,7 @@ describe('SitemapsTable', () => {
         updateSitemaps,
       });
       const wrapper = shallow(
-        <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+        <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
       );
       const table = wrapper.find(GenericEndpointInlineEditableTable);
 

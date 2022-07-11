@@ -32,12 +32,12 @@ import { CrawlerPolicies, CrawlRule, CrawlerRules } from '../../api/crawler/type
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 
-interface CrawlRulesTableProps {
+export interface CrawlRulesTableProps {
+  crawlRules: CrawlRule[];
+  defaultCrawlRule?: CrawlRule;
   description?: React.ReactNode;
   domainId: string;
   indexName: string;
-  crawlRules: CrawlRule[];
-  defaultCrawlRule?: CrawlRule;
 }
 
 export const getReadableCrawlerRule = (rule: CrawlerRules) => {
@@ -139,13 +139,13 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
           )}
         />
       ),
-      render: (crawlRule) => (
-        <EuiText size="s">{getReadableCrawlerPolicy((crawlRule as CrawlRule).policy)}</EuiText>
-      ),
+      field: 'policy',
       name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.policyTableHead', {
         defaultMessage: 'Policy',
       }),
-      field: 'policy',
+      render: (crawlRule) => (
+        <EuiText size="s">{getReadableCrawlerPolicy((crawlRule as CrawlRule).policy)}</EuiText>
+      ),
     },
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
@@ -167,13 +167,13 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
           }))}
         />
       ),
-      render: (crawlRule) => (
-        <EuiText size="s">{getReadableCrawlerRule((crawlRule as CrawlRule).rule)}</EuiText>
-      ),
+      field: 'rule',
       name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.ruleTableHead', {
         defaultMessage: 'Rule',
       }),
-      field: 'rule',
+      render: (crawlRule) => (
+        <EuiText size="s">{getReadableCrawlerRule((crawlRule as CrawlRule).rule)}</EuiText>
+      ),
     },
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
@@ -196,11 +196,11 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      render: (crawlRule) => <EuiCode>{(crawlRule as CrawlRule).pattern}</EuiCode>,
+      field: 'pattern',
       name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.pathPatternTableHead', {
         defaultMessage: 'Path pattern',
       }),
-      field: 'pattern',
+      render: (crawlRule) => <EuiCode>{(crawlRule as CrawlRule).pattern}</EuiCode>,
     },
   ];
 

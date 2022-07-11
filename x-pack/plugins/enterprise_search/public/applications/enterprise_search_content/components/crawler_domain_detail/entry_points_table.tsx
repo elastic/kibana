@@ -22,7 +22,7 @@ import { CrawlerDomain, EntryPoint } from '../../api/crawler/types';
 
 import { EntryPointsTableLogic } from './entry_points_table_logic';
 
-interface EntryPointsTableProps {
+export interface EntryPointsTableProps {
   domain: CrawlerDomain;
   indexName: string;
   items: EntryPoint[];

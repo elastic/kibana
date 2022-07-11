@@ -56,9 +56,9 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
     },
   ];
 
-  const sitemapsRoute = `/internal/enterpries_search/indices/${indexName}/crawler/domains/${domain.id}/sitemaps`;
+  const sitemapsRoute = `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domain.id}/sitemaps`;
   const getSitemapRoute = (sitemap: Sitemap) =>
-    `/internal/enterpries_search/indices/${indexName}/crawler/domains/${domain.id}/sitemaps/${sitemap.id}`;
+    `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domain.id}/sitemaps/${sitemap.id}`;
 
   return (
     <GenericEndpointInlineEditableTable
