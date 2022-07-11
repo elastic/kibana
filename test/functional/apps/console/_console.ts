@@ -155,7 +155,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('with folded/unfolded lines in request body', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135914
+    describe.skip('with folded/unfolded lines in request body', () => {
       const enterRequestWithBody = async () => {
         await PageObjects.console.enterRequest();
         await PageObjects.console.pressEnter();

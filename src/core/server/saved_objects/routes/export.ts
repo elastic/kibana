@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
-import { KibanaRequest } from '../../http';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import {

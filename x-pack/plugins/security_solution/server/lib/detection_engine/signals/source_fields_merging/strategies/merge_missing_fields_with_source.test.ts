@@ -6,7 +6,7 @@
  */
 
 import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
-import { SignalSourceHit } from '../../types';
+import type { SignalSourceHit } from '../../types';
 import { emptyEsResult } from '../../__mocks__/empty_signal_source_hit';
 
 /**

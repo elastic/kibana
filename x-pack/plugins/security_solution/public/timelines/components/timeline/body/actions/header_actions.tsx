@@ -6,23 +6,14 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import {
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiDataGridSorting,
-  EuiToolTip,
-  useDataGridColumnSorting,
-} from '@elastic/eui';
+import type { EuiDataGridSorting } from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import {
-  HeaderActionProps,
-  SortDirection,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../../../common/types/timeline';
+import type { HeaderActionProps, SortDirection } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
 import {
