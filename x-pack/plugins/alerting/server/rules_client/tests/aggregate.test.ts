@@ -202,11 +202,7 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
-            },
+            terms: { field: 'alert.attributes.isSnoozedUntil' },
           },
           tags: {
             terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
@@ -239,11 +235,7 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
-            },
+            terms: { field: 'alert.attributes.isSnoozedUntil' },
           },
           tags: {
             terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },

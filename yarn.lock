@@ -3176,6 +3176,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-browser@link:bazel-bin/packages/core/http/core-http-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-common@link:bazel-bin/packages/core/http/core-http-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
@@ -3253,6 +3269,10 @@
   uid ""
 
 "@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/crypto-browser@link:bazel-bin/packages/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
@@ -6751,6 +6771,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser@link:bazel-bin/packages/core/http/core-http-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6832,6 +6868,10 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__crypto-browser@link:bazel-bin/packages/kbn-crypto-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -22192,11 +22232,6 @@ os-name@^3.0.0, os-name@^3.1.0:
     macos-release "^2.2.0"
     windows-release "^3.1.0"
 
-os-shim@^0.1.2:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/os-shim/-/os-shim-0.1.3.tgz#6b62c3791cf7909ea35ed46e17658bb417cb3917"
-  integrity sha1-a2LDeRz3kJ6jXtRuF2WLtBfLORc=
-
 os-tmpdir@^1.0.0, os-tmpdir@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
@@ -26832,14 +26867,6 @@ sparkles@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/sparkles/-/sparkles-1.0.0.tgz#1acbbfb592436d10bbe8f785b7cc6f82815012c3"
   integrity sha1-Gsu/tZJDbRC76PeFt8xvgoFQEsM=
-
-spawn-sync@^1.0.15:
-  version "1.0.15"
-  resolved "https://registry.yarnpkg.com/spawn-sync/-/spawn-sync-1.0.15.tgz#b00799557eb7fb0c8376c29d44e8a1ea67e57476"
-  integrity sha1-sAeZVX63+wyDdsKdROih6mfldHY=
-  dependencies:
-    concat-stream "^1.4.7"
-    os-shim "^0.1.2"
 
 spawn-wrap@^2.0.0:
   version "2.0.0"
