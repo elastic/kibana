@@ -15,6 +15,7 @@ import {
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import { HeaderEndpointInfo } from '../../components/endpoint_responder/header_endpoint_info';
+import { OfflineCallout } from '../../components/endpoint_responder/offline_callout';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -52,6 +53,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
+            PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
             ActionComponents: [ActionLogButton],
           })
           .show();

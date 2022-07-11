@@ -46,6 +46,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
 
       return {
         pageTitle,
+        pageBody: body,
         headerHasBottomBorder: false,
         'data-test-subj': getTestId('layout'),
         headerBackComponent: (
@@ -74,7 +75,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
           ...(actions ?? []),
         ],
       };
-    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden, pageTitle]);
+    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden, pageTitle, body]);
 
     return (
       <PageOverlay
@@ -84,11 +85,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         paddingSize="l"
         enableScrolling={false}
       >
-        <PageLayout {...layoutProps}>
-          {body}
-
-          {console}
-        </PageLayout>
+        <PageLayout {...layoutProps}>{console}</PageLayout>
       </PageOverlay>
     );
   }
