@@ -18,5 +18,6 @@ module.exports = {
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
+    'no-naked-eslint-disable': require('./rules/no_naked_eslint_disable'),
   },
 };
