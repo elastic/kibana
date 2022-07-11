@@ -13,8 +13,8 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { ESBoolQuery } from '../../../../../common/typed_json';
+import type { Logger } from '@kbn/core/server';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   ThresholdNormalized,
   TimestampOverride,

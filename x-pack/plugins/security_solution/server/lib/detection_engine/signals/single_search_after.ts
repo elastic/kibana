@@ -16,7 +16,7 @@ import type { SignalSearchResponse, SignalSource } from './types';
 import type { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import {
+import type {
   TimestampOverride,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';

@@ -35,7 +35,6 @@ import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 import type {
   TimestampOverride,
-  TimestampOverrideOrUndefined,
   Privilege,
 } from '../../../../common/detection_engine/schemas/common';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
