@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { isSavedQueryPrebuilt } from './utils';
 
 export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

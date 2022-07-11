@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/server';
-import { RuleActionParams } from '@kbn/alerting-plugin/common';
+import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { RuleActionParams } from '@kbn/alerting-plugin/common';
 
 /**
  * This was the pre-7.16 version of LegacyRuleAlertAction and how it was stored on disk pre-7.16.
