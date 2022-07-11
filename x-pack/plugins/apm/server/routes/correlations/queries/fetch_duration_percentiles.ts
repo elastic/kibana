@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
 import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import { getDurationField } from '../utils';
 
 export const fetchDurationPercentiles = async ({
   eventType,
@@ -32,36 +29,35 @@ export const fetchDurationPercentiles = async ({
   totalDocs: number;
   percentiles: Record<string, number>;
 }> => {
-  const response = await setup.apmEventClient.search(
-    'get_duration_percentiles',
-    {
-      apm: { events: [eventType] },
-      body: {
-        track_total_hits: true,
-        query: getCommonCorrelationsQuery({
-          start,
-          end,
-          environment,
-          kuery,
-          query,
-        }),
-        size: 0,
-        aggs: {
-          duration_percentiles: {
-            percentiles: {
-              hdr: {
-                number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
-              },
-              field:
-                eventType === ProcessorEvent.span
-                  ? SPAN_DURATION
-                  : TRANSACTION_DURATION,
-              ...(Array.isArray(percents) ? { percents } : {}),
+  const params = {
+    apm: { events: [eventType] },
+    body: {
+      track_total_hits: true,
+      query: getCommonCorrelationsQuery({
+        start,
+        end,
+        environment,
+        kuery,
+        query,
+      }),
+      size: 0,
+      aggs: {
+        duration_percentiles: {
+          percentiles: {
+            hdr: {
+              number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
             },
+            field: getDurationField(eventType),
+            ...(Array.isArray(percents) ? { percents } : {}),
           },
         },
       },
-    }
+    },
+  };
+  console.log(JSON.stringify(params));
+  const response = await setup.apmEventClient.search(
+    'get_duration_percentiles',
+    params
   );
 
   // return early with no results if the search didn't return any documents
