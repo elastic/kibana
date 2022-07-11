@@ -80,7 +80,20 @@ export class SyntheticsPrivateLocation {
       const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
       const newPolicy = await this.generateNewPolicy(config, location);
 
-      await this.updatePolicy(newPolicy, config.id + '-' + location.id);
+      const currId = config.id + '-' + location.id;
+
+      if (location) {
+        await this.updatePolicy(newPolicy, currId);
+      } else {
+        const hasPolicy = await this.getMonitor(currId);
+        if (hasPolicy) {
+          const soClient = this.server.authSavedObjectsClient!;
+          const esClient = this.server.uptimeEsClient.baseESClient;
+          await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId]);
+        } else {
+          await this.createPolicy(newPolicy, currId);
+        }
+      }
     }
   }
 
@@ -108,7 +121,16 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async getMonitor(config: SyntheticsMonitorWithId) {
+  async getMonitor(id: string) {
+    try {
+      const soClient = this.server.authSavedObjectsClient;
+      return await this.server.fleet.packagePolicyService.get(soClient!, id);
+    } catch (e) {
+      return;
+    }
+  }
+
+  async findMonitor(config: SyntheticsMonitorWithId) {
     const soClient = this.server.authSavedObjectsClient;
     const list = await this.server.fleet.packagePolicyService.list(soClient!, {
       page: 1,
@@ -128,7 +150,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async deleteMonitor(config: SyntheticsMonitorWithId) {
-    const policies = await this.getMonitor(config);
+    const policies = await this.findMonitor(config);
 
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;

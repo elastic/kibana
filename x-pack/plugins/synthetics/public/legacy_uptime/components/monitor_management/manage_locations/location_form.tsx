@@ -9,7 +9,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -73,28 +72,6 @@ export const LocationForm = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <PolicyHostsField errors={errors} control={control} isDisabled={Boolean(location)} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow label="Lat/Lon">
-              <EuiFieldText name="latlon" />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label="Concurrent monitors">
-              <EuiRange
-                min={5}
-                value={10}
-                max={50}
-                tickInterval={5}
-                name="concurrentMonitors"
-                id={'concurrentMonitors'}
-                showTicks={true}
-              />
-            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
