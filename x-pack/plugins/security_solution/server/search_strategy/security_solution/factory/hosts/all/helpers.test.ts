@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsEdges } from '../../../../../../common/search_strategy/security_solution';
+import type { HostsEdges } from '../../../../../../common/search_strategy/security_solution';
 
 import { formatHostEdgesData } from './helpers';
 import { mockBuckets } from './__mocks__';

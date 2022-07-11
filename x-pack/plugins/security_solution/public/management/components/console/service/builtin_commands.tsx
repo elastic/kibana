@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ClearCommand } from '../components/builtin_commands/clear_command';
 import { HelpCommand } from '../components/builtin_commands/help_command';
-import { CommandDefinition } from '../types';
+import type { CommandDefinition } from '../types';
 
 export const getBuiltinCommands = (): CommandDefinition[] => {
   return [
@@ -20,7 +20,7 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
       RenderComponent: HelpCommand,
     },
     {
-      name: 'clear',
+      name: 'cls',
       about: i18n.translate('xpack.securitySolution.console.builtInCommands.clearAbout', {
         defaultMessage: 'Clear the console buffer',
       }),

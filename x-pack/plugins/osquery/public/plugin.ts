@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   AppMountParameters,
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
   StartPlugins,

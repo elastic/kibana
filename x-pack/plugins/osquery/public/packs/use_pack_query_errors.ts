@@ -7,7 +7,8 @@
 
 import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
-import { DataView, SortDirection } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../common/lib/kibana';
 

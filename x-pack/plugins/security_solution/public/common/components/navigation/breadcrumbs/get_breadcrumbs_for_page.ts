@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { SecurityPageName } from '../../../../app/types';
 import { APP_NAME } from '../../../../../common/constants';
 import { getAppLandingUrl } from '../../link_to/redirect_to_landing';
 
-import { GetSecuritySolutionUrl } from '../../link_to';
+import type { GetSecuritySolutionUrl } from '../../link_to';
 import { getAncestorLinksInfo } from '../../../links';
-import { GenericNavRecord } from '../types';
+import type { GenericNavRecord } from '../types';
 
 export const getLeadingBreadcrumbsForSecurityPage = (
   pageName: SecurityPageName,

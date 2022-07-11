@@ -7,7 +7,8 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { useCreateFieldButton, UseCreateFieldButton, UseCreateFieldButtonProps } from '.';
+import type { UseCreateFieldButton, UseCreateFieldButtonProps } from '.';
+import { useCreateFieldButton } from '.';
 
 import { TestProviders } from '../../../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';

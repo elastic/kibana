@@ -173,4 +173,24 @@ describe('Utils class', () => {
       ]);
     });
   });
+
+  test('get response with most severe status code', () => {
+    expect(
+      utils.getResponseWithMostSevereStatusCode([
+        { response: { statusCode: 500 } },
+        { response: { statusCode: 400 } },
+        { response: { statusCode: 200 } },
+      ])
+    ).toEqual({ response: { statusCode: 500 } });
+
+    expect(
+      utils.getResponseWithMostSevereStatusCode([
+        { response: { statusCode: 0 } },
+        { response: { statusCode: 100 } },
+        { response: { statusCode: 201 } },
+      ])
+    ).toEqual({ response: { statusCode: 201 } });
+
+    expect(utils.getResponseWithMostSevereStatusCode(undefined)).toBe(undefined);
+  });
 });

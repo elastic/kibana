@@ -8,7 +8,7 @@
 
 import { getApmConfigMock } from './http_resources_service.test.mocks';
 
-import { IRouter, RouteConfig } from '../http';
+import type { RouteConfig } from '@kbn/core-http-server';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { coreMock } from '../mocks';
@@ -25,7 +25,7 @@ describe('HttpResources service', () => {
   let service: HttpResourcesService;
   let prebootDeps: PrebootDeps;
   let setupDeps: SetupDeps;
-  let router: jest.Mocked<IRouter>;
+  let router: ReturnType<typeof httpServiceMock.createRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
   const context = coreMock.createCustomRequestHandlerContext({});
   const apmConfig = { mockApmConfig: true };

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { History } from 'history';
-import React, { memo, FC } from 'react';
-import { Store, Action } from 'redux';
+import type { History } from 'history';
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -26,9 +27,9 @@ import {
   useKibana,
   useUiSetting$,
 } from '../common/lib/kibana';
-import { State } from '../common/store';
+import type { State } from '../common/store';
 
-import { StartServices } from '../types';
+import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
@@ -56,7 +57,8 @@ const StartAppComponent: FC<StartAppComponent> = ({
     cases,
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  const casesPermissions = useGetUserCasesPermissions();
+  const userPermissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
   const CasesContext = cases.ui.getCasesContext();
   return (
     <EuiErrorBoundary>
@@ -69,10 +71,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <CasesContext
-                          owner={[APP_ID]}
-                          userCanCrud={casesPermissions?.crud ?? false}
-                        >
+                        <CasesContext owner={[APP_ID]} permissions={casesPermissions}>
                           <PageRouter
                             history={history}
                             onAppLeave={onAppLeave}
