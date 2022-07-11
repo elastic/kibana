@@ -24,11 +24,13 @@ import { useStyles } from './styles';
 import { disableEventDefaults, focusNextElement } from './helpers';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
 
+const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
+
 const focusNextButton = (event: KeyboardEvent) => {
-  focusNextElement(event, '[data-test-subj="dynamicTreeViewButton"]', 'next');
+  focusNextElement(event, `[data-test-subj="${BUTTON_TEST_ID}"]`, 'next');
 };
 const focusPreviousButton = (event: KeyboardEvent) => {
-  focusNextElement(event, '[data-test-subj="dynamicTreeViewButton"]', 'prev');
+  focusNextElement(event, `[data-test-subj="${BUTTON_TEST_ID}"]`, 'prev');
 };
 
 const DynamicTreeViewExpander = ({
@@ -166,7 +168,7 @@ export const DynamicTreeView = ({
             <EuiBadge
               css={styles.loadMoreButton}
               onClickAriaLabel={TREE_NAVIGATION_SHOW_MORE(tree[depth].namePlural)}
-              data-test-subj="dynamicTreeViewButton"
+              data-test-subj={BUTTON_TEST_ID}
               onKeyDown={(event: React.KeyboardEvent) => onLoadMoreKeydown(event)}
               onClick={onClickNextPageHandler}
             >
@@ -278,10 +280,9 @@ const DynamicTreeViewItem = ({
         ${isExpanded ? 'euiTreeView__node--expanded' : ''}
         ${isSelected ? 'euiTreeView__node--selected' : ''}
       `}
-      data-test-subj={`${isSelected ? 'euiTreeView__node--selected' : ''}`}
     >
       <button
-        data-test-subj={`dynamicTreeViewButton${!expanded ? 'Hidden' : ''}`}
+        data-test-subj={expanded ? BUTTON_TEST_ID : ''}
         className="euiTreeView__nodeInner euiTreeView__nodeInner--withArrows"
         onClick={onButtonToggle}
         onKeyDown={(event: React.KeyboardEvent) => onKeyDown(event)}
