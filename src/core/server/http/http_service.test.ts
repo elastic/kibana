@@ -17,11 +17,11 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { cspConfig } from './csp';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
-import { Router } from './router';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

@@ -22,9 +22,9 @@ import type {
   HttpServiceStart,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
+import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 
 import { CspConfig } from './csp';
-import { mockRouter, RouterMock } from './router/router.mock';
 import {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,

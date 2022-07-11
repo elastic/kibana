@@ -13,7 +13,7 @@ import type {
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
 } from '@kbn/core-http-server';
-import { mockRouter } from './router/router.mock';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
   redirected: jest.fn(),

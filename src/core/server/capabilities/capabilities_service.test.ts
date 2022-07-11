@@ -7,12 +7,12 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 import {
   httpServiceMock,
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
 } from '../http/http_service.mock';
-import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 
 describe('CapabilitiesService', () => {
