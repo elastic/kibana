@@ -580,18 +580,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         supertest,
         objectRemover,
       });
+      const snoozedAndDisabledAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
 
       await disableAlert({
         supertest,
         alertId: disabledAlert.id,
       });
+
       await snoozeAlert({
         supertest,
         alertId: snoozedAlert.id,
       });
 
+      await snoozeAlert({
+        supertest,
+        alertId: snoozedAndDisabledAlert.id,
+      });
+
+      await disableAlert({
+        supertest,
+        alertId: snoozedAndDisabledAlert.id,
+      });
+
       await refreshAlertsList();
-      await assertRulesLength(3);
+      await assertRulesLength(4);
 
       // Select enabled
       await testSubjects.click('ruleStatusFilterButton');
@@ -603,7 +618,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(1);
+      await assertRulesLength(2);
 
       // Select snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
@@ -614,12 +629,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Select disabled and snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(2);
+      await assertRulesLength(3);
 
-      // Select all 3
+      // Select all 4
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(3);
+      await assertRulesLength(4);
     });
 
     it('should filter rules by the tag', async () => {

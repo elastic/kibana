@@ -7,10 +7,10 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { HostEcs } from '../../../../ecs/host';
-import { UserEcs } from '../../../../ecs/user';
-import { ProcessEcs } from '../../../../ecs/process';
-import {
+import type { HostEcs } from '../../../../ecs/host';
+import type { UserEcs } from '../../../../ecs/user';
+import type { ProcessEcs } from '../../../../ecs/process';
+import type {
   RequestOptionsPaginated,
   SortField,
   CursorType,

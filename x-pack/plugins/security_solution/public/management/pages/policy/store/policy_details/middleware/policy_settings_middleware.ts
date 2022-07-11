@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core/public';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../../../../common/endpoint/models/policy_config';
-import { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
+import type { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
 import {
   policyIdFromParams,
   isOnPolicyDetailsPage,
@@ -23,7 +23,7 @@ import {
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
 } from '../../../../../services/policies/ingest';
-import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
+import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
 export const policySettingsMiddlewareRunner: MiddlewareRunner = async (

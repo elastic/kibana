@@ -16,14 +16,14 @@ jobs:
       )
     steps:
       - name: Backport Action
-        uses: sqren/backport-github-action@v8.5.2
+        uses: sqren/backport-github-action@v8.8.0
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
       - name: Info log
         if: ${{ success() }}
         run: cat /home/runner/.backport/backport.info.log
-        
+
       - name: Debug log
         if: ${{ failure() }}
-        run: cat /home/runner/.backport/backport.debug.log        
+        run: cat /home/runner/.backport/backport.debug.log

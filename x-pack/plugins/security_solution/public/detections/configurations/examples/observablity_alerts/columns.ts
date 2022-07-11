@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS } from '@kbn/rule-data-utils';
 
-import { ColumnHeaderOptions } from '../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
 

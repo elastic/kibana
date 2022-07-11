@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, FormSchema, fieldValidators } from '../../../../shared_imports';
+import type { FormSchema } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 
 export const formSchema: FormSchema = {
   title: {
