@@ -8,7 +8,7 @@
 
 import fn from './legend';
 
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 import invoke from './helpers/invoke_series_fn';
 
 describe('legend.js', () => {

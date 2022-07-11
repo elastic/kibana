@@ -9,7 +9,7 @@
 import fn from './divide';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 import invoke from './helpers/invoke_series_fn';
 
 describe('divide.js', () => {

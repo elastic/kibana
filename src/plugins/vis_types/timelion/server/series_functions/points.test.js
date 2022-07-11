@@ -9,8 +9,7 @@
 import fn from './points';
 
 import _ from 'lodash';
-import assert from 'chai';
-const expect = assert.expect;
+import expect from '@kbn/expect';
 import invoke from './helpers/invoke_series_fn';
 
 describe('points.js', () => {
@@ -63,7 +62,7 @@ describe('points.js', () => {
       return invoke(fn, [seriesList, null, null, null, null, 'beer'])
         .then(expect.fail)
         .catch((e) => {
-          expect(e).to.be.an('error');
+          expect(e).to.be.an(Error);
         });
     });
   });
