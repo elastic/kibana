@@ -22,7 +22,7 @@ import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, GraphContainer } from './styles';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverProps, ResolverState } from '../types';
+import type { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';

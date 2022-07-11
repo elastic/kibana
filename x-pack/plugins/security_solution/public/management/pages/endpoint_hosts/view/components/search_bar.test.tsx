@@ -6,17 +6,15 @@
  */
 
 import React from 'react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { endpointPageHttpMock } from '../../mocks';
 import { act, waitFor, cleanup } from '@testing-library/react';
 import { getEndpointListPath } from '../../../../common/routing';
 import { AdminSearchBar } from './search_bar';
 import { fireEvent } from '@testing-library/dom';
 import { uiQueryParams } from '../../store/selectors';
-import { EndpointIndexUIQueryParams } from '../../types';
+import type { EndpointIndexUIQueryParams } from '../../types';
 
 // FLAKY: https://github.com/elastic/kibana/issues/132398
 describe.skip('when rendering the endpoint list `AdminSearchBar`', () => {
