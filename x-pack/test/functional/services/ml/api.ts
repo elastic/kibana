@@ -28,13 +28,42 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
-export type TrainedModelName =
-  | 'pt_tiny_fill_mask'
-  | 'pt_tiny_ner'
-  | 'pt_tiny_pass_through'
-  | 'pt_tiny_text_classification'
-  | 'pt_tiny_text_embedding'
-  | 'pt_tiny_zero_shot';
+
+export const SUPPORTED_TRAINED_MODELS = {
+  TINY_FILL_MASK: {
+    name: 'pt_tiny_fill_mask',
+    description: 'Tiny/Dummy PyTorch model (fill_mask)',
+    modelTypes: ['pytorch', 'fill_mask'],
+  },
+  TINY_NER: {
+    name: 'pt_tiny_ner',
+    description: 'Tiny/Dummy PyTorch model (ner)',
+    modelTypes: ['pytorch', 'ner'],
+  },
+  TINY_PASS_THROUGH: {
+    name: 'pt_tiny_pass_through',
+    description: 'Tiny/Dummy PyTorch model (pass_through)',
+    modelTypes: ['pytorch', 'pass_through'],
+  },
+  TINY_TEXT_CLASSIFICATION: {
+    name: 'pt_tiny_text_classification',
+    description: 'Tiny/Dummy PyTorch model (text_classification)',
+    modelTypes: ['pytorch', 'text_classification'],
+  },
+  TINY_TEXT_EMBEDDING: {
+    name: 'pt_tiny_text_embedding',
+    description: 'Tiny/Dummy PyTorch model (text_embedding)',
+    modelTypes: ['pytorch', 'text_embedding'],
+  },
+  TINY_ZERO_SHOT: {
+    name: 'pt_tiny_zero_shot',
+    description: 'Tiny/Dummy PyTorch model (zero_shot)',
+    modelTypes: ['pytorch', 'zero_shot'],
+  },
+} as const;
+export type SupportedTrainedModelNamesType =
+  typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
+
 export interface TrainedModelVocabulary {
   vocabulary: string[];
 }
@@ -1234,7 +1263,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    getTrainedModelConfig(modelName: TrainedModelName) {
+    getTrainedModelConfig(modelName: SupportedTrainedModelNamesType) {
       const configFileContent = fs.readFileSync(
         require.resolve(`./resources/trained_model_definitions/${modelName}/config.json`),
         'utf-8'
@@ -1242,7 +1271,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return JSON.parse(configFileContent) as PutTrainedModelConfig;
     },
 
-    getTrainedModelVocabulary(modelName: TrainedModelName) {
+    getTrainedModelVocabulary(modelName: SupportedTrainedModelNamesType) {
       const vocabularyFileContent = fs.readFileSync(
         require.resolve(`./resources/trained_model_definitions/${modelName}/vocabulary.json`),
         'utf-8'
@@ -1250,13 +1279,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return JSON.parse(vocabularyFileContent) as TrainedModelVocabulary;
     },
 
-    getTrainedModelDefinitionPath(modelName: TrainedModelName) {
+    getTrainedModelDefinitionPath(modelName: SupportedTrainedModelNamesType) {
       return require.resolve(
         `./resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
       );
     },
 
-    async importTrainedModel(modelId: string, modelName: TrainedModelName) {
+    async importTrainedModel(modelId: string, modelName: SupportedTrainedModelNamesType) {
       await this.createTrainedModel(modelId, this.getTrainedModelConfig(modelName));
       await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
       await this.uploadTrainedModelDefinitionES(

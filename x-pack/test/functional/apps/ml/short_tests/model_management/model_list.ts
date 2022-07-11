@@ -6,28 +6,19 @@
  */
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { TrainedModelName } from '../../../../services/ml/api';
+import { SUPPORTED_TRAINED_MODELS } from '../../../../services/ml/api';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
-  const tinyTrainedModels = [
-    'fill_mask',
-    'ner',
-    'pass_through',
-    'text_classification',
-    'text_embedding',
-    'zero_shot',
-  ].map((type) => ({
-    id: `tiny_${type}`,
-    name: `pt_tiny_${type}` as TrainedModelName,
-    desription: `Tiny/Dummy PyTorch model (${type})`,
-    modelTypes: ['pytorch', type],
+  const trainedModels = Object.values(SUPPORTED_TRAINED_MODELS).map((model) => ({
+    ...model,
+    id: model.name,
   }));
 
   describe('trained models', function () {
     before(async () => {
-      for (const model of tinyTrainedModels) {
+      for (const model of trainedModels) {
         await ml.api.importTrainedModel(model.id, model.name);
       }
 
@@ -100,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      for (const model of tinyTrainedModels) {
+      for (const model of trainedModels) {
         it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
           await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
           await ml.trainedModelsTable.assertDetailsTabContent();
