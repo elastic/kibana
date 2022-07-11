@@ -6,23 +6,24 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
-import { BrowserFields } from '../../../../../common/containers/source';
+import type { BrowserFields } from '../../../../../common/containers/source';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import {
+import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   HeaderActionProps,
-  TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { OnSelectAll } from '../../events';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import type { OnSelectAll } from '../../events';
 import {
   EventsTh,
   EventsThead,
@@ -30,11 +31,12 @@ import {
   EventsTrHeader,
   EventsThGroupActions,
 } from '../../styles';
-import { Sort } from '../sort';
+import type { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useFieldBrowserOptions, FieldEditorActions } from '../../../fields_browser';
+import type { FieldEditorActions } from '../../../fields_browser';
+import { useFieldBrowserOptions } from '../../../fields_browser';
 
 export interface ColumnHeadersComponentProps {
   actionsColumnWidth: number;

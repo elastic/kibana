@@ -12,7 +12,7 @@ import { EuiStat, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
+import type { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import * as i18n from './translations';
 

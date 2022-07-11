@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { act, waitFor, fireEvent } from '@testing-library/react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
 import { PolicyList } from './policy_list';
 import { sendGetAgentPolicyList } from '../../../services/policies/ingest';
-import { GetPolicyListResponse } from '../types';
+import type { GetPolicyListResponse } from '../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
 import { APP_UI_ID } from '../../../../../common/constants';
 
