@@ -23,6 +23,14 @@ export default function enterSpaceFunctionalTests({
         name: 'Another Space',
         disabledFeatures: [],
       });
+      await kibanaServer.uiSettings.replace(
+        {
+          defaultRoute: '/app/canvas',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
+        },
+        { space: 'another-space' }
+      );
       const config = await kibanaServer.savedObjects.get({
         id: await kibanaServer.version.get(),
         type: 'config',
