@@ -30,6 +30,7 @@ import {
   executionContextConfig,
 } from '@kbn/core-execution-context-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
+import { ContextService } from '@kbn/core-http-context-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
@@ -50,7 +51,6 @@ import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
-import { ContextService } from './context';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';

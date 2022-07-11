@@ -10,8 +10,8 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 
+import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createCoreContext, createHttpServer } from '../../../http/test_utils';
-import { ContextService } from '../../../context';
 import { metricsServiceMock } from '../../../metrics/metrics_service.mock';
 import { MetricsServiceSetup } from '../../../metrics';
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
@@ -20,7 +20,7 @@ import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { contextServiceMock } from '../../../context/context_service.mock';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 const coreId = Symbol('core');
 

@@ -44,10 +44,10 @@ jest.doMock('./saved_objects/saved_objects_service', () => ({
   SavedObjectsService: jest.fn(() => mockSavedObjectsService),
 }));
 
-import { contextServiceMock } from './context/context_service.mock';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 export const mockContextService = contextServiceMock.create();
-jest.doMock('./context/context_service', () => ({
+jest.doMock('@kbn/core-http-context-server-internal', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
