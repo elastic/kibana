@@ -88,7 +88,8 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  probability?: number
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -164,16 +165,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         )
     );
 
-    // getDocumentCountStats(data.search, searchStrategyParams, searchOptions).then(
-    //   (documentStats) => {
-    //     // setOverallStats({
-    //     //   documentCountStats: documentStats,
-    //     //   totalCount: documentStats.totalCount,
-    //     // });
-    //
-    //     console.log('documentStats', documentStats);
-    //   }
-    // );
     // Have to divide into smaller requests to avoid 413 payload too large
     const aggregatableFieldsChunks = chunk(aggregatableFields, 30);
 
@@ -204,17 +195,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           })
         )
     );
-    // const documentCountStats$ = data.search.search(
-    //   {
-    //     params: getDocumentCountStatsRequest(searchStrategyParams),
-    //   },
-    //   searchOptions
-    // );
+
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
     >(
       [
-        from(getDocumentCountStats(data.search, searchStrategyParams, searchOptions)),
+        // @ts-ignore @TODO update type
+        from(getDocumentCountStats(data.search, searchStrategyParams, searchOptions, probability)),
         ...aggregatableOverallStatsObs,
         ...nonAggregatableFieldsObs,
       ],
@@ -271,7 +258,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
     });
-  }, [data.search, searchStrategyParams, toasts, lastRefresh]);
+  }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

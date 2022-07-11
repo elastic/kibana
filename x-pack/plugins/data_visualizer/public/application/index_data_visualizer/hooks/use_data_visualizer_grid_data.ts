@@ -215,7 +215,8 @@ export const useDataVisualizerGridData = (
 
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
-    lastRefresh
+    lastRefresh,
+    dataVisualizerListState.probability
   );
 
   const configsWithoutStats = useMemo(() => {

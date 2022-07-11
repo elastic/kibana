@@ -9,22 +9,15 @@ import { each, get, sortedIndex } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
-import { firstValueFrom } from 'rxjs';
 import seedrandom from 'seedrandom';
+import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
-const fidelities = [
-  1.0, 0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0005, 0.00025, 0.0001, 0.00005,
-  0.000025, 0.00001, 0.000005, 0.0000025, 0.000001,
-].reverse();
 
-// @TODO: move this to user/browser session
-// Create a unique `seed` for browser session - To give repeatable results, the seed should be set based on the user's browser session
-const seed = Math.abs(seedrandom().int32());
-
+const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
   const {
     index,
@@ -81,8 +74,14 @@ interface DocumentStats extends DocumentCountStats {
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
-  searchOptions: ISearchOptions
+  searchOptions: ISearchOptions,
+  probability?: number,
+  minimumRandomSamplerDocCount?: number
 ): Promise<DocumentStats> => {
+  // @TODO: move this to user/browser session
+  // Create a unique `seed` for browser session - To give repeatable results, the seed should be set based on the user's browser session
+  const seed = Math.abs(seedrandom().int32());
+
   const {
     index,
     timeFieldName,
@@ -94,7 +93,7 @@ export const getDocumentCountStats = async (
     fieldsToFetch,
   } = params;
 
-  let result = { randomlySampled: false, took: 0, totalCount: 0 };
+  const result = { randomlySampled: false, took: 0, totalCount: 0 };
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   const query = {
@@ -114,10 +113,12 @@ export const getDocumentCountStats = async (
     },
   };
 
-  // First make a query with very low probability
-  const initialDefaultProbability = 0.0001;
+  // If probability is provided, use that
+  // Else, make an initial query using very low p
+  // so that we can calculate the next p value that's appropriate for the data set
+  const initialDefaultProbability = probability ?? 0.000001;
 
-  const aggsWithRandomSampling = (p: number) => ({
+  const getAggsWithRandomSampling = (p: number) => ({
     sampler: {
       aggs,
       random_sampler: {
@@ -127,93 +128,79 @@ export const getDocumentCountStats = async (
     },
   });
 
-  const firstResp = await firstValueFrom(
-    search.search(
+  const getSearchParams = (aggregations: unknown) => ({
+    index,
+    body: {
+      query,
+      ...(!fieldsToFetch &&
+      timeFieldName !== undefined &&
+      intervalMs !== undefined &&
+      intervalMs > 0
+        ? { aggs: aggregations }
+        : {}),
+      ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
+    },
+    track_total_hits: false,
+    size: 0,
+  });
+  const firstResp = await search
+    .search(
       {
-        params: {
-          index,
-          body: {
-            query,
-            ...(!fieldsToFetch &&
-            timeFieldName !== undefined &&
-            intervalMs !== undefined &&
-            intervalMs > 0
-              ? { aggs: aggsWithRandomSampling(initialDefaultProbability) } // @todo: correct to 0.000001
-              : {}),
-            ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
-          },
-          track_total_hits: false,
-          size: 0,
-        },
+        params: getSearchParams(getAggsWithRandomSampling(initialDefaultProbability)),
       },
       searchOptions
     )
-  );
+    .toPromise();
+
+  if (firstResp === undefined) {
+    throw Error(
+      `An error occurred with the following query ${JSON.stringify(
+        getSearchParams(getAggsWithRandomSampling(initialDefaultProbability))
+      )}`
+    );
+  }
+  if (probability !== undefined) {
+    return {
+      ...result,
+      randomlySampled: probability === 1 ? false : true,
+      took: firstResp.rawResponse?.took,
+      probability: initialDefaultProbability,
+      ...processDocumentCountStats(firstResp.rawResponse, params, true),
+    };
+  }
 
   // @ts-expect-error ES types needs to be updated with doc_count as part random sampler aggregation
   const numSampled = firstResp.rawResponse.aggregations?.sampler?.doc_count;
-  const numDocs = 100000;
-  if (numSampled < numDocs) {
+  const numDocs = minimumRandomSamplerDocCount ?? MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
+  if (firstResp !== undefined && numSampled < numDocs) {
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
-    // @todo: if newProbability < 0
+    // If the number of docs sampled is indicative of query with < 10 million docs
+    // proceed to make a vanilla aggregation without any sampling
     if (numSampled === 0 || newProbability === Infinity) {
-      const vanillaAggResp = await firstValueFrom(
-        search.search(
+      const vanillaAggResp = await search
+        .search(
           {
-            params: {
-              index,
-              body: {
-                query,
-                ...(!fieldsToFetch &&
-                timeFieldName !== undefined &&
-                intervalMs !== undefined &&
-                intervalMs > 0
-                  ? { aggs }
-                  : {}),
-                ...(isPopulatedObject(runtimeFieldMap)
-                  ? { runtime_mappings: runtimeFieldMap }
-                  : {}),
-              },
-              track_total_hits: true,
-              size: 0,
-            },
+            params: getSearchParams(getAggsWithRandomSampling(1)),
           },
           searchOptions
         )
-      );
-      result = {
+        .toPromise();
+      return {
         ...result,
         randomlySampled: false,
-        took: firstResp.rawResponse.took + vanillaAggResp.rawResponse.took,
-        ...processDocumentCountStats(vanillaAggResp.rawResponse, params, false),
+        took: firstResp.rawResponse.took + (vanillaAggResp?.rawResponse?.took ?? 0),
+        ...processDocumentCountStats(vanillaAggResp?.rawResponse, params, true),
       };
     } else {
       // Else, make second random sampler
-      const closestProbability = fidelities[sortedIndex(fidelities, newProbability)];
+      const closestProbability =
+        RANDOM_SAMPLER_PROBABILITIES[sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability)];
       const secondResp = await search
         .search(
           {
-            params: {
-              index,
-              body: {
-                query,
-                ...(!fieldsToFetch &&
-                timeFieldName !== undefined &&
-                intervalMs !== undefined &&
-                intervalMs > 0
-                  ? { aggs: aggsWithRandomSampling(closestProbability) }
-                  : {}),
-                ...(isPopulatedObject(runtimeFieldMap)
-                  ? { runtime_mappings: runtimeFieldMap }
-                  : {}),
-                size: 0,
-                track_total_hits: false,
-              },
-              track_total_hits: false,
-              size: 0,
-            },
+            params: getSearchParams(getAggsWithRandomSampling(closestProbability)),
           },
           searchOptions
         )

@@ -8,6 +8,10 @@
 import React, { FC } from 'react';
 import { EuiCodeBlock, EuiRange, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { sortedIndex } from 'lodash';
+import {
+  RANDOM_SAMPLER_PROBABILITIES,
+  RANDOM_SAMPLER_STEP,
+} from '../../../index_data_visualizer/constants/random_sampler';
 import { DocumentCountChart, DocumentCountChartPoint } from './document_count_chart';
 import { TotalCountHeader } from './total_count_header';
 import { DocumentCountStats } from '../../../../../common/types/field_stats';
@@ -17,12 +21,6 @@ export interface Props {
   samplingProbability?: number;
   setSamplingProbability?: (value: number) => void;
 }
-
-// @TODO: move this to constant file
-const probabilities = [
-  1.0, 0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0005, 0.00025, 0.0001, 0.00005,
-  0.00001,
-].reverse();
 
 export const DocumentCountContent: FC<Props> = ({
   documentCountStats,
@@ -47,31 +45,37 @@ export const DocumentCountContent: FC<Props> = ({
   return (
     <>
       <EuiFlexGroup>
-        <TotalCountHeader totalCount={totalCount} />
+        <TotalCountHeader
+          totalCount={totalCount}
+          approximate={documentCountStats.randomlySampled === true}
+        />
         <EuiFlexItem grow={true}>
           <EuiRange
             fullWidth
-            min={0.00001}
+            min={RANDOM_SAMPLER_STEP}
             max={1}
             value={samplingProbability ?? 1}
-            ticks={probabilities.map((d) => ({
+            ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
               value: d,
-              // label: d >= 0.0001 ? `${d * 100}` : '',
-              label: d === 0.00001 || d >= 0.1 ? `${d * 100}%` : '',
+              label: d === 0.00001 || d === 0.05 || d >= 0.1 ? `${d * 100}%` : '',
             }))}
             onChange={(e) => {
               const newProbability = Number(e.currentTarget.value);
-              const closestProbability = probabilities[sortedIndex(probabilities, newProbability)];
+              const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
+              const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
+              const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
+              const closestProbability =
+                Math.abs(closestPrev - newProbability) < Math.abs(closestNext - newProbability)
+                  ? closestPrev
+                  : closestNext;
 
               if (setSamplingProbability) {
-                console.log('setting closestProbability', closestProbability);
-
                 setSamplingProbability(closestProbability);
               }
             }}
             showTicks
             showRange={false}
-            step={0.00001}
+            step={RANDOM_SAMPLER_STEP}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -81,7 +85,10 @@ export const DocumentCountContent: FC<Props> = ({
         timeRangeLatest={timeRangeLatest}
         interval={documentCountStats.interval}
       />
-      <EuiCodeBlock>{`randomly sampled: ${documentCountStats.randomlySampled}\nprobability: ${documentCountStats.probability}\ntook: ${documentCountStats.took}`}</EuiCodeBlock>
+      <EuiCodeBlock>{
+        // @TODO: Remove when draft PR is ready
+        `randomly sampled: ${documentCountStats.randomlySampled}\nprobability: ${documentCountStats.probability}\ntook: ${documentCountStats.took}`
+      }</EuiCodeBlock>
     </>
   );
 };
