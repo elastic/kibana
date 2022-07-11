@@ -22,8 +22,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibana } from '../../lib/kibana';
-
 import { tourConfig } from './tour_config';
 
 const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
@@ -162,10 +160,8 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
     resetStep();
   }, [setIsTourActive, resetStep]);
 
-  const { services } = useKibana();
-  const hideAnnouncements = Boolean(services.uiSettings?.get('hideAnnouncements'));
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
-  const showTour = isTourActive && !hideAnnouncements && !isSmallScreen;
+  const showTour = isTourActive && !isSmallScreen;
   const context: TourContextValue = { isTourShown: showTour };
   return (
     <TourContext.Provider value={context}>
