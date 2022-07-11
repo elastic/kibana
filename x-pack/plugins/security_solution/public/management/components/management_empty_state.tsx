@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, MouseEvent, CSSProperties } from 'react';
+import type { MouseEvent, CSSProperties } from 'react';
+import React, { useMemo } from 'react';
+import type { EuiSelectableProps } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
@@ -16,7 +18,6 @@ import {
   EuiTitle,
   EuiSelectable,
   EuiSelectableMessage,
-  EuiSelectableProps,
   EuiIcon,
   EuiLoadingSpinner,
   EuiLink,

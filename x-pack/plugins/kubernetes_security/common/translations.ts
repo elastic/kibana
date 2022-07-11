@@ -21,3 +21,11 @@ export const SEARCH_GROUP_GROUP_BY = i18n.translate(
 export const SEARCH_GROUP_SORT_BY = i18n.translate('xpack.kubernetesSecurity.searchGroup.sortBy', {
   defaultMessage: 'Sort by',
 });
+
+export const WIDGET_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.show', {
+  defaultMessage: 'Show widgets',
+});
+
+export const WIDGET_TOGGLE_HIDE = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.hide', {
+  defaultMessage: 'Hide widgets',
+});
