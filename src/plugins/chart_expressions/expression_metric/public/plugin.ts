@@ -40,13 +40,15 @@ export class ExpressionMetricPlugin implements Plugin {
       core.getStartServices
     );
 
+    charts.palettes.getPalettes().then((palettes) => {
+      setPaletteService(palettes);
+    });
+
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer({ getStartDeps }));
 
     setUiSettingsService(core.uiSettings);
     setThemeService(charts.theme);
-    const palettes = await charts.palettes.getPalettes();
-    setPaletteService(palettes);
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
