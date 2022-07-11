@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
+import type { ActionCreator } from 'typescript-fsa';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { HostsTableType } from '../../store/model';
-import { HostsQueryProps } from '../types';
-import { NavTab } from '../../../common/components/navigation/types';
-import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
-import { hostsModel } from '../../store';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { HostsTableType } from '../../store/model';
+import type { HostsQueryProps } from '../types';
+import type { NavTab } from '../../../common/components/navigation/types';
+import type { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
+import type { hostsModel } from '../../store';
 interface HostDetailsComponentReduxProps {
   query: Query;
   filters: Filter[];

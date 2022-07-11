@@ -240,7 +240,7 @@ describe('loadRules', () => {
     `);
   });
 
-  test('should call find API with ruleStatusesilter', async () => {
+  test('should call find API with ruleStatusesFilter', async () => {
     const resolvedValue = {
       page: 1,
       per_page: 10,
@@ -266,7 +266,7 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)",
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -295,7 +295,7 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "filter": "alert.attributes.enabled: false",
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -324,7 +324,7 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or alert.attributes.enabled: false or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)",
             "page": 1,
             "per_page": 10,
             "search": undefined,
