@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { List } from '@kbn/securitysolution-io-ts-list-types';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
   getEndpointListMock,
 } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import {
+import type {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
@@ -40,7 +40,7 @@ import {
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
