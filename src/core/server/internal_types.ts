@@ -21,6 +21,7 @@ import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
 } from '@kbn/core-execution-context-server-internal';
+import { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { InternalContextPreboot, InternalContextSetup } from './context';
 import {
@@ -49,7 +50,6 @@ import { InternalStatusServiceSetup } from './status';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
-import { InternalPrebootServicePreboot } from './preboot';
 
 /** @internal */
 export interface InternalCorePreboot {

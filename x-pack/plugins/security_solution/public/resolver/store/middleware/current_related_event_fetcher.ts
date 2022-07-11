@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
+import type { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
+import type { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
-import { ResolverAction } from '../actions';
+import type { ResolverAction } from '../actions';
 
 /**
  *

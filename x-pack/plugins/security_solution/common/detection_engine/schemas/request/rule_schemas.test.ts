@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createRulesSchema, CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
+import type { CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
+import { createRulesSchema } from './rule_schemas';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
