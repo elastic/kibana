@@ -151,7 +151,7 @@ export function ChangeDataView({
     if (Boolean(textBasedLanguage) !== isTextBasedLangSelected) {
       setIsTextBasedLangSelected(Boolean(textBasedLanguage));
     }
-  }, [setIsTextBasedLangSelected, isTextBasedLangSelected, textBasedLanguage]);
+  }, [isTextBasedLangSelected, textBasedLanguage]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;

@@ -72,8 +72,9 @@ export function useDiscoverState({
   );
 
   const { appStateContainer } = stateContainer;
+  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
 
-  const [state, setState] = useState(appStateContainer.getState());
+  const [state, setState] = useState(() => appStateContainer.getState());
 
   /**
    * Search session logic
@@ -246,10 +247,14 @@ export function useDiscoverState({
   const fetchResults = useCallback(() => {
     if (documentState.result?.length) {
       const firstRow = documentState.result[0];
-      return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      if (!isEqual(columns, documentStateCols)) {
+        return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      }
+      return [];
     }
     return [];
-  }, [documentState.result]);
+  }, [documentState.result, documentStateCols]);
 
   useEffect(() => {
     async function fetchDataview() {
@@ -259,6 +264,9 @@ export function useDiscoverState({
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
         if (dataViewObj) {
           const columns = fetchResults();
+          if (columns.length) {
+            setDocumentStateCols(columns);
+          }
           const nextState = {
             index: dataViewObj.id,
             ...(columns.length && { columns }),

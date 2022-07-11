@@ -56,8 +56,8 @@ export const DiscoverTopNav = ({
   const history = useHistory();
 
   const showDatePicker = useMemo(
-    () => !isPlainRecord && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
-    [indexPattern, isPlainRecord]
+    () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
+    [indexPattern]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;

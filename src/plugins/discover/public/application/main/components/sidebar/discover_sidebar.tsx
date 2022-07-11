@@ -161,16 +161,24 @@ export function DiscoverSidebarComponent({
     [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
   );
 
+  /**
+   * Popular fields are not displayed in text based lang mode
+   */
+  const restFields = useMemo(
+    () => (isPlainRecord ? [...popularFields, ...unpopularFields] : unpopularFields),
+    [isPlainRecord, popularFields, unpopularFields]
+  );
+
   const paginate = useCallback(() => {
     const newFieldsToRender = fieldsToRender + Math.round(fieldsPerPage * 0.5);
-    setFieldsToRender(Math.max(fieldsPerPage, Math.min(newFieldsToRender, unpopularFields.length)));
-  }, [setFieldsToRender, fieldsToRender, unpopularFields, fieldsPerPage]);
+    setFieldsToRender(Math.max(fieldsPerPage, Math.min(newFieldsToRender, restFields.length)));
+  }, [setFieldsToRender, fieldsToRender, restFields, fieldsPerPage]);
 
   useEffect(() => {
-    if (scrollContainer && unpopularFields.length && availableFieldsContainer.current) {
+    if (scrollContainer && restFields.length && availableFieldsContainer.current) {
       const { clientHeight, scrollHeight } = scrollContainer;
       const isScrollable = scrollHeight > clientHeight; // there is no scrolling currently
-      const allFieldsRendered = fieldsToRender >= unpopularFields.length;
+      const allFieldsRendered = fieldsToRender >= restFields.length;
 
       if (!isScrollable && !allFieldsRendered) {
         // Not all available fields were rendered with the given fieldsPerPage number
@@ -188,7 +196,7 @@ export function DiscoverSidebarComponent({
   }, [
     fieldsPerPage,
     scrollContainer,
-    unpopularFields,
+    restFields,
     fieldsToRender,
     setFieldsPerPage,
     setFieldsToRender,
@@ -199,11 +207,11 @@ export function DiscoverSidebarComponent({
     if (scrollContainer) {
       const { scrollTop, clientHeight, scrollHeight } = scrollContainer;
       const nearBottom = scrollTop + clientHeight > scrollHeight * 0.9;
-      if (nearBottom && unpopularFields) {
+      if (nearBottom && restFields) {
         paginate();
       }
     }
-  }, [paginate, scrollContainer, unpopularFields]);
+  }, [paginate, scrollContainer, restFields]);
 
   const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
@@ -430,7 +438,7 @@ export function DiscoverSidebarComponent({
                   }
                   extraAction={
                     <EuiNotificationBadge size="m" color={filterChanged ? 'subdued' : 'accent'}>
-                      {popularFields.length + unpopularFields.length}
+                      {restFields.length}
                     </EuiNotificationBadge>
                   }
                 >
@@ -479,7 +487,7 @@ export function DiscoverSidebarComponent({
                     data-test-subj={`fieldList-unpopular`}
                     ref={availableFieldsContainer}
                   >
-                    {getPaginated(unpopularFields).map((field: DataViewField) => {
+                    {getPaginated(restFields).map((field: DataViewField) => {
                       return (
                         <li key={`field${field.name}`} data-attr-field={field.name}>
                           <DiscoverField
