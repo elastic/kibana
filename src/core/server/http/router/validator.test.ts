@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { RouteValidationError, RouteValidator } from '.';
 import { schema, Type } from '@kbn/config-schema';
+import { RouteValidationError } from '@kbn/core-http-server';
+import { RouteValidator } from './validator';
 
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
