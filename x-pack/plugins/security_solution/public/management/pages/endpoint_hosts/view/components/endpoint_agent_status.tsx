@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
+import type { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
 import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
 import { useEndpointSelector } from '../hooks';
 import { getEndpointHostIsolationStatusPropsCallback } from '../../store/selectors';

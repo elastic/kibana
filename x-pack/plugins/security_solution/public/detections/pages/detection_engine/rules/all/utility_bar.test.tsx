@@ -7,20 +7,15 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { ThemeProvider } from 'styled-components';
 import { waitFor } from '@testing-library/react';
 
 import { AllRulesUtilityBar } from './utility_bar';
-import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: { euiBreakpoints: { l: '1200px' }, euiSizeM: '10px' },
-});
+import { TestProviders } from '../../../../../common/mock';
 
 describe('AllRules', () => {
   it('renders AllRulesUtilityBar total rules and selected rules', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
@@ -31,7 +26,7 @@ describe('AllRules', () => {
           onRefreshSwitch={jest.fn()}
           hasBulkActions
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual('Showing 4 rules');
@@ -42,7 +37,7 @@ describe('AllRules', () => {
 
   it('does not render total selected and bulk actions when "hasBulkActions" is false', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
@@ -53,7 +48,7 @@ describe('AllRules', () => {
           onRefreshSwitch={jest.fn()}
           hasBulkActions={false}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="showingRules"]').exists()).toBeFalsy();
@@ -65,7 +60,7 @@ describe('AllRules', () => {
 
   it('renders utility actions if user has permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
@@ -76,7 +71,7 @@ describe('AllRules', () => {
           onRefreshSwitch={jest.fn()}
           hasBulkActions
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="bulkActions"]').exists()).toBeTruthy();
@@ -84,7 +79,7 @@ describe('AllRules', () => {
 
   it('renders no utility actions if user has no permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <AllRulesUtilityBar
           canBulkEdit={false}
           onRefresh={jest.fn()}
@@ -95,7 +90,7 @@ describe('AllRules', () => {
           onRefreshSwitch={jest.fn()}
           hasBulkActions
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="bulkActions"]').exists()).toBeFalsy();
@@ -104,7 +99,7 @@ describe('AllRules', () => {
   it('invokes refresh on refresh action click', () => {
     const mockRefresh = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={mockRefresh}
@@ -115,7 +110,7 @@ describe('AllRules', () => {
           onRefreshSwitch={jest.fn()}
           hasBulkActions
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="refreshRulesAction"] button').at(0).simulate('click');
@@ -123,10 +118,34 @@ describe('AllRules', () => {
     expect(mockRefresh).toHaveBeenCalled();
   });
 
-  it('invokes onRefreshSwitch when auto refresh switch is clicked', async () => {
+  it('invokes onRefreshSwitch when auto refresh switch is clicked if there are not selected items', async () => {
     const mockSwitch = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
+        <AllRulesUtilityBar
+          canBulkEdit
+          onRefresh={jest.fn()}
+          paginationTotal={4}
+          numberSelectedItems={0}
+          onGetBulkItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={mockSwitch}
+          hasBulkActions
+        />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
+      wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
+      expect(mockSwitch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not invokes onRefreshSwitch when auto refresh switch is clicked if there are selected items', async () => {
+    const mockSwitch = jest.fn();
+    const wrapper = mount(
+      <TestProviders>
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
@@ -137,13 +156,13 @@ describe('AllRules', () => {
           onRefreshSwitch={mockSwitch}
           hasBulkActions
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     await waitFor(() => {
       wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
       wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
-      expect(mockSwitch).toHaveBeenCalledTimes(1);
+      expect(mockSwitch).not.toHaveBeenCalled();
     });
   });
 });

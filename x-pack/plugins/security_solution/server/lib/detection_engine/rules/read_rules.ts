@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
-import { isAlertType, ReadRuleOptions } from './types';
+import type { ReadRuleOptions } from './types';
+import { isAlertType } from './types';
 
 /**
  * This reads the rules through a cascade try of what is fastest to what is slowest.

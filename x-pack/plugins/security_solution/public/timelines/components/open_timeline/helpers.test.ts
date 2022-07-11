@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, getOr, omit } from 'lodash/fp';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 
 import {
   mockTimelineResults,
@@ -24,6 +24,7 @@ import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
+import type { QueryTimelineById } from './helpers';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
@@ -32,19 +33,14 @@ import {
   omitTypenameInTimeline,
   dispatchUpdateTimeline,
   queryTimelineById,
-  QueryTimelineById,
   formatTimelineResultToModel,
 } from './helpers';
-import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { Note } from '../../../common/lib/note';
+import type { OpenTimelineResult, DispatchUpdateTimeline } from './types';
+import type { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineStatus,
-  KueryFilterQueryKind,
-} from '../../../../common/types/timeline';
+import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,

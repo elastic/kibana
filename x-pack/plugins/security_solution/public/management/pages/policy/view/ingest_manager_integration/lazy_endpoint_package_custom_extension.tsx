@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { lazy } from 'react';
-import { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
-import { StartPlugins } from '../../../../../types';
+import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
+import type { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPackageCustomExtension = (
   coreStart: CoreStart,
