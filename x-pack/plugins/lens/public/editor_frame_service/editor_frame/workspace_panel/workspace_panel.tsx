@@ -605,18 +605,20 @@ export const VisualizationWrapper = ({
             )
           )
         );
-
-        if (activeDatasourceId) {
-          const { layers } = datasourceStates[activeDatasourceId].state as {
-            layers?: Record<string, IndexPatternLayer>;
-          };
-          trackLensOperationsEvents(layers);
-        }
-        trackUiCounterEvents('vis_editor');
       }
     },
-    [activeDatasourceId, datasourceStates, defaultLayerId, dispatchLens]
+    [defaultLayerId, dispatchLens]
   );
+
+  const onRender$ = useCallback(() => {
+    if (activeDatasourceId) {
+      const { layers } = datasourceStates[activeDatasourceId].state as {
+        layers?: Record<string, IndexPatternLayer>;
+      };
+      trackLensOperationsEvents(layers);
+    }
+    trackUiCounterEvents('vis_editor');
+  }, [activeDatasourceId, datasourceStates]);
 
   function renderFixAction(
     validationError:
@@ -802,6 +804,7 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
+        onRender$={onRender$}
         inspectorAdapters={lensInspector.adapters}
         executionContext={{
           type: 'lens',

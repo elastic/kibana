@@ -484,7 +484,6 @@ export class Embeddable
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
     if (activeDatasourceId) {
-      this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
       const { layers } = this.savedVis?.state.datasourceStates[activeDatasourceId] as {
         layers?: Record<string, IndexPatternLayer>;
       };

@@ -9,6 +9,5 @@
   },
   "description": "Adds expression runtime to Kibana",
   "extraPublicDirs": ["common", "common/fonts"],
-  "requiredBundles": ["kibanaUtils", "inspector"],
-  "optionalPlugins": ["usageCollection"]
+  "requiredBundles": ["kibanaUtils", "inspector"]
 }

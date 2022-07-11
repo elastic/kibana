@@ -74,11 +74,6 @@ export interface IInterpreterRenderEvent<Context = unknown> {
   data?: Context;
 }
 
-export interface IInterpreterRenderTelemetry {
-  originatingApp: string;
-  counterEvents: string | Array<string | undefined>;
-}
-
 export interface IInterpreterRenderHandlers {
   /**
    * Done increments the number of rendering successes
