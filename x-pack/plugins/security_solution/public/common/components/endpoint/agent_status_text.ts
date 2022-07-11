@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HostStatus } from '../../../../common/endpoint/types';
+import type { HostStatus } from '../../../../common/endpoint/types';
 
 export const getAgentStatusText = (hostStatus: HostStatus) => {
   return i18n.translate('xpack.securitySolution.endpoint.list.hostStatusValue', {
