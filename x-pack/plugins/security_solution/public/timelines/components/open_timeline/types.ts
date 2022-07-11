@@ -6,10 +6,10 @@
  */
 
 import type React from 'react';
-import { AllTimelinesVariables } from '../../containers/all';
-import { TimelineModel } from '../../store/timeline/model';
-import { NoteResult } from '../../../../common/types/timeline/note';
-import {
+import type { AllTimelinesVariables } from '../../containers/all';
+import type { TimelineModel } from '../../store/timeline/model';
+import type { NoteResult } from '../../../../common/types/timeline/note';
+import type {
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
   TimelineStatus,

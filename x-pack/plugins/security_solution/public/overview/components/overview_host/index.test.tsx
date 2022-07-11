@@ -19,7 +19,8 @@ import {
 } from '../../../common/mock';
 
 import { OverviewHost } from '.';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { useHostOverview } from '../../containers/overview_host';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
