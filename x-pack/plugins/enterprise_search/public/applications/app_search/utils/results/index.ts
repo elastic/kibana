@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-function isFieldValueWrapper(object) {
-  return (
-    object &&
-    (Object.prototype.hasOwnProperty.call(object, 'raw') ||
-     Object.prototype.hasOwnProperty.call(object, 'snippet'))
-  );
+function isFieldValueWrapper(object: object): boolean {
+  return object && (object.hasOwnProperty('raw') || object.hasOwnProperty('snippet'));
 }
 
 // Returns true for objects like this:
@@ -20,7 +16,7 @@ function isFieldValueWrapper(object) {
 // }
 // And false for objects like this:
 // objectField: { raw: "one" }
-function isNestedFieldValue(fiedlValue) {
+function isNestedFieldValue(fiedlValue: object | object[]): boolean {
   if (Array.isArray(fiedlValue)) {
     fiedlValue.map(isNestedFieldValue).reduce((acc, current) => acc || current, false);
   }
@@ -31,13 +27,13 @@ function isNestedFieldValue(fiedlValue) {
 // Takes any value and removes the wrapper around deepest values
 // (removes the wrapper Object with "raw" and/or "snippet" fields)
 // See tests for examples
-function cleanValueWrappers(value) {
-  if (isFieldValueWrapper(value) && value.raw) {
-    return value.raw;
-  }
-
+function cleanValueWrappers(value: object | object[]) : object {
   if (Array.isArray(value)) {
     return value.map(cleanValueWrappers);
+  }
+
+  if (isFieldValueWrapper(value)) {
+    return value.raw;
   }
 
   if (typeof value === 'object') {
@@ -50,7 +46,7 @@ function cleanValueWrappers(value) {
   return value;
 }
 
-export function formatResult(result) {
+export function formatResult(result: object): object {
   return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
     if (fieldName != '_meta' && isNestedFieldValue(fieldValue)) {
       return {
