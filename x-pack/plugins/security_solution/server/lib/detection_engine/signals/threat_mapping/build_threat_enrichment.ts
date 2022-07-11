@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SignalsEnrichment } from '../types';
+import type { SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
+import type { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({

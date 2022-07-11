@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { Capabilities } from '../../types/capabilities';
-import { KibanaRequest } from '../http';
 
 export type { Capabilities };
 

@@ -6,7 +6,8 @@
  */
 
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
-import { HostsModel, HostsTableType, HostsType } from './model';
+import type { HostsModel } from './model';
+import { HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
 import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
