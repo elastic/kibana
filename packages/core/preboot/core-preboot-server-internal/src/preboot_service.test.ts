@@ -9,8 +9,8 @@
 import { REPO_ROOT } from '@kbn/utils';
 import { LoggerFactory } from '@kbn/logging';
 import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config-mocks';
-import { configServiceMock, loggingSystemMock } from '../mocks';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PrebootService } from './preboot_service';
 

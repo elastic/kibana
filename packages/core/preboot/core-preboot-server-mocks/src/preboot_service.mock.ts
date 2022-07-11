@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InternalPrebootServicePreboot, PrebootServicePreboot } from './types';
-import { PrebootService } from './preboot_service';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  InternalPrebootServicePreboot,
+  PrebootService,
+} from '@kbn/core-preboot-server-internal';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
 
 export type InternalPrebootServicePrebootMock = jest.Mocked<InternalPrebootServicePreboot>;
 export type PrebootServicePrebootMock = jest.Mocked<PrebootServicePreboot>;
