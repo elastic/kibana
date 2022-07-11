@@ -11,11 +11,8 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AlertSummaryRow } from '../helpers';
 import { getEmptyTagValue } from '../../empty_value';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
-import {
-  useActionCellDataProvider,
-  ActionCellValuesAndDataProvider,
-  getDataProvider,
-} from './use_action_cell_data_provider';
+import type { ActionCellValuesAndDataProvider } from './use_action_cell_data_provider';
+import { useActionCellDataProvider, getDataProvider } from './use_action_cell_data_provider';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
 

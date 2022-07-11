@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { HttpFetchError } from '@kbn/core/public';
+import type { HttpFetchError } from '@kbn/core/public';
 import { useQuery } from 'react-query';
 import { useHttp } from '../../lib/kibana';
 
