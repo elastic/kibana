@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { mockRouter } from './router.mock';
+export type { RouterMock, RequestFixtureOptions } from './router.mock';

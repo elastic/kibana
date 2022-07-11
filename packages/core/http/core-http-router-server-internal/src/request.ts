@@ -8,7 +8,7 @@
 
 import { URL } from 'url';
 import uuid from 'uuid';
-import { Request, RouteOptions } from '@hapi/hapi';
+import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';

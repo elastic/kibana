@@ -20,7 +20,7 @@ import type {
   KibanaRequestState,
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from './request';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 export type RouterMock = jest.Mocked<IRouter<any>>;
 

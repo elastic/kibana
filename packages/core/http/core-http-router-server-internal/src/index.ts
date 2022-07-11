@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { filterHeaders } from './headers';
+export { Router } from './router';
+export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './request';
+export { isSafeMethod } from './route';
+export { HapiResponseAdapter } from './response_adapter';
+export {
+  kibanaResponseFactory,
+  lifecycleResponseFactory,
+  isKibanaResponse,
+  KibanaResponse,
+} from './response';
