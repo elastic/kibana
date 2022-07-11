@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 export { ExternalUrlConfig } from './external_url_config';
-export type { IExternalUrlConfig } from './external_url_config';
 export { externalUrlConfig } from './config';
 export type { ExternalUrlConfigType } from './config';

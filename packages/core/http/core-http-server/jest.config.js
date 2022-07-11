@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './context';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/http/core-http-server'],
+};
