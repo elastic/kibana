@@ -72,7 +72,6 @@ export function useDiscoverState({
   );
 
   const { appStateContainer } = stateContainer;
-  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
 
   const [state, setState] = useState(() => appStateContainer.getState());
 
@@ -244,29 +243,29 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
-  const fetchResults = useCallback(() => {
+  const getAllColumns = useCallback(() => {
     if (documentState.result?.length) {
       const firstRow = documentState.result[0];
-      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-      if (!isEqual(columns, documentStateCols)) {
-        return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-      }
-      return [];
+      return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
     }
     return [];
-  }, [documentState.result, documentStateCols]);
+  }, [documentState.result]);
 
+  /**
+   * Select all columns for text based lang mode if they were not defined
+   */
   useEffect(() => {
-    async function fetchDataview() {
-      if (isPlainRecord(state.query) && documentState.fetchStatus === FetchStatus.COMPLETE) {
+    async function selectAllColumns() {
+      if (
+        isPlainRecord(state.query) &&
+        documentState.fetchStatus === FetchStatus.COMPLETE &&
+        !state.columns?.length
+      ) {
         const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
         const idsTitles = await indexPatterns.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
         if (dataViewObj) {
-          const columns = fetchResults();
-          if (columns.length) {
-            setDocumentStateCols(columns);
-          }
+          const columns = getAllColumns();
           const nextState = {
             index: dataViewObj.id,
             ...(columns.length && { columns }),
@@ -275,9 +274,9 @@ export function useDiscoverState({
         }
       }
     }
-    fetchDataview();
+    selectAllColumns();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, documentState, indexPatterns]);
+  }, [config, indexPatterns, documentState, state.columns]);
 
   return {
     data$,
