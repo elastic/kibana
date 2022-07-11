@@ -12,11 +12,14 @@ import { shallow } from 'enzyme';
 import { UseCaseCard } from './use_case_card';
 
 jest.mock('../../kibana_services', () => {
-  const { applicationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+  const { applicationServiceMock, uiSettingsServiceMock, httpServiceMock } =
+    jest.requireActual('@kbn/core/public/mocks');
   return {
     getServices: () => ({
       application: applicationServiceMock.createStartContract(),
       trackUiMetric: jest.fn(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      http: httpServiceMock.createStartContract(),
     }),
   };
 });

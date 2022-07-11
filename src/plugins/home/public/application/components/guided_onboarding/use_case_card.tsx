@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCard, EuiText, EuiTitle } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';

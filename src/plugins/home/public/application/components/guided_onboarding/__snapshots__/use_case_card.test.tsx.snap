@@ -14,23 +14,10 @@ exports[`use case card should render use case card component for observability 1
     </EuiText>
   }
   display="subdued"
-  icon={
-    <EuiAvatar
-      color="plain"
-      iconSize="xl"
-      iconType="eye"
-      name="Observability icon"
-      size="xl"
-    />
-  }
   image={
-    <div
-      css={
-        Object {
-          "backgroundColor": "#00BFB3",
-          "minHeight": 200,
-        }
-      }
+    <img
+      alt="Observability logo"
+      src="/plugins/home/assets/solution_logos/illustration-observability.png"
     />
   }
   onClick={[Function]}
@@ -63,23 +50,10 @@ exports[`use case card should render use case card component for search 1`] = `
     </EuiText>
   }
   display="subdued"
-  icon={
-    <EuiAvatar
-      color="plain"
-      iconSize="xl"
-      iconType="inspect"
-      name="Enterprise Search icon"
-      size="xl"
-    />
-  }
   image={
-    <div
-      css={
-        Object {
-          "backgroundColor": "#FEC514",
-          "minHeight": 200,
-        }
-      }
+    <img
+      alt="Enterprise Search logo"
+      src="/plugins/home/assets/solution_logos/illustration-search.png"
     />
   }
   onClick={[Function]}
@@ -112,23 +86,10 @@ exports[`use case card should render use case card component for security 1`] = 
     </EuiText>
   }
   display="subdued"
-  icon={
-    <EuiAvatar
-      color="plain"
-      iconSize="xl"
-      iconType="securitySignal"
-      name="Security icon"
-      size="xl"
-    />
-  }
   image={
-    <div
-      css={
-        Object {
-          "backgroundColor": "#F04E98",
-          "minHeight": 200,
-        }
-      }
+    <img
+      alt="Security logo"
+      src="/plugins/home/assets/solution_logos/illustration-security.png"
     />
   }
   onClick={[Function]}
