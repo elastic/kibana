@@ -15,18 +15,12 @@ import { SelectionContext } from '../context';
 
 interface BulkActionsProps {
   totalItems: number;
-  selectedCount: number;
-  bulkActionItems?: JSX.Element[];
-  pageSize: number;
+  bulkActionItems: JSX.Element[];
 }
 
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({
-  totalItems,
-  bulkActionItems,
-  pageSize,
-}) => {
+const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActionItems }) => {
   const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(SelectionContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -63,12 +57,11 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
-      updateSelectedRows({ action: 'selectCurrentPage', rowsCount: pageSize });
       updateSelectedRows({ action: 'selectAll' });
     } else {
       updateSelectedRows({ action: 'clear' });
     }
-  }, [pageSize, showClearSelection, updateSelectedRows]);
+  }, [showClearSelection, updateSelectedRows]);
 
   const selectedAlertsText = useMemo(
     () =>

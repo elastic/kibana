@@ -6,8 +6,8 @@
  */
 
 import { createContext } from 'react';
-import { SelectedRowsAction, SelectedRowsState } from '../../../../types';
+import { RowSelectionState, RowSelectionAction } from '../../../../types';
 
 export const SelectionContext = createContext<
-  [SelectedRowsState, React.Dispatch<SelectedRowsAction>]
->([undefined, () => {}]);
+  [RowSelectionState, React.Dispatch<RowSelectionAction>]
+>([{ rowSelection: new Set<string>(), isAllSelected: false, isPageSelected: false }, () => {}]);

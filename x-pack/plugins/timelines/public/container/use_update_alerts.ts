@@ -39,6 +39,7 @@ export const useUpdateAlertsStatus = (
   const { http } = useKibana<CoreStart>().services;
   return {
     updateAlertStatus: async ({ status, index, query }) => {
+      console.log('use_update_alerts query', query);
       if (useDetectionEngine) {
         return http.fetch<estypes.UpdateByQueryResponse>(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
           method: 'POST',

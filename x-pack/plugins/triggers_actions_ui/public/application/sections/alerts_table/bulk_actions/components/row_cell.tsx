@@ -12,8 +12,7 @@ import { SelectionContext } from '../context';
 
 export const BulkActionsRowCell = ({ rowIndex }: { rowIndex: string }) => {
   const [{ rowSelection }, updateSelectedRows] = useContext(SelectionContext);
-  const isChecked = rowSelection.has(parseInt(rowIndex, 10));
-
+  const isChecked = rowSelection.has(rowIndex);
   return (
     <EuiCheckbox
       id={rowIndex}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -22,10 +22,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
+import { SelectionContext as BulkActionsContext } from './bulk_actions/context';
 import { EmptyState } from './empty_state';
 import { AlertsTableConfigurationRegistry } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
+import { selectedRowsReducer } from './bulk_actions/selected_rows_reducer';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -115,6 +117,12 @@ const AlertsTableState = ({
     pageSize: pageSize ?? DefaultPagination.pageSize,
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
+
+  const initialSelectionContextState = useReducer(selectedRowsReducer, {
+    rowSelection: new Set<string>(),
+    isAllSelected: false,
+    isPageSelected: false,
+  });
 
   const [
     isLoading,
@@ -208,6 +216,7 @@ const AlertsTableState = ({
       useFetchAlertsData,
       visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
+      query,
     }),
     [
       alertsTableConfiguration,
@@ -217,6 +226,7 @@ const AlertsTableState = ({
       showCheckboxes,
       showExpandToDetails,
       useFetchAlertsData,
+      query,
     ]
   );
 
@@ -226,7 +236,11 @@ const AlertsTableState = ({
       {isLoading && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && <AlertsTable {...tableProps} />}
+      {alertsCount !== 0 && (
+        <BulkActionsContext.Provider value={initialSelectionContextState}>
+          <AlertsTable {...tableProps} />
+        </BulkActionsContext.Provider>
+      )}
     </>
   ) : (
     <EuiEmptyPrompt

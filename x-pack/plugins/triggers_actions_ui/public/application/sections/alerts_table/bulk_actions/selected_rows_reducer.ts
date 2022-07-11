@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { RowSelectionAction, RowSelectionState } from '../../../../../types';
+import { RowSelectionAction, RowSelectionState } from '../../../../types';
 
 export const selectedRowsReducer = (
-  { rowSelection }: RowSelectionState,
-  { action, rowIndex, rowsCount }: RowSelectionAction
+  { rowSelection, pageSize: currentPageSize }: RowSelectionState,
+  { action, rowIndex, pageSize }: RowSelectionAction
 ): RowSelectionState => {
-  console.log('action', action);
-  const nextState = { rowSelection, isAllSelected: false, isPageSelected: false };
+  const nextState = {
+    rowSelection,
+    isAllSelected: false,
+    isPageSelected: false,
+    pageSize: currentPageSize,
+  };
   if (action === 'add' && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
-    nextRowSelection.add(parseInt(rowIndex, 10));
+    nextRowSelection.add(rowIndex);
     nextState.rowSelection = nextRowSelection;
   } else if (action === 'delete' && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
-    nextRowSelection.delete(parseInt(rowIndex, 10));
+    nextRowSelection.delete(rowIndex);
     nextState.rowSelection = nextRowSelection;
-  } else if (action === 'selectCurrentPage' && rowsCount) {
-    nextState.rowSelection = new Set(Array.from(Array(rowsCount).keys()));
+  } else if (action === 'selectCurrentPage' && pageSize) {
+    nextState.rowSelection = new Set(Array.from(Array(pageSize).keys()));
     nextState.isPageSelected = true;
   } else if (action === 'selectAll') {
     nextState.isAllSelected = true;
@@ -31,6 +35,5 @@ export const selectedRowsReducer = (
     nextState.isAllSelected = false;
     nextState.isPageSelected = false;
   }
-  console.log(nextState);
   return nextState;
 };

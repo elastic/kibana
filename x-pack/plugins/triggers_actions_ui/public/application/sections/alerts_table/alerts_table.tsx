@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
-  useReducer,
+  useContext,
 } from 'react';
 import {
   EuiDataGrid,
@@ -30,12 +30,11 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
-import { selectedRowsReducer } from './bulk_actions/hooks';
 import { getLeadingControlColumn as getBulkActionsLeadingControlColumn } from './bulk_actions/leading_control_column';
 
 import './alerts_table.scss';
-import { SelectionContext } from './bulk_actions/context';
 import { getToolbarVisibility } from './toolbar';
+import { SelectionContext } from './bulk_actions/context';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
@@ -48,6 +47,7 @@ const GridStyles: EuiDataGridStyle = {
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
+  const alertsData = props.useFetchAlertsData();
   const {
     activePage,
     alerts,
@@ -57,9 +57,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     onSortChange,
     sort: sortingFields,
-  } = props.useFetchAlertsData();
+  } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
+  console.log('alertsData j', alertsData);
 
+  // const {toolbarVisibility, leadingControlColumn } = useBulkActions(alertsData, query, props.alertsTableConfiguration)
   const {
     useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }),
     useBulkActions = () => ({ render: undefined }),
@@ -67,13 +69,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
     useActionsColumn();
 
-  const initialSelectionContextState = useReducer(selectedRowsReducer, {
-    rowSelection: new Set<number>(),
-    isAllSelected: false,
-    isPageSelected: false,
-  });
-
-  const [rowSelectionState, updateSelectionState] = initialSelectionContextState;
+  const [rowSelectionState, updateSelectionState] = useContext(SelectionContext);
   const { render: renderBulkActions } = useBulkActions();
 
   const isBulkActionsColumnActive = Boolean(renderBulkActions);
@@ -156,7 +152,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
     if (isBulkActionsColumnActive) {
       controlColumns = [
-        getBulkActionsLeadingControlColumn({ rowsCount: alerts.length }),
+        getBulkActionsLeadingControlColumn({ pageSize: pagination.pageSize }),
         ...controlColumns,
       ];
     }
@@ -166,6 +162,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     actionsColumnWidth,
     alerts,
     isBulkActionsColumnActive,
+    pagination.pageSize,
     props.leadingControlColumns,
     props.showExpandToDetails,
     renderCustomActionsRow,
@@ -231,50 +228,54 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [alerts, pagination.pageIndex, pagination.pageSize, renderCellValue]
   );
 
+  const toolbarVisibility = useCallback(() => {
+    const { rowSelection, isAllSelected } = rowSelectionState;
+    return getToolbarVisibility({
+      renderBulkActions,
+      alertsCount,
+      rowSelection,
+      isAllSelected,
+      alerts: alertsData.alerts,
+    });
+  }, [alertsCount, alertsData.alerts, renderBulkActions, rowSelectionState])();
+
   return (
-    <SelectionContext.Provider value={initialSelectionContextState}>
-      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-        <Suspense fallback={null}>
-          {flyoutAlertIndex > -1 && (
-            <AlertsFlyout
-              alert={alerts[flyoutAlertIndex]}
-              alertsCount={alertsCount}
-              onClose={handleFlyoutClose}
-              alertsTableConfiguration={props.alertsTableConfiguration}
-              flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
-              onPaginate={onPaginateFlyout}
-              isLoading={isLoading}
-            />
-          )}
-        </Suspense>
-        {alertsCount >= 0 && (
-          <EuiDataGrid
-            aria-label="Alerts table"
-            data-test-subj="alertsTable"
-            columns={props.columns}
-            columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-            trailingControlColumns={props.trailingControlColumns}
-            leadingControlColumns={leadingControlColumns}
-            rowCount={alertsCount}
-            renderCellValue={handleRenderCellValue}
-            gridStyle={{ ...GridStyles, rowClasses }}
-            sorting={{ columns: sortingColumns, onSort }}
-            toolbarVisibility={getToolbarVisibility({
-              selectedRowsCount: rowSelectionState.rowSelection.size,
-              bulkActionItems: renderBulkActions ? renderBulkActions() : undefined,
-              alertsCount,
-              pageSize: pagination.pageSize,
-            })}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: props.pageSizeOptions,
-              onChangeItemsPerPage: onChangePageSize,
-              onChangePage: onChangePageIndex,
-            }}
+    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+      <Suspense fallback={null}>
+        {flyoutAlertIndex > -1 && (
+          <AlertsFlyout
+            alert={alerts[flyoutAlertIndex]}
+            alertsCount={alertsCount}
+            onClose={handleFlyoutClose}
+            alertsTableConfiguration={props.alertsTableConfiguration}
+            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+            onPaginate={onPaginateFlyout}
+            isLoading={isLoading}
           />
         )}
-      </section>
-    </SelectionContext.Provider>
+      </Suspense>
+      {alertsCount >= 0 && (
+        <EuiDataGrid
+          aria-label="Alerts table"
+          data-test-subj="alertsTable"
+          columns={props.columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+          trailingControlColumns={props.trailingControlColumns}
+          leadingControlColumns={leadingControlColumns}
+          rowCount={alertsCount}
+          renderCellValue={handleRenderCellValue}
+          gridStyle={{ ...GridStyles, rowClasses }}
+          sorting={{ columns: sortingColumns, onSort }}
+          toolbarVisibility={toolbarVisibility}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: props.pageSizeOptions,
+            onChangeItemsPerPage: onChangePageSize,
+            onChangePage: onChangePageIndex,
+          }}
+        />
+      )}
+    </section>
   );
 };
 

@@ -11,14 +11,14 @@ import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@ela
 import { BulkActionsHeader, BulkActionsRowCell } from './components';
 
 export const getLeadingControlColumn = ({
-  rowsCount,
+  pageSize,
 }: {
-  rowsCount: number;
+  pageSize: number;
 }): EuiDataGridControlColumn => ({
   id: 'bulkActions',
   width: 30,
   headerCellRender: () => {
-    return <BulkActionsHeader rowsCount={rowsCount} />;
+    return <BulkActionsHeader pageSize={pageSize} />;
   },
   rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
     const { visibleRowIndex: rowIndex } = cveProps as EuiDataGridCellValueElementProps & {

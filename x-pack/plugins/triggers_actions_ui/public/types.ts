@@ -43,7 +43,10 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
@@ -418,6 +421,7 @@ export interface AlertsTableProps {
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
   'data-test-subj': string;
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -447,20 +451,21 @@ export interface AlertsTableConfigurationRegistry {
     width?: number;
   };
   useBulkActions?: () => {
-    render: () => JSX.Element[];
+    render: (isAllSelected: boolean, selectedAlertIds: string[]) => JSX.Element[];
   };
 }
 
 export interface RowSelectionAction {
   action: string;
-  rowIndex?: string;
-  rowsCount?: number;
+  rowIndex?: number;
+  pageSize?: number;
 }
 
 export interface RowSelectionState {
   rowSelection: Set<number>;
   isAllSelected: boolean;
   isPageSelected: boolean;
+  pageSize: number;
 }
 
 export interface AlertsTableFlyoutBaseProps {

@@ -6,21 +6,30 @@
  */
 
 import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React from 'react';
 import { BulkActions } from '../bulk_actions/components/toolbar';
 
 export const getToolbarVisibility = ({
-  selectedRowsCount,
+  renderBulkActions,
   alertsCount,
-  bulkActionItems,
-  pageSize,
+  isAllSelected,
+  rowSelection,
+  alerts,
 }: {
-  selectedRowsCount: number;
+  renderBulkActions?: (isAllSelected: boolean, selectedAlertIds: string[]) => JSX.Element[];
   alertsCount: number;
-  bulkActionItems?: JSX.Element[];
-  pageSize: number;
+  isAllSelected: boolean;
+  rowSelection: Set<number>;
+  alerts: EcsFieldsResponse[];
 }): boolean | EuiDataGridToolBarVisibilityOptions => {
-  if (selectedRowsCount === 0 || selectedRowsCount === undefined) return {};
+  const selectedRowsCount = rowSelection.size;
+  if (selectedRowsCount === 0 || selectedRowsCount === undefined || renderBulkActions === undefined)
+    return {};
+
+  const selectedAlertIds = Array.from(rowSelection.values()).map(
+    (rowIndex: number) => alerts[rowIndex]._id
+  );
 
   const options = {
     showColumnSelector: false,
@@ -29,10 +38,8 @@ export const getToolbarVisibility = ({
       left: {
         append: (
           <BulkActions
-            selectedCount={selectedRowsCount}
             totalItems={alertsCount}
-            bulkActionItems={bulkActionItems}
-            pageSize={pageSize}
+            bulkActionItems={renderBulkActions(isAllSelected, selectedAlertIds)}
           />
         ),
       },

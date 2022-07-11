@@ -90,7 +90,7 @@ export const useBulkActionItems = ({
     async (status: AlertStatus) => {
       try {
         setEventsLoading({ eventIds, isLoading: true });
-
+        console.log('use_bulk_action_items query', query);
         const response = await updateAlertStatus({
           index: indexName,
           status,
