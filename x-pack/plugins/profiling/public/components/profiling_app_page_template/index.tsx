@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { EuiPageHeaderContentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { compact } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { SettingsFlyout } from '../settings_flyout';
-import { ProfilingDatePicker } from './profiling_date_picker';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -25,17 +27,19 @@ export function ProfilingAppPageTemplate({
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, n, projectID, index },
+    query: { rangeFrom, rangeTo, n, projectID, index, kuery },
   } = useProfilingParams('/*');
 
   const {
-    start: { observability, data },
+    start: { observability, data, dataViews },
   } = useProfilingDependencies();
 
   const { PageTemplate: ObservabilityPageTemplate } = observability.navigation;
 
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
+
+  const [dataView, setDataView] = useState<DataView>();
 
   useEffect(() => {
     // set time if both to and from are given in the url
@@ -48,6 +52,19 @@ export function ProfilingAppPageTemplate({
     }
   }, [rangeFrom, rangeTo, data]);
 
+  useEffect(() => {
+    dataViews
+      .create({
+        title: index,
+      })
+      .then((nextDataView) => setDataView(nextDataView));
+  }, [index, dataViews]);
+
+  const searchBarQuery: Required<React.ComponentProps<typeof SearchBar>>['query'] = {
+    language: 'kuery',
+    query: kuery,
+  };
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -57,19 +74,6 @@ export function ProfilingAppPageTemplate({
         }),
         tabs,
         rightSideItems: [
-          <ProfilingDatePicker
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            onTimeRangeChange={(nextTimeRange) => {
-              profilingRouter.push(routePath, {
-                path,
-                query: {
-                  ...query,
-                  ...nextTimeRange,
-                },
-              });
-            }}
-          />,
           <SettingsFlyout
             title={i18n.translate('xpack.profiling.appPageTemplate.settingsTitle', {
               defaultMessage: 'Settings',
@@ -97,7 +101,44 @@ export function ProfilingAppPageTemplate({
         paddingSize: 'none',
       }}
     >
-      {children}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <SearchBar
+            onQuerySubmit={(next) => {
+              profilingRouter.push(routePath, {
+                path,
+                query: {
+                  ...query,
+                  kuery: next.query?.query || '',
+                  rangeFrom: next.dateRange.from,
+                  rangeTo: next.dateRange.to,
+                },
+              });
+            }}
+            showQueryBar
+            showQueryInput
+            showDatePicker
+            showFilterBar={false}
+            showSaveQuery={false}
+            query={searchBarQuery}
+            dateRangeFrom={rangeFrom}
+            dateRangeTo={rangeTo}
+            indexPatterns={compact([dataView])}
+            onRefresh={(nextDateRange) => {
+              profilingRouter.push(routePath, {
+                path,
+                query: {
+                  ...query,
+                  rangeFrom: nextDateRange.dateRange.from,
+                  rangeTo: nextDateRange.dateRange.to,
+                },
+              });
+            }}
+          />
+          ,
+        </EuiFlexItem>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );
 }

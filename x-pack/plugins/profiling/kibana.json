@@ -16,7 +16,9 @@
     "share",
     "observability",
     "features",
-    "kibanaReact"
+    "kibanaReact",
+    "unifiedSearch",
+    "dataViews"
   ],
   "optionalPlugins": []
 }

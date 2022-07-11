@@ -6,20 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
+import { getClient } from './compat';
+import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { createProjectTimeQuery, ProjectTimeQuery } from './query';
-import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import {
   mgetExecutables,
   mgetStackFrames,
   mgetStackTraces,
   searchEventsGroupByStackTrace,
 } from './stacktrace';
-import { getClient } from './compat';
 
 async function queryFlameGraph(
   logger: Logger,
@@ -76,10 +76,7 @@ async function queryFlameGraph(
   });
 }
 
-export function registerFlameChartElasticSearchRoute(
-  router: IRouter<DataRequestHandlerContext>,
-  logger: Logger
-) {
+export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {

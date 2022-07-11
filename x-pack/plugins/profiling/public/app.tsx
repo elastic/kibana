@@ -41,6 +41,8 @@ function App({
   theme$,
   history,
 }: Props) {
+  const i18nCore = coreStart.i18n;
+
   const profilingDependencies = useMemo(() => {
     return {
       start: {
@@ -58,15 +60,17 @@ function App({
   return (
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
-        <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-          <RouterProvider router={profilingRouter as any} history={history}>
-            <ProfilingDependenciesContextProvider value={profilingDependencies}>
-              <RedirectWithDefaultDateRange>
-                <RouteRenderer />
-              </RedirectWithDefaultDateRange>
-            </ProfilingDependenciesContextProvider>
-          </RouterProvider>
-        </RedirectAppLinks>
+        <i18nCore.Context>
+          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
+            <RouterProvider router={profilingRouter as any} history={history}>
+              <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                <RedirectWithDefaultDateRange>
+                  <RouteRenderer />
+                </RedirectWithDefaultDateRange>
+              </ProfilingDependenciesContextProvider>
+            </RouterProvider>
+          </RedirectAppLinks>
+        </i18nCore.Context>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

@@ -6,20 +6,20 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
+import { getClient } from './compat';
+import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { createProjectTimeQuery, ProjectTimeQuery } from './query';
-import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import {
   mgetExecutables,
   mgetStackFrames,
   mgetStackTraces,
   searchEventsGroupByStackTrace,
 } from './stacktrace';
-import { getClient } from './compat';
 
 async function queryTopNFunctions(
   logger: Logger,
@@ -89,10 +89,7 @@ const querySchema = schema.object({
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
 
-export function registerTopNFunctionsSearchRoute(
-  router: IRouter<DataRequestHandlerContext>,
-  logger: Logger
-) {
+export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {

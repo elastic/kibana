@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-
+import { PROFILING_FEATURE } from './feature';
+import { registerRoutes } from './routes';
 import {
   ProfilingPluginSetup,
-  ProfilingPluginStart,
   ProfilingPluginSetupDeps,
+  ProfilingPluginStart,
   ProfilingPluginStartDeps,
+  ProfilingRequestHandlerContext,
 } from './types';
-import { mySearchStrategyProvider } from './my_strategy';
-import { registerRoutes } from './routes';
-import { PROFILING_FEATURE } from './feature';
 
 export class ProfilingPlugin
   implements
@@ -36,14 +34,19 @@ export class ProfilingPlugin
 
   public setup(core: CoreSetup<ProfilingPluginStartDeps>, deps: ProfilingPluginSetupDeps) {
     this.logger.debug('profiling: Setup');
-    const router = core.http.createRouter<DataRequestHandlerContext>();
+    const router = core.http.createRouter<ProfilingRequestHandlerContext>();
 
     deps.features.registerKibanaFeature(PROFILING_FEATURE);
 
     core.getStartServices().then(([_, depsStart]) => {
-      const myStrategy = mySearchStrategyProvider(depsStart.data);
-      deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
-      registerRoutes(router, this.logger);
+      registerRoutes({
+        router,
+        logger: this.logger!,
+        dependencies: {
+          start: depsStart,
+          setup: deps,
+        },
+      });
     });
 
     return {};

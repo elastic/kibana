@@ -20,7 +20,7 @@ import type {
   GetGetResult,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { ProfilingRequestHandlerContext } from '../types';
 
 type HitsWithTotalHits = Omit<SearchHitsMetadata<unknown>, 'total'> & {
   total: SearchTotalHits;
@@ -48,6 +48,8 @@ export function getDocs(res: MgetResponse<any>): Array<GetGetResult<any>> {
   return res.docs as unknown as Array<GetGetResult<any>>;
 }
 
-export async function getClient(context: DataRequestHandlerContext): Promise<ElasticsearchClient> {
+export async function getClient(
+  context: ProfilingRequestHandlerContext
+): Promise<ElasticsearchClient> {
   return (await context.core).elasticsearch.client.asCurrentUser;
 }
