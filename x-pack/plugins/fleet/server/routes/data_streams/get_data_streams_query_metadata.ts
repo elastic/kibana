@@ -24,8 +24,8 @@ export async function getDataStreamsQueryMetadata({
     esClient.search({
       size: 1,
       index: dataStreamName,
-      // @ts-expect-error Type '{ 'event.ingested': { order: string; ignore_unmapped: true; }; }' is not assignable to type 'string'
-      sort: [{ 'event.ingested': { order: 'desc', ignore_unmapped: true } }],
+      // @ts-expect-error
+      sort: [{ 'event.ingested': { order: 'desc', unmapped_type: 'long' } }],
       _source: false,
       fields: ['event.ingested'],
     }),
