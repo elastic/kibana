@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { createContext, ReactChild, useContext, useState, useCallback } from 'react';
+import type { ReactChild } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
+import type { EuiTourStepProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTourStep,
-  EuiTourStepProps,
   EuiText,
   EuiSpacer,
   EuiImage,
