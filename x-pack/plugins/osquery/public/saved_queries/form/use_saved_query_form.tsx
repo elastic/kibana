@@ -13,7 +13,7 @@ import { useMemo } from 'react';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useForm } from '../../shared_imports';
 import { createFormSchema } from '../../packs/queries/schema';
-import { PackFormData } from '../../packs/queries/use_pack_query_form';
+import type { PackFormData } from '../../packs/queries/use_pack_query_form';
 import { useSavedQueries } from '../use_saved_queries';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
@@ -59,7 +59,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             // @ts-expect-error update types
-            delete draft.version;
+            draft.version = '';
           } else {
             draft.version = draft.version[0];
           }

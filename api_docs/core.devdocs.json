@@ -651,6 +651,9 @@
         "description": [
           "\nAnalytics client's public APIs"
         ],
+        "signature": [
+          "AnalyticsClient"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1282,13 +1285,7 @@
               "{@link HttpSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1523,13 +1520,7 @@
               "{@link HttpStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1711,6 +1702,9 @@
         "description": [
           "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
         ],
+        "signature": [
+          "CoreTheme"
+        ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1880,6 +1874,9 @@
         "tags": [],
         "label": "DocLinksStart",
         "description": [],
+        "signature": [
+          "DocLinksStart"
+        ],
         "path": "node_modules/@types/kbn__core-doc-links-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1926,6 +1923,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2033,6 +2033,9 @@
         "description": [
           "\nDefinition of the full event structure"
         ],
+        "signature": [
+          "Event"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2101,6 +2104,9 @@
         "label": "EventContext",
         "description": [
           "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+        ],
+        "signature": [
+          "EventContext"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -2330,6 +2336,9 @@
         "description": [
           "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
         ],
+        "signature": [
+          "ExecutionContextSetup"
+        ],
         "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2486,6 +2495,9 @@
         "description": [
           "\nRepresents the `message` and `stack` of a fatal Error\n"
         ],
+        "signature": [
+          "FatalErrorInfo"
+        ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2523,6 +2535,9 @@
         "label": "FatalErrorsSetup",
         "description": [
           "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+        ],
+        "signature": [
+          "FatalErrorsSetup"
         ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
@@ -2603,12 +2618,1204 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.HttpFetchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpFetchOptions",
+        "description": [
+          "\nAll options that may be used with a {@link HttpHandler}."
+        ],
+        "signature": [
+          "HttpFetchOptions",
+          " extends ",
+          "HttpRequestInit"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "\nThe query string for an HTTP request. See {@link HttpFetchQuery}."
+            ],
+            "signature": [
+              "HttpFetchQuery",
+              " | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.prependBasePath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "prependBasePath",
+            "description": [
+              "\nWhether or not the request should automatically prepend the basePath. Defaults to `true`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "\nHeaders to send with the request. See {@link HttpHeadersInit}."
+            ],
+            "signature": [
+              "HttpHeadersInit",
+              " | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.asSystemRequest",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "asSystemRequest",
+            "description": [
+              "\nWhether or not the request should include the \"system request\" header to differentiate an end user request from\nKibana internal request.\nCan be read on the server-side using KibanaRequest#isSystemRequest. Defaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.asResponse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "asResponse",
+            "description": [
+              "\nWhen `true` the return type of {@link HttpHandler} will be an {@link HttpResponse} with detailed request and\nresponse information. When `false`, the return type will just be the parsed response body. Defaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptions.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpFetchOptionsWithPath",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpFetchOptionsWithPath",
+        "description": [
+          "\nSimilar to {@link HttpFetchOptions} but with the URL path included."
+        ],
+        "signature": [
+          "HttpFetchOptionsWithPath",
+          " extends ",
+          "HttpFetchOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchOptionsWithPath.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpFetchQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpFetchQuery",
+        "description": [],
+        "signature": [
+          "HttpFetchQuery"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpFetchQuery.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
+            "description": [
+              "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
+            ],
+            "signature": [
+              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpHandler",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpHandler",
+        "description": [
+          "\nA function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and\n{@link HttpResponse} for the response.\n"
+        ],
+        "signature": [
+          "HttpHandler"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpHandler.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpHandler.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpHandler.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpHandler.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpHeadersInit",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpHeadersInit",
+        "description": [
+          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
+        ],
+        "signature": [
+          "HttpHeadersInit"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpHeadersInit.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[name: string]: any",
+            "description": [],
+            "signature": [
+              "[name: string]:  any"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpInterceptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpInterceptor",
+        "description": [
+          "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee {@link IHttpInterceptController}.\n"
+        ],
+        "signature": [
+          "HttpInterceptor"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptor.request",
+            "type": "Function",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nDefine an interceptor to be executed before a request is sent."
+            ],
+            "signature": [
+              "((fetchOptions: Readonly<",
+              "HttpFetchOptionsWithPath",
+              ">, controller: ",
+              "IHttpInterceptController",
+              ") => void | ",
+              "MaybePromise",
+              "<Partial<",
+              "HttpFetchOptionsWithPath",
+              ">>) | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.request.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fetchOptions",
+                "description": [],
+                "signature": [
+                  "Readonly<",
+                  "HttpFetchOptionsWithPath",
+                  ">"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.request.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controller",
+                "description": [
+                  "{@link IHttpInterceptController }"
+                ],
+                "signature": [
+                  "IHttpInterceptController"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptor.requestError",
+            "type": "Function",
+            "tags": [],
+            "label": "requestError",
+            "description": [
+              "\nDefine an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise."
+            ],
+            "signature": [
+              "((httpErrorRequest: ",
+              "HttpInterceptorRequestError",
+              ", controller: ",
+              "IHttpInterceptController",
+              ") => void | ",
+              "MaybePromise",
+              "<Partial<",
+              "HttpFetchOptionsWithPath",
+              ">>) | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.requestError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "httpErrorRequest",
+                "description": [
+                  "{@link HttpInterceptorRequestError }"
+                ],
+                "signature": [
+                  "HttpInterceptorRequestError"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.requestError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controller",
+                "description": [
+                  "{@link IHttpInterceptController }"
+                ],
+                "signature": [
+                  "IHttpInterceptController"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptor.response",
+            "type": "Function",
+            "tags": [],
+            "label": "response",
+            "description": [
+              "\nDefine an interceptor to be executed after a response is received."
+            ],
+            "signature": [
+              "((httpResponse: ",
+              "HttpResponse",
+              "<unknown>, controller: ",
+              "IHttpInterceptController",
+              ") => void | ",
+              "MaybePromise",
+              "<",
+              "IHttpResponseInterceptorOverrides",
+              "<unknown>>) | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.response.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "httpResponse",
+                "description": [
+                  "{@link HttpResponse }"
+                ],
+                "signature": [
+                  "HttpResponse",
+                  "<unknown>"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.response.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controller",
+                "description": [
+                  "{@link IHttpInterceptController }"
+                ],
+                "signature": [
+                  "IHttpInterceptController"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptor.responseError",
+            "type": "Function",
+            "tags": [],
+            "label": "responseError",
+            "description": [
+              "\nDefine an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise."
+            ],
+            "signature": [
+              "((httpErrorResponse: ",
+              "HttpInterceptorResponseError",
+              ", controller: ",
+              "IHttpInterceptController",
+              ") => void | ",
+              "MaybePromise",
+              "<",
+              "IHttpResponseInterceptorOverrides",
+              "<unknown>>) | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.responseError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "httpErrorResponse",
+                "description": [
+                  "{@link HttpInterceptorResponseError }"
+                ],
+                "signature": [
+                  "HttpInterceptorResponseError"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpInterceptor.responseError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controller",
+                "description": [
+                  "{@link IHttpInterceptController }"
+                ],
+                "signature": [
+                  "IHttpInterceptController"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpInterceptorRequestError",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpInterceptorRequestError",
+        "description": [],
+        "signature": [
+          "HttpInterceptorRequestError"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptorRequestError.fetchOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "fetchOptions",
+            "description": [],
+            "signature": [
+              "{ readonly path: string; readonly query?: ",
+              "HttpFetchQuery",
+              " | undefined; readonly prependBasePath?: boolean | undefined; readonly headers?: ",
+              "HttpHeadersInit",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              "KibanaExecutionContext",
+              " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptorRequestError.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpInterceptorResponseError",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpInterceptorResponseError",
+        "description": [],
+        "signature": [
+          "HttpInterceptorResponseError",
+          " extends ",
+          "HttpResponse",
+          "<unknown>"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptorResponseError.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpInterceptorResponseError.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | ",
+              "IHttpFetchError",
+              "<unknown>"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpRequestInit",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpRequestInit",
+        "description": [
+          "\nFetch API options available to {@link HttpHandler}s.\n"
+        ],
+        "signature": [
+          "HttpRequestInit"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.body",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "\nA BodyInit object or null to set request's body."
+            ],
+            "signature": [
+              "BodyInit | null | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.cache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cache",
+            "description": [
+              "\nThe cache mode associated with request, which is a string indicating how the request will interact with the\nbrowser's cache when fetching."
+            ],
+            "signature": [
+              "RequestCache | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.credentials",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "credentials",
+            "description": [
+              "\nThe credentials mode associated with request, which is a string indicating whether credentials will be sent with\nthe request always, never, or only when sent to a same-origin URL."
+            ],
+            "signature": [
+              "RequestCredentials | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "{@link HttpHeadersInit}"
+            ],
+            "signature": [
+              "HttpHeadersInit",
+              " | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.integrity",
+            "type": "string",
+            "tags": [],
+            "label": "integrity",
+            "description": [
+              "\nSubresource integrity metadata, which is a cryptographic hash of the resource being fetched. Its value consists of\nmultiple hashes separated by whitespace."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.keepalive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "keepalive",
+            "description": [
+              "Whether or not request can outlive the global in which it was created."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.method",
+            "type": "string",
+            "tags": [],
+            "label": "method",
+            "description": [
+              "HTTP method, which is \"GET\" by default."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [
+              "\nThe mode associated with request, which is a string indicating whether the request will use CORS, or will be\nrestricted to same-origin URLs."
+            ],
+            "signature": [
+              "RequestMode | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.redirect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "redirect",
+            "description": [
+              "\nThe redirect mode associated with request, which is a string indicating how redirects for the request will be\nhandled during fetching. A request will follow redirects by default."
+            ],
+            "signature": [
+              "RequestRedirect | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.referrer",
+            "type": "string",
+            "tags": [],
+            "label": "referrer",
+            "description": [
+              "\nThe referrer of request. Its value can be a same-origin URL if explicitly set in init, the empty string to\nindicate no referrer, and \"about:client\" when defaulting to the global's default. This is used during fetching to\ndetermine the value of the `Referer` header of the request being made."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.referrerPolicy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "referrerPolicy",
+            "description": [
+              "\nThe referrer policy associated with request. This is used during fetching to compute the value of the request's\nreferrer."
+            ],
+            "signature": [
+              "ReferrerPolicy | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.signal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "signal",
+            "description": [
+              "\nReturns the signal associated with request, which is an AbortSignal object indicating whether or not request has\nbeen aborted, and its abort event handler."
+            ],
+            "signature": [
+              "AbortSignal | null | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpRequestInit.window",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "window",
+            "description": [
+              "\nCan only be null. Used to disassociate request from any Window."
+            ],
+            "signature": [
+              "null | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpResponse",
+        "description": [],
+        "signature": [
+          "HttpResponse",
+          "<TResponseBody>"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpResponse.fetchOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "fetchOptions",
+            "description": [
+              "The original {@link HttpFetchOptionsWithPath} used to send this request."
+            ],
+            "signature": [
+              "{ readonly path: string; readonly query?: ",
+              "HttpFetchQuery",
+              " | undefined; readonly prependBasePath?: boolean | undefined; readonly headers?: ",
+              "HttpHeadersInit",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              "KibanaExecutionContext",
+              " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpResponse.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "Raw request sent to Kibana server."
+            ],
+            "signature": [
+              "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpResponse.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [
+              "Raw response received, may be undefined if there was an error."
+            ],
+            "signature": [
+              "Readonly<Response> | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpResponse.body",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "Parsed body received, may be undefined if there was an error."
+            ],
+            "signature": [
+              "TResponseBody | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpSetup",
+        "description": [],
+        "signature": [
+          "HttpSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.basePath",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "\nAPIs for manipulating the basePath on URL segments.\nSee {@link IBasePath}"
+            ],
+            "signature": [
+              "IBasePath"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.anonymousPaths",
+            "type": "Object",
+            "tags": [],
+            "label": "anonymousPaths",
+            "description": [
+              "\nAPIs for denoting certain paths for not requiring authentication"
+            ],
+            "signature": [
+              "IAnonymousPaths"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.externalUrl",
+            "type": "Object",
+            "tags": [],
+            "label": "externalUrl",
+            "description": [],
+            "signature": [
+              "IExternalUrl"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.intercept",
+            "type": "Function",
+            "tags": [],
+            "label": "intercept",
+            "description": [
+              "\nAdds a new {@link HttpInterceptor} to the global HTTP client."
+            ],
+            "signature": [
+              "(interceptor: ",
+              "HttpInterceptor",
+              ") => () => void"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpSetup.intercept.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "interceptor",
+                "description": [
+                  "a {@link HttpInterceptor }"
+                ],
+                "signature": [
+                  "HttpInterceptor"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a function for removing the attached interceptor."
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [
+              "Makes an HTTP request. Defaults to a GET request unless overridden. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "Makes an HTTP request with the GET method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.head",
+            "type": "Function",
+            "tags": [],
+            "label": "head",
+            "description": [
+              "Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.options",
+            "type": "Function",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.patch",
+            "type": "Function",
+            "tags": [],
+            "label": "patch",
+            "description": [
+              "Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.post",
+            "type": "Function",
+            "tags": [],
+            "label": "post",
+            "description": [
+              "Makes an HTTP request with the POST method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.put",
+            "type": "Function",
+            "tags": [],
+            "label": "put",
+            "description": [
+              "Makes an HTTP request with the PUT method. See {@link HttpHandler} for options."
+            ],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.addLoadingCountSource",
+            "type": "Function",
+            "tags": [],
+            "label": "addLoadingCountSource",
+            "description": [
+              "\nAdds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are\nmore than 0."
+            ],
+            "signature": [
+              "(countSource$: ",
+              "Observable",
+              "<number>) => void"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.HttpSetup.addLoadingCountSource.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "countSource$",
+                "description": [
+                  "an Observable to subscribe to for loading count updates."
+                ],
+                "signature": [
+                  "Observable",
+                  "<number>"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.HttpSetup.getLoadingCount$",
+            "type": "Function",
+            "tags": [],
+            "label": "getLoadingCount$",
+            "description": [
+              "\nGet the sum of all loading count sources as a single Observable."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<number>"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.I18nStart",
         "type": "Interface",
         "tags": [],
         "label": "I18nStart",
         "description": [
           "\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\n"
+        ],
+        "signature": [
+          "I18nStart"
         ],
         "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
         "deprecated": false,
@@ -2661,56 +3868,511 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-public.IExternalUrlPolicy",
+        "id": "def-public.IAnonymousPaths",
         "type": "Interface",
         "tags": [],
-        "label": "IExternalUrlPolicy",
+        "label": "IAnonymousPaths",
         "description": [
-          "\nA policy describing whether access to an external destination is allowed."
+          "\nAPIs for denoting paths as not requiring authentication"
         ],
-        "path": "src/core/server/http/external_url/external_url_config.ts",
+        "signature": [
+          "IAnonymousPaths"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.IExternalUrlPolicy.allow",
+            "id": "def-public.IAnonymousPaths.isAnonymous",
+            "type": "Function",
+            "tags": [],
+            "label": "isAnonymous",
+            "description": [
+              "\nDetermines whether the provided path doesn't require authentication. `path` should include the current basePath."
+            ],
+            "signature": [
+              "(path: string) => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IAnonymousPaths.isAnonymous.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IAnonymousPaths.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister `path` as not requiring authentication. `path` should not include the current basePath."
+            ],
+            "signature": [
+              "(path: string) => void"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IAnonymousPaths.register.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IBasePath",
+        "type": "Interface",
+        "tags": [],
+        "label": "IBasePath",
+        "description": [
+          "\nAPIs for manipulating the basePath on URL segments."
+        ],
+        "signature": [
+          "IBasePath"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IBasePath.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGets the `basePath` string."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IBasePath.prepend",
+            "type": "Function",
+            "tags": [],
+            "label": "prepend",
+            "description": [
+              "\nPrepends `path` with the basePath."
+            ],
+            "signature": [
+              "(url: string) => string"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IBasePath.prepend.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IBasePath.remove",
+            "type": "Function",
+            "tags": [],
+            "label": "remove",
+            "description": [
+              "\nRemoves the prepended basePath from the `path`."
+            ],
+            "signature": [
+              "(url: string) => string"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IBasePath.remove.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IBasePath.serverBasePath",
+            "type": "string",
+            "tags": [],
+            "label": "serverBasePath",
+            "description": [
+              "\nReturns the server's root basePath as configured, without any namespace prefix.\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IBasePath.publicBaseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "publicBaseUrl",
+            "description": [
+              "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link IBasePath.serverBasePath}.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IExternalUrl",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExternalUrl",
+        "description": [
+          "\nAPIs for working with external URLs.\n"
+        ],
+        "signature": [
+          "IExternalUrl"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IExternalUrl.isInternalUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "isInternalUrl",
+            "description": [
+              "\nDetermines if the provided URL is an internal url.\n"
+            ],
+            "signature": [
+              "(relativeOrAbsoluteUrl: string) => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IExternalUrl.isInternalUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "relativeOrAbsoluteUrl",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IExternalUrl.validateUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "validateUrl",
+            "description": [
+              "\nDetermines if the provided URL is a valid location to send users.\nValidation is based on the configured allow list in kibana.yml.\n\nIf the URL is valid, then a URL will be returned.\nOtherwise, this will return null.\n"
+            ],
+            "signature": [
+              "(relativeOrAbsoluteUrl: string) => URL | null"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IExternalUrl.validateUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "relativeOrAbsoluteUrl",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IHttpFetchError",
+        "type": "Interface",
+        "tags": [],
+        "label": "IHttpFetchError",
+        "description": [],
+        "signature": [
+          "IHttpFetchError",
+          "<TResponseBody> extends Error"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpFetchError.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpFetchError.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "Request"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpFetchError.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Response | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpFetchError.req",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "req",
+            "description": [],
+            "signature": [
+              "Request"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
+            "references": [
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpFetchError.res",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "res",
+            "description": [],
+            "signature": [
+              "Response | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
+            "references": [
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-browser-internal",
+                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpFetchError.body",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TResponseBody | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IHttpInterceptController",
+        "type": "Interface",
+        "tags": [],
+        "label": "IHttpInterceptController",
+        "description": [
+          "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
+        ],
+        "signature": [
+          "IHttpInterceptController"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpInterceptController.halted",
             "type": "boolean",
             "tags": [],
-            "label": "allow",
+            "label": "halted",
             "description": [
-              "\nIndicates if this policy allows or denies access to the described destination."
+              "Whether or not this chain has been halted."
             ],
-            "path": "src/core/server/http/external_url/external_url_config.ts",
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.IExternalUrlPolicy.host",
-            "type": "string",
+            "id": "def-public.IHttpInterceptController.halt",
+            "type": "Function",
             "tags": [],
-            "label": "host",
+            "label": "halt",
             "description": [
-              "\nOptional host describing the external destination.\nMay be combined with `protocol`.\n"
+              "Halt the request Promise chain and do not process further interceptors or response handlers."
             ],
             "signature": [
-              "string | undefined"
+              "() => void"
             ],
-            "path": "src/core/server/http/external_url/external_url_config.ts",
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IHttpResponseInterceptorOverrides",
+        "type": "Interface",
+        "tags": [],
+        "label": "IHttpResponseInterceptorOverrides",
+        "description": [
+          "\nProperties that can be returned by HttpInterceptor.request to override the response."
+        ],
+        "signature": [
+          "IHttpResponseInterceptorOverrides",
+          "<TResponseBody>"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IHttpResponseInterceptorOverrides.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [
+              "Raw response received, may be undefined if there was an error."
+            ],
+            "signature": [
+              "Readonly<Response> | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.IExternalUrlPolicy.protocol",
-            "type": "string",
+            "id": "def-public.IHttpResponseInterceptorOverrides.body",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "protocol",
+            "label": "body",
             "description": [
-              "\nOptional protocol describing the external destination.\nMay be combined with `host`.\n"
+              "Parsed body received, may be undefined if there was an error."
             ],
             "signature": [
-              "string | undefined"
+              "TResponseBody | undefined"
             ],
-            "path": "src/core/server/http/external_url/external_url_config.ts",
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -2724,6 +4386,9 @@
         "label": "IShipper",
         "description": [
           "\nBasic structure of a Shipper"
+        ],
+        "signature": [
+          "IShipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -3603,6 +5268,9 @@
         "label": "OptInConfig",
         "description": [
           "\n"
+        ],
+        "signature": [
+          "OptInConfig"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -4890,6 +6558,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -5168,6 +6839,55 @@
               "{ get: <T extends object = ConfigSchema>() => T; }"
             ],
             "path": "src/core/public/plugins/plugin_context.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ResponseErrorBody",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResponseErrorBody",
+        "description": [],
+        "signature": [
+          "ResponseErrorBody"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResponseErrorBody.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResponseErrorBody.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResponseErrorBody.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -6980,6 +8700,9 @@
         "description": [
           "\nShape of the events emitted by the telemetryCounter$ observable"
         ],
+        "signature": [
+          "TelemetryCounter"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7056,6 +8779,9 @@
         "tags": [],
         "label": "ThemeServiceSetup",
         "description": [],
+        "signature": [
+          "ThemeServiceSetup"
+        ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7085,6 +8811,9 @@
         "tags": [],
         "label": "ThemeServiceStart",
         "description": [],
+        "signature": [
+          "ThemeServiceStart"
+        ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7580,6 +9309,22 @@
           "FatalErrorsSetup"
         ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.HttpStart",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpStart",
+        "description": [
+          "\nSee {@link HttpSetup}"
+        ],
+        "signature": [
+          "HttpSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8953,6 +10698,9 @@
         "description": [
           "\nAnalytics client's public APIs"
         ],
+        "signature": [
+          "AnalyticsClient"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -9905,6 +11653,9 @@
         "description": [
           "\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\n"
         ],
+        "signature": [
+          "ConfigDeprecationContext"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -10011,6 +11762,9 @@
         "label": "ConfigDeprecationFactory",
         "description": [
           "\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\nwhen invoking a {@link ConfigDeprecationProvider}.\n\nSee methods documentation for more detailed examples.\n"
+        ],
+        "signature": [
+          "ConfigDeprecationFactory"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -11222,153 +12976,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.CountResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "CountResponse",
-        "description": [],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CountResponse._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ShardsInfo",
-                "text": "ShardsInfo"
-              }
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CountResponse.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.DeleteDocumentResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "DeleteDocumentResponse",
-        "description": [],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ShardsResponse",
-                "text": "ShardsResponse"
-              }
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse.found",
-            "type": "boolean",
-            "tags": [],
-            "label": "found",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse._index",
-            "type": "string",
-            "tags": [],
-            "label": "_index",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse._type",
-            "type": "string",
-            "tags": [],
-            "label": "_type",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse._id",
-            "type": "string",
-            "tags": [],
-            "label": "_id",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse._version",
-            "type": "number",
-            "tags": [],
-            "label": "_version",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse.result",
-            "type": "string",
-            "tags": [],
-            "label": "result",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.DeleteDocumentResponse.error",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "{ type: string; } | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.DeprecationsClient",
         "type": "Interface",
         "tags": [],
@@ -11540,6 +13147,9 @@
         "description": [
           "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
         ],
+        "signature": [
+          "DiscoveredPlugin"
+        ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11655,6 +13265,9 @@
         "tags": [],
         "label": "DocLinksServiceSetup",
         "description": [],
+        "signature": [
+          "DocLinksServiceSetup"
+        ],
         "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -12133,6 +13746,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -12180,6 +13796,9 @@
         "label": "Event",
         "description": [
           "\nDefinition of the full event structure"
+        ],
+        "signature": [
+          "Event"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -12249,6 +13868,9 @@
         "label": "EventContext",
         "description": [
           "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+        ],
+        "signature": [
+          "EventContext"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -12476,6 +14098,9 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [],
+        "signature": [
+          "ExecutionContextSetup"
+        ],
         "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -12984,125 +14609,6 @@
               "; }"
             ],
             "path": "src/core/server/deprecations/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.GetResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "GetResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.GetResponse",
-            "text": "GetResponse"
-          },
-          "<T>"
-        ],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._index",
-            "type": "string",
-            "tags": [],
-            "label": "_index",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._type",
-            "type": "string",
-            "tags": [],
-            "label": "_type",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._id",
-            "type": "string",
-            "tags": [],
-            "label": "_id",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._version",
-            "type": "number",
-            "tags": [],
-            "label": "_version",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._routing",
-            "type": "string",
-            "tags": [],
-            "label": "_routing",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse.found",
-            "type": "boolean",
-            "tags": [],
-            "label": "found",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._source",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "_source",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._seq_no",
-            "type": "number",
-            "tags": [],
-            "label": "_seq_no",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.GetResponse._primary_term",
-            "type": "number",
-            "tags": [],
-            "label": "_primary_term",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
             "deprecated": false
           }
         ],
@@ -15622,6 +17128,9 @@
         "tags": [],
         "label": "IExecutionContextContainer",
         "description": [],
+        "signature": [
+          "IExecutionContextContainer"
+        ],
         "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -18216,6 +19725,9 @@
         "description": [
           "\nBasic structure of a Shipper"
         ],
+        "signature": [
+          "IShipper"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -18681,6 +20193,9 @@
         "description": [
           "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
         ],
+        "signature": [
+          "Logger"
+        ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19053,6 +20568,9 @@
         "description": [
           "\nDescribes the configuration of a given logger.\n"
         ],
+        "signature": [
+          "LoggerConfigType"
+        ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19104,6 +20622,9 @@
         "description": [
           "\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
         ],
+        "signature": [
+          "LoggerContextConfigInput"
+        ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19149,6 +20670,9 @@
         "label": "LoggerFactory",
         "description": [
           "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
+        ],
+        "signature": [
+          "LoggerFactory"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -19199,6 +20723,9 @@
         "label": "LoggingServiceSetup",
         "description": [
           "\nProvides APIs to plugins for customizing the plugin's logger."
+        ],
+        "signature": [
+          "LoggingServiceSetup"
         ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
@@ -19308,6 +20835,9 @@
         "description": [
           "\nContains information about how this Kibana process has been configured.\n"
         ],
+        "signature": [
+          "NodeInfo"
+        ],
         "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19337,6 +20867,9 @@
         "label": "NodeRoles",
         "description": [
           "\nThe Kibana process can be run in dedicated \"modes\" via `node.roles`.\nThis configuration is then exposed to plugins via `NodeRoles`,\nwhich is available on the `PluginInitializerContext`.\n\nThe node roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured.\n"
+        ],
+        "signature": [
+          "NodeRoles"
         ],
         "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
         "deprecated": false,
@@ -19899,6 +21432,9 @@
         "description": [
           "\n"
         ],
+        "signature": [
+          "OptInConfig"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19944,6 +21480,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22514,122 +24053,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.SearchResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.SearchResponse",
-            "text": "SearchResponse"
-          },
-          "<T>"
-        ],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse.took",
-            "type": "number",
-            "tags": [],
-            "label": "took",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse.timed_out",
-            "type": "boolean",
-            "tags": [],
-            "label": "timed_out",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse._scroll_id",
-            "type": "string",
-            "tags": [],
-            "label": "_scroll_id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ShardsResponse",
-                "text": "ShardsResponse"
-              }
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse.hits",
-            "type": "Object",
-            "tags": [],
-            "label": "hits",
-            "description": [],
-            "signature": [
-              "{ total: number; max_score: number; hits: { _index: string; _type: string; _id: string; _score: number; _source: T; _version?: number | undefined; _explanation?: ",
-              "Explanation",
-              " | undefined; fields?: any; highlight?: any; inner_hits?: any; matched_queries?: string[] | undefined; sort?: unknown[] | undefined; }[]; }"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse.aggregations",
-            "type": "Any",
-            "tags": [],
-            "label": "aggregations",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.SearchResponse.pit_id",
-            "type": "string",
-            "tags": [],
-            "label": "pit_id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.ServiceStatus",
         "type": "Interface",
         "tags": [],
@@ -22720,114 +24143,6 @@
               "Meta | undefined"
             ],
             "path": "src/core/server/status/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ShardsInfo",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShardsInfo",
-        "description": [],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsInfo.total",
-            "type": "number",
-            "tags": [],
-            "label": "total",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsInfo.successful",
-            "type": "number",
-            "tags": [],
-            "label": "successful",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsInfo.skipped",
-            "type": "number",
-            "tags": [],
-            "label": "skipped",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsInfo.failed",
-            "type": "number",
-            "tags": [],
-            "label": "failed",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ShardsResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShardsResponse",
-        "description": [
-          "\nAll response typings are maintained until elasticsearch-js provides them out of the box\nhttps://github.com/elastic/elasticsearch-js/pull/970\n"
-        ],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsResponse.total",
-            "type": "number",
-            "tags": [],
-            "label": "total",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsResponse.successful",
-            "type": "number",
-            "tags": [],
-            "label": "successful",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsResponse.failed",
-            "type": "number",
-            "tags": [],
-            "label": "failed",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ShardsResponse.skipped",
-            "type": "number",
-            "tags": [],
-            "label": "skipped",
-            "description": [],
-            "path": "src/core/server/elasticsearch/client/types.ts",
             "deprecated": false
           }
         ],
@@ -23101,6 +24416,9 @@
         "label": "TelemetryCounter",
         "description": [
           "\nShape of the events emitted by the telemetryCounter$ observable"
+        ],
+        "signature": [
+          "TelemetryCounter"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -23858,6 +25176,9 @@
         "tags": [],
         "label": "PluginType",
         "description": [],
+        "signature": [
+          "PluginType"
+        ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false

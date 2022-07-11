@@ -3,7 +3,7 @@ id: kibDevDocsDeprecationsDueByTeam
 slug: /kibana-dev-docs/api-meta/deprecations-due-by-team
 title: Deprecated APIs due to be removed, by team
 summary: Lists the teams that are referencing deprecated APIs with a remove by date.
-date: 2022-07-07
+date: 2022-07-11
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -187,3 +187,18 @@ migrates to using the Kibana Privilege model: https://github.com/elastic/kibana/
 | visualizations | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObject" text="SavedObject"/> | [display_duplicate_title_confirm_modal.ts](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts#:~:text=SavedObject), [display_duplicate_title_confirm_modal.ts](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts#:~:text=SavedObject), [check_for_duplicate_title.ts](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts#:~:text=SavedObject), [check_for_duplicate_title.ts](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts#:~:text=SavedObject), [display_duplicate_title_confirm_modal.ts](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts#:~:text=SavedObject), [display_duplicate_title_confirm_modal.ts](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts#:~:text=SavedObject), [check_for_duplicate_title.ts](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts#:~:text=SavedObject), [check_for_duplicate_title.ts](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts#:~:text=SavedObject) | 8.8.0 |
 | visualizations | <DocLink id="kibCorePluginApi" section="def-public.AppMountParameters.onAppLeave" text="onAppLeave"/> | [visualize_top_nav.tsx](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/visualize_app/components/visualize_top_nav.tsx#:~:text=onAppLeave), [visualize_editor_common.tsx](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/visualize_app/components/visualize_editor_common.tsx#:~:text=onAppLeave), [app.tsx](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/visualize_app/app.tsx#:~:text=onAppLeave), [index.tsx](https://github.com/elastic/kibana/tree/master/src/plugins/visualizations/public/visualize_app/index.tsx#:~:text=onAppLeave), [types.ts](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/app_plugin/types.ts#:~:text=onAppLeave), [types.ts](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/app_plugin/types.ts#:~:text=onAppLeave), [mounter.tsx](https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/app_plugin/mounter.tsx#:~:text=onAppLeave) | 8.8.0 |
 | management | <DocLink id="kibCorePluginApi" section="def-public.AppMountParameters.appBasePath" text="appBasePath"/> | [application.tsx](https://github.com/elastic/kibana/tree/master/src/plugins/management/public/application.tsx#:~:text=appBasePath) | 8.8.0 |
+
+
+
+## [Owner missing]
+
+| Plugin | Deprecated API | Reference location(s) | Remove By |
+| --------|-------|-----------|-----------|
+| @kbn/core-http-browser-internal | <DocLink id="kibCorePluginApi" section="def-public.IHttpFetchError.req" text="req"/> | [http_fetch_error.ts](https://github.com/elastic/kibana/tree/master/packages/core/http/core-http-browser-internal/src/http_fetch_error.ts#:~:text=req), [http_fetch_error.ts](https://github.com/elastic/kibana/tree/master/packages/core/http/core-http-browser-internal/src/http_fetch_error.ts#:~:text=req) | 8.8.0
+
+Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
+so TS and code-reference navigation might not highlight them. |
+| @kbn/core-http-browser-internal | <DocLink id="kibCorePluginApi" section="def-public.IHttpFetchError.res" text="res"/> | [http_fetch_error.ts](https://github.com/elastic/kibana/tree/master/packages/core/http/core-http-browser-internal/src/http_fetch_error.ts#:~:text=res), [http_fetch_error.ts](https://github.com/elastic/kibana/tree/master/packages/core/http/core-http-browser-internal/src/http_fetch_error.ts#:~:text=res) | 8.8.0
+
+Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
+so TS and code-reference navigation might not highlight them. |

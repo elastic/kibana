@@ -16,13 +16,11 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { DetailsPanel } from '.';
-import {
-  TimelineExpandedDetail,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import type { TimelineExpandedDetail } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useKibana } from '../../../common/lib/kibana';
