@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { PageRoute } from './pageroute';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
 describe('pageroute', () => {
   const documentTitle = 'Kibana';

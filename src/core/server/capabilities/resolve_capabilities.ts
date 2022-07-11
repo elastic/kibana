@@ -7,8 +7,8 @@
  */
 
 import { cloneDeep } from 'lodash';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { Capabilities, CapabilitiesSwitcher } from './types';
-import { KibanaRequest } from '../http';
 
 export type CapabilitiesResolver = (
   request: KibanaRequest,

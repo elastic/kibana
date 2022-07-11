@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { PackageInfo } from '@kbn/config';
 
 import type { PluginName } from '@kbn/core-base-common';
-import { IRouter } from '../../http';
+import type { IRouter } from '@kbn/core-http-server';
 import { MetricsServiceSetup } from '../../metrics';
 import type { CoreIncrementUsageCounter } from '../../core_usage_data/types';
 import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';

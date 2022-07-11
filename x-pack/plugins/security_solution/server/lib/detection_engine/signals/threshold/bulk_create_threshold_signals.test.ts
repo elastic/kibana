@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { calculateThresholdSignalUuid } from '../utils';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';

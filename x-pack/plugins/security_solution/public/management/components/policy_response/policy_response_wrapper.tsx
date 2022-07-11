@@ -7,7 +7,7 @@
 import React, { memo, useEffect, useState, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import type { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
