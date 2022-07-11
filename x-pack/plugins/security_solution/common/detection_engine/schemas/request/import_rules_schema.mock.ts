@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImportRulesSchema } from './import_rules_schema';
+import type { ImportRulesSchema } from './import_rules_schema';
 
 export const getImportRulesSchemaMock = (ruleId = 'rule-1'): ImportRulesSchema => ({
   description: 'some description',

@@ -8,8 +8,9 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
@@ -18,12 +19,12 @@ import { isOfQueryType } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { OnTimeChangeProps } from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
 
 import { inputsActions } from '../../store/inputs';
-import { InputsRange } from '../../store/inputs/model';
-import { InputsModelId } from '../../store/inputs/constants';
-import { State, inputsModel } from '../../store';
+import type { InputsRange } from '../../store/inputs/model';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { State, inputsModel } from '../../store';
 import { formatDate } from '../super_date_picker';
 import {
   endSelector,

@@ -8,16 +8,13 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
-import {
-  FilterManager,
-  TimeHistory,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { TimeHistory } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface QueryBarComponentProps {
