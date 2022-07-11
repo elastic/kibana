@@ -3104,6 +3104,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-deprecations-common-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal":
   version "0.0.0"
   uid ""
@@ -6695,6 +6707,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-common-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6767,10 +6791,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6784,6 +6804,10 @@
   uid ""
 
 "@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
   version "0.0.0"
   uid ""
 

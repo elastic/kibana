@@ -78,7 +78,7 @@ import type { SavedObjectsStart } from './saved_objects';
 import type { DeprecationsServiceStart } from './deprecations';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
-export type { DomainDeprecationDetails } from '../server/types';
+export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';

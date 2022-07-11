@@ -8,8 +8,8 @@
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
 import { DeprecationsClient, ResolveDeprecationResponse } from './deprecations_client';
-import type { DomainDeprecationDetails } from '../../server/types';
 
 /**
  * DeprecationsService provides methods to fetch domain deprecation details from
