@@ -113,8 +113,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
-    [CONSTANTS.filters]: [],
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
@@ -137,7 +135,6 @@ export const getMockProps = (
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.appQuery]: kqlQueryValue || { query: '', language: 'kuery' },
   },
   history: {
     ...mockHistory,

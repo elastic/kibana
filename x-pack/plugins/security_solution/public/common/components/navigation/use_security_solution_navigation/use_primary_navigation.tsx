@@ -19,11 +19,8 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 });
 
 export const usePrimaryNavigation = ({
-  filters,
-  query,
   navTabs,
   pageName,
-  savedQuery,
   tabName,
   timeline,
   timerange,
@@ -49,9 +46,6 @@ export const usePrimaryNavigation = ({
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
-    filters,
-    query,
-    savedQuery,
     timeline,
     timerange,
   });
