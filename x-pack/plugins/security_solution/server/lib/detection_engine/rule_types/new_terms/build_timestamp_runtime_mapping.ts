@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 export const TIMESTAMP_RUNTIME_FIELD = 'kibana.combined_timestamp' as const;
 

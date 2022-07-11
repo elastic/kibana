@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { newTermsRuleParams, NewTermsRuleParams } from '../../schemas/rule_schemas';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { NewTermsRuleParams } from '../../schemas/rule_schemas';
+import { newTermsRuleParams } from '../../schemas/rule_schemas';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
-import { GenericBulkCreateResponse } from '../factories';
-import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { GenericBulkCreateResponse } from '../factories';
+import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
-import {
-  buildDocFetchAgg,
-  buildRecentTermsAgg,
-  buildNewTermsAgg,
+import type {
   DocFetchAggResult,
   RecentTermsAggResult,
   NewTermsAggResult,
 } from './build_new_terms_aggregation';
 import {
+  buildDocFetchAgg,
+  buildRecentTermsAgg,
+  buildNewTermsAgg,
+} from './build_new_terms_aggregation';
+import {
   buildTimestampRuntimeMapping,
   TIMESTAMP_RUNTIME_FIELD,
 } from './build_timestamp_runtime_mapping';
-import { SignalSource } from '../../signals/types';
+import type { SignalSource } from '../../signals/types';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];

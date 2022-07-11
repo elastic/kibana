@@ -7,8 +7,9 @@
 
 import React, { useMemo } from 'react';
 
-import { Field, FieldHook } from '../../../../shared_imports';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { FieldHook } from '../../../../shared_imports';
+import { Field } from '../../../../shared_imports';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { getCategorizedFieldNames } from '../../../../timelines/components/edit_data_provider/helpers';
 import { NEW_TERMS_FIELD_PLACEHOLDER } from './translations';
 

@@ -6,7 +6,7 @@
  */
 
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';

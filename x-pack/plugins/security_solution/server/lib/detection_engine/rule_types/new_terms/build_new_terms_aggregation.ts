@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import { SignalSource } from '../../signals/types';
+import type { Moment } from 'moment';
+import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { SignalSource } from '../../signals/types';
 
 export type RecentTermsAggResult = ESSearchResponse<
   SignalSource,
