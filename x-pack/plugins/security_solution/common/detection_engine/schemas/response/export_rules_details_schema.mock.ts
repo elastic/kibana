@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { ExportRulesDetails } from './export_rules_details_schema';
-import {
-  ExportExceptionDetailsMock,
-  getExceptionExportDetailsMock,
-} from '@kbn/lists-plugin/common/schemas/response/exception_export_details_schema.mock';
+import type { ExportRulesDetails } from './export_rules_details_schema';
+import type { ExportExceptionDetailsMock } from '@kbn/lists-plugin/common/schemas/response/exception_export_details_schema.mock';
+import { getExceptionExportDetailsMock } from '@kbn/lists-plugin/common/schemas/response/exception_export_details_schema.mock';
 
 interface RuleDetailsMock {
   totalCount?: number;

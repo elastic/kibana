@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
@@ -14,7 +14,7 @@ import { useSecuritySolutionNavigation } from '.';
 import { CONSTANTS } from '../../url_state/constants';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { UrlInputsModel } from '../../../store/inputs/model';
+import type { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
@@ -37,8 +37,6 @@ jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
-    [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
-    [CONSTANTS.savedQuery]: '',
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
@@ -171,10 +169,10 @@ describe('useSecuritySolutionNavigation', () => {
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-href": "securitySolutionUI/cases?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "data-test-subj": "navigation-cases",
             "disabled": false,
-            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "href": "securitySolutionUI/cases?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "id": "cases",
             "isSelected": false,
             "name": "Cases",
