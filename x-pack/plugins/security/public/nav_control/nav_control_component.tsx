@@ -102,7 +102,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       name: (
         <FormattedMessage
           id="xpack.security.navControlComponent.editProfileLinkText"
-          defaultMessage="Profile"
+          defaultMessage="Edit Profile"
         />
       ),
       icon: <EuiIcon type="user" size="m" />,
