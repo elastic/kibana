@@ -8,11 +8,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
 import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';
-import {
-  useAlertsByStatus,
-  UseAlertsByStatus,
-  UseAlertsByStatusProps,
-} from './use_alerts_by_status';
+import type { UseAlertsByStatus, UseAlertsByStatusProps } from './use_alerts_by_status';
+import { useAlertsByStatus } from './use_alerts_by_status';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);

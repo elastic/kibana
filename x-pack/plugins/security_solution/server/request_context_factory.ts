@@ -7,30 +7,30 @@
 
 import { memoize } from 'lodash';
 
-import { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
-import { FleetAuthz } from '@kbn/fleet-plugin/common';
+import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 import { ruleExecutionLogForRoutesFactory } from './lib/detection_engine/rule_execution_log';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
-import {
+import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
 } from './plugin_contract';
-import {
+import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
-import { Immutable } from '../common/endpoint/types';
-import { EndpointAuthz } from '../common/endpoint/types/authz';
+import type { Immutable } from '../common/endpoint/types';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
-import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 
 export interface IRequestContextFactory {
   create(
