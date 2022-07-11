@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
-import { Direction, Maybe } from '../../../search_strategy/common';
+import type { Maybe } from '../../../search_strategy/common';
+import { Direction } from '../../../search_strategy/common';
 
 import { unionWithNullType } from '../../../utility_types';
 

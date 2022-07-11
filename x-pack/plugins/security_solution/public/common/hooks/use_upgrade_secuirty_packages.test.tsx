@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { useKibana } from '../lib/kibana';
-import { renderHook as _renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook as _renderHook } from '@testing-library/react-hooks';
 import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { Artifact, ArtifactsClientInterface, ListArtifactsProps } from '@kbn/fleet-plugin/server';
-import { ListResult } from '@kbn/fleet-plugin/common';
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import type {
+  Artifact,
+  ArtifactsClientInterface,
+  ListArtifactsProps,
+} from '@kbn/fleet-plugin/server';
+import type { ListResult } from '@kbn/fleet-plugin/common';
+import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;

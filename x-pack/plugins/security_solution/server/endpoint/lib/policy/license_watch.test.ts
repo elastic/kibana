@@ -14,13 +14,13 @@ import {
 import { LicenseService } from '../../../../common/license';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { PolicyWatcher } from './license_watch';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
-import { PolicyConfig } from '../../../../common/endpoint/types';
+import type { PolicyConfig } from '../../../../common/endpoint/types';
 
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();

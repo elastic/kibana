@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerApiError } from '../../../../../common/types';
+import type { ServerApiError } from '../../../../../common/types';
 
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.name.placeholder',

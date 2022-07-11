@@ -10,8 +10,9 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
+import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
@@ -19,12 +20,15 @@ import type {
   RequiredFieldArray,
 } from '../../../../../common/detection_engine/schemas/common';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import { FieldValueTimeline } from '../pick_timeline';
-import { FormSchema } from '../../../../shared_imports';
-import { ListItems } from './types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+} from '../../../pages/detection_engine/rules/types';
+import type { FieldValueTimeline } from '../pick_timeline';
+import type { FormSchema } from '../../../../shared_imports';
+import type { ListItems } from './types';
 import {
   buildQueryBarDescription,
   buildSeverityDescription,
