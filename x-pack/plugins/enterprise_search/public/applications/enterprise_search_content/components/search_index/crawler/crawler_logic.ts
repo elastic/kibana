@@ -40,6 +40,7 @@ export interface CrawlRequestOverrides {
 }
 
 export interface CrawlerValues {
+  data: CrawlerData | null;
   dataLoading: boolean;
   domains: CrawlerDomain[];
   events: CrawlEvent[];
@@ -64,8 +65,8 @@ export type CrawlerActions = Pick<
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   path: ['enterprise_search', 'crawler_logic'],
   connect: {
-    // actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
-    // values: [GetCrawlerApiLogic, ['status']],
+    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
+    values: [GetCrawlerApiLogic, ['status', 'data']],
   },
   actions: {
     clearTimeoutId: true,
@@ -84,24 +85,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         apiSuccess: () => false,
       },
     ],
-    domains: [
-      [],
-      {
-        apiSuccess: (_, { domains }) => domains,
-      },
-    ],
-    events: [
-      [],
-      {
-        apiSuccess: (_, { events }) => events,
-      },
-    ],
-    mostRecentCrawlRequest: [
-      null,
-      {
-        apiSuccess: (_, { mostRecentCrawlRequest }) => mostRecentCrawlRequest,
-      },
-    ],
     timeoutId: [
       null,
       {
@@ -112,13 +95,15 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     ],
   },
   selectors: ({ selectors }) => ({
+    domains: [() => [selectors.data], (data: CrawlerValues['data']) => data?.domains ?? []],
+    events: [() => [selectors.data], (data: CrawlerValues['data']) => data?.events ?? []],
+    mostRecentCrawlRequest: [
+      () => [selectors.data],
+      (data: CrawlerValues['data']) => data?.mostRecentCrawlRequest ?? null,
+    ],
     mostRecentCrawlRequestStatus: [
       () => [selectors.mostRecentCrawlRequest],
-      (crawlRequest: CrawlerValues['mostRecentCrawlRequest']) => {
-        if (crawlRequest) {
-          return crawlRequest.status;
-        }
-      },
+      (crawlRequest: CrawlerValues['mostRecentCrawlRequest']) => crawlRequest?.status ?? null,
     ],
   }),
   listeners: ({ actions, values }) => ({
@@ -128,46 +113,13 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     },
     apiSuccess: ({ mostRecentCrawlRequest }) => {
       const continuePoll =
-        mostRecentCrawlRequest && ACTIVE_STATUSES.includes(mostRecentCrawlRequest.status); // || crawlerData.events.find((event) => ACTIVE_STATUSES.includes(event.status));
+        mostRecentCrawlRequest && ACTIVE_STATUSES.includes(mostRecentCrawlRequest.status);
 
       if (continuePoll) {
         actions.createNewTimeoutForCrawlerData(POLLING_DURATION);
       }
     },
-    fetchCrawlerData: () => {
-      const { indexName } = IndexNameLogic.values;
 
-      if (values.timeoutId) {
-        clearTimeout(values.timeoutId);
-      }
-      GetCrawlerApiLogic.actions.makeRequest({ indexName });
-    },
-    startCrawl: async ({ overrides = {} }) => {
-      const { indexName } = IndexNameLogic.values;
-      const { http } = HttpLogic.values;
-
-      try {
-        await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
-          body: JSON.stringify({ overrides }),
-        });
-        actions.fetchCrawlerData();
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
-    stopCrawl: async () => {
-      const { indexName } = IndexNameLogic.values;
-      const { http } = HttpLogic.values;
-
-      try {
-        await http.post(
-          `/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests/cancel`
-        );
-        actions.fetchCrawlerData();
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
     createNewTimeoutForCrawlerData: ({ duration }) => {
       if (values.timeoutId) {
         clearTimeout(values.timeoutId);
@@ -203,6 +155,40 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         );
 
         CrawlerLogic.actions.fetchCrawlerData();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    fetchCrawlerData: () => {
+      const { indexName } = IndexNameLogic.values;
+
+      if (values.timeoutId) {
+        clearTimeout(values.timeoutId);
+      }
+      GetCrawlerApiLogic.actions.makeRequest({ indexName });
+    },
+    startCrawl: async ({ overrides = {} }) => {
+      const { indexName } = IndexNameLogic.values;
+      const { http } = HttpLogic.values;
+
+      try {
+        await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
+          body: JSON.stringify({ overrides }),
+        });
+        actions.fetchCrawlerData();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    stopCrawl: async () => {
+      const { indexName } = IndexNameLogic.values;
+      const { http } = HttpLogic.values;
+
+      try {
+        await http.post(
+          `/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests/cancel`
+        );
+        actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
       }

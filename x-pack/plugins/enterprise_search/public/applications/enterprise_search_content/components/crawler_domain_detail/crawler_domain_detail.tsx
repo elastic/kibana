@@ -40,7 +40,7 @@ export const CrawlerDomainDetail: React.FC = () => {
 
   const { indexName } = useValues(IndexNameLogic);
   const crawlerDomainDetailLogic = CrawlerDomainDetailLogic({ domainId });
-  const { domain, dataLoading } = useValues(crawlerDomainDetailLogic);
+  const { deleteLoading, domain, getLoading } = useValues(crawlerDomainDetailLogic);
   const { fetchDomainData, deleteDomain } = useActions(crawlerDomainDetailLogic);
 
   useEffect(() => {
@@ -52,13 +52,13 @@ export const CrawlerDomainDetail: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName, domainUrl]}
-      isLoading={dataLoading}
+      isLoading={getLoading}
       pageHeader={{
         pageTitle: domainUrl,
         rightSideItems: [
           <CrawlerStatusIndicator />,
           <EuiButton
-            isLoading={dataLoading}
+            isLoading={getLoading || deleteLoading}
             color="danger"
             onClick={() => {
               if (window.confirm(getDeleteDomainConfirmationMessage(domainUrl))) {

@@ -27,11 +27,12 @@ import { IndexNameLogic } from '../../index_name_logic';
 import { CrawlerLogic } from '../crawler_logic';
 
 interface DomainManagementValues {
+  deleteStatus: Status;
   domains: CrawlerDomain[];
+  getData: CrawlerDomainsWithMeta | null;
+  getStatus: Status;
   isLoading: boolean;
   meta: Meta;
-  deleteStatus: Status;
-  getStatus: Status;
 }
 
 interface DomainManagementActions {
@@ -40,7 +41,7 @@ interface DomainManagementActions {
   deleteSuccess(): void;
   getApiError(error: HttpError): HttpError;
   getApiSuccess(data: CrawlerDomainsWithMeta): CrawlerDomainsWithMeta;
-  getDomains(): void;
+  getDomains(meta: Meta): { meta: Meta };
   onPaginate(newPageIndex: number): { newPageIndex: number };
 }
 
@@ -56,7 +57,7 @@ export const DomainManagementLogic = kea<
     ],
     values: [
       GetCrawlerDomainsApiLogic,
-      ['status as getStatus'],
+      ['status as getStatus', 'data as getData'],
       DeleteCrawlerDomainApiLogic,
       ['status as deleteStatus'],
     ],
@@ -64,33 +65,17 @@ export const DomainManagementLogic = kea<
   path: ['enterprise_search', 'domain_management'],
   actions: {
     deleteDomain: (domain) => ({ domain }),
-    getDomains: () => true,
+    getDomains: (meta) => ({ meta }),
     onPaginate: (newPageIndex) => ({
       newPageIndex,
     }),
-  },
-  reducers: {
-    domains: [
-      [],
-      {
-        getApiSuccess: (_, { domains }) => domains,
-      },
-    ],
-    meta: [
-      DEFAULT_META,
-      {
-        getApiSuccess: (_, { meta }) => meta,
-        onPaginate: (currentMeta, { newPageIndex }) =>
-          updateMetaPageIndex(currentMeta, newPageIndex),
-      },
-    ],
   },
   listeners: ({ values, actions }) => ({
     deleteApiError: (error) => {
       flashAPIErrors(error);
     },
     deleteApiSuccess: ({ domain }) => {
-      actions.getDomains();
+      actions.getDomains(values.meta);
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.delete.successMessage', {
           defaultMessage: "Successfully deleted domain '{domainUrl}'",
@@ -108,21 +93,37 @@ export const DomainManagementLogic = kea<
     getApiError: (error) => {
       flashAPIErrors(error);
     },
-    getDomains: () => {
+    getDomains: ({ meta }) => {
       const { indexName } = IndexNameLogic.values;
-      const { meta } = values;
       GetCrawlerDomainsApiLogic.actions.makeRequest({ indexName, meta });
     },
-    onPaginate: () => {
-      actions.getDomains();
+    onPaginate: ({ newPageIndex }) => {
+      actions.getDomains(updateMetaPageIndex(values.meta, newPageIndex));
     },
   }),
   selectors: ({ selectors }) => ({
-    isLoading: [() => [selectors.getStatus], (getStatus) => getStatus === Status.LOADING],
+    domains: [
+      () => [selectors.getData],
+      (getData: DomainManagementValues['getData']) => getData?.domains ?? [],
+    ],
+    meta: [
+      () => [selectors.getData],
+      (getData: DomainManagementValues['getData']) => getData?.meta ?? DEFAULT_META,
+    ],
+    isLoading: [
+      () => [selectors.getStatus, selectors.deleteStatus],
+      (
+        getStatus: DomainManagementValues['getStatus'],
+        deleteStatus: DomainManagementValues['deleteStatus']
+      ) =>
+        getStatus === Status.IDLE ||
+        getStatus === Status.LOADING ||
+        deleteStatus === Status.LOADING,
+    ],
   }),
-  events: ({ actions }) => ({
+  events: ({ actions, values }) => ({
     afterMount: () => {
-      actions.getDomains();
+      actions.getDomains(values.meta);
     },
   }),
 });

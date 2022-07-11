@@ -26,7 +26,6 @@ export const SearchIndexRouter: React.FC = () => {
 
   const indexNameLogic = IndexNameLogic({ indexName });
   const { setIndexName } = useActions(indexNameLogic);
-  // const { indexName: indexNameFromLogic } = useValues(indexNameLogic);
 
   useEffect(() => {
     setIndexName(indexName);

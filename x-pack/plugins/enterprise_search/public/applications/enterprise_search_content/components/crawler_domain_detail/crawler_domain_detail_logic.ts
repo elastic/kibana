@@ -32,22 +32,24 @@ export interface CrawlerDomainDetailProps {
 }
 
 export interface CrawlerDomainDetailValues {
-  dataLoading: boolean;
-  domainId: string;
+  deleteLoading: boolean;
   domain: CrawlerDomain | null;
+  domainId: string;
+  getLoading: boolean;
 }
 
 interface CrawlerDomainDetailActions {
   deleteDomain(): void;
+  deleteDomainComplete(): void;
   fetchDomainData(domainId: string): { domainId: string };
-  onReceiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
+  receiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
+  submitDeduplicationUpdate(payload: { enabled?: boolean; fields?: string[] }): {
+    enabled: boolean;
+    fields: string[];
+  };
   updateCrawlRules(crawlRules: CrawlRule[]): { crawlRules: CrawlRule[] };
   updateEntryPoints(entryPoints: EntryPoint[]): { entryPoints: EntryPoint[] };
   updateSitemaps(entryPoints: Sitemap[]): { sitemaps: Sitemap[] };
-  submitDeduplicationUpdate(payload: { fields?: string[]; enabled?: boolean }): {
-    fields: string[];
-    enabled: boolean;
-  };
 }
 
 export const CrawlerDomainDetailLogic = kea<
@@ -56,24 +58,26 @@ export const CrawlerDomainDetailLogic = kea<
   path: ['enterprise_search', 'crawler', 'crawler_domain_detail_logic'],
   actions: {
     deleteDomain: () => true,
+    deleteDomainComplete: () => true,
     fetchDomainData: (domainId) => ({ domainId }),
-    onReceiveDomainData: (domain) => ({ domain }),
+    receiveDomainData: (domain) => ({ domain }),
+    submitDeduplicationUpdate: ({ fields, enabled }) => ({ enabled, fields }),
     updateCrawlRules: (crawlRules) => ({ crawlRules }),
     updateEntryPoints: (entryPoints) => ({ entryPoints }),
     updateSitemaps: (sitemaps) => ({ sitemaps }),
-    submitDeduplicationUpdate: ({ fields, enabled }) => ({ fields, enabled }),
   },
   reducers: ({ props }) => ({
-    dataLoading: [
-      true,
+    deleteLoading: [
+      false,
       {
-        onReceiveDomainData: () => false,
+        deleteDomain: () => true,
+        deleteDomainComplete: () => false,
       },
     ],
     domain: [
       null,
       {
-        onReceiveDomainData: (_, { domain }) => domain,
+        receiveDomainData: (_, { domain }) => domain,
         updateCrawlRules: (currentDomain, { crawlRules }) =>
           ({ ...currentDomain, crawlRules } as CrawlerDomain),
         updateEntryPoints: (currentDomain, { entryPoints }) =>
@@ -83,6 +87,12 @@ export const CrawlerDomainDetailLogic = kea<
       },
     ],
     domainId: [props.domainId, { fetchDomainData: (_, { domainId }) => domainId }],
+    getLoading: [
+      true,
+      {
+        receiveDomainData: () => false,
+      },
+    ],
   }),
   listeners: ({ actions, values }) => ({
     deleteDomain: async () => {
@@ -110,6 +120,7 @@ export const CrawlerDomainDetailLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
       }
+      actions.deleteDomainComplete();
     },
     fetchDomainData: async ({ domainId }) => {
       const { http } = HttpLogic.values;
@@ -122,7 +133,7 @@ export const CrawlerDomainDetailLogic = kea<
 
         const domainData = crawlerDomainServerToClient(response);
 
-        actions.onReceiveDomainData(domainData);
+        actions.receiveDomainData(domainData);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -147,7 +158,7 @@ export const CrawlerDomainDetailLogic = kea<
 
         const domainData = crawlerDomainServerToClient(response);
 
-        actions.onReceiveDomainData(domainData);
+        actions.receiveDomainData(domainData);
       } catch (e) {
         flashAPIErrors(e);
       }
