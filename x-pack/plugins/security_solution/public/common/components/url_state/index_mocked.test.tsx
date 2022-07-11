@@ -13,7 +13,7 @@ import { SecurityPageName } from '../../../app/types';
 
 import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
-import { UrlStateContainerPropTypes } from './types';
+import type { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { useLocation } from 'react-router-dom';
 import { DASHBOARDS_PATH, MANAGEMENT_PATH } from '../../../../common/constants';

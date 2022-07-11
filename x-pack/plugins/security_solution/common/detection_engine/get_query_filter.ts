@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
-import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query';
+import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 
-import { ESBoolQuery } from '../typed_json';
-import { Query, Index } from './schemas/common/schemas';
+import type { ESBoolQuery } from '../typed_json';
+import type { Query, Index } from './schemas/common/schemas';
 
 export const getQueryFilter = (
   query: Query,

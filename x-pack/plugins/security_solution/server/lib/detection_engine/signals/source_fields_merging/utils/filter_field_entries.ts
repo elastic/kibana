@@ -8,7 +8,7 @@
 import { isMultiField } from './is_multifield';
 import { isInvalidKey } from './is_invalid_key';
 import { isTypeObject } from './is_type_object';
-import { FieldsType } from '../types';
+import type { FieldsType } from '../types';
 import { isIgnored } from './is_ignored';
 import { isEqlBug77152 } from './is_eql_bug_77152';
 

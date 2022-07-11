@@ -6,8 +6,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { State } from '../types';
-import {
+import type { State } from '../types';
+import type {
   SourcererDataView,
   SourcererModel,
   SourcererScope,

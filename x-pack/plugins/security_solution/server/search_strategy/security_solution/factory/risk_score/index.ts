@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes, RiskQueries } from '../../../../../common/search_strategy';
-import { SecuritySolutionFactory } from '../types';
+import type { FactoryQueryTypes } from '../../../../../common/search_strategy';
+import { RiskQueries } from '../../../../../common/search_strategy';
+import type { SecuritySolutionFactory } from '../types';
 import { riskScore } from './all';
 import { kpiRiskScore } from './kpi';
 

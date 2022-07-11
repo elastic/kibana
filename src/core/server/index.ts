@@ -42,6 +42,7 @@ import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -76,12 +77,9 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
-import { PrebootServicePreboot } from './preboot';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
 import { KibanaResponseFactory, RouteMethod } from './http';
-
-export type { PrebootServicePreboot } from './preboot';
 
 export type {
   CoreUsageStats,
@@ -136,12 +134,6 @@ export type {
   ICustomClusterClient,
   ElasticsearchClientConfig,
   IScopedClusterClient,
-  SearchResponse,
-  CountResponse,
-  ShardsInfo,
-  ShardsResponse,
-  GetResponse,
-  DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
