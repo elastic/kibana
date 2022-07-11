@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiTextColor, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const UNSUPPORTED_LABEL = i18n.translate(
@@ -28,9 +28,8 @@ export const UnsupportedMessageCallout = memo<UnsupportedMessageCalloutProps>(
         <EuiText size="s">
           <EuiTextColor color="danger">{header}</EuiTextColor>
         </EuiText>
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{children}</EuiTextColor>
-        </EuiText>
+        <EuiSpacer size="s" />
+        {children}
       </div>
     );
   }

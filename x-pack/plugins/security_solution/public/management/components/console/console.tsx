@@ -85,10 +85,12 @@ const ConsoleWindow = styled.div`
     &.euiDescriptionList {
       > .euiDescriptionList__title {
         width: 20%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
 
       > .euiDescriptionList__description {
         width: 80%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
     }
   }
