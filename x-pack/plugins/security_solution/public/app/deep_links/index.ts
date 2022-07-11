@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { get, isArray } from 'lodash';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import {
   CREATE_CASES_CAPABILITY,
@@ -17,8 +17,9 @@ import {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '@kbn/cases-plugin/common';
-import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
-import { Subject, Subscription } from 'rxjs';
+import type { AppDeepLink, AppUpdater, Capabilities } from '@kbn/core/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import type { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
   OVERVIEW,
@@ -70,9 +71,9 @@ import {
   RULES_CREATE_PATH,
   RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
-import { AppLinkItems } from '../../common/links/types';
+import type { AppLinkItems } from '../../common/links/types';
 
 export const FEATURE = {
   general: `${SERVER_APP_ID}.show`,

@@ -23,7 +23,8 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, Props as StatefulTimelineOwnProps } from '.';
+import type { Props as StatefulTimelineOwnProps } from '.';
+import { StatefulTimeline } from '.';
 import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';

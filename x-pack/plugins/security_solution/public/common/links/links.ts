@@ -9,7 +9,7 @@ import type { Capabilities } from '@kbn/core/public';
 import { get, isArray } from 'lodash';
 import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { SecurityPageName } from '../../../common/constants';
+import type { SecurityPageName } from '../../../common/constants';
 import type {
   AppLinkItems,
   LinkInfo,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { createUICapabilities } from '@kbn/cases-plugin/common';

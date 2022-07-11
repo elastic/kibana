@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { FEATURE, getDeepLinks, hasFeaturesCapability } from '.';
-import { AppDeepLink, Capabilities } from '@kbn/core/public';
+import type { AppDeepLink, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../../common/constants';
@@ -88,7 +88,7 @@ describe('deepLinks', () => {
           [[FEATURE.casesRead, FEATURE.casesCreate]],
           createCap({ siem: { show: true }, securitySolutionCases: { read: true, create: true } })
         )
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
 
     it('returns false when neither the single OR feature is found nor all of the AND features', () => {

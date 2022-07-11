@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { TakeActionDropdown, TakeActionDropdownProps } from '.';
+import type { TakeActionDropdownProps } from '.';
+import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
@@ -26,7 +28,7 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
