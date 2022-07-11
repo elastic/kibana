@@ -55,57 +55,56 @@ async function metricFilterable(
   );
 }
 
-interface ExpressionMetricVisRendererDependencies {
+/** @internal **/
+export interface ExpressionMetricVisRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionLegacyMetricPluginStart>;
 }
 
-export const getMetricVisRenderer = (
+export const getMetricVisRenderer: (
   deps: ExpressionMetricVisRendererDependencies
-): (() => ExpressionRenderDefinition<MetricVisRenderConfig>) => {
-  return () => ({
-    name: EXPRESSION_METRIC_NAME,
-    displayName: 'metric visualization',
-    reuseDomNode: true,
-    render: async (domNode, { visData, visConfig }, handlers) => {
-      const { core, plugins } = deps.getStartDeps();
+) => ExpressionRenderDefinition<MetricVisRenderConfig> = ({ getStartDeps }) => ({
+  name: EXPRESSION_METRIC_NAME,
+  displayName: 'metric visualization',
+  reuseDomNode: true,
+  render: async (domNode, { visData, visConfig }, handlers) => {
+    const { core, plugins } = getStartDeps();
 
-      handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
-      });
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
 
-      const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
+    const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
 
-      const renderComplete = () => {
-        const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+    const renderComplete = () => {
+      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
 
-        if (originatingApp) {
-          plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-            `render_${originatingApp}_legacy_metric`,
-          ]);
-        }
+      if (originatingApp) {
+        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
+          `render_${originatingApp}_legacy_metric`,
+        ]);
+      }
 
-        handlers.done();
-      };
+      handlers.done();
+    };
 
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <VisualizationContainer
-            data-test-subj="legacyMtrVis"
-            className="legacyMtrVis"
-            showNoResult={!visData.rows?.length}
-            handlers={handlers}
-          >
-            <MetricVisComponent
-              visData={visData}
-              visParams={visConfig}
-              renderComplete={renderComplete}
-              fireEvent={handlers.event}
-              filterable={filterable}
-            />
-          </VisualizationContainer>
-        </KibanaThemeProvider>,
-        domNode
-      );
-    },
-  });
-};
+    render(
+      <KibanaThemeProvider theme$={core.theme.theme$}>
+        <VisualizationContainer
+          data-test-subj="legacyMtrVis"
+          className="legacyMtrVis"
+          showNoResult={!visData.rows?.length}
+          handlers={handlers}
+        >
+          <MetricVisComponent
+            visData={visData}
+            visParams={visConfig}
+            renderComplete={renderComplete}
+            fireEvent={handlers.event}
+            filterable={filterable}
+          />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
+      domNode
+    );
+  },
+});

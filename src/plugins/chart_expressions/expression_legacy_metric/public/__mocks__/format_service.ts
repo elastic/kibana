@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const getFormatService = () => ({
-  deserialize: (target: any) => ({
-    convert: (text: string, format: string) => text,
-  }),
-});
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+
+export const getFormatService = () =>
+  ({
+    deserialize: (target: any) => ({
+      convert: (text: string, format: string) => text,
+    }),
+  } as FieldFormatsStart);

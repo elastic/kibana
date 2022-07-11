@@ -9,7 +9,7 @@ import { flatten, uniq } from 'lodash';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { IndexPatternLayer } from '..';
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
@@ -69,7 +69,16 @@ export const trackExecutionContextEvents = (context?: KibanaExecutionContext) =>
   const events = [];
 
   if (context) {
-    events.push(`vis_${context.type}`);
+    events.push(
+      [
+        'vis',
+        context.type,
+        context.meta?.viewMode,
+        context.meta?.fullScreenMode ? 'fullscreen' : undefined,
+      ]
+        .filter(Boolean)
+        .join('_')
+    );
   }
 
   trackUiCounterEvents(events);

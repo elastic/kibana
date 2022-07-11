@@ -231,6 +231,7 @@ export const useDashboardAppState = ({
       /**
        * Build the dashboard container embeddable, and apply the incoming embeddable if it exists.
        */
+
       const dashboardContainer = await buildDashboardContainer({
         ...dashboardBuildContext,
         initialDashboardState,
@@ -240,8 +241,13 @@ export const useDashboardAppState = ({
         executionContext: {
           type: 'dashboard',
           description: savedDashboard.title,
+          meta: {
+            viewMode: initialDashboardState.viewMode,
+            fullScreenMode: initialDashboardState.fullScreenMode,
+          },
         },
       });
+
       if (canceled || !dashboardContainer) {
         tryDestroyDashboardContainer(dashboardContainer);
         return;
