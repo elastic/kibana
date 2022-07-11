@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { Indicator } from '../../../../common/types/Indicator';
 import { useKibana } from '../../../hooks/use_kibana';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -47,8 +48,11 @@ export const useIndicators = (): UseIndicatorsValue => {
   const {
     services: {
       data: { search: searchService },
+      uiSettings,
     },
   } = useKibana();
+
+  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   const searchSubscription$ = useRef(new Subscription());
   const abortController = useRef(new AbortController());
@@ -71,14 +75,29 @@ export const useIndicators = (): UseIndicatorsValue => {
         .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(
           {
             params: {
-              index: 'logs-ti*',
+              index: defaultThreatIndices,
               body: {
                 size,
                 from,
                 fields: [{ field: '*', include_unmapped: true }],
                 query: {
-                  exists: {
-                    field: 'threat',
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'event.category': {
+                            value: 'threat',
+                          },
+                        },
+                      },
+                      {
+                        term: {
+                          'event.type': {
+                            value: 'indicator',
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
               },

@@ -10,20 +10,23 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useIndicators, RawIndicatorsResponse } from './use_indicators';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 
 jest.mock('../../../hooks/use_kibana');
 
 const mockSearchService = (subject: Observable<unknown>) => {
   const search = jest.fn().mockReturnValue(subject);
   const showError = jest.fn();
+  const getUiSetting = jest.fn();
 
   (hook as jest.Mocked<typeof hook>).useKibana.mockReturnValue({
-    services: { data: { search: { search, showError } } },
+    services: { data: { search: { search, showError } }, uiSettings: { get: getUiSetting } },
   } as any);
 
   return {
     search,
     showError,
+    getUiSetting,
   };
 };
 
@@ -43,6 +46,10 @@ describe('useIndicators()', () => {
 
     it('should query the database for threat indicators', async () => {
       expect(mockSearch.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retrieve index patterns from settings', () => {
+      expect(mockSearch.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
     });
   });
 
