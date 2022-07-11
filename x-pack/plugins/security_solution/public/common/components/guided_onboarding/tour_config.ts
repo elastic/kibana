@@ -7,11 +7,8 @@
 
 import { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error gif is not declared as module
 import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
-// @ts-expect-error
 import rulesGif from '../../images/onboarding_tour_step_rules.gif';
-// @ts-expect-error
 import casesGif from '../../images/onboarding_tour_step_cases.gif';
 
 type TourConfig = Array<
