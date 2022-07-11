@@ -33,13 +33,12 @@ function cleanValueWrappers(value: object | object[]) : object {
   }
 
   if (isFieldValueWrapper(value)) {
-    return value.raw;
+    return (value as { raw: object }).raw;
   }
 
   if (typeof value === 'object') {
-    return Object.entries(value).reduce((acc: any, [key, value]) => {
-      acc[key] = cleanValueWrappers(value);
-      return acc;
+    return Object.entries(value).reduce((acc, [key, currentValue]) => {
+      return { ...acc, [key]: cleanValueWrappers(currentValue) };
     }, {});
   }
 
@@ -48,7 +47,7 @@ function cleanValueWrappers(value: object | object[]) : object {
 
 export function formatResult(result: object): object {
   return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
-    if (fieldName != '_meta' && isNestedFieldValue(fieldValue)) {
+    if (fieldName !== '_meta' && isNestedFieldValue(fieldValue)) {
       return {
         ...acc,
         [fieldName]: { raw: cleanValueWrappers(fieldValue) }
