@@ -16,9 +16,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Indicator } from '../../../../common/types/Indicator';
+import { EMPTY_VALUE } from '../../../../../common/constants';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
+import { unwrapValue } from '../../lib/unwrap_value';
+import { displayValue } from '../../lib/display_value';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
@@ -66,19 +69,22 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
     [selectedTabId, tabs]
   );
 
+  const firstSeen = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen);
+  const value = displayValue(indicator) || EMPTY_VALUE;
+
   let formattedFirstSeen: string;
-  if (indicator.first_seen) {
-    const date = new Date(indicator.first_seen);
-    formattedFirstSeen = isNaN(date.getTime()) ? 'N/A' : date.toDateString();
+  if (firstSeen) {
+    const date = new Date(firstSeen);
+    formattedFirstSeen = isNaN(date.getTime()) ? EMPTY_VALUE : date.toDateString();
   } else {
-    formattedFirstSeen = 'N/A';
+    formattedFirstSeen = EMPTY_VALUE;
   }
 
   return (
     <EuiFlyout onClose={closeFlyout}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 data-test-subj={TITLE_TEST_ID}>Indicator: {indicator.value || 'N/A'}</h2>
+          <h2 data-test-subj={TITLE_TEST_ID}>Indicator: {value}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size={'xs'}>

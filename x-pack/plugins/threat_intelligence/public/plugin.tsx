@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/public';
+import { Services } from './types';
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
   public setup(core: CoreSetup) {
@@ -15,8 +16,9 @@ export class ThreatIntelligencePlugin implements Plugin<void, void> {
       title: 'Threat Intelligence',
       async mount(params) {
         const { renderApp } = await import('./app');
-        const [coreStart] = await core.getStartServices();
-        return renderApp(coreStart, params);
+        const [coreStart, startPlugins] = await core.getStartServices();
+
+        return renderApp({ ...coreStart, ...startPlugins } as Services, params);
       },
     });
   }

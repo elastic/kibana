@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/Indicator';
 import {
   CODE_BLOCK_TEST_ID,
   EMPTY_PROMPT_TEST_ID,

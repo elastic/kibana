@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
+import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-export const EMPTY_VALUE = '-';
-
-export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
+export type Services = { data: DataPublicPluginStart } & CoreStart;

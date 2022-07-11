@@ -7,12 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
+import {
+  generateMockIndicator,
+  Indicator,
+  RawIndicatorFieldId,
+} from '../../../../../common/types/Indicator';
 import {
   EMPTY_PROMPT_TEST_ID,
   IndicatorsFlyoutTable,
   TABLE_TEST_ID,
 } from './indicators_flyout_table';
+import { unwrapValue } from '../../lib/unwrap_value';
+import { displayValue } from '../../lib/display_value';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
@@ -21,10 +27,14 @@ describe('IndicatorsFlyoutTable', () => {
     const { getByTestId, getByText } = render(<IndicatorsFlyoutTable indicator={mockIndicator} />);
 
     expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
-    expect(getByText('value')).toBeInTheDocument();
-    expect(getByText('feed')).toBeInTheDocument();
-    expect(getByText(mockIndicator.value)).toBeInTheDocument();
-    expect(getByText(mockIndicator.feed)).toBeInTheDocument();
+
+    expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
+
+    expect(getByText(displayValue(mockIndicator) as string)).toBeInTheDocument();
+
+    expect(
+      getByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Feed) as string)
+    ).toBeInTheDocument();
   });
 
   it('should render error message on invalid indicator', () => {

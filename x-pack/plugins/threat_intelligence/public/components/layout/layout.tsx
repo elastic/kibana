@@ -5,43 +5,27 @@
  * 2.0.
  */
 
-import {
-  EuiHorizontalRule,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 
 interface LayoutProps {
   pageTitle?: string;
 }
 
-const ROOT_HEADER = 'Threat intelligence';
-
 export const displayName = 'DefaultPageLayout';
 
-export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle }) => {
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageHeader pageTitle={ROOT_HEADER}>
-          Elastic threat intelligence help you see if you are open to or have been subject to
-          current or historical known threats
-        </EuiPageHeader>
-        <EuiHorizontalRule />
+export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle }) => (
+  <EuiPageBody>
+    <EuiPageContent>
+      {pageTitle && (
+        <EuiText>
+          <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
+        </EuiText>
+      )}
 
-        {pageTitle && (
-          <EuiText>
-            <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
-          </EuiText>
-        )}
-
-        {children}
-      </EuiPageContent>
-    </EuiPageBody>
-  );
-};
+      {children}
+    </EuiPageContent>
+  </EuiPageBody>
+);
 
 DefaultPageLayout.displayName = displayName;
