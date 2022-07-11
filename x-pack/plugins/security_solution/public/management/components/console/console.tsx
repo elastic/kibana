@@ -10,8 +10,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
-import { CommandInput, CommandInputProps } from './components/command_input';
-import { ConsoleProps } from './types';
+import type { CommandInputProps } from './components/command_input';
+import { CommandInput } from './components/command_input';
+import type { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
@@ -21,6 +22,8 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 const ConsoleWindow = styled.div`
   height: 100%;
   background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
 
   .layout {
     height: 100%;
@@ -44,8 +47,10 @@ const ConsoleWindow = styled.div`
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
     }
 
-    &-footer {
+    &-footer,
+    &-commandInput {
       padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
 
     &-rightPanel {
@@ -61,10 +66,6 @@ const ConsoleWindow = styled.div`
     &-historyViewport {
       height: 100%;
       overflow-x: hidden;
-    }
-
-    &-commandInput {
-      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
   }
 
@@ -84,10 +85,12 @@ const ConsoleWindow = styled.div`
     &.euiDescriptionList {
       > .euiDescriptionList__title {
         width: 20%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
 
       > .euiDescriptionList__description {
         width: 80%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
     }
   }

@@ -6,7 +6,8 @@
  */
 
 import uuid from 'uuid';
-import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   applyActionListEsSearchMock,
   createActionRequestsEsSearchResultsMock,

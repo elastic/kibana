@@ -11,7 +11,7 @@ import { stringify } from 'querystring';
 import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchErrorDetails } from './types';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {

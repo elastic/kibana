@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SetAuthHeaders } from '../../http';
+import type { UnauthorizedError } from '@kbn/es-errors';
+import type { SetAuthHeaders } from '@kbn/core-http-server';
 import { httpServerMock } from '../../http/http_server.mocks';
-import type { UnauthorizedError } from './errors';
 import {
   createInternalErrorHandler,
   isRetryResult,

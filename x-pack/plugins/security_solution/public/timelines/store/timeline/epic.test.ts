@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { convertTimelineAsInput } from './epic';
-import { TimelineModel } from './model';
+import type { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {

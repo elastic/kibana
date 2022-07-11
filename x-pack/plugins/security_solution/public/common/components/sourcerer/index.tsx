@@ -14,13 +14,16 @@ import {
   EuiSpacer,
   EuiSuperSelect,
 } from '@elastic/eui';
-import React, { ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import * as i18n from './translations';
-import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
+import type { sourcererModel } from '../../store/sourcerer';
+import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
+import type { SourcererUrlState } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButton, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';

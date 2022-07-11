@@ -75,7 +75,6 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       PERCENTILE,
     ],
     baseFilters: [],
-    palette: { type: 'palette', name: 'status' },
     definitionFields: [
       { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
       { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
@@ -92,12 +91,14 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         id: SUMMARY_UP,
         label: UP_LABEL,
         columnType: OPERATION_COLUMN,
+        palette: { type: 'palette', name: 'status' },
       },
       {
         field: SUMMARY_DOWN,
         id: SUMMARY_DOWN,
         label: DOWN_LABEL,
         columnType: OPERATION_COLUMN,
+        palette: { type: 'palette', name: 'status' },
       },
       {
         label: STEP_DURATION_LABEL,
