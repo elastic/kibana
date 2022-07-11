@@ -13,6 +13,7 @@ import memoizeOne from 'memoize-one';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 import {
+  DataView,
   DataViewSpec,
   Form,
   useForm,
@@ -23,6 +24,8 @@ import {
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
+
+import { removeSpaces } from '../lib';
 
 import {
   MatchedItem,
@@ -39,13 +42,14 @@ import {
   TimestampField,
   TypeField,
   TitleField,
+  NameField,
   schema,
   Footer,
   AdvancedParamsContent,
-  EmptyPrompts,
   PreviewPanel,
   RollupBetaWarning,
 } from '.';
+import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 
 export interface Props {
   /**
@@ -58,10 +62,15 @@ export interface Props {
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
+  editData?: DataView;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
   defaultMessage: 'Create data view',
+});
+
+const editorTitleEditMode = i18n.translate('indexPatternEditor.titleEditMode', {
+  defaultMessage: 'Edit data view',
 });
 
 const IndexPatternEditorFlyoutContentComponent = ({
@@ -69,14 +78,28 @@ const IndexPatternEditorFlyoutContentComponent = ({
   onCancel,
   defaultTypeIsRollup,
   requireTimestampField = false,
+  editData,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, searchClient },
+    services: { http, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
+    // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      ...(editData
+        ? {
+            title: editData.title,
+            id: editData.id,
+            name: editData.name,
+            ...(editData.timeFieldName
+              ? {
+                  timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
+                }
+              : {}),
+          }
+        : {}),
     },
     schema,
     onSubmit: async (formData, isValid) => {
@@ -85,9 +108,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       const indexPatternStub: DataViewSpec = {
-        title: formData.title,
+        title: removeSpaces(formData.title),
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
+        name: formData.name,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -100,7 +124,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      await onSave(indexPatternStub);
+      if (editData && editData.title !== formData.title) {
+        editDataViewModal({
+          dataViewName: formData.name || formData.title,
+          overlays,
+          onEdit: async () => {
+            await onSave(indexPatternStub);
+          },
+        });
+      } else {
+        await onSave(indexPatternStub);
+      }
     },
   });
 
@@ -155,13 +189,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const indexPatternTitles = await dataViews.getTitles();
+      const indexPatternTitles = await dataViews.getTitles(editData ? true : false);
 
-      setExistingIndexPatterns(indexPatternTitles);
+      setExistingIndexPatterns(
+        editData ? indexPatternTitles.filter((v) => v !== editData.title) : indexPatternTitles
+      );
       setIsLoadingIndexPatterns(false);
     };
     getTitles();
-  }, [http, dataViews, loadSources]);
+  }, [http, dataViews, editData, loadSources]);
 
   // loading rollup info
   useEffect(() => {
@@ -219,11 +255,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     ]
   );
 
-  useEffect(() => {
-    loadTimestampFieldOptions(title);
-    getFields().timestampField?.setValue('');
-  }, [loadTimestampFieldOptions, title, getFields]);
-
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
       const isRollupIndex = (indexName: string) =>
@@ -239,7 +270,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
           ? await loadMatchedIndices(query, allowHidden, allSources, {
               isRollupIndex,
               http,
-              searchClient,
             })
           : {
               matchedIndicesResult: {
@@ -270,12 +300,31 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
+    [http, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
   );
+
+  // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
+  useEffect(() => {
+    if (editData) {
+      loadSources();
+      reloadMatchedIndices(removeSpaces(editData.title));
+    }
+    // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editData]);
+
+  useEffect(() => {
+    const timeFieldQuery = editData ? editData.title : title;
+    loadTimestampFieldOptions(removeSpaces(timeFieldQuery));
+    if (!editData) getFields().timestampField?.setValue('');
+    // We use the below eslint-disable as adding editData as a dependency create an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadTimestampFieldOptions, title, getFields]);
 
   const onTypeChange = useCallback(
     (newType) => {
       form.setFieldValue('title', '');
+      form.setFieldValue('name', '');
       form.setFieldValue('timestampField', '');
       if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
         form.setFieldValue('allowHidden', false);
@@ -295,7 +344,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <TypeField onChange={onTypeChange} />
@@ -316,60 +365,68 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   return (
-    <EmptyPrompts onCancel={onCancel} allSources={allSources} loadSources={loadSources}>
-      <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-        <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
-          <EuiTitle data-test-subj="flyoutTitle">
-            <h2>{editorTitle}</h2>
-          </EuiTitle>
-          <Form form={form} className="indexPatternEditor__form">
-            {indexPatternTypeSelect}
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <TitleField
-                  isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                  existingIndexPatterns={existingIndexPatterns}
-                  refreshMatchedIndices={reloadMatchedIndices}
-                  matchedIndices={matchedIndices.exactMatchedIndices}
-                  rollupIndicesCapabilities={rollupIndicesCapabilities}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <TimestampField
-                  options={timestampFieldOptions}
-                  isLoadingOptions={isLoadingTimestampFields}
-                  isExistingIndexPattern={existingIndexPatterns.includes(title)}
-                  isLoadingMatchedIndices={isLoadingMatchedIndices}
-                  hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <AdvancedParamsContent disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP} />
-          </Form>
-          <Footer
-            onCancel={onCancel}
-            onSubmit={() => form.submit()}
-            submitDisabled={form.isSubmitted && !form.isValid}
+    <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
+      <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
+        <EuiTitle data-test-subj="flyoutTitle">
+          <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
+        </EuiTitle>
+        <Form form={form} className="indexPatternEditor__form">
+          {indexPatternTypeSelect}
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <NameField editData={editData} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <TitleField
+                isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
+                existingIndexPatterns={existingIndexPatterns}
+                refreshMatchedIndices={reloadMatchedIndices}
+                matchedIndices={matchedIndices.exactMatchedIndices}
+                rollupIndicesCapabilities={rollupIndicesCapabilities}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <TimestampField
+                options={timestampFieldOptions}
+                isLoadingOptions={isLoadingTimestampFields}
+                isExistingIndexPattern={existingIndexPatterns.includes(title)}
+                isLoadingMatchedIndices={isLoadingMatchedIndices}
+                hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <AdvancedParamsContent
+            disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
+            disableId={!!editData}
           />
-        </FlyoutPanels.Item>
-        <FlyoutPanels.Item>
-          {isLoadingSources ? (
-            <></>
-          ) : (
-            <PreviewPanel
-              type={type}
-              allowHidden={allowHidden}
-              title={title}
-              matched={matchedIndices}
-            />
-          )}
-        </FlyoutPanels.Item>
-      </FlyoutPanels.Group>
-    </EmptyPrompts>
+        </Form>
+        <Footer
+          onCancel={onCancel}
+          onSubmit={() => form.submit()}
+          submitDisabled={form.isSubmitted && !form.isValid}
+          isEdit={!!editData}
+        />
+      </FlyoutPanels.Item>
+      <FlyoutPanels.Item>
+        {isLoadingSources ? (
+          <></>
+        ) : (
+          <PreviewPanel
+            type={type}
+            allowHidden={allowHidden}
+            title={title}
+            matched={matchedIndices}
+          />
+        )}
+      </FlyoutPanels.Item>
+    </FlyoutPanels.Group>
   );
 };
 
@@ -387,11 +444,9 @@ const loadMatchedIndices = memoizeOne(
     {
       isRollupIndex,
       http,
-      searchClient,
     }: {
       isRollupIndex: (index: string) => boolean;
       http: DataViewEditorContext['http'];
-      searchClient: DataViewEditorContext['searchClient'];
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;

@@ -16,6 +16,11 @@ import type {
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -23,21 +28,30 @@ import type {
   CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
   CspRequestHandlerContext,
+  CspServerPluginStartServices,
 } from './types';
 import { defineRoutes } from './routes';
-import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
-import { cspRuleAssetType } from './saved_objects/csp_rule_type';
-import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import { setupSavedObjects } from './saved_objects';
+import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
+  isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
-  onPackagePolicyDeleteCallback,
+  removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { updateAgentConfiguration } from './routes/configuration/update_rules_configuration';
+
+import {
+  removeFindingsStatsTask,
+  scheduleFindingsStatsTask,
+  setupFindingsStatsTask,
+} from './tasks/findings_stats_task';
 
 export interface CspAppContext {
   logger: Logger;
   service: CspAppService;
+  security: SecurityPluginSetup;
 }
 
 export class CspPlugin
@@ -64,15 +78,18 @@ export class CspPlugin
     const cspAppContext: CspAppContext = {
       logger: this.logger,
       service: this.CspAppService,
+      security: plugins.security,
     };
 
-    core.savedObjects.registerType(cspRuleAssetType);
-    core.savedObjects.registerType(cspRuleTemplateAssetType);
+    setupSavedObjects(core.savedObjects);
 
     const router = core.http.createRouter<CspRequestHandlerContext>();
 
     // Register server side APIs
     defineRoutes(router, cspAppContext);
+
+    const coreStartServices = core.getStartServices();
+    this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
 
     return {};
   }
@@ -84,13 +101,13 @@ export class CspPlugin
 
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-        CIS_KUBERNETES_PACKAGE_NAME
+        CLOUD_SECURITY_POSTURE_PACKAGE_NAME
       );
 
       // If package is installed we want to make sure all needed assets are installed
       if (packageInfo) {
         // noinspection ES6MissingAwait
-        this.initialize(core);
+        this.initialize(core, plugins.taskManager);
       }
 
       plugins.fleet.registerExternalCallback(
@@ -98,12 +115,23 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          _: KibanaRequest
+          request: KibanaRequest
         ): Promise<PackagePolicy> => {
-          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
-            await this.initialize(core);
+          if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+            await this.initialize(core, plugins.taskManager);
+
             const soClient = (await context.core).savedObjects.client;
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
+            const userAuth = await plugins.security.authc.getCurrentUser(request);
+            const updatedPackagePolicy = await updateAgentConfiguration(
+              plugins.fleet.packagePolicyService,
+              packagePolicy,
+              esClient,
+              soClient,
+              userAuth
+            );
+            return updatedPackagePolicy;
           }
 
           return packagePolicy;
@@ -114,12 +142,15 @@ export class CspPlugin
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
-            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
-              await onPackagePolicyDeleteCallback(
-                this.logger,
-                deletedPackagePolicy,
-                core.savedObjects.createInternalRepository()
-              );
+            if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+              const soClient = core.savedObjects.createInternalRepository();
+              await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
+
+              const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
+
+              if (isPackageExists) {
+                await this.uninstallResources(plugins.taskManager, this.logger);
+              }
             }
           }
         }
@@ -131,9 +162,22 @@ export class CspPlugin
 
   public stop() {}
 
-  async initialize(core: CoreStart): Promise<void> {
+  async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
-    await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeCspIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    await scheduleFindingsStatsTask(taskManager, this.logger);
+  }
+
+  async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
+    await removeFindingsStatsTask(taskManager, logger);
+  }
+
+  setupCspTasks(
+    taskManager: TaskManagerSetupContract,
+    coreStartServices: CspServerPluginStartServices,
+    logger: Logger
+  ) {
+    setupFindingsStatsTask(taskManager, coreStartServices, logger);
   }
 }

@@ -6,13 +6,17 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
+import type {
+  EuiDataGridSorting,
+  EuiDataGridProps,
+  EuiDataGridColumn,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+} from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCode,
   EuiDataGrid,
-  EuiDataGridSorting,
-  EuiDataGridProps,
-  EuiDataGridColumn,
   EuiLink,
   EuiLoadingContent,
   EuiProgress,
@@ -25,7 +29,8 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAllResults } from './use_all_results';
-import { Direction, ResultEdges } from '../../common/search_strategy';
+import type { ResultEdges } from '../../common/search_strategy';
+import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { useActionResults } from '../action_results/use_action_results';
 import { generateEmptyDataMessage } from './translations';
@@ -46,7 +51,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
-  hideFullscreen?: true;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -54,7 +59,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
-  hideFullscreen,
+  addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -107,11 +112,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const {
-    data: allResultsData,
-    isFetched,
-    isLoading,
-  } = useAllResults({
+  const { data: allResultsData, isLoading } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -309,10 +310,33 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    const data = allResultsData?.edges;
+    if (addToTimeline && data) {
+      return [
+        {
+          id: 'timeline',
+          width: 38,
+          headerCellRender: () => null,
+          rowCellRender: (actionProps) => {
+            const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
+              visibleRowIndex: number;
+            };
+            const eventId = data[visibleRowIndex]?._id;
+
+            return addToTimeline({ query: ['_id', eventId], isIcon: true });
+          },
+        },
+      ];
+    }
+
+    return [];
+  }, [addToTimeline, allResultsData?.edges]);
+
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: !hideFullscreen,
+      showFullScreenSelector: !addToTimeline,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -327,10 +351,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
+          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
         </>
       ),
     }),
-    [actionId, endDate, startDate, hideFullscreen]
+    [actionId, addToTimeline, endDate, startDate]
   );
 
   useEffect(
@@ -338,20 +363,44 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        return !!(aggregations.totalResponded !== agentIds?.length);
+        return !!(
+          aggregations.totalResponded !== agentIds?.length ||
+          allResultsData?.totalCount !== aggregations?.totalRowCount ||
+          (allResultsData?.totalCount && !allResultsData?.edges.length)
+        );
       }),
-    [agentIds?.length, aggregations.failed, aggregations.totalResponded, expired]
+    [
+      agentIds?.length,
+      aggregations.totalResponded,
+      aggregations?.totalRowCount,
+      allResultsData?.edges.length,
+      allResultsData?.totalCount,
+      expired,
+    ]
   );
 
   if (!hasActionResultsPrivileges) {
     return (
-      <EuiCallOut title="Missing privileges" color="danger" iconType="alert">
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
+            defaultMessage="Permission denied"
+          />
+        }
+        color="danger"
+        iconType="alert"
+      >
         <p>
-          {'Your user role doesn’t have index read permissions on the '}
-          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>
-          {
-            'index. Access to this index is required to view osquery results. Administrators can update role permissions in Stack Management > Roles.'
-          }
+          <FormattedMessage
+            id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
+            defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{
+              read: <EuiCode>read</EuiCode>,
+              logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
+            }}
+          />
         </p>
       </EuiCallOut>
     );
@@ -365,13 +414,12 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
+      {!allResultsData?.edges.length ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />
         </>
       ) : (
-        // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
             data-test-subj="osqueryResultsTable"
@@ -380,6 +428,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             columnVisibility={columnVisibility}
             rowCount={allResultsData?.totalCount ?? 0}
             renderCellValue={renderCellValue}
+            leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
             pagination={tablePagination}
             height="500px"

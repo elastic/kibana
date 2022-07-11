@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdateRulesSchema } from './rule_schemas';
+import type { UpdateRulesSchema } from './rule_schemas';
 
 export const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
   if (rule.timeline_id != null) {
@@ -43,6 +43,31 @@ export const validateId = (rule: UpdateRulesSchema): string[] => {
   }
 };
 
-export const updateRuleValidateTypeDependents = (schema: UpdateRulesSchema): string[] => {
-  return [...validateId(schema), ...validateTimelineId(schema), ...validateTimelineTitle(schema)];
+export const validateThreshold = (rule: UpdateRulesSchema): string[] => {
+  const errors: string[] = [];
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      errors.push('when "type" is "threshold", "threshold" is required');
+    } else {
+      if (
+        rule.threshold.cardinality?.length &&
+        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+      ) {
+        errors.push('Cardinality of a field that is being aggregated on is always 1');
+      }
+      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+        errors.push('Number of fields must be 3 or less');
+      }
+    }
+  }
+  return errors;
+};
+
+export const updateRuleValidateTypeDependents = (rule: UpdateRulesSchema): string[] => {
+  return [
+    ...validateId(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
+  ];
 };

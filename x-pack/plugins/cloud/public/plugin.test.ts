@@ -9,9 +9,9 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { CloudPlugin, CloudConfigType, loadUserId } from './plugin';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { KibanaExecutionContext } from '@kbn/core/public';
+import { CloudPlugin, CloudConfigType } from './plugin';
+import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/core/public/utils';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -20,17 +20,7 @@ describe('Cloud Plugin', () => {
         jest.clearAllMocks();
       });
 
-      const setupPlugin = async ({
-        config = {},
-        securityEnabled = true,
-        currentUserProps = {},
-        currentContext$ = undefined,
-      }: {
-        config?: Partial<CloudConfigType>;
-        securityEnabled?: boolean;
-        currentUserProps?: Record<string, any>;
-        currentContext$?: Observable<KibanaExecutionContext>;
-      }) => {
+      const setupPlugin = async ({ config = {} }: { config?: Partial<CloudConfigType> }) => {
         const initContext = coreMock.createPluginInitializerContext({
           id: 'cloudId',
           base_url: 'https://cloud.elastic.co',
@@ -49,21 +39,9 @@ describe('Cloud Plugin', () => {
         const plugin = new CloudPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
-        const coreStart = coreMock.createStart();
 
-        if (currentContext$) {
-          coreStart.executionContext.context$ = currentContext$;
-        }
+        const setup = plugin.setup(coreSetup, {});
 
-        coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
-
-        const securitySetup = securityMock.createSetup();
-
-        securitySetup.authc.getCurrentUser.mockResolvedValue(
-          securityMock.createMockAuthenticatedUser(currentUserProps)
-        );
-
-        const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
         // Wait for FullStory dynamic import to resolve
         await new Promise((r) => setImmediate(r));
 
@@ -73,9 +51,6 @@ describe('Cloud Plugin', () => {
       test('register the shipper FullStory with correct args when enabled and org_id are set', async () => {
         const { coreSetup } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
         });
 
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
@@ -83,187 +58,6 @@ describe('Cloud Plugin', () => {
           fullStoryOrgId: 'foo',
           scriptUrl: '/internal/cloud/100/fullstory.js',
           namespace: 'FSKibana',
-        });
-      });
-
-      test('register the context provider for the cloud user with hashed user ID when security is available', async () => {
-        const { coreSetup } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
-        });
-
-        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
-
-        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
-          ([{ name }]) => name === 'cloud_user_id'
-        )!;
-
-        await expect(firstValueFrom(context$)).resolves.toEqual({
-          userId: '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
-        });
-      });
-
-      it('user hash includes org id', async () => {
-        const { coreSetup: coreSetup1 } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg1' },
-          currentUserProps: {
-            username: '1234',
-          },
-        });
-
-        const [{ context$: context1$ }] =
-          coreSetup1.analytics.registerContextProvider.mock.calls.find(
-            ([{ name }]) => name === 'cloud_user_id'
-          )!;
-
-        const hashId1 = await firstValueFrom(context1$);
-
-        const { coreSetup: coreSetup2 } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
-          currentUserProps: {
-            username: '1234',
-          },
-        });
-
-        const [{ context$: context2$ }] =
-          coreSetup2.analytics.registerContextProvider.mock.calls.find(
-            ([{ name }]) => name === 'cloud_user_id'
-          )!;
-
-        const hashId2 = await firstValueFrom(context2$);
-
-        expect(hashId1).not.toEqual(hashId2);
-      });
-
-      it('emits the execution context provider everytime an app changes', async () => {
-        const currentContext$ = new Subject<KibanaExecutionContext>();
-        const { coreSetup } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
-          currentContext$,
-        });
-
-        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
-          ([{ name }]) => name === 'execution_context'
-        )!;
-
-        let latestContext;
-        context$.subscribe((context) => {
-          latestContext = context;
-        });
-
-        // takes the app name
-        expect(latestContext).toBeUndefined();
-        currentContext$.next({
-          name: 'App1',
-          description: '123',
-        });
-
-        await new Promise((r) => setImmediate(r));
-
-        expect(latestContext).toEqual({
-          pageName: 'App1',
-          applicationId: 'App1',
-        });
-
-        // context clear
-        currentContext$.next({});
-        expect(latestContext).toEqual({
-          pageName: '',
-          applicationId: 'unknown',
-        });
-
-        // different app
-        currentContext$.next({
-          name: 'App2',
-          page: 'page2',
-          id: '123',
-        });
-        expect(latestContext).toEqual({
-          pageName: 'App2:page2',
-          applicationId: 'App2',
-          page: 'page2',
-          entityId: '123',
-        });
-
-        // Back to first app
-        currentContext$.next({
-          name: 'App1',
-          page: 'page3',
-          id: '123',
-        });
-
-        expect(latestContext).toEqual({
-          pageName: 'App1:page3',
-          applicationId: 'App1',
-          page: 'page3',
-          entityId: '123',
-        });
-      });
-
-      it('does not register the cloud user id context provider when security is not available', async () => {
-        const { coreSetup } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          securityEnabled: false,
-        });
-
-        expect(
-          coreSetup.analytics.registerContextProvider.mock.calls.find(
-            ([{ name }]) => name === 'cloud_user_id'
-          )
-        ).toBeUndefined();
-      });
-
-      describe('with memory', () => {
-        beforeAll(() => {
-          // @ts-expect-error 2339
-          window.performance.memory = {
-            get jsHeapSizeLimit() {
-              return 3;
-            },
-            get totalJSHeapSize() {
-              return 2;
-            },
-            get usedJSHeapSize() {
-              return 1;
-            },
-          };
-        });
-
-        afterAll(() => {
-          // @ts-expect-error 2339
-          delete window.performance.memory;
-        });
-
-        it('reports an event when security is available', async () => {
-          const { initContext, coreSetup } = await setupPlugin({
-            config: { full_story: { enabled: true, org_id: 'foo' } },
-            currentUserProps: {
-              username: '1234',
-            },
-          });
-
-          expect(coreSetup.analytics.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
-            kibana_version: initContext.env.packageInfo.version,
-            memory_js_heap_size_limit: 3,
-            memory_js_heap_size_total: 2,
-            memory_js_heap_size_used: 1,
-          });
-        });
-      });
-
-      it('reports an event when security is not available', async () => {
-        const { initContext, coreSetup } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          securityEnabled: false,
-        });
-
-        expect(coreSetup.analytics.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version: initContext.env.packageInfo.version,
         });
       });
 
@@ -277,6 +71,156 @@ describe('Cloud Plugin', () => {
       it('does not call initializeFullStory when org_id is undefined', async () => {
         const { coreSetup } = await setupPlugin({ config: { full_story: { enabled: true } } });
         expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('setupTelemetryContext', () => {
+      const username = '1234';
+      const expectedHashedPlainUsername = new Sha256().update(username, 'utf8').digest('hex');
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      const setupPlugin = async ({
+        config = {},
+        securityEnabled = true,
+        currentUserProps = {},
+      }: {
+        config?: Partial<CloudConfigType>;
+        securityEnabled?: boolean;
+        currentUserProps?: Record<string, any> | Error;
+      }) => {
+        const initContext = coreMock.createPluginInitializerContext({
+          base_url: 'https://cloud.elastic.co',
+          deployment_url: '/abc123',
+          profile_url: '/profile/alice',
+          organization_url: '/org/myOrg',
+          full_story: {
+            enabled: false,
+          },
+          chat: {
+            enabled: false,
+          },
+          ...config,
+        });
+
+        const plugin = new CloudPlugin(initContext);
+
+        const coreSetup = coreMock.createSetup();
+        const securitySetup = securityMock.createSetup();
+        if (currentUserProps instanceof Error) {
+          securitySetup.authc.getCurrentUser.mockRejectedValue(currentUserProps);
+        } else {
+          securitySetup.authc.getCurrentUser.mockResolvedValue(
+            securityMock.createMockAuthenticatedUser(currentUserProps)
+          );
+        }
+
+        const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
+
+        return { initContext, plugin, setup, coreSetup };
+      };
+
+      test('register the context provider for the cloud user with hashed user ID when security is available', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { id: 'cloudId' },
+          currentUserProps: { username },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
+          isElasticCloudUser: false,
+        });
+      });
+
+      it('user hash includes cloud id', async () => {
+        const { coreSetup: coreSetup1 } = await setupPlugin({
+          config: { id: 'esOrg1' },
+          currentUserProps: { username },
+        });
+
+        const [{ context$: context1$ }] =
+          coreSetup1.analytics.registerContextProvider.mock.calls.find(
+            ([{ name }]) => name === 'cloud_user_id'
+          )!;
+
+        const { userId: hashId1 } = (await firstValueFrom(context1$)) as { userId: string };
+        expect(hashId1).not.toEqual(expectedHashedPlainUsername);
+
+        const { coreSetup: coreSetup2 } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
+          currentUserProps: { username },
+        });
+
+        const [{ context$: context2$ }] =
+          coreSetup2.analytics.registerContextProvider.mock.calls.find(
+            ([{ name }]) => name === 'cloud_user_id'
+          )!;
+
+        const { userId: hashId2 } = (await firstValueFrom(context2$)) as { userId: string };
+        expect(hashId2).not.toEqual(expectedHashedPlainUsername);
+
+        expect(hashId1).not.toEqual(hashId2);
+      });
+
+      test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { id: 'cloudDeploymentId' },
+          currentUserProps: { username, elastic_cloud_user: true },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: expectedHashedPlainUsername,
+          isElasticCloudUser: true,
+        });
+      });
+
+      test('user hash does not include cloudId when not provided', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: {},
+          currentUserProps: { username },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: expectedHashedPlainUsername,
+          isElasticCloudUser: false,
+        });
+      });
+
+      test('user hash is undefined when failed to fetch a user', async () => {
+        const { coreSetup } = await setupPlugin({
+          currentUserProps: new Error('failed to fetch a user'),
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: undefined,
+          isElasticCloudUser: false,
+        });
       });
     });
 
@@ -650,58 +594,6 @@ describe('Cloud Plugin', () => {
       await nextTick();
 
       expect(securityStart.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('loadFullStoryUserId', () => {
-    let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
-
-    beforeEach(() => {
-      consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    });
-    afterEach(() => {
-      consoleMock.mockRestore();
-    });
-
-    it('returns principal ID when username specified', async () => {
-      expect(
-        await loadUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({
-            username: '1234',
-          }),
-        })
-      ).toEqual('1234');
-      expect(consoleMock).not.toHaveBeenCalled();
-    });
-
-    it('returns undefined if getCurrentUser throws', async () => {
-      expect(
-        await loadUserId({
-          getCurrentUser: jest.fn().mockRejectedValue(new Error(`Oh no!`)),
-        })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined if getCurrentUser returns undefined', async () => {
-      expect(
-        await loadUserId({
-          getCurrentUser: jest.fn().mockResolvedValue(undefined),
-        })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined and logs if username undefined', async () => {
-      expect(
-        await loadUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({
-            username: undefined,
-            metadata: { foo: 'bar' },
-          }),
-        })
-      ).toBeUndefined();
-      expect(consoleMock).toHaveBeenLastCalledWith(
-        `[cloud.analytics] username not specified. User metadata: {"foo":"bar"}`
-      );
     });
   });
 });

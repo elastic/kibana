@@ -11,7 +11,7 @@ import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
@@ -20,7 +20,7 @@ import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 interface ActiveStateSwitchProps {

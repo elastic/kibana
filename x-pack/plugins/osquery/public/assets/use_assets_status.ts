@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/public';
 import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
 import { INTEGRATION_ASSETS_STATUS_ID } from './constants';
@@ -18,6 +18,7 @@ export const useAssetsStatus = () => {
     () => http.get('/internal/osquery/assets'),
     {
       keepPreviousData: true,
+      retry: false,
     }
   );
 };

@@ -46,16 +46,15 @@ export const getDatatableRenderer = (dependencies: {
     // ROW_CLICK_TRIGGER trigger.
     let rowHasRowClickTriggerActions: boolean[] = [];
     if (hasCompatibleActions) {
-      const table = Object.values(config.data.tables)[0];
-      if (!!table) {
+      if (!!config.data) {
         rowHasRowClickTriggerActions = await Promise.all(
-          table.rows.map(async (row, rowIndex) => {
+          config.data.rows.map(async (row, rowIndex) => {
             try {
               const hasActions = await hasCompatibleActions({
                 name: 'tableRowContextMenuClick',
                 data: {
                   rowIndex,
-                  table,
+                  table: config.data,
                   columns: config.args.columns.map((column) => column.columnId),
                 },
               });
@@ -82,13 +81,11 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
+            renderComplete={() => handlers.done()}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

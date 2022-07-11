@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
+import type { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
 
-export const createCustomRule = (
-  rule: CustomRule,
-  ruleId = 'rule_testing',
-  interval = '100m',
-  enabled = false
-) =>
+export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -28,7 +23,7 @@ export const createCustomRule = (
       index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
-      enabled,
+      enabled: false,
       exceptions_list: rule.exceptionLists ?? [],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -135,4 +130,25 @@ export const deleteCustomRule = (ruleId = '1') => {
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
+};
+
+export const importRule = (ndjsonPath: string) => {
+  cy.fixture(ndjsonPath)
+    .then((file) => Cypress.Blob.binaryStringToBlob(file))
+    .then((blob) => {
+      const formdata = new FormData();
+      formdata.append('file', blob, ndjsonPath);
+
+      cy.request({
+        url: 'api/detection_engine/rules/_import',
+        method: 'POST',
+        headers: {
+          'kbn-xsrf': 'cypress-creds',
+          'content-type': 'multipart/form-data',
+        },
+        body: formdata,
+      })
+        .its('status')
+        .should('be.equal', 200);
+    });
 };

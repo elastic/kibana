@@ -11,8 +11,7 @@
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": [
-    "windows_anomalous_process_creation",
-    "v2_windows_anomalous_process_creation"
+    "v3_windows_anomalous_process_creation"
   ],
   "name": "Anomalous Windows Process Creation",
   "references": [
@@ -29,5 +28,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 5
+  "version": 6
 }

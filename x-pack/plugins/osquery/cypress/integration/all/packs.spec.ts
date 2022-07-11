@@ -55,11 +55,11 @@ describe('ALL - Packs', () => {
       cy.react('List').first().click();
       findAndClickButton('Add query');
       cy.contains('Attach next query');
-      getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
+      getSavedQueriesDropdown().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
-        .type('500');
+        .type('10');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       findAndClickButton('Save pack');
@@ -92,25 +92,11 @@ describe('ALL - Packs', () => {
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       cy.contains('ID must be unique').should('not.exist');
-      getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
+      getSavedQueriesDropdown().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
-    // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
-    it.skip('to click the icon and visit discover', () => {
-      preparePack(PACK_NAME);
-      cy.react('CustomItemAction', {
-        props: { index: 0, item: { id: SAVED_QUERY_ID } },
-      }).click();
-      cy.getBySel('superDatePickerToggleQuickMenuButton').click();
-      cy.getBySel('superDatePickerToggleRefreshButton').click();
-      cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('10');
-      cy.get('button').contains('Apply').click();
-      cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-        `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
-      );
-    });
-    it('by clicking in Lens button', () => {
+    it('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
@@ -122,17 +108,43 @@ describe('ALL - Packs', () => {
       preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: SAVED_QUERY_ID } },
-      }).click();
+      })
+        .should('exist')
+        .click();
       cy.window()
         .its('open')
         .then(() => {
           cy.visit(lensUrl);
         });
-      cy.getBySel('lnsWorkspace');
+      cy.getBySel('lnsWorkspace').should('exist');
       cy.getBySel('breadcrumbs').contains(`Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`);
     });
 
-    // strange behaviour with modal
+    // TODO extremely strange behaviour with Cypress not finding Discover's page elements
+    // it('should open discover in new tab', () => {
+    //   preparePack(PACK_NAME);
+    //   cy.wait(1000);
+    //   cy.react('CustomItemAction', {
+    //     props: { index: 0, item: { id: SAVED_QUERY_ID } },
+    //   })
+    //     .should('exist')
+    //     .within(() => {
+    //       cy.get('a')
+    //         .should('have.attr', 'href')
+    //         .then(($href) => {
+    //           // @ts-expect-error-next-line href string - check types
+    //           cy.visit($href);
+    //           cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+    //           cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
+    //           cy.getBySel('superDatePickerToggleQuickMenuButton').click();
+    //           cy.getBySel('superDatePickerCommonlyUsed_Today').click();
+    //           cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
+    //             `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+    //           );
+    //         });
+    //     });
+    // });
+
     it('activate and deactive pack', () => {
       cy.contains('Packs').click();
       cy.react('ActiveStateSwitchComponent', {
@@ -160,8 +172,8 @@ describe('ALL - Packs', () => {
         .contains(/^Save and deploy changes$/)
         .click();
       cy.contains(`${PACK_NAME}`).click();
-      cy.contains(`${PACK_NAME} details`);
-      cy.contains(/^No items found/);
+      cy.contains(`${PACK_NAME} details`).should('exist');
+      cy.contains(/^No items found/).should('exist');
     });
 
     it('enable changing saved queries and ecs_mappings', () => {
@@ -170,32 +182,35 @@ describe('ALL - Packs', () => {
 
       findAndClickButton('Add query');
 
-      getSavedQueriesDropdown().click().type('Multiple {downArrow} {enter}');
-      cy.contains('Custom key/value pairs');
-      cy.contains('Days of uptime');
-      cy.contains('List of keywords used to tag each');
-      cy.contains('Seconds of uptime');
-      cy.contains('Client network address.');
-      cy.contains('Total uptime seconds');
+      getSavedQueriesDropdown().type('Multiple {downArrow} {enter}');
+      cy.contains('Custom key/value pairs').should('exist');
+      cy.contains('Days of uptime').should('exist');
+      cy.contains('List of keywords used to tag each').should('exist');
+      cy.contains('Seconds of uptime').should('exist');
+      cy.contains('Client network address.').should('exist');
+      cy.contains('Total uptime seconds').should('exist');
+      cy.getBySel('ECSMappingEditorForm').should('have.length', 4);
 
-      getSavedQueriesDropdown().click().type('NOMAPPING {downArrow} {enter}');
+      getSavedQueriesDropdown().type('NOMAPPING {downArrow} {enter}');
       cy.contains('Custom key/value pairs').should('not.exist');
       cy.contains('Days of uptime').should('not.exist');
       cy.contains('List of keywords used to tag each').should('not.exist');
       cy.contains('Seconds of uptime').should('not.exist');
       cy.contains('Client network address.').should('not.exist');
       cy.contains('Total uptime seconds').should('not.exist');
+      cy.getBySel('ECSMappingEditorForm').should('have.length', 1);
 
-      getSavedQueriesDropdown().click().type('ONE_MAPPING {downArrow} {enter}');
-      cy.contains('Name of the continent');
-      cy.contains('Seconds of uptime');
+      getSavedQueriesDropdown().type('ONE_MAPPING {downArrow} {enter}');
+      cy.contains('Name of the continent').should('exist');
+      cy.contains('Seconds of uptime').should('exist');
+      cy.getBySel('ECSMappingEditorForm').should('have.length', 2);
 
       findAndClickButton('Save');
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: 'ONE_MAPPING_CHANGED' } },
       }).click();
-      cy.contains('Name of the continent');
-      cy.contains('Seconds of uptime');
+      cy.contains('Name of the continent').should('exist');
+      cy.contains('Seconds of uptime').should('exist');
     });
 
     it('to click delete button', () => {
@@ -231,7 +246,7 @@ describe('ALL - Packs', () => {
 
       cy.getBySel('toastCloseButton').click();
       cy.contains(REMOVING_PACK).click();
-      cy.contains(`${REMOVING_PACK} details`);
+      cy.contains(`${REMOVING_PACK} details`).should('exist');
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: AGENT_NAME } }).should('exist');
 
@@ -246,7 +261,7 @@ describe('ALL - Packs', () => {
       closeModalIfVisible();
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
-      cy.contains(`${REMOVING_PACK} details`);
+      cy.contains(`${REMOVING_PACK} details`).should('exist');
       cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');

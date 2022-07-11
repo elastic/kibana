@@ -9,23 +9,23 @@ import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import type { InspectResponse } from '../common/helpers';
 import {
   createFilter,
   getInspectResponse,
-  InspectResponse,
   generateTablePaginationOptions,
 } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import {
+import type {
   ResultEdges,
   PageInfoPaginated,
-  OsqueryQueries,
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
   Direction,
 } from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
+import { OsqueryQueries } from '../../common/search_strategy';
+import type { ESTermQuery } from '../../common/typed_json';
 import { queryClient } from '../query_client';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -68,7 +68,7 @@ export const useActionResults = ({
   return useQuery(
     ['actionResults', { actionId }],
     async () => {
-      const responseData = await firstValueFrom(
+      const responseData = await lastValueFrom(
         data.search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
           {
             actionId,

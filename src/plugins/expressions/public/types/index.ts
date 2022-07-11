@@ -50,6 +50,7 @@ export interface IExpressionLoaderParams {
   searchSessionId?: string;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   executionContext?: KibanaExecutionContext;
 

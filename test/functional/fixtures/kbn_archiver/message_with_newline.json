@@ -1,0 +1,14 @@
+{
+  "attributes": {
+    "fields": "[]",
+    "title": "newline-test"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "newline-test",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzEzLDJd"
+}

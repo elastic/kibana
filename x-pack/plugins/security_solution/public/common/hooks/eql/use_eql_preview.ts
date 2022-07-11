@@ -11,22 +11,21 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import {
   isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
-  EqlSearchStrategyRequest,
-  EqlSearchStrategyResponse,
+  EQL_SEARCH_STRATEGY,
 } from '@kbn/data-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { EQL_SEARCH_STRATEGY } from '@kbn/data-enhanced-plugin/public';
 import * as i18n from '../translations';
 import { useKibana } from '../../lib/kibana';
 import { formatInspect, getEqlAggsData } from './helpers';
-import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
+import type { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { inputsModel } from '../../store';
+import type { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import type { inputsModel } from '../../store';
 import { useAppToasts } from '../use_app_toasts';
 
 export const useEqlPreview = (): [

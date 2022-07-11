@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { memo, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +38,7 @@ import {
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import type { PackageList } from '../../../../types';
+import type { GetPackagesResponse, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
@@ -180,7 +180,10 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
-export const AvailablePackages: React.FC = memo(() => {
+export const AvailablePackages: React.FC<{
+  allPackages?: GetPackagesResponse | null;
+  isLoading: boolean;
+}> = ({ allPackages, isLoading }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
 
@@ -214,6 +217,7 @@ export const AvailablePackages: React.FC = memo(() => {
     error: eprPackageLoadingError,
   } = useGetPackages({
     category: '',
+    excludeInstallStatus: true,
   });
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
@@ -237,7 +241,7 @@ export const AvailablePackages: React.FC = memo(() => {
   ];
 
   const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard(getAbsolutePath, getHref, item);
+    return mapToCard({ getAbsolutePath, getHref, item });
   });
 
   cards.sort((a, b) => {
@@ -350,11 +354,11 @@ export const AvailablePackages: React.FC = memo(() => {
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint Security',
+                defaultMessage: 'Endpoint and Cloud Security',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:
-                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
               })}
             />
           </TrackApplicationView>
@@ -381,6 +385,7 @@ export const AvailablePackages: React.FC = memo(() => {
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
+      showCardLabels={false}
     />
   );
-});
+};

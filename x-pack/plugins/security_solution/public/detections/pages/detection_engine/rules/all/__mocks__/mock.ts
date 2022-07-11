@@ -6,9 +6,9 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
-import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
+import type { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
+import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import type { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
 import { getThreatMock } from '../../../../../../../common/detection_engine/schemas/types/threat.mock';
 
@@ -70,6 +70,9 @@ export const mockRule = (id: string): Rule => ({
   timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
   timeline_title: 'Untitled timeline',
   meta: { from: '0m' },
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -133,6 +136,9 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
   timeline_title: 'Titled timeline',
   meta: { from: '0m' },
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -187,8 +193,11 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   anomalyThreshold: 50,
   machineLearningJobId: [],
   index: ['filebeat-'],
+  dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
+  requiredFields: [],
+  relatedIntegrations: [],
   threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -203,6 +212,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
       value: '2',
     },
   },
+  eqlOptions: {},
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

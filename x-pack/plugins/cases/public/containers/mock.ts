@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import type {
   ResolvedCase,
-  CaseMetrics,
-  CaseMetricsFeature,
+  SingleCaseMetrics,
+  SingleCaseMetricsFeature,
   AlertComment,
+  CasesMetrics,
+  ExternalReferenceComment,
 } from '../../common/ui/types';
 import {
   Actions,
@@ -31,11 +33,16 @@ import {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+  CaseSeverity,
+  ExternalReferenceStorageType,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
+import {
+  ExternalReferenceAttachmentType,
+  ExternalReferenceAttachmentViewObject,
+} from '../client/attachment_framework/types';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -73,6 +80,25 @@ export const basicComment: Comment = {
 export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const alertCommentWithIndices: AlertComment = {
+  alertId: 'alert-id-1',
+  index: '.alerts-matchme.alerts',
   type: CommentType.alert,
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
@@ -139,6 +165,23 @@ export const hostReleaseComment: () => Comment = () => {
   };
 };
 
+export const externalReferenceAttachment: ExternalReferenceComment = {
+  type: CommentType.externalReference,
+  id: 'external-reference-comment-id',
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 export const basicCase: Case = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
@@ -154,6 +197,8 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  severity: CaseSeverity.LOW,
+  duration: null,
   externalService: null,
   status: CaseStatuses.open,
   tags,
@@ -188,7 +233,7 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
+export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
@@ -196,9 +241,9 @@ export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
   'connectors',
 ];
 
-export const basicCaseStatusFeatures: CaseMetricsFeature[] = ['lifespan'];
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
 
-export const basicCaseMetrics: CaseMetrics = {
+export const basicCaseMetrics: SingleCaseMetrics = {
   alerts: {
     count: 12,
     hosts: {
@@ -245,6 +290,8 @@ export const mockCase: Case = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  duration: null,
+  severity: CaseSeverity.LOW,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
@@ -285,6 +332,10 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const casesMetrics: CasesMetrics = {
+  mttr: 12,
 };
 
 export const basicPush = {
@@ -328,7 +379,7 @@ export const cases: Case[] = [
   caseWithAlertsSyncOff,
 ];
 
-export const allCases: AllCases = {
+export const allCases: Cases = {
   cases,
   page: 1,
   perPage: 5,
@@ -383,6 +434,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: { id: 'none', name: 'My Connector', type: ConnectorTypes.none, fields: null },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  duration: null,
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
@@ -509,6 +561,7 @@ export const getUserAction = (
           description: 'a desc',
           connector: { ...getJiraConnector() },
           status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
           settings: { syncAlerts: true },
@@ -649,13 +702,10 @@ export const caseUserActions: CaseUserActions[] = [
 ];
 
 // components tests
-export const useGetCasesMockState: UseGetCasesState = {
+export const useGetCasesMockState = {
   data: allCases,
-  loading: [],
-  selectedCases: [],
+  isLoading: false,
   isError: false,
-  queryParams: DEFAULT_QUERY_PARAMS,
-  filterOptions: DEFAULT_FILTER_OPTIONS,
 };
 
 export const basicCaseClosed: Case = {
@@ -664,3 +714,36 @@ export const basicCaseClosed: Case = {
   closedBy: elasticUser,
   status: CaseStatuses.closed,
 };
+
+export const getExternalReferenceUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
+  actionId: 'external-reference-action-id',
+  type: ActionTypes.comment,
+  commentId: 'external-reference-comment-id',
+  payload: {
+    comment: {
+      type: CommentType.externalReference,
+      externalReferenceId: 'my-id',
+      externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+      externalReferenceAttachmentTypeId: '.test',
+      externalReferenceMetadata: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
+});
+
+export const getExternalReferenceAttachment = (
+  viewObject: ExternalReferenceAttachmentViewObject = {}
+): ExternalReferenceAttachmentType => ({
+  id: '.test',
+  icon: 'casesApp',
+  displayName: 'Test',
+  getAttachmentViewObject: () => ({
+    type: 'update',
+    event: 'added a chart',
+    timelineIcon: 'casesApp',
+    ...viewObject,
+  }),
+});

@@ -5,19 +5,24 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListClient } from '@kbn/lists-plugin/server';
-import { BuildRuleMessage } from '../rule_messages';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { BuildRuleMessage } from '../rule_messages';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventSearchResult: estypes.SearchResponse<T>;
+  events: Array<estypes.SearchHit<T>>;
   buildRuleMessage: BuildRuleMessage;
 }
+
+export type FilterEventsAgainstListReturn<T> = [
+  Array<estypes.SearchHit<T>>,
+  Array<estypes.SearchHit<T>>
+];
 
 export interface CreateSetToFilterAgainstOptions<T> {
   events: Array<estypes.SearchHit<T>>;

@@ -26,12 +26,8 @@ import {
   SearchSourceService,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
-import { SearchUsage } from './collectors';
-import type { IScopedSearchSessionsClient, ISearchSessionService } from './session';
-
-export interface SearchEnhancements {
-  sessionService: ISearchSessionService;
-}
+import { SearchUsage } from './collectors/search';
+import type { IScopedSearchSessionsClient } from './session';
 
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -59,11 +55,6 @@ export interface ISearchSetup {
    * Used internally for telemetry
    */
   usage?: SearchUsage;
-
-  /**
-   * @internal
-   */
-  __enhance: (enhancements: SearchEnhancements) => void;
 
   searchSource: ReturnType<SearchSourceService['setup']>;
 }

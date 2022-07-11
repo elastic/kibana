@@ -38,9 +38,11 @@ export const ML_PAGES = {
    */
   DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
   ANOMALY_DETECTION_CREATE_JOB: `jobs/new_job`,
+  ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: `jobs/new_job/recognize`,
   ANOMALY_DETECTION_CREATE_JOB_ADVANCED: `jobs/new_job/advanced`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: `jobs/new_job/step/job_type`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: `jobs/new_job/step/index_or_search`,
+  ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: `jobs/new_job/from_lens`,
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',
   CALENDARS_NEW: 'settings/calendars_list/new_calendar',
@@ -50,6 +52,9 @@ export const ML_PAGES = {
   FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
   ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
+  AIOPS: 'aiops',
+  AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
+  AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: 'aiops/explain_log_rate_spikes_index_select',
 } as const;
 
 export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];

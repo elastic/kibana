@@ -283,4 +283,9 @@ export class GraphPageObject extends FtrService {
     const el = await this.find.byCssSelector('small.gphLinkSummary__term--2');
     return await el.getVisibleText();
   }
+
+  async getAllGraphNodes() {
+    const el = await this.find.allByCssSelector('.gphNode');
+    return el.length;
+  }
 }

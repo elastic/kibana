@@ -9,7 +9,8 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
 
-import { EuiCodeEditor, EuiCodeEditorProps } from '../shared_imports';
+import type { EuiCodeEditorProps } from '../shared_imports';
+import { EuiCodeEditor } from '../shared_imports';
 
 import './osquery_mode';
 
@@ -35,9 +36,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
 
-  useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
-    editorValue,
-  ]);
+  useDebounce(() => onChange(editorValue), 500, [editorValue]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 

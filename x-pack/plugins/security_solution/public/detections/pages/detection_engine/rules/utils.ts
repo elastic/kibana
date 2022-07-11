@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import {
-  getRulesUrl,
-  getRuleDetailsUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { getRuleDetailsUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18nRules from './translations';
-import { RouteSpyState } from '../../../../common/utils/route/types';
-import { GetUrlForApp } from '../../../../common/components/navigation/types';
+import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_UI_ID, RULES_PATH } from '../../../../../common/constants';
-import { RuleStep, RuleStepsOrder } from './types';
+import { RULES_PATH } from '../../../../../common/constants';
+import type { RuleStepsOrder } from './types';
+import { RuleStep } from './types';
+import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
 
 export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.defineRule,
@@ -26,47 +22,26 @@ export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.ruleActions,
 ];
 
-const getRulesBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
-  const tabPath = pathname.split('/')[1];
-
-  if (tabPath === 'rules') {
-    return {
-      text: i18nRules.PAGE_TITLE,
-      href: getUrlForApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
-      }),
-    };
-  }
-};
-
 const isRuleCreatePage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/create');
 
 const isRuleEditPage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/edit');
 
-export const getBreadcrumbs = (
+export const getTrailingBreadcrumbs = (
   params: RouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
   let breadcrumb: ChromeBreadcrumb[] = [];
-
-  const rulesBreadcrumb = getRulesBreadcrumb(params.pathName, search, getUrlForApp);
-
-  if (rulesBreadcrumb) {
-    breadcrumb = [...breadcrumb, rulesBreadcrumb];
-  }
 
   if (params.detailName && params.state?.ruleName) {
     breadcrumb = [
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: getUrlForApp(APP_UI_ID, {
+        href: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+          path: getRuleDetailsUrl(params.detailName, ''),
         }),
       },
     ];

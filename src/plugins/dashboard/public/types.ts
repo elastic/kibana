@@ -24,6 +24,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
@@ -91,6 +92,7 @@ export interface DashboardContainerInput extends ContainerInput {
   description?: string;
   useMargins: boolean;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
@@ -154,6 +156,7 @@ export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
+  syncTooltips: boolean;
 };
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
@@ -203,6 +206,7 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   visualizations: VisualizationsStart;
+  dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;

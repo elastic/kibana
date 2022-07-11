@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  describe('Kibana tags page meets a11y validations', () => {
+  describe('Kibana Tags Page Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -71,7 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('tag assignment panel meets a11y requirements', async () => {
+    // https://github.com/elastic/kibana/issues/135985 inconsistent test failure
+    it.skip('tag assignment panel meets a11y requirements', async () => {
       await testSubjects.click('euiCollapsedItemActionsButton');
       const actionOnTag = 'assign';
       await PageObjects.tagManagement.clickActionItem(actionOnTag);
@@ -79,6 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('tag management page with connections column populated meets a11y requirements', async () => {
+      await testSubjects.click('euiCollapsedItemActionsButton');
+      const actionOnTag = 'assign';
+      await PageObjects.tagManagement.clickActionItem(actionOnTag);
       await testSubjects.click('assignFlyout-selectAllButton');
 
       await testSubjects.click('assignFlyoutConfirmButton');

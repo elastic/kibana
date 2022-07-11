@@ -1,15 +1,757 @@
 {
   "id": "actions",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-public.Plugin",
+        "type": "Class",
+        "tags": [],
+        "label": "Plugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "public",
+            "docId": "kibActionsPluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "actions",
+            "scope": "public",
+            "docId": "kibActionsPluginApi",
+            "section": "def-public.ActionsPublicPluginSetup",
+            "text": "ActionsPublicPluginSetup"
+          },
+          ", void, object, object>"
+        ],
+        "path": "x-pack/plugins/actions/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-public.Plugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-public.Plugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<",
+                  "Config",
+                  ">"
+                ],
+                "path": "x-pack/plugins/actions/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-public.Plugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "actions",
+                "scope": "public",
+                "docId": "kibActionsPluginApi",
+                "section": "def-public.ActionsPublicPluginSetup",
+                "text": "ActionsPublicPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/actions/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-public.Plugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/actions/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "actions",
+      "id": "def-public.ActionsPublicPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ActionsPublicPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/actions/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "actions",
+          "id": "def-public.ActionsPublicPluginSetup.validateEmailAddresses",
+          "type": "Function",
+          "tags": [],
+          "label": "validateEmailAddresses",
+          "description": [],
+          "signature": [
+            "(emails: string[], options?: ",
+            {
+              "pluginId": "actions",
+              "scope": "common",
+              "docId": "kibActionsPluginApi",
+              "section": "def-common.ValidateEmailAddressesOptions",
+              "text": "ValidateEmailAddressesOptions"
+            },
+            " | undefined) => ",
+            {
+              "pluginId": "actions",
+              "scope": "common",
+              "docId": "kibActionsPluginApi",
+              "section": "def-common.ValidatedEmail",
+              "text": "ValidatedEmail"
+            },
+            "[]"
+          ],
+          "path": "x-pack/plugins/actions/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-public.ActionsPublicPluginSetup.validateEmailAddresses.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "emails",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/actions/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "actions",
+              "id": "def-public.ActionsPublicPluginSetup.validateEmailAddresses.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "actions",
+                  "scope": "common",
+                  "docId": "kibActionsPluginApi",
+                  "section": "def-common.ValidateEmailAddressesOptions",
+                  "text": "ValidateEmailAddressesOptions"
+                },
+                " | undefined"
+              ],
+              "path": "x-pack/plugins/actions/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.CaseConnector",
+        "type": "Class",
+        "tags": [],
+        "label": "CaseConnector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.CaseConnector",
+            "text": "CaseConnector"
+          },
+          "<Config, Secrets> extends ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.SubActionConnector",
+            "text": "SubActionConnector"
+          },
+          "<Config, Secrets> implements ",
+          "CaseConnectorInterface"
+        ],
+        "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.CaseConnector.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.ServiceParams",
+                    "text": "ServiceParams"
+                  },
+                  "<Config, Secrets>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.CaseConnector.addComment",
+            "type": "Function",
+            "tags": [],
+            "label": "addComment",
+            "description": [],
+            "signature": [
+              "({ incidentId, comment, }: { incidentId: string; comment: string; }) => Promise<unknown>"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.addComment.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    incidentId,\n    comment,\n  }",
+                "description": [],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.addComment.$1.incidentId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "incidentId",
+                    "description": [],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.addComment.$1.comment",
+                    "type": "string",
+                    "tags": [],
+                    "label": "comment",
+                    "description": [],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.CaseConnector.createIncident",
+            "type": "Function",
+            "tags": [],
+            "label": "createIncident",
+            "description": [],
+            "signature": [
+              "(incident: Record<string, unknown>) => Promise<",
+              "ExternalServiceIncidentResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.createIncident.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "incident",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.CaseConnector.updateIncident",
+            "type": "Function",
+            "tags": [],
+            "label": "updateIncident",
+            "description": [],
+            "signature": [
+              "({ incidentId, incident, }: { incidentId: string; incident: Record<string, unknown>; }) => Promise<",
+              "ExternalServiceIncidentResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.updateIncident.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    incidentId,\n    incident,\n  }",
+                "description": [],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.updateIncident.$1.incidentId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "incidentId",
+                    "description": [],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.updateIncident.$1.incident",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "incident",
+                    "description": [],
+                    "signature": [
+                      "{ [x: string]: unknown; }"
+                    ],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.CaseConnector.getIncident",
+            "type": "Function",
+            "tags": [],
+            "label": "getIncident",
+            "description": [],
+            "signature": [
+              "({ id }: { id: string; }) => Promise<",
+              "ExternalServiceIncidentResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.getIncident.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ id }",
+                "description": [],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.getIncident.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.CaseConnector.pushToService",
+            "type": "Function",
+            "tags": [],
+            "label": "pushToService",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "PushToServiceParams",
+              ") => Promise<",
+              "PushToServiceResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.pushToService.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "PushToServiceParams"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.SubActionConnector",
+        "type": "Class",
+        "tags": [],
+        "label": "SubActionConnector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.SubActionConnector",
+            "text": "SubActionConnector"
+          },
+          "<Config, Secrets>"
+        ],
+        "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              "{ id: string; type: string; }"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.config",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Config"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.secrets",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "Secrets"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.SubActionConnector.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.ServiceParams",
+                    "text": "ServiceParams"
+                  },
+                  "<Config, Secrets>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.registerSubAction",
+            "type": "Function",
+            "tags": [],
+            "label": "registerSubAction",
+            "description": [],
+            "signature": [
+              "(subAction: ",
+              "SubAction",
+              ") => void"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.SubActionConnector.registerSubAction.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "subAction",
+                "description": [],
+                "signature": [
+                  "SubAction"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.removeNullOrUndefinedFields",
+            "type": "Function",
+            "tags": [],
+            "label": "removeNullOrUndefinedFields",
+            "description": [],
+            "signature": [
+              "(data: unknown) => unknown"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.SubActionConnector.removeNullOrUndefinedFields.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.getSubActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSubActions",
+            "description": [],
+            "signature": [
+              "() => Map<string, ",
+              "SubAction",
+              ">"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.getResponseErrorMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "getResponseErrorMessage",
+            "description": [],
+            "signature": [
+              "(error: ",
+              "AxiosError",
+              "<unknown, any>) => string"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.SubActionConnector.getResponseErrorMessage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "AxiosError",
+                  "<unknown, any>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.request",
+            "type": "Function",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "<R>({ url, data, method, responseSchema, headers, ...config }: { url: string; responseSchema: ",
+              "Type",
+              "<R>; method?: ",
+              "Method",
+              " | undefined; } & ",
+              "AxiosRequestConfig",
+              "<any>) => Promise<",
+              "AxiosResponse",
+              "<R, any>>"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.SubActionConnector.request.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    ...config\n  }",
+                "description": [],
+                "signature": [
+                  "{ url: string; responseSchema: ",
+                  "Type",
+                  "<R>; method?: ",
+                  "Method",
+                  " | undefined; } & ",
+                  "AxiosRequestConfig",
+                  "<any>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "actions",
@@ -178,6 +920,16 @@
             "type": "boolean",
             "tags": [],
             "label": "isPreconfigured",
+            "description": [],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionResult.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
@@ -684,6 +1436,109 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.ServiceParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServiceParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ServiceParams",
+            "text": "ServiceParams"
+          },
+          "<Config, Secrets>"
+        ],
+        "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [
+              "\nThe type is the connector type id. For example \".servicenow\"\nThe id is the connector's SavedObject UUID."
+            ],
+            "signature": [
+              "{ id: string; type: string; }"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.config",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Config"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.configurationUtilities",
+            "type": "Object",
+            "tags": [],
+            "label": "configurationUtilities",
+            "description": [],
+            "signature": [
+              "ActionsConfigurationUtilities"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.secrets",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "Secrets"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "Services"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -738,7 +1593,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly group?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"info\" | \"warning\" | \"critical\" | undefined; readonly component?: string | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly group?: string | undefined; readonly component?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
@@ -926,7 +1781,9 @@
           },
           "<",
           "ActionTypeConfig",
-          ">[]>; enqueueExecution: (options: ",
+          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"client\" | \"jwt\"; options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; }>, configurationUtilities: ",
+          "ActionsConfigurationUtilities",
+          ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<void>; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
@@ -1177,6 +2034,47 @@
         },
         {
           "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.registerSubActionConnectorType",
+          "type": "Function",
+          "tags": [],
+          "label": "registerSubActionConnectorType",
+          "description": [],
+          "signature": [
+            "<Config extends ",
+            "ActionTypeConfig",
+            " = ",
+            "ActionTypeConfig",
+            ", Secrets extends ",
+            "ActionTypeSecrets",
+            " = ",
+            "ActionTypeSecrets",
+            ">(connector: ",
+            "SubActionConnectorType",
+            "<Config, Secrets>) => void"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.registerSubActionConnectorType.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "connector",
+              "description": [],
+              "signature": [
+                "SubActionConnectorType",
+                "<Config, Secrets>"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
           "id": "def-server.PluginSetupContract.isPreconfiguredConnector",
           "type": "Function",
           "tags": [],
@@ -1203,6 +2101,40 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getSubActionConnectorClass",
+          "type": "Function",
+          "tags": [],
+          "label": "getSubActionConnectorClass",
+          "description": [],
+          "signature": [
+            "<Config, Secrets>() => ",
+            "IServiceAbstract",
+            "<Config, Secrets>"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getCaseConnectorClass",
+          "type": "Function",
+          "tags": [],
+          "label": "getCaseConnectorClass",
+          "description": [],
+          "signature": [
+            "<Config, Secrets>() => ",
+            "IServiceAbstract",
+            "<Config, Secrets>"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "children": [],
           "returnComment": []
         }
       ],
@@ -1588,6 +2520,85 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.hasMustacheTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "hasMustacheTemplate",
+        "description": [
+          "does the string contain `{{.*}}`?"
+        ],
+        "signature": [
+          "(string: string) => boolean"
+        ],
+        "path": "x-pack/plugins/actions/common/mustache_template.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.hasMustacheTemplate.$1",
+            "type": "string",
+            "tags": [],
+            "label": "string",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/actions/common/mustache_template.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.invalidEmailsAsMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "invalidEmailsAsMessage",
+        "description": [],
+        "signature": [
+          "(validatedEmails: ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ValidatedEmail",
+            "text": "ValidatedEmail"
+          },
+          "[]) => string | undefined"
+        ],
+        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.invalidEmailsAsMessage.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "validatedEmails",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.ValidatedEmail",
+                "text": "ValidatedEmail"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.isActionTypeExecutorResult",
         "type": "Function",
         "tags": [],
@@ -1610,6 +2621,159 @@
               "unknown"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.validateEmailAddresses",
+        "type": "Function",
+        "tags": [],
+        "label": "validateEmailAddresses",
+        "description": [],
+        "signature": [
+          "(allowedDomains: string[] | null, addresses: string[], options: ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ValidateEmailAddressesOptions",
+            "text": "ValidateEmailAddressesOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ValidatedEmail",
+            "text": "ValidatedEmail"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.validateEmailAddresses.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowedDomains",
+            "description": [],
+            "signature": [
+              "string[] | null"
+            ],
+            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.validateEmailAddresses.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "addresses",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.validateEmailAddresses.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.ValidateEmailAddressesOptions",
+                "text": "ValidateEmailAddressesOptions"
+              }
+            ],
+            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.validateEmailAddressesAsAlwaysValid",
+        "type": "Function",
+        "tags": [],
+        "label": "validateEmailAddressesAsAlwaysValid",
+        "description": [],
+        "signature": [
+          "(addresses: string[]) => ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ValidatedEmail",
+            "text": "ValidatedEmail"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.validateEmailAddressesAsAlwaysValid.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "addresses",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.withoutMustacheTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutMustacheTemplate",
+        "description": [
+          "filter strings that do not contain `{{.*}}`"
+        ],
+        "signature": [
+          "(strings: string[]) => string[]"
+        ],
+        "path": "x-pack/plugins/actions/common/mustache_template.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.withoutMustacheTemplate.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "strings",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/mustache_template.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1679,6 +2843,32 @@
             "tags": [],
             "label": "isPreconfigured",
             "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ActionsPublicConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionsPublicConfigType",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionsPublicConfigType.allowedEmailDomains",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedEmailDomains",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
           }
@@ -1858,6 +3048,165 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.SNProductsConfigValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "SNProductsConfigValue",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SNProductsConfigValue.table",
+            "type": "string",
+            "tags": [],
+            "label": "table",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SNProductsConfigValue.appScope",
+            "type": "string",
+            "tags": [],
+            "label": "appScope",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SNProductsConfigValue.useImportAPI",
+            "type": "boolean",
+            "tags": [],
+            "label": "useImportAPI",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SNProductsConfigValue.importSetTable",
+            "type": "string",
+            "tags": [],
+            "label": "importSetTable",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SNProductsConfigValue.commentFieldKey",
+            "type": "string",
+            "tags": [],
+            "label": "commentFieldKey",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SNProductsConfigValue.appId",
+            "type": "string",
+            "tags": [],
+            "label": "appId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ValidatedEmail",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidatedEmail",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ValidatedEmail.address",
+            "type": "string",
+            "tags": [],
+            "label": "address",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ValidatedEmail.valid",
+            "type": "boolean",
+            "tags": [],
+            "label": "valid",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ValidatedEmail.reason",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.InvalidEmailReason",
+                "text": "InvalidEmailReason"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ValidateEmailAddressesOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidateEmailAddressesOptions",
+        "description": [
+          "Options that can be used when validating email addresses"
+        ],
+        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ValidateEmailAddressesOptions.treatMustacheTemplatesAsValid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "treatMustacheTemplatesAsValid",
+            "description": [
+              "treat any address which contains a mustache template as valid"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -1869,6 +3218,17 @@
         "label": "AdditionalEmailServices",
         "description": [],
         "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.InvalidEmailReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "InvalidEmailReason",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1885,6 +3245,27 @@
           "\"actions\""
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ActionTypeExecutorRawResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeExecutorRawResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<Data> & { error?: Error | undefined; }"
+        ],
+        "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1966,6 +3347,34 @@
           "\"/api/actions\""
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_ALERTS_GROUPING_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_ALERTS_GROUPING_KEY",
+        "description": [],
+        "signature": [
+          "\"{{rule.id}}:{{alert.id}}\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.FIELD_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "FIELD_PREFIX",
+        "description": [],
+        "signature": [
+          "\"u_\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2066,8 +3475,343 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ServiceNowITOMActionTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "ServiceNowITOMActionTypeId",
+        "description": [],
+        "signature": [
+          "\".servicenow-itom\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ServiceNowITSMActionTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "ServiceNowITSMActionTypeId",
+        "description": [],
+        "signature": [
+          "\".servicenow\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.serviceNowITSMTable",
+        "type": "string",
+        "tags": [],
+        "label": "serviceNowITSMTable",
+        "description": [],
+        "signature": [
+          "\"incident\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ServiceNowSIRActionTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "ServiceNowSIRActionTypeId",
+        "description": [],
+        "signature": [
+          "\".servicenow-sir\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.serviceNowSIRTable",
+        "type": "string",
+        "tags": [],
+        "label": "serviceNowSIRTable",
+        "description": [],
+        "signature": [
+          "\"sn_si_incident\""
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.SNProductsConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "SNProductsConfig",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.SNProductsConfigValue",
+            "text": "SNProductsConfigValue"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.MustacheInEmailRegExp",
+        "type": "Object",
+        "tags": [],
+        "label": "MustacheInEmailRegExp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/plugins/actions/common/mustache_template.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.snExternalServiceConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "snExternalServiceConfig",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.snExternalServiceConfig..servicenow",
+            "type": "Object",
+            "tags": [],
+            "label": "'.servicenow'",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenow.importSetTable",
+                "type": "string",
+                "tags": [],
+                "label": "importSetTable",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenow.appScope",
+                "type": "string",
+                "tags": [],
+                "label": "appScope",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenow.table",
+                "type": "string",
+                "tags": [],
+                "label": "table",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenow.useImportAPI",
+                "type": "boolean",
+                "tags": [],
+                "label": "useImportAPI",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenow.commentFieldKey",
+                "type": "string",
+                "tags": [],
+                "label": "commentFieldKey",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenow.appId",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.snExternalServiceConfig..servicenowsir",
+            "type": "Object",
+            "tags": [],
+            "label": "'.servicenow-sir'",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowsir.importSetTable",
+                "type": "string",
+                "tags": [],
+                "label": "importSetTable",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowsir.appScope",
+                "type": "string",
+                "tags": [],
+                "label": "appScope",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowsir.table",
+                "type": "string",
+                "tags": [],
+                "label": "table",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowsir.useImportAPI",
+                "type": "boolean",
+                "tags": [],
+                "label": "useImportAPI",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowsir.commentFieldKey",
+                "type": "string",
+                "tags": [],
+                "label": "commentFieldKey",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowsir.appId",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.snExternalServiceConfig..servicenowitom",
+            "type": "Object",
+            "tags": [],
+            "label": "'.servicenow-itom'",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowitom.importSetTable",
+                "type": "string",
+                "tags": [],
+                "label": "importSetTable",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowitom.appScope",
+                "type": "string",
+                "tags": [],
+                "label": "appScope",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowitom.table",
+                "type": "string",
+                "tags": [],
+                "label": "table",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowitom.useImportAPI",
+                "type": "boolean",
+                "tags": [],
+                "label": "useImportAPI",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-common.snExternalServiceConfig..servicenowitom.commentFieldKey",
+                "type": "string",
+                "tags": [],
+                "label": "commentFieldKey",
+                "description": [],
+                "path": "x-pack/plugins/actions/common/servicenow_config.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

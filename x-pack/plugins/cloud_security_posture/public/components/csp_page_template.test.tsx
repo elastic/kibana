@@ -58,6 +58,8 @@ describe('<CspPageTemplate />', () => {
     jest.resetAllMocks();
     // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
       data: { item: { status: 'installed' } },
     }));
   });
@@ -99,6 +101,7 @@ describe('<CspPageTemplate />', () => {
   it('renders integrations installation prompt if integration is not installed', () => {
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
+      isLoading: false,
       data: { item: { status: 'not_installed' } },
     }));
 
@@ -116,6 +119,22 @@ describe('<CspPageTemplate />', () => {
   it('renders default loading text when query isLoading', () => {
     const query = createReactQueryResponse({
       status: 'loading',
+    }) as unknown as UseQueryResult;
+
+    const children = chance.sentence();
+    renderCspPageTemplate({ children, query });
+
+    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
+
+  it('renders default loading text when query is idle', () => {
+    const query = createReactQueryResponse({
+      status: 'idle',
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();

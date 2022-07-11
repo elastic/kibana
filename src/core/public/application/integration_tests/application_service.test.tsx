@@ -16,7 +16,7 @@ import { ApplicationService } from '../application_service';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
-import { themeServiceMock } from '../../theme/theme_service.mock';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { AppMountParameters, AppUpdater } from '../types';
 import { Observable } from 'rxjs';
 import { MountPoint } from '../..';
@@ -89,7 +89,7 @@ describe('ApplicationService', () => {
     });
 
     describe('using navigateToApp', () => {
-      it('emits currentAppId$ before mounting the app', async () => {
+      it('emits currentAppId$ once before mounting the app', async () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
@@ -106,15 +106,24 @@ describe('ApplicationService', () => {
           },
         });
 
-        const { navigateToApp, currentAppId$ } = await service.start(startDeps);
+        const { navigateToApp, currentAppId$, getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
 
-        await act(() => navigateToApp('app1'));
+        const currentAppIds: Array<string | undefined> = [];
+        currentAppId$.subscribe((currentAppId) => {
+          currentAppIds.push(currentAppId);
+        });
 
-        expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
+        await act(async () => {
+          await navigateToApp('app1');
+          update();
+        });
+
+        expect(currentAppIds).toEqual(['app1']);
 
         resolveMount!();
 
-        expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
+        expect(currentAppIds).toEqual(['app1']);
       });
 
       it('replaces the current history entry when the `replace` option is true', async () => {

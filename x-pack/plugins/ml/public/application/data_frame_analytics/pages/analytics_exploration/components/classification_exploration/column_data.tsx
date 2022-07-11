@@ -14,7 +14,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { ConfusionMatrix } from '../../../../common/analytics';
+import { ConfusionMatrix } from '../../../../../../../common/types/data_frame_analytics';
 
 const COL_INITIAL_WIDTH = 165; // in pixels
 

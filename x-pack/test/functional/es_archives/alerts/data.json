@@ -671,10 +671,7 @@
      "source":{
         "alert":{
            "name":"enabled 7.16.1 query rule",
-           "tags":[
-              "__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41",
-              "__internal_immutable:false"
-           ],
+           "tags":[],
            "alertTypeId":"siem.signals",
            "consumer":"siem",
            "params":{
@@ -767,10 +764,7 @@
      "source":{
         "alert":{
            "name":"disabled 7.16.1 query rule",
-           "tags":[
-              "__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41",
-              "__internal_immutable:false"
-           ],
+           "tags":[],
            "alertTypeId":"siem.signals",
            "consumer":"siem",
            "params":{
@@ -894,5 +888,156 @@
       "references": [
       ]
     }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "123",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:8990af61-c09a-11ec-9164-4bfd6fc32c43",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test remove internal tags",
+           "alertTypeId":"siem.queryRule",
+           "consumer":"siem",
+           "params":{
+              "immutable":true,
+              "ruleId":"bf9638eb-7d3c-4f40-83d7-8c40a7c80f2e",
+              "author":[
+                 
+              ],
+              "description":"remove interns tags mock rule",
+              "falsePositives":[
+                 
+              ],
+              "from":"now-36000060s",
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[
+                 
+              ],
+              "severity":"low",
+              "severityMapping":[
+                 
+              ],
+              "threat":[
+                 
+              ],
+              "to":"now",
+              "references":[
+                 
+              ],
+              "version":4,
+              "exceptionsList":[
+              ],
+              "type":"query",
+              "language":"kuery",
+              "index":[
+                 "apm-*-transaction*",
+                 "traces-apm*",
+                 "auditbeat-*",
+                 "endgame-*",
+                 "filebeat-*",
+                 "logs-*",
+                 "packetbeat-*",
+                 "winlogbeat-*",
+                 "test-index-3"
+              ],
+              "query":"*:*",
+              "filters":[
+                 
+              ]
+           },
+           "schedule":{
+              "interval":"1m"
+           },
+           "enabled":true,
+           "actions":[
+              
+           ],
+           "throttle":null,
+           "apiKeyOwner":null,
+           "apiKey":null,
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2021-07-27T20:42:55.896Z",
+           "muteAll":false,
+           "mutedInstanceIds":[
+              
+           ],
+           "scheduledTaskId":null,
+           "tags":[
+              "__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41",
+              "__internal_immutable:false",
+              "test-tag-1",
+              "foo-tag"
+           ]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"8.2.0"
+        },
+        "updated_at":"2021-08-13T23:00:11.985Z",
+        "references":[
+           
+        ]
+     }
   }
 }

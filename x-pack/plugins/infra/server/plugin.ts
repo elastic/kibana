@@ -7,8 +7,6 @@
 
 import { Server } from '@hapi/hapi';
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
 import {
   CoreStart,
   Plugin,
@@ -16,6 +14,8 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { Logger } from '@kbn/logging';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
@@ -35,6 +35,7 @@ import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
+import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { logViewSavedObjectType } from './saved_objects';
@@ -236,6 +237,7 @@ export class InfraServerPlugin
 
     return {
       logViews,
+      getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
 

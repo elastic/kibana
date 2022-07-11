@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ListClient } from '@kbn/lists-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
-import { BuildRuleMessage } from '../rule_messages';
-import { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import type { BuildRuleMessage } from '../rule_messages';
+import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 export const mlExecutor = async ({
@@ -97,21 +97,21 @@ export const mlExecutor = async ({
       exceptionItems,
     });
 
-    const filteredAnomalyResults = await filterEventsAgainstList({
+    const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
       exceptionsList: exceptionItems,
       logger,
-      eventSearchResult: anomalyResults,
+      events: anomalyResults.hits.hits,
       buildRuleMessage,
     });
 
-    const anomalyCount = filteredAnomalyResults.hits.hits.length;
+    const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
       logger.debug(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
     }
     const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
       await bulkCreateMlSignals({
-        someResult: filteredAnomalyResults,
+        anomalyHits: filteredAnomalyHits,
         completeRule,
         services,
         logger,
@@ -124,7 +124,7 @@ export const mlExecutor = async ({
     // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
     const shardFailures =
       (
-        filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+        anomalyResults._shards as typeof anomalyResults._shards & {
           failures: [];
         }
       ).failures ?? [];
@@ -134,7 +134,7 @@ export const mlExecutor = async ({
     return mergeReturns([
       result,
       createSearchAfterReturnType({
-        success: success && filteredAnomalyResults._shards.failed === 0,
+        success: success && anomalyResults._shards.failed === 0,
         errors: [...errors, ...searchErrors],
         createdSignalsCount: createdItemsCount,
         createdSignals: createdItems,

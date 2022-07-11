@@ -7,13 +7,26 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
+import { getRuleMock, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
-import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
+import {
+  getAddPrepackagedRulesSchemaMock,
+  getAddPrepackagedThreatMatchRulesSchemaMock,
+} from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
+import { legacyMigrate } from './utils';
+import { getQueryRuleParams, getThreatRuleParams } from '../schemas/rule_schemas.mock';
 
 jest.mock('./patch_rules');
+
+jest.mock('./utils', () => {
+  const actual = jest.requireActual('./utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('updatePrepackagedRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -24,6 +37,8 @@ describe('updatePrepackagedRules', () => {
     rulesClient = rulesClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
     ruleExecutionLog = ruleExecutionLogMock.forRoutes.create();
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -35,27 +50,29 @@ describe('updatePrepackagedRules', () => {
         params: {},
       },
     ];
-    const outputIndex = 'outputIndex';
-    const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
+    const prepackagedRule = getAddPrepackagedRulesSchemaMock();
     rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, actions }],
-      outputIndex,
       ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        actions: undefined,
+        params: expect.objectContaining({
+          actions: undefined,
+        }),
       })
     );
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        enabled: undefined,
+        params: expect.objectContaining({
+          enabled: undefined,
+        }),
       })
     );
   });
@@ -66,32 +83,41 @@ describe('updatePrepackagedRules', () => {
       threat_indicator_path: 'test.path',
       threat_query: 'threat:*',
     };
-    const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    const prepackagedRule = getAddPrepackagedThreatMatchRulesSchemaMock();
+    rulesClient.find.mockResolvedValue({
+      ...getFindResultWithSingleHit(),
+      data: [getRuleMock(getThreatRuleParams())],
+    });
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getThreatRuleParams()));
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, ...updatedThreatParams }],
-      'output-index',
       ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        threatIndicatorPath: 'test.path',
+        params: expect.objectContaining({
+          threat_indicator_path: 'test.path',
+        }),
       })
     );
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        threatIndex: ['test-index'],
+        params: expect.objectContaining({
+          threat_index: ['test-index'],
+        }),
       })
     );
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        threatQuery: 'threat:*',
+        params: expect.objectContaining({
+          threat_query: 'threat:*',
+        }),
       })
     );
   });

@@ -14,7 +14,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import * as i18n from './translations';
 
 import { Loader } from '../../loader';
-import { AnomaliesUserTableProps } from '../types';
+import type { AnomaliesUserTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 
@@ -82,7 +82,6 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     return (
       <Panel loading={loading} data-test-subj="user-anomalies-tab">
         <HeaderSection
-          height={!toggleStatus ? 40 : undefined}
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}

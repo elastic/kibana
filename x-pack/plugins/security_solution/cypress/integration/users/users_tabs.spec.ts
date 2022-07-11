@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HEADER_SUBTITLE } from '../../screens/users/all_users';
+import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../screens/users/all_users';
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../screens/users/user_anomalies';
 import {
   AUTHENTICATIONS_TAB,
@@ -39,7 +39,9 @@ describe('Users stats and tables', () => {
     it(`renders all users`, () => {
       const totalUsers = 1;
 
-      cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} user`);
+      cy.get(ALL_USERS_TABLE)
+        .find(HEADER_SUBTITLE)
+        .should('have.text', `Showing: ${totalUsers} user`);
     });
 
     it(`renders all authentications`, () => {

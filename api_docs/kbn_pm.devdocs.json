@@ -271,50 +271,6 @@
           },
           {
             "parentPluginId": "@kbn/pm",
-            "id": "def-server.Project.ensureValidProjectDependency",
-            "type": "Function",
-            "tags": [],
-            "label": "ensureValidProjectDependency",
-            "description": [],
-            "signature": [
-              "(project: ",
-              {
-                "pluginId": "@kbn/pm",
-                "scope": "server",
-                "docId": "kibKbnPmPluginApi",
-                "section": "def-server.Project",
-                "text": "Project"
-              },
-              ") => void"
-            ],
-            "path": "packages/kbn-pm/src/utils/project.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.Project.ensureValidProjectDependency.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "project",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/pm",
-                    "scope": "server",
-                    "docId": "kibKbnPmPluginApi",
-                    "section": "def-server.Project",
-                    "text": "Project"
-                  }
-                ],
-                "path": "packages/kbn-pm/src/utils/project.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/pm",
             "id": "def-server.Project.getBuildConfig",
             "type": "Function",
             "tags": [],
@@ -322,23 +278,6 @@
             "description": [],
             "signature": [
               "() => BuildConfig"
-            ],
-            "path": "packages/kbn-pm/src/utils/project.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/pm",
-            "id": "def-server.Project.getIntermediateBuildDirectory",
-            "type": "Function",
-            "tags": [],
-            "label": "getIntermediateBuildDirectory",
-            "description": [
-              "\nReturns the directory that should be copied into the Kibana build artifact.\nThis config can be specified to only include the project's build artifacts\ninstead of everything located in the project directory."
-            ],
-            "signature": [
-              "() => string"
             ],
             "path": "packages/kbn-pm/src/utils/project.ts",
             "deprecated": false,
@@ -578,177 +517,12 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/pm",
-            "id": "def-server.Project.installDependencies",
-            "type": "Function",
-            "tags": [],
-            "label": "installDependencies",
-            "description": [],
-            "signature": [
-              "(options?: { extraArgs?: string[] | undefined; }) => Promise<void>"
-            ],
-            "path": "packages/kbn-pm/src/utils/project.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.Project.installDependencies.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "packages/kbn-pm/src/utils/project.ts",
-                "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/pm",
-                    "id": "def-server.Project.installDependencies.$1.extraArgs",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "extraArgs",
-                    "description": [],
-                    "signature": [
-                      "string[] | undefined"
-                    ],
-                    "path": "packages/kbn-pm/src/utils/project.ts",
-                    "deprecated": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
       }
     ],
     "functions": [
-      {
-        "parentPluginId": "@kbn/pm",
-        "id": "def-server.buildBazelProductionProjects",
-        "type": "Function",
-        "tags": [],
-        "label": "buildBazelProductionProjects",
-        "description": [],
-        "signature": [
-          "({\n  kibanaRoot,\n  buildRoot,\n  onlyOSS,\n}: { kibanaRoot: string; buildRoot: string; onlyOSS?: boolean | undefined; }) => Promise<void>"
-        ],
-        "path": "packages/kbn-pm/src/production/build_bazel_production_projects.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/pm",
-            "id": "def-server.buildBazelProductionProjects.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  kibanaRoot,\n  buildRoot,\n  onlyOSS,\n}",
-            "description": [],
-            "path": "packages/kbn-pm/src/production/build_bazel_production_projects.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.buildBazelProductionProjects.$1.kibanaRoot",
-                "type": "string",
-                "tags": [],
-                "label": "kibanaRoot",
-                "description": [],
-                "path": "packages/kbn-pm/src/production/build_bazel_production_projects.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.buildBazelProductionProjects.$1.buildRoot",
-                "type": "string",
-                "tags": [],
-                "label": "buildRoot",
-                "description": [],
-                "path": "packages/kbn-pm/src/production/build_bazel_production_projects.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.buildBazelProductionProjects.$1.onlyOSS",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "onlyOSS",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-pm/src/production/build_bazel_production_projects.ts",
-                "deprecated": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/pm",
-        "id": "def-server.buildNonBazelProductionProjects",
-        "type": "Function",
-        "tags": [],
-        "label": "buildNonBazelProductionProjects",
-        "description": [],
-        "signature": [
-          "({\n  kibanaRoot,\n  buildRoot,\n  onlyOSS,\n}: { kibanaRoot: string; buildRoot: string; onlyOSS?: boolean | undefined; }) => Promise<void>"
-        ],
-        "path": "packages/kbn-pm/src/production/build_non_bazel_production_projects.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/pm",
-            "id": "def-server.buildNonBazelProductionProjects.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  kibanaRoot,\n  buildRoot,\n  onlyOSS,\n}",
-            "description": [],
-            "path": "packages/kbn-pm/src/production/build_non_bazel_production_projects.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.buildNonBazelProductionProjects.$1.kibanaRoot",
-                "type": "string",
-                "tags": [],
-                "label": "kibanaRoot",
-                "description": [],
-                "path": "packages/kbn-pm/src/production/build_non_bazel_production_projects.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.buildNonBazelProductionProjects.$1.buildRoot",
-                "type": "string",
-                "tags": [],
-                "label": "buildRoot",
-                "description": [],
-                "path": "packages/kbn-pm/src/production/build_non_bazel_production_projects.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.buildNonBazelProductionProjects.$1.onlyOSS",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "onlyOSS",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/kbn-pm/src/production/build_non_bazel_production_projects.ts",
-                "deprecated": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/pm",
         "id": "def-server.getProjectPaths",
@@ -883,42 +657,6 @@
               "string[]"
             ],
             "path": "packages/kbn-pm/src/cli.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/pm",
-        "id": "def-server.transformDependencies",
-        "type": "Function",
-        "tags": [],
-        "label": "transformDependencies",
-        "description": [
-          "\nReplaces `link:` dependencies with `file:` dependencies. When installing\ndependencies, these `file:` dependencies will be copied into `node_modules`\ninstead of being symlinked.\n\nThis will allow us to copy packages into the build and run `yarn`, which\nwill then _copy_ the `file:` dependencies into `node_modules` instead of\nsymlinking like we do in development.\n\nAdditionally it also taken care of replacing `link:bazel-bin/` with\n`file:` so we can also support the copy of the Bazel packages dist already into\nbuild/packages to be copied into the node_modules"
-        ],
-        "signature": [
-          "(dependencies: ",
-          "IPackageDependencies",
-          ") => ",
-          "IPackageDependencies"
-        ],
-        "path": "packages/kbn-pm/src/utils/package_json.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/pm",
-            "id": "def-server.transformDependencies.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "dependencies",
-            "description": [],
-            "signature": [
-              "IPackageDependencies"
-            ],
-            "path": "packages/kbn-pm/src/utils/package_json.ts",
             "deprecated": false,
             "isRequired": true
           }

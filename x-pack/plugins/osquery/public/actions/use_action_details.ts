@@ -8,15 +8,15 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import {
-  OsqueryQueries,
+import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
 } from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
+import { OsqueryQueries } from '../../common/search_strategy';
+import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionDetailsArgs {
@@ -37,7 +37,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],
     async () => {
-      const responseData = await firstValueFrom(
+      const responseData = await lastValueFrom(
         data.search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
           {
             actionId,

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
+import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -64,7 +65,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
 
-    return [
+    const mlTabs: Tab[] = [
       {
         id: 'main_section',
         name: '',
@@ -85,6 +86,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
           defaultMessage: 'Anomaly Detection',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'anomaly_detection',
@@ -218,6 +220,29 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ],
       },
     ];
+
+    if (AIOPS_ENABLED) {
+      mlTabs.push({
+        id: 'aiops_section',
+        name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
+          defaultMessage: 'AIOps',
+        }),
+        disabled: disableLinks,
+        items: [
+          {
+            id: 'explainlogratespikes',
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
+              defaultMessage: 'Explain log rate spikes',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+        ],
+      });
+    }
+
+    return mlTabs;
   }, [mlFeaturesDisabled, canViewMlNodes]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(

@@ -2,7 +2,7 @@
 
 exports[`Storyshots Home/Tabs/My Workpads My Workpads 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
 >
   <div
     className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -16,7 +16,9 @@ exports[`Storyshots Home/Tabs/My Workpads My Workpads 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <span
-        className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+        aria-label="Loading"
+        className="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+        role="progressbar"
       />
     </div>
   </div>

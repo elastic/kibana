@@ -27,8 +27,9 @@ import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/ren
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
 import { PORT_NAMES } from '../../../../network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
-import { BrowserField } from '../../../containers/source';
-import { DataProvider, IS_OPERATOR } from '../../../../../common/types';
+import type { BrowserField } from '../../../containers/source';
+import type { DataProvider } from '../../../../../common/types';
+import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
   contextId?: string;
@@ -42,7 +43,7 @@ export interface UseActionCellDataProvider {
   values: string[] | null | undefined;
 }
 
-const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
+export const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),

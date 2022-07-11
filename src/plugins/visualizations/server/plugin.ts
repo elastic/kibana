@@ -59,8 +59,7 @@ export class VisualizationsPlugin
         }),
         value: true,
         description: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsText', {
-          defaultMessage: `Allows users to create, view, and edit visualizations that are in technical preview.
-            If disabled, only visualizations that are considered production-ready are available to the user.`,
+          defaultMessage: `When enabled, allows you to create, view, and edit visualizations that are in technical preview. When disabled, only production-ready visualizations are available.`,
         }),
         category: ['visualization'],
         schema: schema.boolean(),

@@ -10,7 +10,8 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
+import type { LegendItem } from './draggable_legend_item';
+import { DraggableLegendItem } from './draggable_legend_item';
 
 export const MIN_LEGEND_HEIGHT = 175;
 
@@ -18,7 +19,10 @@ const DraggableLegendContainer = styled.div<{ height: number }>`
   height: ${({ height }) => `${height}px`};
   overflow: auto;
   scrollbar-width: thin;
-  width: 165px;
+  width: 100%;
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    width: 165px;
+  }
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};

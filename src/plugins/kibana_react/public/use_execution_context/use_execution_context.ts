@@ -15,14 +15,14 @@ import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
  * @param context
  */
 export function useExecutionContext(
-  executionContext: CoreStart['executionContext'],
+  executionContext: CoreStart['executionContext'] | undefined,
   context: KibanaExecutionContext
 ) {
   useDeepCompareEffect(() => {
-    executionContext.set(context);
+    executionContext?.set(context);
 
     return () => {
-      executionContext.clear();
+      executionContext?.clear();
     };
   }, [context]);
 }

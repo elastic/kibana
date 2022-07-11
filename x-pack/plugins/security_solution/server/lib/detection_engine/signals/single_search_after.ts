@@ -6,17 +6,17 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { performance } from 'perf_hooks';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SignalSearchResponse, SignalSource } from './types';
-import { BuildRuleMessage } from './rule_messages';
+import type { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SingleSearchAfterParams {
@@ -33,6 +33,7 @@ interface SingleSearchAfterParams {
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   trackTotalHits?: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 // utilize search_after for paging results into bulk.
@@ -40,6 +41,7 @@ export const singleSearchAfter = async ({
   aggregations,
   searchAfterSortIds,
   index,
+  runtimeMappings,
   from,
   to,
   services,
@@ -62,6 +64,7 @@ export const singleSearchAfter = async ({
         index,
         from,
         to,
+        runtimeMappings,
         filter,
         size: pageSize,
         sortOrder,

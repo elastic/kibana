@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -119,7 +119,7 @@ export function FiltersSection({
             <EuiFlexItem>
               <SuggestionsSelect
                 dataTestSubj={`${key}.value`}
-                field={key}
+                fieldName={key}
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
@@ -129,6 +129,8 @@ export function FiltersSection({
                 }
                 defaultValue={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
+                start={moment().subtract(24, 'h').toISOString()}
+                end={moment().toISOString()}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

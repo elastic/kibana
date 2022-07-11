@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
-import { ScaleType } from '@elastic/charts';
+import { Ast, AstFunction } from '@kbn/interpreter';
+import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { ValidLayer, YConfig } from '@kbn/expression-xy-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   State,
+  YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
+  AxisConfig,
 } from './types';
+import type { ValidXYDataLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
@@ -28,8 +30,9 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
+import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
+import { axisExtentConfigToExpression } from '../shared_components';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -50,6 +53,7 @@ export const toExpression = (
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
+  datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
   if (!state || !state.layers.length) {
@@ -73,7 +77,7 @@ export const toExpression = (
     metadata,
     datasourceLayers,
     paletteService,
-    attributes,
+    datasourceExpressionsByLayers,
     eventAnnotationService
   );
 };
@@ -83,7 +87,7 @@ const simplifiedLayerExpression = {
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     hide: true,
-    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+    yConfig: layer.yConfig?.map(({ ...rest }) => ({
       ...rest,
       lineWidth: 1,
       icon: undefined,
@@ -93,12 +97,6 @@ const simplifiedLayerExpression = {
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     hide: true,
-    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
-      ...rest,
-      lineWidth: 1,
-      icon: undefined,
-      textVisibility: false,
-    })),
   }),
 };
 
@@ -106,6 +104,7 @@ export function toPreviewExpression(
   state: State,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
+  datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ) {
   return toExpression(
@@ -122,6 +121,7 @@ export function toPreviewExpression(
     datasourceLayers,
     paletteService,
     {},
+    datasourceExpressionsByLayers,
     eventAnnotationService
   );
 }
@@ -157,11 +157,13 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {},
+  datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
-  const validDataLayers = getDataLayers(state.layers)
-    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+  const validDataLayers: ValidXYDataLayerConfig[] = getDataLayers(state.layers)
+    .filter<ValidXYDataLayerConfig>((layer): layer is ValidXYDataLayerConfig =>
+      Boolean(layer.accessors.length)
+    )
     .map((layer) => ({
       ...layer,
       accessors: getSortedAccessors(datasourceLayers[layer.layerId], layer),
@@ -189,18 +191,61 @@ export const buildExpression = (
     return null;
   }
 
+  const isLeftAxis = validDataLayers.some(({ yConfig }) =>
+    yConfig?.some((config) => config.axisMode === Position.Left)
+  );
+  const isRightAxis = validDataLayers.some(({ yConfig }) =>
+    yConfig?.some((config) => config.axisMode === Position.Right)
+  );
+
+  const yAxisConfigs: AxisConfig[] = [
+    {
+      position: Position.Left,
+      extent: state?.yLeftExtent,
+      showTitle: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
+      title: state.yTitle || '',
+      showLabels: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
+      showGridLines: state?.gridlinesVisibilitySettings?.yLeft ?? true,
+      labelsOrientation: state?.labelsOrientation?.yLeft ?? 0,
+      scaleType: state.yLeftScale || 'linear',
+    },
+    {
+      position: Position.Right,
+      extent: state?.yRightExtent,
+      showTitle: state?.axisTitlesVisibilitySettings?.yRight ?? true,
+      title: state.yRightTitle || '',
+      showLabels: state?.tickLabelsVisibilitySettings?.yRight ?? true,
+      showGridLines: state?.gridlinesVisibilitySettings?.yRight ?? true,
+      labelsOrientation: state?.labelsOrientation?.yRight ?? 0,
+      scaleType: state.yRightScale || 'linear',
+    },
+  ];
+
+  if (isLeftAxis) {
+    yAxisConfigs.push({
+      id: Position.Left,
+      position: Position.Left,
+      // we need also settings from global config here so that default's doesn't override it
+      ...yAxisConfigs[0],
+    });
+  }
+
+  if (isRightAxis) {
+    yAxisConfigs.push({
+      id: Position.Right,
+      position: Position.Right,
+      // we need also settings from global config here so that default's doesn't override it
+      ...yAxisConfigs[1],
+    });
+  }
+
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'xyVis',
+        function: 'layeredXyVis',
         arguments: {
-          title: [attributes?.title || ''],
-          description: [attributes?.description || ''],
-          xTitle: [state.xTitle || ''],
-          yTitle: [state.yTitle || ''],
-          yRightTitle: [state.yRightTitle || ''],
           legend: [
             {
               type: 'expression',
@@ -213,20 +258,30 @@ export const buildExpression = (
                     showSingleSeries: state.legend.showSingleSeries
                       ? [state.legend.showSingleSeries]
                       : [],
-                    position: [state.legend.position],
+                    position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
-                    horizontalAlignment: state.legend.horizontalAlignment
-                      ? [state.legend.horizontalAlignment]
+                    legendSize: state.legend.isInside
+                      ? []
+                      : state.legend.position === Position.Top ||
+                        state.legend.position === Position.Bottom
+                      ? [LegendSize.AUTO]
+                      : state.legend.legendSize
+                      ? [state.legend.legendSize]
                       : [],
-                    verticalAlignment: state.legend.verticalAlignment
-                      ? [state.legend.verticalAlignment]
-                      : [],
+                    horizontalAlignment:
+                      state.legend.horizontalAlignment && state.legend.isInside
+                        ? [state.legend.horizontalAlignment]
+                        : [],
+                    verticalAlignment:
+                      state.legend.verticalAlignment && state.legend.isInside
+                        ? [state.legend.verticalAlignment]
+                        : [],
                     // ensure that even if the user types more than 5 columns
                     // we will only show 5
-                    floatingColumns: state.legend.floatingColumns
-                      ? [Math.min(5, state.legend.floatingColumns)]
-                      : [],
+                    floatingColumns:
+                      state.legend.floatingColumns && state.legend.isInside
+                        ? [Math.min(5, state.legend.floatingColumns)]
+                        : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
                     shouldTruncate: [
                       state.legend.shouldTruncate ??
@@ -242,130 +297,47 @@ export const buildExpression = (
           emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
-          yLeftExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yLeftExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yLeftExtent?.lowerBound !== undefined
-                        ? [state?.yLeftExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yLeftExtent?.upperBound !== undefined
-                        ? [state?.yLeftExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
-          yRightExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yRightExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yRightExtent?.lowerBound !== undefined
-                        ? [state?.yRightExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yRightExtent?.upperBound !== undefined
-                        ? [state?.yRightExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
-          axisTitlesVisibilitySettings: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisTitlesVisibilityConfig',
-                  arguments: {
-                    x: [state?.axisTitlesVisibilitySettings?.x ?? true],
-                    yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
-                    yRight: [state?.axisTitlesVisibilitySettings?.yRight ?? true],
-                  },
-                },
-              ],
-            },
-          ],
-          tickLabelsVisibilitySettings: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'tickLabelsConfig',
-                  arguments: {
-                    x: [state?.tickLabelsVisibilitySettings?.x ?? true],
-                    yLeft: [state?.tickLabelsVisibilitySettings?.yLeft ?? true],
-                    yRight: [state?.tickLabelsVisibilitySettings?.yRight ?? true],
-                  },
-                },
-              ],
-            },
-          ],
-          gridlinesVisibilitySettings: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'gridlinesConfig',
-                  arguments: {
-                    x: [state?.gridlinesVisibilitySettings?.x ?? true],
-                    yLeft: [state?.gridlinesVisibilitySettings?.yLeft ?? true],
-                    yRight: [state?.gridlinesVisibilitySettings?.yRight ?? true],
-                  },
-                },
-              ],
-            },
-          ],
-          labelsOrientation: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'labelsOrientationConfig',
-                  arguments: {
-                    x: [state?.labelsOrientation?.x ?? 0],
-                    yLeft: [state?.labelsOrientation?.yLeft ?? 0],
-                    yRight: [state?.labelsOrientation?.yRight ?? 0],
-                  },
-                },
-              ],
-            },
-          ],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
+          yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
+          xAxisConfig: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'xAxisConfig',
+                  arguments: {
+                    id: ['x'],
+                    position: ['bottom'],
+                    title: [state.xTitle || ''],
+                    showTitle: [state?.axisTitlesVisibilitySettings?.x ?? true],
+                    showLabels: [state?.tickLabelsVisibilitySettings?.x ?? true],
+                    showGridLines: [state?.gridlinesVisibilitySettings?.x ?? true],
+                    labelsOrientation: [state?.labelsOrientation?.x ?? 0],
+                    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
+                  },
+                },
+              ],
+            },
+          ],
           layers: [
             ...validDataLayers.map((layer) =>
               dataLayerToExpression(
                 layer,
+                yAxisConfigs,
                 datasourceLayers[layer.layerId],
                 metadata,
-                paletteService
+                paletteService,
+                datasourceExpressionsByLayers[layer.layerId]
               )
             ),
             ...validReferenceLayers.map((layer) =>
               referenceLineLayerToExpression(
                 layer,
-                datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
+                datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId],
+                datasourceExpressionsByLayers[layer.layerId]
               )
             ),
             ...validAnnotationsLayers.map((layer) =>
@@ -378,9 +350,33 @@ export const buildExpression = (
   };
 };
 
+const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
+  return yAxisConfigs.map((axis) => ({
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'yAxisConfig',
+        arguments: {
+          id: axis.id ? [axis.id] : [],
+          position: axis.position ? [axis.position] : [],
+          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent)] : [],
+          showTitle: [axis.showTitle ?? true],
+          title: axis.title !== undefined ? [axis.title] : [],
+          showLabels: [axis.showLabels ?? true],
+          showGridLines: [axis.showGridLines ?? true],
+          labelsOrientation: axis.labelsOrientation !== undefined ? [axis.labelsOrientation] : [],
+          scaleType: axis.scaleType ? [axis.scaleType] : [],
+        },
+      },
+    ],
+  }));
+};
+
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
-  datasourceLayer: DatasourcePublicAPI
+  datasourceLayer: DatasourcePublicAPI,
+  datasourceExpression: Ast
 ): Ast => {
   return {
     type: 'expression',
@@ -390,13 +386,14 @@ const referenceLineLayerToExpression = (
         function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
-          yConfig: layer.yConfig
+          decorations: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
-                yConfigToExpression(yConfig, defaultReferenceLineColor)
+                extendedYConfigToRLDecorationConfigExpression(yConfig, defaultReferenceLineColor)
               )
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
         },
       },
     ],
@@ -412,24 +409,12 @@ const annotationLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'annotationLayer',
+        function: 'extendedAnnotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
           annotations: layer.annotations
-            ? layer.annotations.map(
-                (ann): Ast =>
-                  eventAnnotationService.toExpression({
-                    time: ann.key.timestamp,
-                    label: ann.label || defaultAnnotationLabel,
-                    textVisibility: ann.textVisibility,
-                    icon: ann.icon,
-                    lineStyle: ann.lineStyle,
-                    lineWidth: ann.lineWidth,
-                    color: ann.color,
-                    isHidden: Boolean(ann.isHidden),
-                  })
-              )
+            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
             : [],
         },
       },
@@ -438,10 +423,12 @@ const annotationLayerToExpression = (
 };
 
 const dataLayerToExpression = (
-  layer: ValidLayer,
+  layer: ValidXYDataLayerConfig,
+  yAxisConfigs: AxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  datasourceExpression: Ast
 ): Ast => {
   const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
 
@@ -454,28 +441,61 @@ const dataLayerToExpression = (
       xAxisOperation.scale !== 'ordinal'
   );
 
+  const dataFromType = layer.seriesType.split('_');
+  const seriesType = dataFromType[0];
+  const isPercentage = dataFromType.includes('percentage');
+  const isStacked = dataFromType.includes('stacked');
+  const isHorizontal = dataFromType.includes('horizontal');
+
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'dataLayer',
+        function: 'extendedDataLayer',
         arguments: {
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-          yScaleType: [
-            getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-          ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
-          splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
-          yConfig: layer.yConfig
-            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
+          isPercentage: isPercentage ? [isPercentage] : [],
+          isStacked: isStacked ? [isStacked] : [],
+          isHorizontal: isHorizontal ? [isHorizontal] : [],
+          splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
+          decorations: layer.yConfig
+            ? layer.yConfig.map((yConfig) =>
+                yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
+              )
             : [],
-          seriesType: [layer.seriesType],
+          seriesType: [seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
+          ...(datasourceExpression
+            ? {
+                table: [
+                  {
+                    ...datasourceExpression,
+                    chain: [
+                      ...datasourceExpression.chain,
+                      ...(layer.collapseFn
+                        ? [
+                            {
+                              type: 'function',
+                              function: 'lens_collapse',
+                              arguments: {
+                                by: layer.xAccessor ? [layer.xAccessor] : [],
+                                metric: layer.accessors,
+                                fn: [layer.collapseFn!],
+                              },
+                            } as AstFunction,
+                          ]
+                        : []),
+                    ],
+                  },
+                ],
+              }
+            : {}),
           palette: [
             {
               type: 'expression',
@@ -507,16 +527,41 @@ const dataLayerToExpression = (
   };
 };
 
-const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
+const yConfigToDataDecorationConfigExpression = (
+  yConfig: YConfig,
+  yAxisConfigs: AxisConfig[],
+  defaultColor?: string
+): Ast => {
+  const axisId = yAxisConfigs.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'yConfig',
+        function: 'dataDecorationConfig',
+        arguments: {
+          axisId: axisId ? [axisId] : [],
+          forAccessor: [yConfig.forAccessor],
+          color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
+        },
+      },
+    ],
+  };
+};
+
+const extendedYConfigToRLDecorationConfigExpression = (
+  yConfig: YConfig,
+  defaultColor?: string
+): Ast => {
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'referenceLineDecorationConfig',
         arguments: {
           forAccessor: [yConfig.forAccessor],
-          axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+          position: yConfig.axisMode ? [yConfig.axisMode] : [],
           color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
           lineStyle: [yConfig.lineStyle || 'solid'],
           lineWidth: [yConfig.lineWidth || 1],

@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
-import { PrimaryNavigationProps } from './types';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
+import { useIsGroupedNavigationEnabled } from '../helpers';
+import { SecuritySideNav } from '../security_side_nav';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
 });
 
 export const usePrimaryNavigation = ({
-  filters,
-  query,
   navTabs,
   pageName,
-  savedQuery,
-  sourcerer,
   tabName,
   timeline,
   timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
     (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
     [pageName, tabName, navTabs]
@@ -47,10 +46,6 @@ export const usePrimaryNavigation = ({
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
-    filters,
-    query,
-    savedQuery,
-    sourcerer,
     timeline,
     timerange,
   });
@@ -58,6 +53,11 @@ export const usePrimaryNavigation = ({
   return {
     name: translatedNavTitle,
     icon: 'logoSecurity',
-    items: navItems,
+    ...(isGroupedNavigationEnabled
+      ? {
+          children: <SecuritySideNav />,
+          closeFlyoutButtonPosition: 'inside',
+        }
+      : { items: navItems }),
   };
 };

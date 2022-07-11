@@ -8,10 +8,11 @@
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
-import {
+import type {
   BrowserField,
   BrowserFields,
   DocValueFields,
@@ -23,6 +24,7 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { getDataViewStateFromIndexFields } from './use_data_view';
 
 export type { BrowserField, BrowserFields, DocValueFields };
 
@@ -155,19 +157,27 @@ export const useFetchIndex = (
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                const stringifyIndices = response.indicesExist.sort().join();
+                Promise.resolve().then(() => {
+                  ReactDOM.unstable_batchedUpdates(() => {
+                    const stringifyIndices = response.indicesExist.sort().join();
 
-                previousIndexesName.current = response.indicesExist;
-                setLoading(false);
-                setState({
-                  browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                  indexes: response.indicesExist,
-                  indexExists: response.indicesExist.length > 0,
-                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                    previousIndexesName.current = response.indicesExist;
+                    const { browserFields, docValueFields } = getDataViewStateFromIndexFields(
+                      stringifyIndices,
+                      response.indexFields
+                    );
+                    setLoading(false);
+                    setState({
+                      browserFields,
+                      docValueFields,
+                      indexes: response.indicesExist,
+                      indexExists: response.indicesExist.length > 0,
+                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                    });
+
+                    searchSubscription$.current.unsubscribe();
+                  });
                 });
-
-                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_BEAT_FIELDS);

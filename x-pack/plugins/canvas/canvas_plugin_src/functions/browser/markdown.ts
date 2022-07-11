@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { compileFnName } from '@kbn/handlebars';
 import {
   Datatable,
   Render,
@@ -64,7 +65,7 @@ export function markdown(): ExpressionFunctionDefinition<
       // @ts-expect-error untyped local
       const { Handlebars } = await import('../../../common/lib/handlebars');
       const compileFunctions = args.content.map((str) =>
-        Handlebars.compile(String(str), { knownHelpersOnly: true })
+        Handlebars[compileFnName](String(str), { knownHelpersOnly: true })
       );
       const ctx = {
         columns: [],

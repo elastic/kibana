@@ -7,7 +7,6 @@
 
 import { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
 import { Rule, RuleTypeIndex, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
-import { Status, RuleStatus } from './types';
 import {
   RULE_STATUS_OK,
   RULE_STATUS_ACTIVE,
@@ -15,25 +14,7 @@ import {
   RULE_STATUS_PENDING,
   RULE_STATUS_UNKNOWN,
   RULE_STATUS_WARNING,
-  RULE_STATUS_ENABLED,
-  RULE_STATUS_DISABLED,
-  RULE_STATUS_SNOOZED_INDEFINITELY,
 } from './translations';
-
-export const statusMap: Status = {
-  [RuleStatus.enabled]: {
-    color: 'primary',
-    label: RULE_STATUS_ENABLED,
-  },
-  [RuleStatus.disabled]: {
-    color: 'default',
-    label: RULE_STATUS_DISABLED,
-  },
-  [RuleStatus.snoozed]: {
-    color: 'warning',
-    label: RULE_STATUS_SNOOZED_INDEFINITELY,
-  },
-};
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
 
@@ -60,20 +41,6 @@ export const rulesStatusesTranslationsMapping = {
   unknown: RULE_STATUS_UNKNOWN,
   warning: RULE_STATUS_WARNING,
 };
-
-export const OBSERVABILITY_RULE_TYPES = [
-  'xpack.uptime.alerts.monitorStatus',
-  'xpack.uptime.alerts.tls',
-  'xpack.uptime.alerts.tlsCertificate',
-  'xpack.uptime.alerts.durationAnomaly',
-  'apm.error_rate',
-  'apm.transaction_error_rate',
-  'apm.transaction_duration',
-  'apm.transaction_duration_anomaly',
-  'metrics.alert.inventory.threshold',
-  'metrics.alert.threshold',
-  'logs.alert.document.count',
-];
 
 export const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
 

@@ -7,8 +7,9 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { Logger } from '../../logging';
-import { IAuthHeadersStorage, Headers, isKibanaRequest, isRealRequest } from '../../http';
+import type { Logger } from '@kbn/logging';
+import type { Headers, IAuthHeadersStorage } from '@kbn/core-http-server';
+import { isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';

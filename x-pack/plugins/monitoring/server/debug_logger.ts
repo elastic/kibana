@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RouteMethod } from '@kbn/core/server';
 import fs from 'fs';
 import { MonitoringConfig } from './config';
-import { RouteDependencies } from './types';
+import { LegacyRequest, MonitoringCore, MonitoringRouteConfig, RouteDependencies } from './types';
 
 export function decorateDebugServer(
-  _server: any,
+  server: MonitoringCore,
   config: MonitoringConfig,
   logger: RouteDependencies['logger']
-) {
+): MonitoringCore {
   // bail if the proper config value is not set (extra protection)
   if (!config.ui.debug_mode) {
-    return _server;
+    return server;
   }
 
   // create a debug logger that will either write to file (if debug_log_path exists) or log out via logger
@@ -23,14 +24,16 @@ export function decorateDebugServer(
 
   return {
     // maintain the rest of _server untouched
-    ..._server,
+    ...server,
     // TODO: replace any
-    route: (options: any) => {
+    route: <Params, Query, Body, Method extends RouteMethod>(
+      options: MonitoringRouteConfig<Params, Query, Body, Method>
+    ) => {
       const apiPath = options.path;
-      return _server.route({
+      return server.route({
         ...options,
         // TODO: replace any
-        handler: async (req: any) => {
+        handler: async (req: LegacyRequest<Params, Query, Body>): Promise<any> => {
           const { elasticsearch: cached } = req.server.plugins;
           const apiRequestHeaders = req.headers;
           req.server.plugins.elasticsearch = {

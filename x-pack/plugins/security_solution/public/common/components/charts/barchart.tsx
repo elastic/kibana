@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
@@ -24,20 +24,19 @@ import { EMPTY_VALUE_LABEL } from './translation';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
   chartDefaultSettings,
-  ChartSeriesConfigs,
-  ChartSeriesData,
   checkIfAllValuesAreZero,
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
   useTheme,
   Wrapper,
+  ChartWrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
-import { LegendItem } from './draggable_legend_item';
-import type { ChartData } from './common';
+import type { LegendItem } from './draggable_legend_item';
+import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
-import { VisualizationActionsProps } from '../visualization_actions/types';
+import type { VisualizationActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 const LegendFlexItem = styled(EuiFlexItem)`
@@ -87,6 +86,34 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
+  const xAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.bottom.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const yAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.left.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const xAxisLabelFormat = get('configs.axis.bottom.labelFormat', chartConfigs);
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
@@ -106,6 +133,7 @@ export const BarChartBaseComponent = ({
             data={series.value ?? []}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
+            barSeriesStyle={get('configs.series.barSeriesStyle', chartConfigs)}
           />
         ) : null;
       })}
@@ -114,22 +142,15 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        style={{
-          tickLine: {
-            size: tickSize,
-          },
-        }}
+        style={xAxisStyle}
         tickFormat={xTickFormatter}
+        labelFormat={xAxisLabelFormat}
       />
 
       <Axis
         id={yAxisId}
         position={Position.Left}
-        style={{
-          tickLine: {
-            size: tickSize,
-          },
-        }}
+        style={yAxisStyle}
         tickFormat={yTickFormatter}
         title={yAxisTitle}
       />
@@ -143,7 +164,7 @@ export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
-interface BarChartComponentProps {
+export interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
@@ -188,7 +209,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && barChart && (
-          <EuiFlexGroup gutterSize="none">
+          <ChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
                 <BarChartBase
@@ -205,7 +226,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             <LegendFlexItem grow={false}>
               <DraggableLegend legendItems={legendItems} height={height} />
             </LegendFlexItem>
-          </EuiFlexGroup>
+          </ChartWrapper>
         )}
         {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />

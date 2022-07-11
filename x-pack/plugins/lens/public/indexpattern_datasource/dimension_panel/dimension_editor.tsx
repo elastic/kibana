@@ -6,7 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -16,9 +16,10 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import type { GenericIndexPatternColumn } from '../indexpattern';
+import { deleteColumn, GenericIndexPatternColumn } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -30,12 +31,13 @@ import {
   FieldBasedIndexPatternColumn,
   canTransition,
   DEFAULT_TIME_SCALE,
+  adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
@@ -58,8 +60,9 @@ import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
 import { NameInput } from '../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
-
-const operationPanels = getOperationDisplay();
+import { WrappingHelpPopover } from '../help_popover';
+import { isColumn } from '../operations/definitions/helpers';
+import { FieldChoiceWithOperationType } from './field_select';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;
@@ -67,6 +70,8 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;
 }
+
+const operationDisplay = getOperationDisplay();
 
 export function DimensionEditor(props: DimensionEditorProps) {
   const {
@@ -94,6 +99,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
+    dataViews: props.dataViews,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -111,15 +117,47 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   const setStateWrapper = (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+    setter:
+      | IndexPatternLayer
+      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+      | GenericIndexPatternColumn,
     options: { forceRender?: boolean } = {}
   ) => {
-    const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
-    const isDimensionComplete = Boolean(hypotheticalLayer.columns[columnId]);
+    const layer = state.layers[layerId];
+    let hypotethicalLayer: IndexPatternLayer;
+    if (isColumn(setter)) {
+      hypotethicalLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          [columnId]: setter,
+        },
+      };
+    } else {
+      hypotethicalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
+    }
+    const isDimensionComplete = Boolean(hypotethicalLayer.columns[columnId]);
+
     setState(
       (prevState) => {
-        const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
-        return mergeLayer({ state: prevState, layerId, newLayer: layer });
+        let outputLayer: IndexPatternLayer;
+        const prevLayer = prevState.layers[layerId];
+        if (isColumn(setter)) {
+          outputLayer = {
+            ...prevLayer,
+            columns: {
+              ...prevLayer.columns,
+              [columnId]: setter,
+            },
+          };
+        } else {
+          outputLayer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
+        }
+        return mergeLayer({
+          state: prevState,
+          layerId,
+          newLayer: adjustColumnReferencesForChangedColumn(outputLayer, columnId),
+        });
       },
       {
         isDimensionComplete,
@@ -186,7 +224,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
   // Note: it forced a rerender at this point to avoid UI glitches in async updates (another hack upstream)
   // TODO: revisit this once we get rid of updateDatasourceAsync upstream
   const moveDefinetelyToStaticValueAndUpdate = (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+    setter:
+      | IndexPatternLayer
+      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+      | GenericIndexPatternColumn
   ) => {
     if (temporaryStaticValue) {
       setTemporaryState('none');
@@ -202,6 +243,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
           forceRender: true,
         }
       );
+    }
+    if (isColumn(setter)) {
+      throw new Error('static value should only be updated by the whole layer');
     }
   };
 
@@ -228,6 +272,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
   const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
+  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    return () => {
+      if (helpPopoverContainer.current) {
+        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+        document.body.removeChild(helpPopoverContainer.current);
+      }
+    };
+  }, []);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -278,23 +331,23 @@ export function DimensionEditor(props: DimensionEditorProps) {
         color = 'subdued';
       }
 
-      let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
+      let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
             <EuiText color="danger" size="s">
-              <strong>{operationPanels[operationType].displayName}</strong>
+              <strong>{operationDisplay[operationType].displayName}</strong>
             </EuiText>
           </EuiToolTip>
         );
       } else if (disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <span>{operationPanels[operationType].displayName}</span>
+            <span>{operationDisplay[operationType].displayName}</span>
           </EuiToolTip>
         );
       } else if (isActive) {
-        label = <strong>{operationPanels[operationType].displayName}</strong>;
+        label = <strong>{operationDisplay[operationType].displayName}</strong>;
       }
 
       return {
@@ -309,6 +362,45 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         [`aria-pressed`]: isActive,
+        extraAction: operationDefinitionMap[operationType].helpComponent
+          ? {
+              color: 'primary',
+              onClick: (e) => {
+                if (!helpPopoverContainer.current) {
+                  const container = document.createElement('div');
+                  helpPopoverContainer.current = container;
+                  document.body.appendChild(container);
+                  const HelpComponent = operationDefinitionMap[operationType].helpComponent!;
+                  const element = (
+                    <WrappingHelpPopover
+                      button={e.target as HTMLElement}
+                      isOpen={true}
+                      title={operationDefinitionMap[operationType].helpComponentTitle}
+                      closePopover={() => {
+                        if (helpPopoverContainer.current) {
+                          ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                          document.body.removeChild(helpPopoverContainer.current);
+                          helpPopoverContainer.current = null;
+                        }
+                      }}
+                    >
+                      <HelpComponent />
+                    </WrappingHelpPopover>
+                  );
+                  ReactDOM.render(element, helpPopoverContainer.current);
+                } else {
+                  ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                  document.body.removeChild(helpPopoverContainer.current);
+                  helpPopoverContainer.current = null;
+                }
+              },
+              iconType: 'documentation',
+              iconSize: 's',
+              'aria-label': i18n.translate('xpack.lens.indexPattern.helpLabel', {
+                defaultMessage: 'Function help',
+              }),
+            }
+          : undefined,
         onClick() {
           if (
             ['none', 'fullReference', 'managedReference'].includes(
@@ -387,6 +479,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           if (temporaryQuickFunction) {
             setTemporaryState('none');
           }
+
           const newLayer = replaceColumn({
             layer: props.state.layers[props.layerId],
             indexPattern: currentIndexPattern,
@@ -424,11 +517,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const FieldInputComponent = selectedOperationDefinition?.renderFieldInput || FieldInput;
 
-  const paramEditorProps: ParamEditorProps<GenericIndexPatternColumn> = {
+  const paramEditorProps: ParamEditorProps<
+    GenericIndexPatternColumn,
+    | IndexPatternLayer
+    | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+    | GenericIndexPatternColumn
+  > = {
     layer: state.layers[layerId],
     layerId,
     activeData: props.activeData,
-    updateLayer: (setter) => {
+    paramEditorUpdater: (setter) => {
       if (temporaryQuickFunction) {
         setTemporaryState('none');
       }
@@ -443,6 +541,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     isFullscreen,
     setIsCloseable,
     paramEditorCustomProps,
+    ReferenceEditor,
+    existingFields: state.existingFields,
     ...services,
   };
 
@@ -472,21 +572,75 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {selectedColumn.references.map((referenceId, index) => {
               const validation = selectedOperationDefinition.requiredReferences[index];
-
+              const layer = state.layers[layerId];
               return (
                 <ReferenceEditor
+                  operationDefinitionMap={operationDefinitionMap}
                   key={index}
-                  layer={state.layers[layerId]}
+                  layer={layer}
                   layerId={layerId}
                   activeData={props.activeData}
                   columnId={referenceId}
-                  updateLayer={(
+                  column={layer.columns[referenceId]}
+                  incompleteColumn={
+                    layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
+                  }
+                  onDeleteColumn={() => {
+                    updateLayer(
+                      deleteColumn({
+                        layer,
+                        columnId: referenceId,
+                        indexPattern: currentIndexPattern,
+                      })
+                    );
+                  }}
+                  onChooseFunction={(operationType: string, field?: IndexPatternField) => {
+                    updateLayer(
+                      insertOrReplaceColumn({
+                        layer,
+                        columnId: referenceId,
+                        op: operationType,
+                        indexPattern: currentIndexPattern,
+                        field,
+                        visualizationGroups: dimensionGroups,
+                      })
+                    );
+                  }}
+                  onChooseField={(choice: FieldChoiceWithOperationType) => {
+                    trackUiEvent('indexpattern_dimension_field_changed');
+                    updateLayer(
+                      insertOrReplaceColumn({
+                        layer,
+                        columnId: referenceId,
+                        indexPattern: currentIndexPattern,
+                        op: choice.operationType,
+                        field: currentIndexPattern.getFieldByName(choice.field),
+                        visualizationGroups: dimensionGroups,
+                      })
+                    );
+                  }}
+                  paramEditorUpdater={(
                     setter:
                       | IndexPatternLayer
                       | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+                      | GenericIndexPatternColumn
                   ) => {
-                    updateLayer(
-                      typeof setter === 'function' ? setter(state.layers[layerId]) : setter
+                    let newLayer: IndexPatternLayer;
+                    if (typeof setter === 'function') {
+                      newLayer = setter(layer);
+                    } else if (isColumn(setter)) {
+                      newLayer = {
+                        ...layer,
+                        columns: {
+                          ...layer.columns,
+                          [referenceId]: setter,
+                        },
+                      };
+                    } else {
+                      newLayer = setter;
+                    }
+                    return updateLayer(
+                      adjustColumnReferencesForChangedColumn(newLayer, referenceId)
                     );
                   }}
                   validation={validation}
@@ -497,9 +651,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   labelAppend={selectedOperationDefinition?.getHelpMessage?.({
                     data: props.data,
                     uiSettings: props.uiSettings,
-                    currentColumn: state.layers[layerId].columns[columnId],
+                    currentColumn: layer.columns[columnId],
                   })}
-                  dimensionGroups={dimensionGroups}
                   isFullscreen={isFullscreen}
                   toggleFullscreen={toggleFullscreen}
                   setIsCloseable={setIsCloseable}
@@ -549,19 +702,23 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
+        existingFields={state.existingFields}
         layer={state.layers[layerId]}
-        layerId={layerId}
         activeData={props.activeData}
-        updateLayer={temporaryStaticValue ? moveDefinetelyToStaticValueAndUpdate : setStateWrapper}
+        paramEditorUpdater={
+          temporaryStaticValue ? moveDefinetelyToStaticValueAndUpdate : setStateWrapper
+        }
         columnId={columnId}
         currentColumn={state.layers[layerId].columns[columnId]}
-        dateRange={dateRange}
-        indexPattern={currentIndexPattern}
         operationDefinitionMap={operationDefinitionMap}
-        toggleFullscreen={toggleFullscreen}
-        isFullscreen={isFullscreen}
-        setIsCloseable={setIsCloseable}
+        layerId={layerId}
         paramEditorCustomProps={paramEditorCustomProps}
+        dateRange={dateRange}
+        isFullscreen={isFullscreen}
+        indexPattern={currentIndexPattern}
+        toggleFullscreen={toggleFullscreen}
+        setIsCloseable={setIsCloseable}
+        ReferenceEditor={ReferenceEditor}
         {...services}
       />
     </>
@@ -758,6 +915,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedOperationDefinition.shiftable &&
                   selectedColumn.timeShift !== undefined ? (
                     <TimeShift
+                      datatableUtilities={services.data.datatableUtilities}
                       indexPattern={currentIndexPattern}
                       selectedColumn={selectedColumn}
                       columnId={columnId}

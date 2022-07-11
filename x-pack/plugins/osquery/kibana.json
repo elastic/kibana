@@ -12,7 +12,6 @@
   "requiredPlugins": [
     "actions",
     "data",
-    "dataEnhanced",
     "discover",
     "features",
     "navigation",

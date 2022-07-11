@@ -14,8 +14,8 @@ export {
   EsVersion,
   Lifecycle,
   LifecyclePhase,
+  runCheckFtrConfigsCli,
 } from './lib';
-export type { ScreenshotRecord } from './lib';
 export { runFtrCli } from './cli';
 export * from './lib/docker_servers';
 export * from './public_types';

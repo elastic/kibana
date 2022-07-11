@@ -9,7 +9,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
-import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 import { RedirectAppLinks } from '../../../app_links';
@@ -35,9 +35,23 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     services: { http, application },
   } = useKibana<CoreStart>();
   const addBasePath = http.basePath.prepend;
-  const image = addBasePath(`/plugins/kibanaReact/assets/elastic_agent_card.svg`);
+  const imageUrl = addBasePath(`/plugins/kibanaReact/assets/elastic_agent_card.svg`);
   const canAccessFleet = application.capabilities.navLinks.integrations;
   const hasCategory = category ? `/${category}` : '';
+
+  const image = (
+    <EuiImage
+      size="fullWidth"
+      style={{
+        width: 'max(100%, 360px)',
+        height: 240,
+        objectFit: 'cover',
+        background: 'aliceblue',
+      }}
+      url={imageUrl}
+      alt=""
+    />
+  );
 
   if (!canAccessFleet) {
     return (

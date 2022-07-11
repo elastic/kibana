@@ -5,16 +5,38 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useGlobalQueryString } from '../../utils/global_query_string';
 import { makeMapStateToProps } from '../url_state/helpers';
-import { getSearch } from './helpers';
-import { SearchNavTab } from './types';
+import { getSearch, getUrlStateSearch } from './helpers';
+import type { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab?: SearchNavTab) => {
   const mapState = makeMapStateToProps();
   const { urlState } = useDeepEqualSelector(mapState);
-  const urlSearch = useMemo(() => (tab ? getSearch(tab, urlState) : ''), [tab, urlState]);
+  const globalQueryString = useGlobalQueryString();
+  const urlSearch = useMemo(
+    () => (tab ? getSearch(tab, urlState, globalQueryString) : ''),
+    [tab, urlState, globalQueryString]
+  );
+
   return urlSearch;
+};
+
+export const useGetUrlStateQueryString = () => {
+  const mapState = makeMapStateToProps();
+  const { urlState } = useDeepEqualSelector(mapState);
+  const globalQueryString = useGlobalQueryString();
+  const getUrlStateQueryString = useCallback(() => {
+    // TODO: Temporary code while we are migrating all query strings to global_query_string_manager
+    if (globalQueryString.length > 0) {
+      return `${getUrlStateSearch(urlState)}&${globalQueryString}`;
+    }
+
+    return getUrlStateSearch(urlState);
+  }, [urlState, globalQueryString]);
+
+  return getUrlStateQueryString;
 };

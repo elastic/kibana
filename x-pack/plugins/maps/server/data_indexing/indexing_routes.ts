@@ -51,7 +51,7 @@ export function initIndexingRoutes({
     async (context, request, response) => {
       const coreContext = await context.core;
       const { index, mappings } = request.body;
-      const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
+      const indexPatternsService = await dataPlugin.indexPatterns.dataViewsServiceFactory(
         coreContext.savedObjects.client,
         coreContext.elasticsearch.client.asCurrentUser,
         request

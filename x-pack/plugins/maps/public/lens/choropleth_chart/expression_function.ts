@@ -6,8 +6,8 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { LensMultiTable } from '@kbn/lens-plugin/common';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 import { RENDERER_ID } from './expression_renderer';
@@ -20,7 +20,7 @@ interface ChoroplethChartRender {
 
 export const getExpressionFunction = (): ExpressionFunctionDefinition<
   'lens_choropleth_chart',
-  LensMultiTable,
+  Datatable,
   Omit<ChoroplethChartConfig, 'layerType'>,
   ChoroplethChartRender
 > => ({
@@ -57,11 +57,14 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
       help: 'Value accessor identifies the value column',
     },
   },
-  inputTypes: ['lens_multitable'],
+  inputTypes: ['datatable'],
   fn(data, args, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
-        Object.values(data.tables)[0],
+        data,
         [
           [
             args.valueAccessor ? [args.valueAccessor] : undefined,
@@ -88,6 +91,6 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
         data,
         args,
       },
-    } as ChoroplethChartRender;
+    };
   },
 });

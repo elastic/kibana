@@ -12,6 +12,7 @@ export type {
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
 } from '../../common';
+export { ExperimentalFeaturesService } from './experimental_features';
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
@@ -40,7 +41,8 @@ export {
   countValidationErrors,
   getStreamsForInputType,
 } from '../../common';
-
+export * from './package_verification';
 export * from './pkg_key_from_package_info';
 export * from './ui_extensions';
 export * from './increment_policy_name';
+export * from './has_fleet_server';

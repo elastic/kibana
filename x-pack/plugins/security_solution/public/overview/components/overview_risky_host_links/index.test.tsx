@@ -13,24 +13,26 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostLinks } from '.';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
+
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
 import { useHostRiskScore } from '../../../risk_score/containers';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../risk_score/containers');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
-const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
+jest.mock('../../../common/hooks/use_dashboard_button_href');
+const useRiskyHostsDashboardButtonHrefMock = useDashboardButtonHref as jest.Mock;
 useRiskyHostsDashboardButtonHrefMock.mockReturnValue({ buttonHref: '/test' });
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links');

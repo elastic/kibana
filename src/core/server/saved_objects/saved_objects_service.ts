@@ -8,14 +8,16 @@
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
-import { CoreService } from '../../types';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { CoreContext } from '../core_context';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
@@ -28,7 +30,7 @@ import {
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import { KibanaRequest, InternalHttpServiceSetup } from '../http';
+import { InternalHttpServiceSetup } from '../http';
 import {
   SavedObjectsClientContract,
   SavedObjectsType,
@@ -40,7 +42,6 @@ import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
-import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
@@ -50,7 +51,6 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { DocLinksServiceStart } from '../doc_links';
 
 const kibanaIndex = '.kibana';
 

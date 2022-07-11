@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { JsonObject, JsonValue } from '@kbn/utility-types';
-import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
+import type { NodeID, TimeRange } from '../utils';
+import { docValueFields, validIDs } from '../utils';
 
 interface LifecycleParams {
   schema: ResolverSchema;
   indexPatterns: string | string[];
   timeRange: TimeRange;
+  isInternalRequest: boolean;
 }
 
 /**
@@ -24,11 +26,13 @@ export class LifecycleQuery {
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
   private readonly docValueFields: JsonValue[];
-  constructor({ schema, indexPatterns, timeRange }: LifecycleParams) {
+  private readonly isInternalRequest: boolean;
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: LifecycleParams) {
     this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
+    this.isInternalRequest = isInternalRequest;
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -91,7 +95,9 @@ export class LifecycleQuery {
       return [];
     }
 
-    const body = await client.asCurrentUser.search({
+    const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+
+    const body = await esClient.search({
       body: this.query(validNodes),
       index: this.indexPatterns,
     });

@@ -6,18 +6,19 @@
  */
 
 import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { Anomaly } from '../../../common/components/ml/types';
+import type { Anomaly } from '../../../common/components/ml/types';
 import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 
-import { HostDetailsTabsProps } from './types';
+import type { HostDetailsTabsProps } from './types';
 import { type } from './utils';
 
 import {
@@ -33,7 +34,6 @@ import { TimelineId } from '../../../../common/types';
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     detailName,
-    docValueFields,
     filterQuery,
     indexNames,
     indexPattern,
@@ -87,7 +87,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />

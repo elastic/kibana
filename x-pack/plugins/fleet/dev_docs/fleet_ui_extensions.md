@@ -37,6 +37,12 @@ export class Plugin {
       view: 'package-detail-custom',
       component: getLazyEndpointPackageCustomExtension(core, plugins),
     });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
   }
   //...
 }

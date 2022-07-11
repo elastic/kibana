@@ -53,27 +53,6 @@ export const RULE_STATUS_WARNING = i18n.translate(
   }
 );
 
-export const RULE_STATUS_ENABLED = i18n.translate(
-  'xpack.observability.rules.rulesTable.ruleStatusEnabled',
-  {
-    defaultMessage: 'Enabled',
-  }
-);
-
-export const RULE_STATUS_DISABLED = i18n.translate(
-  'xpack.observability.rules.rulesTable.ruleStatusDisabled',
-  {
-    defaultMessage: 'Disabled',
-  }
-);
-
-export const RULE_STATUS_SNOOZED_INDEFINITELY = i18n.translate(
-  'xpack.observability.rules.rulesTable.ruleStatusSnoozedIndefinitely',
-  {
-    defaultMessage: 'Snoozed indefinitely',
-  }
-);
-
 export const LAST_RESPONSE_COLUMN_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.columns.lastResponseTitle',
   {
@@ -145,6 +124,13 @@ export const RULES_BREADCRUMB_TEXT = i18n.translate(
 export const RULES_LOAD_ERROR = i18n.translate('xpack.observability.rules.loadError', {
   defaultMessage: 'Unable to load rules',
 });
+
+export const RULE_TAGS_LOAD_ERROR = i18n.translate(
+  'xpack.observability.rulesList.unableToLoadRuleTags',
+  {
+    defaultMessage: 'Unable to load rule tags',
+  }
+);
 
 export const RULES_SINGLE_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.singleTitle',

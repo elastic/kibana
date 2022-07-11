@@ -9,19 +9,21 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { flatMap, get } from 'lodash';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
-import { AggregateRuleExecutionEvent } from '../../../../../../common/detection_engine/schemas/common';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/schemas/response';
-import {
+import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { AggregateRuleExecutionEvent } from '../../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/schemas/response';
+import type {
   ExecutionEventAggregationOptions,
   ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
-  EXECUTION_UUID_FIELD,
 } from './types';
+import { EXECUTION_UUID_FIELD } from './types';
 
 // Base ECS fields
 const ACTION_FIELD = 'event.action';
 const DURATION_FIELD = 'event.duration';
+const ERROR_MESSAGE_FIELD = 'error.message';
 const MESSAGE_FIELD = 'message';
 const PROVIDER_FIELD = 'event.provider';
 const OUTCOME_FIELD = 'event.outcome';
@@ -48,7 +50,7 @@ const SORT_FIELD_TO_AGG_MAPPING: Record<string, string> = {
   duration_ms: 'ruleExecution>executionDuration',
   indexing_duration_ms: 'securityMetrics>indexDuration',
   search_duration_ms: 'securityMetrics>searchDuration',
-  gap_duration_ms: 'securityMetrics>gapDuration',
+  gap_duration_s: 'securityMetrics>gapDuration',
   schedule_delay_ms: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
   // TODO: To be added in https://github.com/elastic/kibana/pull/126210
@@ -166,7 +168,7 @@ export const getExecutionEventAggregation = ({
               top_hits: {
                 size: 1,
                 _source: {
-                  includes: [OUTCOME_FIELD, MESSAGE_FIELD],
+                  includes: [ERROR_MESSAGE_FIELD, OUTCOME_FIELD, MESSAGE_FIELD],
                 },
               },
             },
@@ -293,11 +295,18 @@ export const formatAggExecutionEventFromBucket = (
     // security fields
     indexing_duration_ms: bucket?.securityMetrics?.indexDuration?.value ?? 0,
     search_duration_ms: bucket?.securityMetrics?.searchDuration?.value ?? 0,
-    gap_duration_ms: bucket?.securityMetrics?.gapDuration?.value ?? 0,
+    gap_duration_s: bucket?.securityMetrics?.gapDuration?.value ?? 0,
+    // If security_status isn't available, use platform status from `event.outcome`, but translate to RuleExecutionStatus
     security_status:
       bucket?.securityStatus?.status?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution
-        ?.status,
-    security_message: bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message,
+        ?.status ??
+      mapPlatformStatusToRuleExecutionStatus(
+        bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome
+      ),
+    // If security_message isn't available, use `error.message` instead for platform errors since it is more descriptive than `message`
+    security_message:
+      bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message ??
+      bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.error?.message,
   };
 };
 
@@ -352,4 +361,41 @@ export const formatSortForTermsSort = (sort: estypes.Sort) => {
       {}
     )
   );
+};
+
+/**
+ * Maps a RuleExecutionStatus[] to string[] of associated platform statuses. Useful for querying specific platform
+ * events based on security status values
+ * @param ruleStatuses RuleExecutionStatus[]
+ */
+export const mapRuleExecutionStatusToPlatformStatus = (
+  ruleStatuses: RuleExecutionStatus[]
+): string[] => {
+  return flatMap(ruleStatuses, (rs) => {
+    switch (rs) {
+      case RuleExecutionStatus.failed:
+        return 'failure';
+      case RuleExecutionStatus.succeeded:
+        return 'success';
+      default:
+        return [];
+    }
+  });
+};
+
+/**
+ * Maps a platform status string to RuleExecutionStatus
+ * @param platformStatus string, i.e. `failure` or `success`
+ */
+export const mapPlatformStatusToRuleExecutionStatus = (
+  platformStatus: string
+): RuleExecutionStatus | undefined => {
+  switch (platformStatus) {
+    case 'failure':
+      return RuleExecutionStatus.failed;
+    case 'success':
+      return RuleExecutionStatus.succeeded;
+    default:
+      return undefined;
+  }
 };

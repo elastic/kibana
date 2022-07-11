@@ -12,8 +12,6 @@ import {
 } from '../__mocks__/request_responses';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
 
-// TODO: Add additional tests for param validation
-
 describe('getRuleExecutionEventsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();

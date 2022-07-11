@@ -7,13 +7,29 @@
 import { ComponentType, JSXElementConstructor } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 
+// Temporary import from triggers-actions-ui public types, it will not be needed after alerts table migrated
+import type {
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+
 import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
-import { TimelineNonEcsData } from '../../../search_strategy';
+import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
-import { FieldBrowserOptions } from '../../fields_browser';
 
+export {
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
+};
 export interface ActionProps {
   action?: RowCellRender;
   ariaRowindex: number;
@@ -53,17 +69,33 @@ export type OnUpdateAlertStatusSuccess = (
 ) => void;
 export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => void;
 
-export interface StatusBulkActionsProps {
+export interface CustomBulkAction {
+  key: string;
+  label: string;
+  disableOnQuery?: boolean;
+  disabledLabel?: string;
+  onClick: (items?: TimelineItem[]) => void;
+  ['data-test-subj']?: string;
+}
+
+export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
+  onClick: (eventIds: string[]) => void;
+};
+
+export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertStatus;
   query?: string;
   indexName: string;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  showAlertStatusActions?: boolean;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkActionProp[];
   timelineId?: string;
 }
+
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
@@ -117,6 +149,7 @@ export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
   onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
   onAlertStatusActionFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkAction[];
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 

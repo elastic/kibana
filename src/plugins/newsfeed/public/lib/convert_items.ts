@@ -42,7 +42,7 @@ export const localizeItem = (rawItem: ApiItem, userLanguage: string): NewsfeedIt
   } = rawItem;
 
   let chosenLanguage = userLanguage;
-  if (languages && !languages.includes(chosenLanguage)) {
+  if (!languages || !languages.includes(chosenLanguage)) {
     chosenLanguage = NEWSFEED_FALLBACK_LANGUAGE; // don't remove the item: fallback on a language
   }
 

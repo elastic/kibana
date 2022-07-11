@@ -13,8 +13,8 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { StartServicesAccessor } from '@kbn/core/server';
-import { StartPlugins } from '../../../plugin';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { StartPlugins } from '../../../plugin';
 
 jest.mock('./helpers', () => {
   const original = jest.requireActual('./helpers');
@@ -26,6 +26,13 @@ jest.mock('./helpers', () => {
 });
 const mockPattern = {
   id: 'security-solution',
+  fields: [
+    { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
+    { name: '@version', searchable: true, type: 'string', aggregatable: true },
+    { name: 'agent.ephemeral_id', searchable: true, type: 'string', aggregatable: true },
+    { name: 'agent.hostname', searchable: true, type: 'string', aggregatable: true },
+    { name: 'agent.id', searchable: true, type: 'string', aggregatable: true },
+  ],
   title:
     'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,ml_host_risk_score_*,.siem-signals-default',
 };
@@ -147,7 +154,6 @@ describe('sourcerer route', () => {
 
       test('returns sourcerer formatted Data Views when SIEM Data View does NOT exist but has been created in the mean time', async () => {
         const getMock = jest.fn();
-        getMock.mockResolvedValueOnce(null);
         getMock.mockResolvedValueOnce(mockPattern);
         const getStartServicesSpecial = jest.fn().mockResolvedValue([
           null,

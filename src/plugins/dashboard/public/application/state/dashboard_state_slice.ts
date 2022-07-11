@@ -54,6 +54,9 @@ export const dashboardStateSlice = createSlice({
     setSyncColors: (state, action: PayloadAction<boolean>) => {
       state.options.syncColors = action.payload;
     },
+    setSyncTooltips: (state, action: PayloadAction<boolean>) => {
+      state.options.syncTooltips = action.payload;
+    },
     setHidePanelTitles: (state, action: PayloadAction<boolean>) => {
       state.options.hidePanelTitles = action.payload;
     },
@@ -114,6 +117,7 @@ export const {
   setTimeRestore,
   setTimeRange,
   setSyncColors,
+  setSyncTooltips,
   setUseMargins,
   setViewMode,
   setFilters,

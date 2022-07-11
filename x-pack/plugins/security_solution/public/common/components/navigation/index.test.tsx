@@ -12,9 +12,10 @@ import { CONSTANTS } from '../url_state/constants';
 import { TabNavigationComponent } from '.';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
-import { RouteSpyState } from '../../utils/route/types';
-import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
+import type { RouteSpyState } from '../../utils/route/types';
+import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -61,7 +62,7 @@ describe('SIEM Navigation', () => {
   const mockProps: TabNavigationComponentProps &
     SecuritySolutionTabNavigationProps &
     RouteSpyState = {
-    pageName: 'hosts',
+    pageName: SecurityPageName.hosts,
     pathName: '/',
     detailName: undefined,
     search: '',
@@ -90,9 +91,6 @@ describe('SIEM Navigation', () => {
           linkTo: ['global'],
         },
       },
-      [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
-      [CONSTANTS.filters]: [],
-      [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
         activeTab: TimelineTabs.query,
         id: '',
@@ -111,44 +109,12 @@ describe('SIEM Navigation', () => {
         pageName: 'hosts',
         pathName: '/',
         search: '',
-        sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        query: { query: '', language: 'kuery' },
-        filters: [],
         flowTarget: undefined,
         savedQuery: undefined,
-        timeline: {
-          activeTab: TimelineTabs.query,
-          id: '',
-          isOpen: false,
-          graphEventId: '',
-        },
-        timerange: {
-          global: {
-            linkTo: ['timeline'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-          timeline: {
-            linkTo: ['global'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-        },
       },
       undefined,
-      mockGetUrlForApp,
       mockNavigateToUrl
     );
   });
@@ -163,43 +129,15 @@ describe('SIEM Navigation', () => {
       2,
       {
         detailName: undefined,
-        filters: [],
         flowTarget: undefined,
         navTabs,
+        search: '',
         pageName: 'network',
         pathName: '/',
-        query: { language: 'kuery', query: '' },
-        savedQuery: undefined,
-        search: '',
-        sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' },
-        timerange: {
-          global: {
-            linkTo: ['timeline'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-          timeline: {
-            linkTo: ['global'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-        },
       },
       undefined,
-      mockGetUrlForApp,
       mockNavigateToUrl
     );
   });

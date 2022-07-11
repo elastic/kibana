@@ -24,7 +24,12 @@ export type {
 export { SavedObjectsManagementAction } from './services';
 export type { ProcessedImportResponse, FailedImport } from './lib';
 export { processImportResponse } from './lib';
-export type { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+export type {
+  SavedObjectRelation,
+  SavedObjectWithMetadata,
+  SavedObjectMetadata,
+  SavedObjectManagementTypeInfo,
+} from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

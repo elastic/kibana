@@ -106,7 +106,15 @@ export function UXAppRoot({
   appMountParameters,
   core,
   deps,
-  corePlugins: { embeddable, inspector, maps, observability, data },
+  corePlugins: {
+    embeddable,
+    inspector,
+    maps,
+    observability,
+    data,
+    dataViews,
+    lens,
+  },
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -130,6 +138,8 @@ export function UXAppRoot({
           observability,
           embeddable,
           data,
+          dataViews,
+          lens,
         }}
       >
         <i18nCore.Context>

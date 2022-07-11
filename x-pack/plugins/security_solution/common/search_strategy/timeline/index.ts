@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../typed_json';
-import {
+import type { ESQuery } from '../../typed_json';
+import type {
   TimelineEventsQueries,
   TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
@@ -18,14 +18,14 @@ import {
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
 } from './events';
-import {
+import type {
   DocValueFields,
   PaginationInputPaginated,
   TimerangeInput,
   SortField,
   Maybe,
 } from '../common';
-import {
+import type {
   DataProviderType,
   TimelineType,
   TimelineStatus,
@@ -47,6 +47,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
   type: string;
+  esTypes: string[];
 }
 
 export interface TimelineRequestOptionsPaginated<Field = string>

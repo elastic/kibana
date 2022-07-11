@@ -9,8 +9,8 @@
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
 import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import type { Logger } from '@kbn/logging';
 
-import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 
 export class HttpsRedirectServer {

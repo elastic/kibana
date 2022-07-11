@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
-import { HostRouteSpyState } from '../../../common/utils/route/types';
-import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_UI_ID } from '../../../../common/constants';
+import type { HostRouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
+import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 export const type = hostsModel.HostsType.details;
 
@@ -31,28 +30,19 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.sessions]: i18n.NAVIGATION_SESSIONS_TITLE,
 };
 
-export const getBreadcrumbs = (
+export const getTrailingBreadcrumbs = (
   params: HostRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
-  let breadcrumb = [
-    {
-      text: i18n.PAGE_TITLE,
-      href: getUrlForApp(APP_UI_ID, {
-        path: !isEmpty(search[0]) ? search[0] : '',
-        deepLinkId: SecurityPageName.hosts,
-      }),
-    },
-  ];
+  let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,
       {
         text: params.detailName,
-        href: getUrlForApp(APP_UI_ID, {
-          path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+        href: getSecuritySolutionUrl({
+          path: getHostDetailsUrl(params.detailName, ''),
           deepLinkId: SecurityPageName.hosts,
         }),
       },

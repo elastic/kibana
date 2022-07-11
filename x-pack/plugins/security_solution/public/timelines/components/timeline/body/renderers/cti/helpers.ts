@@ -10,8 +10,8 @@ import styled from 'styled-components';
 
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
-import { Ecs } from '../../../../../../../common/ecs';
-import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
+import type { Ecs } from '../../../../../../../common/ecs';
+import type { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
 
 const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
   const threatData = get(data, ENRICHMENT_DESTINATION_PATH);
@@ -31,5 +31,5 @@ export const hasThreatMatchValue = (data: Ecs): boolean =>
   );
 
 export const HorizontalSpacer = styled.div`
-  margin: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin: 0 ${({ theme }) => theme.eui.euiSizeXS};
 `;

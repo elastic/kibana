@@ -84,6 +84,10 @@ export interface CiStatsTestGroupInfo {
    */
   name: string;
   /**
+   * Overall result of this test group
+   */
+  result: 'fail' | 'pass' | 'skip';
+  /**
    * Arbitrary metadata associated with this group. We currently look for a ciGroup metadata property for highlighting that when appropriate
    */
   meta: CiStatsMetadata;

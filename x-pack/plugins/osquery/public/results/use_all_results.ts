@@ -8,23 +8,23 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import type { InspectResponse } from '../common/helpers';
 import {
   createFilter,
   generateTablePaginationOptions,
   getInspectResponse,
-  InspectResponse,
 } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import {
+import type {
   ResultEdges,
   PageInfoPaginated,
-  OsqueryQueries,
   ResultsRequestOptions,
   ResultsStrategyResponse,
   Direction,
 } from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
+import { OsqueryQueries } from '../../common/search_strategy';
+import type { ESTermQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -62,7 +62,7 @@ export const useAllResults = ({
   return useQuery(
     ['allActionResults', { actionId, activePage, limit, sort }],
     async () => {
-      const responseData = await firstValueFrom(
+      const responseData = await lastValueFrom(
         data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
           {
             actionId,

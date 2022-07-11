@@ -122,6 +122,80 @@
           },
           {
             "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListView.componentDidUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidUpdate",
+            "description": [],
+            "signature": [
+              "(prevProps: ",
+              {
+                "pluginId": "kibanaReact",
+                "scope": "public",
+                "docId": "kibKibanaReactPluginApi",
+                "section": "def-public.TableListViewProps",
+                "text": "TableListViewProps"
+              },
+              "<V>, prevState: ",
+              {
+                "pluginId": "kibanaReact",
+                "scope": "public",
+                "docId": "kibKibanaReactPluginApi",
+                "section": "def-public.TableListViewState",
+                "text": "TableListViewState"
+              },
+              "<V>) => void"
+            ],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaReact",
+                "id": "def-public.TableListView.componentDidUpdate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "prevProps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaReact",
+                    "scope": "public",
+                    "docId": "kibKibanaReactPluginApi",
+                    "section": "def-public.TableListViewProps",
+                    "text": "TableListViewProps"
+                  },
+                  "<V>"
+                ],
+                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaReact",
+                "id": "def-public.TableListView.componentDidUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "prevState",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaReact",
+                    "scope": "public",
+                    "docId": "kibKibanaReactPluginApi",
+                    "section": "def-public.TableListViewState",
+                    "text": "TableListViewState"
+                  },
+                  "<V>"
+                ],
+                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaReact",
             "id": "def-public.TableListView.debouncedFetch",
             "type": "Function",
             "tags": [],
@@ -336,6 +410,39 @@
           },
           {
             "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListView.onTableChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTableChange",
+            "description": [],
+            "signature": [
+              "(criteria: ",
+              "CriteriaWithPagination",
+              "<V>) => void"
+            ],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaReact",
+                "id": "def-public.TableListView.onTableChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "criteria",
+                "description": [],
+                "signature": [
+                  "CriteriaWithPagination",
+                  "<V>"
+                ],
+                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaReact",
             "id": "def-public.TableListView.renderTable",
             "type": "Function",
             "tags": [],
@@ -343,6 +450,23 @@
             "description": [],
             "signature": [
               "() => JSX.Element"
+            ],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListView.getTableColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "getTableColumns",
+            "description": [],
+            "signature": [
+              "() => ",
+              "EuiBasicTableColumn",
+              "<V>[]"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
@@ -885,7 +1009,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaPageTemplate",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "KibanaPageTemplate",
         "description": [],
         "signature": [
@@ -900,7 +1026,161 @@
           ">) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-        "deprecated": false,
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "management",
+            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
+          },
+          {
+            "plugin": "management",
+            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
+          },
+          {
+            "plugin": "management",
+            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
+          },
+          {
+            "plugin": "spaces",
+            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
+          },
+          {
+            "plugin": "spaces",
+            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
+          },
+          {
+            "plugin": "spaces",
+            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/product_selector/product_selector.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/product_selector/product_selector.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/product_selector/product_selector.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/app_search/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/app_search/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/app_search/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/error_state/error_state.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/error_state/error_state.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/error_state/error_state.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1493,6 +1773,30 @@
             "path": "src/plugins/home/public/application/application.tsx"
           },
           {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
+          },
+          {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
           },
@@ -1563,30 +1867,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/public/search/sessions_mgmt/lib/get_columns.tsx"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/public/search/sessions_mgmt/lib/get_columns.tsx"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/public/search/sessions_mgmt/lib/get_columns.tsx"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/public/search/ui/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/public/search/ui/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/public/search/ui/connected_search_session_indicator/connected_search_session_indicator.tsx"
           },
           {
             "plugin": "ml",
@@ -1689,6 +1969,42 @@
             "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
           },
           {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
+          },
+          {
             "plugin": "upgradeAssistant",
             "path": "x-pack/plugins/upgrade_assistant/public/shared_imports.ts"
           },
@@ -1705,30 +2021,6 @@
             "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
           },
           {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/apps/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/apps/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/apps/uptime_app.tsx"
-          },
-          {
             "plugin": "ux",
             "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
           },
@@ -1739,50 +2031,6 @@
           {
             "plugin": "ux",
             "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
           },
           {
             "plugin": "savedObjectsManagement",
@@ -1807,6 +2055,30 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "kibanaOverview",
+            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "kibanaOverview",
+            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "kibanaOverview",
+            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "kibanaOverview",
+            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "kibanaOverview",
+            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "kibanaOverview",
+            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
           },
           {
             "plugin": "home",
@@ -1833,6 +2105,41 @@
               "React.PropsWithChildren<RedirectCrossAppLinksProps>"
             ],
             "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.Route",
+        "type": "Function",
+        "tags": [],
+        "label": "Route",
+        "description": [
+          "\nIt's a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
+        ],
+        "signature": [
+          "({ children, component: Component, render, ...rest }: ",
+          "RouteProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/kibana_react/public/router/router.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Route.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, component: Component, render, ...rest }",
+            "description": [],
+            "signature": [
+              "RouteProps"
+            ],
+            "path": "src/plugins/kibana_react/public/router/router.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -2078,14 +2385,8 @@
         ],
         "signature": [
           "(executionContext: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          },
-          ", context: ",
+          "ExecutionContextSetup",
+          " | undefined, context: ",
           "KibanaExecutionContext",
           ") => void"
         ],
@@ -2100,17 +2401,12 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup",
+              " | undefined"
             ],
             "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2306,13 +2602,7 @@
           "(node: React.ReactNode, theme$: ",
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
@@ -2342,13 +2632,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
@@ -3148,17 +3432,7 @@
             "label": "toastNotifications",
             "description": [],
             "signature": [
-              "{ get$: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "[]>; add: (toastOrTitle: ",
+              "{ add: (toastOrTitle: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -3174,7 +3448,17 @@
                 "section": "def-public.Toast",
                 "text": "Toast"
               },
-              "; remove: (toastOrId: string | ",
+              "; get$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              },
+              "[]>; remove: (toastOrId: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -3360,12 +3644,25 @@
             "label": "theme",
             "description": [],
             "signature": [
+              "ThemeServiceStart"
+            ],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListViewProps.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
               {
                 "pluginId": "core",
                 "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ThemeServiceStart",
-                "text": "ThemeServiceStart"
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.ApplicationStart",
+                "text": "ApplicationStart"
               }
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
@@ -3414,6 +3711,19 @@
             "tags": [],
             "label": "hasInitialFetchReturned",
             "description": [],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListViewState.hasUpdatedAtMetadata",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasUpdatedAtMetadata",
+            "description": [],
+            "signature": [
+              "boolean | null"
+            ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false
           },
@@ -3501,6 +3811,34 @@
             "tags": [],
             "label": "totalItems",
             "description": [],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListViewState.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "Pagination"
+            ],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListViewState.tableSort",
+            "type": "Object",
+            "tags": [],
+            "label": "tableSort",
+            "description": [],
+            "signature": [
+              "{ field: keyof V; direction: ",
+              "Direction",
+              "; } | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false
           }
@@ -3619,13 +3957,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               "> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
@@ -3884,7 +4216,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaPageTemplateProps",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "KibanaPageTemplateProps",
         "description": [
           "\nA thin wrapper around EuiPageTemplate with a few Kibana specific additions"
@@ -3905,8 +4239,8 @@
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "EuiBottomBarProps",
           " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
-          "MinHeightProperty",
-          "<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
           "KibanaPageTemplateSolutionNavProps",
           " | undefined; noDataConfig?: ",
           {
@@ -3919,7 +4253,73 @@
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-        "deprecated": false,
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "management",
+            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
+          },
+          {
+            "plugin": "management",
+            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/index.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/index.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3931,13 +4331,7 @@
         "description": [],
         "signature": [
           "{ analytics?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           " | undefined; application?: ",
           {
             "pluginId": "core",
@@ -3955,21 +4349,9 @@
             "text": "ChromeStart"
           },
           " | undefined; docLinks?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.DocLinksStart",
-            "text": "DocLinksStart"
-          },
+          "DocLinksStart",
           " | undefined; executionContext?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          },
+          "ExecutionContextSetup",
           " | undefined; http?: ",
           {
             "pluginId": "core",
@@ -3987,13 +4369,7 @@
             "text": "SavedObjectsStart"
           },
           " | undefined; i18n?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
+          "I18nStart",
           " | undefined; notifications?: ",
           {
             "pluginId": "core",
@@ -4019,13 +4395,7 @@
             "text": "IUiSettingsClient"
           },
           " | undefined; fatalErrors?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          },
+          "FatalErrorsSetup",
           " | undefined; deprecations?: ",
           {
             "pluginId": "core",
@@ -4035,14 +4405,10 @@
             "text": "DeprecationsServiceStart"
           },
           " | undefined; theme?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
-          " | undefined; injectedMetadata?: { getInjectedVar: (name: string, defaultValue?: any) => unknown; } | undefined; }"
+          "ThemeServiceStart",
+          " | undefined; injectedMetadata?: ",
+          "InjectedMetadataStart",
+          " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
         "deprecated": false,
@@ -4333,14 +4699,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/map_container/map_container.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/map_container/map_container.tsx"
           }
         ],
         "initialIsOpen": false
@@ -4633,11 +4991,17 @@
         "signature": [
           "(storyFn: ",
           "PartialStoryFn",
-          "<",
+          "<ReturnTypeFramework<",
           "StoryFnReactReturnType",
+          ">, ",
+          "Args",
           ">, { globals }: ",
           "StoryContext",
-          ") => JSX.Element"
+          "<ReturnTypeFramework<",
+          "StoryFnReactReturnType",
+          ">, ",
+          "Args",
+          ">) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
@@ -4651,8 +5015,10 @@
             "description": [],
             "signature": [
               "PartialStoryFn",
-              "<",
+              "<ReturnTypeFramework<",
               "StoryFnReactReturnType",
+              ">, ",
+              "Args",
               ">"
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
@@ -4667,7 +5033,12 @@
             "label": "{ globals }",
             "description": [],
             "signature": [
-              "StoryContext"
+              "StoryContext",
+              "<ReturnTypeFramework<",
+              "StoryFnReactReturnType",
+              ">, ",
+              "Args",
+              ">"
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
             "deprecated": false,
@@ -4793,7 +5164,7 @@
             "label": "eui",
             "description": [],
             "signature": [
-              "{ paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCodeBlockPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; success: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; success: string; subdued: string; text: string; warning: string; inherit: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiLinkColors: { subdued: string; primary: string; success: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; euiLoadingSpinnerSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTextColors: { default: string; subdued: string; success: string; accent: string; warning: string; danger: string; ghost: string; inherit: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; subdued: string; ghost: string; text: string; }; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipBorderColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; euiDatePickerCalendarWidth: string; euiDatePickerPadding: string; euiDatePickerGap: string; euiDatePickerCalendarColumns: number; euiDatePickerButtonSize: string; euiDatePickerMinControlWidth: string; euiDatePickerMaxControlWidth: string; euiButtonDefaultTransparency: number; euiButtonFontWeight: number; euiRangeHighlightColor: string; euiRangeThumbBackgroundColor: string; euiRangeTrackCompressedHeight: string; euiRangeHighlightCompressedHeight: string; euiRangeHeight: string; euiRangeCompressedHeight: string; euiStepStatusColors: { default: string; complete: string; warning: string; danger: string; }; }"
+              "{ euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCodeBlockPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiEmptyPromptContentMaxWidth: string; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; success: string; subdued: string; text: string; warning: string; inherit: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipBorderColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; euiDatePickerCalendarWidth: string; euiDatePickerPadding: string; euiDatePickerGap: string; euiDatePickerCalendarColumns: number; euiDatePickerButtonSize: string; euiDatePickerMinControlWidth: string; euiDatePickerMaxControlWidth: string; euiButtonDefaultTransparency: number; euiButtonFontWeight: number; euiRangeHighlightColor: string; euiRangeThumbBackgroundColor: string; euiRangeTrackCompressedHeight: string; euiRangeHighlightCompressedHeight: string; euiRangeHeight: string; euiRangeCompressedHeight: string; euiStepStatusColors: { default: string; complete: string; warning: string; danger: string; }; }"
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
             "deprecated": false

@@ -8,6 +8,7 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -29,6 +30,7 @@ export interface UnifiedSearchStartDependencies {
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
+  screenshotMode?: ScreenshotModePluginStart;
 }
 
 /**
@@ -54,3 +56,13 @@ export interface UnifiedSearchPublicPluginStart {
    */
   ui: UnifiedSearchPublicPluginStartUi;
 }
+
+/**
+ * Filter options from Unified Search menu panels
+ */
+export type FilterPanelOption =
+  | 'pinFilter'
+  | 'editFilter'
+  | 'negateFilter'
+  | 'disableFilter'
+  | 'deleteFilter';

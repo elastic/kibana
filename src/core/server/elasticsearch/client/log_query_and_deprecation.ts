@@ -10,9 +10,9 @@ import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
-import type { ElasticsearchErrorDetails } from './types';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { getEcsResponseLog } from './get_ecs_response_log';
-import { Logger } from '../../logging';
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
   if (qs === undefined || typeof qs === 'string') {

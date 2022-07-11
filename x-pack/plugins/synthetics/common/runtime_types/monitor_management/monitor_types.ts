@@ -10,10 +10,12 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations';
 import {
+  DataStream,
   DataStreamCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
+  SourceTypeCodec,
   TLSVersionCodec,
   VerificationModeCodec,
 } from './monitor_configs';
@@ -75,6 +77,7 @@ export const CommonFieldsCodec = t.intersection([
   t.partial({
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
+    [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
   }),
 ]);
 
@@ -199,12 +202,21 @@ export const ThrottlingConfigKeyCodec = t.union([
 export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
 
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
-  t.interface({
-    [ConfigKey.METADATA]: MetadataCodec,
-    [ConfigKey.SOURCE_ZIP_URL]: t.string,
-    [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,
-    [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
-  }),
+  t.intersection([
+    t.interface({
+      [ConfigKey.METADATA]: MetadataCodec,
+      [ConfigKey.SOURCE_ZIP_URL]: t.string,
+      [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,
+      [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
+    }),
+    t.partial({
+      [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
+      [ConfigKey.JOURNEY_ID]: t.string,
+      [ConfigKey.PROJECT_ID]: t.string,
+      [ConfigKey.ORIGINAL_SPACE]: t.string,
+      [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+    }),
+  ]),
   ZipUrlTLSFieldsCodec,
   ZipUrlTLSSensitiveFieldsCodec,
   CommonFieldsCodec,
@@ -213,11 +225,12 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
 export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.SOURCE_INLINE]: t.string,
+    [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
     [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.PARAMS]: t.string,
-    [ConfigKey.URLS]: t.union([t.string, t.undefined]),
-    [ConfigKey.PORT]: t.union([t.number, t.undefined]),
+    [ConfigKey.URLS]: t.union([t.string, t.null]),
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   ZipUrlTLSFieldsCodec,
   CommonFieldsCodec,
@@ -302,11 +315,28 @@ export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
   t.interface({ id: t.string }),
 ]);
 
+// TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
+export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
+  EncryptedSyntheticsMonitorCodec,
+  t.interface({ id: t.string, updated_at: t.string }),
+]);
+
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
 
 export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
   typeof EncryptedSyntheticsMonitorWithIdCodec
 >;
+
+export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
+
+export const MonitorDefaultsCodec = t.interface({
+  [DataStream.HTTP]: HTTPFieldsCodec,
+  [DataStream.TCP]: TCPFieldsCodec,
+  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
+  [DataStream.BROWSER]: BrowserFieldsCodec,
+});
+
+export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(
@@ -319,10 +349,28 @@ export const MonitorManagementListResultCodec = t.type({
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
+  absoluteTotal: t.union([t.number, t.null]),
   syncErrors: t.union([ServiceLocationErrors, t.null]),
 });
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
+
+export const MonitorOverviewResultCodec = t.type({
+  total: t.number,
+  allMonitorIds: t.array(t.string),
+  pages: t.record(
+    t.number,
+    t.array(
+      t.interface({
+        name: t.string,
+        id: t.string,
+        location: MonitorServiceLocationsCodec,
+      })
+    )
+  ),
+});
+
+export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
 
 export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,

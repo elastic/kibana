@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';

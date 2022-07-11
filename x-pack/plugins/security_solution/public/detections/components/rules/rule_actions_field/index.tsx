@@ -12,15 +12,12 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import {
-  ActionForm,
-  ActionType,
-  loadActionTypes,
-  ActionVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleAction } from '@kbn/alerting-plugin/common';
+import type { ActionType, ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { FieldHook, useFormContext } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { useFormContext } from '../../../../shared_imports';
 import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
@@ -84,7 +81,7 @@ export const RuleActionsField: React.FC<Props> = ({
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
     http,
-    triggersActionsUi: { actionTypeRegistry },
+    triggersActionsUi: { getActionForm },
   } = useKibana().services;
 
   const actions: RuleAction[] = useMemo(
@@ -135,6 +132,29 @@ export const RuleActionsField: React.FC<Props> = ({
     [field.setValue, actions]
   );
 
+  const actionForm = useMemo(
+    () =>
+      getActionForm({
+        actions,
+        messageVariables,
+        defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
+        setActionIdByIndex,
+        setActions: setAlertActionsProperty,
+        setActionParamsProperty,
+        actionTypes: supportedActionTypes,
+        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+      }),
+    [
+      actions,
+      getActionForm,
+      messageVariables,
+      setActionIdByIndex,
+      setActionParamsProperty,
+      setAlertActionsProperty,
+      supportedActionTypes,
+    ]
+  );
+
   useEffect(() => {
     (async function () {
       const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
@@ -168,17 +188,7 @@ export const RuleActionsField: React.FC<Props> = ({
           <EuiSpacer />
         </>
       ) : null}
-      <ActionForm
-        actions={actions}
-        messageVariables={messageVariables}
-        defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
-        setActionIdByIndex={setActionIdByIndex}
-        setActions={setAlertActionsProperty}
-        setActionParamsProperty={setActionParamsProperty}
-        actionTypeRegistry={actionTypeRegistry}
-        actionTypes={supportedActionTypes}
-        defaultActionMessage={DEFAULT_ACTION_MESSAGE}
-      />
+      {actionForm}
     </ContainerActions>
   );
 };

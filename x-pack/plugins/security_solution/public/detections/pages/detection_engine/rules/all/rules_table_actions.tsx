@@ -5,33 +5,45 @@
  * 2.0.
  */
 
-import {
+import type {
   DefaultItemAction,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
-  EuiToolTip,
 } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import type { NavigateToAppOptions } from '@kbn/core/public';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
-import { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
 import { executeRulesBulkAction, goToRuleEditPage } from './actions';
-import { RulesTableActions } from './rules_table/rules_table_context';
+import type { RulesTableActions } from './rules_table/rules_table_context';
+import type { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 type NavigateToApp = (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
-export const getRulesTableActions = (
-  toasts: UseAppToasts,
-  navigateToApp: NavigateToApp,
-  invalidateRules: () => void,
-  actionsPrivileges: boolean,
-  setLoadingRules: RulesTableActions['setLoadingRules']
-): Array<DefaultItemAction<Rule>> => [
+export const getRulesTableActions = ({
+  toasts,
+  navigateToApp,
+  invalidateRules,
+  invalidatePrePackagedRulesStatus,
+  actionsPrivileges,
+  setLoadingRules,
+  startTransaction,
+}: {
+  toasts: UseAppToasts;
+  navigateToApp: NavigateToApp;
+  invalidateRules: () => void;
+  invalidatePrePackagedRulesStatus: () => void;
+  actionsPrivileges: boolean;
+  setLoadingRules: RulesTableActions['setLoadingRules'];
+  startTransaction: ReturnType<typeof useStartTransaction>['startTransaction'];
+}): Array<DefaultItemAction<Rule>> => [
   {
     type: 'icon',
     'data-test-subj': 'editRuleAction',
@@ -61,6 +73,7 @@ export const getRulesTableActions = (
     ),
     enabled: (rule: Rule) => canEditRuleWithActions(rule, actionsPrivileges),
     onClick: async (rule: Rule) => {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
       const result = await executeRulesBulkAction({
         action: BulkAction.duplicate,
         setLoadingRules,
@@ -69,6 +82,7 @@ export const getRulesTableActions = (
         search: { ids: [rule.id] },
       });
       invalidateRules();
+      invalidatePrePackagedRulesStatus();
       const createdRules = result?.attributes.results.created;
       if (createdRules?.length) {
         goToRuleEditPage(createdRules[0].id, navigateToApp);
@@ -81,14 +95,16 @@ export const getRulesTableActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rule: Rule) =>
-      executeRulesBulkAction({
+    onClick: async (rule: Rule) => {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
+      await executeRulesBulkAction({
         action: BulkAction.export,
         setLoadingRules,
         visibleRuleIds: [rule.id],
         toasts,
         search: { ids: [rule.id] },
-      }),
+      });
+    },
     enabled: (rule: Rule) => !rule.immutable,
   },
   {
@@ -98,6 +114,7 @@ export const getRulesTableActions = (
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: async (rule: Rule) => {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
       await executeRulesBulkAction({
         action: BulkAction.delete,
         setLoadingRules,
@@ -106,6 +123,7 @@ export const getRulesTableActions = (
         search: { ids: [rule.id] },
       });
       invalidateRules();
+      invalidatePrePackagedRulesStatus();
     },
   },
 ];

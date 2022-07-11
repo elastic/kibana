@@ -10,10 +10,9 @@ import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
-import { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
-import { addTags } from './add_tags';
+import type { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -23,16 +22,28 @@ const DUPLICATE_TITLE = i18n.translate(
 );
 
 export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCreate => {
-  const newRuleId = uuid.v4();
+  // Generate a new static ruleId
+  const ruleId = uuid.v4();
+
+  // If it's a prebuilt rule, reset Related Integrations, Required Fields and Setup Guide.
+  // We do this because for now we don't allow the users to edit these fields for custom rules.
+  const isPrebuilt = rule.params.immutable;
+  const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
+  const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
+  const setup = isPrebuilt ? '' : rule.params.setup;
+
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
-    tags: addTags(rule.tags, newRuleId, false),
+    tags: rule.tags,
     alertTypeId: ruleTypeMappings[rule.params.type],
     consumer: SERVER_APP_ID,
     params: {
       ...rule.params,
       immutable: false,
-      ruleId: newRuleId,
+      ruleId,
+      relatedIntegrations,
+      requiredFields,
+      setup,
     },
     schedule: rule.schedule,
     enabled: false,

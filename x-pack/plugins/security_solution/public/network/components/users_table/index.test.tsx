@@ -19,12 +19,13 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -42,7 +43,7 @@ describe('Users Table Component', () => {
 
   const defaultProps = {
     data: mockUsersData.edges,
-    flowTarget: FlowTarget.source,
+    flowTarget: FlowTargetSourceDest.source,
     fakeTotalCount: getOr(50, 'fakeTotalCount', mockUsersData.pageInfo),
     id: 'user',
     isInspect: false,

@@ -7,20 +7,17 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
-import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
-import { RulesFeatureTour } from './feature_tour/rules_feature_tour';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
 interface AllRulesProps {
-  createPrePackagedRules: CreatePreBuiltRules | null;
+  createPrePackagedRules: () => void;
   hasPermissions: boolean;
-  loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  rulesCustomInstalled: number | null;
-  rulesInstalled: number | null;
-  rulesNotInstalled: number | null;
-  rulesNotUpdated: number | null;
+  rulesCustomInstalled?: number;
+  rulesInstalled?: number;
+  rulesNotInstalled?: number;
+  rulesNotUpdated?: number;
 }
 
 /**
@@ -35,7 +32,6 @@ export const AllRules = React.memo<AllRulesProps>(
   ({
     createPrePackagedRules,
     hasPermissions,
-    loading,
     loadingCreatePrePackagedRules,
     rulesCustomInstalled,
     rulesInstalled,
@@ -46,13 +42,11 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <RulesFeatureTour />
         <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
         <EuiSpacer />
         <RulesTables
           createPrePackagedRules={createPrePackagedRules}
           hasPermissions={hasPermissions}
-          loading={loading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}

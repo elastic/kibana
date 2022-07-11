@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
@@ -22,13 +23,16 @@ import {
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
+import { CasesPermissions } from '../../client/helpers/capabilities';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
-  userCanCrud?: boolean;
+  permissions?: CasesPermissions;
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
+  externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -40,14 +44,29 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
+  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
 }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+          <QueryClientProvider client={queryClient}>
+            <CasesProvider
+              value={{ externalReferenceAttachmentTypeRegistry, features, owner, permissions }}
+            >
+              {children}
+            </CasesProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
@@ -58,39 +77,87 @@ TestProvidersComponent.displayName = 'TestProviders';
 export const TestProviders = React.memo(TestProvidersComponent);
 
 export interface AppMockRenderer {
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   render: UiRender;
   coreStart: StartServices;
+  queryClient: QueryClient;
+  AppWrapper: React.FC<{ children: React.ReactElement }>;
 }
+export const testQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+export const buildCasesPermissions = (overrides: Partial<CasesPermissions> = {}) => {
+  const read = overrides.read ?? true;
+  const all = overrides.all ?? true;
+
+  return {
+    all,
+    read,
+  };
+};
+
+export const allCasesPermissions = () => buildCasesPermissions();
+export const noCasesPermissions = () => buildCasesPermissions({ read: false, all: false });
+export const readCasesPermissions = () => buildCasesPermissions({ all: false });
 
 export const createAppMockRenderer = ({
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
+  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
-            {children}
-          </CasesProvider>
+          <QueryClientProvider client={queryClient}>
+            <CasesProvider
+              value={{
+                externalReferenceAttachmentTypeRegistry,
+                features,
+                owner,
+                permissions,
+                releasePhase,
+              }}
+            >
+              {children}
+            </CasesProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
+
   AppWrapper.displayName = 'AppWrapper';
+
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
       wrapper: AppWrapper,
       ...options,
     });
   };
+
   return {
     coreStart: services,
+    queryClient,
     render,
+    AppWrapper,
+    externalReferenceAttachmentTypeRegistry,
   };
 };
 

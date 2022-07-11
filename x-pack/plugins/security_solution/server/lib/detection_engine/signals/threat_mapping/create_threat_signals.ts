@@ -6,17 +6,17 @@
  */
 
 import chunk from 'lodash/fp/chunk';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getThreatList, getThreatListCount } from './get_threat_list';
-import {
+import type {
   CreateThreatSignalsOptions,
   CreateSignalInterface,
   GetDocumentListInterface,
 } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
@@ -51,6 +51,7 @@ export const createThreatSignals = async ({
   tuple,
   type,
   wrapHits,
+  runtimeMappings,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
@@ -87,10 +88,10 @@ export const createThreatSignals = async ({
 
   logger.debug(`Total event count: ${eventCount}`);
 
-  if (eventCount === 0) {
-    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
-    return results;
-  }
+  // if (eventCount === 0) {
+  //   logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+  //   return results;
+  // }
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -130,6 +131,7 @@ export const createThreatSignals = async ({
     threatQuery,
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
+    listClient,
   });
 
   const createSignals = async ({
@@ -195,6 +197,7 @@ export const createThreatSignals = async ({
           buildRuleMessage,
           perPage,
           tuple,
+          runtimeMappings,
         }),
 
       createSignal: (slicedChunk) =>
@@ -229,6 +232,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          runtimeMappings,
         }),
     });
   } else {
@@ -249,6 +253,8 @@ export const createThreatSignals = async ({
           threatListConfig,
           pitId: threatPitId,
           reassignPitId: reassignThreatPitId,
+          runtimeMappings,
+          listClient,
         }),
 
       createSignal: (slicedChunk) =>
@@ -276,6 +282,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          runtimeMappings,
         }),
     });
   }

@@ -106,6 +106,28 @@
             ],
             "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.editData",
+            "type": "Object",
+            "tags": [],
+            "label": "editData",
+            "description": [
+              "\nPass the data view to be edited."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_view_editor/public/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { RuleAlertType, isAlertTypes } from './types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 import { findRules } from './find_rules';
+import type { RuleAlertType } from './types';
 
-export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`;
-export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
+export const FILTER_NON_PREPACKED_RULES = 'alert.attributes.params.immutable: false';
+export const FILTER_PREPACKED_RULES = 'alert.attributes.params.immutable: true';
 
 export const getNonPackagedRulesCount = async ({
   rulesClient,
@@ -28,16 +28,18 @@ export const getRulesCount = async ({
   rulesClient: RulesClient;
   filter: string;
 }): Promise<number> => {
-  const firstRule = await findRules({
-    rulesClient,
-    filter,
-    perPage: 1,
-    page: 1,
-    sortField: 'createdAt',
-    sortOrder: 'desc',
-    fields: undefined,
+  return withSecuritySpan('getRulesCount', async () => {
+    const { total } = await findRules({
+      rulesClient,
+      filter,
+      perPage: 0,
+      page: 1,
+      sortField: 'createdAt',
+      sortOrder: 'desc',
+      fields: undefined,
+    });
+    return total;
   });
-  return firstRule.total;
 };
 
 export const getRules = async ({
@@ -46,26 +48,21 @@ export const getRules = async ({
 }: {
   rulesClient: RulesClient;
   filter: string;
-}) => {
-  const count = await getRulesCount({ rulesClient, filter });
-  const rules = await findRules({
-    rulesClient,
-    filter,
-    perPage: count,
-    page: 1,
-    sortField: 'createdAt',
-    sortOrder: 'desc',
-    fields: undefined,
-  });
+}): Promise<RuleAlertType[]> =>
+  withSecuritySpan('getRules', async () => {
+    const count = await getRulesCount({ rulesClient, filter });
+    const rules = await findRules({
+      rulesClient,
+      filter,
+      perPage: count,
+      page: 1,
+      sortField: 'createdAt',
+      sortOrder: 'desc',
+      fields: undefined,
+    });
 
-  if (isAlertTypes(rules.data)) {
     return rules.data;
-  } else {
-    // If this was ever true, you have a really messed up system.
-    // This is keep typescript happy since we have an unknown with data
-    return [];
-  }
-};
+  });
 
 export const getNonPackagedRules = async ({
   rulesClient,

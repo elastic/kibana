@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { map } from 'lodash';
 import {
   EuiFlyout,
   EuiTitle,
@@ -19,17 +19,19 @@ import {
   EuiButton,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
-import { Form, getUseField, Field, useFormData } from '../../shared_imports';
+import { Form, getUseField, Field } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
-import { UsePackQueryFormProps, PackFormData, usePackQueryForm } from './use_pack_query_form';
+import type { UsePackQueryFormProps, PackFormData } from './use_pack_query_form';
+import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
-import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapping_editor_field';
+import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
+import { useKibana } from '../../common/lib/kibana';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -46,70 +48,47 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
-  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
+  const permissions = useKibana().services.application.capabilities.osquery;
   const [isEditMode] = useState(!!defaultValue);
   const { form } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
-    handleSubmit: async (payload, isValid) => {
-      const ecsFieldValue = await ecsFieldRef?.current?.validate();
-      const isEcsFieldValueValid =
-        ecsFieldValue &&
-        Object.values(ecsFieldValue).every((field) => !isEmpty(Object.values(field)[0]));
-
-      return new Promise((resolve) => {
-        if (isValid && isEcsFieldValueValid) {
-          onSave({
-            ...payload,
-            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
-          });
+    handleSubmit: async (payload, isValid) =>
+      new Promise((resolve) => {
+        if (isValid) {
+          onSave(payload);
           onClose();
         }
 
         resolve();
-      });
-    },
+      }),
   });
 
-  const { submit, setFieldValue, reset, isSubmitting, validate } = form;
-
-  const [{ query }] = useFormData({
-    form,
-    watch: ['query'],
-  });
+  const { submit, isSubmitting, updateFieldValues } = form;
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
-      reset();
-
       if (savedQuery) {
-        setFieldValue('id', savedQuery.id);
-        setFieldValue('query', savedQuery.query);
-
-        if (savedQuery.description) {
-          setFieldValue('description', savedQuery.description);
-        }
-
-        if (savedQuery.interval) {
-          setFieldValue('interval', savedQuery.interval);
-        }
-
-        if (savedQuery.platform) {
-          setFieldValue('platform', savedQuery.platform);
-        }
-
-        if (savedQuery.version) {
-          setFieldValue('version', [savedQuery.version]);
-        }
-
-        if (savedQuery.ecs_mapping) {
-          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
-        }
+        updateFieldValues({
+          id: savedQuery.id,
+          query: savedQuery.query,
+          description: savedQuery.description,
+          platform: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
+          version: savedQuery.version,
+          interval: savedQuery.interval,
+          // @ts-expect-error update types
+          ecs_mapping:
+            map(savedQuery.ecs_mapping, (value, key) => ({
+              key,
+              result: {
+                type: Object.keys(value)[0],
+                value: Object.values(value)[0],
+              },
+            })) ?? [],
+        });
       }
-
-      validate();
     },
-    [reset, validate, setFieldValue]
+    [updateFieldValues]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
@@ -141,7 +120,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Form form={form}>
-          {!isEditMode ? (
+          {!isEditMode && permissions.readSavedQueries ? (
             <>
               <SavedQueriesDropdown onChange={handleSetQueryValue} />
               <EuiSpacer />
@@ -190,12 +169,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <CommonUseField
-                path="ecs_mapping"
-                component={ECSMappingEditorField}
-                query={query}
-                fieldRef={ecsFieldRef}
-              />
+              <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>
         </Form>

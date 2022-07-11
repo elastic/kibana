@@ -16,9 +16,6 @@ function resolveRelative(path: string) {
 }
 
 export const KIBANA_EXEC = 'node';
-export const KIBANA_EXEC_PATH = resolveRelative('scripts/kibana');
+export const KIBANA_SCRIPT_PATH = resolveRelative('scripts/kibana');
 export const KIBANA_ROOT = REPO_ROOT;
 export const KIBANA_FTR_SCRIPT = resolve(KIBANA_ROOT, 'scripts/functional_test_runner');
-export const PROJECT_ROOT = resolve(__dirname, '../../../../../../');
-export const FUNCTIONAL_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/functional/config');
-export const API_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/api_integration/config');

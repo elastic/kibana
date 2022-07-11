@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { exportTimeline } from '../../tasks/timelines';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 

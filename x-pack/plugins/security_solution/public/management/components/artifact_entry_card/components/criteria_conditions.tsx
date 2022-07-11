@@ -6,14 +6,8 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  CommonProps,
-  EuiExpression,
-  EuiToken,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-} from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -31,8 +25,8 @@ import {
   CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
   CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
-import { ArtifactInfo, ArtifactInfoEntry } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { ArtifactInfo, ArtifactInfoEntry } from '../types';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,
@@ -56,7 +50,7 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.spacerSizes.xl};
+  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`

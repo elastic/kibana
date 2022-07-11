@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Suite } from 'mocha';
+import 'mocha';
 
 declare module 'mocha' {
   interface Suite {

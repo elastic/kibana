@@ -1,0 +1,139 @@
+{
+  "id": "@kbn/ci-stats-core",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ci-stats-core",
+        "id": "def-server.parseConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "parseConfig",
+        "description": [],
+        "signature": [
+          "(log: ",
+          "ToolingLog",
+          ") => ",
+          {
+            "pluginId": "@kbn/ci-stats-core",
+            "scope": "server",
+            "docId": "kibKbnCiStatsCorePluginApi",
+            "section": "def-server.Config",
+            "text": "Config"
+          },
+          " | undefined"
+        ],
+        "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ci-stats-core",
+            "id": "def-server.parseConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              "ToolingLog"
+            ],
+            "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ci-stats-core",
+        "id": "def-server.CiStatsMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "CiStatsMetadata",
+        "description": [
+          "Container for metadata that can be attached to different ci-stats objects"
+        ],
+        "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ci-stats-core",
+            "id": "def-server.CiStatsMetadata.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: string | number | boolean | string[] | undefined",
+            "description": [
+              "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
+            ],
+            "signature": [
+              "[key: string]:  string | number | boolean | string[] | undefined"
+            ],
+            "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ci-stats-core",
+        "id": "def-server.Config",
+        "type": "Interface",
+        "tags": [],
+        "label": "Config",
+        "description": [
+          "\nInformation about how CiStatsReporter should talk to the ci-stats service. Normally\nit is read from a JSON environment variable using the `parseConfig()` function\nexported by this module."
+        ],
+        "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ci-stats-core",
+            "id": "def-server.Config.apiToken",
+            "type": "string",
+            "tags": [],
+            "label": "apiToken",
+            "description": [
+              "ApiToken necessary for writing build data to ci-stats service"
+            ],
+            "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/ci-stats-core",
+            "id": "def-server.Config.buildId",
+            "type": "string",
+            "tags": [],
+            "label": "buildId",
+            "description": [
+              "\nuuid which should be obtained by first creating a build with the\nci-stats service and then passing it to all subsequent steps"
+            ],
+            "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

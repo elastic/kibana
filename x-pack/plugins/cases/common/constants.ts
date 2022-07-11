@@ -69,6 +69,7 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
+export const CASE_METRICS_URL = `${CASES_URL}/metrics` as const;
 export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as const;
 
 /**

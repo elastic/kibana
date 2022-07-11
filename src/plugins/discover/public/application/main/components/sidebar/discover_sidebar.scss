@@ -2,7 +2,7 @@
   overflow: hidden;
   margin: 0 !important;
   flex-grow: 1;
-  padding-left: $euiSize;
+  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
   width: $euiSize * 19;
   height: 100%;
 
@@ -19,7 +19,7 @@
 
 .dscSidebar__mobile {
   width: 100%;
-  padding: $euiSize $euiSize 0;
+  padding: $euiSizeS $euiSizeS 0;
 
   .dscSidebar__mobileBadge {
     margin-left: $euiSizeS;

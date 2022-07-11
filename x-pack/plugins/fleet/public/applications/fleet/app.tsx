@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +27,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz } from './hooks';
+import { useAuthz, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -38,8 +38,15 @@ import {
   useBreadcrumbs,
   useStartServices,
   UIExtensionsContext,
+  FlyoutContextProvider,
 } from './hooks';
-import { Error, Loading, FleetSetupLoading } from './components';
+import {
+  Error,
+  Loading,
+  FleetSetupLoading,
+  AgentEnrollmentFlyout,
+  FleetServerFlyout,
+} from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -51,6 +58,7 @@ import { MissingESRequirementsPage } from './sections/agents/agent_requirements_
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -251,7 +259,7 @@ export const FleetAppContext: React.FC<{
                               notifications={startServices.notifications}
                               theme$={theme$}
                             >
-                              {children}
+                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
                             </PackageInstallProvider>
                           </Router>
                         </FleetStatusProvider>
@@ -295,6 +303,8 @@ const FleetTopNav = memo(
 
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const flyoutContext = useFlyoutContext();
+
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
@@ -315,6 +325,10 @@ export const AppRoutes = memo(
 
           <Route path={FLEET_ROUTING_PATHS.settings}>
             <SettingsApp />
+          </Route>
+
+          <Route path={FLEET_ROUTING_PATHS.debug}>
+            <DebugPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}
@@ -343,6 +357,22 @@ export const AppRoutes = memo(
             }}
           />
         </Switch>
+
+        {flyoutContext.isEnrollmentFlyoutOpen && (
+          <EuiPortal>
+            <AgentEnrollmentFlyout
+              defaultMode="standalone"
+              isIntegrationFlow={true}
+              onClose={() => flyoutContext.closeEnrollmentFlyout()}
+            />
+          </EuiPortal>
+        )}
+
+        {flyoutContext.isFleetServerFlyoutOpen && (
+          <EuiPortal>
+            <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+          </EuiPortal>
+        )}
       </>
     );
   }

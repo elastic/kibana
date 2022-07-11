@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useNetworkHttp } from '.';
+import { ID, useNetworkHttp } from '.';
 import { NetworkType } from '../../store/model';
 
 describe('useNetworkHttp', () => {
@@ -17,6 +17,7 @@ describe('useNetworkHttp', () => {
       docValueFields: [],
       startDate: '2020-07-07T08:20:18.966Z',
       endDate: '2020-07-08T08:20:18.966Z',
+      id: `${ID}-${NetworkType.page}`,
       indexNames: ['cool'],
       type: NetworkType.page,
       skip: false,

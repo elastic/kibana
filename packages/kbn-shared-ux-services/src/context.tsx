@@ -63,3 +63,8 @@ export const useDocLinks = () => useSharedUxServices().docLinks;
 export const useHttp = () => useSharedUxServices().http;
 
 export const useApplication = () => useSharedUxServices().application;
+
+/**
+ * React hook for accessing the pre-wired `SharedUxDataService`.
+ */
+export const useData = () => useSharedUxServices().data;

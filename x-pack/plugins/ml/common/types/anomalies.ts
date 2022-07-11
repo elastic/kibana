@@ -278,6 +278,11 @@ export interface AnomaliesTableRecord {
    * which can be plotted by the ML UI in an anomaly chart.
    */
   isTimeSeriesViewRecord?: boolean;
+
+  /**
+   * Returns true if the anomaly record represented by the table row can be shown in the maps plugin
+   */
+  isGeoRecord?: boolean;
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];

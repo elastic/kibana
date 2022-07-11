@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import React, { CSSProperties, HTMLAttributes, memo, useCallback, useMemo, useState } from 'react';
-import {
-  CommonProps,
-  EuiContextMenuPanel,
-  EuiContextMenuPanelProps,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiPopoverTitle,
-  EuiLoadingContent,
-} from '@elastic/eui';
+import type { CSSProperties, HTMLAttributes } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { CommonProps, EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle, EuiLoadingContent } from '@elastic/eui';
 import uuid from 'uuid';
-import {
-  ContextMenuItemNavByRouter,
-  ContextMenuItemNavByRouterProps,
-} from './context_menu_item_nav_by_router';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import type { ContextMenuItemNavByRouterProps } from './context_menu_item_nav_by_router';
+import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
   extends CommonProps,
@@ -153,11 +145,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         closePopover={handleCloseMenu}
       >
         {title ? <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle> : null}
-        <EuiContextMenuPanel
-          hasFocus={false}
-          {...additionalContextMenuPanelProps}
-          items={menuItems}
-        />
+        <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
       </EuiPopover>
     );
   }

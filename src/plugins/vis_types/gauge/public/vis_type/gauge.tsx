@@ -29,6 +29,7 @@ export const getGaugeVisTypeDefinition = (
     defaultMessage: 'Show the status of a metric.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {
@@ -77,6 +78,7 @@ export const getGaugeVisTypeDefinition = (
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getGaugeOptions(props),
     schemas: [
       {
@@ -97,6 +99,7 @@ export const getGaugeVisTypeDefinition = (
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

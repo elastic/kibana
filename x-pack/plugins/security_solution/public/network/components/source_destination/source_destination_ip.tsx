@@ -18,7 +18,7 @@ import * as i18n from '../../../timelines/components/timeline/body/renderers/tra
 import { GeoFields } from './geo_fields';
 import { IpWithPort } from './ip_with_port';
 import { Label } from './label';
-import { SourceDestinationIpProps, SourceDestinationType } from './types';
+import type { SourceDestinationIpProps, SourceDestinationType } from './types';
 
 export interface IpPortPair {
   ip: string;
@@ -195,7 +195,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
           gutterSize="xs"
         >
           <EuiFlexItem grow={false}>
-            <Label data-test-subj={`${type}-label`}>{label}</Label>
+            <Label>{label}</Label>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (

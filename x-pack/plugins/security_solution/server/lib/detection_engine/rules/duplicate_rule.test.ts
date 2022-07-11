@@ -6,7 +6,8 @@
  */
 
 import uuid from 'uuid';
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleParams } from '../schemas/rule_schemas';
 import { duplicateRule } from './duplicate_rule';
 
 jest.mock('uuid', () => ({
@@ -14,122 +15,288 @@ jest.mock('uuid', () => ({
 }));
 
 describe('duplicateRule', () => {
-  it('should return a copy of rule with new ruleId', () => {
-    (uuid.v4 as jest.Mock).mockReturnValue('newId');
+  const createTestRule = (): SanitizedRule<RuleParams> => ({
+    id: 'some id',
+    notifyWhen: 'onActiveAlert',
+    name: 'Some rule',
+    tags: ['some tag'],
+    alertTypeId: 'siem.queryRule',
+    consumer: 'siem',
+    params: {
+      savedId: undefined,
+      author: [],
+      description: 'Some description.',
+      ruleId: 'some ruleId',
+      falsePositives: [],
+      from: 'now-360s',
+      immutable: false,
+      license: '',
+      outputIndex: '.siem-signals-default',
+      meta: undefined,
+      maxSignals: 100,
+      relatedIntegrations: [],
+      requiredFields: [],
+      riskScore: 42,
+      riskScoreMapping: [],
+      severity: 'low',
+      severityMapping: [],
+      setup: 'Some setup guide.',
+      threat: [],
+      to: 'now',
+      references: [],
+      version: 1,
+      exceptionsList: [],
+      type: 'query',
+      language: 'kuery',
+      index: [],
+      query: 'process.args : "chmod"',
+      filters: [],
+      buildingBlockType: undefined,
+      namespace: undefined,
+      note: undefined,
+      timelineId: undefined,
+      timelineTitle: undefined,
+      ruleNameOverride: undefined,
+      timestampOverride: undefined,
+      dataViewId: undefined,
+    },
+    schedule: {
+      interval: '5m',
+    },
+    enabled: false,
+    actions: [],
+    throttle: null,
+    apiKeyOwner: 'kibana',
+    createdBy: 'kibana',
+    updatedBy: 'kibana',
+    muteAll: false,
+    mutedInstanceIds: [],
+    updatedAt: new Date(2021, 0),
+    createdAt: new Date(2021, 0),
+    scheduledTaskId: undefined,
+    executionStatus: {
+      lastExecutionDate: new Date(2021, 0),
+      status: 'ok',
+    },
+  });
 
-    expect(
-      duplicateRule({
-        id: 'oldTestRuleId',
-        notifyWhen: 'onActiveAlert',
-        name: 'test',
-        tags: ['test', '__internal_rule_id:oldTestRuleId', `${INTERNAL_IMMUTABLE_KEY}:false`],
-        alertTypeId: 'siem.signals',
-        consumer: 'siem',
-        params: {
-          savedId: undefined,
-          author: [],
-          description: 'test',
-          ruleId: 'oldTestRuleId',
-          falsePositives: [],
-          from: 'now-360s',
-          immutable: false,
-          license: '',
-          outputIndex: '.siem-signals-default',
-          meta: undefined,
-          maxSignals: 100,
-          riskScore: 42,
-          riskScoreMapping: [],
-          severity: 'low',
-          severityMapping: [],
-          threat: [],
-          to: 'now',
-          references: [],
-          version: 1,
-          exceptionsList: [],
-          type: 'query',
-          language: 'kuery',
-          index: [],
-          query: 'process.args : "chmod"',
-          filters: [],
-          buildingBlockType: undefined,
-          namespace: undefined,
-          note: undefined,
-          timelineId: undefined,
-          timelineTitle: undefined,
-          ruleNameOverride: undefined,
-          timestampOverride: undefined,
-        },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: false,
-        actions: [],
-        throttle: null,
-        apiKeyOwner: 'kibana',
-        createdBy: 'kibana',
-        updatedBy: 'kibana',
-        muteAll: false,
-        mutedInstanceIds: [],
-        updatedAt: new Date(2021, 0),
-        createdAt: new Date(2021, 0),
-        scheduledTaskId: undefined,
-        executionStatus: {
-          lastExecutionDate: new Date(2021, 0),
-          status: 'ok',
-        },
+  beforeAll(() => {
+    (uuid.v4 as jest.Mock).mockReturnValue('new ruleId');
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns an object with fields copied from a given rule', () => {
+    const rule = createTestRule();
+    const result = duplicateRule(rule);
+
+    expect(result).toEqual({
+      name: expect.anything(), // covered in a separate test
+      params: {
+        ...rule.params,
+        ruleId: expect.anything(), // covered in a separate test
+      },
+      tags: rule.tags,
+      alertTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
+      schedule: rule.schedule,
+      actions: rule.actions,
+      throttle: null, // TODO: fix?
+      notifyWhen: null, // TODO: fix?
+      enabled: false, // covered in a separate test
+    });
+  });
+
+  it('appends [Duplicate] to the name', () => {
+    const rule = createTestRule();
+    rule.name = 'PowerShell Keylogging Script';
+    const result = duplicateRule(rule);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        name: 'PowerShell Keylogging Script [Duplicate]',
       })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [],
-        "alertTypeId": "siem.queryRule",
-        "consumer": "siem",
-        "enabled": false,
-        "name": "test [Duplicate]",
-        "notifyWhen": null,
-        "params": Object {
-          "author": Array [],
-          "buildingBlockType": undefined,
-          "description": "test",
-          "exceptionsList": Array [],
-          "falsePositives": Array [],
-          "filters": Array [],
-          "from": "now-360s",
-          "immutable": false,
-          "index": Array [],
-          "language": "kuery",
-          "license": "",
-          "maxSignals": 100,
-          "meta": undefined,
-          "namespace": undefined,
-          "note": undefined,
-          "outputIndex": ".siem-signals-default",
-          "query": "process.args : \\"chmod\\"",
-          "references": Array [],
-          "riskScore": 42,
-          "riskScoreMapping": Array [],
-          "ruleId": "newId",
-          "ruleNameOverride": undefined,
-          "savedId": undefined,
-          "severity": "low",
-          "severityMapping": Array [],
-          "threat": Array [],
-          "timelineId": undefined,
-          "timelineTitle": undefined,
-          "timestampOverride": undefined,
-          "to": "now",
-          "type": "query",
-          "version": 1,
+    );
+  });
+
+  it('generates a new ruleId', () => {
+    const rule = createTestRule();
+    const result = duplicateRule(rule);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          ruleId: 'new ruleId',
+        }),
+      })
+    );
+  });
+
+  it('makes sure the duplicated rule is disabled', () => {
+    const rule = createTestRule();
+    rule.enabled = true;
+    const result = duplicateRule(rule);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+  });
+
+  describe('when duplicating a prebuilt (immutable) rule', () => {
+    const createPrebuiltRule = () => {
+      const rule = createTestRule();
+      rule.params.immutable = true;
+      return rule;
+    };
+
+    it('transforms it to a custom (mutable) rule', () => {
+      const rule = createPrebuiltRule();
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            immutable: false,
+          }),
+        })
+      );
+    });
+
+    it('resets related integrations to an empty array', () => {
+      const rule = createPrebuiltRule();
+      rule.params.relatedIntegrations = [
+        {
+          package: 'aws',
+          version: '~1.2.3',
+          integration: 'route53',
         },
-        "schedule": Object {
-          "interval": "5m",
+      ];
+
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            relatedIntegrations: [],
+          }),
+        })
+      );
+    });
+
+    it('resets required fields to an empty array', () => {
+      const rule = createPrebuiltRule();
+      rule.params.requiredFields = [
+        {
+          name: 'event.action',
+          type: 'keyword',
+          ecs: true,
         },
-        "tags": Array [
-          "test",
-          "__internal_rule_id:newId",
-          "__internal_immutable:false",
-        ],
-        "throttle": null,
-      }
-    `);
+      ];
+
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            requiredFields: [],
+          }),
+        })
+      );
+    });
+
+    it('resets setup guide to an empty string', () => {
+      const rule = createPrebuiltRule();
+      rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            setup: '',
+          }),
+        })
+      );
+    });
+  });
+
+  describe('when duplicating a custom (mutable) rule', () => {
+    const createCustomRule = () => {
+      const rule = createTestRule();
+      rule.params.immutable = false;
+      return rule;
+    };
+
+    it('keeps it custom', () => {
+      const rule = createCustomRule();
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            immutable: false,
+          }),
+        })
+      );
+    });
+
+    it('copies related integrations as is', () => {
+      const rule = createCustomRule();
+      rule.params.relatedIntegrations = [
+        {
+          package: 'aws',
+          version: '~1.2.3',
+          integration: 'route53',
+        },
+      ];
+
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            relatedIntegrations: rule.params.relatedIntegrations,
+          }),
+        })
+      );
+    });
+
+    it('copies required fields as is', () => {
+      const rule = createCustomRule();
+      rule.params.requiredFields = [
+        {
+          name: 'event.action',
+          type: 'keyword',
+          ecs: true,
+        },
+      ];
+
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            requiredFields: rule.params.requiredFields,
+          }),
+        })
+      );
+    });
+
+    it('copies setup guide as is', () => {
+      const rule = createCustomRule();
+      rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
+      const result = duplicateRule(rule);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            setup: rule.params.setup,
+          }),
+        })
+      );
+    });
   });
 });

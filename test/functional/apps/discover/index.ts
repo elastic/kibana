@@ -13,8 +13,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const config = getService('config');
 
   describe('discover app', function () {
-    this.tags('ciGroup6');
-
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -27,39 +25,49 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_view_editor'));
       loadTestFile(require.resolve('./_saved_queries'));
     } else {
+      loadTestFile(require.resolve('./_no_data'));
       loadTestFile(require.resolve('./_saved_queries'));
       loadTestFile(require.resolve('./_discover'));
+      loadTestFile(require.resolve('./_discover_accessibility'));
       loadTestFile(require.resolve('./_discover_histogram'));
-      loadTestFile(require.resolve('./_doc_table'));
-      loadTestFile(require.resolve('./_doc_table_newline'));
+      loadTestFile(require.resolve('./_doc_accessibility'));
+      loadTestFile(require.resolve('./classic/_doc_table'));
+      loadTestFile(require.resolve('./classic/_doc_table_newline'));
       loadTestFile(require.resolve('./_filter_editor'));
       loadTestFile(require.resolve('./_errors'));
       loadTestFile(require.resolve('./_field_data'));
+      loadTestFile(require.resolve('./classic/_field_data'));
       loadTestFile(require.resolve('./_field_data_with_fields_api'));
+      loadTestFile(require.resolve('./classic/_field_data_with_fields_api'));
       loadTestFile(require.resolve('./_shared_links'));
       loadTestFile(require.resolve('./_sidebar'));
       loadTestFile(require.resolve('./_source_filters'));
       loadTestFile(require.resolve('./_large_string'));
       loadTestFile(require.resolve('./_inspector'));
-      loadTestFile(require.resolve('./_classic_table_doc_navigation'));
+      loadTestFile(require.resolve('./classic/_classic_table_doc_navigation'));
       loadTestFile(require.resolve('./_date_nanos'));
       loadTestFile(require.resolve('./_date_nanos_mixed'));
       loadTestFile(require.resolve('./_indexpattern_without_timefield'));
+      loadTestFile(require.resolve('./classic/_discover_fields_api'));
       loadTestFile(require.resolve('./_discover_fields_api'));
       loadTestFile(require.resolve('./_data_grid'));
       loadTestFile(require.resolve('./_data_grid_context'));
       loadTestFile(require.resolve('./_data_grid_field_data'));
       loadTestFile(require.resolve('./_data_grid_doc_navigation'));
+      loadTestFile(require.resolve('./_data_grid_row_navigation'));
       loadTestFile(require.resolve('./_data_grid_doc_table'));
+      loadTestFile(require.resolve('./_data_grid_copy_to_clipboard'));
+      loadTestFile(require.resolve('./_data_grid_pagination'));
       loadTestFile(require.resolve('./_indexpattern_with_unmapped_fields'));
       loadTestFile(require.resolve('./_runtime_fields_editor'));
       loadTestFile(require.resolve('./_huge_fields'));
       loadTestFile(require.resolve('./_date_nested'));
       loadTestFile(require.resolve('./_search_on_page_load'));
       loadTestFile(require.resolve('./_chart_hidden'));
-      loadTestFile(require.resolve('./_context_encoded_url_param'));
+      loadTestFile(require.resolve('./_context_encoded_url_params'));
       loadTestFile(require.resolve('./_data_view_editor'));
-      loadTestFile(require.resolve('./_empty_state'));
+      loadTestFile(require.resolve('./_hide_announcements'));
+      loadTestFile(require.resolve('./classic/_hide_announcements'));
     }
   });
 }

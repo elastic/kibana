@@ -7,13 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Filter } from '@kbn/es-query';
 import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
-import { TimeRange } from '@kbn/data-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { TimeRange } from '@kbn/es-query';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -60,6 +61,7 @@ export interface IESSource extends IVectorSource {
     sourceQuery,
     timeFilters,
     searchSessionId,
+    inspectorAdapters,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -68,6 +70,7 @@ export interface IESSource extends IVectorSource {
     sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
+    inspectorAdapters: Adapters;
   }): Promise<object>;
 }
 
@@ -98,8 +101,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     };
   }
 
-  constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters?: Adapters) {
-    super(AbstractESSource.createDescriptor(descriptor), inspectorAdapters);
+  constructor(descriptor: AbstractESSourceDescriptor) {
+    super(AbstractESSource.createDescriptor(descriptor));
     this._descriptor = descriptor;
   }
 
@@ -142,13 +145,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return true;
   }
 
-  destroy() {
-    const inspectorAdapters = this.getInspectorAdapters();
-    if (inspectorAdapters?.requests) {
-      inspectorAdapters.requests.resetRequest(this.getId());
-    }
-  }
-
   cloneDescriptor(): AbstractSourceDescriptor {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
@@ -164,6 +160,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSessionId,
     searchSource,
     executionContext,
+    requestsAdapter,
   }: {
     registerCancelCallback: (callback: () => void) => void;
     requestDescription: string;
@@ -172,6 +169,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSessionId?: string;
     searchSource: ISearchSource;
     executionContext: KibanaExecutionContext;
+    requestsAdapter: RequestAdapter | undefined;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -183,7 +181,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           sessionId: searchSessionId,
           legacyHitsTotal: false,
           inspector: {
-            adapter: this.getInspectorAdapters()?.requests,
+            adapter: requestsAdapter,
             id: requestId,
             title: requestName,
             description: requestDescription,
@@ -230,7 +228,17 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
       allFilters.push(extentFilter);
     }
-    if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
+
+    let isFeatureEditorOpenForLayer = false;
+    if ('isFeatureEditorOpenForLayer' in searchFilters) {
+      isFeatureEditorOpenForLayer = searchFilters.isFeatureEditorOpenForLayer;
+    }
+
+    if (
+      searchFilters.applyGlobalTime &&
+      (await this.isTimeAware()) &&
+      !isFeatureEditorOpenForLayer
+    ) {
       const timeRange = searchFilters.timeslice
         ? {
             from: new Date(searchFilters.timeslice.from).toISOString(),
@@ -250,11 +258,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (searchFilters.applyGlobalQuery) {
+    if (searchFilters.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
       searchSource.setField('query', searchFilters.query);
     }
 
-    if (searchFilters.sourceQuery) {
+    if (searchFilters.sourceQuery && !isFeatureEditorOpenForLayer) {
       const layerSearchSource = searchService.searchSource.createEmpty();
 
       layerSearchSource.setField('index', indexPattern);
@@ -427,6 +435,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     sourceQuery,
     timeFilters,
     searchSessionId,
+    inspectorAdapters,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -435,6 +444,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
+    inspectorAdapters: Adapters;
   }): Promise<object> {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
@@ -482,6 +492,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       ),
       searchSessionId,
       executionContext: makePublicExecutionContext('es_source:style_meta'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     return resp.aggregations;

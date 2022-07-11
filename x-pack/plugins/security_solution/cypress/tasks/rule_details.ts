@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Exception } from '../objects/exception';
+import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN,
@@ -19,6 +19,7 @@ import {
 import {
   ALERTS_TAB,
   BACK_TO_RULES,
+  DATA_VIEW_DETAILS,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -28,6 +29,8 @@ import {
   INDEX_PATTERNS_DETAILS,
   DETAILS_TITLE,
   DETAILS_DESCRIPTION,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EDIT_EXCEPTION_BTN,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -71,7 +74,7 @@ export const openExceptionFlyoutFromRuleSettings = () => {
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
   openExceptionFlyoutFromRuleSettings();
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
+  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
@@ -95,7 +98,15 @@ export const goToExceptionsTab = () => {
     .should('be.visible');
 };
 
+export const editException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+
+  cy.get(EDIT_EXCEPTION_BTN).click();
+};
+
 export const removeException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
@@ -119,5 +130,11 @@ export const getDetails = (title: string) =>
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
+};
+
+export const doesNotHaveDataView = () => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    cy.get(DETAILS_TITLE).within(() => cy.get(DATA_VIEW_DETAILS).should('not.exist'));
   });
 };

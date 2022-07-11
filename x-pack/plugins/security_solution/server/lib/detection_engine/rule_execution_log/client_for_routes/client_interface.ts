@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   ExecutionLogTableSortColumns,
   RuleExecutionEvent,
-  RuleExecutionStatusType,
+  RuleExecutionStatus,
   RuleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 
 export interface GetAggregateExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
   queryText: string;
-  statusFilters: RuleExecutionStatusType[];
+  statusFilters: RuleExecutionStatus[];
   page: number;
   perPage: number;
   sortField: ExecutionLogTableSortColumns;

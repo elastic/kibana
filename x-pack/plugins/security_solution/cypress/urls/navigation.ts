@@ -29,12 +29,13 @@ export const hostDetailsUrl = (hostName: string) =>
 
 export const USERS_URL = '/app/security/users/allUsers';
 
+export const DETECTIONS_RESPONSE_URL = '/app/security/detection_response';
+
 export const userDetailsUrl = (userName: string) => `/app/security/users/${userName}/allUsers`;
 
 export const HOSTS_PAGE_TAB_URLS = {
   allHosts: '/app/security/hosts/allHosts',
   anomalies: '/app/security/hosts/anomalies',
-  authentications: '/app/security/hosts/authentications',
   events: '/app/security/hosts/events',
   uncommonProcesses: '/app/security/hosts/uncommonProcesses',
 };
@@ -49,3 +50,8 @@ export const RULE_CREATION = 'app/security/rules/create';
 export const TIMELINES_URL = '/app/security/timelines';
 export const TIMELINE_TEMPLATES_URL = '/app/security/timelines/template';
 export const LOGOUT_URL = '/logout';
+
+export const DISCOVER_WITH_FILTER_URL =
+  "/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now%2Fd,to:now%2Fd))&_a=(columns:!(),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:security-solution-default,key:host.name,negate:!f,params:(query:test-host),type:phrase),query:(match_phrase:(host.name:test-host)))),index:security-solution-default,interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))";
+export const DISCOVER_WITH_PINNED_FILTER_URL =
+  "/app/discover#/?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:security-solution-default,key:host.name,negate:!f,params:(query:test-host),type:phrase),query:(match_phrase:(host.name:test-host)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(),filters:!(),index:security-solution-default,interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))";

@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // order they are added.
     let aggIndex = 1;
     // Used to track flag before and after reset
-    let isNewChartsLibraryEnabled = false;
+    let isNewChartsLibraryEnabled = true;
 
     before(async function () {
       log.debug(
@@ -56,9 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );
 
-      if (isNewChartsLibraryEnabled) {
+      if (!isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       }

@@ -12,9 +12,10 @@
   "license": "Elastic License v2",
   "name": "Emond Rules Creation or Modification",
   "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "file where event.type != \"deletion\" and\n file.path : (\"/private/etc/emond.d/rules/*.plist\", \"/etc/emon.d/rules/*.plist\")\n",
+  "query": "file where event.type != \"deletion\" and\n file.path : (\"/private/etc/emond.d/rules/*.plist\", \"/etc/emon.d/rules/*.plist\", \"/private/var/db/emondClients/*\")\n",
   "references": [
-    "https://www.xorrior.com/emond-persistence/"
+    "https://www.xorrior.com/emond-persistence/",
+    "https://www.sentinelone.com/blog/how-malware-persists-on-macos/"
   ],
   "risk_score": 47,
   "rule_id": "a6bf4dd4-743e-4da8-8c03-3ebd753a6c90",
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

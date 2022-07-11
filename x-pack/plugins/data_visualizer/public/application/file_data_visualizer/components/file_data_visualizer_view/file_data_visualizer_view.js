@@ -65,7 +65,6 @@ export class FileDataVisualizerView extends Component {
       linesToSample: DEFAULT_LINES_TO_SAMPLE,
     };
 
-    this.savedObjectsClient = props.savedObjectsClient;
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
   }
 
@@ -297,7 +296,12 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
+            {!loading && !loaded && (
+              <AboutPanel
+                onFilePickerChange={this.onFilePickerChange}
+                hasPermissionToImport={hasPermissionToImport}
+              />
+            )}
 
             {loading && <LoadingPanel />}
 
@@ -367,9 +371,8 @@ export class FileDataVisualizerView extends Component {
               dataViewsContract={this.props.dataViewsContract}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
-              savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
-              resultsLinks={this.props.resultsLinks}
+              getAdditionalLinks={this.props.getAdditionalLinks}
               capabilities={this.props.capabilities}
             />
 

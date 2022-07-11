@@ -70,7 +70,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -82,7 +82,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -239,7 +239,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -251,7 +251,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -408,7 +408,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -420,7 +420,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div

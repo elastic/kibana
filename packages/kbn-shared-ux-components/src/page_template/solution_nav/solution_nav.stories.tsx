@@ -69,4 +69,16 @@ PureComponent.argTypes = {
     options: ['logoKibana', 'logoObservability', 'logoSecurity'],
     defaultValue: 'logoKibana',
   },
+  children: {
+    control: 'text',
+    defaultValue: '',
+  },
+  canBeCollapsed: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+};
+
+PureComponent.parameters = {
+  layout: 'fullscreen',
 };

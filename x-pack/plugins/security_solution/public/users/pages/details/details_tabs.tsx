@@ -6,21 +6,23 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
-import { UsersDetailsTabsProps } from './types';
+import type { UsersDetailsTabsProps } from './types';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { Anomaly } from '../../../common/components/ml/types';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
+import type { Anomaly } from '../../../common/components/ml/types';
 import { usersDetailsPagePath } from '../constants';
 import { TimelineId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
+import { UserRiskTabBody } from '../navigation/user_risk_tab_body';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -106,6 +108,9 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
             pageFilters={alertsPageFilters}
             {...tabProps}
           />
+        </Route>
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
+          <UserRiskTabBody {...tabProps} />
         </Route>
       </Switch>
     );

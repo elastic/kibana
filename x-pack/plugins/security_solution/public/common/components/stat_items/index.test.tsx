@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import type { StatItemsProps, StatItems } from '.';
 import {
   StatItemsComponent,
-  StatItemsProps,
   addValueToFields,
   addValueToAreaChart,
   addValueToBarChart,
   useKpiMatrixStatus,
-  StatItems,
 } from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
@@ -34,9 +34,10 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
-import { State, createStore } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
@@ -182,7 +183,7 @@ describe('Stat Items Component', () => {
     });
 
     test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]')).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="stat-title"]').find('p')).toHaveLength(2);
     });
 
     test('should render kpi icons', () => {

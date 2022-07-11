@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import seedrandom from 'seedrandom';
+import type seedrandom from 'seedrandom';
 import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
-import {
+import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   EsAssetReference,
   KibanaAssetReference,
-  agentPolicyStatuses,
 } from '@kbn/fleet-plugin/common';
-import {
+import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
+import type {
   AlertEvent,
   DataStream,
-  EndpointStatus,
   Host,
   HostMetadata,
   HostPolicyResponse,
-  HostPolicyResponseActionStatus,
   OSFields,
   PolicyData,
   SafeEndpointEvent,
 } from './types';
+import { EndpointStatus, HostPolicyResponseActionStatus } from './types';
 import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
@@ -36,7 +35,7 @@ import {
   timestampSafeVersion,
 } from './models/event';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
-import { EventOptions } from './types/generator';
+import type { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -464,16 +463,17 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const agentVersion = this.randomVersion();
     const minCapabilitiesVersion = '7.15.0';
     const capabilities = ['isolation'];
+    const agentId = this.seededUUIDv4();
 
     return {
       agent: {
         version: agentVersion,
-        id: this.seededUUIDv4(),
+        id: agentId,
         type: 'endpoint',
       },
       elastic: {
         agent: {
-          id: this.seededUUIDv4(),
+          id: agentId,
         },
       },
       host: {
@@ -1763,12 +1763,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           name: 'endpoint',
           version: '0.5.0',
           internal: false,
-          removable: false,
           install_version: '0.5.0',
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',
           install_source: 'registry',
           keep_policies_up_to_date: false,
+          verification_status: 'unknown',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

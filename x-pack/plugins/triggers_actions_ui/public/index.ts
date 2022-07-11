@@ -6,7 +6,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110895
-/* eslint-disable @kbn/eslint/no_export_all */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PluginInitializerContext } from '@kbn/core/server';
@@ -18,6 +17,7 @@ export type {
   RuleType,
   RuleTypeIndex,
   RuleTypeModel,
+  RuleStatus,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
@@ -30,28 +30,63 @@ export type {
   RuleTypeParams,
   AsApiContract,
   RuleTableItem,
+  AlertsTableProps,
+  BulkActionsObjectProp,
+  RuleSummary,
+  AlertStatus,
+  AlertsTableConfigurationRegistryContract,
+  AlertsTableFlyoutBaseProps,
+  RuleEventLogListProps,
+  AlertTableFlyoutComponent,
+  GetRenderCellValue,
+  FieldBrowserOptions,
+  FieldBrowserProps,
+  RuleDefinitionProps,
 } from './types';
 
 export {
   ActionForm,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
+  CreateConnectorFlyout,
+  EditConnectorFlyout,
 } from './application/sections/action_connector_form';
 
 export type { ActionGroupWithCondition } from './application/sections';
 
 export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
-export * from './common';
-
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
 
-export { Plugin };
-export * from './plugin';
+export type { AggregationType, Comparator } from './common';
+
+export {
+  WhenExpression,
+  OfExpression,
+  ForLastExpression,
+  ThresholdExpression,
+  ValueExpression,
+  builtInComparators,
+  builtInGroupByTypes,
+  builtInAggregationTypes,
+  getFields,
+  getIndexOptions,
+  firstFieldOption,
+  getTimeFieldOptions,
+  GroupByExpression,
+  COMPARATORS,
+} from './common';
+
+export type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from './plugin';
+export { Plugin } from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
+export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
+export { loadRuleTypes } from './application/lib/rule_api';
+export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
 export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';
@@ -59,11 +94,17 @@ export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';
 export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
-export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
+export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
-
+export { loadRule } from './application/lib/rule_api/get_rule';
+export { loadAllActions } from './application/lib/action_connector_api';
+export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
-
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/app';
+
+export const getNotifyWhenOptions = async () => {
+  const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
+  return NOTIFY_WHEN_OPTIONS;
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Timeline, TimelineFilter } from '../objects/timeline';
+import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
@@ -177,6 +177,8 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.focused().should('have.class', 'euiPopover__panel');
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
     .should('have.focus'); // make sure the focus is ready before start typing

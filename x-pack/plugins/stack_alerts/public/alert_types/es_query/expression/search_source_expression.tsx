@@ -5,86 +5,87 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './search_source_expression.scss';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiSpacer,
-  EuiTitle,
-  EuiExpression,
-  EuiLoadingSpinner,
-  EuiEmptyPrompt,
-  EuiCallOut,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Filter, ISearchSource } from '@kbn/data-plugin/common';
-import {
-  ForLastExpression,
-  RuleTypeParamsExpressionProps,
-  ThresholdExpression,
-  ValueExpression,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elastic/eui';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { SavedQuery } from '@kbn/data-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
+import { useTriggersAndActionsUiDeps } from '../util';
+import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
-import { ReadOnlyFilterItems } from './read_only_filter_items';
+
+export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
+  EsQueryAlertParams<SearchType.searchSource>
+>;
 
 export const SearchSourceExpression = ({
   ruleParams,
+  errors,
   setRuleParams,
   setRuleProperty,
-  data,
-  errors,
-}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.searchSource>>) => {
+}: SearchSourceExpressionProps) => {
   const {
-    searchConfiguration,
     thresholdComparator,
     threshold,
     timeWindowSize,
     timeWindowUnit,
     size,
-  } = ruleParams;
-  const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
-  const [paramsError, setParamsError] = useState<Error | undefined>();
-
-  const [currentAlertParams, setCurrentAlertParams] = useState<
-    EsQueryAlertParams<SearchType.searchSource>
-  >({
+    savedQueryId,
     searchConfiguration,
-    searchType: SearchType.searchSource,
-    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-    threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-    thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-    size: size ?? DEFAULT_VALUES.SIZE,
-  });
+  } = ruleParams;
+  const { data } = useTriggersAndActionsUiDeps();
+
+  const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
+  const [paramsError, setParamsError] = useState<Error>();
 
   const setParam = useCallback(
-    (paramField: string, paramValue: unknown) => {
-      setCurrentAlertParams((currentParams) => ({
-        ...currentParams,
-        [paramField]: paramValue,
-      }));
-      setRuleParams(paramField, paramValue);
-    },
+    (paramField: string, paramValue: unknown) => setRuleParams(paramField, paramValue),
     [setRuleParams]
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setRuleProperty('params', currentAlertParams), []);
+  useEffect(() => {
+    const initSearchSource = async () => {
+      let initialSearchConfiguration = searchConfiguration;
+
+      // Init searchConfiguration when creating rule from Stack Management page
+      if (!searchConfiguration) {
+        const newSearchSource = data.search.searchSource.createEmpty();
+        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        if (defaultDataView) {
+          newSearchSource.setField('index', defaultDataView);
+        }
+        initialSearchConfiguration = newSearchSource.getSerializedFields();
+      }
+
+      setRuleProperty('params', {
+        searchConfiguration: initialSearchConfiguration,
+        searchType: SearchType.searchSource,
+        timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+        timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+        threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+        thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+        size: size ?? DEFAULT_VALUES.SIZE,
+      });
+
+      data.search.searchSource
+        .create(initialSearchConfiguration)
+        .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
+        .catch(setParamsError);
+    };
+
+    initSearchSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search.searchSource, data.dataViews]);
 
   useEffect(() => {
-    async function initSearchSource() {
-      try {
-        const loadedSearchSource = await data.search.searchSource.create(searchConfiguration);
-        setUsedSearchSource(loadedSearchSource);
-      } catch (error) {
-        setParamsError(error);
-      }
+    if (savedQueryId) {
+      data.query.savedQueries.getSavedQuery(savedQueryId).then(setSavedQuery);
     }
-    if (searchConfiguration) {
-      initSearchSource();
-    }
-  }, [data.search.searchSource, searchConfiguration]);
+  }, [data.query.savedQueries, savedQueryId]);
 
   if (paramsError) {
     return (
@@ -97,124 +98,17 @@ export const SearchSourceExpression = ({
     );
   }
 
-  if (!usedSearchSource) {
+  if (!searchSource) {
     return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
   }
 
-  const dataView = usedSearchSource.getField('index')!;
-  const query = usedSearchSource.getField('query')!;
-  const filters = (usedSearchSource.getField('filter') as Filter[]).filter(
-    ({ meta }) => !meta.disabled
-  );
-  const dataViews = [dataView];
   return (
-    <Fragment>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
-            defaultMessage="When the number of documents match"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        title={
-          <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.notEditable"
-            defaultMessage="The data view, query, and filter are initialized in Discover and cannot be edited."
-          />
-        }
-        iconType="iInCircle"
-      />
-      <EuiSpacer size="s" />
-      <EuiExpression
-        className="dscExpressionParam"
-        description={'Data view'}
-        value={dataView.title}
-        display="columns"
-      />
-      {query.query !== '' && (
-        <EuiExpression
-          className="dscExpressionParam"
-          description={'Query'}
-          value={query.query}
-          display="columns"
-        />
-      )}
-      {filters.length > 0 && (
-        <EuiExpression
-          className="dscExpressionParam searchSourceAlertFilters"
-          title={'sas'}
-          description={'Filter'}
-          value={<ReadOnlyFilterItems filters={filters} indexPatterns={dataViews} />}
-          display="columns"
-        />
-      )}
-
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.conditionPrompt"
-            defaultMessage="When the number of matches"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ThresholdExpression
-        data-test-subj="thresholdExpression"
-        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
-        errors={errors}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedThreshold={(selectedThresholds) =>
-          setParam('threshold', selectedThresholds)
-        }
-        onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-          setParam('thresholdComparator', selectedThresholdComparator)
-        }
-      />
-      <ForLastExpression
-        data-test-subj="forLastExpression"
-        popupPosition={'upLeft'}
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
-        display="fullWidth"
-        errors={errors}
-        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-          setParam('timeWindowSize', selectedWindowSize)
-        }
-        onChangeWindowUnit={(selectedWindowUnit: string) =>
-          setParam('timeWindowUnit', selectedWindowUnit)
-        }
-      />
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.selectSizePrompt"
-            defaultMessage="Select a size"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ValueExpression
-        description={i18n.translate('xpack.stackAlerts.searchSource.ui.sizeExpression', {
-          defaultMessage: 'Size',
-        })}
-        data-test-subj="sizeValueExpression"
-        value={size}
-        errors={errors.size}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedValue={(updatedValue) => {
-          setParam('size', updatedValue);
-        }}
-      />
-      <EuiSpacer size="s" />
-    </Fragment>
+    <SearchSourceExpressionForm
+      ruleParams={ruleParams}
+      searchSource={searchSource}
+      errors={errors}
+      initialSavedQuery={savedQuery}
+      setParam={setParam}
+    />
   );
 };

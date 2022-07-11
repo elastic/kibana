@@ -9,10 +9,10 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
-import { Actions } from '.';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -20,9 +20,7 @@ jest.mock('../../../../../detections/components/user_info', () => ({
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-}));
+jest.mock('../../../../../common/hooks/use_selector');
 jest.mock(
   '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => ({
@@ -34,33 +32,36 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(),
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalKibanaLib = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
         },
       },
-      cases: mockCasesContract(),
-      uiSettings: {
-        get: jest.fn(),
-      },
-      savedObjects: {
-        client: {},
-      },
-      timelines: { ...mockTimelines },
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
-}));
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
+  };
+});
 
 const defaultProps = {
   ariaRowindex: 2,
@@ -87,6 +88,10 @@ const defaultProps = {
 };
 
 describe('Actions', () => {
+  beforeAll(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
+
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
@@ -219,6 +224,16 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+  });
+
+  describe('isAlert', () => {
+    test('it returns true when the eventType is an alert', () => {
+      expect(isAlert('signal')).toBe(true);
+    });
+
+    test('it returns false when the eventType is NOT an alert', () => {
+      expect(isAlert('raw')).toBe(false);
     });
   });
 });

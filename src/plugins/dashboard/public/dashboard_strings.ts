@@ -165,7 +165,7 @@ export const dashboardLibraryNotification = {
   getTooltip: () =>
     i18n.translate('dashboard.panel.libraryNotification.toolTip', {
       defaultMessage:
-        'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
+        'Editing this panel might affect other dashboards. To change this panel only, unlink it from the library.',
     }),
   getPopoverAriaLabel: () =>
     i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {

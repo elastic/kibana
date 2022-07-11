@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
+import { isUndefined, uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
-import { search } from '@kbn/data-plugin/public';
-import type { LensMultiTable, DataLayerArgs } from '../../common';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {
   min?: number;
@@ -19,17 +23,18 @@ export interface XDomain {
   minInterval?: number;
 }
 
-export const getAppliedTimeRange = (layers: DataLayerArgs[], data: LensMultiTable) => {
-  return Object.entries(data.tables)
-    .map(([tableId, table]) => {
-      const layer = layers.find((l) => l.layerId === tableId);
-      const xColumn = table.columns.find((col) => col.id === layer?.xAccessor);
-      const timeRange =
-        xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
+export const getAppliedTimeRange = (
+  datatableUtilitites: DatatableUtilitiesService,
+  layers: CommonXYDataLayerConfig[]
+) => {
+  return layers
+    .map(({ xAccessor, table }) => {
+      const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
+      const timeRange = xColumn && datatableUtilitites.getDateHistogramMeta(xColumn)?.timeRange;
       if (timeRange) {
         return {
           timeRange,
-          field: xColumn.meta.field,
+          field: xColumn?.meta.field,
         };
       }
     })
@@ -37,13 +42,14 @@ export const getAppliedTimeRange = (layers: DataLayerArgs[], data: LensMultiTabl
 };
 
 export const getXDomain = (
-  layers: DataLayerArgs[],
-  data: LensMultiTable,
+  datatableUtilitites: DatatableUtilitiesService,
+  layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
   isTimeViz: boolean,
-  isHistogram: boolean
+  isHistogram: boolean,
+  xExtent?: AxisExtentConfigResult
 ) => {
-  const appliedTimeRange = getAppliedTimeRange(layers, data)?.timeRange;
+  const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers)?.timeRange;
   const from = appliedTimeRange?.from;
   const to = appliedTimeRange?.to;
   const baseDomain = isTimeViz
@@ -57,14 +63,25 @@ export const getXDomain = (
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {
+    if (xExtent && !isTimeViz) {
+      return {
+        extendedDomain: {
+          min: xExtent.lowerBound ?? NaN,
+          max: xExtent.upperBound ?? NaN,
+          minInterval: baseDomain.minInterval,
+        },
+        baseDomain,
+      };
+    }
     const xValues = uniq(
       layers
-        .flatMap((layer) =>
-          data.tables[layer.layerId].rows.map((row) => row[layer.xAccessor!].valueOf() as number)
-        )
+        .flatMap<number>(({ table, xAccessor }) => {
+          const accessor = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+          return table.rows.map((row) => accessor && row[accessor] && row[accessor].valueOf());
+        })
+        .filter((v) => !isUndefined(v))
         .sort()
     );
-
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
 

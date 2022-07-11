@@ -11,21 +11,21 @@ import { EuiContextMenuItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST } from '@kbn/rule-data-utils';
-import {
+import type {
   ExceptionListIdentifiers,
   ExceptionListItemSchema,
-  ReadExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
-import { CreateTimelineProps } from '../types';
+import type { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getField } from '../../../../helpers';
@@ -51,48 +51,48 @@ export const useInvestigateInTimeline = ({
 
   const getExceptions = useCallback(
     async (ecsData: Ecs): Promise<ExceptionListItemSchema[]> => {
-      const exceptionsLists: ReadExceptionListSchema[] = (
-        getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? []
-      )
-        .map((list: string) => JSON.parse(list))
-        .filter((list: ExceptionListIdentifiers) => list.type === 'detection');
+      const exceptionsLists = (getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? []).reduce(
+        (acc: ExceptionListIdentifiers[], next: string) => {
+          const parsedList = JSON.parse(next);
+          if (parsedList.type === 'detection') {
+            const formattedList = {
+              id: parsedList.id,
+              listId: parsedList.list_id,
+              type: ExceptionListTypeEnum.DETECTION,
+              namespaceType: parsedList.namespace_type,
+            };
+            acc.push(formattedList);
+          }
+          return acc;
+        },
+        []
+      );
 
       const allExceptions: ExceptionListItemSchema[] = [];
 
       if (exceptionsLists.length > 0) {
-        for (const list of exceptionsLists) {
-          if (list.id && list.list_id && list.namespace_type) {
-            await getExceptionListsItems({
-              lists: [
-                {
-                  id: list.id,
-                  listId: list.list_id,
-                  type: 'detection',
-                  namespaceType: list.namespace_type,
-                },
-              ],
-              filterOptions: [],
-              pagination: {
-                page: 0,
-                perPage: 10000,
-                total: 10000,
-              },
-              showDetectionsListsOnly: true,
-              showEndpointListsOnly: false,
-              onSuccess: ({ exceptions }) => {
-                allExceptions.push(...exceptions);
-              },
-              onError: (err: string[]) => {
-                addError(err, {
-                  title: i18n.translate(
-                    'xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure',
-                    { defaultMessage: 'Error fetching exceptions.' }
-                  ),
-                });
-              },
+        await getExceptionListsItems({
+          lists: exceptionsLists,
+          filterOptions: [],
+          pagination: {
+            page: 0,
+            perPage: 10000,
+            total: 10000,
+          },
+          showDetectionsListsOnly: true,
+          showEndpointListsOnly: false,
+          onSuccess: ({ exceptions }) => {
+            allExceptions.push(...exceptions);
+          },
+          onError: (err: string[]) => {
+            addError(err, {
+              title: i18n.translate(
+                'xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure',
+                { defaultMessage: 'Error fetching exceptions.' }
+              ),
             });
-          }
-        }
+          },
+        });
       }
       return allExceptions;
     },

@@ -16,7 +16,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import {
+import type {
   AboutStepRule,
   RuleStepsFormHooks,
   RuleStep,
@@ -31,6 +31,7 @@ const mockTheme = getMockTheme({
   },
 });
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

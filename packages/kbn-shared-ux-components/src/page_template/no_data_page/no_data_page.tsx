@@ -7,14 +7,17 @@
  */
 
 import React, { useMemo, FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import classNames from 'classnames';
 
 import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import classNames from 'classnames';
-import { ElasticAgentCard } from './no_data_card';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
+
+import { useSharedUxServices } from '@kbn/shared-ux-services';
+import { NoDataCard, NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 import { NoDataPageProps } from './types';
-import { KibanaSolutionAvatar } from '../../solution_avatar';
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
@@ -24,6 +27,19 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   pageTitle,
   ...rest
 }) => {
+  const services = useSharedUxServices();
+
+  // TODO: clintandrewhall - including the `NoDataCardProvider` here is a temporary solution
+  // to consumers using this context to populate the NoDataPage.  This will likely be removed soon,
+  // when NoDataPage is moved to its own package.
+  const currentAppId = useObservable(services.application.currentAppId$);
+  const noDataCardServices = {
+    currentAppId,
+    addBasePath: services.http.addBasePath,
+    canAccessFleet: services.permissions.canAccessFleet,
+    navigateToUrl: services.application.navigateToUrl,
+  };
+
   const actionKeys = Object.keys(action);
 
   const actionCard = useMemo(() => {
@@ -33,7 +49,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     const actionKey = actionKeys[0];
     const key =
       actionKey === 'elasticAgent' ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
-    return <ElasticAgentCard key={key} {...action[actionKey]} />;
+    return <NoDataCard key={key} {...action[actionKey]} />;
   }, [action, actionKeys]);
 
   const title =
@@ -44,7 +60,10 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     });
 
   return (
-    <div className={classNames('kbnNoDataPageContents', rest.className)}>
+    <div
+      className={classNames('kbnNoDataPageContents', rest.className)}
+      data-test-subj="kbnNoDataPage"
+    >
       <EuiText textAlign="center">
         <KibanaSolutionAvatar name={solution} iconType={logo || `logo${solution}`} size="xxl" />
         <EuiSpacer size="l" />
@@ -57,7 +76,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
               values={{
                 solution,
                 link: (
-                  <EuiLink href={docsLink}>
+                  <EuiLink href={docsLink} target="_blank">
                     <FormattedMessage
                       id="sharedUXComponents.noDataPage.intro.link"
                       defaultMessage="learn more"
@@ -70,7 +89,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="xxl" />
-      {actionCard}
+      <NoDataCardProvider {...noDataCardServices}>{actionCard}</NoDataCardProvider>
     </div>
   );
 };

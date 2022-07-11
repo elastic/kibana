@@ -22,7 +22,11 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { IngestManagerError, PackageNotFoundError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -45,9 +49,10 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
+    excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category } = options;
+  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
@@ -63,7 +68,23 @@ export async function getPackages(
       )
     )
     .sort(sortByName);
-  return packageList;
+
+  if (!excludeInstallStatus) {
+    return packageList;
+  }
+
+  // Exclude the `installStatus` value if the `excludeInstallStatus` query parameter is set to true
+  // to better facilitate response caching
+  const packageListWithoutStatus = packageList.map((pkg) => {
+    const newPkg = {
+      ...pkg,
+      status: undefined,
+    };
+
+    return newPkg;
+  });
+
+  return packageListWithoutStatus;
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
@@ -71,7 +92,10 @@ export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
+  const allPackages = await getPackages({
+    savedObjectsClient,
+    experimental: true,
+  });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
   );
@@ -156,7 +180,6 @@ export async function getPackageInfo({
         : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: true,
     notice: Registry.getNoticePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
@@ -249,8 +272,10 @@ export async function getPackageFromSource(options: {
       try {
         res = await Registry.getRegistryPackage(pkgName, pkgVersion);
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
-        // TODO: add to cache and storage here?
       } catch (error) {
+        if (error instanceof PackageFailedVerificationError) {
+          throw error;
+        }
         // treating this is a 404 as no status code returned
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }

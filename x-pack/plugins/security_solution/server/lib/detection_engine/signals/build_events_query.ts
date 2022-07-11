@@ -5,16 +5,21 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import type {
+  FiltersOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   index: string[];
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   size: number;
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
@@ -93,6 +98,7 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
+  runtimeMappings,
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
@@ -128,6 +134,7 @@ export const buildEventsSearchQuery = ({
 
   const searchQuery = {
     allow_no_indices: true,
+    runtime_mappings: runtimeMappings,
     index,
     size,
     ignore_unavailable: true,
@@ -173,9 +180,13 @@ export const buildEqlSearchRequest = (
   from: string,
   to: string,
   size: number,
+  filters: FiltersOrUndefined,
   timestampOverride: TimestampOverrideOrUndefined,
   exceptionLists: ExceptionListItemSchema[],
-  eventCategoryOverride: string | undefined
+  runtimeMappings: estypes.MappingRuntimeFields | undefined,
+  eventCategoryOverride?: string,
+  timestampField?: string,
+  tiebreakerField?: string
 ): estypes.EqlSearchRequest => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -185,28 +196,10 @@ export const buildEqlSearchRequest = (
     format: 'strict_date_optional_time',
   }));
 
-  // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
-  // allowing us to make 1024-item chunks of exception list items.
-  // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
-  // very conservative value.
-  const exceptionFilter = buildExceptionFilter({
-    lists: exceptionLists,
-    excludeExceptions: true,
-    chunkSize: 1024,
-    alias: null,
-  });
+  const esFilter = getQueryFilter('', 'eql', filters || [], index, exceptionLists);
 
   const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });
-  const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter];
-  if (exceptionFilter !== undefined) {
-    requestFilter.push({
-      bool: {
-        must_not: {
-          bool: exceptionFilter.query?.bool,
-        },
-      },
-    });
-  }
+  const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
   const fields = [
     {
       field: '*',
@@ -225,7 +218,10 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
+      runtime_mappings: runtimeMappings,
+      timestamp_field: timestampField,
       event_category_field: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
       fields,
     },
   };

@@ -22,6 +22,20 @@ import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+
+function limitMetaStrings(meta: CiStatsMetadata) {
+  return Object.fromEntries(
+    Object.entries(meta).map(([key, value]) => {
+      if (typeof value === 'string' && value.length > 2000) {
+        return [key, value.slice(0, 2000)];
+      }
+
+      return [key, value];
+    })
+  );
+}
 
 /** A ci-stats metric record */
 export interface CiStatsMetric {
@@ -42,6 +56,8 @@ export interface CiStatsMetric {
   /** Arbitrary key-value pairs which can be used for additional filtering/reporting */
   meta?: CiStatsMetadata;
 }
+
+export type PerformanceMetrics = Record<string, number>;
 
 /** A ci-stats timing event */
 export interface CiStatsTiming {
@@ -84,10 +100,8 @@ export interface CiStatsReportTestsOptions {
 }
 
 /* @internal */
-interface ReportTestsResponse {
-  buildId: string;
+interface ReportTestGroupResponse {
   groupId: string;
-  testRunCount: number;
 }
 
 /* @internal */
@@ -97,6 +111,7 @@ interface ReqOptions {
   body: any;
   bodyDesc: string;
   query?: AxiosRequestConfig['params'];
+  timeout?: number;
 }
 
 /** Object that helps report data to the ci-stats service */
@@ -138,7 +153,14 @@ export class CiStatsReporter {
     }
 
     const buildId = this.config?.buildId;
-    const timings = options.timings;
+    const timings = options.timings.map((timing) =>
+      timing.meta
+        ? {
+            ...timing,
+            meta: limitMetaStrings(timing.meta),
+          }
+        : timing
+    );
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
@@ -238,18 +260,70 @@ export class CiStatsReporter {
       );
     }
 
-    return await this.req<ReportTestsResponse>({
+    const groupResp = await this.req<ReportTestGroupResponse>({
       auth: true,
-      path: '/v1/test_group',
+      path: '/v2/test_group',
       query: {
         buildId: this.config?.buildId,
       },
-      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
-      body: [
-        JSON.stringify({ group }),
-        ...testRuns.map((testRun) => JSON.stringify({ testRun })),
-      ].join('\n'),
+      bodyDesc: `[${group.name}/${group.type}] test group`,
+      body: group,
     });
+
+    if (!groupResp) {
+      return;
+    }
+
+    let bufferBytes = 0;
+    const buffer: string[] = [];
+    const flushBuffer = async () => {
+      await this.req<{ testRunCount: number }>({
+        auth: true,
+        path: '/v2/test_runs',
+        query: {
+          buildId: this.config?.buildId,
+          groupId: groupResp.groupId,
+          groupType: group.type,
+        },
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
+        body: buffer.join('\n'),
+        timeout: 5 * MINUTE,
+      });
+      buffer.length = 0;
+      bufferBytes = 0;
+    };
+
+    // send test runs in chunks of ~500kb
+    for (const testRun of testRuns) {
+      const json = JSON.stringify(testRun);
+      bufferBytes += json.length;
+      buffer.push(json);
+      if (bufferBytes >= 450000) {
+        await flushBuffer();
+      }
+    }
+
+    if (bufferBytes) {
+      await flushBuffer();
+    }
+  }
+
+  async reportPerformanceMetrics(metrics: PerformanceMetrics) {
+    if (!this.hasBuildConfig()) {
+      return;
+    }
+
+    const buildId = this.config?.buildId;
+    if (!buildId) {
+      throw new Error(`Performance metrics can't be reported without a buildId`);
+    }
+
+    return !!(await this.req({
+      auth: true,
+      path: `/v1/performance_metrics_report?buildId=${buildId}`,
+      body: { metrics },
+      bodyDesc: `performance metrics: ${metrics}`,
+    }));
   }
 
   /**
@@ -286,7 +360,7 @@ export class CiStatsReporter {
     }
   }
 
-  private async req<T>({ auth, body, bodyDesc, path, query }: ReqOptions) {
+  private async req<T>({ auth, body, bodyDesc, path, query, timeout = 60 * SECOND }: ReqOptions) {
     let attempt = 0;
     const maxAttempts = 5;
 
@@ -315,6 +389,7 @@ export class CiStatsReporter {
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
           maxContentLength: Infinity,
+          timeout,
         });
 
         return resp.data;

@@ -6,21 +6,21 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { MlJobUpgradeModal } from '../../../components/modals/ml_job_upgrade_modal';
+import { affectedJobIds } from '../../../components/callouts/ml_job_compatibility_callout/affected_job_ids';
+import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
-import {
-  getDetectionEngineUrl,
-  getCreateRuleUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ValueListsModal } from '../../../components/value_lists_management_modal';
+import { ValueListsFlyout } from '../../../components/value_lists_management_flyout';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
   getPrePackagedRuleStatus,
@@ -30,8 +30,7 @@ import {
 } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
-import { LinkButton } from '../../../../common/components/links';
-import { useFormatUrl } from '../../../../common/components/link_to';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
@@ -41,12 +40,19 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
 import { useInvalidateRules } from '../../../containers/detection_engine/rules/use_find_rules_query';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
-  const [isValueListModalVisible, showValueListModal, hideValueListModal] = useBoolState();
+  const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
+  const { startTransaction } = useStartTransaction();
   const invalidateRules = useInvalidateRules();
+
+  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
+  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
+  const [isUpgradeModalVisible, setIsUpgradeModalVisible] = useState(false);
 
   const [
     {
@@ -66,9 +72,7 @@ const RulesPageComponent: React.FC = () => {
   const loading = userInfoLoading || listsConfigLoading;
   const {
     createPrePackagedRules,
-    loading: prePackagedRuleLoading,
     loadingCreatePrePackagedRules,
-    refetchPrePackagedRulesStatus,
     rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
@@ -96,47 +100,57 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotInstalled,
     timelinesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
+      startTransaction({ name: RULES_TABLE_ACTIONS.LOAD_PREBUILT });
       await createPrePackagedRules();
-      invalidateRules();
     }
-  }, [createPrePackagedRules, invalidateRules]);
+  }, [createPrePackagedRules, startTransaction]);
 
-  const handleRefetchPrePackagedRulesStatus = useCallback(() => {
-    if (refetchPrePackagedRulesStatus != null) {
-      return refetchPrePackagedRulesStatus();
+  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
+  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
+  const mlJobUpgradeModalConfirm = useCallback(async () => {
+    setIsUpgradeModalVisible(false);
+    await handleCreatePrePackagedRules();
+  }, [handleCreatePrePackagedRules, setIsUpgradeModalVisible]);
+
+  const showMlJobUpgradeModal = useCallback(async () => {
+    if (legacyJobsInstalled.length > 0) {
+      setIsUpgradeModalVisible(true);
     } else {
-      return Promise.resolve();
+      await handleCreatePrePackagedRules();
     }
-  }, [refetchPrePackagedRulesStatus]);
-
-  const goToNewRule = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
-    },
-    [navigateToApp]
-  );
+  }, [handleCreatePrePackagedRules, legacyJobsInstalled.length]);
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions(canUserCRUD) || loading,
-        onClick: handleCreatePrePackagedRules,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading || loadingJobs,
+        onClick: showMlJobUpgradeModal,
       }),
-    [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+    [
+      canUserCRUD,
+      getLoadPrebuiltRulesAndTemplatesButton,
+      showMlJobUpgradeModal,
+      loading,
+      loadingJobs,
+    ]
   );
 
   const reloadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getReloadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions(canUserCRUD) || loading,
-        onClick: handleCreatePrePackagedRules,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading || loadingJobs,
+        onClick: showMlJobUpgradeModal,
       }),
-    [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+    [
+      canUserCRUD,
+      getReloadPrebuiltRulesAndTemplatesButton,
+      showMlJobUpgradeModal,
+      loading,
+      loadingJobs,
+    ]
   );
 
   if (
@@ -159,7 +173,14 @@ const RulesPageComponent: React.FC = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
-      <ValueListsModal showModal={isValueListModalVisible} onClose={hideValueListModal} />
+      {isUpgradeModalVisible && (
+        <MlJobUpgradeModal
+          jobs={legacyJobsInstalled}
+          onCancel={() => setIsUpgradeModalVisible(false)}
+          onConfirm={mlJobUpgradeModalConfirm}
+        />
+      )}
+      <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={hideImportModal}
@@ -177,9 +198,7 @@ const RulesPageComponent: React.FC = () => {
         showCheckBox
       />
 
-      <RulesTableContextProvider
-        refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
-      >
+      <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -195,9 +214,9 @@ const RulesPageComponent: React.FC = () => {
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
                     isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
-                    onClick={showValueListModal}
+                    onClick={showValueListFlyout}
                   >
-                    {i18n.UPLOAD_VALUE_LISTS}
+                    {i18n.IMPORT_VALUE_LISTS}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -212,16 +231,15 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LinkButton
+                <SecuritySolutionLinkButton
                   data-test-subj="create-new-rule"
                   fill
-                  onClick={goToNewRule}
-                  href={formatUrl(getCreateRuleUrl())}
                   iconType="plusInCircle"
                   isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
                 >
                   {i18n.ADD_NEW_RULE}
-                </LinkButton>
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
@@ -232,13 +250,12 @@ const RulesPageComponent: React.FC = () => {
               loading={loadingCreatePrePackagedRules}
               numberOfUpdatedRules={rulesNotUpdated ?? 0}
               numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
-              updateRules={handleCreatePrePackagedRules}
+              updateRules={showMlJobUpgradeModal}
             />
           )}
           <AllRules
             createPrePackagedRules={createPrePackagedRules}
             data-test-subj="all-rules"
-            loading={loading || prePackagedRuleLoading}
             loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
             hasPermissions={userHasPermissions(canUserCRUD)}
             rulesCustomInstalled={rulesCustomInstalled}

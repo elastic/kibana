@@ -15,6 +15,7 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@k
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../types';
@@ -49,13 +50,15 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
+  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   if (!state.accessor) {
     return null;
   }
 
   const [datasource] = Object.values(datasourceLayers);
+  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
   const stops = state.palette?.params?.stops || [];
@@ -99,9 +102,10 @@ const toExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression?.chain ?? []),
       {
         type: 'function',
-        function: 'metricVis',
+        function: 'legacyMetricVis',
         arguments: {
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [
@@ -225,6 +229,7 @@ export const getMetricVisualization = ({
       }
     );
   },
+  triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
@@ -271,10 +276,23 @@ export const getMetricVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers, { mode: 'reduced' }),
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { ...attributes },
+      datasourceExpressionsByLayers
+    ),
+
+  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { mode: 'reduced' },
+      datasourceExpressionsByLayers
+    ),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };

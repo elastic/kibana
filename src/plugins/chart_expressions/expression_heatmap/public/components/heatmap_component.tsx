@@ -29,8 +29,18 @@ import {
   getAccessorByDimension,
   getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
-import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
+import {
+  applyPaletteParams,
+  findMinMaxByColumnId,
+  getFormattedTable,
+  getSortPredicate,
+} from './helpers';
 import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapper,
@@ -127,11 +137,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     timeZone,
     formatFactory,
     chartsThemeService,
+    datatableUtilities,
     onClickValue,
     onSelectRange,
     paletteService,
     uiState,
     interactive,
+    renderComplete,
   }) => {
     const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
@@ -168,6 +180,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       [uiState]
     );
 
+    const onRenderChange = useCallback(
+      (isRendered: boolean = true) => {
+        if (isRendered) {
+          renderComplete();
+        }
+      },
+      [renderComplete]
+    );
+
     const table = data;
     const valueAccessor = args.valueAccessor
       ? getAccessorByDimension(args.valueAccessor, table.columns)
@@ -188,11 +209,31 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
     const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
 
-    const xAxisColumn = table.columns[xAxisColumnIndex];
-    const yAxisColumn = table.columns[yAxisColumnIndex];
-    const valueColumn = table.columns.find((v) => v.id === valueAccessor);
+    const xAxisColumn = table.columns[xAxisColumnIndex] as DatatableColumn | undefined;
+    const yAxisColumn = table.columns[yAxisColumnIndex] as DatatableColumn | undefined;
+    const valueColumn = table.columns.find((v) => v.id === valueAccessor) as
+      | DatatableColumn
+      | undefined;
     const xAxisMeta = xAxisColumn?.meta;
     const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+
+    const xValuesFormatter = useMemo(
+      () => formatFactory(xAxisMeta?.params),
+      [formatFactory, xAxisMeta?.params]
+    );
+    const yValuesFormatter = useMemo(
+      () => formatFactory(yAxisColumn?.meta.params),
+      [formatFactory, yAxisColumn?.meta.params]
+    );
+    const metricFormatter = useMemo(
+      () => formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns)),
+      [args.valueAccessor, formatFactory, table.columns]
+    );
+
+    const formattedTable = getFormattedTable(table, formatFactory);
+    let chartData = formattedTable.table.rows.filter(
+      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
+    );
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -201,14 +242,27 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
         const points = [
           {
-            row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
+            row: table.rows.findIndex((r) => {
+              if (!xAxisColumn) return false;
+              if (formattedTable.formattedColumns[xAxisColumn.id]) {
+                // stringify the value to compare with the chart value
+                return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+              }
+              return r[xAxisColumn.id] === x;
+            }),
             column: xAxisColumnIndex,
             value: x,
           },
           ...(yAxisColumn
             ? [
                 {
-                  row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+                  row: table.rows.findIndex((r) => {
+                    if (formattedTable.formattedColumns[yAxisColumn.id]) {
+                      // stringify the value to compare with the chart value
+                      return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                    }
+                    return r[yAxisColumn.id] === y;
+                  }),
                   column: yAxisColumnIndex,
                   value: y,
                 },
@@ -226,7 +280,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         };
         onClickValue(context);
       },
-      [onClickValue, table, xAxisColumn?.id, xAxisColumnIndex, yAxisColumn, yAxisColumnIndex]
+      [
+        formattedTable.formattedColumns,
+        onClickValue,
+        table,
+        xAxisColumn,
+        xAxisColumnIndex,
+        xValuesFormatter,
+        yAxisColumn,
+        yAxisColumnIndex,
+        yValuesFormatter,
+      ]
     );
 
     const onBrushEnd = useCallback(
@@ -246,7 +310,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           if (yAxisColumn) {
             (y as string[]).forEach((v) => {
               points.push({
-                row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+                row: table.rows.findIndex((r) => {
+                  if (formattedTable.formattedColumns[yAxisColumn.id]) {
+                    // stringify the value to compare with the chart value
+                    return yValuesFormatter.convert(r[yAxisColumn.id]) === v;
+                  }
+                  return r[yAxisColumn.id] === v;
+                }),
                 column: yAxisColumnIndex,
                 value: v,
               });
@@ -255,7 +325,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           if (xAxisColumn) {
             (x as string[]).forEach((v) => {
               points.push({
-                row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+                row: table.rows.findIndex((r) => {
+                  if (formattedTable.formattedColumns[xAxisColumn.id]) {
+                    // stringify the value to compare with the chart value
+                    return xValuesFormatter.convert(r[xAxisColumn.id]) === v;
+                  }
+                  return r[xAxisColumn.id] === v;
+                }),
                 column: xAxisColumnIndex,
                 value: v,
               });
@@ -274,27 +350,22 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         }
       },
       [
+        formattedTable.formattedColumns,
         isTimeBasedSwimLane,
         onClickValue,
         onSelectRange,
         table,
         xAxisColumn,
         xAxisColumnIndex,
+        xValuesFormatter,
         yAxisColumn,
         yAxisColumnIndex,
+        yValuesFormatter,
       ]
     );
 
-    if (!valueColumn) {
-      // Chart is not ready
-      return null;
-    }
-
-    let chartData = table.rows.filter(
-      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
-    );
     if (!chartData || !chartData.length) {
-      return <EmptyPlaceholder icon={HeatmapIcon} />;
+      return <EmptyPlaceholder icon={HeatmapIcon} renderComplete={onRenderChange} />;
     }
 
     if (!yAxisColumn) {
@@ -306,13 +377,25 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         };
       });
     }
+    if (!xAxisColumn) {
+      // required for tooltip
+      chartData = chartData.map((row) => {
+        return {
+          ...row,
+          unifiedX: '',
+        };
+      });
+    }
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
-    const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
-      ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
       : undefined;
+
+    if (!valueColumn) {
+      // Chart is not ready
+      return null;
+    }
 
     // Fallback to the ordinal scale type when a single row of data is provided.
     // Related issue https://github.com/elastic/elastic-charts/issues/1184
@@ -482,10 +565,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         >
           <Chart>
             <Settings
+              onRenderChange={onRenderChange}
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
-              legendSize={args.legend.legendSize}
+              legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
@@ -513,7 +597,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               }}
               timeZone={timeZone}
               data={chartData}
-              xAccessor={xAccessor}
+              xAccessor={xAccessor || 'unifiedX'}
               yAccessor={yAccessor || 'unifiedY'}
               valueAccessor={valueAccessor}
               valueFormatter={valueFormatter}
@@ -525,13 +609,23 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
               xAxisLabelFormatter={(v) =>
-                args.gridConfig.isXAxisLabelVisible ? `${xValuesFormatter.convert(v)}` : ''
+                args.gridConfig.isXAxisLabelVisible
+                  ? `${
+                      xAccessor && formattedTable.formattedColumns[xAccessor]
+                        ? v
+                        : xValuesFormatter.convert(v)
+                    }`
+                  : ''
               }
               yAxisLabelFormatter={
                 yAxisColumn
                   ? (v) =>
                       args.gridConfig.isYAxisLabelVisible
-                        ? `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                        ? `${
+                            yAccessor && formattedTable.formattedColumns[yAccessor]
+                              ? v
+                              : yValuesFormatter.convert(v) ?? ''
+                          }`
                         : ''
                   : undefined
               }

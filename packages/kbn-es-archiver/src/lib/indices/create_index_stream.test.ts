@@ -17,6 +17,7 @@ import { createCreateIndexStream } from './create_index_stream';
 import {
   createStubStats,
   createStubIndexRecord,
+  createStubDataStreamRecord,
   createStubDocRecord,
   createStubClient,
   createStubLogger,
@@ -170,6 +171,19 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       expect(output).toEqual(nonRecordValues);
+    });
+
+    it('creates data streams', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+
+      await createPromiseFromStreams([
+        createListStream([createStubDataStreamRecord('foo-datastream', 'foo-template')]),
+        createCreateIndexStream({ client, stats, log }),
+      ]);
+
+      sinon.assert.calledOnce(client.indices.putIndexTemplate as sinon.SinonSpy);
+      sinon.assert.calledOnce(client.indices.createDataStream as sinon.SinonSpy);
     });
   });
 

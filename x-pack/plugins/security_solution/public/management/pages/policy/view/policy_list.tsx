@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiText,
@@ -14,18 +15,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  CriteriaWithPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
-import { CreatePackagePolicyRouteState, pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
+import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
   useGetAgentCountForPolicy,
   useGetEndpointSecurityPackage,
@@ -189,7 +190,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'created-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="created-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -222,7 +225,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'updated-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="updated-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

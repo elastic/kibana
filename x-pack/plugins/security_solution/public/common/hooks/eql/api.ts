@@ -7,11 +7,10 @@
 
 import { firstValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  EqlSearchStrategyRequest,
-  EqlSearchStrategyResponse,
-  EQL_SEARCH_STRATEGY,
-} from '@kbn/data-plugin/common';
+import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import {
   getValidationErrors,
   isErrorResponse,
@@ -19,22 +18,27 @@ import {
 } from '../../../../common/search_strategy/eql';
 
 interface Params {
-  index: string[];
+  dataViewTitle: string;
   query: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export const validateEql = async ({
   data,
-  index,
+  dataViewTitle,
   query,
   signal,
+  runtimeMappings,
 }: Params): Promise<{ valid: boolean; errors: string[] }> => {
   const { rawResponse: response } = await firstValueFrom(
     data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
       {
-        params: { index: index.join(), body: { query, size: 0 } },
+        params: {
+          index: dataViewTitle,
+          body: { query, runtime_mappings: runtimeMappings, size: 0 },
+        },
         options: { ignore: [400] },
       },
       {

@@ -12,12 +12,14 @@ import {
   buildRangeFilter,
   COMPARE_ALL_OPTIONS,
   RangeFilterParams,
+  Filter,
+  Query,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Subscription, BehaviorSubject } from 'rxjs';
+import { Subscription, BehaviorSubject, lastValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
@@ -27,6 +29,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { ControlsDataViewsService } from '../../services/data_views';
 import { ControlsDataService } from '../../services/data';
@@ -59,6 +62,7 @@ interface RangeSliderDataFetchProps {
   dataViewId: string;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
+  validate?: boolean;
 }
 
 const fieldMissingError = (fieldName: string) =>
@@ -99,6 +103,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       max: '',
       loading: true,
       fieldFormatter: (value: string) => value,
+      isInvalid: false,
     };
     this.updateComponentState(this.componentState);
 
@@ -111,7 +116,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.setInitializationFinished();
     }
 
-    this.fetchMinMax().then(async () => {
+    this.runRangeSliderQuery().then(async () => {
       if (initialValue) {
         this.setInitializationFinished();
       }
@@ -122,6 +127,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
@@ -134,7 +140,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     );
 
     // fetch available min/max when input changes
-    this.subscriptions.add(dataFetchPipe.subscribe(this.fetchMinMax));
+    this.subscriptions.add(dataFetchPipe.subscribe(this.runRangeSliderQuery));
 
     // build filters when value change
     this.subscriptions.add(
@@ -149,21 +155,23 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: DataViewField;
+    dataView?: DataView;
+    field?: DataViewField;
   }> => {
     const { dataViewId, fieldName } = this.getInput();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId));
+      } catch (e) {
+        this.onFatalError(e);
       }
     }
 
     if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView.getFieldByName(fieldName);
+      this.field = this.dataView?.getFieldByName(fieldName);
       if (this.field === undefined) {
         this.onFatalError(new Error(RangeSliderStrings.errors.getDataViewNotFoundError(fieldName)));
       }
@@ -171,7 +179,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.updateComponentState({
         field: this.field,
         fieldFormatter: this.field
-          ? this.dataView.getFormatterForField(this.field).getConverterFor('text')
+          ? this.dataView?.getFormatterForField(this.field).getConverterFor('text')
           : (value: string) => value,
       });
     }
@@ -187,40 +195,19 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.componentStateSubject$.next(this.componentState);
   }
 
-  private minMaxAgg = (field?: DataViewField) => {
-    const aggBody: any = {};
-    if (field) {
-      if (field.scripted) {
-        aggBody.script = {
-          source: field.script,
-          lang: field.lang,
-        };
-      } else {
-        aggBody.field = field.name;
-      }
-    }
-
-    return {
-      maxAgg: {
-        max: aggBody,
-      },
-      minAgg: {
-        min: aggBody,
-      },
-    };
-  };
-
-  private fetchMinMax = async () => {
+  private runRangeSliderQuery = async () => {
     this.updateComponentState({ loading: true });
     this.updateOutput({ loading: true });
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
     const embeddableInput = this.getInput();
     const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
     let { filters = [] } = embeddableInput;
 
     if (!field) {
       this.updateComponentState({ loading: false });
-      this.updateOutput({ loading: false });
+      this.updateOutput({ filters: [], loading: false });
       throw fieldMissingError(fieldName);
     }
 
@@ -235,23 +222,12 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       }
     }
 
-    const searchSource = await this.dataService.searchSource.create();
-    searchSource.setField('size', 0);
-    searchSource.setField('index', dataView);
-
-    const aggs = this.minMaxAgg(field);
-    searchSource.setField('aggs', aggs);
-
-    searchSource.setField('filter', filters);
-
-    if (!ignoreParentSettings?.ignoreQuery) {
-      searchSource.setField('query', query);
-    }
-
-    const resp = await searchSource.fetch$().toPromise();
-
-    const min = get(resp, 'rawResponse.aggregations.minAgg.value', '');
-    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
+    const { min, max } = await this.fetchMinMax({
+      dataView,
+      field,
+      filters,
+      query,
+    });
 
     this.updateComponentState({
       min: `${min ?? ''}`,
@@ -262,8 +238,68 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     await this.buildFilter();
   };
 
+  private fetchMinMax = async ({
+    dataView,
+    field,
+    filters,
+    query,
+  }: {
+    dataView: DataView;
+    field: DataViewField;
+    filters: Filter[];
+    query?: Query;
+  }) => {
+    const searchSource = await this.dataService.searchSource.create();
+    searchSource.setField('size', 0);
+    searchSource.setField('index', dataView);
+
+    searchSource.setField('filter', filters);
+
+    if (query) {
+      searchSource.setField('query', query);
+    }
+
+    const aggBody: any = {};
+
+    if (field) {
+      if (field.scripted) {
+        aggBody.script = {
+          source: field.script,
+          lang: field.lang,
+        };
+      } else {
+        aggBody.field = field.name;
+      }
+    }
+
+    const aggs = {
+      maxAgg: {
+        max: aggBody,
+      },
+      minAgg: {
+        min: aggBody,
+      },
+    };
+
+    searchSource.setField('aggs', aggs);
+
+    const resp = await lastValueFrom(searchSource.fetch$());
+
+    const min = get(resp, 'rawResponse.aggregations.minAgg.value', '');
+    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
+
+    return { min, max };
+  };
+
   private buildFilter = async () => {
-    const { value: [selectedMin, selectedMax] = ['', ''], ignoreParentSettings } = this.getInput();
+    const {
+      value: [selectedMin, selectedMax] = ['', ''],
+      query,
+      timeRange,
+      filters = [],
+      ignoreParentSettings,
+    } = this.getInput();
+
     const availableMin = this.componentState.min;
     const availableMax = this.componentState.max;
 
@@ -271,23 +307,16 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
-    const hasBothSelections = hasLowerSelection && hasUpperSelection;
-    const hasInvalidSelection =
-      !ignoreParentSettings?.ignoreValidations &&
-      hasBothSelections &&
-      parseFloat(selectedMin) > parseFloat(selectedMax);
-    const isLowerSelectionOutOfRange =
-      hasLowerSelection && parseFloat(selectedMin) > parseFloat(availableMax);
-    const isUpperSelectionOutOfRange =
-      hasUpperSelection && parseFloat(selectedMax) < parseFloat(availableMin);
-    const isSelectionOutOfRange =
-      (!ignoreParentSettings?.ignoreValidations && hasData && isLowerSelectionOutOfRange) ||
-      isUpperSelectionOutOfRange;
-    const { dataView, field } = await this.getCurrentDataViewAndField();
 
-    if (!hasData || !hasEitherSelection || hasInvalidSelection || isSelectionOutOfRange) {
-      this.updateComponentState({ loading: false });
-      this.updateOutput({ filters: [], dataViews: [dataView], loading: false });
+    const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
+    if (!hasData || !hasEitherSelection) {
+      this.updateComponentState({
+        loading: false,
+        isInvalid: !ignoreParentSettings?.ignoreValidations && hasEitherSelection,
+      });
+      this.updateOutput({ filters: [], dataViews: dataView && [dataView], loading: false });
       return;
     }
 
@@ -307,12 +336,52 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
 
-    this.updateComponentState({ loading: false });
+    // Check if new range filter results in no data
+    if (!ignoreParentSettings?.ignoreValidations) {
+      const searchSource = await this.dataService.searchSource.create();
+
+      filters.push(rangeFilter);
+
+      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
+
+      if (timeFilter) {
+        filters.push(timeFilter);
+      }
+
+      searchSource.setField('size', 0);
+      searchSource.setField('index', dataView);
+
+      searchSource.setField('filter', filters);
+
+      if (query) {
+        searchSource.setField('query', query);
+      }
+
+      const {
+        rawResponse: {
+          hits: { total },
+        },
+      } = await lastValueFrom(searchSource.fetch$());
+
+      const docCount = typeof total === 'number' ? total : total?.value;
+
+      if (!docCount) {
+        this.updateComponentState({ loading: false, isInvalid: true });
+        this.updateOutput({
+          filters: [],
+          dataViews: [dataView],
+          loading: false,
+        });
+        return;
+      }
+    }
+
+    this.updateComponentState({ loading: false, isInvalid: false });
     this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });
   };
 
   public reload = () => {
-    this.fetchMinMax();
+    this.runRangeSliderQuery();
   };
 
   public destroy = () => {
@@ -326,9 +395,18 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     }
     this.node = node;
     ReactDOM.render(
-      <RangeSliderReduxWrapper embeddable={this} reducers={rangeSliderReducers}>
-        <RangeSliderComponent componentStateSubject={this.componentStateSubject$} />
-      </RangeSliderReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <RangeSliderReduxWrapper embeddable={this} reducers={rangeSliderReducers}>
+          <RangeSliderComponent
+            componentStateSubject={this.componentStateSubject$}
+            ignoreValidation={
+              this.getInput().ignoreParentSettings !== undefined &&
+              this.getInput().ignoreParentSettings?.ignoreValidations !== undefined &&
+              this.getInput().ignoreParentSettings?.ignoreValidations!
+            }
+          />
+        </RangeSliderReduxWrapper>
+      </KibanaThemeProvider>,
       node
     );
   };

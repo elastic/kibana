@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObject } from '@kbn/core/server';
+
 import { getCaseMetrics } from './get_case_metrics';
 import { CaseAttributes, CaseResponse, CaseStatuses } from '../../../common/api';
 import { CasesClientMock, createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
   createUserActionServiceMock,
 } from '../../services/mocks';
-import { SavedObject } from '@kbn/core/server';
 import { mockAlertsService } from './test_utils/alerts';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
 
-describe('getMetrics', () => {
+describe('getCaseMetrics', () => {
   const inProgressStatusChangeTimestamp = new Date('2021-11-23T20:00:43Z');
   const currentTime = new Date('2021-11-23T20:01:43Z');
 

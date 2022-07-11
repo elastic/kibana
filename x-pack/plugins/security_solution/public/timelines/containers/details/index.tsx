@@ -7,23 +7,24 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import {
+import type {
   DocValueFields,
   TimelineEventsDetailsItem,
-  TimelineEventsQueries,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
+import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { Ecs } from '../../../../common/ecs';
+import type { Ecs } from '../../../../common/ecs';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -90,11 +91,15 @@ export const useTimelineEventsDetails = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                setLoading(false);
-                setTimelineDetailsResponse(response.data || []);
-                setRawEventData(response.rawResponse.hits.hits[0]);
-                setEcsData(response.ecs || null);
-                searchSubscription$.current.unsubscribe();
+                Promise.resolve().then(() => {
+                  ReactDOM.unstable_batchedUpdates(() => {
+                    setLoading(false);
+                    setTimelineDetailsResponse(response.data || []);
+                    setRawEventData(response.rawResponse.hits.hits[0]);
+                    setEcsData(response.ecs || null);
+                    searchSubscription$.current.unsubscribe();
+                  });
+                });
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.FAIL_TIMELINE_DETAILS);

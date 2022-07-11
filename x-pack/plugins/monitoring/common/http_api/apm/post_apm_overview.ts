@@ -6,25 +6,23 @@
  */
 
 import * as rt from 'io-ts';
+import { ccsRT, clusterUuidRT, timeRangeRT } from '../shared';
 
 export const postApmOverviewRequestParamsRT = rt.type({
-  clusterUuid: rt.string,
+  clusterUuid: clusterUuidRT,
 });
 
 export const postApmOverviewRequestPayloadRT = rt.intersection([
   rt.partial({
-    ccs: rt.string,
+    ccs: ccsRT,
   }),
   rt.type({
-    timeRange: rt.type({
-      min: rt.string,
-      max: rt.string,
-    }),
+    timeRange: timeRangeRT,
   }),
 ]);
 
 export type PostApmOverviewRequestPayload = rt.TypeOf<typeof postApmOverviewRequestPayloadRT>;
 
 export const postApmOverviewResponsePayloadRT = rt.type({
-  data: rt.string,
+  // TODO: add payload entries
 });

@@ -16,3 +16,7 @@
   transform: rotate(45deg);
   transform-origin: center;
 }
+
+.xyAnnotationTooltipDetail {
+  padding: $euiSizeXS ($euiSizeXS * 2);
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
 import uuid from 'uuid';
 
@@ -113,7 +113,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       <InspectButtonContainer show={toggleStatus}>
         <KpiPanel $toggleStatus={toggleStatus} hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
-            height={!toggleStatus ? 30 : undefined}
             id={uniqueQueryId}
             title={i18n.COUNT_TABLE_TITLE}
             titleSize="s"

@@ -13,7 +13,8 @@ import { useLocation } from 'react-router-dom';
 import { useSetInitialStateFromUrl } from './initialize_redux_by_url';
 
 import { useKibana } from '../../lib/kibana';
-import { CONSTANTS, UrlStateType } from './constants';
+import type { UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
 import {
   getQueryStringFromLocation,
   getParamFromQueryString,
@@ -26,20 +27,21 @@ import {
   isQueryStateEmpty,
   updateTimerangeUrl,
 } from './helpers';
-import {
+import type {
   UrlStateContainerPropTypes,
   ReplaceStateInLocation,
   PreviousLocationUrlState,
   KeyUrlState,
-  ALL_URL_STATE_KEYS,
   UrlStateToRedux,
   UrlState,
-  isAdministration,
   ValueUrlState,
 } from './types';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { UrlInputsModel } from '../../store/inputs/model';
+import { ALL_URL_STATE_KEYS, isAdministration } from './types';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { UrlInputsModel } from '../../store/inputs/model';
 import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
+import { getLinkInfo } from '../../links';
+import { useIsGroupedNavigationEnabled } from '../navigation/helpers';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -54,15 +56,16 @@ export const useUrlStateHooks = ({
   navTabs,
   pageName,
   urlState,
-  search,
   pathName,
   history,
 }: UrlStateContainerPropTypes) => {
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
-  const { pathname: browserPathName } = useLocation();
+  const { pathname: browserPathName, search } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState, search });
+  const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
 
+  const linkInfo = pageName ? getLinkInfo(pageName) : undefined;
   const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
     useSetInitialStateFromUrl();
 
@@ -70,9 +73,10 @@ export const useUrlStateHooks = ({
     (type: UrlStateType) => {
       const urlStateUpdatesToStore: UrlStateToRedux[] = [];
       const urlStateUpdatesToLocation: ReplaceStateInLocation[] = [];
+      const skipUrlState = isGroupedNavEnabled ? linkInfo?.skipUrlState : isAdministration(type);
 
       // Delete all query strings from URL when the page is security/administration (Manage menu group)
-      if (isAdministration(type)) {
+      if (skipUrlState) {
         ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
           urlStateUpdatesToLocation.push({
             urlStateToReplace: '',
@@ -146,6 +150,8 @@ export const useUrlStateHooks = ({
       setInitialStateFromUrl,
       urlState,
       isFirstPageLoad,
+      isGroupedNavEnabled,
+      linkInfo?.skipUrlState,
     ]
   );
 
@@ -159,8 +165,9 @@ export const useUrlStateHooks = ({
     if (browserPathName !== pathName) return;
 
     const type: UrlStateType = getUrlType(pageName);
+    const skipUrlState = isGroupedNavEnabled ? linkInfo?.skipUrlState : isAdministration(type);
 
-    if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !isAdministration(type)) {
+    if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !skipUrlState) {
       const urlStateUpdatesToLocation: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
         (urlKey: KeyUrlState) => ({
           urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
@@ -186,11 +193,17 @@ export const useUrlStateHooks = ({
     browserPathName,
     handleInitialize,
     search,
+    isGroupedNavEnabled,
+    linkInfo?.skipUrlState,
   ]);
 
   useEffect(() => {
-    document.title = `${getTitle(pageName, navTabs)} - Kibana`;
-  }, [pageName, navTabs]);
+    if (!isGroupedNavEnabled) {
+      document.title = `${getTitle(pageName, navTabs)} - Kibana`;
+    } else {
+      document.title = `${linkInfo?.title ?? ''} - Kibana`;
+    }
+  }, [pageName, navTabs, isGroupedNavEnabled, linkInfo]);
 
   useEffect(() => {
     queryTimelineByIdOnUrlChange({

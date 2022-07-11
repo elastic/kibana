@@ -49,6 +49,10 @@ export interface DataViewEditorProps {
    * Sets whether a timestamp field is required to create an index pattern. Defaults to false.
    */
   requireTimestampField?: boolean;
+  /**
+   * Pass the data view to be edited.
+   */
+  editData?: DataView;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -152,6 +156,7 @@ export interface IndexPatternConfig {
   allowHidden: boolean;
   id?: string;
   type: INDEX_PATTERN_TYPE;
+  name?: string;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {

@@ -37,7 +37,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   index: ['auditbeat-*', 'filebeat-*'],
   immutable: false,
   interval: '5m',
-  output_index: '.siem-signals-default',
+  output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {
@@ -97,4 +97,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   version: 1,
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });

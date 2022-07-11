@@ -38,6 +38,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: false,
     };
 
@@ -58,6 +59,7 @@ describe('getActionRoute', () => {
           "config": Object {},
           "connector_type_id": "2",
           "id": "1",
+          "is_deprecated": false,
           "is_missing_secrets": false,
           "is_preconfigured": false,
           "name": "action name",
@@ -75,6 +77,7 @@ describe('getActionRoute', () => {
         name: 'action name',
         config: {},
         is_preconfigured: false,
+        is_deprecated: false,
         is_missing_secrets: false,
       },
     });
@@ -95,6 +98,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -129,6 +133,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

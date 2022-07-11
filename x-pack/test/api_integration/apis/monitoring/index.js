@@ -18,5 +18,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./standalone_cluster'));
     loadTestFile(require.resolve('./logs'));
     loadTestFile(require.resolve('./setup'));
+    loadTestFile(require.resolve('./_health'));
   });
 }

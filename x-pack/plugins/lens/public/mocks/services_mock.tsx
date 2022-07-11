@@ -10,6 +10,8 @@ import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
@@ -155,5 +157,7 @@ export function makeDefaultServices(
       clear: jest.fn(),
     },
     spaces: spacesPluginMock.createStartContract(),
+    dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+    dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
   };
 }

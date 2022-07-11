@@ -16,10 +16,6 @@ jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   },
 }));
 jest.mock('../../../../components/editor_example', () => {});
-jest.mock('../../../../../lib/mappings/mappings', () => ({
-  retrieveAutoCompleteInfo: () => {},
-  clearSubscriptions: () => {},
-}));
 jest.mock('../../../../models/sense_editor', () => {
   return {
     create: () => ({
@@ -30,6 +26,8 @@ jest.mock('../../../../models/sense_editor', () => {
           focus: () => {},
         }),
         on: jest.fn(),
+        addFoldsAtRanges: jest.fn(),
+        getAllFoldRanges: jest.fn(),
       }),
       update: jest.fn(),
       commands: {

@@ -13,17 +13,24 @@ import { Actions } from '../../../../common/api';
 import {
   alertComment,
   basicCase,
+  externalReferenceAttachment,
   getAlertUserAction,
+  getExternalReferenceAttachment,
+  getExternalReferenceUserAction,
   getHostIsolationUserAction,
   getUserAction,
   hostIsolationComment,
 } from '../../../containers/mock';
-import { TestProviders } from '../../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
 import { getMockBuilderArgs } from '../mock';
+import { useCaseViewParams } from '../../../common/navigation';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
+
+const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 
 describe('createCommentUserActionBuilder', () => {
   const builderArgs = getMockBuilderArgs();
@@ -113,7 +120,8 @@ describe('createCommentUserActionBuilder', () => {
   });
 
   describe('Multiple alerts', () => {
-    it('renders correctly multiple alerts', async () => {
+    it('renders correctly multiple alerts with a link to the alerts table', async () => {
+      useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
       const userAction = getAlertUserAction();
 
       const builder = createCommentUserActionBuilder({
@@ -141,6 +149,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
+      expect(screen.getByTestId('comment-action-show-alerts-1234'));
     });
   });
 
@@ -166,5 +175,92 @@ describe('createCommentUserActionBuilder', () => {
     expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
     expect(screen.getByText('host1')).toBeInTheDocument();
     expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
+  });
+
+  describe('External references', () => {
+    let appMockRender: AppMockRenderer;
+
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer();
+    });
+
+    it('renders correctly an external reference', async () => {
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(
+        getExternalReferenceAttachment({ type: 'regular' })
+      );
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-external-reference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
+      expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
+      expect(screen.getByText('added a chart')).toBeInTheDocument();
+    });
+
+    it('renders correctly if the reference is not registered', async () => {
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-external-reference-not-found')).toBeInTheDocument();
+      expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
+      expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+    });
+
+    it('renders correctly an external reference with actions', async () => {
+      const ActionsView = () => {
+        return <>{'Attachment actions'}</>;
+      };
+
+      const attachment = getExternalReferenceAttachment({
+        type: 'regular',
+        actions: <ActionsView />,
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-external-reference-.test')).toBeInTheDocument();
+      expect(screen.getByText('Attachment actions')).toBeInTheDocument();
+    });
   });
 });

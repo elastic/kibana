@@ -14,7 +14,7 @@
   "query": "event.category:process and event.type:(start or process_started) and \n  process.args:(spctl and \"--master-disable\")\n",
   "references": [
     "https://support.apple.com/en-us/HT202491",
-    "https://www.carbonblack.com/blog/tau-threat-intelligence-notification-new-macos-malware-variant-of-shlayer-osx-discovered/"
+    "https://community.carbonblack.com/t5/Threat-Advisories-Documents/TAU-TIN-Shlayer-OSX/ta-p/68397"
   ],
   "risk_score": 47,
   "rule_id": "4da13d6e-904f-4636-81d8-6ab14b4e6ae9",
@@ -45,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

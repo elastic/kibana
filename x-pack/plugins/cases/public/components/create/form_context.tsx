@@ -12,9 +12,8 @@ import { getNoneConnector, normalizeActionConnector } from '../configure_cases/u
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   UseCreateAttachments,
   useCreateAttachments,
@@ -23,11 +22,13 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
 import { CaseAttachments } from '../../types';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
+  severity: CaseSeverity.LOW,
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
@@ -50,7 +51,7 @@ export const FormContext: React.FC<Props> = ({
   onSuccess,
   attachments,
 }) => {
-  const { connectors, loading: isLoadingConnectors } = useConnectors();
+  const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
   const { owner } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();

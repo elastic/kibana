@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { usersModel } from '../../store';
 import { UsersTableType } from '../../store/model';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 
 import * as i18n from '../translations';
-import { UsersRouteSpyState } from '../../../common/utils/route/types';
-import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_UI_ID } from '../../../../common/constants';
+import type { UsersRouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
+import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 export const type = usersModel.UsersType.details;
 
@@ -27,30 +26,21 @@ const TabNameMappedToI18nKey: Record<UsersTableType, string> = {
   [UsersTableType.risk]: i18n.NAVIGATION_RISK_TITLE,
   [UsersTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [UsersTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
+  [UsersTableType.risk]: i18n.NAVIGATION_RISK_TITLE,
 };
 
-export const getBreadcrumbs = (
+export const getTrailingBreadcrumbs = (
   params: UsersRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
-  let breadcrumb = [
-    {
-      text: i18n.PAGE_TITLE,
-      href: getUrlForApp(APP_UI_ID, {
-        path: !isEmpty(search[0]) ? search[0] : '',
-        deepLinkId: SecurityPageName.users,
-      }),
-    },
-  ];
+  let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {
     breadcrumb = [
-      ...breadcrumb,
       {
         text: params.detailName,
-        href: getUrlForApp(APP_UI_ID, {
-          path: getUsersDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+        href: getSecuritySolutionUrl({
+          path: getUsersDetailsUrl(params.detailName, ''),
           deepLinkId: SecurityPageName.users,
         }),
       },

@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('transform', function () {
-    this.tags(['ciGroup21', 'transform']);
+    this.tags('transform');
 
     before(async () => {
       await transform.securityCommon.createTransformRoles();
@@ -67,6 +67,7 @@ export interface BaseTransformTestData {
   destinationIndex: string;
   destinationDataViewTimeField?: string;
   discoverAdjustSuperDatePicker: boolean;
+  numFailureRetries?: string;
 }
 
 export interface PivotTransformTestData extends BaseTransformTestData {

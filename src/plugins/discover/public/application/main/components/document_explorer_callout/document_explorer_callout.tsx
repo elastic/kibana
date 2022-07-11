@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
@@ -88,6 +88,7 @@ export const DocumentExplorerCallout = () => {
       >
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="tryDocumentExplorerButton"
             iconType="tableDensityNormal"
             size="s"
             href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
@@ -99,7 +100,7 @@ export const DocumentExplorerCallout = () => {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.links.discover.documentExplorer}>
+          <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
             <FormattedMessage
               id="discover.docExplorerCallout.learnMore"
               defaultMessage="Learn more"

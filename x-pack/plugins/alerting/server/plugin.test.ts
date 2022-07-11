@@ -21,6 +21,8 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -65,6 +67,7 @@ describe('Alerting Plugin', () => {
       actions: actionsMock.createSetup(),
       statusService: statusServiceMock.createSetupContract(),
       monitoringCollection: monitoringCollectionMock.createSetup(),
+      data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
     };
 
     let plugin: AlertingPlugin;
@@ -111,6 +114,7 @@ describe('Alerting Plugin', () => {
       const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
       expect(setupContract.getConfig()).toEqual({
+        isUsingSecurity: false,
         minimumScheduleInterval: { value: '1m', enforce: false },
       });
     });
@@ -206,12 +210,14 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
+          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
           actions: actionsMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
+          spaces: spacesMock.createStart(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
@@ -244,12 +250,14 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
+          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
           actions: actionsMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
+          spaces: spacesMock.createStart(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
@@ -293,12 +301,14 @@ describe('Alerting Plugin', () => {
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
         monitoringCollection: monitoringCollectionMock.createSetup(),
+        data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
         actions: actionsMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         features: mockFeatures(),
+        spaces: spacesMock.createStart(),
         licensing: licensingMock.createStart(),
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),

@@ -7,7 +7,15 @@
 
 import './table_basic.scss';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
-import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
+import React, {
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useContext,
+  useEffect,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
@@ -20,7 +28,8 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
@@ -58,8 +67,6 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
-  const [firstTable] = Object.values(props.data.tables);
-
   const isInteractive = props.interactive;
 
   const [columnConfig, setColumnConfig] = useState({
@@ -67,12 +74,19 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     sortingColumnId: props.args.sortingColumnId,
     sortingDirection: props.args.sortingDirection,
   });
-  const [firstLocalTable, updateTable] = useState(firstTable);
+  const [firstLocalTable, updateTable] = useState(props.data);
 
   // ** Pagination config
   const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
     undefined
   );
+
+  useLayoutEffect(() => {
+    // Temporary solution: DataGrid should provide onRender callback
+    setTimeout(() => {
+      props.renderComplete();
+    }, 300);
+  }, [props]);
 
   useEffect(() => {
     setPagination(
@@ -94,8 +108,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props.args.columns, props.args.sortingColumnId, props.args.sortingDirection]);
 
   useDeepCompareEffect(() => {
-    updateTable(firstTable);
-  }, [firstTable]);
+    updateTable(props.data);
+  }, [props.data]);
 
   const firstTableRef = useRef(firstLocalTable);
   firstTableRef.current = firstLocalTable;
@@ -120,7 +134,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onClickValue = useCallback(
-    (data: LensFilterEvent['data']) => {
+    (data: ClickTriggerEvent['data']) => {
       dispatchEvent({ name: 'filter', data });
     },
     [dispatchEvent]
@@ -193,7 +207,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const isEmpty =
     firstLocalTable.rows.length === 0 ||
     (bucketColumns.length &&
-      firstTable.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
+      props.data.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(
     () =>
@@ -252,10 +266,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter(({ columnId }) => isNumericMap[columnId])
         .map(({ columnId }) => columnId),
-      firstTable,
+      props.data,
       getOriginalId
     );
-  }, [firstTable, isNumericMap, columnConfig]);
+  }, [props.data, isNumericMap, columnConfig]);
 
   const headerRowHeight = props.args.headerRowHeight ?? 'single';
   const headerRowLines = props.args.headerRowHeightLines ?? 1;
@@ -344,16 +358,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         DataContext,
         props.uiSettings,
-        props.args.fitRowToContent,
-        props.args.rowHeightLines
+        props.args.fitRowToContent
       ),
-    [
-      formatters,
-      columnConfig,
-      props.uiSettings,
-      props.args.fitRowToContent,
-      props.args.rowHeightLines,
-    ]
+    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(
@@ -375,7 +382,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       .map((config) => ({
         columnId: config.columnId,
         summaryRowValue: config.summaryRowValue,
-        ...getFinalSummaryConfiguration(config.columnId, config, firstTable),
+        ...getFinalSummaryConfiguration(config.columnId, config, props.data),
       }))
       .filter(({ summaryRow }) => summaryRow !== 'none');
 
@@ -401,7 +408,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         ) : null;
       };
     }
-  }, [columnConfig.columns, alignments, firstTable, columns]);
+  }, [columnConfig.columns, alignments, props.data, columns]);
 
   if (isEmpty) {
     return (

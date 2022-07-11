@@ -3,7 +3,7 @@
 exports[`UrlFormatEditor should render normally 1`] = `
 <div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -67,7 +67,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -129,7 +129,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -170,7 +170,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
@@ -179,7 +179,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             URL template help
           </span>
           <span
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -194,7 +194,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -235,7 +235,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
@@ -244,7 +244,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             Label template help
           </span>
           <span
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -259,7 +259,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div

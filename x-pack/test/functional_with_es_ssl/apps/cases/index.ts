@@ -9,10 +9,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cases', function () {
-    this.tags('ciGroup27');
     loadTestFile(require.resolve('./create_case_form'));
     loadTestFile(require.resolve('./view_case'));
     loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./configure'));
+    loadTestFile(require.resolve('./attachment_framework'));
   });
 };

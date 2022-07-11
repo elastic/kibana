@@ -9,17 +9,17 @@ import moment from 'moment-timezone';
 import { has, mapKeys, set, unset, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import { IRouter } from '@kbn/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { IRouter } from '@kbn/core/server';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO } from './utils';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -138,7 +138,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries,
+                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
                   });
 
                   return draft;

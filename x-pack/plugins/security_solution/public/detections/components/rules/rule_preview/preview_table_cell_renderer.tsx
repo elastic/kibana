@@ -6,9 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { CellValueElementProps } from '@kbn/timelines-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { StyledContent } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
@@ -70,14 +69,9 @@ export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
   timelineId,
   truncate,
 }) => {
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
-
   const asPlainText = useMemo(() => {
-    return (
-      getLinkColumnDefinition(header.id, header.type, undefined, usersEnabled) !== undefined &&
-      !isTimeline
-    );
-  }, [header.id, header.type, isTimeline, usersEnabled]);
+    return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
+  }, [header.id, header.type, isTimeline]);
 
   const values = useGetMappedNonEcsValue({
     data,

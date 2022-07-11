@@ -5,6 +5,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "dataViews",
     "home",
     "licensing",
     "management",

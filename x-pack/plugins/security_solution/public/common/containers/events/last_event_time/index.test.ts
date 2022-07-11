@@ -7,7 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { noop } from 'lodash/fp';
-import { useTimelineLastEventTime, UseTimelineLastEventTimeArgs } from '.';
+import type { UseTimelineLastEventTimeArgs } from '.';
+import { useTimelineLastEventTime } from '.';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../lib/kibana';
 
@@ -47,6 +48,7 @@ jest.mock('../../../lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
 }));
 

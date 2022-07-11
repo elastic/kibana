@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TOASTER } from '../screens/alerts_detection_rules';
 import { KQL_INPUT, REFRESH_BUTTON } from '../screens/security_header';
 
 export const clearSearchBar = () => {
@@ -21,5 +22,18 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const refreshPage = () => {
-  cy.get(REFRESH_BUTTON).click({ force: true }).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON)
+    .click({ force: true })
+    .should('not.have.attr', 'aria-label', 'Needs updating');
+};
+
+export const saveQuery = (name: string) => {
+  const random = Math.floor(Math.random() * 100000);
+  const queryName = `${name}-${random}`;
+  cy.get('div[data-test-subj="globalDatePicker"] [data-test-subj="queryBarMenuPopover"]').click();
+  cy.get('[data-test-subj="saved-query-management-save-button"]').click();
+  cy.get('[data-test-subj="saveQueryFormTitle"]').type(queryName);
+  cy.get('[data-test-subj="savedQueryFormSaveButton"]').click();
+  cy.get(TOASTER).should('have.text', `Your query "${queryName}" was saved`);
+  return queryName;
 };

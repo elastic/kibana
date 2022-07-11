@@ -14,17 +14,30 @@ import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { API_KEY_LABEL } from '../../../constants';
 import { API_KEYS_PATH } from '../../../routes';
 
-import { ContentSource, CustomSource, SourceDataItem } from '../../../types';
+import { ContentSource, CustomSource } from '../../../types';
+
+import { getSourceData } from '../source_data';
 
 import { SourceIdentifier } from './source_identifier';
 
 interface Props {
   source: ContentSource | CustomSource;
-  sourceData: SourceDataItem;
+  baseServiceType?: string;
   small?: boolean;
 }
-export const CustomSourceDeployment: React.FC<Props> = ({ source, sourceData, small = false }) => {
+export const CustomSourceDeployment: React.FC<Props> = ({
+  source,
+  baseServiceType,
+  small = false,
+}) => {
   const { name, id } = source;
+
+  const sourceData = getSourceData('custom', baseServiceType);
+
+  if (!sourceData) {
+    return null;
+  }
+
   const {
     configuration: { documentationUrl, githubRepository },
   } = sourceData;

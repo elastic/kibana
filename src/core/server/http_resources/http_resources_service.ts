@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext } from '..';
-
-import { CoreContext } from '../core_context';
-import {
+import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type {
   IRouter,
   RouteConfig,
-  InternalHttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
-  InternalHttpServicePreboot,
-} from '../http';
-
-import { Logger } from '../logging';
+} from '@kbn/core-http-server';
+import { RequestHandlerContext } from '..';
+import { InternalHttpServiceSetup, InternalHttpServicePreboot } from '../http';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
-import { CoreService } from '../../types';
-
 import {
   InternalHttpResourcesSetup,
   HttpResources,
@@ -67,7 +62,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   stop() {}
 
-  private createRegistrar(deps: SetupDeps | PrebootDeps, router: IRouter): HttpResources {
+  private createRegistrar(
+    deps: SetupDeps | PrebootDeps,
+    router: IRouter<RequestHandlerContext>
+  ): HttpResources {
     return {
       register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,

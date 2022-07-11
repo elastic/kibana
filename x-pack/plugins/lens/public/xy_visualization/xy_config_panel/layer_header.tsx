@@ -8,17 +8,16 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
-import { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../types';
-import { State, visualizationTypes, XYDataLayerConfig } from '../types';
+import { State, visualizationTypes, SeriesType } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
 import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { updateLayer } from '.';
-import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
+import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -58,9 +57,9 @@ function AnnotationsLayerHeader() {
 function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const { state, layerId } = props;
-  const layers = state.layers as XYDataLayerConfig[];
-  const index = layers.findIndex((l) => l.layerId === layerId);
-  const layer = layers[index];
+  const layers = state.layers.filter(isDataLayer);
+  const layer = layers.find((l) => l.layerId === layerId)!;
+  const index = state.layers.findIndex((l) => l === layer)!;
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
   const horizontalOnly = isHorizontalChart(state.layers);
 

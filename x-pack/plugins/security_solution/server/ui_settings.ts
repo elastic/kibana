@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -25,14 +25,16 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
+  ENABLE_GROUPED_NAVIGATION,
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../common/constants';
-import { ExperimentalFeatures } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
@@ -144,6 +146,27 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.number(),
     },
+    ...(experimentalFeatures.groupedNavigation
+      ? {
+          [ENABLE_GROUPED_NAVIGATION]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
+              defaultMessage: 'New streamlined navigation',
+            }),
+            value: false,
+            type: 'boolean',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
+              {
+                defaultMessage:
+                  '<p>Improve your experience with the new navigation organized and optimized around the most important workflows.</p>',
+              }
+            ),
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: schema.boolean(),
+          },
+        }
+      : {}),
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
         defaultMessage: 'News feed',
@@ -165,7 +188,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.rulesTableRefreshDescription',
         {
           defaultMessage:
-            '<p>Enables auto refresh on the all rules and monitoring tables, in milliseconds</p>',
+            '<p>Enables auto refresh on the rules and monitoring tables, in milliseconds</p>',
         }
       ),
       type: 'json',
@@ -227,6 +250,22 @@ export const initUiSettings = (
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: false,
+      schema: schema.boolean(),
+    },
+    [SHOW_RELATED_INTEGRATIONS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
+        defaultMessage: 'Related integrations',
+      }),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.showRelatedIntegrationsDescription',
+        {
+          defaultMessage: '<p>Shows related integrations on the rules and monitoring tables</p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
       schema: schema.boolean(),
     },
   };

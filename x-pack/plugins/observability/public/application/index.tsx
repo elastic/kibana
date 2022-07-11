@@ -18,7 +18,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ConfigSchema } from '..';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
@@ -47,21 +47,23 @@ function App() {
 }
 
 export const renderApp = ({
-  config,
   core,
   plugins,
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
   kibanaFeatures,
+  usageCollection,
+  isDev,
 }: {
-  config: ConfigSchema;
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   kibanaFeatures: KibanaFeature[];
+  usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -77,34 +79,39 @@ export const renderApp = ({
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
 
+  const ApplicationUsageTrackingProvider =
+    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
-      <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
-        <PluginContext.Provider
-          value={{
-            appMountParameters,
-            config,
-            observabilityRuleTypeRegistry,
-            ObservabilityPageTemplate,
-            kibanaFeatures,
-          }}
+    <ApplicationUsageTrackingProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaContextProvider
+          services={{ ...core, ...plugins, storage: new Storage(localStorage), isDev }}
         >
-          <Router history={history}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <i18nCore.Context>
-                <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                  <DatePickerContextProvider>
-                    <HasDataContextProvider>
-                      <App />
-                    </HasDataContextProvider>
-                  </DatePickerContextProvider>
-                </RedirectAppLinks>
-              </i18nCore.Context>
-            </EuiThemeProvider>
-          </Router>
-        </PluginContext.Provider>
-      </KibanaContextProvider>
-    </KibanaThemeProvider>,
+          <PluginContext.Provider
+            value={{
+              appMountParameters,
+              observabilityRuleTypeRegistry,
+              ObservabilityPageTemplate,
+              kibanaFeatures,
+            }}
+          >
+            <Router history={history}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <i18nCore.Context>
+                  <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
+                    <DatePickerContextProvider>
+                      <HasDataContextProvider>
+                        <App />
+                      </HasDataContextProvider>
+                    </DatePickerContextProvider>
+                  </RedirectAppLinks>
+                </i18nCore.Context>
+              </EuiThemeProvider>
+            </Router>
+          </PluginContext.Provider>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
+    </ApplicationUsageTrackingProvider>,
     element
   );
   return () => {

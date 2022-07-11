@@ -28,7 +28,7 @@ import { RuleNotifyWhenType } from '../../../types';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
 
-const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
+export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
     value: 'onActionGroupChange',
     inputDisplay: i18n.translate(

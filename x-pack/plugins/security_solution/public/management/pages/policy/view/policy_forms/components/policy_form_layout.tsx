@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
@@ -30,13 +30,13 @@ import {
 } from '../../../store/policy_details/selectors';
 
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../../../app/types';
 import { getEndpointListPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
+import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../../../common/components/page_wrapper';
 import { PolicyDetailsForm } from '../../policy_details_form';
 import { ConfirmUpdate } from './policy_form_confirm_update';
@@ -146,7 +146,7 @@ export const PolicyFormLayout = React.memo(() => {
     <>
       {showConfirm && (
         <ConfirmUpdate
-          hostCount={policyAgentStatusSummary?.total ?? 0}
+          endpointCount={policyAgentStatusSummary?.total ?? 0}
           onCancel={handleSaveCancel}
           onConfirm={handleSaveConfirmation}
         />

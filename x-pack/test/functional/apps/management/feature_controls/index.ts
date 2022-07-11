@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
-    this.tags(['ciGroup2']);
-
     loadTestFile(require.resolve('./management_security'));
   });
 }

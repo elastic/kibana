@@ -9,6 +9,7 @@
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -24,7 +25,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
 } from '@elastic/eui';
 import type {
@@ -33,14 +33,15 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -62,8 +63,9 @@ import {
   retrieveAlertOsTypes,
   filterIndexPatterns,
 } from '../helpers';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData } from '../types';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
+import type { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
@@ -72,6 +74,7 @@ export interface AddExceptionFlyoutProps {
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
+  dataViewId?: string;
   alertData?: AlertData;
   /**
    * The components that use this may or may not define `alertData`
@@ -127,6 +130,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
+  dataViewId,
   exceptionListType,
   alertData,
   isAlertDataLoading,
@@ -135,7 +139,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onRuleChange,
   alertStatus,
 }: AddExceptionFlyoutProps) {
-  const { http, unifiedSearch } = useKibana().services;
+  const { http, unifiedSearch, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -166,7 +170,21 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [jobs, ruleIndices]);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(memoRuleIndices);
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (dataViewId != null && dataViewId !== '') {
+        const dv = await data.dataViews.get(dataViewId);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, dataViewId, setIndexPattern]);
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -513,7 +531,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns,
+                indexPatterns:
+                  dataViewId != null && dataViewId !== '' ? indexPattern : indexIndexPatterns,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

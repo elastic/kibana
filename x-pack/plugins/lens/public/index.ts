@@ -15,8 +15,12 @@ export type {
   XYState,
   XYReferenceLineLayerConfig,
   XYLayerConfig,
+  ValidLayer,
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
+  YAxisMode,
+  SeriesType,
+  YConfig,
 } from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
@@ -28,6 +32,7 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
+  MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
@@ -55,6 +60,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -67,44 +73,35 @@ export type {
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
+  IndexPatternLayer,
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
-  YConfig,
   XYRender,
   LayerType,
-  YAxisMode,
   LineStyle,
   FillStyle,
-  SeriesType,
   YScaleType,
   XScaleType,
   AxisConfig,
-  ValidLayer,
   XYCurveType,
   XYChartProps,
   LegendConfig,
   IconPosition,
-  YConfigResult,
   DataLayerArgs,
-  LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
+  DataLayerConfig,
   FittingFunction,
   AxisExtentConfig,
   LegendConfigResult,
   AxesSettingsConfig,
-  GridlinesConfigResult,
-  DataLayerConfigResult,
-  TickLabelsConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
-  LabelsOrientationConfig,
-  LabelsOrientationConfigResult,
-  ReferenceLineLayerConfigResult,
-  AxisTitlesVisibilityConfigResult,
+  ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
-export type { LensEmbeddableInput } from './embeddable';
+export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+
 export { layerTypes } from '../common';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';

@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
 import { getApmSettings } from './settings_definition/apm_settings';
+import { getDebugSettings } from './settings_definition/debug_settings';
 import {
   getRUMSettings,
   isRUMFormValid,
@@ -41,11 +42,13 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
     tlsSettings,
     agentAuthorizationSettings,
     tailSamplingSettings,
+    debugSettings,
   } = useMemo(() => {
     return {
       apmSettings: getApmSettings(),
       rumSettings: getRUMSettings(),
       tlsSettings: getTLSSettings(),
+      debugSettings: getDebugSettings(),
       agentAuthorizationSettings: getAgentAuthorizationSettings(),
       tailSamplingSettings: getTailSamplingSettings(
         tailSamplingPoliciesDocsLink
@@ -63,7 +66,8 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
       isSettingsFormValid(agentAuthorizationSettings, newVars) &&
-      isTailBasedSamplingValid(newVars, tailSamplingSettings);
+      isTailBasedSamplingValid(newVars, tailSamplingSettings) &&
+      isSettingsFormValid(debugSettings, newVars);
 
     updateAPMPolicy(newVars, isFormValid);
   }
@@ -134,6 +138,18 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
           },
         ]
       : []),
+    {
+      id: 'debug',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.debug.settings.title',
+        { defaultMessage: 'Debug settings' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.debug.settings.subtitle',
+        { defaultMessage: 'Settings for the APM server debug flags' }
+      ),
+      settings: debugSettings,
+    },
   ];
 
   return (

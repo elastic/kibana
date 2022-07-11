@@ -8,7 +8,8 @@
 
 import Listr from 'listr';
 import chalk from 'chalk';
-import { createFailError, run } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 
 import {
   createTaskContext,

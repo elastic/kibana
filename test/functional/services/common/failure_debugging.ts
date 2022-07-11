@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
+import { createHash } from 'crypto';
 
 import del from 'del';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -48,8 +49,14 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   }
 
   async function onFailure(_: any, test: Test) {
+    const fullName = test.fullTitle();
+
+    // include a hash of the full title of the test in the filename so that even with truncation filenames are
+    // always unique and deterministic based on the test title
+    const hash = createHash('sha256').update(fullName).digest('hex');
+
     // Replace characters in test names which can't be used in filenames, like *
-    const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
+    const name = `${fullName.replace(/([^ a-zA-Z0-9-]+)/g, '_').slice(0, 80)}-${hash}`;
 
     await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
   }

@@ -17,12 +17,14 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -31,8 +33,9 @@ import {
 } from '../types';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
-import { setSavedObjectsClient } from '../common/lib/data_apis';
-import { KibanaContextProvider } from '../common/lib/kibana';
+import { setDataViewsService } from '../common/lib/data_apis';
+import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
+import { ConnectorProvider } from './context/connector_context';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -40,8 +43,10 @@ const RuleDetailsRoute = lazy(
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
+  actions: ActionsPublicPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -67,12 +72,12 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { savedObjects, uiSettings, theme$ } = deps;
+  const { dataViews, uiSettings, theme$ } = deps;
   const sections: Section[] = ['rules', 'connectors', 'alerts', '__components_sandbox'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
-  setSavedObjectsClient(savedObjects.client);
+  setDataViewsService(dataViews);
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
@@ -89,23 +94,29 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
+  const {
+    actions: { validateEmailAddresses },
+  } = useKibana().services;
+
   return (
-    <Switch>
-      <Route
-        path={`/:section(${sectionsRegex})`}
-        component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
-      />
-      <Route
-        path={routeToRuleDetails}
-        component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
-      />
-      <Route
-        exact
-        path={legacyRouteToRuleDetails}
-        render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
-      />
-      <Redirect from={'/'} to="rules" />
-      <Redirect from={'/alerts'} to="rules" />
-    </Switch>
+    <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+      <Switch>
+        <Route
+          path={`/:section(${sectionsRegex})`}
+          component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
+        />
+        <Route
+          path={routeToRuleDetails}
+          component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
+        />
+        <Route
+          exact
+          path={legacyRouteToRuleDetails}
+          render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
+        />
+        <Redirect from={'/'} to="rules" />
+        <Redirect from={'/alerts'} to="rules" />
+      </Switch>
+    </ConnectorProvider>
   );
 };

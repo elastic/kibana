@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
@@ -29,6 +35,8 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../../common/store';
+
+const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
 const OverlayStyle = css`
   display: flex;
@@ -59,10 +67,12 @@ const StyledResolver = styled(Resolver)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM};
-  background-color: ${theme.eui.euiColorEmptyShade};`}
+  ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`}
   overflow: hidden;
   width: 100%;
+  &.${SESSION_VIEW_FULL_SCREEN} {
+    ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM}`}
+  }
 `;
 
 interface GraphOverlayProps {
@@ -158,8 +168,13 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     return (
       <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
         <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+          <EuiHorizontalRule margin="none" />
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-          <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
+          <ScrollableFlexItem grow={2} className={fullScreen ? SESSION_VIEW_FULL_SCREEN : ''}>
+            {SessionView}
+          </ScrollableFlexItem>
         </EuiFlexGroup>
       </OverlayContainer>
     );

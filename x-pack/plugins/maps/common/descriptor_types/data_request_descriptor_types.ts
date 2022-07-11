@@ -9,7 +9,7 @@
 
 import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { MapExtent } from './map_descriptor';
 
 export type Timeslice = {
@@ -41,6 +41,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   sourceQuery?: Query;
   sourceMeta: object | null;
   isForceRefresh: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 };
 
 export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;

@@ -83,10 +83,13 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
         ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const fieldCaps = await asCurrentUser.fieldCaps({
-          index: job.datafeed_config.indices.join(','),
-          fields: uniqueFieldNames,
-        });
+        const fieldCaps = await asCurrentUser.fieldCaps(
+          {
+            index: job.datafeed_config.indices.join(','),
+            fields: uniqueFieldNames,
+          },
+          { maxRetries: 0 }
+        );
         const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
 
         let aggregatableFieldNames: string[] = [];

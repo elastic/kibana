@@ -226,5 +226,5 @@ const MainContainer = euiStyled.div`
 `;
 
 const TopActionContainer = euiStyled.div`
-  padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `12px ${props.theme.eui.euiSizeM}`};
 `;

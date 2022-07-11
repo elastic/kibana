@@ -11,8 +11,6 @@ import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: trial', function () {
-    this.tags('ciGroup25');
-
     before(async () => {
       await createSpacesAndUsers(getService);
     });
@@ -25,6 +23,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
     loadTestFile(require.resolve('./configure'));
+    // sub privileges are only available with a license above basic
+    loadTestFile(require.resolve('./delete_sub_privilege'));
 
     // Common
     loadTestFile(require.resolve('../common'));

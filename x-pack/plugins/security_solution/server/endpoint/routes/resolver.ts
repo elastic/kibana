@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import {
   validateEvents,
   validateEntities,
@@ -13,7 +13,7 @@ import {
 } from '../../../common/endpoint/schema/resolver';
 
 import { handleTree } from './resolver/tree/handler';
-import { handleEntities } from './resolver/entity';
+import { handleEntities } from './resolver/entity/handler';
 import { handleEvents } from './resolver/events';
 
 export function registerResolverRoutes(router: IRouter) {

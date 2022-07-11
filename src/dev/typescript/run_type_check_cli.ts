@@ -12,7 +12,8 @@ import Os from 'os';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import execa from 'execa';
-import { run, createFailError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { PROJECTS } from './projects';
 import { buildTsRefs } from './build_ts_refs';

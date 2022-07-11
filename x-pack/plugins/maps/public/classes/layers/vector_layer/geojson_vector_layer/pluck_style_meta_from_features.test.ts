@@ -188,7 +188,7 @@ describe('pluckStyleMetaFromFeatures', () => {
     });
   });
 
-  test('Should extract scaled field range', async () => {
+  test('Should extract range', async () => {
     const features = [
       {
         type: 'Feature',
@@ -197,7 +197,7 @@ describe('pluckStyleMetaFromFeatures', () => {
           coordinates: [0, 0],
         },
         properties: {
-          myDynamicField: 1,
+          myDynamicField: 3,
         },
       },
       {
@@ -242,9 +242,9 @@ describe('pluckStyleMetaFromFeatures', () => {
         myDynamicField: {
           categories: [],
           range: {
-            delta: 9,
+            delta: 7,
             max: 10,
-            min: 1,
+            min: 3,
           },
         },
       },
@@ -253,6 +253,65 @@ describe('pluckStyleMetaFromFeatures', () => {
         isPointsOnly: true,
         isPolygonsOnly: false,
       },
+    });
+  });
+
+  test('Should extract range with "min = 1" for count field', async () => {
+    const features = [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0],
+        },
+        properties: {
+          count: 3,
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0],
+        },
+        properties: {
+          count: 10,
+        },
+      },
+    ] as Feature[];
+    const dynamicColorOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+      field: {
+        origin: FIELD_ORIGIN.SOURCE,
+        name: 'count',
+      },
+    } as ColorDynamicOptions;
+    const field = new InlineField({
+      fieldName: dynamicColorOptions.field!.name,
+      source: {} as unknown as IVectorSource,
+      origin: dynamicColorOptions.field!.origin,
+      dataType: 'number',
+    });
+    field.isCount = () => {
+      return true;
+    };
+    const dynamicColorProperty = new DynamicColorProperty(
+      dynamicColorOptions,
+      VECTOR_STYLES.FILL_COLOR,
+      field,
+      {} as unknown as IVectorLayer,
+      () => {
+        return null;
+      } // getFieldFormatter
+    );
+
+    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), [
+      dynamicColorProperty,
+    ]);
+    expect(styleMeta.fieldMeta.count.range).toEqual({
+      delta: 9,
+      max: 10,
+      min: 1,
     });
   });
 });

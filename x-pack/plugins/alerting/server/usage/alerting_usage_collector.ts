@@ -68,6 +68,8 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     unknown: { type: 'long' },
   };
 
+export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).length;
+
 const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =
   {
     p50: { type: 'long' },
@@ -186,6 +188,16 @@ export function createAlertingUsageCollector(
             p90: {},
             p99: {},
           },
+          percentile_num_alerts_per_day: {
+            p50: 0,
+            p90: 0,
+            p99: 0,
+          },
+          percentile_num_alerts_by_type_per_day: {
+            p50: {},
+            p90: {},
+            p99: {},
+          },
         };
       }
     },
@@ -239,6 +251,8 @@ export function createAlertingUsageCollector(
       avg_total_search_duration_by_type_per_day: byTypeSchema,
       percentile_num_generated_actions_per_day: byPercentileSchema,
       percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
+      percentile_num_alerts_per_day: byPercentileSchema,
+      percentile_num_alerts_by_type_per_day: byPercentileSchemaByType,
     },
   });
 }

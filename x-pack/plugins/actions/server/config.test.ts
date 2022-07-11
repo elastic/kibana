@@ -212,6 +212,25 @@ describe('config validation', () => {
       }
     `);
   });
+
+  test('validates email.domain_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {};
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email.domain_allowlist]: expected value of type [array] but got [undefined]"`
+    );
+
+    config.email = { domain_allowlist: [] };
+    result = configSchema.validate(config);
+    expect(result.email?.domain_allowlist).toEqual([]);
+
+    config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
+    result = configSchema.validate(config);
+    expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an

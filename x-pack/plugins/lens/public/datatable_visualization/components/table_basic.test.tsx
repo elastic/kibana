@@ -11,68 +11,58 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType } from '@kbn/data-plugin/public';
-import {
-  FieldFormatParams,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
+import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
-import { LensMultiTable } from '../../../common';
 import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { RenderMode } from '@kbn/expressions-plugin';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin';
 
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      l1: {
-        type: 'datatable',
-        columns: [
-          {
-            id: 'a',
-            name: 'a',
-            meta: {
-              type: 'string',
-              source: 'esaggs',
-              field: 'a',
-              sourceParams: { type: 'terms', indexPatternId },
-            },
-          },
-          {
-            id: 'b',
-            name: 'b',
-            meta: {
-              type: 'date',
-              field: 'b',
-              source: 'esaggs',
-              sourceParams: {
-                type: 'date_histogram',
-                indexPatternId,
-              },
-            },
-          },
-          {
-            id: 'c',
-            name: 'c',
-            meta: {
-              type: 'number',
-              source: 'esaggs',
-              field: 'c',
-              sourceParams: { indexPatternId, type: 'count' },
-            },
-          },
-        ],
-        rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
+  const data: Datatable = {
+    type: 'datatable',
+    columns: [
+      {
+        id: 'a',
+        name: 'a',
+        meta: {
+          type: 'string',
+          source: 'esaggs',
+          field: 'a',
+          sourceParams: { type: 'terms', indexPatternId },
+        },
       },
-    },
+      {
+        id: 'b',
+        name: 'b',
+        meta: {
+          type: 'date',
+          field: 'b',
+          source: 'esaggs',
+          sourceParams: {
+            type: 'date_histogram',
+            indexPatternId,
+          },
+        },
+      },
+      {
+        id: 'c',
+        name: 'c',
+        meta: {
+          type: 'number',
+          source: 'esaggs',
+          field: 'c',
+          sourceParams: { indexPatternId, type: 'count' },
+        },
+      },
+    ],
+    rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
   };
 
   const args: DatatableProps['args'] = {
@@ -103,9 +93,11 @@ async function waitForWrapperUpdate(wrapper: ReactWrapper) {
 
 describe('DatatableComponent', () => {
   let onDispatchEvent: jest.Mock;
+  let renderComplete: jest.Mock;
 
   beforeEach(() => {
     onDispatchEvent = jest.fn();
+    renderComplete = jest.fn();
   });
 
   test('it renders the title and value', () => {
@@ -116,13 +108,14 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
           interactive
+          renderComplete={renderComplete}
         />
       )
     ).toMatchSnapshot();
@@ -136,7 +129,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[true, true, true]}
@@ -144,6 +137,7 @@ describe('DatatableComponent', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           interactive
+          renderComplete={renderComplete}
         />
       )
     ).toMatchSnapshot();
@@ -157,7 +151,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[false, false, false]}
@@ -165,6 +159,7 @@ describe('DatatableComponent', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           interactive
+          renderComplete={renderComplete}
         />
       )
     ).toMatchSnapshot();
@@ -175,13 +170,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -190,6 +179,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -206,7 +196,7 @@ describe('DatatableComponent', () => {
           {
             column: 0,
             row: 0,
-            table: data.tables.l1,
+            table: data,
             value: 'shoes',
           },
         ],
@@ -220,13 +210,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -235,6 +219,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -251,7 +236,7 @@ describe('DatatableComponent', () => {
           {
             column: 1,
             row: 0,
-            table: data.tables.l1,
+            table: data,
             value: 1588024800000,
           },
         ],
@@ -261,35 +246,30 @@ describe('DatatableComponent', () => {
   });
 
   test('it invokes executeTriggerActions with correct context on click on timefield from range', async () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        l1: {
-          type: 'datatable',
-          columns: [
-            {
-              id: 'a',
-              name: 'a',
-              meta: {
-                type: 'date',
-                source: 'esaggs',
-                field: 'a',
-                sourceParams: { type: 'date_range', indexPatternId: 'a' },
-              },
-            },
-            {
-              id: 'b',
-              name: 'b',
-              meta: {
-                type: 'number',
-                source: 'esaggs',
-                sourceParams: { type: 'count', indexPatternId: 'a' },
-              },
-            },
-          ],
-          rows: [{ a: 1588024800000, b: 3 }],
+    const data: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'a',
+          name: 'a',
+          meta: {
+            type: 'date',
+            source: 'esaggs',
+            field: 'a',
+            sourceParams: { type: 'date_range', indexPatternId: 'a' },
+          },
         },
-      },
+        {
+          id: 'b',
+          name: 'b',
+          meta: {
+            type: 'number',
+            source: 'esaggs',
+            sourceParams: { type: 'count', indexPatternId: 'a' },
+          },
+        },
+      ],
+      rows: [{ a: 1588024800000, b: 3 }],
     };
 
     const args: DatatableProps['args'] = {
@@ -305,13 +285,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -320,6 +294,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -336,7 +311,7 @@ describe('DatatableComponent', () => {
           {
             column: 0,
             row: 0,
-            table: data.tables.l1,
+            table: data,
             value: 1588024800000,
           },
         ],
@@ -350,13 +325,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -365,6 +334,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive={false}
+        renderComplete={renderComplete}
       />
     );
 
@@ -377,14 +347,9 @@ describe('DatatableComponent', () => {
 
   test('it shows emptyPlaceholder for undefined bucketed data', () => {
     const { args, data } = sampleArgs();
-    const emptyData: LensMultiTable = {
+    const emptyData: Datatable = {
       ...data,
-      tables: {
-        l1: {
-          ...data.tables.l1,
-          rows: [{ a: undefined, b: undefined, c: 0 }],
-        },
-      },
+      rows: [{ a: undefined, b: undefined, c: 0 }],
     };
 
     const component = shallow(
@@ -400,6 +365,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
     expect(component.find(VisualizationContainer)).toHaveLength(1);
@@ -424,6 +390,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -475,6 +442,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -506,6 +474,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -535,6 +504,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -551,8 +521,7 @@ describe('DatatableComponent', () => {
   test('it detect last_value filtered metric type', () => {
     const { data, args } = sampleArgs();
 
-    const table = data.tables.l1;
-    const column = table.columns[1];
+    const column = data.columns[1];
 
     column.meta = {
       ...column.meta,
@@ -560,7 +529,7 @@ describe('DatatableComponent', () => {
       type: 'number',
       sourceParams: { ...column.meta.sourceParams, type: 'filtered_metric' },
     };
-    table.rows[0].b = 'Hello';
+    data.rows[0].b = 'Hello';
 
     const wrapper = shallow(
       <DatatableComponent
@@ -582,6 +551,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -609,11 +579,12 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
     // mnake a copy of the data, changing only the name of the first column
     const newData = copyData(data);
-    newData.tables.l1.columns[0].name = 'new a';
+    newData.columns[0].name = 'new a';
     wrapper.setProps({ data: newData });
     wrapper.update();
 
@@ -647,6 +618,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -683,6 +655,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-a"]').exists()).toEqual(false);
@@ -719,6 +692,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -754,6 +728,7 @@ describe('DatatableComponent', () => {
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
+        renderComplete={renderComplete}
       />
     );
 
@@ -770,13 +745,14 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
           interactive
+          renderComplete={renderComplete}
         />
       );
 
@@ -805,13 +781,14 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
           interactive
+          renderComplete={renderComplete}
         />
       );
 
@@ -830,13 +807,14 @@ describe('DatatableComponent', () => {
 
       const defaultProps = {
         data,
-        formatFactory: (x?: SerializedFieldFormat<FieldFormatParams>) => x as IFieldFormat,
+        formatFactory: (x?: SerializedFieldFormat) => x as unknown as IFieldFormat,
         dispatchEvent: onDispatchEvent,
         getType: jest.fn(),
         paletteService: chartPluginMock.createPaletteRegistry(),
         uiSettings: { get: jest.fn() } as unknown as IUiSettingsClient,
         renderMode: 'edit' as RenderMode,
         interactive: true,
+        renderComplete,
       };
 
       const wrapper = mount(
@@ -866,13 +844,14 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
           interactive
+          renderComplete={renderComplete}
         />
       );
 

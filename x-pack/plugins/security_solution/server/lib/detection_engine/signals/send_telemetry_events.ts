@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { TelemetryEvent } from '../../telemetry/types';
-import { BuildRuleMessage } from './rule_messages';
-import { SignalSearchResponse, SignalSource } from './types';
+import type { Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { TelemetryEvent } from '../../telemetry/types';
+import type { BuildRuleMessage } from './rule_messages';
+import type { SignalSource, SignalSourceHit } from './types';
 
 interface SearchResultSource {
   _source: SignalSource;
@@ -18,9 +18,9 @@ interface SearchResultSource {
 type CreatedSignalId = string;
 type AlertId = string;
 
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+export function selectEvents(filteredEvents: SignalSourceHit[]): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
+  const sources: TelemetryEvent[] = filteredEvents.map(function (
     obj: SearchResultSource
   ): TelemetryEvent {
     return obj._source;
@@ -46,7 +46,7 @@ export function enrichEndpointAlertsSignalID(
 export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: ITelemetryEventsSender | undefined,
-  filteredEvents: SignalSearchResponse,
+  filteredEvents: SignalSourceHit[],
   createdEvents: SignalSource[],
   buildRuleMessage: BuildRuleMessage
 ) {

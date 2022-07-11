@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { FindHit } from '../routes/__mocks__/request_responses';
 import {
   getRuleMock,
   getFindResultWithSingleHit,
-  FindHit,
   getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
@@ -22,7 +22,7 @@ import {
 
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
 const exceptionsClient = getExceptionListClientMock();
@@ -85,6 +85,9 @@ describe('getExportAll', () => {
       name: 'Detect Root/Admin Users',
       query: 'user.name: root or user.name: admin',
       references: ['http://example.com', 'https://example.com'],
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
       timeline_id: 'some-timeline-id',
       timeline_title: 'some-timeline-title',
       meta: { someMeta: 'someField' },

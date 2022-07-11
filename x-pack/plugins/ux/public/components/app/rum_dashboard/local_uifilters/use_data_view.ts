@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
 
@@ -15,10 +15,8 @@ export function useDataView() {
   const { dataView } = useDynamicDataViewFetcher();
 
   const {
-    services: {
-      data: { dataViews },
-    },
-  } = useKibana<{ data: DataPublicPluginStart }>();
+    services: { dataViews },
+  } = useKibana<{ dataViews: DataViewsPublicPluginStart }>();
 
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (dataView?.title) {
