@@ -9,8 +9,12 @@ import { firstNonNullValue } from '../../../common/endpoint/models/ecs_safety_he
 
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
-import { ResolverEvent, SafeResolverEvent, ResolverNode } from '../../../common/endpoint/types';
-import { ResolverProcessType } from '../types';
+import type {
+  ResolverEvent,
+  SafeResolverEvent,
+  ResolverNode,
+} from '../../../common/endpoint/types';
+import type { ResolverProcessType } from '../types';
 
 /**
  * Returns true if the process's eventType is either 'processCreated' or 'processRan'.

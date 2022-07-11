@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiFieldPassword,
   EuiCodeBlock,
+  EuiTextArea,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -55,6 +56,17 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       );
     }
     switch (type) {
+      case 'textarea':
+        return (
+          <EuiTextArea
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+            resize="vertical"
+          />
+        );
       case 'yaml':
         return frozen ? (
           <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">

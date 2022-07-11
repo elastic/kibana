@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { IRouter } from '@kbn/core-http-server';
 import { CapabilitiesResolver } from '../resolve_capabilities';
-import { IRouter } from '../../http';
 import { registerCapabilitiesRoutes } from './resolve_capabilities';
 
 export function registerRoutes(router: IRouter, resolver: CapabilitiesResolver) {

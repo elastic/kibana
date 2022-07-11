@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
-import { UsersRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/all';
+import type { UsersRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/all';
 import { UsersFields } from '../../../../../../../common/search_strategy/security_solution/users/common';
 
 export const mockOptions: UsersRequestOptions = {
