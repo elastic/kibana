@@ -5,92 +5,63 @@
  * 2.0.
  */
 
-/* This method flattens fields in documents returned from the ent-search backend.
- * If a field in the document contains "raw" key, it's already flat.
- * If it doesn't, we want to pull properties from it, and move them to the top level.
- * This field is already flat:
- * 'country', { raw: 'United States' }
- * This field is not flat:
- * 'address', {
- *     country: { raw: 'United States' },
- *     city: { raw: 'Los Angeles' }
- * }
- * It will be transformed into:
- * [
- *   ['address.country', { raw: 'United States' }],
- *   ['address.city', { raw: 'Los Angeles' }]
- * ]
- */
-export const flattenDocumentField = (
-  fieldName: string,
-  fieldValue: object
-): Array<[string, object]> => {
-  const flattened: Array<[string, object]> = [];
+function isFieldValueWrapper(object: [key: string]) {
+  return (
+    object &&
+    (Object.prototype.hasOwnProperty.call(object, "raw") ||
+     Object.prototype.hasOwnProperty.call(object, "snippet"))
+  );
+}
 
-  if (typeof fieldValue === 'object' && !fieldValue.hasOwnProperty('raw')) {
-    for (const [propName, value] of Object.entries(fieldValue)) {
-      flattenDocumentField(fieldName + '.' + propName, value).map(([flatKey, flatVal]) => {
-        flattened.push([flatKey, flatVal]);
-      });
-    }
-  } else {
-    flattened.push([fieldName, fieldValue]);
-  }
+// Returns true for objects like this:
+// objectField: {
+//     objectSubField1: { raw: "one" },
+//     objectSubField2: { raw: "two" }
+// }
+// And false for objects like this:
+// objectField: { raw: "one" }
+function isNestedField(result: any, field: string) {
+  return (
+    result &&
+    result[field] &&
+    field !== "_meta" &&
+    typeof result[field] === "object" &&
+    !isFieldValueWrapper(result[field])
+  );
+}
 
-  return flattened;
-};
-
-export const cleanNestedValue = (value: { raw?: object }): any => {
-  if (Array.isArray(value)) {
-    return value.map(cleanNestedValue);
-  }
-
-  if (!!value.raw) {
-    return value.raw
-  }
-
-  if (typeof(value) == 'string' || typeof(value) == 'number') {
+// Takes any value and removes the wrapper around deepest values
+// (removes the wrapper Object with "raw" and/or "snippet" fields)
+// See tests for examples
+function cleanValueWrappers(value: any): object {
+  if (isFieldValueWrapper(value) && value.raw) {
     return value;
   }
 
-  return Object.entries(value).reduce((acc: { [key: string] : any } , [key, value]) => {
-    acc[key] = cleanNestedValue(value);
-    return acc;
-  }, {});
+  if (Array.isArray(value)) {
+    return value.map(cleanValueWrappers);
+  }
+
+  if (typeof value === "object") {
+    return Object.entries(value).reduce((acc: any, [key, value]) => {
+      acc[key] = cleanValueWrappers(value);
+      return acc;
+    }, {});
+  }
+
+  return value;
 }
 
-/* This method flattens documents returned from the ent-search backend.
- * Example document:
- * {
- *   id: { raw: '123' },
- *   _meta: { engine: 'Test', id: '1' },
- *   title: { raw: 'Getty Museum' },
- *   address: { city: { raw: 'Los Angeles' }, state: { raw: 'California' } },
- * }
- * Will be transformed to:
- * {
- *   id: { raw: '123' },
- *   _meta: { engine: 'Test', id: '1' },
- *   title: { raw: 'Getty Museum' },
- *   'address.city': { raw: 'Los Angeles' },
- *   'address.state': { raw: 'California' },
- * }
- */
-export const flattenDocument = (result: object): object => {
-  const flattened: { [index: string]: object } = {};
 
-  for (const [key, value] of Object.entries(result)) {
-    if (key === 'id' || key === '_meta') {
-      flattened[key] = value;
-    } else {
-      if (!!value.raw || !!value.snippet) {
-        flattened[key] = value;
-      } else {
-        flattened[key] = { raw: cleanNestedValue(value) }
-      }
+export function formatResult(result: any): object {
+  return Object.keys(result).reduce((acc: any, field) => {
+    if (isNestedField(result, field)) {
+      return {
+        ...acc,
+        [field]: { raw: cleanValueWrappers(result[field]) }
+      };
     }
-  }
-  console.log(flattened)
 
-  return flattened;
-};
+    return { ...acc, [field]: result[field] };
+  }, {});
+}

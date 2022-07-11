@@ -15,7 +15,7 @@ import {
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH } from '../../../routes';
-import { flattenDocument } from '../../../utils/results';
+import { formatResult } from '../../../utils/results';
 import { EngineLogic, generateEnginePath } from '../../engine';
 import { DELETE_SUCCESS_MESSAGE } from '../constants';
 
@@ -238,8 +238,8 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         );
         const payload = {
           ...response,
-          hidden: response.hidden.map((x) => flattenDocument(x) as CurationResult),
-          promoted: response.promoted.map((x) => flattenDocument(x) as CurationResult),
+          hidden: response.hidden.map((x) => formatResult(x) as CurationResult),
+          promoted: response.promoted.map((x) => formatResult(x) as CurationResult),
         };
         actions.onCurationLoad(payload);
       } catch (e) {
@@ -271,8 +271,8 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         );
         const payload = {
           ...response,
-          hidden: response.hidden.map((x) => flattenDocument(x) as CurationResult),
-          promoted: response.promoted.map((x) => flattenDocument(x) as CurationResult),
+          hidden: response.hidden.map((x) => formatResult(x) as CurationResult),
+          promoted: response.promoted.map((x) => formatResult(x) as CurationResult),
         };
         actions.onCurationLoad(payload);
       } catch (e) {
