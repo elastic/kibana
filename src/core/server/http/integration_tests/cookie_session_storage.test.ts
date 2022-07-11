@@ -18,9 +18,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+
 import { HttpService } from '../http_service';
 
-import { contextServiceMock } from '../../context/context_service.mock';
 import { httpServerMock } from '../http_server.mocks';
 
 import { createCookieSessionStorageFactory } from '../cookie_session_storage';

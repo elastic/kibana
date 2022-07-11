@@ -21,21 +21,21 @@ import type {
   IContextContainer,
   IContextProvider,
 } from '@kbn/core-http-server';
+import type {
+  InternalContextSetup,
+  InternalContextPreboot,
+} from '@kbn/core-http-context-server-internal';
 
-import { InternalContextSetup, InternalContextPreboot } from '../context';
 import { CspConfigType, cspConfig } from './csp';
-
 import { Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
-
 import {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
-
 import { registerCoreHandlers } from './lifecycle_handlers';
 import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
 

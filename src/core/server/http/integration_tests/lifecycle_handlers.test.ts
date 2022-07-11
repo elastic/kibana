@@ -12,12 +12,12 @@ import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
 
-import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

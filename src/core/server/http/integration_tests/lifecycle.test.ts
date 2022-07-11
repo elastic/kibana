@@ -11,11 +11,11 @@ import { parse as parseCookie } from 'tough-cookie';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
 
-import { contextServiceMock } from '../../context/context_service.mock';
 import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
