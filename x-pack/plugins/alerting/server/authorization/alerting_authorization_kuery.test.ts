@@ -297,7 +297,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       'space1'
     );
 
-    expect(result).toEqual(fromKueryExpression(`path.to.rule_type_id:myAppAlertType`));
+    expect(result).toEqual(esKuery.fromKueryExpression(`path.to.rule_type_id:myAppAlertType`));
   });
 });
 
