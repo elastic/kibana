@@ -12,7 +12,7 @@ import type { HttpFetchError } from '@kbn/core/public';
 import { v4 as uuidV4 } from 'uuid';
 import type { HostInfo, PendingActionsResponse } from '../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from './types';
-import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../hooks';

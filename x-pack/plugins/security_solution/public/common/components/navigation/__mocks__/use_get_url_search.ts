@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { SearchNavTab } from '../types';
+import type { SearchNavTab } from '../types';
 
 export const useGetUrlSearch = (tab: SearchNavTab) => '';

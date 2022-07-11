@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 
 import moment from 'moment';
 
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
 import {
   calculateTimeSeriesInterval,
   createQueryFilterClauses,

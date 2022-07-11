@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { endpointPageHttpMock } from '../../mocks';
 import { act } from '@testing-library/react';
-import { EndpointAgentStatus, EndpointAgentStatusProps } from './endpoint_agent_status';
-import { HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
+import type { EndpointAgentStatusProps } from './endpoint_agent_status';
+import { EndpointAgentStatus } from './endpoint_agent_status';
+import type { HostMetadata } from '../../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 import { isLoadedResourceState } from '../../../../state';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
