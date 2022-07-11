@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CommandArgs, CommandDefinition } from '../types';
+import type { CommandArgs, CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
@@ -37,21 +37,21 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
   .euiTableHeaderCell {
     .euiTableCellContent__text {
-      font-size: 14px;
-      padding-bottom: 10px;
-      padding-left: 7px;
+      font-size: ${({ theme: { eui } }) => eui.euiFontSize};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeM};
+      padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
     }
   }
 `;
 
 const StyledEuiCallOut = styled(EuiCallOut)`
-  margin-left: ${({ theme }) => theme.eui.euiSize};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  margin-bottom: ${({ theme }) => theme.eui.euiSize};
+  margin-left: ${({ theme: { eui } }) => eui.euiSize};
+  margin-right: ${({ theme: { eui } }) => eui.euiSizeS};
+  margin-bottom: ${({ theme: { eui } }) => eui.euiSize};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+  padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
 `;
 
 export interface CommandListProps {
@@ -91,6 +91,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     );
   }, []);
 
+  const otherCommandsGroupLabel = i18n.translate(
+    'xpack.securitySolution.console.commandList.otherCommandsGroup.label',
+    {
+      defaultMessage: 'Other commands',
+    }
+  );
+
   const commandsByGroups = useMemo(() => {
     return Object.values(groupBy(commands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
       (acc, current) => {
@@ -119,20 +126,20 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       if (commandsByGroup[0].helpGroupLabel === HELP_GROUPS.supporting.label) {
         return [...COMMON_ARGS, ...commandsByGroup].map((command) => {
           return {
-            [commandsByGroup[0]?.helpGroupLabel ?? 'Other commands']: command,
+            [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
           };
         });
       }
       return commandsByGroup.map((command) => {
         return {
-          [commandsByGroup[0]?.helpGroupLabel ?? 'Other commands']: command,
+          [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
         };
       });
     },
-    []
+    [otherCommandsGroupLabel]
   );
 
-  const getCommandNameWithArgs = useCallback((command: CommandDefinition) => {
+  const getCommandNameWithArgs = useCallback((command: Partial<CommandDefinition>) => {
     if (!command.mustHaveArgs || !command.args) {
       return command.name;
     }
@@ -168,12 +175,12 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     [dispatch]
   );
 
-  const getColumns = useCallback(
+  const getTableColumns = useCallback(
     (commandsByGroup) => {
       return [
         {
-          field: commandsByGroup[0]?.helpGroupLabel ?? 'Other commands',
-          name: commandsByGroup[0]?.helpGroupLabel ?? 'Other commands',
+          field: commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel,
+          name: commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel,
           render: (command: CommandDefinition) => {
             const commandNameWithArgs = getCommandNameWithArgs(command);
             return (
@@ -213,7 +220,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         },
       ];
     },
-    [getCommandNameWithArgs, getTestId, updateInputText]
+    [getCommandNameWithArgs, getTestId, otherCommandsGroupLabel, updateInputText]
   );
 
   if (display === 'table') {
@@ -260,7 +267,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         {commandsByGroups.map((commandsByGroup) => (
           <StyledEuiBasicTable
             items={getTableItems(commandsByGroup)}
-            columns={getColumns(commandsByGroup)}
+            columns={getTableColumns(commandsByGroup)}
           />
         ))}
         <EuiSpacer size="s" />
@@ -268,6 +275,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       </>
     );
   }
+
   return (
     <>
       <EuiSpacer />
@@ -275,7 +283,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         const groupLabel = commandsByGroup[0].helpGroupLabel;
         const groupedCommands =
           groupLabel === HELP_GROUPS.supporting.label
-            ? [...commandsByGroup, ...(COMMON_ARGS as CommandDefinition[])]
+            ? [...commandsByGroup, ...COMMON_ARGS]
             : commandsByGroup;
         return (
           <EuiFlexGrid columns={3} responsive={false} gutterSize="m" key={groupLabel}>
