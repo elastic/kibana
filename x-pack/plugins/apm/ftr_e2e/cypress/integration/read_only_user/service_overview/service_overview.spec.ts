@@ -148,7 +148,7 @@ describe('Service Overview', () => {
       );
     });
 
-    it('persists transaction type selected when clicking on View Transactions link', () => {
+    it.skip('persists transaction type selected when clicking on View Transactions link', () => {
       cy.intercept(
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
