@@ -6,7 +6,7 @@
  */
 import type { QueryObserverResult, UseQueryOptions } from 'react-query';
 import { useQuery } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
@@ -57,10 +57,10 @@ export function useGetAgentCountForPolicy({
   customQueryOptions,
 }: {
   policyIds: string[];
-  customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, HttpFetchError>;
-}): QueryObserverResult<GetAgentPoliciesResponse, HttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, IHttpFetchError>;
+}): QueryObserverResult<GetAgentPoliciesResponse, IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetAgentPoliciesResponse, HttpFetchError>(
+  return useQuery<GetAgentPoliciesResponse, IHttpFetchError>(
     ['endpointCountForPolicy', policyIds],
     () => {
       return sendGetAgentPolicyList(http, {
@@ -80,10 +80,10 @@ export function useGetAgentCountForPolicy({
 export function useGetEndpointSecurityPackage({
   customQueryOptions,
 }: {
-  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], HttpFetchError>;
-}): QueryObserverResult<GetPackagesResponse['items'][number], HttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], IHttpFetchError>;
+}): QueryObserverResult<GetPackagesResponse['items'][number], IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetPackagesResponse['items'][number], HttpFetchError>(
+  return useQuery<GetPackagesResponse['items'][number], IHttpFetchError>(
     ['endpointPackageVersion', customQueryOptions],
     () => {
       return sendGetEndpointSecurityPackage(http);

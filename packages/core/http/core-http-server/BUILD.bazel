@@ -39,7 +39,8 @@ TYPES_DEPS = [
   "@npm//@hapi/boom",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
-  "//packages/core/base/core-base-common:npm_module_types"
+  "//packages/core/base/core-base-common:npm_module_types",
+  "//packages/core/http/core-http-common:npm_module_types"
 ]
 
 jsts_transpiler(
