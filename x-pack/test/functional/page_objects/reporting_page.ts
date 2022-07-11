@@ -149,6 +149,7 @@ export class ReportingPageObject extends FtrService {
       allowHidden: true,
       timeout: 90000,
     });
+    this.log.debug(isToastPresent);
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {
       await this.testSubjects.click('completeReportSuccess > toastCloseButton');
