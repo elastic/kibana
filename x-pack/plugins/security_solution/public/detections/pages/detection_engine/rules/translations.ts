@@ -280,7 +280,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.transl
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Enter the pattern of Elasticsearch indices which you would like to delete. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
+      'Enter the pattern of Elasticsearch indices that you would like to delete. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
