@@ -88,7 +88,7 @@ ${HORIZONTAL_LINE}
                             the credentials defined via 'username' and 'password' options. This
                             new user will then be used to run this utility.
         --kibana            The url to Kibana (Default: http://localhost:5601)
-        --elastic           The url to Elasticsearch (Default: http:localholst:9200)
+        --elastic           The url to Elasticsearch (Default: http://localhost:9200)
         --checkinInterval   The interval between how often the Agent is checked into fleet and a
                             metadata document update is sent for the endpoint. Default is 1 minute
         --actionDelay       The delay (in milliseconds) that should be applied before responding
