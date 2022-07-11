@@ -8,9 +8,9 @@
 import React, { memo } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
-import { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
-import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
+import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
+import type { EventFiltersPageLocation } from '../../../../event_filters/types';
+import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface CommonProps {
   policyId: string;

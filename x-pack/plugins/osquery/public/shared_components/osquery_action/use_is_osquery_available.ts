@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { find } from 'lodash';
-import { AgentStatus } from '@kbn/fleet-plugin/common';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';

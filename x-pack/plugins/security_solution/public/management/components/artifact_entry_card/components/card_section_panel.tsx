@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiPanel, EuiPanelProps } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
 export type CardSectionPanelProps = Exclude<
   EuiPanelProps,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SanitizedRule, RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { createRules } from './create_rules';
 
 export const installPrepackagedRules = (

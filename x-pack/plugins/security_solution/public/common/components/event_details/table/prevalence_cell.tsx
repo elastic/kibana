@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { AlertSummaryRow } from '../helpers';
+import type { AlertSummaryRow } from '../helpers';
 import { getEmptyTagValue } from '../../empty_value';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
