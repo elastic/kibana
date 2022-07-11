@@ -8962,7 +8962,13 @@
         "description": [],
         "signature": [
           "(id: string | undefined, timeRange: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined) => string"
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
@@ -8990,7 +8996,13 @@
             "label": "timeRange",
             "description": [],
             "signature": [
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/constants.ts",

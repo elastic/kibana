@@ -6,7 +6,7 @@
  */
 
 import { requestContextMock } from './lib/detection_engine/routes/__mocks__';
-import { IRequestContextFactory } from './request_context_factory';
+import type { IRequestContextFactory } from './request_context_factory';
 
 export const requestContextFactoryMock = {
   create: (): jest.Mocked<IRequestContextFactory> => ({

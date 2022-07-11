@@ -9,12 +9,12 @@ import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { ImportRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   getOutputDetailsSample,
   getSampleDetailsAsNdjson,
 } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
-import { RuleExceptionsPromiseFromStreams } from '../routes/rules/utils/import_rules_utils';
+import type { RuleExceptionsPromiseFromStreams } from '../routes/rules/utils/import_rules_utils';
 
 export const getOutputSample = (): Partial<ImportRulesSchema> => ({
   rule_id: 'rule-1',

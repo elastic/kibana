@@ -11,18 +11,18 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel } from '../../../common/store';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import {
-  NetworkQueries,
+import type {
   NetworkDetailsRequestOptions,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
+import { NetworkQueries } from '../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'networkDetailsQuery';
