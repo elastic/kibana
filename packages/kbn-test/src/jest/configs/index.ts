@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getAllTestFiles } from './get_all_test_files';
-export { groupTestFiles } from './group_test_files';
-export {
-  findMissingConfigFiles,
-  UNIT_CONFIG_NAME,
-  INTEGRATION_CONFIG_NAME,
-} from './find_missing_config_files';
+export * from './get_all_jest_paths';
+export * from './get_tests_for_config_paths';

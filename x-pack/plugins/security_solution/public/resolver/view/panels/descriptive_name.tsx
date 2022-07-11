@@ -13,7 +13,7 @@ import {
   processNameSafeVersion,
   entityIDSafeVersion,
 } from '../../../../common/endpoint/models/event';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 /**
  * Based on the ECS category of the event, attempt to provide a more descriptive name

@@ -6,15 +6,12 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import {
-  TimelineId,
-  TimelineTabs,
-  TimelineExpandedDetailType,
-} from '../../../../../../common/types/timeline';
+import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
