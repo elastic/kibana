@@ -456,6 +456,8 @@ export class TaskRunner<
       });
     }
 
+    await rulesClient.clearExpiredSnoozes({ id: rule.id });
+
     const ruleIsSnoozed = isRuleSnoozed(rule);
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);

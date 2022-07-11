@@ -3360,13 +3360,7 @@
             "text": "NavigateToAppOptions"
           },
           " | undefined) => Promise<void>; basePath: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; mapping: string | Mapping; toastNotifications: ",
           {
             "pluginId": "core",
@@ -3484,13 +3478,7 @@
                 "label": "basePath",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.IBasePath",
-                    "text": "IBasePath"
-                  }
+                  "IBasePath"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false

@@ -111,6 +111,7 @@ import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveSnoozes } from '../lib/is_rule_snoozed';
+import { isSnoozeExpired } from '../lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -2290,6 +2291,40 @@ export class RulesClient {
     if (!isSnoozedUntil && !rule.isSnoozedUntil) return;
 
     return isSnoozedUntil ? isSnoozedUntil.toISOString() : null;
+  }
+
+  public async clearExpiredSnoozes({ id }: { id: string }): Promise<void> {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    const snoozeSchedule = attributes.snoozeSchedule
+      ? attributes.snoozeSchedule.filter((s) => {
+          try {
+            return !isSnoozeExpired(s);
+          } catch (e) {
+            this.logger.error(`Error checking for expiration of snooze ${s.id}: ${e}`);
+            return true;
+          }
+        })
+      : [];
+
+    if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
+
+    const updateAttributes = this.updateMeta({
+      snoozeSchedule,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
   public async muteAll({ id }: { id: string }): Promise<void> {
