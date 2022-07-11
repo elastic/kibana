@@ -179,6 +179,7 @@ export function getTopNavConfig({
               ...props,
               newTags: selectedTags,
               saveByReference: props.addToLibrary,
+              saveFilters: props.saveFilters,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -196,7 +197,6 @@ export function getTopNavConfig({
         const PresentationUtilContext = getPresentationUtilContext();
 
         let saveModal;
-
         if (savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables()) {
           saveModal = (
             <SavedObjectSaveModalOrigin

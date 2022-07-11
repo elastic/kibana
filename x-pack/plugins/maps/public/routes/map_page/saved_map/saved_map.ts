@@ -369,11 +369,13 @@ export class SavedMap {
     newTags,
     saveByReference,
     dashboardId,
+    saveFilters,
   }: OnSaveProps & {
     returnToOrigin?: boolean;
     newTags?: string[];
     saveByReference: boolean;
     dashboardId?: string | null;
+    saveFilters?: boolean;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling save');
@@ -387,7 +389,7 @@ export class SavedMap {
     if (newTags) {
       this._tags = newTags;
     }
-    this._syncAttributesWithStore();
+    this._syncAttributesWithStore(Boolean(saveFilters));
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
@@ -412,7 +414,7 @@ export class SavedMap {
       this._tags = prevTags;
       return;
     }
-
+    const state: MapStoreState = this._store.getState();
     if (returnToOrigin) {
       if (!this._originatingApp) {
         getToasts().addDanger({
@@ -431,6 +433,7 @@ export class SavedMap {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
+          filters: getFilters(state),
         },
         path: this._originatingPath,
       });
@@ -440,6 +443,7 @@ export class SavedMap {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
+          filters: getFilters(state),
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
@@ -471,7 +475,7 @@ export class SavedMap {
     return;
   }
 
-  private _syncAttributesWithStore() {
+  private _syncAttributesWithStore(saveFilters: boolean) {
     const state: MapStoreState = this._store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
@@ -488,7 +492,7 @@ export class SavedMap {
         interval: getTimeFilter().getRefreshInterval().value,
       },
       query: getQuery(state),
-      filters: getFilters(state),
+      filters: saveFilters ? getFilters(state) : [],
       settings: {
         ...mapSettings,
         // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
