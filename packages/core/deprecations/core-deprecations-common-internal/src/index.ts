@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { DomainDeprecationDetails, ResolveDeprecationResponse } from './types';
+export function foo() {
+  return 'hello world';
+}

@@ -42,6 +42,7 @@ import type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
+import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -75,10 +76,9 @@ import type {
 import type { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import type { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import type { SavedObjectsStart } from './saved_objects';
-import type { DeprecationsServiceStart } from './deprecations';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
-export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
+export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
@@ -210,7 +210,10 @@ export type {
 
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
-export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+export type {
+  DeprecationsServiceStart,
+  ResolveDeprecationResponse,
+} from '@kbn/core-deprecations-browser';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 

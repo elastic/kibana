@@ -7,5 +7,3 @@
  */
 
 export { DeprecationsService } from './deprecations_service';
-export type { DeprecationsServiceStart } from './deprecations_service';
-export type { ResolveDeprecationResponse } from './deprecations_client';
