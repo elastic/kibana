@@ -37,7 +37,7 @@ export const TREE_VIEW_INFRASTRUCTURE_VIEW = i18n.translate(
 );
 
 export const TREE_VIEW_SWITCHER_LEGEND = i18n.translate(
-  'xpack.kubernetesSecurity.treeView.infrastructureView',
+  'xpack.kubernetesSecurity.treeView.switherLegend',
   {
     defaultMessage: 'You can switch between the Logical and Infrastructure view',
   }
