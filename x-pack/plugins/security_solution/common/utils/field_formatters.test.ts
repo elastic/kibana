@@ -73,59 +73,14 @@ describe('Events Details Helpers', () => {
       const whackResultFields = [
         {
           category: 'crazy',
-          field: 'crazy.pants.matched.field',
-          values: ['matched_field'],
-          originalValue: ['matched_field'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.first_seen',
-          values: ['2021-02-22T17:29:25.195Z'],
-          originalValue: ['2021-02-22T17:29:25.195Z'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.provider',
-          values: ['yourself'],
-          originalValue: ['yourself'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.type',
-          values: ['custom'],
-          originalValue: ['custom'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.matched.atomic',
-          values: ['matched_atomic'],
-          originalValue: ['matched_atomic'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.lazer.great.field',
-          values: ['grrrrr', 'grrrrr_2'],
-          originalValue: ['grrrrr', 'grrrrr_2'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.lazer.lazer.lazer.cool',
-          values: ['true', 'false'],
-          originalValue: ['true', 'false'],
-          isObjectArray: false,
-        },
-        {
-          category: 'crazy',
-          field: 'crazy.pants.lazer.lazer.lazer.lazer.lazer.lazer.lazer.whoa',
-          values: ['false'],
-          originalValue: ['false'],
-          isObjectArray: false,
+          field: 'crazy.pants',
+          values: [
+            '{"matched.field":["matched_field"],"first_seen":["2021-02-22T17:29:25.195Z"],"provider":["yourself"],"type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"],"lazer":[{"lazer":[{"cool":true,"lazer":[{"lazer":[{"lazer":[{"lazer":[{"whoa":false}]}]}]}]}]},{"lazer":[{"cool":false}]}]},{"great.field":["grrrrr_2"]}]}',
+          ],
+          originalValue: [
+            '{"matched.field":["matched_field"],"first_seen":["2021-02-22T17:29:25.195Z"],"provider":["yourself"],"type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"],"lazer":[{"lazer":[{"cool":true,"lazer":[{"lazer":[{"lazer":[{"lazer":[{"whoa":false}]}]}]}]}]},{"lazer":[{"cool":false}]}]},{"great.field":["grrrrr_2"]}]}',
+          ],
+          isObjectArray: true,
         },
       ];
       const result = getDataFromFieldsHits(whackFields);
