@@ -7,7 +7,7 @@
 
 import type { UseMutationOptions, UseMutationResult } from 'react-query';
 import { useMutation } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   ProcessesRequestBody,
   ResponseActionApiResponse,
@@ -23,17 +23,17 @@ import { KibanaServices } from '../../../common/lib/kibana';
 export const useSendGetEndpointProcessesRequest = (
   customOptions?: UseMutationOptions<
     ResponseActionApiResponse<ProcessesEntry>,
-    HttpFetchError,
+    IHttpFetchError,
     ProcessesRequestBody
   >
 ): UseMutationResult<
   ResponseActionApiResponse<ProcessesEntry>,
-  HttpFetchError,
+  IHttpFetchError,
   ProcessesRequestBody
 > => {
   return useMutation<
     ResponseActionApiResponse<ProcessesEntry>,
-    HttpFetchError,
+    IHttpFetchError,
     ProcessesRequestBody
   >((getRunningProcessesData: ProcessesRequestBody) => {
     return KibanaServices.get().http.post<ResponseActionApiResponse<ProcessesEntry>>(
