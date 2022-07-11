@@ -1429,10 +1429,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.11.2":
-  version "46.11.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.11.2.tgz#8d95515e4c0adf5fd94392d304dc5b5ea8416be0"
-  integrity sha512-RcqrjMguXNCS+O8hnd8DtCTlVtZxmzdfu0N+ez+zA3a41YOblet1qt6YfLsEY/5wFiJndacR+O8pNHjbeLV7gA==
+"@elastic/charts@46.12.0":
+  version "46.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.12.0.tgz#95c5ba2d4eff75b52fb294b867fb7b147da3383a"
+  integrity sha512-YIILkL3CXSoBMBiwj1N6FJTWMB9PpKi1bfMZVJCGHb23+J3LiiAqsQYsZbm7L28ziH3s0RveRomRcfVo38NvMg==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
