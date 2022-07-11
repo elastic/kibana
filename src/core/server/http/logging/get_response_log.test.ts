@@ -192,7 +192,7 @@ describe('getEcsResponseLog', () => {
     test('redacts x-elastic-app-auth headers by default', () => {
       const req = createMockHapiRequest({
         headers: { 'x-elastic-app-auth': 'hello', 'user-agent': 'world' },
-        response: { headers: { 'content-length': '123' } },
+        response: { headers: { 'content-length': '123', 'x-elastic-app-auth': 'abc' } },
       });
       const result = getEcsResponseLog(req, logger);
       // @ts-expect-error ECS custom field
@@ -206,6 +206,7 @@ describe('getEcsResponseLog', () => {
       expect(result.meta.http.response.headers).toMatchInlineSnapshot(`
         Object {
           "content-length": "123",
+          "x-elastic-app-auth": "[REDACTED]",
         }
       `);
     });

@@ -71,7 +71,7 @@ describe('getEcsResponseLog', () => {
     test('redacts x-elastic-app-auth headers by default', () => {
       const event = createResponseEvent({
         requestParams: { headers: { 'x-elastic-app-auth': 'hello', 'user-agent': 'world' } },
-        response: { headers: { 'content-length': '123' } },
+        response: { headers: { 'content-length': '123', 'x-elastic-app-auth': 'abc' } },
       });
       const log = getEcsResponseLog(event);
       // @ts-expect-error ECS custom field
@@ -85,6 +85,7 @@ describe('getEcsResponseLog', () => {
       expect(log.http.response.headers).toMatchInlineSnapshot(`
         Object {
           "content-length": "123",
+          "x-elastic-app-auth": "[REDACTED]",
         }
       `);
     });
