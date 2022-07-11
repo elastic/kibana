@@ -62,7 +62,7 @@ describe('points.js', () => {
       return invoke(fn, [seriesList, null, null, null, null, 'beer'])
         .then(expect.fail)
         .catch((e) => {
-          expect(e).to.be.a(Error);
+          expect(e).to.be.an(Error);
         });
     });
   });

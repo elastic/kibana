@@ -71,7 +71,7 @@ describe('carry.js', function () {
         fn(data, target);
         expect.fail('Success. Doh.');
       } catch (e) {
-        expect(e).to.be.a(Error);
+        expect(e).to.be.an(Error);
       }
     });
   });
