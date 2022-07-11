@@ -36,7 +36,7 @@ export const SearchIndexOverview: React.FC = () => {
 
   return (
     <>
-      <GenerateApiKeyModal />
+      {data && <GenerateApiKeyModal indexName={data.index.name} />}
       {status === Status.SUCCESS && data && (
         <>
           <EuiSpacer />

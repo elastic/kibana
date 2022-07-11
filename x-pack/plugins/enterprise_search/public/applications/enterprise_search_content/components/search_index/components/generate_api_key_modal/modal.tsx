@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiCopy,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -27,13 +28,18 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { GenerateApiKeyLogic } from '../../../../api/generate_api_key/generate_api_key_logic';
+import { i18n } from '@kbn/i18n';
 
-export const GenerateApiKeyModal: React.FC = () => {
-  const { data } = useValues(GenerateApiKeyLogic);
-  const { makeRequest } = useActions(GenerateApiKeyLogic);
+import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
 
-  console.log(data);
+interface GenerateApiKeyModalProps {
+  indexName: string;
+}
+
+export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexName }) => {
+  const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
+  const { setKeyName, makeRequest } = useActions(GenerateApiKeyModalLogic);
+
   return (
     <EuiModal onClose={() => {}}>
       <EuiModalHeader>
@@ -56,15 +62,50 @@ export const GenerateApiKeyModal: React.FC = () => {
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="center">
                   <EuiFlexItem>
-                    <EuiFormRow>
-                      <EuiFieldText placeholder="Your API key will display here" disabled />
-                    </EuiFormRow>
+                    {!isSuccess ? (
+                      <EuiFormRow label="Name your API key">
+                        <EuiFieldText
+                          placeholder="Type a name for your API key"
+                          onChange={(event) => setKeyName(event.currentTarget.value)}
+                          isLoading={isLoading}
+                        />
+                      </EuiFormRow>
+                    ) : (
+                      <EuiFormRow label={`Your API key: ${keyName.trim()}`}>
+                        <EuiFieldText value={apiKey} />
+                      </EuiFormRow>
+                    )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon display="base" iconType="copyClipboard" disabled />
+                    <EuiCopy
+                      textToCopy={apiKey}
+                      beforeMessage={i18n.translate(
+                        'xpack.enterpriseSearch.content.overview.generateApiKeyModal.copyToClipboard',
+                        { defaultMessage: 'Copy to clipboard' }
+                      )}
+                      afterMessage={i18n.translate(
+                        'xpack.enterpriseSearch.content.overview.generateApiKeyModal.copiedToClipboard',
+                        { defaultMessage: 'Copied Client ID to clipboard' }
+                      )}
+                    >
+                      {(copy) => (
+                        <EuiButtonIcon
+                          display="fill"
+                          iconType="copyClipboard"
+                          disabled={!isSuccess}
+                          onClick={copy}
+                        />
+                      )}
+                    </EuiCopy>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon display="base" iconType="download" disabled />
+                    <EuiButtonIcon
+                      display="fill"
+                      iconType="download"
+                      href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
+                      download={`${keyName}.csv`}
+                      disabled={!isSuccess}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
@@ -72,8 +113,12 @@ export const GenerateApiKeyModal: React.FC = () => {
                       iconType="plusInCircle"
                       fill
                       onClick={() => {
-                        makeRequest({ indexName: ".ds-logs-enterprise_search.api-default-2022.07.06-000001", keyName: "test1" });
+                        makeRequest({
+                          indexName,
+                          keyName: keyName.trim(),
+                        });
                       }}
+                      disabled={keyName.trim().length <= 0 || isSuccess}
                     >
                       Generate API Key
                     </EuiButton>
