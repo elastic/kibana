@@ -781,7 +781,7 @@ describe('IndexPattern Data Panel', () => {
         .first()
         .simulate('click');
 
-      expect(wrapper.find('[aria-live="polite"]').text()).toEqual(
+      expect(wrapper.find('[aria-live="polite"]').at(1).text()).toEqual(
         '1 available field. 1 empty field. 0 meta fields.'
       );
     });

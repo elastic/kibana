@@ -412,7 +412,7 @@ describe('DragDrop', () => {
       );
       const keyboardHandler = component
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-        .first()
+        .at(1)
         .simulate('focus');
 
       keyboardHandler.simulate('keydown', { key: 'ArrowRight' });
@@ -452,7 +452,7 @@ describe('DragDrop', () => {
 
       const keyboardHandler = component
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-        .first()
+        .at(1)
         .simulate('focus');
 
       keyboardHandler.simulate('keydown', { key: 'Enter' });
@@ -805,7 +805,7 @@ describe('DragDrop', () => {
             ))}
           </ChildDragDropProvider>
         );
-        component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]').first().simulate('focus');
+        component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]').at(1).simulate('focus');
         act(() => {
           jest.runAllTimers();
         });
@@ -838,7 +838,7 @@ describe('DragDrop', () => {
         act(() => {
           component
             .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-            .first()
+            .at(1)
             .simulate('keydown', { key: 'ArrowRight', altKey: true });
         });
         expect(setActiveDropTarget).toBeCalledWith({
@@ -849,7 +849,7 @@ describe('DragDrop', () => {
         act(() => {
           component
             .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-            .first()
+            .at(1)
             .simulate('keydown', { key: 'ArrowRight', shiftKey: true });
         });
         expect(setActiveDropTarget).toBeCalledWith({
@@ -884,7 +884,7 @@ describe('DragDrop', () => {
         act(() => {
           component
             .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-            .first()
+            .at(1)
             .simulate('keydown', { key: 'Alt' });
         });
         expect(setActiveDropTarget).toBeCalledWith({
@@ -895,7 +895,7 @@ describe('DragDrop', () => {
         act(() => {
           component
             .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-            .first()
+            .at(1)
             .simulate('keyup', { key: 'Alt' });
         });
         expect(setActiveDropTarget).toBeCalledWith({
@@ -930,7 +930,7 @@ describe('DragDrop', () => {
         act(() => {
           component
             .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-            .first()
+            .at(1)
             .simulate('keydown', { key: 'Shift' });
         });
 
@@ -942,7 +942,7 @@ describe('DragDrop', () => {
         act(() => {
           component
             .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-            .first()
+            .at(1)
             .simulate('keyup', { key: 'Shift' });
         });
         expect(setActiveDropTarget).toBeCalledWith({
@@ -1161,7 +1161,7 @@ describe('DragDrop', () => {
       });
       const keyboardHandler = component
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-        .first();
+        .at(1);
 
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
@@ -1189,7 +1189,7 @@ describe('DragDrop', () => {
       });
       const keyboardHandler = component
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-        .first()
+        .at(1)
         .simulate('focus');
 
       act(() => {
@@ -1207,7 +1207,9 @@ describe('DragDrop', () => {
         { dragging: { ...items[0] }, setA11yMessage },
         onDropHandler
       );
-      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+      const keyboardHandler = component
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .at(1);
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'Escape' });
       act(() => {
@@ -1242,7 +1244,9 @@ describe('DragDrop', () => {
         setA11yMessage,
       });
 
-      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+      const keyboardHandler = component
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .at(1);
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
 
@@ -1318,7 +1322,9 @@ describe('DragDrop', () => {
           </ReorderProvider>
         </ChildDragDropProvider>
       );
-      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+      const keyboardHandler = component
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .at(1);
 
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowUp' });

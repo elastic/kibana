@@ -157,7 +157,7 @@ Array [
             disabled={false}
           >
             <legend
-              className="euiScreenReaderOnly"
+              className="emotion-euiScreenReaderOnly"
             >
               Boolean value
             </legend>
