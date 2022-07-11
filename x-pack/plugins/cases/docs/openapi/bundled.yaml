@@ -2192,8 +2192,17 @@ paths:
           content:
             application/json; charset=utf-8:
               schema:
-                type: string
-            examples: {}
+                type: object
+                properties:
+                  count_closed_cases:
+                    type: integer
+                  count_in_progress_cases:
+                    type: integer
+                  count_open_cases:
+                    type: integer
+              examples:
+                getStatusResponse:
+                  $ref: '#/components/examples/get_status_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -5045,8 +5054,17 @@ paths:
           content:
             application/json; charset=utf-8:
               schema:
-                type: string
-            examples: {}
+                type: object
+                properties:
+                  count_closed_cases:
+                    type: integer
+                  count_in_progress_cases:
+                    type: integer
+                  count_open_cases:
+                    type: integer
+              examples:
+                getStatusResponse:
+                  $ref: '#/components/examples/get_status_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -6365,6 +6383,12 @@ components:
         - username: user2
           full_name: User 2
           email: user2@elastic.co
+    get_status_response:
+      summary: Get the number of cases in each state.
+      value:
+        count_open_cases: 27
+        count_in_progress_cases: 50
+        count_closed_cases: 198
     get_tags_response:
       summary: A list of tags that are used in cases
       value:
