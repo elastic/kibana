@@ -8,9 +8,9 @@
 import { useMemo } from 'react';
 import { find } from 'lodash';
 import type { AgentStatus } from '@kbn/fleet-plugin/common';
-import { useAgentDetails } from '../../agents/use_agent_details';
-import { useAgentPolicy } from '../../agent_policies';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { useAgentPolicy } from '../agent_policies';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { useAgentDetails } from '../agents/use_agent_details';
 
 interface IIsOsqueryAvailable {
   osqueryAvailable: boolean;

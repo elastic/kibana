@@ -18,9 +18,6 @@ import {
 } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type {
-  ActionEdges,
-  OsqueryQueries,
-  PageInfoPaginated,
   ActionsRequestOptions,
   ActionsStrategyResponse,
   Direction,

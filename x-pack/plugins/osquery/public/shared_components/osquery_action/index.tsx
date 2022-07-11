@@ -24,7 +24,6 @@ import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { KibanaThemeProvider } from '../../shared_imports';
 import { useIsOsqueryAvailable } from '../use_is_osquery_available';
-import { useIsOsqueryAvailable } from './use_is_osquery_available';
 import type { StartPlugins } from '../../types';
 
 interface OsqueryActionProps {
