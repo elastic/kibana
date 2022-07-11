@@ -49,7 +49,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       }
     },
     async getRulesListTitle() {
-      const noPermissionsTitle = await find.byCssSelector('[data-test-subj="rulesList"] .euiTitle');
+      const noPermissionsTitle = await find.byCssSelector('[data-test-subj="alertsList"] .euiTitle');
       return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
