@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  MouseEventHandler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { ConsoleDataState } from '../console_state/types';
+import type { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
-import { KeyCapture, KeyCaptureProps } from './key_capture';
+import type { KeyCaptureProps } from './key_capture';
+import { KeyCapture } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';

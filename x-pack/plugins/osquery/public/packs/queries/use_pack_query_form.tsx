@@ -11,7 +11,8 @@ import { produce } from 'immer';
 
 import { useMemo } from 'react';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import { FormConfig, useForm } from '../../shared_imports';
+import type { FormConfig } from '../../shared_imports';
+import { useForm } from '../../shared_imports';
 import { createFormSchema } from './schema';
 
 const FORM_ID = 'editQueryFlyoutForm';

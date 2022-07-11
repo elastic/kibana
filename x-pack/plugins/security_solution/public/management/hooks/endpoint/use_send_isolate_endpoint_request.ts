@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
+import type { UseMutationOptions, UseMutationResult } from 'react-query';
+import { useMutation } from 'react-query';
+import type { HttpFetchError } from '@kbn/core/public';
 import { isolateHost } from '../../../common/lib/endpoint_isolation';
-import { HostIsolationRequestBody, HostIsolationResponse } from '../../../../common/endpoint/types';
+import type {
+  HostIsolationRequestBody,
+  HostIsolationResponse,
+} from '../../../../common/endpoint/types';
 
 /**
  * Create host isolation requests
