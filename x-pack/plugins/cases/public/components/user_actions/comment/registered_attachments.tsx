@@ -15,7 +15,7 @@ import React, { Suspense } from 'react';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
 import { AttachmentType } from '../../../client/attachment_framework/types';
-import { CaseRegistry } from '../../../../common/registry';
+import { AttachmentTypeRegistry } from '../../../../common/registry';
 import { CommentResponse } from '../../../../common/api';
 import { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
@@ -34,7 +34,7 @@ type BuilderArgs<C, R> = Pick<UserActionBuilderArgs, 'userAction' | 'caseData'> 
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends CommentResponse,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends CaseRegistry<AttachmentType<any>>
+  R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
   userAction,
   comment,

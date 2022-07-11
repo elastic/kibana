@@ -247,6 +247,7 @@ export const caseWithAlertsSyncOff = {
 
 export const caseWithRegisteredAttachments = {
   ...basicCase,
+  id: 'case-with-registered-attachment',
   comments: [externalReferenceAttachment, persistableStateAttachment],
 };
 
@@ -514,6 +515,7 @@ export const caseWithAlertsSyncOffSnake = {
 
 export const caseWithRegisteredAttachmentsSnake = {
   ...basicCaseSnake,
+  id: 'case-with-registered-attachment',
   comments: [externalReferenceAttachmentSnake, persistableStateAttachmentSnake],
 };
 
@@ -713,7 +715,7 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsRespo
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
-    case_id: basicCaseId,
+    case_id: 'case-with-registered-attachment',
     comment_id: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
@@ -724,7 +726,7 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsRespo
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
-    case_id: basicCaseId,
+    case_id: 'case-with-registered-attachment',
     comment_id: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
@@ -795,7 +797,7 @@ export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
-    caseId: basicCaseId,
+    caseId: 'case-with-registered-attachment',
     commentId: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
@@ -806,7 +808,7 @@ export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
-    caseId: basicCaseId,
+    caseId: 'case-with-registered-attachment',
     commentId: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',

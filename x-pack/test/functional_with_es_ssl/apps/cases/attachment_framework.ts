@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type SuperTest from 'supertest';
 import {
   ExternalReferenceStorageType,
   CommentType,
@@ -14,7 +15,33 @@ import {
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const createLogStashDataView = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+): Promise<{ data_view: { id: string } }> => {
+  const { body } = await supertest
+    .post(`/api/data_views/data_view`)
+    .set('kbn-xsrf', 'foo')
+    .send({ data_view: { title: 'logstash-*', name: 'logstash', timeFieldName: '@timestamp' } })
+    .expect(200);
+
+  return body;
+};
+
+const deleteLogStashDataView = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  dataViewId: string
+): Promise<void> => {
+  await supertest
+    .delete(`/api/saved_objects/index-pattern/${dataViewId}`)
+    .query({ force: true })
+    .set('kbn-xsrf', 'foo')
+    .send()
+    .expect(200);
+};
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
+  const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -74,15 +101,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Persistable state attachments', () => {
-      const lensState = {
+      const getLensState = (dataViewId: string) => ({
         title: '',
         visualizationType: 'lnsXY',
         type: 'lens',
         references: [
           {
             type: 'index-pattern',
-            id: 'metrics-*',
-            name: 'indexpattern-datasource-layer-7fdeee5d-e487-45ff-ae12-f312b6682a5f',
+            id: dataViewId,
+            name: 'indexpattern-datasource-layer-85863a23-73a0-4e11-9774-70f77b9a5898',
           },
         ],
         state: {
@@ -97,13 +124,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             preferredSeriesType: 'bar_stacked',
             layers: [
               {
-                layerId: '7fdeee5d-e487-45ff-ae12-f312b6682a5f',
-                accessors: ['989537db-633c-4fd5-acf2-e26e3cd57067'],
+                layerId: '85863a23-73a0-4e11-9774-70f77b9a5898',
+                accessors: ['63810bd4-8481-4aab-822a-532d8513a8b1'],
                 position: 'top',
                 seriesType: 'bar_stacked',
                 showGridlines: false,
                 layerType: 'data',
-                xAccessor: '4e40166e-1daa-421a-8ea1-3de791edf59d',
+                xAccessor: 'ab807e89-c453-415b-8eb4-3986de52c923',
               },
             ],
           },
@@ -112,40 +139,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           datasourceStates: {
             indexpattern: {
               layers: {
-                '7fdeee5d-e487-45ff-ae12-f312b6682a5f': {
+                '85863a23-73a0-4e11-9774-70f77b9a5898': {
                   columns: {
-                    '4e40166e-1daa-421a-8ea1-3de791edf59d': {
-                      label: 'Top 5 values of agent.id',
-                      dataType: 'string',
-                      operationType: 'terms',
-                      scale: 'ordinal',
-                      sourceField: 'agent.id',
+                    'ab807e89-c453-415b-8eb4-3986de52c923': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
                       isBucketed: true,
-                      params: {
-                        size: 5,
-                        orderBy: {
-                          type: 'column',
-                          columnId: '989537db-633c-4fd5-acf2-e26e3cd57067',
-                        },
-                        orderDirection: 'desc',
-                        otherBucket: true,
-                        missingBucket: false,
-                        parentFormat: { id: 'terms' },
-                      },
+                      scale: 'interval',
+                      params: { interval: 'auto', includeEmptyRows: true, dropPartials: false },
                     },
-                    '989537db-633c-4fd5-acf2-e26e3cd57067': {
-                      label: 'Count of records',
+                    '63810bd4-8481-4aab-822a-532d8513a8b1': {
+                      label: 'Median of id',
                       dataType: 'number',
-                      operationType: 'count',
+                      operationType: 'median',
+                      sourceField: 'id',
                       isBucketed: false,
                       scale: 'ratio',
-                      sourceField: '___records___',
                       params: { emptyAsNull: true },
                     },
                   },
                   columnOrder: [
-                    '4e40166e-1daa-421a-8ea1-3de791edf59d',
-                    '989537db-633c-4fd5-acf2-e26e3cd57067',
+                    'ab807e89-c453-415b-8eb4-3986de52c923',
+                    '63810bd4-8481-4aab-822a-532d8513a8b1',
                   ],
                   incompleteColumns: {},
                 },
@@ -153,21 +170,28 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             },
           },
         },
-      };
+      });
 
       let caseWithAttachment: CaseResponse;
+      let dataViewId = '';
 
       before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        const res = await createLogStashDataView(supertest);
+        dataViewId = res.data_view.id;
+
         caseWithAttachment = await createAttachmentAndNavigate({
           type: CommentType.persistableState,
           persistableStateAttachmentTypeId: '.test',
-          persistableStateAttachmentState: lensState,
+          persistableStateAttachmentState: getLensState(dataViewId),
           owner: 'cases',
         });
       });
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await deleteLogStashDataView(supertest, dataViewId);
+        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       });
 
       it('renders a persistable attachment type correctly', async () => {

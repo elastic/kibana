@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CaseRegistry } from '../../../common/registry';
+import { AttachmentTypeRegistry } from '../../../common/registry';
 import { PersistableStateAttachmentType } from './types';
 
-export class PersistableStateAttachmentTypeRegistry extends CaseRegistry<PersistableStateAttachmentType> {
+export class PersistableStateAttachmentTypeRegistry extends AttachmentTypeRegistry<PersistableStateAttachmentType> {
   constructor() {
     super('PersistableStateAttachmentTypeRegistry');
   }
