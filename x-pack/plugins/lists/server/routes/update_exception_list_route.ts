@@ -8,7 +8,6 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ExceptionListTypeEnum,
   UpdateExceptionListSchemaDecoded,
   exceptionListSchema,
   updateExceptionListSchema,
