@@ -253,7 +253,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                     ),
                     unknownArgs: (
                       <ConsoleCodeBlock bold inline>
-                        {unknownInputArgs.map(toCliArgumentOption).join(', ')}
+                        {unknownInputArgs.map(toCliArgumentOption).join(' ')}
                       </ConsoleCodeBlock>
                     ),
                   }}

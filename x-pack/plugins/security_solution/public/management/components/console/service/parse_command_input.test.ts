@@ -71,7 +71,7 @@ describe('when using parsed command input utils', () => {
     });
 
     it('should parse arguments that have multiple strings as the value', () => {
-      const input = 'foo --one value for one here --two=some more strings for 2';
+      const input = 'foo --one "value for one here" --two="some more strings for 2"';
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand).toEqual(
@@ -116,7 +116,7 @@ describe('when using parsed command input utils', () => {
     });
 
     it('should parse arguments whose value has `--` in it (must be escaped)', () => {
-      const input = 'foo --one something \\-\\- here --two="\\-\\-something \\-\\-';
+      const input = 'foo --one "something \\-\\- here" --two="\\-\\-something \\-\\-"';
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand).toEqual(
@@ -131,7 +131,7 @@ describe('when using parsed command input utils', () => {
     });
 
     it('should parse arguments whose value has `=` in it', () => {
-      const input = 'foo --one =something \\-\\- here --two="=something=something else';
+      const input = 'foo --one "=something \\-\\- here" --two="=something=something else"';
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand).toEqual(
