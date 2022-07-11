@@ -3176,6 +3176,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-browser@link:bazel-bin/packages/core/http/core-http-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-common@link:bazel-bin/packages/core/http/core-http-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
@@ -3253,6 +3269,10 @@
   uid ""
 
 "@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/crypto-browser@link:bazel-bin/packages/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
@@ -6751,6 +6771,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser@link:bazel-bin/packages/core/http/core-http-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6832,6 +6868,10 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__crypto-browser@link:bazel-bin/packages/kbn-crypto-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
