@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
 import { useEndpointPrivileges as _useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';

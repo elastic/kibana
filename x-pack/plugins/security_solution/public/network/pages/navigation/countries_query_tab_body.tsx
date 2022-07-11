@@ -12,7 +12,7 @@ import { NetworkTopCountriesTable } from '../../components/network_top_countries
 import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
-import { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
+import type { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);

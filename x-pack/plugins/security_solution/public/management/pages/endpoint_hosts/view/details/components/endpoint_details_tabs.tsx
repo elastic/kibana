@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiTab, EuiTabs, EuiFlyoutBody } from '@elastic/eui';
-import { EndpointIndexUIQueryParams } from '../../../types';
+import type { EndpointIndexUIQueryParams } from '../../../types';
 
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
