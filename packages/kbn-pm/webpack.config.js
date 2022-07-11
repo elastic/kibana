@@ -37,22 +37,6 @@ module.exports = {
         ],
         exclude: /node_modules/,
       },
-      // Removing an unnecessary require from
-      // https://github.com/ForbesLindesay/spawn-sync/blob/8ba6d1bd032917ff5f0cf68508b91bb628d16336/index.js#L3
-      //
-      // This require would cause warnings when building with Webpack, and it's
-      // only required for Node <= 0.12.
-      {
-        test: /spawn-sync\/index\.js$/,
-        use: {
-          loader: 'string-replace-loader',
-          options: {
-            search: ` || require('./lib/spawn-sync')`,
-            replace: '',
-            strict: true,
-          },
-        },
-      },
       // In order to make it work with Node 10 we had the need to upgrade
       // the package cpy to a version >= 7.0.0. In this version cpy is
       // using the new globby that relies in the fast-glob which relies
