@@ -9,6 +9,7 @@
 import Url from 'url';
 
 import { ToolingLog } from '@kbn/tooling-log';
+import Supertest from 'supertest';
 
 import { KbnClient } from '../../kbn_client';
 import { Config } from './config';
@@ -40,6 +41,7 @@ export class DedicatedTaskRunner {
     readonly url: string;
     readonly client: KbnClient;
     readonly uuid?: string;
+    readonly supertest?: Supertest.SuperTest<Supertest.Test>;
   };
 
   constructor(config: Config, log: ToolingLog) {
@@ -64,8 +66,9 @@ export class DedicatedTaskRunner {
 
     const mainUuid = getKibanaCliArg(config.get('kbnTestServer.serverArgs'), 'server.uuid');
     const uuid = typeof mainUuid === 'string' ? DedicatedTaskRunner.getUuid(mainUuid) : undefined;
+    const supertest = Supertest(url);
 
-    this.enabledProps = { port, url, client, uuid };
+    this.enabledProps = { port, url, client, uuid, supertest };
   }
 
   private getEnabledProps() {
@@ -117,9 +120,20 @@ export class DedicatedTaskRunner {
   }
 
   /**
-   * a `KbnClient` instance that is configured to talk directly to the dedicated task runner. Not really sure how useful this is.
+   * @returns a `KbnClient` instance that is configured to talk directly to the dedicated task runner. Not really sure how useful this is.
    */
   getClient() {
     return this.getEnabledProps().client;
+  }
+
+  /**
+   * @returns a Supertest instance that will send requests to the dedicated task runner.
+   *
+   * @example
+   *  const supertest = dedicatedTaskRunner.getSupertest();
+   *  const response = await supertest.get('/status');
+   */
+  getSupertest() {
+    return this.getEnabledProps().supertest;
   }
 }

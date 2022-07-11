@@ -76,6 +76,7 @@ RUNTIME_DEPS = [
     "@npm//rxjs",
     "@npm//semver",
     "@npm//strip-ansi",
+    "@npm//supertest",
     "@npm//xmlbuilder",
     "@npm//xml2js",
 ]
@@ -123,6 +124,7 @@ TYPES_DEPS = [
   "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
+  "@npm//@types/supertest",
   "@npm//@types/uuid",
   "@npm//@types/xml2js",
 ]
