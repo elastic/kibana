@@ -255,9 +255,9 @@ export type PrePackagedTimelineStatus =
   | 'unknown';
 
 export const getPrePackagedRuleStatus = (
-  rulesInstalled: number | null,
-  rulesNotInstalled: number | null,
-  rulesNotUpdated: number | null
+  rulesInstalled?: number,
+  rulesNotInstalled?: number,
+  rulesNotUpdated?: number
 ): PrePackagedRuleStatus => {
   if (
     rulesNotInstalled != null &&
@@ -294,9 +294,9 @@ export const getPrePackagedRuleStatus = (
   return 'unknown';
 };
 export const getPrePackagedTimelineStatus = (
-  timelinesInstalled: number | null,
-  timelinesNotInstalled: number | null,
-  timelinesNotUpdated: number | null
+  timelinesInstalled?: number,
+  timelinesNotInstalled?: number,
+  timelinesNotUpdated?: number
 ): PrePackagedTimelineStatus => {
   if (
     timelinesNotInstalled != null &&
