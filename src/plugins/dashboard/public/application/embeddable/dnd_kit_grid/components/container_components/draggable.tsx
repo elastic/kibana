@@ -30,26 +30,38 @@ export const Draggable = ({ id, initPosition, deltaPosition, element, children }
   const w = 3;
   const h = 3;
 
-  const columnStart = Math.ceil((initPosition.x + deltaPosition.x) / 30) + 1;
+  const columnStart = Math.ceil((deltaPosition.x - initPosition.x) / 30) + 1;
   const columnEnd = columnStart + w;
-  const rowStart = Math.ceil((initPosition.y + deltaPosition.y) / 26) + 1;
+  const rowStart = Math.ceil((deltaPosition.y - initPosition.y) / 26) + 1;
   const rowEnd = rowStart + h;
   // const columnStart = x + 1;
   // const columnEnd = columnStart + w;
   // const rowStart = x + 1;
   // const rowEnd = rowStart + w;
 
-  console.log({ top, initPosition, deltaPosition, columnStart, columnEnd, rowStart, rowEnd });
+  // console.log({ top, initPosition, deltaPosition, columnStart, columnEnd, rowStart, rowEnd });
+
+  console.log({ initPosition, deltaPosition });
+
+  // const positionStyles = useMemo(
+  //   () => css`
+  //     grid-column-start: ${columnStart};
+  //     grid-column-end: ${columnEnd};
+  //     grid-row-start: ${rowStart};
+  //     grid-row-end: ${rowEnd};
+  //     opacity: ${isDragging ? '0.5' : ''};
+  //   `,
+  //   [columnStart, columnEnd, rowStart, rowEnd, isDragging]
+  // );
 
   const positionStyles = useMemo(
     () => css`
-      grid-column-start: ${columnStart};
-      grid-column-end: ${columnEnd};
-      grid-row-start: ${rowStart};
-      grid-row-end: ${rowEnd};
+      position: absolute;
+      left: ${Math.abs(deltaPosition.x)}px;
+      top: ${Math.abs(deltaPosition.y)}px;
       opacity: ${isDragging ? '0.5' : ''};
     `,
-    [columnStart, columnEnd, rowStart, rowEnd, isDragging]
+    [deltaPosition.x, deltaPosition.y, initPosition.x, initPosition.y, isDragging]
   );
 
   const style = {

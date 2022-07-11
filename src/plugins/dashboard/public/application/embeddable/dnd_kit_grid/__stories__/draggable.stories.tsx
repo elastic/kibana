@@ -77,6 +77,7 @@ export const BasicExample = () => {
       newPanelState.deltaPos.y += event.delta.y;
       if (newPanelState.deltaPos.x < 0) newPanelState.deltaPos.x = 0;
       if (newPanelState.deltaPos.y < 0) newPanelState.deltaPos.y = 0;
+      newPanelState.initPos = newPanelState.deltaPos;
     } else if (type === 'cancel') {
       newPanelState.deltaPos = newPanelState.initPos;
     }
@@ -120,7 +121,7 @@ export const BasicExample = () => {
             initPosition={gridState[id].initPos}
             deltaPosition={gridState[id].deltaPos}
           >
-            <div style={{ height: '100%', width: '100%', background: 'blue' }}>test</div>
+            <div style={{ height: '100%', width: '100%', background: 'pink' }}>test</div>
             {/* <StyledGridItem
               id={gridState[id].id}
               x={gridState[id].initPos.x}
@@ -131,17 +132,21 @@ export const BasicExample = () => {
             /> */}
           </Draggable>
         ))}
-        {/* <DragOverlay
+        <DragOverlay
           dropAnimation={null}
-          style={
-            draggingId
-              ? {
-                  transform: `translate(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px)`,
-                }
-              : {}
-          }
+          // style={
+          //   draggingId
+          //     ? {
+          //         transform: `translate(${gridState[draggingId].deltaPos.x}px, ${gridState[draggingId].deltaPos.y}px)`,
+          //       }
+          //     : {}
+          // }
         >
           {draggingId ? (
+            <div style={{ height: '100%', width: '100%', background: 'lightblue' }}>test</div>
+          ) : null}
+
+          {/* {draggingId ? (
             <StyledGridItem
               id={gridState[draggingId].id}
               x={gridState[draggingId].initPos.x}
@@ -150,8 +155,8 @@ export const BasicExample = () => {
               h={3}
               render={() => <p>{JSON.stringify(gridState[draggingId])}</p>}
             />
-          ) : null}
-        </DragOverlay> */}
+          ) : null} */}
+        </DragOverlay>
       </DndContext>
     </div>
   );
