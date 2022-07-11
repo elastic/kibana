@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _, {cloneDeep, each, reject} from 'lodash';
+import _, { cloneDeep, each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
