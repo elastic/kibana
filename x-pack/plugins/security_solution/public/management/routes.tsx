@@ -8,7 +8,7 @@
 import React from 'react';
 import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
-import { SecuritySubPluginRoutes } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
 
 /**

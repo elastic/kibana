@@ -13,9 +13,10 @@ import {
 import { BaseValidatorMock, createExceptionItemLikeOptionsMock } from './mocks';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { createFleetAuthzMock, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { ExceptionItemLikeOptions } from '../types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { ExceptionItemLikeOptions } from '../types';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,

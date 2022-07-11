@@ -6,7 +6,7 @@
  */
 
 import { lazy } from 'react';
-import { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
+import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const LazyOsqueryManagedCustomButtonExtension = lazy<PackageCustomExtensionComponent>(
   async () => {
