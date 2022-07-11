@@ -8,19 +8,19 @@
 import { set } from '@elastic/safer-lodash-set';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { ESBoolQuery } from '../../../../../common/typed_json';
-import {
+import type {
   ThresholdNormalized,
   TimestampOverride,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BuildRuleMessage } from '../rule_messages';
+import type { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import type { SignalSearchResponse } from '../types';
 

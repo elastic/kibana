@@ -9,13 +9,10 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import {
-  CompleteRule,
-  savedQueryRuleParams,
-  SavedQueryRuleParams,
-} from '../../schemas/rule_schemas';
+import type { CompleteRule, SavedQueryRuleParams } from '../../schemas/rule_schemas';
+import { savedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createSavedQueryAlertType = (
   createOptions: CreateRuleOptions

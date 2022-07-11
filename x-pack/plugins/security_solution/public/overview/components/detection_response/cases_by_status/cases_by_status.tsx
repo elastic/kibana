@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { AxisStyle, Rotation, ScaleType } from '@elastic/charts';
+import type { AxisStyle, Rotation } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';

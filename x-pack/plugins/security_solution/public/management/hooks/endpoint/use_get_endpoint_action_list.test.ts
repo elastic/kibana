@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-  ReactQueryHookRenderer,
-} from '../../../common/mock/endpoint';
+import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointActionList } from './use_get_endpoint_action_list';
 import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import { useQuery as _useQuery } from 'react-query';

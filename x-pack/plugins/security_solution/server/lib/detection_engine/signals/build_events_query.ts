@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash';
-import {
+import type {
   FiltersOrUndefined,
   TimestampOverrideOrUndefined,
   TimestampOverride,
