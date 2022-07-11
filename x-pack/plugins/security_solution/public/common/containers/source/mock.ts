@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { DocValueFields } from '../../../../common/search_strategy';
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type { DocValueFields } from '../../../../common/search_strategy';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
 export const mocksSource = {
   indexFields: [

@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { IntegrationPrivileges } from './integration_privileges';
+import type { IntegrationPrivileges } from './integration_privileges';
 
 /**
  * Hook for determining if user has fleet/integrations/SOM privileges for fetching
