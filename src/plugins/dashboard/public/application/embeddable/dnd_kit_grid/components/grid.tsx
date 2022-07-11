@@ -27,7 +27,6 @@ export const Grid: FC<Props> = ({
   guttersize = 4,
   isNested = false,
 }) => {
-  const engineRef = useRef<GridStackEngine>();
   const [items, setItems] = useState<GridItemProps[]>(gridData);
   const engine = useMemo(
     () =>
@@ -39,26 +38,17 @@ export const Grid: FC<Props> = ({
     [columns, items]
   );
 
-  // useEffect(() => {
-  //   engineRef.current =
-  //     engineRef.current ||
-  //     new GridStackEngine({
-  //       column: columns,
-  //       float: false,
-  //       nodes: items.map((item) => ({ ...item, maxH: item.isCollapsed ? 1 : undefined })),
-  //     });
-  // }, [columns, items]);
+  engine.compact();
 
-  // engine.compact();
-
-  // console.log({ engine });
   let maxRow = 1;
-  items.forEach(({ y, h }) => {
+  engine.nodes.forEach(({ y, h }) => {
     const endRow = y + 1 + h;
     if (maxRow < endRow) {
       maxRow = endRow;
     }
   });
+
+  console.log({ engine });
 
   const gridStyles = useMemo(
     () =>
@@ -79,7 +69,7 @@ export const Grid: FC<Props> = ({
 
   return (
     <div className="dshGrid dshLayout--editing" css={gridStyles}>
-      {items.map((item) =>
+      {engine.nodes.map((item) =>
         item.subGrid ? (
           <StyledGridItem
             {...item}

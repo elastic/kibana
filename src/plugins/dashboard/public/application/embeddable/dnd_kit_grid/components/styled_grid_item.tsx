@@ -27,15 +27,15 @@ export const StyledGridItem: FC<Props> = ({
     updateItem(id, { isCollapsed: !isCollapsed });
   }, [id, isCollapsed, updateItem]);
 
-  // const gridItemStyles = useMemo(
-  //   () => css`
-  //     grid-column-start: ${x + 1};
-  //     grid-column-end: ${x + 1 + w};
-  //     grid-row-start: ${y + 1};
-  //     grid-row-end: ${y + 1 + (isCollapsed ? 1 : h)};
-  //   `,
-  //   [x, y, w, h, isCollapsed]
-  // );
+  const gridItemStyles = useMemo(
+    () => css`
+      grid-column-start: ${x + 1};
+      grid-column-end: ${x + 1 + w};
+      grid-row-start: ${y + 1};
+      grid-row-end: ${y + 1 + (isCollapsed ? 1 : h)};
+    `,
+    [x, y, w, h, isCollapsed]
+  );
 
   const contentStyles = css`
     width: 100%;
@@ -46,7 +46,7 @@ export const StyledGridItem: FC<Props> = ({
     <EuiPanel
       id={id}
       className="dshGridItem embPanel embPanel--editing"
-      // css={gridItemStyles}
+      css={gridItemStyles}
       paddingSize="none"
       hasShadow
     >
