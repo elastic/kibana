@@ -8,7 +8,7 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
-import { RulesSchema } from './rules_schema';
+import type { RulesSchema } from './rules_schema';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -129,7 +129,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     interval: '5m',
     index: ['auditbeat-*'],
     rule_id: 'rule-1',
-    output_index: '.siem-signals-default',
+    output_index: '',
     max_signals: 100,
     risk_score: 55,
     risk_score_mapping: [],

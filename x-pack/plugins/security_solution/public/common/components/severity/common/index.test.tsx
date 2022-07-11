@@ -10,7 +10,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../mock';
 
-import { EuiHealth, EuiHealthProps } from '@elastic/eui';
+import type { EuiHealthProps } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../../../common/search_strategy';

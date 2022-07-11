@@ -6,7 +6,7 @@
  */
 
 import { SecurityPageName } from '../../../app/types';
-import { RouteSpyState } from './types';
+import type { RouteSpyState } from './types';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 

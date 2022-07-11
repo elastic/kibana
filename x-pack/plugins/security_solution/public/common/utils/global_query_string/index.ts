@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import * as H from 'history';
-import { parse, ParsedQuery, stringify } from 'query-string';
+import type * as H from 'history';
+import type { ParsedQuery } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty, pickBy } from 'lodash/fp';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   decodeRisonUrlState,
@@ -31,7 +32,7 @@ import { getLinkInfo } from '../../links';
  * So it is only called when the application starts instead of on every page.
  *
  * @param urlParamKey Must not change.
- * @param onInitialize Called once when initializing.
+ * @param onInitialize Called once when initializing. It must not change.
  */
 export const useInitializeUrlParam = <State>(
   urlParamKey: string,
@@ -41,10 +42,14 @@ export const useInitializeUrlParam = <State>(
   onInitialize: (state: State | null) => void
 ) => {
   const dispatch = useDispatch();
-  const { search } = useLocation();
 
   useEffect(() => {
-    const initialValue = getParamFromQueryString(getQueryStringFromLocation(search), urlParamKey);
+    // window.location.search provides the most updated representation of the url search.
+    // It also guarantees that we don't overwrite URL param managed outside react-router.
+    const initialValue = getParamFromQueryString(
+      getQueryStringFromLocation(window.location.search),
+      urlParamKey
+    );
 
     dispatch(
       globalUrlParamActions.registerUrlParam({
