@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -104,27 +104,34 @@ export async function onSaveSearch({
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
-  const { uiSettings } = services;
+  const { uiSettings, savedObjectsTagging } = services;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
     newDescription,
+    newTags,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
     newDescription: string;
+    newTags: string[];
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
     const currentRowsPerPage = savedSearch.rowsPerPage;
+    const currentDescription = savedSearch.description;
+    const currentTags = savedSearch.tags;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
       : state.appStateContainer.getState().rowsPerPage;
+    if (savedObjectsTagging && newTags) {
+      savedSearch.tags = newTags;
+    }
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -144,6 +151,10 @@ export async function onSaveSearch({
     if (!response.id || response.error) {
       savedSearch.title = currentTitle;
       savedSearch.rowsPerPage = currentRowsPerPage;
+      savedSearch.description = currentDescription;
+      if (savedObjectsTagging) {
+        savedSearch.tags = currentTags;
+      }
     } else {
       state.resetInitialAppState();
     }
@@ -153,9 +164,11 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
+      services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
+      tags={savedSearch.tags ?? []}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
@@ -164,14 +177,22 @@ export async function onSaveSearch({
 }
 
 const SaveSearchObjectModal: React.FC<{
+  services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
   description?: string;
-  onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
+  tags: string[];
+  onSave: (props: OnSaveProps & { newTags: string[] }) => void;
   onClose: () => void;
-}> = ({ title, description, showCopyOnSave, onSave, onClose }) => {
+}> = ({ services, title, description, tags, showCopyOnSave, onSave, onClose }) => {
+  const { savedObjectsTagging } = services;
+  const [currentTags, setCurrentTags] = useState(tags);
+
   const onModalSave = (params: OnSaveProps) => {
-    onSave(params);
+    onSave({
+      ...params,
+      newTags: currentTags,
+    });
   };
 
   return (
@@ -185,6 +206,18 @@ const SaveSearchObjectModal: React.FC<{
       showDescription={true}
       onSave={onModalSave}
       onClose={onClose}
+      options={() => {
+        const tagSelector = savedObjectsTagging ? (
+          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+            initialSelection={currentTags}
+            onTagsSelected={(newTags) => {
+              setCurrentTags(newTags);
+            }}
+          />
+        ) : undefined;
+
+        return tagSelector;
+      }}
     />
   );
 };
