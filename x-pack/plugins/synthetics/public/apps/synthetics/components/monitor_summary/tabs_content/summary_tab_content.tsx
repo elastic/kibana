@@ -27,7 +27,7 @@ export const SummaryTabContent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel style={{ paddingBottom: 0 }}>
             <EuiTitle size="xs">
               <h3>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
@@ -40,6 +40,7 @@ export const SummaryTabContent = () => {
               <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
+          <EuiSpacer size="s" />
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel>

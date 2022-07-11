@@ -159,7 +159,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       layerId: 'layer0',
       layerType: 'data',
       ...(this.metricStateOptions ?? {}),
-      size: 's',
+      size: 'm',
     };
   }
 

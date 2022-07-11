@@ -243,10 +243,10 @@ const Wrapper = styled.div<{
         visibility: visible;
       }
     }
-    .mtrVis > :first-child {
+    .legacyMtrVis > :first-child {
       justify-content: ${(props) =>
         props.align === 'left' ? `flex-start;` : props.align === 'right' ? `flex-end;` : 'center;'};
-      .mtrVis__container {
+      .legacyMtrVis__container {
         padding-top: 4px;
         padding-left: ${(props) => (props.align === 'left' ? `0` : '16px;')};
         padding-right: ${(props) => (props.align === 'right' ? `0` : '16px;')};
