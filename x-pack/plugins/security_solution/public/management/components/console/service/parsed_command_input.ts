@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { i18n } from '@kbn/i18n';
 import type { CommandDefinition } from '..';
 import type { EndpointActionDataParameterTypes } from '../../../../../common/endpoint/types';
 
@@ -17,9 +18,12 @@ interface ParsedCommandInput<TArgs extends object = any> {
   args: {
     [key in keyof TArgs]: ParsedArgData;
   };
+  errors?: string[];
 }
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
+  const errors: ParsedCommandInput['errors'] = [];
+
   const response: ParsedCommandInput = {
     name: getCommandNameFromTextInput(input),
     args: {},
@@ -66,11 +70,34 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
             .trim()
             .replace(/\\/g, '');
 
-          if (newArgValue.charAt(0) === '"') {
+          const firstChar = newArgValue.charAt(0);
+          const lastChar = newArgValue.charAt(newArgValue.length - 1);
+          const validQuotes = ['"', "'"];
+          const isEnclosedInQuotes =
+            validQuotes.includes(firstChar) && validQuotes.includes(lastChar);
+
+          // If the argument value has spaces and it is not enclosed in quotes (single or double),
+          // then generate an error for it
+          if (newArgValue.includes(' ') && !isEnclosedInQuotes) {
+            errors.push(
+              i18n.translate(
+                'xpack.securitySolution.parsedCommandInput.argValueWithSpacesMustBeInQuotes',
+                {
+                  defaultMessage:
+                    'value for {argName} contains spaces and must be enclosed in quotes.',
+                  values: {
+                    argName: `--${argName}`,
+                  },
+                }
+              )
+            );
+          }
+
+          if (validQuotes.includes(firstChar)) {
             newArgValue = newArgValue.substring(1);
           }
 
-          if (newArgValue.charAt(newArgValue.length - 1) === '"') {
+          if (validQuotes.includes(lastChar)) {
             newArgValue = newArgValue.substring(0, newArgValue.length - 1);
           }
 
@@ -78,6 +105,10 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
         }
       }
     }
+  }
+
+  if (errors.length) {
+    response.errors = errors;
   }
 
   return response;
@@ -94,6 +125,11 @@ export interface ParsedCommandInterface<TArgs extends object = any>
   hasArg(argName: string): boolean;
 
   /**
+   * if any errors were found in parsing the user's input
+   */
+  hasErrors(): boolean;
+
+  /**
    * if any argument was entered
    */
   hasArgs: boolean;
@@ -102,17 +138,23 @@ export interface ParsedCommandInterface<TArgs extends object = any>
 class ParsedCommand implements ParsedCommandInterface {
   public readonly name: string;
   public readonly args: Record<string, string[]>;
+  public readonly errors: ParsedCommandInput['errors'];
   public readonly hasArgs: boolean;
 
   constructor(public readonly input: string) {
     const parseInput = parseInputString(input);
     this.name = parseInput.name;
     this.args = parseInput.args;
+    this.errors = parseInput.errors;
     this.hasArgs = Object.keys(this.args).length > 0;
   }
 
   hasArg(argName: string): boolean {
     return argName in this.args;
+  }
+
+  hasErrors(): boolean {
+    return Boolean(this.errors?.length);
   }
 }
 
