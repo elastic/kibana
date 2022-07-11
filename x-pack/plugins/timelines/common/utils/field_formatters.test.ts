@@ -122,8 +122,12 @@ describe('Events Details Helpers', () => {
           category: 'kibana',
           field: 'kibana.alert.rule.parameters.criteria',
           isObjectArray: true,
-          originalValue: ['{"metric":"cpu","comparator":">","threshold":[3],"timeSize":1,"timeUnit":"m","customMetric":{"type":"custom","id":"alert-custom-metric","field":"","aggregation":"avg"}}'],
-          values: ['{"metric":"cpu","comparator":">","threshold":[3],"timeSize":1,"timeUnit":"m","customMetric":{"type":"custom","id":"alert-custom-metric","field":"","aggregation":"avg"}}'],
+          originalValue: [
+            '{"metric":"cpu","comparator":">","threshold":[3],"timeSize":1,"timeUnit":"m","customMetric":{"type":"custom","id":"alert-custom-metric","field":"","aggregation":"avg"}}',
+          ],
+          values: [
+            '{"metric":"cpu","comparator":">","threshold":[3],"timeSize":1,"timeUnit":"m","customMetric":{"type":"custom","id":"alert-custom-metric","field":"","aggregation":"avg"}}',
+          ],
         },
         {
           category: 'kibana',
