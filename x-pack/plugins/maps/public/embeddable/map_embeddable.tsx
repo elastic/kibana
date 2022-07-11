@@ -147,7 +147,7 @@ export class MapEmbeddable
     this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
   }
 
-  protected reportsEmbeddableLoad() {
+  public reportsEmbeddableLoad() {
     return true;
   }
 

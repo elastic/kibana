@@ -91,7 +91,7 @@ export interface IEmbeddable<
    * output variables to notify a container of their loading progress. If set to false, a container should assume
    * the embeddable is loaded immediately.
    */
-  reportsEmbeddableLoad(): () => boolean;
+  reportsEmbeddableLoad(): boolean;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

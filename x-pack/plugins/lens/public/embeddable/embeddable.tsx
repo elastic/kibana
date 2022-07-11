@@ -350,7 +350,7 @@ export class Embeddable
     );
   }
 
-  protected reportsEmbeddableLoad() {
+  public reportsEmbeddableLoad() {
     return true;
   }
 

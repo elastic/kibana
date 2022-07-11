@@ -145,7 +145,7 @@ export class SavedSearchEmbeddable
     });
   }
 
-  protected reportsEmbeddableLoad() {
+  public reportsEmbeddableLoad() {
     return true;
   }
 

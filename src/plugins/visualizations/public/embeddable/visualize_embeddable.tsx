@@ -180,7 +180,7 @@ export class VisualizeEmbeddable
     }
   }
 
-  protected reportsEmbeddableLoad() {
+  public reportsEmbeddableLoad() {
     return true;
   }
 
