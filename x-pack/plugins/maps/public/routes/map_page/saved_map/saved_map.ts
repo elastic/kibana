@@ -433,7 +433,6 @@ export class SavedMap {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
-          filters: getFilters(state),
         },
         path: this._originatingPath,
       });
