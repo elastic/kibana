@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IContextContainer } from './context';
+import type { IContextContainer } from '@kbn/core-http-server';
 
 export type ContextContainerMock = jest.Mocked<IContextContainer>;
 
