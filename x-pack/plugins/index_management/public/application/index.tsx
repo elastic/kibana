@@ -44,7 +44,6 @@ export const renderApp = (
     createKibanaReactContext<KibanaReactContextServices>({
       application,
       uiSettings,
-      overlays,
       kibanaVersion: {
         get: () => kibanaVersion,
       },
@@ -94,7 +93,6 @@ interface KibanaReactContextServices {
   kibanaVersion: {
     get: () => SemVer;
   };
-  overlays: CoreStart['overlays'];
 }
 
 // We override useKibana() from the react plugin to return a typed version for this app
