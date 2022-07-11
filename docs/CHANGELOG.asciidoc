@@ -87,23 +87,44 @@ Review the following information about the {kib} 8.3.1 release.
 [[known-issues-8.3.1]]
 === Known issues
 
-Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1.
-Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited
-in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and
-your alerting rules have stopped running with an error similar to the following
-example, you will need to go to *{stack-manage-app} > {rules-ui}*, multi-select
-the failed rules, click on **Manage rules > Disable** and then click on **Manage
-rules > Enable**. Disabling and re-enabling the rule will generate a new API key
-using the credentials of the user performing these actions and reset the rule
-state. For more details about API key authorization, refer to 
-<<alerting-authorization>>.
+[discrete]
+[[known-issue-133965]]
+.URL arguments cause API requests to fail
+[%collapsible]
+====
+*Details* +
+When you add any URL arguments, such as `?v` or `?pretty`, to API requests, the requests fail  {kibana-issue}133965[#133965]
 
-Example error message::
+*Impact* +
+The known issue only impacts {kib} Dev Tools. All other sources of API requests are unaffected, such as curl and Elastic Cloud API console.
+====
+
+[discrete]
+[[known-issue-alerting-rule]]
+.Alerting rules stop running when you upgrade to 8.3.0 or 8.3.1
+[%collapsible]
+====
+*Details* +
+In 8.3.0 and 8.3.1, there is a known issue where alerting rules that were created or edited in 8.2.0 stop running when you upgrade {kib}. When you upgrade to 8.3.0 or 8.3.1, and your alerting rules have stopped running, the following error appears:
 
 [source,text]
 ----
 <rule-type>:<UUID>: execution failed - security_exception: [security_exception] Reason: missing authentication credentials for REST request [/_security/user/_has_privileges], caused by: ""
 ----
+
+*Impact* +
+If you have upgraded to 8.3.0 or 8.3.1, and your alerting rules fail, reset the rules by disabling, then re-enabling them. When you disable, then re-enable your alerting rules, {kib} generates a new API key using the credentials of the user that manages the rules. 
+
+To disable, then re-enable your alerting rules:
+
+. Open the main menu, then click *{stack-manage-app} > {rules-ui}*.
+
+. Select the failed alerting rules.
+
+. Click **Manage rules > Disable**, then click **Manage rules > Enable**.
+
+For more details about API key authorization, refer to <<alerting-authorization>>.
+====
 
 [float]
 [[breaking-changes-8.3.1]]
