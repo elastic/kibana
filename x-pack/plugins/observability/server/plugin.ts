@@ -99,7 +99,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.deleteSubFeatureDetails',
                     {
-                      defaultMessage: 'Delete entities',
+                      defaultMessage: 'Delete cases and comments',
                     }
                   ),
                   includeIn: 'all',

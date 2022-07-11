@@ -73,7 +73,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 name: i18n.translate(
                   'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
                   {
-                    defaultMessage: 'Delete entities',
+                    defaultMessage: 'Delete cases and comments',
                   }
                 ),
                 includeIn: 'all',

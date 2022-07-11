@@ -80,7 +80,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 api: [],
                 id: 'cases_delete',
                 name: i18n.translate('xpack.cases.features.deleteSubFeatureDetails', {
-                  defaultMessage: 'Delete entities',
+                  defaultMessage: 'Delete cases and comments',
                 }),
                 includeIn: 'all',
                 savedObject: {
