@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PolicyConfig, ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses

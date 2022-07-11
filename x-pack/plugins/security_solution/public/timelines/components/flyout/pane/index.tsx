@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -15,7 +16,7 @@ import {
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
 } from '../../timeline/styles';
 import { StatefulTimeline } from '../../timeline';
-import { TimelineId } from '../../../../../common/types/timeline';
+import type { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
 import { defaultRowRenderers } from '../../timeline/body/renderers';

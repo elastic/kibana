@@ -8,11 +8,11 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
-import {
+import type {
   ExceptionListItemSchema,
-  ListOperatorTypeEnum,
   NonEmptyNestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
 

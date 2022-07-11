@@ -8,22 +8,17 @@
 
 import React, { useCallback } from 'react';
 import { useQueryClient } from 'react-query';
-import {
-  EuiTextColor,
-  EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { mountReactNode } from '@kbn/core/public/utils';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';

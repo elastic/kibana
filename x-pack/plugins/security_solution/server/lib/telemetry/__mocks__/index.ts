@@ -6,11 +6,12 @@
  */
 
 import moment from 'moment';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
-import { SecurityTelemetryTaskConfig } from '../task';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
+import type { SecurityTelemetryTaskConfig } from '../task';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 
 export const createMockTelemetryEventsSender = (

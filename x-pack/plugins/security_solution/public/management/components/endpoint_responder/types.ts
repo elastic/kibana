@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ManagedConsoleExtensionComponentProps } from '../console';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import type { ManagedConsoleExtensionComponentProps } from '../console';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 
 export interface EndpointCommandDefinitionMeta {
   endpointId: string;

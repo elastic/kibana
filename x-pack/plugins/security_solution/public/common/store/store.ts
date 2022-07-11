@@ -5,33 +5,25 @@
  * 2.0.
  */
 
-import {
-  Action,
-  applyMiddleware,
-  compose,
-  createStore as createReduxStore,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
-  CombinedState,
-} from 'redux';
+import type { Action, Store, Middleware, Dispatch, PreloadedState, CombinedState } from 'redux';
+import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
 
 import { createEpicMiddleware } from 'redux-observable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { inputsSelectors } from './inputs';
-import { SubPluginsInitReducer, createReducer } from './reducer';
+import type { SubPluginsInitReducer } from './reducer';
+import { createReducer } from './reducer';
 import { createRootEpic } from './epic';
-import { AppAction } from './actions';
-import { Immutable } from '../../../common/endpoint/types';
-import { State } from './types';
-import { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
+import type { AppAction } from './actions';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { State } from './types';
+import type { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
 
 type ComposeType = typeof compose;
 declare global {
