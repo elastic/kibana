@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         ...defaultSettings,
         'discover:sampleSize': 12,
-        'discover:sampleRowsPerPage': '6',
+        'discover:sampleRowsPerPage': 6,
         hideAnnouncements: true,
       });
 

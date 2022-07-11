@@ -74,14 +74,14 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     name: i18n.translate('discover.advancedSettings.sampleRowsPerPageTitle', {
       defaultMessage: 'Number of rows per page',
     }),
-    value: String(DEFAULT_ROWS_PER_PAGE),
-    options: ROWS_PER_PAGE_OPTIONS.map((option) => String(option)),
+    value: DEFAULT_ROWS_PER_PAGE,
+    options: ROWS_PER_PAGE_OPTIONS,
     type: 'select',
     description: i18n.translate('discover.advancedSettings.sampleRowsPerPageText', {
       defaultMessage: 'The number of rows per page to show in the table',
     }),
     category: ['discover'],
-    schema: schema.string(),
+    schema: schema.number(),
   },
   [SORT_DEFAULT_ORDER_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sortDefaultOrderTitle', {

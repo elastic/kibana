@@ -23,7 +23,7 @@ export const uiSettingsMock = {
     if (key === SAMPLE_SIZE_SETTING) {
       return 10;
     } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
-      return '100';
+      return 100;
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
     } else if (key === DOC_TABLE_LEGACY) {

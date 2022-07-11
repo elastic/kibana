@@ -69,7 +69,7 @@ export const discoverServiceMock = {
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
       } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
-        return '100';
+        return 100;
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
       } else if (key === HIDE_ANNOUNCEMENTS) {

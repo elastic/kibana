@@ -156,7 +156,7 @@ export class Field extends PureComponent<FieldProps> {
     this.onFieldChange(e.target.value);
 
   onFieldChange = (targetValue: any) => {
-    const { type, value, defVal } = this.props.setting;
+    const { type, value, defVal, options } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
@@ -169,6 +169,11 @@ export class Field extends PureComponent<FieldProps> {
         break;
       case 'number':
         newUnsavedValue = Number(targetValue);
+        break;
+      case 'select':
+        if (typeof options?.[0] === 'number') {
+          newUnsavedValue = Number(targetValue);
+        }
         break;
       default:
         newUnsavedValue = targetValue;

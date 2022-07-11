@@ -172,7 +172,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'discover:sampleRowsPerPage': {
-    type: 'keyword',
+    type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
   'discover:maxDocFieldsDisplayed': {

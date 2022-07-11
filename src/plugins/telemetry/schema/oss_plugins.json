@@ -8021,7 +8021,7 @@
           }
         },
         "discover:sampleRowsPerPage": {
-          "type": "keyword",
+          "type": "long",
           "_meta": {
             "description": "Non-default value of setting."
           }
