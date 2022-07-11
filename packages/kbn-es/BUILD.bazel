@@ -38,7 +38,6 @@ RUNTIME_DEPS = [
   "@npm//node-fetch",
   "@npm//simple-git",
   "@npm//tree-kill",
-  "@npm//zlib"
 ]
 
 jsts_transpiler(
