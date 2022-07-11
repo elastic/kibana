@@ -13,7 +13,7 @@ interface TotalStatsProps {
   documentCount: number;
   indexHealth?: string;
   ingestionType: string;
-  lastUpdated: string;
+  lastUpdated?: string;
 }
 
 export const TotalStats: React.FC<TotalStatsProps> = ({
@@ -41,11 +41,13 @@ export const TotalStats: React.FC<TotalStatsProps> = ({
           </EuiPanel>
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat titleSize="m" description="Last Updated" title={lastUpdated} />
-        </EuiPanel>
-      </EuiFlexItem>
+      {lastUpdated && (
+        <EuiFlexItem>
+          <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
+            <EuiStat titleSize="m" description="Last Updated" title={lastUpdated} />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

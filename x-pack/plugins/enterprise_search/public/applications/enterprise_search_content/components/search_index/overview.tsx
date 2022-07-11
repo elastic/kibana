@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -19,32 +19,47 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Status } from '../../../../../common/types/api';
-import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/external_url';
+import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 
-import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
 import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
+import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
-export const SearchIndexOverview: React.FC = () => {
-  const { data, status } = useValues(FetchIndexApiLogic);
+const getDeploymentUrls = (cloudId: string) => {
+  const [host, kibanaHost, elasticHost] = window.atob(cloudId);
+  return {
+    elasticUrl: `https://${elasticHost}.${host}`,
+    kibanaUrl: `https://${kibanaHost}.${host}`,
+  };
+};
 
-  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
-  const apiKey = 'Create an API Key';
+export const SearchIndexOverview: React.FC = () => {
+  const cloudContext = useCloudDetails();
+  const { apiKey, isGenerateModalOpen, indexData, isSuccess } = useValues(OverviewLogic);
+  const { openGenerateModal, closeGenerateModal } = useActions(OverviewLogic);
+
+  const searchIndexApiUrl = cloudContext.cloudId
+    ? getDeploymentUrls(cloudContext.cloudId).elasticUrl
+    : `http://${window.location.hostname}:9200/`;
+
+  const apiKeyExample = apiKey || '<Create an API Key>';
 
   return (
     <>
-      {data && <GenerateApiKeyModal indexName={data.index.name} />}
-      {status === Status.SUCCESS && data && (
+      {isGenerateModalOpen && isSuccess && (
+        <GenerateApiKeyModal indexName={indexData.index.name} onClose={closeGenerateModal} />
+      )}
+      {isSuccess && (
         <>
           <EuiSpacer />
           <TotalStats
-            lastUpdated={'TODO'}
-            documentCount={data.index.total.docs.count ?? 0}
-            indexHealth={data.index.health ?? ''}
-            ingestionType={data.connector ? 'Connector' : data.crawler ? 'Crawler' : 'API'}
+            documentCount={indexData.index.total.docs.count ?? 0}
+            indexHealth={indexData.index.health ?? ''}
+            ingestionType={
+              indexData.connector ? 'Connector' : indexData.crawler ? 'Crawler' : 'API'
+            }
           />
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -53,9 +68,11 @@ export const SearchIndexOverview: React.FC = () => {
                   <EuiFlexItem>
                     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                       <EuiFlexItem>
-                        <EuiTitle size="s">
-                          <h2>Adding documents to your index</h2>
-                        </EuiTitle>
+                        {indexData.index.name[0] !== '.' && (
+                          <EuiTitle size="s">
+                            <h2>Adding documents to your index</h2>
+                          </EuiTitle>
+                        )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
@@ -65,23 +82,29 @@ export const SearchIndexOverview: React.FC = () => {
                             </EuiButton>
                           </EuiFlexItem>
                           <EuiFlexItem>
-                            <EuiButton fill>Generate an API key</EuiButton>
+                            <EuiButton fill onClick={openGenerateModal}>
+                              Generate an API key
+                            </EuiButton>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
-                  <EuiSpacer />
-                  <EuiFlexItem>
-                    <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-                      {`\
-curl -X POST '${searchIndexApiUrl}${data.index?.name}/document' \\
+                  {indexData.index.name[0] !== '.' && (
+                    <>
+                      <EuiSpacer />
+                      <EuiFlexItem>
+                        <EuiCodeBlock language="bash" fontSize="m" isCopyable>
+                          {`\
+curl -X POST '${searchIndexApiUrl}${indexData.index.name}/_doc' \\
   -H 'Content-Type: application/json' \\
-  -H 'Authorization: Bearer ${apiKey}' \\
+  -H 'Authorization: Bearer ${apiKeyExample}' \\
   -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
 `}
-                    </EuiCodeBlock>
-                  </EuiFlexItem>
+                        </EuiCodeBlock>
+                      </EuiFlexItem>
+                    </>
+                  )}
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>

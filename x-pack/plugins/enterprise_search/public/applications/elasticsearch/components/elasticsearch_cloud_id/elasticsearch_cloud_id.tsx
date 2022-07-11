@@ -25,26 +25,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { SendTelemetryHelper } from '../../../shared/telemetry/telemetry_logic';
 
 const onFocusHandler = (e: React.FocusEvent<HTMLInputElement>): void => {
   e.target.select();
-};
-
-interface CloudDetails {
-  cloudId: string | undefined;
-  deploymentUrl: string | undefined;
-}
-
-const useCloudDetails = (): CloudDetails => {
-  const { cloud } = useValues(KibanaLogic);
-  return {
-    cloudId: cloud?.cloudId,
-    deploymentUrl: cloud?.deploymentUrl,
-  };
 };
 
 const copyCloudIdHandler = (

@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFormRow,
@@ -34,14 +35,15 @@ import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
 
 interface GenerateApiKeyModalProps {
   indexName: string;
+  onClose(): void;
 }
 
-export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexName }) => {
+export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexName, onClose }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName, makeRequest } = useActions(GenerateApiKeyModalLogic);
 
   return (
-    <EuiModal onClose={() => {}}>
+    <EuiModal onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>Generate API Key</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -71,7 +73,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                         />
                       </EuiFormRow>
                     ) : (
-                      <EuiFormRow label={`Your API key: ${keyName.trim()}`}>
+                      <EuiFormRow label={`"${keyName.trim()}"`}>
                         <EuiFieldText value={apiKey} />
                       </EuiFormRow>
                     )}
@@ -142,7 +144,9 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
           </EuiPanel>
         </>
       </EuiModalBody>
-      <EuiModalFooter>Cancel</EuiModalFooter>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+      </EuiModalFooter>
     </EuiModal>
   );
 };
