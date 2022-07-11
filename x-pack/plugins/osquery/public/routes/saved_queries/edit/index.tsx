@@ -44,7 +44,7 @@ const EditSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
 
   const elasticPrebuiltQuery = useMemo(
-    () => savedQueryDetails?.attributes?.prebuilt,
+    () => !!savedQueryDetails?.attributes?.prebuilt,
     [savedQueryDetails]
   );
   const viewMode = useMemo(

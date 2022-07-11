@@ -20,6 +20,7 @@ export interface PackSavedObjectAttributes {
   queries: Array<{
     id: string;
     name: string;
+    query: string;
     interval: number;
     ecs_mapping: Record<string, unknown>;
   }>;

@@ -23,7 +23,7 @@ import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_f
 
 interface EditSavedQueryFormProps {
   defaultValue?: unknown;
-  handleSubmit: () => Promise<void>;
+  handleSubmit: () => Promise<{ attributes: { id: string } }>;
   viewMode?: boolean;
 }
 

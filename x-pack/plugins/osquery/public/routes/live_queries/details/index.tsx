@@ -30,8 +30,11 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
-  const isPackResults = useMemo(() => data?.queries.length > 1, [data]);
-  const singleQueryDetails = useMemo(() => data?.queries[0], [data]);
+  const isPackResults = useMemo(
+    () => (data?.queries?.length ? data?.queries?.length > 1 : false),
+    [data]
+  );
+  const singleQueryDetails = useMemo(() => data?.queries?.[0], [data]);
 
   const LeftColumn = useMemo(
     () => (
@@ -80,12 +83,14 @@ const LiveQueryDetailsPageComponent = () => {
           </EuiCodeBlock>
           <EuiSpacer />
 
-          <ResultTabs
-            actionId={singleQueryDetails?.action_id}
-            agentIds={singleQueryDetails?.agents}
-            startDate={singleQueryDetails?.['@timestamp']}
-            endDate={singleQueryDetails?.expiration}
-          />
+          {singleQueryDetails ? (
+            <ResultTabs
+              actionId={singleQueryDetails?.action_id}
+              agentIds={singleQueryDetails?.agents}
+              startDate={data?.['@timestamp']}
+              endDate={singleQueryDetails?.expiration}
+            />
+          ) : null}
         </>
       )}
     </WithHeaderLayout>

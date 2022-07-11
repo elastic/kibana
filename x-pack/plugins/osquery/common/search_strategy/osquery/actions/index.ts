@@ -19,35 +19,37 @@ export interface ActionsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
+export interface ActionDetails {
+  action_id: string;
+  expiration: string;
+  '@timestamp': string;
+  agent_selection: {
+    agents: string[];
+    allAgentsSelected: boolean;
+    platformsSelected: string[];
+    policiesSelected: string[];
+  };
+  agents: string[];
+  user_id?: string;
+  pack_id?: string;
+  pack_name?: string;
+  pack_prebuilt?: boolean;
+  queries: Array<{
+    action_id: string;
+    id: string;
+    query: string;
+    agents: string[];
+    ecs_mapping?: unknown;
+    version?: string;
+    platform?: string;
+    saved_query_id?: string;
+  }>;
+}
+
 export type ActionsRequestOptions = RequestOptionsPaginated;
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
-  actionDetails: estypes.SearchHit<{
-    action_id: string;
-    expiration: string;
-    '@timestamp': string;
-    agent_selection: {
-      agents: string[];
-      allAgentsSelected: boolean;
-      platformsSelected: string[];
-      policiesSelected: string[];
-    };
-    agents: string[];
-    user_id?: string;
-    pack_id?: string;
-    pack_name?: string;
-    pack_prebuilt?: boolean;
-    queries: Array<{
-      action_id: string;
-      id: string;
-      query: string;
-      agents: string[];
-      ecs_mapping?: unknown;
-      version?: string;
-      platform?: string;
-      saved_query_id?: string;
-    }>;
-  }>;
+  actionDetails: estypes.SearchHit<ActionDetails>;
   inspect?: Maybe<Inspect>;
 }
 

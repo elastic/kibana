@@ -13,19 +13,30 @@ export interface IQueryPayload {
   };
 }
 
+export interface PackItemQuery {
+  id: string;
+  name: string;
+  interval: number;
+  query: string;
+  platform?: string;
+  version?: string;
+  ecs_mapping?: Record<string, unknown>;
+}
+
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: Array<{
-    id: string;
-    name: string;
-    interval: number;
-    ecs_mapping: Record<string, unknown>;
-  }>;
+  queries: PackItemQuery[];
   version?: number;
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
-}> & { policy_ids: string[] };
+}>;
+
+export type PackItem = PackSavedObject['attributes'] & {
+  id: string;
+  policy_ids: string[];
+  read_only?: boolean;
+};

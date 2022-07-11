@@ -38,6 +38,7 @@ import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { idSchemaValidation } from '../queries/validations';
+import type { PackItem } from '../types';
 
 const GhostFormField = () => <></>;
 
@@ -46,7 +47,7 @@ const FORM_ID = 'scheduledQueryForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface PackFormProps {
-  defaultValue?: OsqueryManagerPackagePolicy;
+  defaultValue?: PackItem;
   editMode?: boolean;
   isReadOnly?: boolean;
 }
@@ -71,14 +72,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   });
 
   const { form } = useForm<
-    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
-      queries: {};
-      policy_ids: string[];
-    },
-    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
-      queries: {};
-      policy_ids: string[];
-    }
+    PackItem
   >({
     id: FORM_ID,
     schema: {

@@ -7,7 +7,7 @@
 
 import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
-import type { PackSavedObject } from './types';
+import type { PackItem } from './types';
 
 interface UsePack {
   packId: string;
@@ -17,12 +17,8 @@ interface UsePack {
 export const usePack = ({ packId, skip = false }: UsePack) => {
   const { http } = useKibana().services;
 
-  return useQuery<PackSavedObject>(
-    ['pack', { packId }],
-    () => http.get(`/api/osquery/packs/${packId}`),
-    {
-      keepPreviousData: true,
-      enabled: !skip || !packId,
-    }
-  );
+  return useQuery<PackItem>(['pack', { packId }], () => http.get(`/api/osquery/packs/${packId}`), {
+    keepPreviousData: true,
+    enabled: !skip || !packId,
+  });
 };

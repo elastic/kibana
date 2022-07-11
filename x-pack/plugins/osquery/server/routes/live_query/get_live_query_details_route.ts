@@ -96,9 +96,12 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
             >(
               actionDetails._source?.queries,
               (acc, query) => {
+                const agentStatus = agentByActionIdStatusMap[query.action_id];
+
                 acc.push({
                   ...query,
-                  ...agentByActionIdStatusMap[query.action_id],
+                  ...agentStatus,
+                  status: isCompleted || agentStatus?.pending === 0 ? 'completed' : 'running',
                 });
 
                 return acc;

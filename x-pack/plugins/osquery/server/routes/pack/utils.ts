@@ -11,7 +11,7 @@ import type { PackSavedObjectAttributes } from '../../common/types';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 export const convertPackQueriesToSO = (queries) =>
-  reduce<PackSavedObjectAttributes['queries']>(
+  reduce<[], PackSavedObjectAttributes['queries']>(
     queries,
     (acc, value, key) => {
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
@@ -27,7 +27,7 @@ export const convertPackQueriesToSO = (queries) =>
   );
 
 export const convertSOQueriesToPack = (
-  queries: PackSavedObjectAttributes['queries'],
+  queries: P,
   options?: { removeMultiLines?: boolean }
 ) =>
   reduce(

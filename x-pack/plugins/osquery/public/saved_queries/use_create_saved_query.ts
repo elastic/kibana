@@ -13,6 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 interface UseCreateSavedQueryProps {
   withRedirect?: boolean;
@@ -27,13 +28,13 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(
+  return useMutation<SavedQuerySO, { body: { error: string; message: string } }>(
     (payload) =>
       http.post('/api/osquery/saved_query', {
         body: JSON.stringify(payload),
       }),
     {
-      onError: (error: { body: { error: string; message: string } }) => {
+      onError: (error) => {
         setErrorToast(error, {
           title: error.body.error,
           toastMessage: error.body.message,

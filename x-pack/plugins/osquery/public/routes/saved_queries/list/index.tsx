@@ -35,6 +35,7 @@ export type SavedQuerySO = SavedObject<{
   query: string;
   ecs_mapping: ECSMapping;
   updated_at: string;
+  prebuilt?: boolean;
 }>;
 
 interface PlayButtonProps {

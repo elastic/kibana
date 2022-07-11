@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PlatformIcons } from './queries/platforms';
-import type { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
+import type { PackItem, PackItemQuery } from './types';
 
 export interface PackQueriesTableProps {
-  data: OsqueryManagerPackagePolicyInputStream[];
+  data: PackItem['queries'];
   isReadOnly?: boolean;
-  onDeleteClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
-  onEditClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
-  selectedItems?: OsqueryManagerPackagePolicyInputStream[];
-  setSelectedItems?: (selection: OsqueryManagerPackagePolicyInputStream[]) => void;
+  onDeleteClick?: (item: PackItemQuery) => void;
+  onEditClick?: (item: PackItemQuery) => void;
+  selectedItems?: PackItem['queries'];
+  setSelectedItems?: (selection: PackItem['queries']) => void;
 }
 
 const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
@@ -31,12 +30,11 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   setSelectedItems,
 }) => {
   const renderDeleteAction = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => (
+    (item: PackItemQuery) => (
       <EuiButtonIcon
         color="danger"
-        // @ts-expect-error update types
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onDeleteClick(item)}
+        onClick={() => onDeleteClick && onDeleteClick(item)}
         iconType="trash"
         aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
           defaultMessage: 'Delete {queryName}',
@@ -50,12 +48,11 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   );
 
   const renderEditAction = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => (
+    (item: PackItemQuery) => (
       <EuiButtonIcon
         color="primary"
-        // @ts-expect-error update types
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onEditClick(item)}
+        onClick={() => onEditClick && onEditClick(item)}
         iconType="pencil"
         aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
           defaultMessage: 'Edit {queryName}',
@@ -161,14 +158,14 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof OsqueryManagerPackagePolicyInputStream,
+        field: 'id' as keyof PackItemQuery,
         direction: 'asc' as const,
       },
     }),
     []
   );
 
-  const itemId = useCallback((item: OsqueryManagerPackagePolicyInputStream) => get('id', item), []);
+  const itemId = useCallback((item: PackItemQuery) => item.id, []);
 
   const selection = useMemo(
     () => ({
@@ -179,7 +176,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   );
 
   return (
-    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+    <EuiBasicTable<PackItemQuery>
       items={data}
       itemId={itemId}
       columns={columns}

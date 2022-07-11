@@ -20,10 +20,11 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { Form } from '../../../shared_imports';
 import { SavedQueryForm } from '../../../saved_queries/form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
+import type { SavedQuerySO } from '../list';
 
 interface NewSavedQueryFormProps {
   defaultValue?: unknown;
-  handleSubmit: () => Promise<void>;
+  handleSubmit: () => Promise<SavedQuerySO>;
 }
 
 const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({

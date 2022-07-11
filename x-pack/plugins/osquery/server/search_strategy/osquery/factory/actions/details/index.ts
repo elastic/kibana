@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/server';
 import type {
+  ActionDetails,
   ActionDetailsStrategyResponse,
   ActionDetailsRequestOptions,
   OsqueryQueries,
@@ -20,7 +21,7 @@ export const actionDetails: OsqueryFactory<OsqueryQueries.actionDetails> = {
   buildDsl: (options: ActionDetailsRequestOptions) => buildActionDetailsQuery(options),
   parse: async (
     options: ActionDetailsRequestOptions,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<ActionDetails>
   ): Promise<ActionDetailsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionDetailsQuery(options))],

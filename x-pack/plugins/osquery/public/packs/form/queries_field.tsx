@@ -12,16 +12,16 @@ import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
 import type { FieldHook } from '../../shared_imports';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
+import type { PackItem } from '../types';
 
 interface QueriesFieldProps {
   handleNameChange: (name: string) => void;
-  field: FieldHook<Array<Record<string, unknown>>>;
+  field: FieldHook<PackItem['queries']>;
   euiFieldProps: EuiComboBoxProps<{}>;
 }
 
@@ -33,9 +33,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   const isReadOnly = !!euiFieldProps?.isDisabled;
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
-  const [tableSelectedItems, setTableSelectedItems] = useState<
-    OsqueryManagerPackagePolicyInputStream[]
-  >([]);
+  const [tableSelectedItems, setTableSelectedItems] = useState<PackItem[]>([]);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
@@ -141,6 +139,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         produce((draft) => {
           forEach(parsedContent.queries, (newQuery, newQueryId) => {
             draft.push(
+              // @ts-expect-error update types
               pickBy(
                 {
                   id: newQueryId,
@@ -170,7 +169,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       field.value && field.value.length
         ? field.value.reduce((acc, query) => {
             if (query?.id) {
-              // @ts-expect-error update types
               acc.push(query.id);
             }
 
@@ -212,7 +210,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       )}
       {field.value?.length ? (
         <PackQueriesTable
-          // @ts-expect-error update types
           data={tableData}
           isReadOnly={isReadOnly}
           onEditClick={handleEditClick}

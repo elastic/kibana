@@ -22,7 +22,10 @@ export const useSavedQueries = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<{ saved_objects: SavedQuerySO[] }, { body: { error: string; message: string } }>(
+  return useQuery<
+    { saved_objects: SavedQuerySO[]; total: number },
+    { body: { error: string; message: string } }
+  >(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
     () =>
       http.get('/api/osquery/saved_query', {

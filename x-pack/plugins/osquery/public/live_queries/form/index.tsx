@@ -96,7 +96,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     onSubmit: async (formData, isValid) => {
       if (isValid) {
         try {
-          await mutateAsync(pickBy(formData, (value) => !isEmpty(value)));
+          await mutateAsync(formData);
           // eslint-disable-next-line no-empty
         } catch (e) {}
       }

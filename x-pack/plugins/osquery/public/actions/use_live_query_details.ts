@@ -52,7 +52,7 @@ export const useLiveQueryDetails = ({
       pack_name?: string;
       pack_prebuilt?: boolean;
       status?: string;
-      queries: Array<{
+      queries?: Array<{
         action_id: string;
         id: string;
         query: string;

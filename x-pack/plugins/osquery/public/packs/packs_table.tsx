@@ -42,7 +42,7 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
-export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?: string[] }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(

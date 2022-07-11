@@ -70,7 +70,7 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
 export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent);
 
 interface ScheduledQueryErrorsTableProps {
-  actionId?: string;
+  actionId: string;
   agentIds?: string[];
   interval: number;
 }

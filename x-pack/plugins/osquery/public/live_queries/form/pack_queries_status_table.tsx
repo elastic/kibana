@@ -36,10 +36,11 @@ import type { DataView } from '@kbn/data-plugin/common';
 import styled from 'styled-components';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../../common/lib/kibana';
-import type { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
 import { usePackQueryLastResults } from '../../packs/use_pack_query_last_results';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
+import type { PackItem } from '../../packs/types';
 
+// @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
   .euiTableRow.euiTableRow-isExpandedRow > td > div {
     padding: 0;
@@ -497,21 +498,24 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
 
 const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
 
+type PackQueryStatusItem = Partial<{
+  action_id: string;
+  id: string;
+  query: string;
+  agents: string[];
+  ecs_mapping?: unknown;
+  version?: string;
+  platform?: string;
+  saved_query_id?: string;
+  status?: string;
+  pending?: number;
+  docs?: number;
+}>;
+
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
   actionId?: string;
-  data?: Array<
-    Partial<{
-      action_id: string;
-      id: string;
-      query: string;
-      agents: string[];
-      ecs_mapping?: unknown;
-      version?: string;
-      platform?: string;
-      saved_query_id?: string;
-    }>
-  >;
+  data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
 }
@@ -553,13 +557,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDocsColumn = useCallback(
-    (item) => (
+    (item: PackQueryStatusItem) => (
       <DocsColumnResults
         count={item?.docs ?? 0}
-        isLive={data?.status === 'running' && item?.pending !== 0}
+        isLive={item?.status === 'running' && item?.pending !== 0}
       />
     ),
-    [data?.status]
+    []
   );
 
   const renderAgentsColumn = useCallback((item) => {
@@ -625,10 +629,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
-  const getItemId = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => get(item, 'id'),
-    []
-  );
+  const getItemId = useCallback((item: PackItem) => get(item, 'id'), []);
 
   const columns = useMemo(
     () => [
@@ -699,7 +700,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof OsqueryManagerPackagePolicyInputStream,
+        field: 'id' as keyof PackItem,
         direction: 'asc' as const,
       },
     }),

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
@@ -35,10 +34,10 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../common/lib/kibana';
-import type { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { usePackQueryErrors } from './use_pack_query_errors';
+import type { PackItem } from './types';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -642,7 +641,7 @@ const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
 
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
-  data: OsqueryManagerPackagePolicyInputStream[];
+  data: PackItem[];
   packName: string;
 }
 
@@ -769,10 +768,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [agentIds, logsDataView, packName]
   );
 
-  const getItemId = useCallback(
-    (item: OsqueryManagerPackagePolicyInputStream) => get('id', item),
-    []
-  );
+  const getItemId = useCallback((item: PackItem) => item.id, []);
 
   const columns = useMemo(
     () => [
@@ -853,7 +849,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof OsqueryManagerPackagePolicyInputStream,
+        field: 'id' as keyof PackItem,
         direction: 'asc' as const,
       },
     }),
@@ -861,7 +857,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   return (
-    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+    <EuiBasicTable<PackItem>
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data ?? []}
       itemId={getItemId}

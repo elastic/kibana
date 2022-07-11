@@ -12,6 +12,7 @@ import { useKibana } from '../common/lib/kibana';
 import { pagePathGetters } from '../common/page_paths';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERY_ID } from './constants';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 interface UseSavedQueryProps {
   savedQueryId: string;
@@ -25,7 +26,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   const setErrorToast = useErrorToast();
 
   return useQuery<
-    {
+    SavedQuerySO & {
       error?: {
         error: string;
         message: string;
