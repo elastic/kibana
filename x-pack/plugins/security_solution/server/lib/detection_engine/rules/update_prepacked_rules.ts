@@ -6,17 +6,17 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 import { legacyMigrate } from './utils';
 import { deleteRules } from './delete_rules';
 import { PrepackagedRulesError } from '../routes/rules/add_prepackaged_rules_route';
-import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import type { IRuleExecutionLogForRoutes } from '../rule_execution_log';
 import { createRules } from './create_rules';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 

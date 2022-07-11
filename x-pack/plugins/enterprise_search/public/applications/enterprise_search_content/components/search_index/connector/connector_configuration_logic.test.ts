@@ -11,10 +11,6 @@ import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/u
 
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
-// jest.mock('../../api', () => ({
-//   AppLogic: { values: { isOrganization: true } },
-// }));
-
 const DEFAULT_VALUES = {
   configState: { foo: 'bar' },
   isEditing: false,
@@ -22,7 +18,7 @@ const DEFAULT_VALUES = {
 
 describe('ConnectorConfigurationLogic', () => {
   const { mount } = new LogicMounter(ConnectorConfigurationLogic);
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,6 +88,15 @@ describe('ConnectorConfigurationLogic', () => {
       it('should call flashAPIError', () => {
         ConnectorConfigurationLogic.actions.apiError('error' as any);
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+    describe('apiSuccess', () => {
+      it('should call flashAPIError', () => {
+        ConnectorConfigurationLogic.actions.apiSuccess({
+          configuration: {},
+          indexName: 'name',
+        });
+        expect(flashSuccessToast).toHaveBeenCalledWith('Configuration successfully updated');
       });
     });
   });

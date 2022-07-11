@@ -13,8 +13,8 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
-import { State } from '../../../../common/store';
+import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
+import type { State } from '../../../../common/store';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,

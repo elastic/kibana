@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ClearCommand } from '../components/builtin_commands/clear_command';
 import { HelpCommand } from '../components/builtin_commands/help_command';
-import { CommandDefinition } from '../types';
+import type { CommandDefinition } from '../types';
 
 export const HELP_GROUPS = Object.freeze({
   supporting: {

@@ -22,4 +22,5 @@ export {
   openOnClickTooltip,
   closeOnHoverTooltip,
   openOnHoverTooltip,
+  updateOpenTooltips,
 } from './tooltip_actions';

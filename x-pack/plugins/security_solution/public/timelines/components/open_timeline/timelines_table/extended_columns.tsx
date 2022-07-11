@@ -10,7 +10,7 @@ import React from 'react';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 import * as i18n from '../translations';
-import { OpenTimelineResult } from '../types';
+import type { OpenTimelineResult } from '../types';
 
 /**
  * Returns the extended columns that are specific to the `All Timelines` view

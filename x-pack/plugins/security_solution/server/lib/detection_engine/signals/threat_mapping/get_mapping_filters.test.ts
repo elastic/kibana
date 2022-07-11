@@ -6,7 +6,7 @@
  */
 
 import { getMappingFilters } from './get_mapping_filters';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('getMappingFilters', () => {
   const sampleMapping: ThreatMapping = [

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useMemo, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import {
   EuiText,
   EuiIcon,
@@ -14,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandList } from '../command_list';
 import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';

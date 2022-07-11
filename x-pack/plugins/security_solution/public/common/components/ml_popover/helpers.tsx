@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityJob } from './types';
+import type { SecurityJob } from './types';
 
 /**
  * Returns a filtered array of Jobs according to JobsTableFilters selections
