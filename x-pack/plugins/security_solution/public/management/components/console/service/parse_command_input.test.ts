@@ -70,8 +70,8 @@ describe('when using parsed command input utils', () => {
       );
     });
 
-    it('should parse arguments that have multiple strings as the value', () => {
-      const input = 'foo --one "value for one here" --two="some more strings for 2"';
+    it('should report error for unquoted arg values that have spaces', () => {
+      const input = 'foo --one value for one here --two=some more strings for 2';
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand).toEqual(
@@ -81,12 +81,19 @@ describe('when using parsed command input utils', () => {
             one: ['value for one here'],
             two: ['some more strings for 2'],
           },
+          errors: [
+            'value for --one contains spaces and must be enclosed in quotes.',
+            'value for --two contains spaces and must be enclosed in quotes.',
+          ],
         })
       );
     });
 
-    it('should parse arguments whose value is wrapped in quotes', () => {
-      const input = 'foo --one "value for one here" --two="some more strings for 2"';
+    it.each([
+      ['single quotes', "'"],
+      ['double quotes', '"'],
+    ])('should parse arguments whose value is wrapped in %s', (_, quote) => {
+      const input = `foo --one ${quote}value for one here${quote} --two=${quote}some more strings for 2${quote}`;
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand).toEqual(
