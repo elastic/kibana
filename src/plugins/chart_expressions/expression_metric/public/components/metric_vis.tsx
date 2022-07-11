@@ -22,6 +22,7 @@ import {
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -135,7 +136,7 @@ const getFormatter = (
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
   paletteParams
-    ? getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, {
+    ? getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
         min: paletteParams.rangeMin,
         max: paletteParams.rangeMax,
       }) || defaultColor

@@ -31,6 +31,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.metric.help', {
         defaultMessage: 'The primary metric.',
       }),
+      required: true,
     },
     secondaryMetric: {
       types: ['vis_dimension', 'string'],

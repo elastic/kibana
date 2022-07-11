@@ -18,6 +18,8 @@ export * from './datatable_visualization/datatable_visualization';
 export * from './datatable_visualization';
 export * from './metric_visualization/metric_visualization';
 export * from './metric_visualization';
+export * from './visualizations/metric/metric_visualization';
+export * from './visualizations/metric';
 export * from './pie_visualization/pie_visualization';
 export * from './pie_visualization';
 export * from './xy_visualization/xy_visualization';

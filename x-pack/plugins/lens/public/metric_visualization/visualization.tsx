@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- */
-
-import React from 'react';
+ */ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -36,7 +34,7 @@ interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
   palette: PaletteOutput<CustomPaletteState>;
 }
 
-export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+export const legacyMetricSupportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 const getFontSizeAndUnit = (fontSize: string) => {
   const [size, sizeUnit] = fontSize.split(/(\d+)/).filter(Boolean);
@@ -171,7 +169,7 @@ const toExpression = (
   };
 };
 
-export const getMetricVisualization = ({
+export const getLegacyMetricVisualization = ({
   paletteService,
   theme,
 }: {
@@ -185,7 +183,7 @@ export const getMetricVisualization = ({
       id: 'lnsMetric',
       icon: LensIconChartMetric,
       label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
+        defaultMessage: 'Legacy Metric',
       }),
       groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
         defaultMessage: 'Goal and single value',
@@ -251,7 +249,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) =>
-            !op.isBucketed && supportedTypes.has(op.dataType),
+            !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },
