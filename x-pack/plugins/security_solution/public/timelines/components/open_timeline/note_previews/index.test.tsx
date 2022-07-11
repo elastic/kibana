@@ -12,7 +12,7 @@ import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
-import { OpenTimelineResult, TimelineResultNote } from '../types';
+import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 
 jest.mock('../../../../common/hooks/use_selector');

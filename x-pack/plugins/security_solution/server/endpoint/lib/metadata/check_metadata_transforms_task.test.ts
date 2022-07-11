@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CheckMetadataTransformsTask,
   TYPE,
@@ -16,14 +16,16 @@ import {
 import { createMockEndpointAppContext } from '../../mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { TaskManagerSetupContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { CoreSetup } from '@kbn/core/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
-import { RunResult } from '@kbn/task-manager-plugin/server/task';
-import { ElasticsearchAssetType, EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
+import type { RunResult } from '@kbn/task-manager-plugin/server/task';
+import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
 import type { EndpointAppContext } from '../../types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';

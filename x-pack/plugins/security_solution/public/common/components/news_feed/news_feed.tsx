@@ -13,7 +13,7 @@ import { SidebarHeader } from '../sidebar_header';
 
 import { NoNews } from './no_news';
 import { Post } from './post';
-import { NewsItem } from './types';
+import type { NewsItem } from './types';
 
 interface Props {
   news: NewsItem[] | null | undefined;
