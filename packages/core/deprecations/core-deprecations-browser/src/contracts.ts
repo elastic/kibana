@@ -5,13 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
-
-/**
- * Response from correctiveActions.api call from automatically resolving the deprecation
- * @public
- */
-export type ResolveDeprecationResponse = { status: 'ok' } | { status: 'fail'; reason: string };
+import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+import type { ResolveDeprecationResponse } from './types';
 
 /**
  * DeprecationsService provides methods to fetch domain deprecation details from

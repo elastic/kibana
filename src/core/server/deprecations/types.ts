@@ -7,7 +7,6 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { SavedObjectsClientContract } from '../saved_objects/types';
 import type { IScopedClusterClient } from '../elasticsearch';
@@ -25,11 +24,4 @@ export interface RegisterDeprecationsConfig {
 export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
-}
-
-/**
- * @public
- */
-export interface DeprecationsGetResponse {
-  deprecations: DomainDeprecationDetails[];
 }

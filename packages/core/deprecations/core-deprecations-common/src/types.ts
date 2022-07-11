@@ -98,3 +98,10 @@ export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationD
 export type DomainDeprecationDetails = DeprecationsDetails & {
   domainId: string;
 };
+
+/**
+ * @public
+ */
+export interface DeprecationsGetResponse {
+  deprecations: DomainDeprecationDetails[];
+}

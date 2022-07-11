@@ -8,8 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
-import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+import type { DomainDeprecationDetails, DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { DeprecationsRegistry } from './deprecations_registry';
 import type { GetDeprecationsContext } from './types';
 

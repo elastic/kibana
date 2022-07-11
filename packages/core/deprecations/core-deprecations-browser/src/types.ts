@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type {
-  BaseDeprecationDetails,
-  ConfigDeprecationDetails,
-  FeatureDeprecationDetails,
-  DeprecationsDetails,
-  DomainDeprecationDetails,
-  DeprecationsGetResponse,
-} from './types';
+/**
+ * Response from correctiveActions.api call from automatically resolving the deprecation
+ * @public
+ */
+export type ResolveDeprecationResponse = { status: 'ok' } | { status: 'fail'; reason: string };

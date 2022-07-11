@@ -9,7 +9,7 @@
 import type { GetDeprecationsContext } from './types';
 import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DeprecationsDetails } from './types';
+import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 
 describe('DeprecationsFactory', () => {
   let logger: ReturnType<typeof loggerMock.create>;

@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { ResolveDeprecationResponse, DeprecationsServiceStart } from './contracts';
+export type { DeprecationsServiceStart } from './contracts';
+export type { ResolveDeprecationResponse } from './types';

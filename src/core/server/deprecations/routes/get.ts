@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { DeprecationsGetResponse } from '../types';
+import type { DeprecationsGetResponse } from '@kbn/core-deprecations-common';
 import type { InternalDeprecationRouter } from '../internal_types';
 
 export const registerGetRoute = (router: InternalDeprecationRouter) => {

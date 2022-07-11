@@ -8,9 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+import type {
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
 import type { ResolveDeprecationResponse } from '@kbn/core-deprecations-browser';
-import type { DeprecationsGetResponse } from '../../server/types';
 
 /* @internal */
 export interface DeprecationsClientDeps {

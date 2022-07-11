@@ -8,7 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DeprecationsService } from './deprecations_service';
-import type { DeprecationsServiceStart } from './deprecations_service';
+import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 
 const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> => ({
   getAllDeprecations: jest.fn().mockResolvedValue([]),
