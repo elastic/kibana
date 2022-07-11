@@ -73,10 +73,10 @@ const expecteds = [
   },
 ];
 
-const testsToRun: [MapSavedObjectAttributes, any] = mapSavedObjects.map(
+const testsToRun = mapSavedObjects.map(
   (savedObject: { attributes: MapSavedObjectAttributes }, index: number) => {
     const { attributes } = savedObject;
-    return [attributes, expecteds[index]];
+    return [attributes, expecteds[index]] as const;
   }
 );
 
