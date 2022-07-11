@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsSingleBucketAggregateBase,
   AggregationsTopHitsAggregate,
   AggregationsRateAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  ListResult,
-  PackagePolicy,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { getRouteMetric } from '../routes/usage';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
-import { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
+import type { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
 
 interface PolicyLevelUsage {
   scheduled_queries?: ScheduledQueryUsageMetrics;
