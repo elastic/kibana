@@ -14,18 +14,18 @@ import { join } from 'path';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { HttpConfig } from './http_config';
-import {
-  Router,
+import type {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
   RouteValidationResultFactory,
   RouteValidationFunction,
-} from './router';
+  RequestHandlerContextBase,
+} from '@kbn/core-http-server';
+import { HttpConfig } from './http_config';
+import { Router } from './router';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
-import { RequestHandlerContextBase } from '..';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import { of } from 'rxjs';

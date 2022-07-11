@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '../http';
-import type { RequestHandlerContextBase } from '..';
+import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
 import type { DeprecationsRequestHandlerContext } from './deprecations_route_handler_context';
 
 /**

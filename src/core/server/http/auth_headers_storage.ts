@@ -7,25 +7,13 @@
  */
 
 import { Request } from '@hapi/hapi';
-import { KibanaRequest, ensureRawRequest } from './router';
-import { AuthHeaders } from './lifecycle/auth';
-
-/**
- * Get headers to authenticate a user against Elasticsearch.
- * @param request {@link KibanaRequest} - an incoming request.
- * @return authentication headers {@link AuthHeaders} for - an incoming request.
- * @public
- * */
-export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
-
-/** @internal */
-export type SetAuthHeaders = (request: KibanaRequest, headers: AuthHeaders) => void;
-
-/** @internal */
-export interface IAuthHeadersStorage {
-  set: SetAuthHeaders;
-  get: GetAuthHeaders;
-}
+import type {
+  KibanaRequest,
+  AuthHeaders,
+  IAuthHeadersStorage,
+  GetAuthHeaders,
+} from '@kbn/core-http-server';
+import { ensureRawRequest } from './router';
 
 /** @internal */
 export class AuthHeadersStorage implements IAuthHeadersStorage {

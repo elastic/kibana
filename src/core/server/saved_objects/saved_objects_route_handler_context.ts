@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '../http';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalSavedObjectsServiceStart } from './saved_objects_service';
 import type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import type { SavedObjectsClientContract } from './types';

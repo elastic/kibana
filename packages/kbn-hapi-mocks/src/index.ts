@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { RouteValidator } from './validator';
-export type {
-  RouteValidatorConfig,
-  RouteValidationSpec,
-  RouteValidationFunction,
-  RouteValidatorOptions,
-  RouteValidatorFullConfig,
-  RouteValidationResultFactory,
-} from './validator';
-export { RouteValidationError } from './validator_error';
+import { createRequestMock } from './request';
+
+export const hapiMocks = {
+  createRequest: createRequestMock,
+};

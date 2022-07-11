@@ -11,8 +11,8 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import type { LogMeta, Logger } from '@kbn/logging';
+import type { KibanaRequestState } from '@kbn/core-http-server';
 import { getResponsePayloadBytes } from './get_payload_size';
-import type { KibanaRequestState } from '../router';
 
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';

@@ -122,3 +122,17 @@ export type Writable<T> = {
  */
 export type OneOf<T, K extends keyof T> = Omit<T, K> &
   { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: never } }[K];
+
+/**
+ * Deep partial version of a type.
+ */
+export type DeepPartial<T> = T extends any[]
+  ? DeepPartialArray<T[number]>
+  : T extends object
+  ? DeepPartialObject<T>
+  : T;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
+
+export type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };

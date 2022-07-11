@@ -8,7 +8,7 @@
 
 import { getApmConfigMock } from './http_resources_service.test.mocks';
 
-import { RouteConfig } from '../http';
+import type { RouteConfig } from '@kbn/core-http-server';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { coreMock } from '../mocks';

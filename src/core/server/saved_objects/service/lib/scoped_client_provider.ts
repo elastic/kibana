@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { KibanaRequest } from '../../../http';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.

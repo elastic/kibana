@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest, RouteMethod, KibanaRouteOptions } from '@kbn/core-http-server';
 import {
   createCustomHeadersPreResponseHandler,
   createVersionCheckPostAuthHandler,
@@ -13,7 +14,6 @@ import {
 } from './lifecycle_handlers';
 import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
-import { KibanaRequest, RouteMethod, KibanaRouteOptions } from './router';
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 

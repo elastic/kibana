@@ -24,29 +24,35 @@ import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { HttpConfig } from './http_config';
-import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
-import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
-import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
-import {
+import type {
   IRouter,
   RouteConfigOptions,
   KibanaRouteOptions,
   KibanaRequestState,
-  isSafeMethod,
   RouterRoute,
-} from './router';
-import {
+  AuthenticationHandler,
+  OnPreAuthHandler,
+  OnPostAuthHandler,
+  OnPreRoutingHandler,
+  OnPreResponseHandler,
   SessionStorageCookieOptions,
-  createCookieSessionStorageFactory,
-} from './cookie_session_storage';
+  HttpServiceSetup,
+  HttpServerInfo,
+  HttpAuth,
+  IAuthHeadersStorage,
+} from '@kbn/core-http-server';
+import { HttpConfig } from './http_config';
+import { adoptToHapiAuthFormat } from './lifecycle/auth';
+import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
+import { adoptToHapiOnRequest } from './lifecycle/on_pre_routing';
+import { adoptToHapiOnPreResponseFormat } from './lifecycle/on_pre_response';
+import { isSafeMethod } from './router';
+import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
 
 /** @internal */
 export interface HttpServerSetup {

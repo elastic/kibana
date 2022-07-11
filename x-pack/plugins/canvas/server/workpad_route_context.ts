@@ -7,7 +7,7 @@
 
 import {
   CustomRequestHandlerContext,
-  RequestHandlerContextProvider,
+  IContextProvider,
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
@@ -39,7 +39,7 @@ interface Deps {
 
 export const createWorkpadRouteContext: (
   deps: Deps
-) => RequestHandlerContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
+) => IContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
   return async (context) => {
     const soClient = (await context.core).savedObjects.client;
     return {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '../../http';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */

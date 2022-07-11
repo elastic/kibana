@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObject } from '../../../types';
-import { KibanaRequest } from '../../http';
 import { SavedObjectsExportError } from './errors';
 import { SavedObjectsExportTransform, SavedObjectsExportTransformContext } from './types';
 import { getObjKey, SavedObjectComparator } from './utils';

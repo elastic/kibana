@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalCoreStart } from './internal_types';
-import type { KibanaRequest } from './http';
 import {
   CoreSavedObjectsRouteHandlerContext,
   SavedObjectsRequestHandlerContext,

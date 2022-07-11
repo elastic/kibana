@@ -7,8 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Headers } from '../http/router';
-import { KibanaRequest } from '../http';
+import type { Headers, KibanaRequest } from '@kbn/core-http-server';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';

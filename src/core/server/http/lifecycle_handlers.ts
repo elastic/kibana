@@ -7,8 +7,7 @@
  */
 
 import { Env } from '@kbn/config';
-import { OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { OnPreResponseHandler } from './lifecycle/on_pre_response';
+import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
 import { HttpConfig } from './http_config';
 import { isSafeMethod } from './router';
 import { LifecycleRegistrar } from './http_server';

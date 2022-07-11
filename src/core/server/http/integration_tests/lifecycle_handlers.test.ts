@@ -11,11 +11,11 @@ import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { configServiceMock } from '@kbn/config-mocks';
+import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
-import { IRouter, RouteRegistrar } from '../router';
 
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';

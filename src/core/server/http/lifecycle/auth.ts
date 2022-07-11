@@ -8,41 +8,23 @@
 
 import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
+import type {
+  AuthenticationHandler,
+  ResponseHeaders,
+  AuthResultParams,
+  AuthResult,
+  AuthResultAuthenticated,
+  AuthResultNotHandled,
+  AuthResultRedirected,
+  AuthToolkit,
+} from '@kbn/core-http-server';
+import { AuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
   CoreKibanaRequest,
-  IKibanaResponse,
   lifecycleResponseFactory,
-  LifecycleResponseFactory,
   isKibanaResponse,
-  ResponseHeaders,
 } from '../router';
-
-/** @public */
-export enum AuthResultType {
-  authenticated = 'authenticated',
-  notHandled = 'notHandled',
-  redirected = 'redirected',
-}
-
-/** @public */
-export interface Authenticated extends AuthResultParams {
-  type: AuthResultType.authenticated;
-}
-
-/** @public */
-export interface AuthNotHandled {
-  type: AuthResultType.notHandled;
-}
-
-/** @public */
-export interface AuthRedirected extends AuthRedirectedParams {
-  type: AuthResultType.redirected;
-}
-
-/** @public */
-export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 const authResult = {
   authenticated(data: AuthResultParams = {}): AuthResult {
@@ -64,76 +46,16 @@ const authResult = {
       headers,
     };
   },
-  isAuthenticated(result: AuthResult): result is Authenticated {
+  isAuthenticated(result: AuthResult): result is AuthResultAuthenticated {
     return result?.type === AuthResultType.authenticated;
   },
-  isNotHandled(result: AuthResult): result is AuthNotHandled {
+  isNotHandled(result: AuthResult): result is AuthResultNotHandled {
     return result?.type === AuthResultType.notHandled;
   },
-  isRedirected(result: AuthResult): result is AuthRedirected {
+  isRedirected(result: AuthResult): result is AuthResultRedirected {
     return result?.type === AuthResultType.redirected;
   },
 };
-
-/**
- * Auth Headers map
- * @public
- */
-
-export type AuthHeaders = Record<string, string | string[]>;
-
-/**
- * Result of successful authentication.
- * @public
- */
-export interface AuthResultParams {
-  /**
-   * Data to associate with an incoming request. Any downstream plugin may get access to the data.
-   */
-  state?: Record<string, any>;
-  /**
-   * Auth specific headers to attach to a request object.
-   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
-   */
-  requestHeaders?: AuthHeaders;
-  /**
-   * Auth specific headers to attach to a response object.
-   * Used to send back authentication mechanism related headers to a client when needed.
-   */
-  responseHeaders?: AuthHeaders;
-}
-
-/**
- * Result of auth redirection.
- * @public
- */
-export interface AuthRedirectedParams {
-  /**
-   * Headers to attach for auth redirect.
-   * Must include "location" header
-   */
-  headers: { location: string } & ResponseHeaders;
-}
-
-/**
- * @public
- * A tool set defining an outcome of Auth interceptor for incoming request.
- */
-export interface AuthToolkit {
-  /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (data?: AuthResultParams) => AuthResult;
-  /**
-   * User has no credentials.
-   * Allows user to access a resource when authRequired is 'optional'
-   * Rejects a request when authRequired: true
-   * */
-  notHandled: () => AuthResult;
-  /**
-   * Redirects user to another location to complete authentication when authRequired: true
-   * Allows user to access a resource without redirection when authRequired: 'optional'
-   * */
-  redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;
-}
 
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
@@ -141,17 +63,7 @@ const toolkit: AuthToolkit = {
   redirected: authResult.redirected,
 };
 
-/**
- * See {@link AuthToolkit}.
- * @public
- */
-export type AuthenticationHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: AuthToolkit
-) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
-
-/** @public */
+/** @internal */
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
   log: Logger,

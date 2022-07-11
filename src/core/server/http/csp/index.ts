@@ -7,6 +7,5 @@
  */
 
 export { CspConfig } from './csp_config';
-export type { ICspConfig } from './csp_config';
 export { cspConfig } from './config';
 export type { CspConfigType } from './config';
