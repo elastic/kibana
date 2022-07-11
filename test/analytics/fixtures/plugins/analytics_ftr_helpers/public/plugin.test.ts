@@ -123,7 +123,7 @@ describe('AnalyticsFTRHelpers', () => {
         window.__analytics_ftr_helpers__.getEvents(2, {
           eventTypes: [event.event_type],
           fromTimestamp: '2022-03-10T00:00:00.000Z',
-          withTimeoutMs: 100,
+          withTimeoutMs: 1,
         })
       ).resolves.toEqual([{ ...event, timestamp: '2022-06-10T00:00:00.000Z' }]);
     });
