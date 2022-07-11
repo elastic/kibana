@@ -272,7 +272,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Enter the pattern of Elasticsearch indices which you would like to add. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
+      'Enter the pattern of Elasticsearch indices that you would like to add. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
