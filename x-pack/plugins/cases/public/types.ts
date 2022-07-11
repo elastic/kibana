@@ -28,7 +28,7 @@ import {
 } from '../common/api';
 import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-import type { canUseCases } from './client/helpers/can_use_cases';
+import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';

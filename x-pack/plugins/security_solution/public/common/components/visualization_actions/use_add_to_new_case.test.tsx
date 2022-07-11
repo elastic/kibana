@@ -9,7 +9,11 @@ import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToNewCase } from './use_add_to_new_case';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
-import { allCasesPermissions, readCasesPermissions } from '../../../cases_test_utils';
+import {
+  allCasesPermissions,
+  readCasesPermissions,
+  writeCasesPermissions,
+} from '../../../cases_test_utils';
 
 jest.mock('../../lib/kibana/kibana_react');
 
@@ -58,8 +62,20 @@ describe('useAddToNewCase', () => {
     expect(result.current.disabled).toEqual(false);
   });
 
-  it("button disabled if user can't create and read", () => {
+  it("disables the button if the user can't create but can read", () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+
+    const { result } = renderHook(() =>
+      useAddToNewCase({
+        lensAttributes: kpiHostMetricLensAttributes,
+        timeRange,
+      })
+    );
+    expect(result.current.disabled).toEqual(true);
+  });
+
+  it("disables the button if the user can't read but can create", () => {
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(writeCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToNewCase({

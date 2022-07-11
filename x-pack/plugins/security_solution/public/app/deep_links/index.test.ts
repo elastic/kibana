@@ -68,7 +68,16 @@ describe('deepLinks', () => {
       expect(
         hasFeaturesCapability(
           [FEATURE.general, FEATURE.casesCreate],
-          createCap({ siem: { show: true }, securitySolutionCases: { create: false } })
+          createCap({ siem: { show: true }, securitySolutionCases: { create_cases: false } })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns true when only the create_cases requested feature is found in an OR situation', () => {
+      expect(
+        hasFeaturesCapability(
+          [FEATURE.general, FEATURE.casesCreate],
+          createCap({ siem: { show: false }, securitySolutionCases: { create_cases: true } })
         )
       ).toBeTruthy();
     });
@@ -77,7 +86,7 @@ describe('deepLinks', () => {
       expect(
         hasFeaturesCapability(
           [FEATURE.casesRead, FEATURE.casesCreate],
-          createCap({ siem: { show: true }, securitySolutionCases: { create: false } })
+          createCap({ siem: { show: true }, securitySolutionCases: { create_cases: false } })
         )
       ).toBeFalsy();
     });
@@ -86,7 +95,10 @@ describe('deepLinks', () => {
       expect(
         hasFeaturesCapability(
           [[FEATURE.casesRead, FEATURE.casesCreate]],
-          createCap({ siem: { show: true }, securitySolutionCases: { read: true, create: true } })
+          createCap({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: true, create_cases: true },
+          })
         )
       ).toBeTruthy();
     });
@@ -95,7 +107,10 @@ describe('deepLinks', () => {
       expect(
         hasFeaturesCapability(
           [FEATURE.general, [FEATURE.casesRead, FEATURE.casesCreate]],
-          createCap({ siem: { show: false }, securitySolutionCases: { read: false, create: true } })
+          createCap({
+            siem: { show: false },
+            securitySolutionCases: { read_cases: false, create_cases: true },
+          })
         )
       ).toBeFalsy();
     });
@@ -104,7 +119,10 @@ describe('deepLinks', () => {
       expect(
         hasFeaturesCapability(
           [FEATURE.general, [FEATURE.casesRead, FEATURE.casesCreate]],
-          createCap({ siem: { show: true }, securitySolutionCases: { read: false, create: true } })
+          createCap({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: false, create_cases: true },
+          })
         )
       ).toBeTruthy();
     });
@@ -118,7 +136,7 @@ describe('deepLinks', () => {
           ],
           createCap({
             siem: { show: true },
-            securitySolutionCases: { read: false, create: true, push: false },
+            securitySolutionCases: { read_cases: false, create_cases: true, push_cases: false },
           })
         )
       ).toBeFalsy();

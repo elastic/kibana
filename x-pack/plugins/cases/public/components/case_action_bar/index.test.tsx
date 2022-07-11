@@ -224,7 +224,7 @@ describe('CaseActionBar', () => {
     expect(queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
-  it('should not show the actions menu when the user does not have delete privileges', () => {
+  it('should not show the delete item in the menu when the user does not have delete privileges', () => {
     const { queryByText } = render(
       <TestProviders permissions={noDeleteCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
@@ -234,7 +234,7 @@ describe('CaseActionBar', () => {
     expect(queryByText('Delete case')).not.toBeInTheDocument();
   });
 
-  it('should show the actions menu when the user does have delete privileges', () => {
+  it('should show the the delete item in the menu when the user does have delete privileges', () => {
     const { queryByText } = render(
       <TestProviders permissions={allCasesPermissions()}>
         <CaseActionBar {...defaultProps} />

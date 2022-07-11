@@ -387,4 +387,16 @@ describe('EditConnector ', () => {
       expect(result.queryByTestId('connector-edit')).toBe(null);
     });
   });
+
+  it('does not show the edit connectors pencil if the user does not have push permissions', async () => {
+    const defaultProps = getDefaultProps();
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noPushCasesPermissions() });
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    await waitFor(() => {
+      expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
+      expect(result.queryByTestId('connector-edit')).toBe(null);
+    });
+  });
 });

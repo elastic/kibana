@@ -49,18 +49,8 @@ const triggersActionsUiStartMock = {
 
 export const observabilityPublicPluginsStartMock = {
   createStart() {
-    const cases = mockCasesContract();
-    cases.helpers.getUICapabilities.mockReturnValue({
-      all: false,
-      create: false,
-      read: false,
-      update: false,
-      delete: false,
-      push: false,
-    });
-
     return {
-      cases,
+      cases: mockCasesContract(),
       embeddable: embeddableStartMock.createStart(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: null,

@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -62,7 +63,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   }
 
   return (
-    <>
+    <EuiFlexItem grow={false} data-test-subj="case-view-actions">
       <PropertyActions propertyActions={propertyActions} />
       <ConfirmDeleteCaseModal
         caseTitle={caseData.title}
@@ -70,7 +71,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
-    </>
+    </EuiFlexItem>
   );
 };
 ActionsComponent.displayName = 'Actions';

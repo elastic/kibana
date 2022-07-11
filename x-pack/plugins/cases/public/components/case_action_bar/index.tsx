@@ -172,9 +172,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                     </EuiButtonEmpty>
                   </span>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-                  <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
-                </EuiFlexItem>
+                <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
               </EuiFlexGroup>
             </EuiDescriptionList>
           </EuiFlexItem>

@@ -222,7 +222,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 </EuiCallOut>
               </SectionWrapper>
             )}
-            {/* should these include push? */}
             <SectionWrapper>
               <ClosureOptions
                 closureTypeSelected={closureType}

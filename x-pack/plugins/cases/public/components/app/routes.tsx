@@ -70,7 +70,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {/* TODO: should we add push here?*/}
           {permissions.update ? (
             <ConfigureCases />
           ) : (

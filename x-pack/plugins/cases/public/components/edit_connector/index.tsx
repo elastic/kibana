@@ -288,7 +288,7 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && !editConnector && permissions.update && actionsReadCapabilities && (
+          {!isLoading && !editConnector && permissions.push && actionsReadCapabilities && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"
@@ -316,7 +316,7 @@ export const EditConnector = React.memo(
                       connectors,
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
-                      disabled: !permissions.update,
+                      disabled: !permissions.push,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,
