@@ -12,3 +12,6 @@ import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 export type DomainDeprecationDetails = DeprecationsDetails & {
   domainId: string;
 };
+
+/* @internal */
+export type ResolveDeprecationResponse = { status: 'ok' } | { status: 'fail'; reason: string };

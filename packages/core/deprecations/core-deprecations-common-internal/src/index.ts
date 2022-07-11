@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { DomainDeprecationDetails } from './types';
+export type { DomainDeprecationDetails, ResolveDeprecationResponse } from './types';

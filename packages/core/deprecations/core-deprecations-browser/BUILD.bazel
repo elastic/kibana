@@ -53,7 +53,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "//packages/core/deprecations/core-deprecations-common-internal:npm_module_types"
 ]
 
 jsts_transpiler(
