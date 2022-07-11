@@ -83,7 +83,7 @@ Create filters from your map to focus in on just the data you want. *Maps* provi
 [[maps-map-extent-filter]]
 ==== Filter dashboard by map bounds
 
-To filter your dashboard by map bounds as you pan and zoom your map:
+To filter your dashboard by your map bounds as you pan and zoom your map:
 
 * Open the main menu, and then click *Dashboard*.
 * Select your dashboard from the list or click *Create dashboard*.
@@ -92,9 +92,6 @@ To filter your dashboard by map bounds as you pan and zoom your map:
 * Select *More* to view all panel options.
 * Select *Filter dashboard by map bounds*.
 * In the "Filter dashboard by map bounds" modal, select the checkbox for your map panel.
-
-[role="screenshot"]
-image::maps/images/enable_filter_by_map_extent.png[]
 
 [float]
 [[maps-spatial-filters]]
