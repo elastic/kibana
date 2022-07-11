@@ -10,11 +10,6 @@ import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import { LayerStatsCollector } from './layer_stats_collector';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 
-test('constructor with invalid json', () => {
-  // @ts-ignore
-  expect(new LayerStatsCollector('invalid json')).toBeUndefined;
-});
-
 const expecteds = [
   {
     layerCount: 3,
