@@ -66,6 +66,7 @@ export type PutTrainedModelConfig = {
     model_aliases?: string[];
   } & Record<string, unknown>;
   tags?: string[];
+  model_type?: TrainedModelType;
   inference_config?: Record<string, unknown>;
   input: { field_names: string[] };
 } & XOR<

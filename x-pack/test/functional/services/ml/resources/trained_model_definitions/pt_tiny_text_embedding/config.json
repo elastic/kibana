@@ -1,0 +1,7 @@
+{
+  "description": "Tiny/Dummy PyTorch model (text_embedding)",
+  "model_type": "pytorch",
+  "inference_config": {
+    "text_embedding": {}
+  }
+}
