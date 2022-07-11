@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTourStepProps } from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
 import rulesGif from '../../images/onboarding_tour_step_rules.gif';
