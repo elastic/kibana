@@ -45,16 +45,26 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Generate API Key</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.enterpriseSearch.content.overview.generateApiKeyModal.title', {
+            defaultMessage: 'Generate API Key',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <>
           <EuiText size="m">
             <p>
-              Before you can start posting documents to your Elasticsearch index you'll need to
-              create at least one API key.&nbsp;
+              {i18n.translate('xpack.enterpriseSearch.content.overview.generateApiKeyModal.info', {
+                defaultMessage:
+                  "Before you can start posting documents to your Elasticsearch index you'll need to create at least one API key.",
+              })}
+              &nbsp;
               <EuiLink href={/* TODO link to docs */ '#'} external>
-                Learn more about API keys
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.overview.generateApiKeyModal.learnMore',
+                  { defaultMessage: 'Learn more about API keys' }
+                )}
               </EuiLink>
             </p>
           </EuiText>
@@ -101,13 +111,16 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                     </EuiCopy>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      display="fill"
-                      iconType="download"
-                      href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
-                      download={`${keyName}.csv`}
-                      disabled={!isSuccess}
-                    />
+                    {isSuccess ? (
+                      <EuiButtonIcon
+                        display="fill"
+                        iconType="download"
+                        href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
+                        download={`${keyName}.csv`}
+                      />
+                    ) : (
+                      <EuiButtonIcon display="fill" iconType="download" disabled />
+                    )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
@@ -132,9 +145,13 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                   <EuiFlexItem>
                     <EuiText size="s" color="#006bb8">
                       <p>
-                        Elastic does not store API keys. Once generated, you'll only be able to view
-                        the key one time. Make sure you save it somewhere secure. If you lose access
-                        to it you'll need to generate a new API key from this screen.
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.overview.generateApiKeyModal.apiKeyWarning',
+                          {
+                            defaultMessage:
+                              "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
+                          }
+                        )}
                       </p>
                     </EuiText>
                   </EuiFlexItem>
@@ -145,7 +162,11 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
         </>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose}>
+          {i18n.translate('xpack.enterpriseSearch.content.overview.generateApiKeyModal.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
       </EuiModalFooter>
     </EuiModal>
   );

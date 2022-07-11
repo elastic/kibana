@@ -19,6 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
@@ -70,7 +72,12 @@ export const SearchIndexOverview: React.FC = () => {
                       <EuiFlexItem>
                         {indexData.index.name[0] !== '.' && (
                           <EuiTitle size="s">
-                            <h2>Adding documents to your index</h2>
+                            <h2>
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.overview.documentExample.title',
+                                { defaultMessage: 'Adding documents to your index' }
+                              )}
+                            </h2>
                           </EuiTitle>
                         )}
                       </EuiFlexItem>
@@ -78,12 +85,18 @@ export const SearchIndexOverview: React.FC = () => {
                         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                           <EuiFlexItem>
                             <EuiButton iconType="arrowDown" iconSide="right">
-                              Client Libraries
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content,overview.documentExample.clientLibraries.label',
+                                { defaultMessage: 'Client Libraries' }
+                              )}
                             </EuiButton>
                           </EuiFlexItem>
                           <EuiFlexItem>
                             <EuiButton fill onClick={openGenerateModal}>
-                              Generate an API key
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.overview.documentExample.generateApiKeyButton.label',
+                                { defaultMessage: 'Generate an API key' }
+                              )}
                             </EuiButton>
                           </EuiFlexItem>
                         </EuiFlexGroup>
