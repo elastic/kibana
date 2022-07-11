@@ -178,6 +178,28 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     </ConsoleCodeBlock>
   );
 
+  // Parsing user input error?
+  if (parsedInput.hasErrors()) {
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        createCommandExecutionState({
+          errorMessage: (
+            <ConsoleCodeBlock>
+              {i18n.translate('xpack.securitySolution.console.commandValidation.userInputError', {
+                defaultMessage: 'Invalid input: {inputErrors}',
+                values: {
+                  inputErrors: parsedInput.errors?.join('. '),
+                },
+              })}
+            </ConsoleCodeBlock>
+          ),
+        })
+      )
+    );
+  }
+
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
     // Show command help
