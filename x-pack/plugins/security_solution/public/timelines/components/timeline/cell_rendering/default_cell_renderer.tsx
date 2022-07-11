@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
-import { CellValueElementProps } from '.';
+import type { CellValueElementProps } from '.';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import {

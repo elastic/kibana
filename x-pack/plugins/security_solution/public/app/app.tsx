@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { History } from 'history';
-import React, { memo, FC } from 'react';
-import { Store, Action } from 'redux';
+import type { History } from 'history';
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -26,9 +27,9 @@ import {
   useKibana,
   useUiSetting$,
 } from '../common/lib/kibana';
-import { State } from '../common/store';
+import type { State } from '../common/store';
 
-import { StartServices } from '../types';
+import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';

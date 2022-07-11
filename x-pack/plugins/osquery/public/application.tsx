@@ -15,10 +15,10 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { useUiSetting$, KibanaThemeProvider } from './shared_imports';
-import { AppPluginStartDependencies } from './types';
+import type { AppPluginStartDependencies } from './types';
 import { OsqueryApp } from './components/app';
 import { DEFAULT_DARK_MODE, PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';

@@ -8,8 +8,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
-import { PrimaryNavigationProps } from './types';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { SecuritySideNav } from '../security_side_nav';
@@ -19,11 +19,8 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 });
 
 export const usePrimaryNavigation = ({
-  filters,
-  query,
   navTabs,
   pageName,
-  savedQuery,
   tabName,
   timeline,
   timerange,
@@ -49,9 +46,6 @@ export const usePrimaryNavigation = ({
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
-    filters,
-    query,
-    savedQuery,
     timeline,
     timerange,
   });
