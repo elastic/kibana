@@ -7,13 +7,13 @@
 
 import type { DataViewBase } from '@kbn/es-query';
 
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
-import {
+import type {
   FlowTarget,
   FlowTargetSourceDest,
 } from '../../../../common/search_strategy/security_solution';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export const type = NetworkType.details;
 

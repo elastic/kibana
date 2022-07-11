@@ -1126,18 +1126,6 @@
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
           },
           {
@@ -1147,6 +1135,18 @@
           {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
           },
           {
             "plugin": "enterpriseSearch",

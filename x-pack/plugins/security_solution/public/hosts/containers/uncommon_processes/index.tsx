@@ -8,22 +8,23 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { inputsModel, State } from '../../../common/store';
+import type { inputsModel, State } from '../../../common/store';
 
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { createFilter } from '../../../common/containers/helpers';
-import { hostsModel, hostsSelectors } from '../../store';
-import {
+import type { hostsModel } from '../../store';
+import { hostsSelectors } from '../../store';
+import type {
   SortField,
   PageInfoPaginated,
   HostsUncommonProcessesEdges,
-  HostsQueries,
   HostsUncommonProcessesRequestOptions,
 } from '../../../../common/search_strategy';
+import { HostsQueries } from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { InspectResponse } from '../../../types';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 

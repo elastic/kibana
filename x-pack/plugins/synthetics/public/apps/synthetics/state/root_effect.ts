@@ -10,6 +10,7 @@ import { fetchMonitorStatusEffect, fetchSyntheticsMonitorEffect } from './monito
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
 import { fetchMonitorListEffect } from './monitor_list';
+import { fetchMonitorOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 
 export const rootEffect = function* root(): Generator {
@@ -20,5 +21,6 @@ export const rootEffect = function* root(): Generator {
     fork(fetchMonitorListEffect),
     fork(fetchMonitorStatusEffect),
     fork(fetchSyntheticsMonitorEffect),
+    fork(fetchMonitorOverviewEffect),
   ]);
 };

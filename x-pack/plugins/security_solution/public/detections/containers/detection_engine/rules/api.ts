@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { camelCase } from 'lodash';
 import dateMath from '@kbn/datemath';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -20,22 +20,22 @@ import {
   detectionEngineRuleExecutionEventsUrl,
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
 } from '../../../../../common/constants';
-import {
+import type {
   AggregateRuleExecutionEvent,
   BulkAction,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
-import {
+import type {
   FullResponseSchema,
   PreviewResponse,
 } from '../../../../../common/detection_engine/schemas/request';
-import {
+import type {
   RulesSchema,
   GetAggregateRuleExecutionEventsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
-import { GetInstalledIntegrationsResponse } from '../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
+import type { GetInstalledIntegrationsResponse } from '../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
 
-import {
+import type {
   UpdateRulesProps,
   CreateRulesProps,
   FetchRulesProps,

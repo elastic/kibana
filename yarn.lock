@@ -2563,7 +2563,7 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@jest/types@^26.6.2":
+"@jest/types@^26", "@jest/types@^26.6.2":
   version "26.6.2"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-26.6.2.tgz#bef5a532030e1d88a2f5a6d933f84e97226ed48e"
   integrity sha512-fC6QCp7Sc5sX6g8Tvbmj4XUTbyrik0akgRy03yjXbQaBWWNWGE7SGtJk98m0N8nzegD/7SggrUlivxo5ax4KWQ==
@@ -3225,6 +3225,18 @@
   uid ""
 
 "@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-preboot-server-mocks@link:bazel-bin/packages/core/preboot/core-preboot-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server":
   version "0.0.0"
   uid ""
 
@@ -6776,6 +6788,18 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server-mocks@link:bazel-bin/packages/core/preboot/core-preboot-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -18386,7 +18410,7 @@ jest-cli@^26.6.3:
     prompts "^2.0.1"
     yargs "^15.4.1"
 
-jest-config@^26.6.3:
+jest-config@^26, jest-config@^26.6.3:
   version "26.6.3"
   resolved "https://registry.yarnpkg.com/jest-config/-/jest-config-26.6.3.tgz#64f41444eef9eb03dc51d5c53b75c8c71f645349"
   integrity sha512-t5qdIj/bCj2j7NFVHb2nFB4aUdfucDn3JRKgrZnplb8nieAirAzRSHP8uDEd+qV6ygzg9Pz4YG7UTJf94LPSyg==
@@ -18799,7 +18823,7 @@ jest-runner@^26.6.3:
     source-map-support "^0.5.6"
     throat "^5.0.0"
 
-jest-runtime@^26.6.3:
+jest-runtime@^26, jest-runtime@^26.6.3:
   version "26.6.3"
   resolved "https://registry.yarnpkg.com/jest-runtime/-/jest-runtime-26.6.3.tgz#4f64efbcfac398331b74b4b3c82d27d401b8fa2b"
   integrity sha512-lrzyR3N8sacTAMeonbqpnSka1dHNux2uk0qqDXVkMv2c/A3wYnvQ4EXuI013Y6+gSKSCxdaczvf4HF0mVXHRdw==
@@ -21077,10 +21101,10 @@ moment-timezone@^0.5.27:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.2:
-  version "2.29.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
-  integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
+"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
 monaco-editor@*, monaco-editor@^0.22.3:
   version "0.22.3"
