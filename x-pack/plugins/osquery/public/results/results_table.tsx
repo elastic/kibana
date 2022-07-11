@@ -49,6 +49,7 @@ interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToCase?: () => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -57,6 +58,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   addToTimeline,
+  addToCase,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -349,10 +351,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             startDate={startDate}
           />
           {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
+          {addToCase && addToCase()}
         </>
       ),
     }),
-    [actionId, addToTimeline, endDate, startDate]
+    [actionId, addToCase, addToTimeline, endDate, startDate]
   );
 
   useEffect(

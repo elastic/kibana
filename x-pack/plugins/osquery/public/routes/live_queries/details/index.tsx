@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultTabs } from '../../saved_queries/edit/tabs';
@@ -26,6 +26,8 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
+  const { cases } = useKibana().services;
+  const CasesContext = cases.ui.getCasesContext();
   useBreadcrumbs('live_query_details', { liveQueryId: actionId });
   const liveQueryListProps = useRouterNavigate('live_queries');
 
@@ -58,18 +60,20 @@ const LiveQueryDetailsPageComponent = () => {
   );
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {data?.actionDetails._source?.data?.query}
-      </EuiCodeBlock>
-      <EuiSpacer />
-      <ResultTabs
-        actionId={actionId}
-        agentIds={data?.actionDetails?.fields?.agents}
-        startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
-        endDate={get(data, 'actionDetails.fields.expiration[0]')}
-      />
-    </WithHeaderLayout>
+    <CasesContext owner={['securitySolution']} permissions={{ all: true, read: true }}>
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
+          {data?.actionDetails._source?.data?.query}
+        </EuiCodeBlock>
+        <EuiSpacer />
+        <ResultTabs
+          actionId={actionId}
+          agentIds={data?.actionDetails?.fields?.agents}
+          startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
+          endDate={get(data, 'actionDetails.fields.expiration[0]')}
+        />
+      </WithHeaderLayout>
+    </CasesContext>
   );
 };
 

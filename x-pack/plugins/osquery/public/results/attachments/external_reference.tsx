@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { lazy } from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
+
+const AttachmentContentLazy = lazy(() => import('./external_references_content'));
+
+const AttachmentActions: React.FC = () => (
+  <EuiButtonIcon
+    data-test-subj="test-attachment-action"
+    onClick={() => {}}
+    iconType="arrowRight"
+    aria-label="See attachment"
+  />
+);
+
+export const getExternalReferenceAttachmentRegular = () => ({
+  id: '.test',
+  icon: 'casesApp',
+  displayName: 'Test',
+  getAttachmentViewObject: () => ({
+    type: 'regular',
+    event: 'added a chart',
+    timelineIcon: 'casesApp',
+    actions: <AttachmentActions />,
+    children: AttachmentContentLazy,
+  }),
+});

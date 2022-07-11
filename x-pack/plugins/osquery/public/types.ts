@@ -16,10 +16,12 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
+
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
@@ -36,10 +38,12 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases?: CasesUiStart;
 }
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;

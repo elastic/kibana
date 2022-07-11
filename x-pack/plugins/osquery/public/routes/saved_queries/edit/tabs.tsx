@@ -8,6 +8,8 @@
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { AddToCaseButton } from '../../../cases/AddToCasesButton';
+import { useKibana } from '../../../common/lib/kibana';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 import { ActionAgentsStatus } from '../../../action_results/action_agents_status';
@@ -27,6 +29,9 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   startDate,
   addToTimeline,
 }) => {
+  const { cases } = useKibana().services;
+  const CasesContext = cases!.ui.getCasesContext();
+
   const tabs = useMemo(
     () => [
       {
@@ -41,6 +46,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               startDate={startDate}
               endDate={endDate}
               addToTimeline={addToTimeline}
+              addToCase={() => <AddToCaseButton actionId={actionId} agentIds={agentIds} />}
             />
           </>
         ),
@@ -60,11 +66,11 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ),
       },
     ],
-    [actionId, agentIds, endDate, startDate, addToTimeline]
+    [actionId, agentIds, startDate, endDate, addToTimeline]
   );
 
   return (
-    <>
+    <CasesContext owner={['securitySolution']} permissions={{ all: true, read: true }}>
       <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
       <EuiSpacer size="s" />
       <EuiTabbedContent
@@ -73,7 +79,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         autoFocus="selected"
         expand={false}
       />
-    </>
+    </CasesContext>
   );
 };
 
