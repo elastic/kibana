@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { HostIsolationRequestBody, HostIsolationResponse } from '../../../../common/endpoint/types';
+import type {
+  HostIsolationRequestBody,
+  HostIsolationResponse,
+} from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 
