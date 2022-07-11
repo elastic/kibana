@@ -8,13 +8,14 @@ import {
   Criteria,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useContext, useMemo } from 'react';
+import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CommonFields,
@@ -36,6 +37,7 @@ import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { ManagementSettingsPortal } from './management_settings_portal';
 import { MonitorTags } from './tags';
+import { MonitorDetailFlyout } from './monitor_detail_flyout';
 
 export interface MonitorManagementListPageState {
   pageIndex: number;
@@ -97,6 +99,7 @@ export const MonitorManagementList = ({
     [onPageStateChange]
   );
 
+  const [detailId, setDetailId] = useState<string | null>(null);
   const pagination = {
     pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
     pageSize,
@@ -206,6 +209,13 @@ export const MonitorManagementList = ({
         />
       ),
     },
+    {
+      align: 'right' as const,
+      name: 'Open flyout temp',
+      render: ({ id }: typeof monitors[number]) => (
+        <EuiButtonIcon iconType="iInCircle" onClick={() => setDetailId(id)} />
+      ),
+    },
   ] as Array<EuiBasicTableColumn<EncryptedSyntheticsMonitorWithId>>;
 
   return (
@@ -229,6 +239,13 @@ export const MonitorManagementList = ({
         onChange={handleOnChange}
         noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
       />
+      {!!detailId && (
+        <MonitorDetailFlyout
+          id={detailId}
+          location="North America - US Central"
+          onClose={() => setDetailId(null)}
+        />
+      )}
     </EuiPanel>
   );
 };

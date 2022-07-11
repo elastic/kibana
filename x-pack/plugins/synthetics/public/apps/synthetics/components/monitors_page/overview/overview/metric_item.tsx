@@ -47,6 +47,9 @@ export const MetricItem = ({
 
   return (
     <div
+      onClick={() => {
+        console.log('clicked on', monitorId);
+      }}
       style={{
         height: '160px',
       }}
