@@ -30,6 +30,10 @@ const MOCK_DATA_THOUSAND = {
   pages: [5236],
 };
 
+const MOCK_DATA_CLOSE_TO_MILLION = {
+  pages: [999999],
+};
+
 jest.mock('../../hooks/use_filter', () => ({
   useSetFilter: () => ({
     getFilterForValueButton: jest.fn(),
@@ -83,7 +87,7 @@ describe('CountWidget component', () => {
         render();
 
         expect(renderResult.getByText(TITLE)).toBeVisible();
-        expect(renderResult.getByText('5,236')).toBeVisible();
+        expect(renderResult.getByText('5K')).toBeVisible();
       });
     });
 
@@ -97,6 +101,19 @@ describe('CountWidget component', () => {
 
         expect(renderResult.getByText(TITLE)).toBeVisible();
         expect(renderResult.getByText('1.2M')).toBeVisible();
+      });
+    });
+
+    describe('with huge amount of data (Very close to 1 million)', () => {
+      it('should show title and count numbers (formatted remove the zeroes and add K) correctly', async () => {
+        mockUseFetchData.mockImplementation(() => ({
+          data: MOCK_DATA_CLOSE_TO_MILLION,
+          isLoading: false,
+        }));
+        render();
+
+        expect(renderResult.getByText(TITLE)).toBeVisible();
+        expect(renderResult.getByText('999K')).toBeVisible();
       });
     });
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { CountResult } from '../../../common/types/count';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchCountWidgetData } from './hooks';
-import { addResourceTypeToFilterQuery } from './helpers';
+import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:count-widget-loading';
 
@@ -35,6 +35,7 @@ export const CountWidget = ({
 
   const filterQueryWithTimeRange = useMemo(() => {
     let globalFilterModified = globalFilter.filterQuery;
+
     if (widgetKey === 'CountNodesWidgets') {
       globalFilterModified = addResourceTypeToFilterQuery(globalFilter.filterQuery, 'node');
     }
@@ -56,24 +57,16 @@ export const CountWidget = ({
     return data ? data?.pages[0] : (0 as unknown as CountResult);
   }, [data]);
 
-  const NumberFormatter = useCallback((num: CountResult) => {
-    if (Number(num) < 1e6) {
-      return num.toLocaleString();
-    }
-    return new Intl.NumberFormat('en-GB', {
-      // @ts-ignore
-      notation: 'compact',
-      compactDisplay: 'short',
-    }).format(Number(num));
-  }, []);
-
   const formattedNumber = useMemo((): string => {
-    return NumberFormatter(countValue);
-  }, [countValue, NumberFormatter]);
+    return numberFormatter(countValue);
+  }, [countValue]);
 
   return (
     <div css={styles.container}>
-      <div css={styles.title}>{title}</div>
+      <div css={styles.title}>
+        {title}
+        <EuiIconTip content={countValue} position="top" onMouseOut={() => {}} />
+      </div>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiText css={styles.dataInfo}>

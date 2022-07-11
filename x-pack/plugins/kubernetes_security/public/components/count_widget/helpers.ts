@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CountResult } from '../../../common/types/count';
 import { DEFAULT_QUERY } from '../../../common/constants';
 import { QueryDslQueryContainerBool } from '../../types';
 
@@ -36,4 +37,23 @@ export const addResourceTypeToFilterQuery = (
   }
 
   return validFilterQuery;
+};
+
+export const numberFormatter = (num: CountResult) => {
+  if (Number(num) < 1e3) {
+    return num.toString();
+  }
+  if (Number(num) < 1e6) {
+    const newNum = Math.floor(Number(num) / 1000) * 1000;
+    return new Intl.NumberFormat('en-GB', {
+      // @ts-ignore
+      notation: 'compact',
+      compactDisplay: 'short',
+    }).format(Number(newNum));
+  }
+  return new Intl.NumberFormat('en-GB', {
+    // @ts-ignore
+    notation: 'compact',
+    compactDisplay: 'short',
+  }).format(Number(num));
 };

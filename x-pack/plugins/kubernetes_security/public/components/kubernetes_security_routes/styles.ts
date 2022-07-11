@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font } = euiTheme;
+    const { size, font, border } = euiTheme;
 
     const titleSection: CSSObject = {
       marginBottom: size.l,
@@ -66,12 +66,12 @@ export const useStyles = () => {
       position: 'relative',
       width: '332px',
       height: '235px',
-      padding: '16px',
-      border: `1px solid `,
-      borderRadius: '6px',
-      fontWeight: 700,
-      fontSize: '12px',
-      lineHeight: '16px',
+      padding: size.base,
+      border: border.thin,
+      borderRadius: border.radius.medium,
+      fontWeight: font.weight.bold,
+      fontSize: size.m,
+      lineHeight: size.base,
     };
 
     return {
