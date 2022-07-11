@@ -220,7 +220,7 @@ export type {
   HttpServicePreboot,
   HttpServiceStart,
 } from '@kbn/core-http-server';
-export { IExternalUrlPolicy } from '@kbn/core-http-common';
+export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
 export { validBodyOutput } from '@kbn/core-http-server';
 
