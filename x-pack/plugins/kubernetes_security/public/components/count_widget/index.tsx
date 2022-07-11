@@ -15,6 +15,7 @@ import { useFetchCountWidgetData } from './hooks';
 import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:count-widget-loading';
+export const TOOLTIP_TEST_ID = 'kubernetesSecurity:count-widget-tooltip';
 
 export interface CountWidgetDeps {
   title: string;
@@ -65,7 +66,13 @@ export const CountWidget = ({
     <div css={styles.container}>
       <div css={styles.title}>
         {title}
-        <EuiIconTip content={countValue} position="top" onMouseOut={() => {}} />
+        <EuiIconTip
+          content={countValue}
+          data-test-subj={TOOLTIP_TEST_ID}
+          aria-label="Info"
+          position="top"
+          onMouseOut={() => {}}
+        />
       </div>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>

@@ -8,8 +8,9 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
-import { CountWidget, LOADING_TEST_ID } from '.';
+import { CountWidget, LOADING_TEST_ID, TOOLTIP_TEST_ID } from '.';
 import { useFetchCountWidgetData } from './hooks';
+import { fireEvent, waitFor } from '@testing-library/dom';
 
 const TITLE = 'Count Widget Title';
 const GLOBAL_FILTER: GlobalFilter = {
@@ -126,6 +127,19 @@ describe('CountWidget component', () => {
         render();
 
         expect(renderResult.getAllByTestId(LOADING_TEST_ID)).toHaveLength(1);
+      });
+    });
+
+    describe('Testing Tooltips', () => {
+      it('Tooltips show the real count value (not formatted)', async () => {
+        mockUseFetchData.mockImplementation(() => ({
+          data: MOCK_DATA_THOUSAND,
+          isLoading: false,
+        }));
+        render();
+        fireEvent.mouseOver(renderResult.getByText('Info'));
+        await waitFor(() => renderResult.getByTestId(TOOLTIP_TEST_ID));
+        expect(renderResult.queryByText(MOCK_DATA_THOUSAND.pages[0])).toBeTruthy();
       });
     });
   });
