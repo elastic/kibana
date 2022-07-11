@@ -9,21 +9,20 @@ import * as runtimeTypes from 'io-ts';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { stringEnum, unionWithNullType } from '../../utility_types';
-import { NoteResult, NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
-import {
-  PinnedEventToReturnSavedObjectRuntimeType,
-  PinnedEventSavedObject,
-  PinnedEvent,
-} from './pinned_event';
+import type { NoteResult, NoteSavedObject } from './note';
+import { NoteSavedObjectToReturnRuntimeType } from './note';
+import type { PinnedEventSavedObject, PinnedEvent } from './pinned_event';
+import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
   outcome as savedObjectResolveOutcome,
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
-import { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
+import type { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
-import { Direction, Maybe } from '../../search_strategy';
+import type { Maybe } from '../../search_strategy';
+import { Direction } from '../../search_strategy';
 
 export * from './actions';
 export * from './cells';

@@ -114,6 +114,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_legacy_metric/README.md[expressionLegacyMetricVis]
+|Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
 |Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
