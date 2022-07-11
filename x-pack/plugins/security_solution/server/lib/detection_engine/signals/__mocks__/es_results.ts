@@ -16,11 +16,11 @@ import type {
   AlertAttributes,
   AlertSourceHit,
 } from '../types';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import {
   ALERT_BUILDING_BLOCK_TYPE,

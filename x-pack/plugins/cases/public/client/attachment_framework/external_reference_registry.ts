@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AttachmentTypeRegistry } from './registry';
+import { CaseRegistry } from '../../../common/registry';
 import { ExternalReferenceAttachmentType } from './types';
 
-export class ExternalReferenceAttachmentTypeRegistry extends AttachmentTypeRegistry<ExternalReferenceAttachmentType> {}
+export class ExternalReferenceAttachmentTypeRegistry extends CaseRegistry<ExternalReferenceAttachmentType> {
+  constructor() {
+    super('ExternalReferenceAttachmentTypeRegistry');
+  }
+}
