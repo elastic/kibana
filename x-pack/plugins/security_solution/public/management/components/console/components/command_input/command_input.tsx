@@ -8,7 +8,7 @@
 import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { ConsoleDataState } from '../console_state/types';
@@ -81,6 +81,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
+  console.log(rightOfCursor, textEntered);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
@@ -283,6 +284,20 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               </EuiFlexItem>
             </EuiFlexGroup>
             <InputPlaceholder />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="inputTextSubmitButton"
+              aria-label="submit-command"
+              iconType="playFilled"
+              display="empty"
+              color="primary"
+              isDisabled={useMemo(
+                () => textEntered.length === 0 && rightOfCursor.text.length === 0,
+                [rightOfCursor.text.length, textEntered.length]
+              )}
+              // onClick={}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
