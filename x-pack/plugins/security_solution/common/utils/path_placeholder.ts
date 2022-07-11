@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConditionEntryField, OperatingSystem, EntryTypes } from '@kbn/securitysolution-utils';
+import type { EntryTypes } from '@kbn/securitysolution-utils';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 
 export const getPlaceholderText = () => ({
   windows: {

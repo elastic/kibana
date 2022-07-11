@@ -8,16 +8,16 @@
 import uuid from 'uuid';
 import moment from 'moment';
 
-import { RequestHandler, Logger } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
+import type { RequestHandler, Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 
+import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
-  ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -47,7 +47,7 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import { getMetadataForEndpoints, getActionDetailsById } from '../../services';
 import { doLogsEndpointActionDsExists } from '../../utils';
 import { withEndpointAuthz } from '../with_endpoint_authz';
