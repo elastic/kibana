@@ -6,13 +6,15 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
-import { PoliciesSelector, PoliciesSelectorProps } from '.';
+import type { PoliciesSelectorProps } from '.';
+import { PoliciesSelector } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 // TODO: remove this mock when feature flag is removed

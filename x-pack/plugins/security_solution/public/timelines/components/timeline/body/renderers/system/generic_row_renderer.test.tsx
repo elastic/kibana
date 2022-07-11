@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 import {
   mockDnsEvent,
   mockEndpointProcessExecutionMalwarePreventionAlert,
@@ -65,6 +65,7 @@ import {
   mockEndpointSecurityLogOffEvent,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import type { EndpointAlertCriteria } from './generic_row_renderer';
 import {
   createDnsRowRenderer,
   createEndgameProcessRowRenderer,
@@ -76,10 +77,9 @@ import {
   createGenericFileRowRenderer,
   createSecurityEventRowRenderer,
   createSocketRowRenderer,
-  EndpointAlertCriteria,
 } from './generic_row_renderer';
 import * as i18n from './translations';
-import { RowRenderer } from '../../../../../../../common/types';
+import type { RowRenderer } from '../../../../../../../common/types';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality
