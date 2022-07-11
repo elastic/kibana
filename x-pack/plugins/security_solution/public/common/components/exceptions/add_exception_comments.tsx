@@ -7,6 +7,7 @@
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
+import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiTextArea,
   EuiFlexGroup,
@@ -14,7 +15,6 @@ import {
   EuiAvatar,
   EuiAccordion,
   EuiCommentList,
-  EuiCommentProps,
   EuiText,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';

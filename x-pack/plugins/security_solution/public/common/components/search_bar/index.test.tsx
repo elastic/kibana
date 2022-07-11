@@ -14,9 +14,10 @@ import {
   TestProviders,
 } from '../../mock';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { SearchBarComponent } from '.';
-import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createStore } from '../../store';
 import { inputsActions } from '../../store/inputs';

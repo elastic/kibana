@@ -6,13 +6,12 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../typed_json';
-import {
+import type { ESQuery } from '../../typed_json';
+import type {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
   HostOverviewRequestOptions,
-  HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -23,9 +22,8 @@ import {
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
-  HostFirstLastSeenRequestOptions,
 } from './hosts';
-import {
+import type {
   NetworkQueries,
   NetworkDetailsStrategyResponse,
   NetworkDetailsRequestOptions,
@@ -55,13 +53,18 @@ import {
   NetworkKpiUniquePrivateIpsStrategyResponse,
   NetworkKpiUniquePrivateIpsRequestOptions,
 } from './network';
-import {
+import type {
   MatrixHistogramQuery,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
-import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
-import {
+import type {
+  TimerangeInput,
+  SortField,
+  PaginationInput,
+  PaginationInputPaginated,
+} from '../common';
+import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
@@ -69,30 +72,35 @@ import {
   CtiDataSourceStrategyResponse,
 } from './cti';
 
-import {
+import type {
   RiskScoreStrategyResponse,
   RiskQueries,
   RiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
   KpiRiskScoreRequestOptions,
 } from './risk_score';
-import { UsersQueries } from './users';
-import { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
-import {
+import type { UsersQueries } from './users';
+import type { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
+import type {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
 } from './users/kpi/total_users';
 
-import {
+import type {
   UsersKpiAuthenticationsRequestOptions,
   UsersKpiAuthenticationsStrategyResponse,
 } from './users/kpi/authentications';
 
-import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
-import {
+import type { UsersRequestOptions, UsersStrategyResponse } from './users/all';
+import type {
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from './users/authentications';
+import type {
+  FirstLastSeenQuery,
+  FirstLastSeenRequestOptions,
+  FirstLastSeenStrategyResponse,
+} from './first_last_seen';
 
 export * from './cti';
 export * from './hosts';
@@ -100,6 +108,7 @@ export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
 export * from './users';
+export * from './first_last_seen';
 
 export type FactoryQueryTypes =
   | HostsQueries
@@ -109,7 +118,8 @@ export type FactoryQueryTypes =
   | NetworkKpiQueries
   | RiskQueries
   | CtiQueries
-  | typeof MatrixHistogramQuery;
+  | typeof MatrixHistogramQuery
+  | typeof FirstLastSeenQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -137,8 +147,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenStrategyResponse
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
@@ -199,8 +209,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenRequestOptions
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
   : T extends HostsKpiQueries.kpiHosts

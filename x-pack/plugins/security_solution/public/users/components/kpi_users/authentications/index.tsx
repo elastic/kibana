@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_area';
 import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
@@ -16,7 +16,7 @@ import { useUsersKpiAuthentications, ID } from '../../../containers/users/authen
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { UsersKpiProps } from '../types';
+import type { UsersKpiProps } from '../types';
 
 enum ChartColors {
   authenticationsSuccess = '#54B399',
