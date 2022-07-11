@@ -117,7 +117,7 @@ describe('Service overview - header filters', () => {
     });
   });
 
-  describe('Filtering by kuerybar', () => {
+  describe.skip('Filtering by kuerybar', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
     });
