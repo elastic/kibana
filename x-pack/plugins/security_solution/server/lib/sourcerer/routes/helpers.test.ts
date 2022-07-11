@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { findExistingIndices } from './helpers';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 const fieldCaps = jest
   .fn()
