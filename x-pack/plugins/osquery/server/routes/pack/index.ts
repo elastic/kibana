@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { IRouter } from '@kbn/core/server';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { createPackRoute } from './create_pack_route';
 import { deletePackRoute } from './delete_pack_route';
