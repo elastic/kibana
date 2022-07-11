@@ -65,11 +65,17 @@ export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternCol
   };
 }
 
-export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
+export const cardinalityOperation: OperationDefinition<
+  CardinalityIndexPatternColumn,
+  'field',
+  {},
+  true
+> = {
   type: OPERATION_TYPE,
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
   }),
+  allowAsReference: true,
   input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -123,7 +129,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
     return [
       {
@@ -141,7 +147,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
               onChange={() => {
-                updateLayer(
+                paramEditorUpdater(
                   updateColumnParam({
                     layer,
                     columnId,

@@ -32,7 +32,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {

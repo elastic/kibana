@@ -7,20 +7,16 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 
-import {
-  EuiCallOut,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
 interface DataViewSelectorProps {
   kibanaDataViews: { [x: string]: DataViewListItem };

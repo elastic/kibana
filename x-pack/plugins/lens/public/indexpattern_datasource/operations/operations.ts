@@ -39,7 +39,7 @@ export function getOperations(): OperationType[] {
 /**
  * Returns a list of the display names of all operations with any guaranteed order.
  */
-export function getOperationDisplay() {
+export const getOperationDisplay = memoize(() => {
   const display = {} as Record<
     OperationType,
     {
@@ -54,7 +54,7 @@ export function getOperationDisplay() {
     };
   });
   return display;
-}
+});
 
 export function getSortScoreByPriority(
   a: GenericOperationDefinition,

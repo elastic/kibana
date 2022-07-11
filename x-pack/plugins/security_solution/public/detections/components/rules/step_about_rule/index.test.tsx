@@ -16,7 +16,7 @@ import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_g
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue, stepDefineStepMLRule } from './default_value';
-import {
+import type {
   AboutStepRule,
   RuleStepsFormHooks,
   RuleStep,

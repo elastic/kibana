@@ -6,16 +6,13 @@
  */
 
 import type { AwaitedProperties } from '@kbn/utility-types';
-import {
-  loggingSystemMock,
-  savedObjectsServiceMock,
-  ScopedClusterClientMock,
-} from '@kbn/core/server/mocks';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { FleetStartContract, ExternalCallback } from '@kbn/fleet-plugin/server';
+import type { FleetStartContract, ExternalCallback } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
@@ -32,15 +29,15 @@ import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
-import {
+import type {
   EndpointAppContextService,
   EndpointAppContextServiceSetupContract,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
-import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
+import type { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
-import { EndpointAppContext } from './types';
-import { SecuritySolutionRequestHandlerContext } from '../types';
+import type { EndpointAppContext } from './types';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';

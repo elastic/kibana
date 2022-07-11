@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import React, {
-  FormEventHandler,
-  KeyboardEventHandler,
-  memo,
-  MutableRefObject,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { FormEventHandler, KeyboardEventHandler, MutableRefObject } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
