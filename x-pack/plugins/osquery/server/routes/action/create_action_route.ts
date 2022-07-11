@@ -20,7 +20,8 @@ import { createActionRequestBodySchema } from '../../../common/schemas/routes/ac
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
-import { OsqueryActionType, savedQuerySavedObjectType } from '../../../common/types';
+import type { OsqueryActionType } from '../../../common/types';
+import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(

@@ -6,10 +6,10 @@
  */
 
 import { curry, uniq } from 'lodash';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { osqueryActionTypeBase } from '../../../common/actions/osquery_type';
 import { createActionHandler } from './create_action_handler';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 interface IAlert {
   agent?: {
