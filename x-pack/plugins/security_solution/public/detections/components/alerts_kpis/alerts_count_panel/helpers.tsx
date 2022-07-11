@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 
 export const getAlertsCountQuery = (
