@@ -27,7 +27,7 @@ export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
   return (
     <>
       <EuiSpacer size="m" />
-      <SettingsSection fleetServerHosts={settings.fleet_server_hosts} />
+      <SettingsSection settings={settings} />
       <EuiSpacer size="m" />
       <OutputSection outputs={outputs} deleteOutput={deleteOutput} />
     </>

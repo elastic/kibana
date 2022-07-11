@@ -13,7 +13,8 @@ const cwd = path.join(__dirname);
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
 
-  describe('APM API tests', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/127939
+  describe.skip('APM API tests', function () {
     const tests = glob.sync('**/*.spec.ts', { cwd });
     tests.forEach((test) => {
       describe(test, function () {
