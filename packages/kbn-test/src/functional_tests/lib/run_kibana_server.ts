@@ -109,22 +109,24 @@ export async function runKibanaServer({
     const mainUuid = getArgValue(kbnFlags, 'server.uuid');
 
     // dedicated task runner
-    procs.run('kbn-tasks', {
-      ...procRunnerOpts,
-      args: [
-        ...prefixArgs,
-        ...parseRawFlags([
-          ...kbnFlags,
-          `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
-          '--node.roles=["background_tasks"]',
-          `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${Uuid.v4()}`)}`,
-          ...(typeof mainUuid === 'string' && mainUuid
-            ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
-            : []),
-          ...(devMode ? ['--no-optimizer'] : []),
-        ]),
-      ],
-    });
+    promises.push(
+      procs.run('kbn-tasks', {
+        ...procRunnerOpts,
+        args: [
+          ...prefixArgs,
+          ...parseRawFlags([
+            ...kbnFlags,
+            `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
+            '--node.roles=["background_tasks"]',
+            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${Uuid.v4()}`)}`,
+            ...(typeof mainUuid === 'string' && mainUuid
+              ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
+              : []),
+            ...(devMode ? ['--no-optimizer'] : []),
+          ]),
+        ],
+      })
+    );
   }
 
   await Promise.all(promises);
