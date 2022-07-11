@@ -21,8 +21,8 @@ export interface CustomFrequencyState {
   bymonth: number[];
 }
 
-export const getWeekdayInfo = (date: Moment) => {
-  const dayOfWeek = date.format('dddd');
+export const getWeekdayInfo = (date: Moment, dayOfWeekFmt: string = 'dddd') => {
+  const dayOfWeek = date.format(dayOfWeekFmt);
   const nthWeekdayOfMonth = Math.ceil(date.date() / 7);
   const isLastOfMonth = nthWeekdayOfMonth > 4 || !date.isSame(moment(date).add(7, 'd'), 'month');
   return { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth };

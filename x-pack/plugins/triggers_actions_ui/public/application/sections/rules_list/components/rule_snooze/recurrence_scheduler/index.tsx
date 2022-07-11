@@ -38,6 +38,8 @@ import {
 } from './helpers';
 import { i18nNthWeekday } from './translations';
 
+import './recurrence_scheduler.scss';
+
 interface ComponentOpts {
   startDate: Moment | null;
   endDate: Moment | null;
@@ -188,7 +190,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
-      <EuiSplitPanel.Inner color="subdued">
+      <EuiSplitPanel.Inner color="subdued" className="RecurrenceScheduler">
         <EuiFormRow
           display="columnCompressed"
           style={{ alignItems: 'center' }}

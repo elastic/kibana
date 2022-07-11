@@ -8,9 +8,11 @@
 import {
   EuiButtonGroup,
   EuiFieldNumber,
-  EuiFormControlLayoutDelimited,
+  EuiFormControlLayout,
   EuiFormRow,
   EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -67,7 +69,7 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
 
   const monthlyRecurDayOptions = useMemo(() => {
     if (!startDate) return [];
-    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate);
+    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate, 'ddd');
     return [
       {
         id: 'day',
@@ -120,24 +122,32 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
 
   return (
     <>
-      <EuiFormRowWithDelimitedFixer data-test-subj="customRecurrenceScheduler" fullWidth label=" ">
-        <EuiFormControlLayoutDelimited
-          compressed
-          delimiter=""
-          prepend={i18n.translate(
-            'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel',
-            {
-              defaultMessage: 'Every',
-            }
-          )}
-          startControl={
-            <EuiFieldNumber
-              min={1}
-              value={interval}
-              onChange={(e) => setInterval(Number(e.target.value))}
-            />
-          }
-          endControl={
+      <EuiFormRow
+        display="columnCompressed"
+        data-test-subj="customRecurrenceScheduler"
+        fullWidth
+        label=" "
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFormControlLayout
+              compressed
+              prepend={i18n.translate(
+                'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel',
+                {
+                  defaultMessage: 'Every',
+                }
+              )}
+            >
+              <EuiFieldNumber
+                compressed
+                min={1}
+                value={interval}
+                onChange={(e) => setInterval(Number(e.target.value))}
+              />
+            </EuiFormControlLayout>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiSelect
               compressed
               className="customRecurrenceSchedulerFrequency"
@@ -146,18 +156,14 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
               value={frequency}
               options={endControlOptions}
             />
-          }
-        />
-      </EuiFormRowWithDelimitedFixer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
       {frequency === RRuleFrequency.WEEKLY && (
         <EuiFormRow
           fullWidth
-          label={i18n.translate(
-            'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatOnWeekdayLabel',
-            {
-              defaultMessage: 'Repeat on',
-            }
-          )}
+          display="columnCompressed"
+          label={' '}
           data-test-subj="customRecurrenceSchedulerWeekly"
         >
           <EuiButtonGroup
@@ -172,7 +178,12 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
         </EuiFormRow>
       )}
       {frequency === RRuleFrequency.MONTHLY && startDate && (
-        <EuiFormRow fullWidth data-test-subj="customRecurrenceSchedulerMonthly">
+        <EuiFormRow
+          fullWidth
+          display="columnCompressed"
+          data-test-subj="customRecurrenceSchedulerMonthly"
+          label=" "
+        >
           <EuiButtonGroup
             buttonSize="compressed"
             isFullWidth
