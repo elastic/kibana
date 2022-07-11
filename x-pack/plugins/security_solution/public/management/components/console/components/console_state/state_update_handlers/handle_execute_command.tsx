@@ -190,7 +190,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               {i18n.translate('xpack.securitySolution.console.commandValidation.userInputError', {
                 defaultMessage: 'Invalid input: {inputErrors}',
                 values: {
-                  inputErrors: parsedInput.errors?.join('. '),
+                  inputErrors: parsedInput.errors?.join(' '),
                 },
               })}
             </ConsoleCodeBlock>
@@ -253,7 +253,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                     ),
                     unknownArgs: (
                       <ConsoleCodeBlock bold inline>
-                        {unknownInputArgs.map(toCliArgumentOption).join(' ')}
+                        {unknownInputArgs.map(toCliArgumentOption).join(', ')}
                       </ConsoleCodeBlock>
                     ),
                   }}

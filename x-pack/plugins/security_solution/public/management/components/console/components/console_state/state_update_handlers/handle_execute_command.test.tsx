@@ -12,7 +12,7 @@ import type { ConsoleTestSetup } from '../../../mocks';
 import { waitFor } from '@testing-library/react';
 import type { ConsoleProps } from '../../../types';
 
-describe('When a Console command is entered by the user', () => {
+describe('When a Console command is entered', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let commands: ConsoleTestSetup['commands'];
@@ -240,6 +240,17 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'This command supports only one of the following arguments: --foo, --bar'
+      );
+    });
+  });
+
+  it('should show error if an input parsing error is detected', async () => {
+    render();
+    enterCommand('cmd6 --foo this is not quoted');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Invalid input: value for --foo contains spaces and must be enclosed in quotes.'
       );
     });
   });
