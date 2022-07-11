@@ -196,7 +196,11 @@ export function ObservabilityTour({
     setActiveStep((prevState) => prevState + 1);
   }, []);
 
-  const endTour = useCallback(() => setIsTourActive(false), []);
+  const endTour = useCallback(() => {
+    // Reset tour state
+    setIsTourActive(false);
+    setActiveStep(1);
+  }, []);
 
   /**
    * The tour should only be visible if the following conditions are met:
