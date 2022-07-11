@@ -14,11 +14,9 @@ import { policyDetails, agentStatusSummary, apiError } from '../store/policy_det
 import { AgentsSummary } from './agents_summary';
 import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import {
-  BackToExternalAppButton,
-  BackToExternalAppButtonProps,
-} from '../../../components/back_to_external_app_button/back_to_external_app_button';
-import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import type { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
 import { useAppUrl } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';

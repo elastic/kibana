@@ -11,10 +11,10 @@ import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
-import { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getCommandListMock } from '../../mocks';
 import { useConsoleManager } from './console_manager';
-import { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
+import type { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
 
 export const getNewConsoleRegistrationMock = (
   overrides: Partial<ConsoleRegistrationInterface> = {}
