@@ -34,7 +34,8 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => {
       expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
         // `+2` to account for builtin commands
-        commands.length + 2
+        // `+2` to account for builtin generic args
+        commands.length + 2 + 2
       );
     });
   });
