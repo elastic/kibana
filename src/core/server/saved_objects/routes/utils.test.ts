@@ -14,10 +14,10 @@ import Boom from '@hapi/boom';
 import {
   KibanaRequest,
   RequestHandler,
-  RequestHandlerContext,
+  RequestHandlerContextBase,
   KibanaResponseFactory,
-  kibanaResponseFactory,
-} from '../..';
+} from '@kbn/core-http-server';
+import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -170,7 +170,7 @@ describe('validateObjects', () => {
 });
 
 describe('catchAndReturnBoomErrors', () => {
-  let context: RequestHandlerContext;
+  let context: RequestHandlerContextBase;
   let request: KibanaRequest<any, any, any>;
   let response: KibanaResponseFactory;
 
