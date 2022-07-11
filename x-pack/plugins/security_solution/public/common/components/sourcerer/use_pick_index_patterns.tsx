@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import { getSourcererDataView } from '../../containers/sourcerer/api';
