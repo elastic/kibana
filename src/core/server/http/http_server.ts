@@ -24,6 +24,7 @@ import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -47,7 +48,6 @@ import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
 import { adoptToHapiOnRequest } from './lifecycle/on_pre_routing';
 import { adoptToHapiOnPreResponseFormat } from './lifecycle/on_pre_response';
-import { isSafeMethod } from './router';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
