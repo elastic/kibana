@@ -66,9 +66,8 @@ export class DedicatedTaskRunner {
 
     const mainUuid = getKibanaCliArg(config.get('kbnTestServer.serverArgs'), 'server.uuid');
     const uuid = typeof mainUuid === 'string' ? DedicatedTaskRunner.getUuid(mainUuid) : undefined;
-    const supertest = Supertest(url);
 
-    this.enabledProps = { port, url, client, uuid, supertest };
+    this.enabledProps = { port, url, client, uuid };
   }
 
   private getEnabledProps() {
@@ -134,6 +133,6 @@ export class DedicatedTaskRunner {
    *  const response = await supertest.get('/status');
    */
   getSupertest() {
-    return this.getEnabledProps().supertest;
+    return Supertest(this.getUrl());
   }
 }
