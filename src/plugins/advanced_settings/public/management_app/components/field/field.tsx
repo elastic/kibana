@@ -173,6 +173,8 @@ export class Field extends PureComponent<FieldProps> {
       case 'select':
         if (typeof options?.[0] === 'number') {
           newUnsavedValue = Number(targetValue);
+        } else {
+          newUnsavedValue = targetValue;
         }
         break;
       default:
