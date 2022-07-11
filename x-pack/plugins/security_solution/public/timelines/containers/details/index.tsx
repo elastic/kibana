@@ -11,19 +11,19 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import {
+import type {
   TimelineEventsDetailsItem,
-  TimelineEventsQueries,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
+import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { Ecs } from '../../../../common/ecs';
+import type { Ecs } from '../../../../common/ecs';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;

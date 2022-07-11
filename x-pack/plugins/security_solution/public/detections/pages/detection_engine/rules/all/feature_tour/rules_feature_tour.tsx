@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import type {
+  EuiStatelessTourStep,
+  EuiTourActions,
+  EuiTourState,
+  EuiTourStepProps,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiStatelessTourStep,
   EuiText,
-  EuiTourActions,
-  EuiTourState,
   EuiTourStep,
-  EuiTourStepProps,
   useEuiTour,
 } from '@elastic/eui';
 import { noop } from 'lodash';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import * as i18n from './translations';

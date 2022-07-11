@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   useGeneratedHtmlId,
   EuiFlyout,
@@ -19,7 +20,8 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 
-import { Form, FormHook } from '../../../../../../../shared_imports';
+import type { FormHook } from '../../../../../../../shared_imports';
+import { Form } from '../../../../../../../shared_imports';
 
 import * as i18n from '../../../translations';
 

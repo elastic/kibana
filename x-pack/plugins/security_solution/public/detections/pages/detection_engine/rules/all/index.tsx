@@ -7,18 +7,17 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
-import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
 interface AllRulesProps {
-  createPrePackagedRules: CreatePreBuiltRules | null;
+  createPrePackagedRules: () => void;
   hasPermissions: boolean;
   loadingCreatePrePackagedRules: boolean;
-  rulesCustomInstalled: number | null;
-  rulesInstalled: number | null;
-  rulesNotInstalled: number | null;
-  rulesNotUpdated: number | null;
+  rulesCustomInstalled?: number;
+  rulesInstalled?: number;
+  rulesNotInstalled?: number;
+  rulesNotUpdated?: number;
 }
 
 /**

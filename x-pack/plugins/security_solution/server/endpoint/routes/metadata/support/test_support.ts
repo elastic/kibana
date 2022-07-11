@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Agent } from '@kbn/fleet-plugin/common';
+import type { Agent } from '@kbn/fleet-plugin/common';
 import { METADATA_UNITED_INDEX } from '../../../../../common/endpoint/constants';
-import { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
+import type { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
 
 export function legacyMetadataSearchResponseMock(
   hostMetadata?: HostMetadata

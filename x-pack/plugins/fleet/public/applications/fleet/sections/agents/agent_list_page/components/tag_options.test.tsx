@@ -57,7 +57,7 @@ describe('TagOptions', () => {
     fireEvent.click(result.getByText('Delete tag'));
 
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
-      'tags:agent',
+      'tags:"agent"',
       [],
       ['agent'],
       expect.anything(),
@@ -80,7 +80,7 @@ describe('TagOptions', () => {
     });
 
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
-      'tags:agent',
+      'tags:"agent"',
       ['newName'],
       ['agent'],
       expect.anything(),
