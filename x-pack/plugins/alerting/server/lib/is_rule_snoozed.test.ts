@@ -75,8 +75,7 @@ describe('isRuleSnoozed', () => {
   test('returns true when snooze is indefinite', () => {
     const snoozeSchedule = [
       {
-        duration: 100000000,
-
+        duration: -1,
         rRule: {
           dtstart: DATE_9999,
           tzid: 'UTC',

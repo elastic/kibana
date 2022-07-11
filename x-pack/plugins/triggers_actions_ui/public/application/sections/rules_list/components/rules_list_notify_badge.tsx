@@ -69,8 +69,11 @@ export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boo
   );
 
 const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
-  if (!rule.snoozeSchedule || rule.snoozeSchedule.length === 0) return null;
-  const nextSchedule = rule.snoozeSchedule.reduce(
+  if (!rule.snoozeSchedule) return null;
+  // Disregard any snoozes without ids; these are non-scheduled snoozes
+  const explicitlyScheduledSnoozes = rule.snoozeSchedule.filter((s) => Boolean(s.id));
+  if (explicitlyScheduledSnoozes.length === 0) return null;
+  const nextSchedule = explicitlyScheduledSnoozes.reduce(
     (a: RuleSnoozeSchedule, b: RuleSnoozeSchedule) => {
       if (moment(b.rRule.dtstart).isBefore(moment(a.rRule.dtstart))) return b;
       return a;
