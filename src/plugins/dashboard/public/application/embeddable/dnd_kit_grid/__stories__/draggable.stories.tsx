@@ -27,5 +27,5 @@ export const BasicSnapToGrid = () => {
     },
   };
 
-  return <DroppableGrid startingState={gridState} />;
+  return <DroppableGrid id="basicGrid" startingState={gridState} />;
 };

@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 import React, { useState, useMemo } from 'react';
-import { DndContext, DragMoveEvent, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragMoveEvent, DragOverlay, useDroppable } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { css } from '@emotion/react';
 
 import { Draggable } from './draggable';
 import { PanelState } from '../../types';
 
-export const DroppableGrid = ({ startingState }: { startingState: Record<string, PanelState> }) => {
+export const DroppableGrid = ({
+  id,
+  startingState,
+}: {
+  id: string;
+  startingState: Record<string, PanelState>;
+}) => {
   const guttersize = 5;
   const columns = 12;
   const maxRow = 30;
@@ -21,6 +27,10 @@ export const DroppableGrid = ({ startingState }: { startingState: Record<string,
 
   const [gridState, setGridState] = useState<Record<string, PanelState>>(startingState);
   const [draggingId, setDraggingId] = useState<string | undefined>(undefined);
+
+  const { setNodeRef } = useDroppable({
+    id,
+  });
 
   const handleDragStart = (event: DragMoveEvent) => {
     setDraggingId(event.active.id);
@@ -32,13 +42,13 @@ export const DroppableGrid = ({ startingState }: { startingState: Record<string,
   };
 
   const setElementPos = (event: DragMoveEvent) => {
-    const id = event.active.id;
-    const newPanelState = gridState[id];
+    const activeId = event.active.id;
+    const newPanelState = gridState[activeId];
 
     newPanelState.pos.x = Math.max(newPanelState.pos.x + event.delta.x, 0);
     newPanelState.pos.y = Math.max(newPanelState.pos.y + event.delta.y, 0);
 
-    setGridState({ ...gridState, [id]: newPanelState });
+    setGridState({ ...gridState, [activeId]: newPanelState });
   };
 
   const gridStyles = useMemo(
@@ -64,9 +74,14 @@ export const DroppableGrid = ({ startingState }: { startingState: Record<string,
       onDragEnd={handleDragEnd}
       modifiers={[restrictToWindowEdges]}
     >
-      <div id="gridContainer" className="dshGrid dshLayout--editing" css={gridStyles}>
-        {Object.keys(gridState).map((id) => (
-          <Draggable id={id} position={gridState[id].pos}>
+      <div
+        ref={setNodeRef}
+        id="gridContainer"
+        className="dshGrid dshLayout--editing"
+        css={gridStyles}
+      >
+        {Object.keys(gridState).map((childId) => (
+          <Draggable id={childId} position={gridState[childId].pos}>
             <div
               style={{
                 height: '100%',
@@ -76,7 +91,7 @@ export const DroppableGrid = ({ startingState }: { startingState: Record<string,
                 padding: '10px',
               }}
             >
-              I am {id}
+              I am {childId}
             </div>
           </Draggable>
         ))}
