@@ -6,8 +6,8 @@
  */
 
 import { capitalize, flatten } from 'lodash';
-import { PackagePolicy, RegistryPackage } from '@kbn/fleet-plugin/common';
-import {
+import type { PackagePolicy, RegistryPackage } from '@kbn/fleet-plugin/common';
+import type {
   InstalledIntegration,
   InstalledIntegrationArray,
   InstalledIntegrationBasicInfo,
