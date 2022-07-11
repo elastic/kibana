@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -27,15 +27,8 @@ import {
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
 import uuid from 'uuid';
-import {
-  aMockAction,
-  aMockResponse,
-  aMockEndpointResponse,
-  MockEndpointResponse,
-  MockAction,
-  mockSearchResult,
-  MockResponse,
-} from './mocks';
+import type { MockEndpointResponse, MockAction, MockResponse } from './mocks';
+import { aMockAction, aMockResponse, aMockEndpointResponse, mockSearchResult } from './mocks';
 
 describe('Endpoint Action Status', () => {
   describe('schema', () => {

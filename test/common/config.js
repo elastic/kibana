@@ -57,11 +57,19 @@ export default function () {
         ...(!!process.env.CODE_COVERAGE
           ? [`--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'coverage')}`]
           : []),
-        '--logging.appenders.deprecation.type=console',
-        '--logging.appenders.deprecation.layout.type=json',
-        '--logging.loggers[0].name=elasticsearch.deprecation',
-        '--logging.loggers[0].level=all',
-        '--logging.loggers[0].appenders[0]=deprecation',
+        `--logging.appenders.deprecation=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'json',
+          },
+        })}`,
+        `--logging.loggers=${JSON.stringify([
+          {
+            name: 'elasticsearch.deprecation',
+            level: 'all',
+            appenders: ['deprecation'],
+          },
+        ])}`,
       ],
     },
     services,

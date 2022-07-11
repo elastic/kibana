@@ -6,9 +6,10 @@
  */
 
 import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
-import { createFleetAuthzMock, FleetAuthz } from '@kbn/fleet-plugin/common';
+import type { FleetAuthz } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
 import { createLicenseServiceMock } from '../../../license/mocks';
-import { EndpointAuthzKeyList } from '../../types/authz';
+import type { EndpointAuthzKeyList } from '../../types/authz';
 
 describe('Endpoint Authz service', () => {
   let licenseService: ReturnType<typeof createLicenseServiceMock>;
@@ -119,6 +120,7 @@ describe('Endpoint Authz service', () => {
         canKillProcess: false,
         canSuspendProcess: false,
         canGetRunningProcesses: false,
+        canAccessResponseConsole: false,
       });
     });
   });

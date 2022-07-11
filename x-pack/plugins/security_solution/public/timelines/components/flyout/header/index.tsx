@@ -14,8 +14,10 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { MouseEventHandler, MouseEvent, useCallback, useMemo } from 'react';
+import type { MouseEventHandler, MouseEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -29,11 +31,11 @@ import {
   TimelineType,
   TimelineId,
 } from '../../../../../common/types/timeline';
-import { State } from '../../../../common/store';
+import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-import { TimerangeInput } from '../../../../../common/search_strategy';
+import type { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
@@ -41,7 +43,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/ki
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/timeline/model';
 import {
   startSelector,
   endSelector,
@@ -56,11 +58,6 @@ import { TimelineKPIs } from './kpis';
 
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
 import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
-
-// to hide side borders
-const StyledPanel = styled(EuiPanel)`
-  margin: 0 -1px 0;
-`;
 
 interface FlyoutHeaderProps {
   timelineId: string;
@@ -144,13 +141,16 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);
 
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <StyledPanel
+    <EuiPanel
       borderRadius="none"
       grow={false}
       paddingSize="s"
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
+      style={{ backgroundColor: euiTheme.colors.emptyShade, color: euiTheme.colors.text }}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
@@ -193,7 +193,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </StyledPanel>
+    </EuiPanel>
   );
 };
 

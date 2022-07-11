@@ -11,16 +11,16 @@ import { mockHttpServer } from './http_service.test.mocks';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
+import { hapiMocks } from '@kbn/hapi-mocks';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
-import { httpServerMock } from './http_server.mocks';
 import { contextServiceMock } from '../context/context_service.mock';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { config as cspConfig } from '../csp';
-import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
+import { cspConfig } from './csp';
+import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import { Router } from './router';
 
 const logger = loggingSystemMock.create();
@@ -149,7 +149,7 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   };
 
   const [[{ handler }]] = prebootHapiServer.route.mock.calls;
-  const response503 = await handler(httpServerMock.createRawRequest(), mockResponseToolkit);
+  const response503 = await handler(hapiMocks.createRequest(), mockResponseToolkit);
   expect(response503).toBe(mockResponse);
   expect({
     body: mockResponseToolkit.response.mock.calls,

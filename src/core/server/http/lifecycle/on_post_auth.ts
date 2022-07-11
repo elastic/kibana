@@ -8,58 +8,34 @@
 
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
+import type {
+  OnPostAuthNextResult,
+  OnPostAuthToolkit,
+  OnPostAuthResult,
+  OnPostAuthHandler,
+} from '@kbn/core-http-server';
+import { OnPostAuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
-  KibanaResponse,
+  CoreKibanaRequest,
   lifecycleResponseFactory,
-  LifecycleResponseFactory,
+  isKibanaResponse,
 } from '../router';
-
-enum ResultType {
-  next = 'next',
-}
-
-interface Next {
-  type: ResultType.next;
-}
-
-type OnPostAuthResult = Next;
 
 const postAuthResult = {
   next(): OnPostAuthResult {
-    return { type: ResultType.next };
+    return { type: OnPostAuthResultType.next };
   },
-  isNext(result: OnPostAuthResult): result is Next {
-    return result && result.type === ResultType.next;
+  isNext(result: OnPostAuthResult): result is OnPostAuthNextResult {
+    return result && result.type === OnPostAuthResultType.next;
   },
 };
-
-/**
- * @public
- * A tool set defining an outcome of OnPostAuth interceptor for incoming request.
- */
-export interface OnPostAuthToolkit {
-  /** To pass request to the next handler */
-  next: () => OnPostAuthResult;
-}
-
-/**
- * See {@link OnPostAuthToolkit}.
- * @public
- */
-export type OnPostAuthHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: OnPostAuthToolkit
-) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,
 };
 
 /**
- * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
@@ -71,8 +47,8 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
       if (postAuthResult.isNext(result)) {

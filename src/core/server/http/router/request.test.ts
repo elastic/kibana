@@ -11,73 +11,73 @@ jest.mock('uuid', () => ({
 }));
 
 import { RouteOptions } from '@hapi/hapi';
-import { KibanaRequest } from './request';
-import { httpServerMock } from '../http_server.mocks';
+import { hapiMocks } from '@kbn/hapi-mocks';
+import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
 
-describe('KibanaRequest', () => {
+describe('CoreKibanaRequest', () => {
   describe('id property', () => {
     it('uses the request.app.requestId property if present', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: { requestId: 'fakeId' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.id).toEqual('fakeId');
     });
 
     it('generates a new UUID if request.app property is not present', () => {
       // Undefined app property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: undefined,
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
 
     it('generates a new UUID if request.app.requestId property is not present', () => {
       // Undefined app.requestId property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: {},
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
 
   describe('uuid property', () => {
     it('uses the request.app.requestUuid property if present', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: { requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.uuid).toEqual('123e4567-e89b-12d3-a456-426614174000');
     });
 
     it('generates a new UUID if request.app property is not present', () => {
       // Undefined app property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: undefined,
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
 
     it('generates a new UUID if request.app.requestUuid property is not present', () => {
       // Undefined app.requestUuid property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: {},
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
 
   describe('get all headers', () => {
     it('returns all headers', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
     });
   });
@@ -85,10 +85,10 @@ describe('KibanaRequest', () => {
   describe('headers property', () => {
     it('provides a frozen copy of request headers', () => {
       const rawRequestHeaders = { custom: 'one' };
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: rawRequestHeaders,
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.headers).toEqual({ custom: 'one' });
       expect(kibanaRequest.headers).not.toBe(rawRequestHeaders);
@@ -96,20 +96,20 @@ describe('KibanaRequest', () => {
     });
 
     it.skip("doesn't expose authorization header by default", () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.headers).toEqual({
         custom: 'one',
       });
     });
 
     it('exposes authorization header if secured = false', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = KibanaRequest.from(request, undefined, false);
+      const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
       expect(kibanaRequest.headers).toEqual({
         custom: 'one',
         authorization: 'token',
@@ -119,26 +119,26 @@ describe('KibanaRequest', () => {
 
   describe('isSytemApi property', () => {
     it('is false when no kbn-system-request header is set', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(false);
     });
 
     it('is true when kbn-system-request header is set to true', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', 'kbn-system-request': 'true' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(true);
     });
 
     it('is false when kbn-system-request header is set to false', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', 'kbn-system-request': 'false' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(false);
     });
   });
@@ -146,20 +146,20 @@ describe('KibanaRequest', () => {
   describe('route.options.authRequired property', () => {
     it('handles required auth: undefined', () => {
       const auth: RouteOptions['auth'] = undefined;
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth,
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe(true);
     });
     it('handles required auth: false', () => {
       const auth: RouteOptions['auth'] = false;
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             // @ts-expect-error According to types/hapi__hapi, `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
@@ -167,51 +167,51 @@ describe('KibanaRequest', () => {
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe(false);
     });
     it('handles required auth: { mode: "required" }', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: 'required' },
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe(true);
     });
 
     it('handles required auth: { mode: "optional" }', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: 'optional' },
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe('optional');
     });
 
     it('handles required auth: { mode: "try" } as "optional"', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: 'try' },
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe('optional');
     });
 
     it('throws on auth: strategy name', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { strategies: ['session'] },
@@ -219,13 +219,13 @@ describe('KibanaRequest', () => {
         },
       });
 
-      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
         `"unexpected authentication options: {\\"strategies\\":[\\"session\\"]} for route: /"`
       );
     });
 
     it('throws on auth: { mode: unexpected mode }', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: undefined },
@@ -233,7 +233,7 @@ describe('KibanaRequest', () => {
         },
       });
 
-      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
         `"unexpected authentication options: {} for route: /"`
       );
     });
@@ -243,13 +243,13 @@ describe('KibanaRequest', () => {
     it('should work with config-schema', () => {
       const body = Buffer.from('body!');
       const request = {
-        ...httpServerMock.createRawRequest({
+        ...hapiMocks.createRequest({
           params: { id: 'params' },
           query: { search: 'query' },
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = KibanaRequest.from(request, {
+      const kibanaRequest = CoreKibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
         body: schema.buffer(),
@@ -265,13 +265,13 @@ describe('KibanaRequest', () => {
     it('should work with ValidationFunction', () => {
       const body = Buffer.from('body!');
       const request = {
-        ...httpServerMock.createRawRequest({
+        ...hapiMocks.createRequest({
           params: { id: 'params' },
           query: { search: 'query' },
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = KibanaRequest.from(request, {
+      const kibanaRequest = CoreKibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
         body: (data, { ok, badRequest }) => {

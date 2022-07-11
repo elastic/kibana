@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import type { SecurityPageName } from '../../../../app/types';
 import type { LinkCategories } from '../../../links/types';
 
