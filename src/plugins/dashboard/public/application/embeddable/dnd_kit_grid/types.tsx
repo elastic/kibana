@@ -12,6 +12,8 @@ export interface PanelState {
     x: number;
     y: number;
   };
+  w: number;
+  h: number;
   // initPos: {
   //   x: number;
   //   y: number;

@@ -38,17 +38,6 @@ export const DroppableGrid = ({
 
   const handleDragEnd = (event: DragMoveEvent) => {
     setDraggingId(undefined);
-    setElementPos(event);
-  };
-
-  const setElementPos = (event: DragMoveEvent) => {
-    const activeId = event.active.id;
-    const newPanelState = gridState[activeId];
-
-    newPanelState.pos.x = Math.max(newPanelState.pos.x + event.delta.x, 0);
-    newPanelState.pos.y = Math.max(newPanelState.pos.y + event.delta.y, 0);
-
-    setGridState({ ...gridState, [activeId]: newPanelState });
   };
 
   const gridStyles = useMemo(
@@ -81,11 +70,9 @@ export const DroppableGrid = ({
         css={gridStyles}
       >
         {Object.keys(gridState).map((childId) => (
-          <Draggable id={childId} position={gridState[childId].pos}>
+          <Draggable id={childId} startingPanelState={gridState[childId]}>
             <div
               style={{
-                height: '100%',
-                width: '100%',
                 border: 'dashed 1px red',
                 background: 'pink',
                 padding: '10px',

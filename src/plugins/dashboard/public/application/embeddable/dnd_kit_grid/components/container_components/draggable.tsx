@@ -5,22 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useMemo, useRef } from 'react';
-import { useDraggable } from '@dnd-kit/core';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Resizable } from 're-resizable';
+import { DragMoveEvent, useDndMonitor, useDraggable } from '@dnd-kit/core';
 import { css } from '@emotion/react';
+import { EuiIcon } from '@elastic/eui';
+import { PanelState } from '../../types';
 interface Props {
   id: string;
-  position: { x: number; y: number };
+  startingPanelState: PanelState;
   element?: React.ElementType | string;
   children?: JSX.Element | JSX.Element[];
 }
 
-export const Draggable = ({ id, position, element, children }: Props) => {
+export const Draggable = ({ id, startingPanelState, element, children }: Props) => {
+  useDndMonitor({
+    onDragEnd(event) {
+      if (event.active.id === id) setElementPos(event);
+    },
+  });
+
   const Element = element || 'div';
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
   });
   const columnSize = useRef<number>(50);
+  const [panelState, setPanelState] = useState<PanelState>(startingPanelState);
 
   const updateColumnWidth = () => {
     const gridEl = document.getElementById('gridContainer');
@@ -28,6 +38,16 @@ export const Draggable = ({ id, position, element, children }: Props) => {
       const cols = window.getComputedStyle(gridEl).gridTemplateColumns;
       columnSize.current = parseFloat(cols.split('px')[0]);
     }
+  };
+
+  const setElementPos = (event: DragMoveEvent) => {
+    setPanelState({
+      ...panelState,
+      pos: {
+        x: Math.max(panelState.pos.x + event.delta.x, 0),
+        y: Math.max(panelState.pos.y + event.delta.y, 0),
+      },
+    });
   };
 
   window.addEventListener('resize', () => {
@@ -39,18 +59,16 @@ export const Draggable = ({ id, position, element, children }: Props) => {
   }, []);
 
   const { columnStart, columnEnd, rowStart, rowEnd } = useMemo(() => {
-    const w = 3;
-    const h = 3;
-    const startC = Math.ceil(position.x / columnSize.current) + 1;
-    const startR = Math.ceil(position.y / 26) + 1;
+    const startC = Math.ceil(panelState.pos.x / columnSize.current) + 1;
+    const startR = Math.ceil(panelState.pos.y / 26) + 1;
 
     return {
       columnStart: startC,
-      columnEnd: startC + w,
+      columnEnd: startC + panelState.w,
       rowStart: startR,
-      rowEnd: startR + h,
+      rowEnd: startR + panelState.h,
     };
-  }, [position.x, position.y]);
+  }, [panelState]);
 
   const positionStyles = useMemo(
     () => css`
@@ -64,14 +82,35 @@ export const Draggable = ({ id, position, element, children }: Props) => {
   );
 
   return (
-    <Element
-      ref={setNodeRef}
-      // style={style}
-      {...listeners}
-      {...attributes}
-      css={positionStyles}
-    >
-      {children}
+    <Element ref={setNodeRef} css={positionStyles}>
+      <Resizable
+        defaultSize={{ height: '100%', width: '100%' }}
+        style={{
+          border: 'dashed 1px red',
+          background: 'lightyellow',
+          padding: '10px',
+        }}
+        onResizeStop={(e, direction, ref, d) => {
+          const pixelWidth = panelState.w * columnSize.current + d.width;
+          const pixelHeight = panelState.h * 26 + d.height;
+
+          ref.setAttribute(
+            'style',
+            'position: relative; user-select: auto; border: 1px dashed red; background: lightyellow; padding: 10px; width: 100%; height: 100%;'
+          );
+          setPanelState({
+            ...panelState,
+            w:
+              d.width >= 0
+                ? Math.ceil(pixelWidth / columnSize.current)
+                : Math.floor(pixelWidth / columnSize.current),
+            h: d.height >= 0 ? Math.ceil(pixelHeight / 26) : Math.floor(pixelHeight / 26),
+          });
+        }}
+      >
+        <EuiIcon type="grab" {...listeners} {...attributes} />
+        {children}
+      </Resizable>
     </Element>
   );
 };

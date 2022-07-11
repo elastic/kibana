@@ -20,10 +20,14 @@ export const BasicSnapToGrid = () => {
     ['panel1']: {
       id: 'panel1',
       pos: { x: 0, y: 0 },
+      w: 3,
+      h: 3,
     },
     ['panel2']: {
       id: 'panel2',
       pos: { x: 50, y: 50 },
+      w: 4,
+      h: 6,
     },
   };
 
