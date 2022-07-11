@@ -7,7 +7,7 @@
 
 import * as i18n from './translations';
 import { ToasterError } from '../../toasters';
-import { SetupMlResponse } from '../../ml_popover/types';
+import type { SetupMlResponse } from '../../ml_popover/types';
 import { isMlStartJobError } from './errors';
 
 export const tryParseResponse = (response: string): string => {

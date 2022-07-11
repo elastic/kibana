@@ -7,11 +7,11 @@
 
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 
+import type { RulesSchema } from './rules_schema';
 import {
   rulesSchema,
-  RulesSchema,
   checkTypeDependents,
   getDependents,
   addSavedId,
@@ -22,7 +22,7 @@ import {
   addEqlFields,
 } from './rules_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import {
   getRulesSchemaMock,
   getRulesMlSchemaMock,

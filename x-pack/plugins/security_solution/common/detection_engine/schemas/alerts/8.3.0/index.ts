@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ALERT_BUILDING_BLOCK_TYPE, ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
-import {
+import type { ALERT_BUILDING_BLOCK_TYPE, ALERT_UUID } from '@kbn/rule-data-utils';
+import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
+import type {
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
   ALERT_NEW_TERMS,

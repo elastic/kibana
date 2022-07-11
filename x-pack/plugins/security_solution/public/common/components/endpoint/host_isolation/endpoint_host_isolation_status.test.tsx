@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EndpointHostIsolationStatus,
-  EndpointHostIsolationStatusProps,
-} from './endpoint_host_isolation_status';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../mock/endpoint';
+import type { EndpointHostIsolationStatusProps } from './endpoint_host_isolation_status';
+import { EndpointHostIsolationStatus } from './endpoint_host_isolation_status';
+import type { AppContextTestRender } from '../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../mock/endpoint';
 
 describe('when using the EndpointHostIsolationStatus component', () => {
   let render: (

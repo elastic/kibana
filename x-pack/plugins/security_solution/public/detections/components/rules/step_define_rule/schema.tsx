@@ -23,15 +23,10 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { FieldValueQueryBar } from '../query_bar';
-import {
-  ERROR_CODE,
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  ValidationFunc,
-} from '../../../../shared_imports';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
@@ -45,6 +40,7 @@ import {
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
+    defaultValue: [],
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(

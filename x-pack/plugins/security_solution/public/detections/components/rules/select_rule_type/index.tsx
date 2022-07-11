@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -17,7 +17,7 @@ import {
   isThreatMatchRule,
   isNewTermsRule,
 } from '../../../../../common/detection_engine/utils';
-import { FieldHook } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';

@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
-import {
+import type {
   MachineLearningCreateSchema,
   MachineLearningUpdateSchema,
   QueryCreateSchema,
