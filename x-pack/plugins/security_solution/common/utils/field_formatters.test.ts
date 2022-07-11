@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventHit } from '../search_strategy';
+import type { EventHit } from '../search_strategy';
 import { getDataFromFieldsHits, getDataSafety } from './field_formatters';
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 
