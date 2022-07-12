@@ -296,7 +296,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           createdBy: null,
           apiKeyOwner: null,
           scheduledTaskId: match.scheduledTaskId,
-          snoozeSchedule: match.snoozeSchedule,
           updatedBy: null,
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',
