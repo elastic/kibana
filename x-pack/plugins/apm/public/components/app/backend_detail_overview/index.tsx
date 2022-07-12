@@ -17,7 +17,7 @@ import { BackendMetricCharts } from '../../shared/backend_metric_charts';
 export function BackendDetailOverview() {
   const {
     query: {
-      backendName,
+      dependencyName,
       rangeFrom,
       rangeTo,
       refreshInterval,
@@ -37,7 +37,7 @@ export function BackendDetailOverview() {
       }),
       href: apmRouter.link('/backends/overview', {
         query: {
-          backendName,
+          dependencyName,
           rangeFrom,
           rangeTo,
           refreshInterval,

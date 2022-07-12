@@ -88,7 +88,7 @@ export function ServiceOverviewDependenciesTable({
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              backendName: location.backendName,
+              dependencyName: location.dependencyName,
               comparisonEnabled,
               offset,
               environment,

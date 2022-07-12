@@ -31,7 +31,7 @@ export const Example: Story<Args> = (args) => {
 };
 Example.args = {
   query: {
-    backendName: 'postgres',
+    dependencyName: 'postgres',
     environment: 'ENVIRONMENT_ALL',
     kuery: '',
     rangeFrom: 'now-15m',

@@ -13,7 +13,7 @@ import { notifyFeatureUsage } from '../../feature';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceMap } from './get_service_map';
-import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_info';
+import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
@@ -210,7 +210,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map/backend',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({ dependencyName: t.string }),
       environmentRt,
       rangeRt,
       offsetRt,
@@ -237,15 +237,15 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const {
-      query: { backendName, environment, start, end, offset },
+      query: { dependencyName, environment, start, end, offset },
     } = params;
 
-    const commonProps = { environment, setup, backendName, start, end };
+    const commonProps = { environment, setup, dependencyName, start, end };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceMapBackendNodeInfo(commonProps),
+      getServiceMapDependencyNodeInfo(commonProps),
       offset
-        ? getServiceMapBackendNodeInfo({ ...commonProps, offset })
+        ? getServiceMapDependencyNodeInfo({ ...commonProps, offset })
         : undefined,
     ]);
 

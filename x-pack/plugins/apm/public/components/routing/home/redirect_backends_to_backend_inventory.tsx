@@ -19,7 +19,7 @@ export function RedirectBackendsToBackendInventory({
   const query = qs.parse(location.search);
 
   const normalizedPathname = location.pathname.replace(/\/$/, '');
-  if (normalizedPathname === '/backends' && !('backendName' in query)) {
+  if (normalizedPathname === '/backends' && !('dependencyName' in query)) {
     return (
       <Redirect
         to={qs.stringifyUrl({

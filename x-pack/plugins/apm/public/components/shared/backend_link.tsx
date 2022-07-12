@@ -43,7 +43,7 @@ export function BackendLink({
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate">
-          <span className="eui-textTruncate">{query.backendName}</span>
+          <span className="eui-textTruncate">{query.dependencyName}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>

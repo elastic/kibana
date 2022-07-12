@@ -45,15 +45,15 @@ export function BackendContents({
 
   const apmRouter = useApmRouter();
 
-  const backendName = nodeData.label;
+  const dependencyName = nodeData.label;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (backendName) {
+      if (dependencyName) {
         return callApmApi('GET /internal/apm/service-map/backend', {
           params: {
             query: {
-              backendName,
+              dependencyName,
               environment,
               start,
               end,
@@ -66,15 +66,15 @@ export function BackendContents({
         });
       }
     },
-    [environment, backendName, start, end, offset, comparisonEnabled]
+    [environment, dependencyName, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const detailsUrl = backendName
+  const detailsUrl = dependencyName
     ? apmRouter.link('/backends/overview', {
         query: {
           ...query,
-          backendName,
+          dependencyName,
         } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
       })
     : undefined;

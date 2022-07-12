@@ -12,11 +12,11 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function RedirectPathBackendDetailView() {
   const {
-    path: { backendName },
+    path: { dependencyName },
     query,
-  } = useApmParams('/backends/{backendName}/overview');
+  } = useApmParams('/backends/{dependencyName}/overview');
 
-  const search = qs.stringify({ ...query, backendName });
+  const search = qs.stringify({ ...query, dependencyName });
 
   return <Redirect to={{ pathname: `/backends/overview`, search }} />;
 }

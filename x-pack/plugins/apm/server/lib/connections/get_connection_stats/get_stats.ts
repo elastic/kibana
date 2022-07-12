@@ -88,7 +88,7 @@ export const getStats = async ({
                 },
               },
               {
-                backendName: {
+                dependencyName: {
                   terms: {
                     field: SPAN_DESTINATION_SERVICE_RESOURCE,
                   },
@@ -178,7 +178,7 @@ export const getStats = async ({
     response.aggregations?.connections.buckets.map((bucket) => {
       const sample = bucket.sample.top[0].metrics;
       const serviceName = bucket.key.serviceName as string;
-      const backendName = bucket.key.backendName as string;
+      const dependencyName = bucket.key.dependencyName as string;
 
       return {
         from: {
@@ -190,8 +190,8 @@ export const getStats = async ({
           type: NodeType.service as const,
         },
         to: {
-          id: objectHash({ backendName }),
-          backendName,
+          id: objectHash({ dependencyName }),
+          dependencyName,
           spanType: sample[SPAN_TYPE] as string,
           spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
           type: NodeType.backend as const,

@@ -299,7 +299,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
-          id: 'backends',
+          id: 'dependencies',
           title: dependenciesTitle,
           path: '/backends/inventory',
         },

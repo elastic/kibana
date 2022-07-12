@@ -62,7 +62,7 @@ describe('Dependencies', () => {
       cy.visit(
         `/app/apm/backends/overview?${new URLSearchParams({
           ...timeRange,
-          backendName: 'postgresql',
+          dependencyName: 'postgresql',
         })}`
       );
 
@@ -79,7 +79,7 @@ describe('Dependencies', () => {
       cy.visit(
         `/app/apm/backends/overview?${new URLSearchParams({
           ...timeRange,
-          backendName: 'postgresql',
+          dependencyName: 'postgresql',
         })}`
       );
       cy.contains('h1', 'postgresql');

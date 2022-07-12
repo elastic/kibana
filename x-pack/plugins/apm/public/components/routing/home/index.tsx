@@ -264,7 +264,13 @@ export const home = {
         }),
       },
       '/backends': {
-        element: <Outlet />,
+        // All chidren routes are going to inherit the BackendDetailView
+        element: (
+          <BackendDetailView>
+            <Outlet />
+          </BackendDetailView>
+        ),
+        // All children routes must have these params
         params: t.partial({
           query: t.intersection([
             t.type({
@@ -275,38 +281,32 @@ export const home = {
           ]),
         }),
         children: {
+          // Redirects to /backends/overview
           '/backends': {
-            element: (
-              <BackendDetailView>
-                <Outlet />
-              </BackendDetailView>
-            ),
-            children: {
-              '/backends/operations': {
-                element: <BackendDetailOperations />,
-              },
-
-              '/backends/operation': {
-                params: t.type({
-                  query: t.intersection([
-                    t.type({
-                      spanName: t.string,
-                    }),
-                    t.partial({
-                      sampleRangeFrom: toNumberRt,
-                      sampleRangeTo: toNumberRt,
-                    }),
-                  ]),
+            element: <RedirectBackendsToBackendDetailOverview />,
+          },
+          // Backends operations overview (Tab operations)
+          '/backends/operations': {
+            element: <BackendDetailOperations />,
+          },
+          // Backends operation details view
+          '/backends/operation': {
+            params: t.type({
+              query: t.intersection([
+                t.type({
+                  spanName: t.string,
                 }),
-                element: <BackendOperationDetailView />,
-              },
-              '/backends/overview': {
-                element: <BackendDetailOverview />,
-              },
-              '/backends': {
-                element: <RedirectBackendsToBackendDetailOverview />,
-              },
-            },
+                t.partial({
+                  sampleRangeFrom: toNumberRt,
+                  sampleRangeTo: toNumberRt,
+                }),
+              ]),
+            }),
+            element: <BackendOperationDetailView />,
+          },
+          // Backends overview (Tab Overview)
+          '/backends/overview': {
+            element: <BackendDetailOverview />,
           },
         },
       },

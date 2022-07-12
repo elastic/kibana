@@ -14,6 +14,10 @@ export function RedirectBackendsToBackendDetailOverview() {
   const { query } = useApmParams('/backends');
 
   const search = qs.stringify(query);
+  console.log(
+    '### caue ~ RedirectBackendsToBackendDetailOverview ~ search',
+    search
+  );
 
   return <Redirect to={{ pathname: `/backends/overview`, search }} />;
 }

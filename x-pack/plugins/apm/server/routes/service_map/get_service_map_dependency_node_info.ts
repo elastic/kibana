@@ -26,21 +26,21 @@ import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 interface Options {
   setup: Setup;
   environment: string;
-  backendName: string;
+  dependencyName: string;
   start: number;
   end: number;
   offset?: string;
 }
 
-export function getServiceMapBackendNodeInfo({
+export function getServiceMapDependencyNodeInfo({
   environment,
-  backendName,
+  dependencyName,
   setup,
   start,
   end,
   offset,
 }: Options): Promise<NodeStats> {
-  return withApmSpan('get_service_map_backend_node_stats', async () => {
+  return withApmSpan('get_service_map_dependency_node_stats', async () => {
     const { apmEventClient } = setup;
     const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
       start,
@@ -77,7 +77,9 @@ export function getServiceMapBackendNodeInfo({
           query: {
             bool: {
               filter: [
-                { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+                {
+                  term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
+                },
                 ...rangeQuery(startWithOffset, endWithOffset),
                 ...environmentQuery(environment),
               ],

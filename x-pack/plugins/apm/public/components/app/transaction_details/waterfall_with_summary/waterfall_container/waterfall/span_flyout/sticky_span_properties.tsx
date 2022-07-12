@@ -115,7 +115,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
             <BackendLink
               query={{
                 ...query,
-                backendName: dependencyName,
+                dependencyName,
               }}
               subtype={span.span.subtype}
               type={span.span.type}

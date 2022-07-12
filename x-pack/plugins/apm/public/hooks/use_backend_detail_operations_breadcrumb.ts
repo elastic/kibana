@@ -13,7 +13,7 @@ import { useApmRouter } from './use_apm_router';
 export function useBackendDetailOperationsBreadcrumb() {
   const {
     query: {
-      backendName,
+      dependencyName,
       rangeFrom,
       rangeTo,
       refreshInterval,
@@ -34,7 +34,7 @@ export function useBackendDetailOperationsBreadcrumb() {
       ),
       href: apmRouter.link('/backends/operations', {
         query: {
-          backendName,
+          dependencyName,
           rangeFrom,
           rangeTo,
           refreshInterval,

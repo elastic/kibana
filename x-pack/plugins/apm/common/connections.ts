@@ -25,7 +25,7 @@ export interface ServiceNode extends NodeBase {
 
 export interface BackendNode extends NodeBase {
   type: NodeType.backend;
-  backendName: string;
+  dependencyName: string;
   spanType: string;
   spanSubtype: string;
 }
@@ -67,5 +67,7 @@ export interface ConnectionStatsItemWithComparisonData {
 }
 
 export function getNodeName(node: Node) {
-  return node.type === NodeType.service ? node.serviceName : node.backendName;
+  return node.type === NodeType.service
+    ? node.serviceName
+    : node.dependencyName;
 }

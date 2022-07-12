@@ -30,7 +30,7 @@ import { Node, NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
 type Destination = {
-  backendName: string;
+  dependencyName: string;
   spanId: string;
   spanType: string;
   spanSubtype: string;
@@ -91,7 +91,7 @@ export const getDestinationMap = ({
               size: 10000,
               sources: asMutableArray([
                 {
-                  backendName: {
+                  dependencyName: {
                     terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
                   },
                 },
@@ -130,7 +130,7 @@ export const getDestinationMap = ({
       const spanId = sample[SPAN_ID] as string;
 
       destinationsBySpanId.set(spanId, {
-        backendName: bucket.key.backendName as string,
+        dependencyName: bucket.key.dependencyName as string,
         spanId,
         spanType: (sample[SPAN_TYPE] as string | null) || '',
         spanSubtype: (sample[SPAN_SUBTYPE] as string | null) || '',
@@ -189,11 +189,11 @@ export const getDestinationMap = ({
       }
     });
 
-    const nodesByBackendName = new Map<string, Node>();
+    const nodesBydependencyName = new Map<string, Node>();
 
     destinationsBySpanId.forEach((destination) => {
       const existingDestination =
-        nodesByBackendName.get(destination.backendName) ?? {};
+        nodesBydependencyName.get(destination.dependencyName) ?? {};
 
       const mergedDestination = {
         ...existingDestination,
@@ -211,17 +211,17 @@ export const getDestinationMap = ({
         };
       } else {
         node = {
-          backendName: mergedDestination.backendName,
+          dependencyName: mergedDestination.dependencyName,
           spanType: mergedDestination.spanType,
           spanSubtype: mergedDestination.spanSubtype,
-          id: objectHash({ backendName: mergedDestination.backendName }),
+          id: objectHash({ dependencyName: mergedDestination.dependencyName }),
           type: NodeType.backend,
         };
       }
 
-      nodesByBackendName.set(destination.backendName, node);
+      nodesBydependencyName.set(destination.dependencyName, node);
     });
 
-    return nodesByBackendName;
+    return nodesBydependencyName;
   });
 };

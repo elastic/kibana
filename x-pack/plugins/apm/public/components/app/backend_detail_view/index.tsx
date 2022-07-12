@@ -18,7 +18,7 @@ export function BackendDetailView({
 }) {
   const {
     query: {
-      backendName,
+      dependencyName,
       rangeFrom,
       rangeTo,
       refreshInterval,
@@ -47,10 +47,10 @@ export function BackendDetailView({
       }),
     },
     {
-      title: backendName,
+      title: dependencyName,
       href: apmRouter.link('/backends', {
         query: {
-          backendName,
+          dependencyName,
           rangeFrom,
           rangeTo,
           refreshInterval,
