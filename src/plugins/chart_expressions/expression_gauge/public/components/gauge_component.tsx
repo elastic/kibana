@@ -395,6 +395,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       <div className="gauge__wrapper">
         <Chart>
           <Settings
+            noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
             ariaLabel={args.ariaLabel}

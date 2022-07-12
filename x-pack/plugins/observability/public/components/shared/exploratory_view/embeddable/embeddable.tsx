@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
@@ -34,6 +35,7 @@ export interface ExploratoryEmbeddableProps {
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
+  legendPosition?: Position;
   onBrushEnd?: (param: { range: number[] }) => void;
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
@@ -61,6 +63,7 @@ export default function Embeddable({
   indexPatterns,
   isSingleMetric = false,
   legendIsVisible,
+  legendPosition,
   lens,
   onBrushEnd,
   caseOwner = observabilityFeatureId,
@@ -105,6 +108,9 @@ export default function Embeddable({
 
   if (typeof legendIsVisible !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+  }
+  if (typeof legendPosition !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).legend.position = legendPosition;
   }
 
   const actions = useActions({
