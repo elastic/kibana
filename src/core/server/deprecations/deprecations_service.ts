@@ -11,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
+import { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 import { DeprecationsFactory } from './deprecations_factory';
 import { RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
