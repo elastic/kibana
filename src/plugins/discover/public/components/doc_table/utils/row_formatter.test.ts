@@ -12,20 +12,9 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 describe('Row formatter', () => {
-  const hit = {
-    _id: 'a',
-    _index: 'foo',
-    _type: 'doc',
-    _score: 1,
-    _source: {
-      foo: 'bar',
-      number: 42,
-      hello: '<h1>World</h1>',
-      also: 'with "quotes" or \'single quotes\'',
-    },
-  };
   let services: DiscoverServices;
 
   const createIndexPattern = () => {
@@ -45,6 +34,18 @@ describe('Row formatter', () => {
   };
 
   const indexPattern = createIndexPattern();
+  const rawHit = {
+    _id: 'a',
+    _index: 'foo',
+    _score: 1,
+    _source: {
+      foo: 'bar',
+      number: 42,
+      hello: '<h1>World</h1>',
+      also: 'with "quotes" or \'single quotes\'',
+    },
+  };
+  const hit = buildDataTableRecord(rawHit, indexPattern);
 
   const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
 
@@ -138,15 +139,13 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(
-      formatRow(
-        { ...hit, highlight: { number: ['42'] } },
-        indexPattern,
-        fieldsToShow,
-        100,
-        services.fieldFormats
-      )
-    ).toMatchInlineSnapshot(`
+    const highLightHit = buildDataTableRecord(
+      { ...rawHit, highlight: { number: ['42'] } },
+      indexPattern
+    );
+
+    expect(formatRow(highLightHit, indexPattern, fieldsToShow, 100, services.fieldFormats))
+      .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [

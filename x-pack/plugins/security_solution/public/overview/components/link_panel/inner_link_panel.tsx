@@ -10,24 +10,24 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSplitPanel, EuiText } from '@elastic/eui';
 
 const ButtonContainer = styled(EuiFlexGroup)`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const Icon = styled(EuiIcon)`
   padding: 0;
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
   margin-left: 12px;
   transform: scale(${({ color }) => (color === 'primary' ? 1.4 : 1)});
 `;
 
 const PanelContainer = styled(EuiSplitPanel.Inner)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 const Title = styled(EuiText)<{ textcolor: 'primary' | 'warning' }>`
   color: ${({ theme, textcolor }) =>
     textcolor === 'primary' ? theme.eui.euiColorPrimary : theme.eui.euiColorWarningText};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export const InnerLinkPanel = ({

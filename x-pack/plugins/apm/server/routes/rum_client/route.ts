@@ -7,9 +7,8 @@
 import * as t from 'io-ts';
 import { Logger } from '@kbn/core/server';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
-import { getClientMetrics } from './get_client_metrics';
-import { getLongTaskMetrics } from './get_long_task_metrics';
-import { getVisitorBreakdown } from './get_visitor_breakdown';
+import { getPageLoadDistribution } from './get_page_load_distribution';
+import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { APMRouteHandlerResources } from '../typings';
@@ -54,89 +53,75 @@ const uxQueryRt = t.intersection([
   t.partial({ urlQuery: t.string, percentile: t.string }),
 ]);
 
-const rumClientMetricsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/client-metrics',
+const rumPageLoadDistributionRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/ux/page-load-distribution',
   params: t.type({
-    query: uxQueryRt,
+    query: t.intersection([uxQueryRt, percentileRangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    pageViews: { value: number };
-    totalPageLoadDuration: { value: number };
-    backEnd: { value: number };
-    frontEnd: { value: number };
+    pageLoadDistribution: {
+      pageLoadDistribution: Array<{ x: number; y: number }>;
+      percentiles: Record<string, number | null> | undefined;
+      minDuration: number;
+      maxDuration: number;
+    } | null;
   }> => {
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile, start, end },
+      query: { minPercentile, maxPercentile, urlQuery, start, end },
     } = resources.params;
 
-    return getClientMetrics({
+    const pageLoadDistribution = await getPageLoadDistribution({
       setup,
+      minPercentile,
+      maxPercentile,
       urlQuery,
-      percentile: percentile ? Number(percentile) : undefined,
       start,
       end,
     });
+
+    return { pageLoadDistribution };
   },
 });
 
-const rumVisitorsBreakdownRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/visitor-breakdown',
+const rumPageLoadDistBreakdownRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/ux/page-load-distribution/breakdown',
   params: t.type({
-    query: uxQueryRt,
+    query: t.intersection([
+      uxQueryRt,
+      percentileRangeRt,
+      t.type({ breakdown: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    os: Array<{ count: number; name: string }>;
-    browsers: Array<{ count: number; name: string }>;
+    pageLoadDistBreakdown:
+      | Array<{ name: string; data: Array<{ x: number; y: number }> }>
+      | undefined;
   }> => {
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, start, end },
+      query: { minPercentile, maxPercentile, breakdown, urlQuery, start, end },
     } = resources.params;
 
-    return getVisitorBreakdown({
+    const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
       setup,
+      minPercentile: Number(minPercentile),
+      maxPercentile: Number(maxPercentile),
+      breakdown,
       urlQuery,
       start,
       end,
     });
-  },
-});
 
-const rumLongTaskMetrics = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/long-task-metrics',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    noOfLongTasks: number;
-    sumOfLongTasks: number;
-    longestLongTask: number;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getLongTaskMetrics({
-      setup,
-      urlQuery,
-      percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
+    return { pageLoadDistBreakdown };
   },
 });
 
@@ -170,7 +155,6 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
 }
 
 export const rumRouteRepository = {
-  ...rumClientMetricsRoute,
-  ...rumVisitorsBreakdownRoute,
-  ...rumLongTaskMetrics,
+  ...rumPageLoadDistributionRoute,
+  ...rumPageLoadDistBreakdownRoute,
 };

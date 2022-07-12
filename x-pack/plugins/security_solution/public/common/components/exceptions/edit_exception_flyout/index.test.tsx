@@ -8,7 +8,8 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { EditExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../lib/kibana';
@@ -31,9 +32,7 @@ const mockTheme = getMockTheme({
     euiBreakpoints: {
       l: '1200px',
     },
-    paddingSizes: {
-      m: '10px',
-    },
+    euiSizeM: '10px',
   },
 });
 

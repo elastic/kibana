@@ -8,15 +8,68 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { buildDataTableRecord } from '../utils/build_data_record';
+import { DataTableRecord } from '../types';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
-import { ElasticSearchHit } from '../types';
 import { useDiscoverServices } from './use_discover_services';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
+
+/**
+ * Custom react hook for querying a single doc in ElasticSearch
+ */
+export function useEsDocSearch({
+  id,
+  index,
+  indexPattern,
+  requestSource,
+}: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
+  const [status, setStatus] = useState(ElasticRequestState.Loading);
+  const [hit, setHit] = useState<DataTableRecord | null>(null);
+  const { data, uiSettings } = useDiscoverServices();
+  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  const requestData = useCallback(async () => {
+    try {
+      const result = await lastValueFrom(
+        data.search.search({
+          params: {
+            index: indexPattern.title,
+            body: buildSearchBody(id, index, indexPattern, useNewFieldsApi, requestSource)?.body,
+          },
+        })
+      );
+      const rawResponse = result.rawResponse;
+
+      const hits = rawResponse.hits;
+
+      if (hits?.hits?.[0]) {
+        setStatus(ElasticRequestState.Found);
+        setHit(buildDataTableRecord(hits.hits[0], indexPattern));
+      } else {
+        setStatus(ElasticRequestState.NotFound);
+      }
+    } catch (err) {
+      if (err.savedObjectId) {
+        setStatus(ElasticRequestState.NotFoundIndexPattern);
+      } else if (err.status === 404) {
+        setStatus(ElasticRequestState.NotFound);
+      } else {
+        setStatus(ElasticRequestState.Error);
+      }
+    }
+  }, [id, index, indexPattern, data.search, useNewFieldsApi, requestSource]);
+
+  useEffect(() => {
+    requestData();
+  }, [requestData]);
+
+  return [status, hit, requestData];
+}
 
 /**
  * helper function to build a query body for Elasticsearch
@@ -24,6 +77,7 @@ type RequestBody = Pick<estypes.SearchRequest, 'body'>;
  */
 export function buildSearchBody(
   id: string,
+  index: string,
   indexPattern: DataView,
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
@@ -33,8 +87,8 @@ export function buildSearchBody(
   const request: RequestBody = {
     body: {
       query: {
-        ids: {
-          values: [id],
+        bool: {
+          filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
         },
       },
       stored_fields: computedFields.storedFields,
@@ -57,55 +111,4 @@ export function buildSearchBody(
   }
   request.body.fields = [...(request.body?.fields || []), ...(computedFields.docvalueFields || [])];
   return request;
-}
-
-/**
- * Custom react hook for querying a single doc in ElasticSearch
- */
-export function useEsDocSearch({
-  id,
-  index,
-  indexPattern,
-  requestSource,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null, () => void] {
-  const [status, setStatus] = useState(ElasticRequestState.Loading);
-  const [hit, setHit] = useState<ElasticSearchHit | null>(null);
-  const { data, uiSettings } = useDiscoverServices();
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
-  const requestData = useCallback(async () => {
-    try {
-      const { rawResponse } = await firstValueFrom(
-        data.search.search({
-          params: {
-            index,
-            body: buildSearchBody(id, indexPattern, useNewFieldsApi, requestSource)?.body,
-          },
-        })
-      );
-
-      const hits = rawResponse.hits;
-
-      if (hits?.hits?.[0]) {
-        setStatus(ElasticRequestState.Found);
-        setHit(hits.hits[0]);
-      } else {
-        setStatus(ElasticRequestState.NotFound);
-      }
-    } catch (err) {
-      if (err.savedObjectId) {
-        setStatus(ElasticRequestState.NotFoundIndexPattern);
-      } else if (err.status === 404) {
-        setStatus(ElasticRequestState.NotFound);
-      } else {
-        setStatus(ElasticRequestState.Error);
-      }
-    }
-  }, [id, index, indexPattern, data.search, useNewFieldsApi, requestSource]);
-
-  useEffect(() => {
-    requestData();
-  }, [requestData]);
-
-  return [status, hit, requestData];
 }

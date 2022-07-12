@@ -32,15 +32,4 @@ describe('rum client dashboard queries', () => {
 
     expect(mock.params).toMatchSnapshot();
   });
-
-  it('fetches long task metrics', async () => {
-    mock = await inspectSearchParams((setup) =>
-      getLongTaskMetrics({
-        setup,
-        start: 0,
-        end: 50000,
-      })
-    );
-    expect(mock.params).toMatchSnapshot();
-  });
 });

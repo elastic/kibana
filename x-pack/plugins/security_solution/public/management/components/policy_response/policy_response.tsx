@@ -8,17 +8,17 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  HostPolicyResponseActionStatus,
+import type {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 
@@ -39,8 +39,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
       .euiTreeView__node {
         // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
-        padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
-        padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+        padding-top: ${({ theme }) => theme.eui.euiSizeS};
+        padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
       }
     }
   }

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FleetAuthz } from '@kbn/fleet-plugin/common';
-import { LicenseService } from '../../../license';
-import { EndpointAuthz } from '../../types/authz';
-import { MaybeImmutable } from '../../types';
+import type { FleetAuthz } from '@kbn/fleet-plugin/common';
+import type { LicenseService } from '../../../license';
+import type { EndpointAuthz } from '../../types/authz';
+import type { MaybeImmutable } from '../../types';
 
 /**
  * Used by both the server and the UI to generate the Authorization for access to Endpoint related
@@ -24,16 +24,18 @@ export const calculateEndpointAuthz = (
   userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
-  const hasAllAccessToFleet = userRoles.includes('superuser');
+  const hasEndpointManagementAccess = userRoles.includes('superuser');
 
   return {
-    canAccessFleet: hasAllAccessToFleet,
-    canAccessEndpointManagement: hasAllAccessToFleet,
-    canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
-    canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
-    canUnIsolateHost: hasAllAccessToFleet,
-    canKillProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
-    canSuspendProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
+    canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
+    canAccessEndpointManagement: hasEndpointManagementAccess,
+    canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canIsolateHost: isPlatinumPlusLicense && hasEndpointManagementAccess,
+    canUnIsolateHost: hasEndpointManagementAccess,
+    canKillProcess: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canSuspendProcess: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canGetRunningProcesses: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canAccessResponseConsole: hasEndpointManagementAccess && isPlatinumPlusLicense,
   };
 };
 
@@ -46,5 +48,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canUnIsolateHost: true,
     canKillProcess: false,
     canSuspendProcess: false,
+    canGetRunningProcesses: false,
+    canAccessResponseConsole: false,
   };
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { ManifestSchema } from '../schema/manifest';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
 export * from './os';
@@ -911,7 +911,10 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
-    advanced?: {};
+    advanced?: {
+      [key: string]: unknown;
+      rollback?: string | boolean;
+    };
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;

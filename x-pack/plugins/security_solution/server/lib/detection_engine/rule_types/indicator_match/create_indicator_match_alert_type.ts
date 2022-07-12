@@ -9,9 +9,10 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { threatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
@@ -73,6 +74,8 @@ export const createIndicatorMatchAlertType = (
           searchAfterSize,
           tuple,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -94,6 +97,8 @@ export const createIndicatorMatchAlertType = (
         tuple,
         version,
         wrapHits,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

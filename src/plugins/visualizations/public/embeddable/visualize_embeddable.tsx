@@ -10,12 +10,13 @@ import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Query, TimefilterContract, TimeRange } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   Adapters,
@@ -178,6 +179,11 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
+
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   public getDescription() {
     return this.vis.description;
   }
@@ -289,12 +295,27 @@ export class VisualizeEmbeddable
 
   onContainerLoading = () => {
     this.renderComplete.dispatchInProgress();
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      rendered: false,
+      error: undefined,
+    });
+  };
+
+  onContainerData = () => {
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: false,
+    });
   };
 
   onContainerRender = () => {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   };
 
   onContainerError = (error: ExpressionRenderError) => {
@@ -302,7 +323,11 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
-    this.updateOutput({ loading: false, error });
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+      error,
+    });
   };
 
   /**
@@ -386,6 +411,7 @@ export class VisualizeEmbeddable
     div.setAttribute('data-shared-item', '');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
+    this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.subscriptions.push(
@@ -393,29 +419,33 @@ export class VisualizeEmbeddable
         const { error } = this.getOutput();
 
         if (error) {
-          if (isFallbackDataView(this.vis.data.indexPattern)) {
-            render(
-              <VisualizationMissedSavedObjectError
-                viewMode={this.input.viewMode ?? ViewMode.VIEW}
-                renderMode={this.input.renderMode ?? 'view'}
-                savedObjectMeta={{
-                  savedObjectId: this.vis.data.indexPattern.id,
-                  savedObjectType: this.vis.data.savedSearchId
-                    ? 'search'
-                    : DATA_VIEW_SAVED_OBJECT_TYPE,
-                }}
-                application={getApplication()}
-              />,
-              this.domNode
-            );
-          } else {
-            render(<VisualizationError error={error} />, this.domNode);
-          }
+          this.renderError(this.domNode, error);
         }
       })
     );
 
     await this.updateHandler();
+  }
+
+  public renderError(domNode: HTMLElement, error: ErrorLike | string) {
+    if (isFallbackDataView(this.vis.data.indexPattern)) {
+      render(
+        <VisualizationMissedSavedObjectError
+          viewMode={this.input.viewMode ?? ViewMode.VIEW}
+          renderMode={this.input.renderMode ?? 'view'}
+          savedObjectMeta={{
+            savedObjectId: this.vis.data.indexPattern.id,
+            savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
+          }}
+          application={getApplication()}
+        />,
+        domNode
+      );
+    } else {
+      render(<VisualizationError error={error} />, domNode);
+    }
+
+    return () => unmountComponentAtNode(domNode);
   }
 
   public destroy() {

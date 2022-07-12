@@ -7,14 +7,16 @@
 
 import moment from 'moment';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   AllSeries,
   ALL_VALUES_SELECTED,
   fromQuery,
   RECORDS_FIELD,
   toQuery,
+  useTheme,
 } from '@kbn/observability-plugin/public';
+import { useHistory } from 'react-router-dom';
+
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -34,11 +36,11 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
   const { dataViewTitle } = useDataView();
   const history = useHistory();
   const { urlParams } = useLegacyUrlParams();
-
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability;
-
   const { start, end } = urlParams;
+
+  const theme = useTheme();
 
   const allSeries: AllSeries = [
     {
@@ -60,9 +62,9 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
           : [ALL_VALUES_SELECTED],
       },
       breakdown: breakdown?.fieldName,
+      color: theme.eui.euiColorVis1,
     },
   ];
-
   const onBrushEnd = ({ range }: { range: number[] }) => {
     if (!range) {
       return;
@@ -84,12 +86,13 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
 
   return (
     <ExploratoryViewEmbeddable
-      customHeight="250px"
+      customHeight="300px"
       attributes={allSeries}
       onBrushEnd={onBrushEnd}
       reportType="kpi-over-time"
       dataTypesIndexPatterns={{ ux: dataViewTitle }}
       isSingleMetric={true}
+      axisTitlesVisibility={{ x: false, yRight: true, yLeft: true }}
     />
   );
 }

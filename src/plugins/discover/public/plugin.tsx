@@ -241,8 +241,8 @@ export class DiscoverPlugin
           }
         >
           <SourceViewer
-            index={hit._index}
-            id={hit._id}
+            index={hit.raw._index}
+            id={hit.raw._id}
             indexPattern={indexPattern}
             hasLineNumbers
           />

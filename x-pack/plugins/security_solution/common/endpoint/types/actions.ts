@@ -5,16 +5,40 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ActionStatusRequestSchema,
-  HostIsolationRequestSchema,
+  NoParametersRequestSchema,
   ResponseActionBodySchema,
+  KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
-export type ResponseActions = ISOLATION_ACTIONS | 'kill-process' | 'suspend-process';
+/** The output provided by some of the Endpoint responses */
+export interface ActionResponseOutput<TOutputContent extends object = object> {
+  type: 'json' | 'text';
+  content: {
+    entries: TOutputContent[];
+  };
+}
+
+export interface ProcessesEntry {
+  command: string;
+  pid: string;
+  entity_id: string;
+  user: string;
+}
+
+export const RESPONSE_ACTION_COMMANDS = [
+  'isolate',
+  'unisolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+] as const;
+
+export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -31,9 +55,9 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields {
+interface EndpointActionFields<TOutputContent extends object = object> {
   action_id: string;
-  data: EndpointActionData;
+  data: EndpointActionData<undefined, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -67,12 +91,12 @@ export interface LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse {
+export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields & ActionResponseFields;
+  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
   error?: EcsError;
 }
 
@@ -83,7 +107,7 @@ interface ResponseActionParametersWithPid {
 
 interface ResponseActionParametersWithEntityId {
   pid?: never;
-  entity_id: number;
+  entity_id: string;
 }
 
 export type ResponseActionParametersWithPidOrEntityId =
@@ -94,10 +118,14 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId;
 
-export interface EndpointActionData<T extends EndpointActionDataParameterTypes = undefined> {
+export interface EndpointActionData<
+  T extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   command: ResponseActions;
   comment?: string;
   parameters?: T;
+  output?: ActionResponseOutput<TOutputContent>;
 }
 
 export interface FleetActionResponseData {
@@ -189,17 +217,20 @@ export interface ActivityLog {
   data: ActivityLogEntry[];
 }
 
-export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
+
+export type KillOrSuspendProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
 
 export interface HostIsolationResponse {
   action: string;
 }
 
-export interface ResponseActionApiResponse {
-  action?: string; // only if command is isolate or release
-  data: ActionDetails;
+export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+export interface ResponseActionApiResponse<TOutput extends object = object> {
+  action?: string;
+  data: ActionDetails<TOutput>;
 }
 
 export interface EndpointPendingActions {
@@ -216,7 +247,7 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails {
+export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
   id: string;
   /**
@@ -228,7 +259,7 @@ export interface ActionDetails {
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: string;
+  command: ResponseActions;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
@@ -245,13 +276,19 @@ export interface ActionDetails {
   /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
   completedAt: string | undefined;
   /**
-   * The list of action log items (actions and responses) received thus far for the action.
+   * The output data from an action
    */
-  logEntries: ActivityLogEntry[];
+  outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
+  /** user that created the action */
+  createdBy: string;
+  /** comment submitted with action */
+  comment?: string;
+  /** parameters submitted with action */
+  parameters?: EndpointActionDataParameterTypes;
 }
 
-export interface ActionDetailsApiResponse {
-  data: ActionDetails;
+export interface ActionDetailsApiResponse<TOutputType extends object = object> {
+  data: ActionDetails<TOutputType>;
 }
 export interface ActionListApiResponse {
   page: number | undefined;

@@ -27,11 +27,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
-import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterLabel } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -46,10 +46,13 @@ import {
 } from '../../../mitre/mitre_tactics_techniques';
 
 import * as i18n from './translations';
-import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
+import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
-import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+} from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
@@ -167,7 +170,7 @@ const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 const TechniqueLinkItem = styled(EuiButtonEmpty)`

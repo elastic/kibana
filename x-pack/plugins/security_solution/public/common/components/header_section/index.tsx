@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiTitle,
-  EuiTitleSize,
-} from '@elastic/eui';
+import type { EuiTitleSize } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
@@ -51,7 +45,7 @@ const Header = styled.header<HeaderProps>`
     border &&
     css`
       border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-      padding-bottom: ${({ theme }) => theme.eui.paddingSizes.l};
+      padding-bottom: ${({ theme }) => theme.eui.euiSizeL};
     `}
 `;
 Header.displayName = 'Header';

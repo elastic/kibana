@@ -6,22 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
-  InjectedMetadataParams,
-  InternalInjectedMetadataSetup,
-  InternalInjectedMetadataStart,
+  type InjectedMetadataParams,
+  type InternalInjectedMetadataSetup,
+  type InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
+import { I18nService } from '@kbn/core-i18n-browser-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { HttpService } from '@kbn/core-http-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
-import { HttpService } from './http';
-import { I18nService } from './i18n';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
@@ -33,8 +36,8 @@ import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
-import { ExecutionContextService } from './execution_context';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
+import { KBN_LOAD_MARKS } from './utils';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -124,6 +127,31 @@ export class CoreSystem {
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
+
+    performance.mark(KBN_LOAD_MARKS, {
+      detail: 'core_created',
+    });
+  }
+
+  private getLoadMarksInfo() {
+    if (!performance) return [];
+    const reportData: Record<string, number> = {};
+    const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
+    for (const mark of marks) {
+      reportData[(mark as PerformanceMark).detail] = mark.startTime;
+    }
+
+    return reportData;
+  }
+
+  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
+    analytics.reportEvent('Loaded Kibana', {
+      kibana_version: this.coreContext.env.packageInfo.version,
+      protocol: window.location.protocol,
+      ...fetchOptionalMemoryInfo(),
+      ...this.getLoadMarksInfo(),
+    });
+    performance.clearMarks(KBN_LOAD_MARKS);
   }
 
   public async setup() {
@@ -170,6 +198,10 @@ export class CoreSystem {
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
+
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: 'setup_done',
+      });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -267,9 +299,16 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
-      analytics.reportEvent('Loaded Kibana', {
-        kibana_version: this.coreContext.env.packageInfo.version,
-        ...fetchOptionalMemoryInfo(),
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: 'start_done',
+      });
+
+      // Wait for the first app navigation to report Kibana Loaded
+      firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
+        performance.mark(KBN_LOAD_MARKS, {
+          detail: 'first_app_nav',
+        });
+        this.reportKibanaLoadedEvent(analytics);
       });
 
       return {
@@ -322,6 +361,39 @@ export class CoreSystem {
         memory_js_heap_size_used: {
           type: 'long',
           _meta: { description: 'The used size of the heap', optional: true },
+        },
+        load_started: {
+          type: 'long',
+          _meta: { description: 'When the render template starts loading assets', optional: true },
+        },
+        bootstrap_started: {
+          type: 'long',
+          _meta: { description: 'When kbnBootstrap callback is called', optional: true },
+        },
+        core_created: {
+          type: 'long',
+          _meta: { description: 'When core system is created', optional: true },
+        },
+        setup_done: {
+          type: 'long',
+          _meta: { description: 'When core system setup is complete', optional: true },
+        },
+        start_done: {
+          type: 'long',
+          _meta: { description: 'When core system start is complete', optional: true },
+        },
+        first_app_nav: {
+          type: 'long',
+          _meta: {
+            description: 'When the application emits the first app navigation',
+            optional: true,
+          },
+        },
+        protocol: {
+          type: 'keyword',
+          _meta: {
+            description: 'Value from window.location.protocol',
+          },
         },
       },
     });

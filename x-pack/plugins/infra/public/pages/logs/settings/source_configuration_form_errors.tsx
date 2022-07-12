@@ -40,6 +40,16 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
         }}
       />
     );
+  } else if (error.type === 'includes_spaces') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.includesSpacesErrorMessage"
+        defaultMessage="The field '{fieldName}' must not include spaces."
+        values={{
+          fieldName: error.fieldName,
+        }}
+      />
+    );
   } else if (error.type === 'empty_column_list') {
     return (
       <FormattedMessage

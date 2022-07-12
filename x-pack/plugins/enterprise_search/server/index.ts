@@ -38,3 +38,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     host: true,
   },
 };
+export const CONNECTORS_INDEX = '.elastic-connectors';
+export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
+export const CONNECTORS_VERSION = '1';

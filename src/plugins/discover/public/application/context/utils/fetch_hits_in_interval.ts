@@ -7,10 +7,11 @@
  */
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
+import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import { EsQuerySearchAfter } from './get_es_query_search_after';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;
@@ -35,7 +36,7 @@ export async function fetchHitsInInterval(
   maxCount: number,
   nanosValue: string,
   anchorId: string
-): Promise<EsHitRecordList> {
+): Promise<DataTableRecord[]> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };
@@ -77,7 +78,8 @@ export async function fetchHitsInInterval(
     .fetch$();
 
   const { rawResponse } = await lastValueFrom(fetch$);
+  const dataView = searchSource.getField('index');
+  const records = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
 
-  // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
-  return (rawResponse.hits?.hits as unknown as EsHitRecord[]) || [];
+  return records ?? [];
 }

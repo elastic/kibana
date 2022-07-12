@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';
@@ -15,7 +17,6 @@ import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 import { RuntimeMappings } from '../../../common/types/fields';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data
@@ -220,15 +221,22 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     timeFieldName: string,
     query: any,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    allowFutureTime = false
   ): Promise<{
     success: boolean;
-    start: { epoch: number; string: string };
-    end: { epoch: number; string: string };
+    start: number;
+    end: number;
   }> {
-    const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
+    const obj = { success: true, start: 0, end: 0 };
 
-    const { aggregations } = await asCurrentUser.search(
+    const { aggregations } = await asCurrentUser.search<
+      unknown,
+      {
+        earliest: estypes.AggregationsMinAggregate;
+        latest: estypes.AggregationsMaxAggregate;
+      }
+    >(
       {
         index,
         size: 0,
@@ -254,15 +262,13 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     );
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
-      // @ts-expect-error incorrect search response type
-      obj.start.epoch = aggregations.earliest.value;
-      // @ts-expect-error incorrect search response type
-      obj.start.string = aggregations.earliest.value_as_string;
+      obj.start = aggregations.earliest.value ?? 0;
+      obj.end = aggregations.latest.value ?? 0;
+    }
 
-      // @ts-expect-error incorrect search response type
-      obj.end.epoch = aggregations.latest.value;
-      // @ts-expect-error incorrect search response type
-      obj.end.string = aggregations.latest.value_as_string;
+    const nowEpoch = Date.now();
+    if (allowFutureTime === false && obj.end > nowEpoch) {
+      obj.end = nowEpoch;
     }
     return obj;
   }

@@ -188,7 +188,7 @@
         "label": "getStoryArgTypes",
         "description": [],
         "signature": [
-          "() => { canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; hasESData: { control: string; defaultValue: boolean; }; hasUserDataView: { control: string; defaultValue: boolean; }; kibanaGuideDocLink: { control: string; defaultValue: string; }; }"
+          "() => { canAccessFleet: { control: string; defaultValue: boolean; }; category: { control: { type: string; }; defaultValue: string; }; title: { control: { type: string; }; defaultValue: string; }; description: { control: { type: string; }; defaultValue: string; }; button: { control: { type: string; }; defaultValue: string; }; canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; hasESData: { control: string; defaultValue: boolean; }; hasUserDataView: { control: string; defaultValue: boolean; }; kibanaGuideDocLink: { control: string; defaultValue: string; }; }"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/src/mocks.ts",
         "deprecated": false,

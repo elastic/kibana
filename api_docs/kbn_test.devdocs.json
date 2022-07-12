@@ -960,6 +960,87 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-server.KbnClientRequesterError",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnClientRequesterError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.KbnClientRequesterError",
+            "text": "KbnClientRequesterError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.axiosError",
+            "type": "Object",
+            "tags": [],
+            "label": "axiosError",
+            "description": [],
+            "signature": [
+              "AxiosError",
+              "<unknown, any> | undefined"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-server.Lifecycle",
         "type": "Class",
         "tags": [],
@@ -1820,6 +1901,90 @@
               "string"
             ],
             "path": "packages/kbn-test/src/mocha/xml.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.getKibanaCliArg",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaCliArg",
+        "description": [
+          "\nParse a list of Kibana CLI Arg flags and find the flag with the given name. If the flag has no\nvalue then a boolean will be returned (assumed to be a switch flag). If the flag does have a value\nthat can be parsed by `JSON.stringify()` the parsed result is returned. Otherwise the raw string\nvalue is returned."
+        ],
+        "signature": [
+          "(rawFlags: string[], name: string) => ",
+          "ArgValue",
+          " | ",
+          "ArgValue",
+          "[] | undefined"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.getKibanaCliArg.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.getKibanaCliArg.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.getKibanaCliLoggers",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaCliLoggers",
+        "description": [
+          "\nParse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended\nin a subsequent FTR config"
+        ],
+        "signature": [
+          "(rawFlags: string[]) => unknown[]"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.getKibanaCliLoggers.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
             "deprecated": false,
             "isRequired": true
           }

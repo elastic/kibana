@@ -7,7 +7,7 @@
 
 import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
@@ -18,7 +18,7 @@ import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import {
+import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
@@ -29,8 +29,8 @@ import {
   histogramConfigs,
 } from '../../../common/components/events_tab/events_query_tab_body';
 import { HostsTableType } from '../../../hosts/store/model';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
@@ -68,7 +68,7 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
 const StyledLinkButton = styled(EuiButton)`
   margin-left: 0;
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+    margin-left: ${({ theme }) => theme.eui.euiSizeL};
   }
 `;
 

@@ -12,9 +12,9 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
-import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
@@ -48,13 +48,13 @@ export const MockFatalErrorsService = fatalErrorsServiceMock.create();
 export const FatalErrorsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockFatalErrorsService);
-jest.doMock('./fatal_errors', () => ({
+jest.doMock('@kbn/core-fatal-errors-browser-internal', () => ({
   FatalErrorsService: FatalErrorsServiceConstructor,
 }));
 
 export const MockI18nService = i18nServiceMock.create();
 export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
-jest.doMock('./i18n', () => ({
+jest.doMock('@kbn/core-i18n-browser-internal', () => ({
   I18nService: I18nServiceConstructor,
 }));
 
@@ -68,7 +68,7 @@ jest.doMock('./notifications', () => ({
 
 export const MockHttpService = httpServiceMock.create();
 export const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
-jest.doMock('./http', () => ({
+jest.doMock('@kbn/core-http-browser-internal', () => ({
   HttpService: HttpServiceConstructor,
 }));
 

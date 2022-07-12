@@ -5,48 +5,29 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, rrulestr } from 'rrule';
+import { first } from 'lodash';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
+import { isSnoozeActive } from './snooze/is_snooze_active';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
+type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string }>;
 
-export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
+export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   if (rule.snoozeSchedule == null) {
     return null;
   }
 
-  const now = Date.now();
-  for (const snooze of rule.snoozeSchedule) {
-    const { duration, rRule } = snooze;
-    const startTimeMS = Date.parse(rRule.dtstart);
-    const initialEndTime = startTimeMS + duration;
-    // If now is during the first occurrence of the snooze
+  return (
+    rule.snoozeSchedule
+      .map((snooze) => isSnoozeActive(snooze))
+      .filter(Boolean)
+      // Sort in descending snoozeEndTime order
+      .sort((a, b) => b!.snoozeEndTime.getTime() - a!.snoozeEndTime.getTime()) as ActiveSnoozes
+  );
+}
 
-    if (now >= startTimeMS && now < initialEndTime) return new Date(initialEndTime);
-
-    // Check to see if now is during a recurrence of the snooze
-    if (rRule) {
-      try {
-        const rRuleOptions = {
-          ...rRule,
-          dtstart: new Date(rRule.dtstart),
-          until: rRule.until ? new Date(rRule.until) : null,
-          wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-          byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
-        };
-
-        const recurrenceRule = new RRule(rRuleOptions);
-        const lastOccurrence = recurrenceRule.before(new Date(now), true);
-        if (!lastOccurrence) continue;
-        const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
-        if (now < lastOccurrenceEndTime) return new Date(lastOccurrenceEndTime);
-      } catch (e) {
-        throw new Error(`Failed to process RRule ${rRule}: ${e}`);
-      }
-    }
-  }
-
-  return null;
+export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
+  return first(getActiveSnoozes(rule))?.snoozeEndTime ?? null;
 }
 
 export function isRuleSnoozed(rule: RuleSnoozeProps) {
@@ -54,10 +35,4 @@ export function isRuleSnoozed(rule: RuleSnoozeProps) {
     return true;
   }
   return Boolean(getRuleSnoozeEndTime(rule));
-}
-
-function parseByWeekday(byweekday: Array<string | number>): ByWeekday[] {
-  const rRuleString = `RRULE:BYDAY=${byweekday.join(',')}`;
-  const parsedRRule = rrulestr(rRuleString);
-  return parsedRRule.origOptions.byweekday as ByWeekday[];
 }

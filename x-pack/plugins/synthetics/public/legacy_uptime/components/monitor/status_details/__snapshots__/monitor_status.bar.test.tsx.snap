@@ -4,13 +4,13 @@ exports[`MonitorStatusBar component renders 1`] = `
 Array [
   <div>
     <h2
-      class="euiTitle css-1mr6cet-euiTitle-s"
+      class="euiTitle emotion-euiTitle-s"
     >
       Up in 2 locations
     </h2>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   .c0.c0.c0 {
   width: 30%;
@@ -65,20 +65,20 @@ Array [
       class="euiDescriptionList__description c1"
     >
       <a
-        class="euiLink css-102pf9n-euiLink-primary"
+        class="euiLink emotion-euiLink-primary"
         href="undefined/monitor-options.html#monitor-tags"
         rel="noopener noreferrer"
         target="_blank"
       >
         Set tags
         <span
-          class="css-q4vwwx-euiLink__externalIcon"
+          class="emotion-euiLink__externalIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
         >
           (opens in a new tab or window)
         </span>

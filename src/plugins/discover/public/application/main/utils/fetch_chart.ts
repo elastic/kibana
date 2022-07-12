@@ -28,14 +28,7 @@ interface Result {
 
 export function fetchChart(
   searchSource: ISearchSource,
-  {
-    abortController,
-    appStateContainer,
-    data,
-    inspectorAdapters,
-    searchSessionId,
-    savedSearch,
-  }: FetchDeps
+  { abortController, appStateContainer, data, inspectorAdapters, searchSessionId }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
