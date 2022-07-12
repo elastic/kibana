@@ -92,7 +92,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         {dataViewError.body?.error === 'Forbidden' ||
         dataViewError.name === 'DataViewInsufficientAccessError'
           ? NO_PERMISSIONS
-          : dataViewError.body.message}
+          : dataViewError.body?.message}
       </EuiText>
     );
   }
