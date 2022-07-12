@@ -3104,6 +3104,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-deprecations-browser-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser":
   version "0.0.0"
   uid ""
@@ -6704,6 +6708,10 @@
   uid ""
 
 "@types/kbn__core-config-server-mocks@link:bazel-bin/packages/core/config/core-config-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-browser-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
