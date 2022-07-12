@@ -18,7 +18,9 @@ import {
   needsUrlState,
   updateAppLinks,
   useLinkExists,
+  hasCapabilities,
 } from './links';
+import { createCapabilities } from './test_utils';
 
 const defaultAppLinks: AppLinkItems = [
   {
@@ -286,6 +288,120 @@ describe('Security app links', () => {
         skipUrlState: true,
         title: 'Events',
       });
+    });
+  });
+
+  describe('hasCapabilities', () => {
+    const siemShow = 'siem.show';
+    const createCases = 'securitySolutionCases.create_cases';
+    const readCases = 'securitySolutionCases.read_cases';
+    const pushCases = 'securitySolutionCases.push_cases';
+
+    it('returns false when capabilities is an empty array', () => {
+      expect(hasCapabilities([], createCapabilities())).toBeFalsy();
+    });
+
+    it('returns true when the capability requested is specified as a single value', () => {
+      expect(hasCapabilities(siemShow, createCapabilities({ siem: { show: true } }))).toBeTruthy();
+    });
+
+    it('returns true when the capability requested is a single entry in an array', () => {
+      expect(
+        hasCapabilities([siemShow], createCapabilities({ siem: { show: true } }))
+      ).toBeTruthy();
+    });
+
+    it("returns true when the capability requested is a single entry in an AND'd array format", () => {
+      expect(
+        hasCapabilities([[siemShow]], createCapabilities({ siem: { show: true } }))
+      ).toBeTruthy();
+    });
+
+    it('returns true when only one requested capability is found in an OR situation', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, createCases],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { create_cases: false },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns true when only the create_cases requested capability is found in an OR situation', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, createCases],
+          createCapabilities({
+            siem: { show: false },
+            securitySolutionCases: { create_cases: true },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns false when none of the requested capabilities are found in an OR situation', () => {
+      expect(
+        hasCapabilities(
+          [readCases, createCases],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { create_cases: false },
+          })
+        )
+      ).toBeFalsy();
+    });
+
+    it('returns true when all of the requested capabilities are found in an AND situation', () => {
+      expect(
+        hasCapabilities(
+          [[readCases, createCases]],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: true, create_cases: true },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it('returns false when neither the single OR capability is found nor all of the AND capabilities', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, [readCases, createCases]],
+          createCapabilities({
+            siem: { show: false },
+            securitySolutionCases: { read_cases: false, create_cases: true },
+          })
+        )
+      ).toBeFalsy();
+    });
+
+    it('returns true when the single OR capability is found when using an OR with an AND format', () => {
+      expect(
+        hasCapabilities(
+          [siemShow, [readCases, createCases]],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: false, create_cases: true },
+          })
+        )
+      ).toBeTruthy();
+    });
+
+    it("returns false when the AND'd expressions are not satisfied", () => {
+      expect(
+        hasCapabilities(
+          [
+            [siemShow, pushCases],
+            [readCases, createCases],
+          ],
+          createCapabilities({
+            siem: { show: true },
+            securitySolutionCases: { read_cases: false, create_cases: true, push_cases: false },
+          })
+        )
+      ).toBeFalsy();
     });
   });
 });

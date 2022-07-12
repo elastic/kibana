@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FEATURE, getDeepLinks, hasFeaturesCapability } from '.';
+import { getDeepLinks, hasFeaturesCapability } from '.';
 import type { AppDeepLink, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../../common/constants';
+import { createCapabilities } from '../../common/links/test_utils';
 
 const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null =>
   deepLinks.reduce((deepLinkFound: AppDeepLink | null, deepLink) => {
@@ -27,119 +28,12 @@ const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null 
 const basicLicense = 'basic';
 const platinumLicense = 'platinum';
 
-interface FeatureCap {
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
-
-const createCap = (capabilities?: FeatureCap): Capabilities => {
-  return {
-    navLinks: {},
-    management: {},
-    catalogue: {},
-    ...capabilities,
-  };
-};
-
 describe('deepLinks', () => {
   describe('hasFeaturesCapability', () => {
     it('returns true when features is undefined', () => {
-      expect(hasFeaturesCapability(undefined, createCap())).toBeTruthy();
-    });
-
-    it('returns true when the feature requested is specified as a single value', () => {
       expect(
-        hasFeaturesCapability(FEATURE.general, createCap({ siem: { show: true } }))
+        hasFeaturesCapability(undefined, createCapabilities({ siem: { show: true } }))
       ).toBeTruthy();
-    });
-
-    it('returns true when the feature requested is a single entry in an array', () => {
-      expect(
-        hasFeaturesCapability([FEATURE.general], createCap({ siem: { show: true } }))
-      ).toBeTruthy();
-    });
-
-    it("returns true when the feature requested is a single entry in an AND'd array format", () => {
-      expect(
-        hasFeaturesCapability([[FEATURE.general]], createCap({ siem: { show: true } }))
-      ).toBeTruthy();
-    });
-
-    it('returns true when only one requested feature is found in an OR situation', () => {
-      expect(
-        hasFeaturesCapability(
-          [FEATURE.general, FEATURE.casesCreate],
-          createCap({ siem: { show: true }, securitySolutionCases: { create_cases: false } })
-        )
-      ).toBeTruthy();
-    });
-
-    it('returns true when only the create_cases requested feature is found in an OR situation', () => {
-      expect(
-        hasFeaturesCapability(
-          [FEATURE.general, FEATURE.casesCreate],
-          createCap({ siem: { show: false }, securitySolutionCases: { create_cases: true } })
-        )
-      ).toBeTruthy();
-    });
-
-    it('returns false when none of the requested features are found in an OR situation', () => {
-      expect(
-        hasFeaturesCapability(
-          [FEATURE.casesRead, FEATURE.casesCreate],
-          createCap({ siem: { show: true }, securitySolutionCases: { create_cases: false } })
-        )
-      ).toBeFalsy();
-    });
-
-    it('returns true when all of the requested features are found in an AND situation', () => {
-      expect(
-        hasFeaturesCapability(
-          [[FEATURE.casesRead, FEATURE.casesCreate]],
-          createCap({
-            siem: { show: true },
-            securitySolutionCases: { read_cases: true, create_cases: true },
-          })
-        )
-      ).toBeTruthy();
-    });
-
-    it('returns false when neither the single OR feature is found nor all of the AND features', () => {
-      expect(
-        hasFeaturesCapability(
-          [FEATURE.general, [FEATURE.casesRead, FEATURE.casesCreate]],
-          createCap({
-            siem: { show: false },
-            securitySolutionCases: { read_cases: false, create_cases: true },
-          })
-        )
-      ).toBeFalsy();
-    });
-
-    it('returns true when the single OR feature is found when using an OR with an AND format', () => {
-      expect(
-        hasFeaturesCapability(
-          [FEATURE.general, [FEATURE.casesRead, FEATURE.casesCreate]],
-          createCap({
-            siem: { show: true },
-            securitySolutionCases: { read_cases: false, create_cases: true },
-          })
-        )
-      ).toBeTruthy();
-    });
-
-    it("returns false when the AND'd expressions are not satisfied", () => {
-      expect(
-        hasFeaturesCapability(
-          [
-            [FEATURE.general, FEATURE.casesPush],
-            [FEATURE.casesRead, FEATURE.casesCreate],
-          ],
-          createCap({
-            siem: { show: true },
-            securitySolutionCases: { read_cases: false, create_cases: true, push_cases: false },
-          })
-        )
-      ).toBeFalsy();
     });
   });
 

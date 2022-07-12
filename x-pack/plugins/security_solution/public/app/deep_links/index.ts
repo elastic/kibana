@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { get, isArray } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import {
@@ -72,7 +71,7 @@ import {
   RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { subscribeAppLinks } from '../../common/links';
+import { hasCapabilities, subscribeAppLinks } from '../../common/links';
 import type { AppLinkItems } from '../../common/links/types';
 
 export const FEATURE = {
@@ -441,11 +440,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
           [SecurityPageName.caseConfigure]: {
             features: [
-              FEATURE.casesCreate,
-              FEATURE.casesRead,
-              FEATURE.casesUpdate,
-              FEATURE.casesDelete,
-              FEATURE.casesPush,
+              [
+                FEATURE.casesCreate,
+                FEATURE.casesRead,
+                FEATURE.casesUpdate,
+                FEATURE.casesDelete,
+                FEATURE.casesPush,
+              ],
             ],
             isPremium: true,
           },
@@ -570,16 +571,7 @@ export function hasFeaturesCapability(
     return true;
   }
 
-  if (!isArray(features)) {
-    return !!get(capabilities, features, false);
-  } else {
-    return features.some((featureKeyOr) => {
-      if (isArray(featureKeyOr)) {
-        return featureKeyOr.every((featureKeyAnd) => get(capabilities, featureKeyAnd, false));
-      }
-      return get(capabilities, featureKeyOr, false);
-    });
-  }
+  return hasCapabilities(features, capabilities);
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {

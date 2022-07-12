@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
 import { CaseActionBar, CaseActionBarProps } from '.';
@@ -225,12 +226,13 @@ describe('CaseActionBar', () => {
   });
 
   it('should not show the delete item in the menu when the user does not have delete privileges', () => {
-    const { queryByText } = render(
+    const { queryByText, queryByTestId } = render(
       <TestProviders permissions={noDeleteCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
+    expect(queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
     expect(queryByText('Delete case')).not.toBeInTheDocument();
   });
 
@@ -241,6 +243,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(queryByText('Delete case')).not.toBeInTheDocument();
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    expect(queryByText('Delete case')).toBeInTheDocument();
   });
 });

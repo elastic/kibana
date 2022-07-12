@@ -26,7 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(async () => {
       await deleteUsersAndRoles(getService, users, roles);
       await cases.api.deleteAllCases();
-      await cases.casesTable.waitForCasesToBeDeleted();
       await PageObjects.security.forceLogout();
     });
 

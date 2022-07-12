@@ -27,24 +27,27 @@ export const getCasesLinkItems = (): LinkItem => {
       },
       [SecurityPageName.caseConfigure]: {
         capabilities: [
-          `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
+          [
+            `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
+          ],
         ],
         licenseType: 'gold',
         sideNavDisabled: true,
         hideTimeline: true,
       },
-      // TODO: can we just use create here?
       [SecurityPageName.caseCreate]: {
         capabilities: [
-          `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
-          `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
+          [
+            `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+            `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
+          ],
         ],
         sideNavDisabled: true,
         hideTimeline: true,

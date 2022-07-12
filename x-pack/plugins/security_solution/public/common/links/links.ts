@@ -185,7 +185,7 @@ const getFilteredAppLinks = (
 type LinkCapabilities = string | Array<string | string[]>;
 
 // It checks if the user has at least one of the link capabilities needed
-const hasCapabilities = (
+export const hasCapabilities = <T>(
   linkCapabilities: LinkCapabilities,
   userCapabilities: Capabilities
 ): boolean => {
