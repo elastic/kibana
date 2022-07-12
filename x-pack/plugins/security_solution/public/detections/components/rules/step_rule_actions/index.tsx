@@ -167,6 +167,16 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               hasErrorOnCreationCaseAction,
             }}
           />
+        </>
+      ) : (
+        <UseField path="actions" component={GhostFormField} />
+      ),
+    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+  );
+  const displayResponseActionsOptions = useMemo(
+    () =>
+      throttle !== stepActionsDefaultValue.throttle ? (
+        <>
           <EuiSpacer />
           <EuiSpacer />
 
@@ -179,7 +189,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           />
         </>
       ) : (
-        <UseField path="actions" component={GhostFormField} />
+        <UseField path="response_actions" component={GhostFormField} />
       ),
     [throttle, actionMessageParams, hasErrorOnCreationCaseAction, isOsqueryEnabled]
   );
@@ -193,6 +203,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           componentProps={throttleFieldComponentProps}
         />
         {displayActionsOptions}
+        {displayResponseActionsOptions}
+
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>

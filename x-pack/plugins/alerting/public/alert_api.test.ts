@@ -321,6 +321,7 @@ function getRule(): Rule<{ x: number }> {
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
       },
     ],
+    responseActions: [],
     params: { x: 42 },
     updatedAt: RuleUpdateDate,
     createdAt: RuleCreateDate,

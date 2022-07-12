@@ -14,7 +14,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   exposeToBrowser: {
     actionEnabled: true,
-    detectionAction: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {

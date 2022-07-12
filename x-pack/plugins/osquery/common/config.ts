@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
   actionEnabled: schema.boolean({ defaultValue: false }),
-  detectionAction: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
-import { ActionForm } from '../application/sections';
+import { ActionForm, ResponseActionForm } from '../application/sections';
 import { ActionAccordionFormProps } from '../application/sections/action_connector_form/action_form';
 import { ConnectorServices } from '../types';
 
@@ -19,4 +19,8 @@ export const getActionFormLazy = (
       <ActionForm {...props} />
     </ConnectorProvider>
   );
+};
+
+export const getResponseActionFormLazy = (props: ActionAccordionFormProps) => {
+  return <ResponseActionForm {...props} />;
 };

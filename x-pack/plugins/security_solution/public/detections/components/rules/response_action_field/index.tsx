@@ -5,34 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { FieldHook } from '../../../../shared_imports';
 
 interface Props {
   field: FieldHook;
-  hasErrorOnCreationCaseAction: boolean;
-  messageVariables: ActionVariables;
-  isOsqueryDisabled: boolean;
 }
 
-export const RuleResponseActionsField: React.FC<Props> = ({
-  field,
-  isOsqueryDisabled,
-  messageVariables,
-}) => {
+export const RuleResponseActionsField: React.FC<Props> = ({ field }) => {
+  const {
+    triggersActionsUi: { getResponseActionForm },
+  } = useKibana().services;
+
+  // @ts-expect-error WIP
+  const responseActionForm = useMemo(() => getResponseActionForm({}), [getResponseActionForm]);
   // const [value, setValue] = useState('');
-  console.log({ field });
   const defaultValue = {
     query: 'select * from uptime',
   };
   useEffect(() => {
     field.setValue([defaultValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return (
-    <>
-      <div>Osquery</div>
-    </>
-  );
+  return <>{responseActionForm}</>;
 };

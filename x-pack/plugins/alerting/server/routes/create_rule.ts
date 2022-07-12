@@ -43,6 +43,7 @@ export const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
+  response_actions: schema.arrayOf(schema.object({})),
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
@@ -94,6 +95,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  response_actions: [],
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {

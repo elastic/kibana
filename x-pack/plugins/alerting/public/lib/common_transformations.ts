@@ -77,6 +77,7 @@ export function transformRule(input: ApiRule): Rule {
     mutedInstanceIds,
     executionStatus: transformExecutionStatus(executionStatusAPI),
     actions: actionsAPI ? actionsAPI.map((action) => transformAction(action)) : [],
+    responseActions: [],
     scheduledTaskId,
     ...rest,
   };

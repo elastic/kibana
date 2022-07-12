@@ -39,7 +39,7 @@ import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { getRulesListLazy } from './common/get_rules_list';
-import { getActionFormLazy } from './common/get_action_form';
+import { getActionFormLazy, getResponseActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
@@ -88,6 +88,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   getActionForm: (
     props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
+  ) => ReactElement<ActionAccordionFormProps>;
+  getResponseActionForm: (
+    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'connectorServices'>
   ) => ReactElement<ActionAccordionFormProps>;
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
@@ -271,6 +274,12 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+        });
+      },
+      getResponseActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+        return getResponseActionFormLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
         });
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {

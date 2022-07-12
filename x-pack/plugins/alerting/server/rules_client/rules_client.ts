@@ -314,6 +314,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
+    | 'responseActions'
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'
@@ -518,6 +519,7 @@ export class RulesClient {
       notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
+      responseActions: [],
     };
 
     const mappedParams = getMappedParams(updatedParams);
