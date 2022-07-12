@@ -65,7 +65,8 @@
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
     "xpack.watcher": "plugins/watcher",
     "xpack.observability": "plugins/observability",
-    "xpack.banners": "plugins/banners"
+    "xpack.banners": "plugins/banners",
+    "xpack.threatIntelligence": "plugins/threat_intelligence"
   },
   "exclude": ["examples"],
   "translations": [

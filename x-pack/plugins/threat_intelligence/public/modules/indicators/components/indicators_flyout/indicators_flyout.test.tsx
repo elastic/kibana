@@ -12,28 +12,34 @@ import { generateMockIndicator, RawIndicatorFieldId } from '../../../../../commo
 import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
+import { TestProvidersComponent } from '../../../../common/test_providers';
+import { fullDateFormatter } from '../../../../common/utils/dates';
 
 const mockIndicator = generateMockIndicator();
 
 describe('IndicatorsFlyout', () => {
   it('should render ioc id in title and first_seen in subtitle', () => {
     const { getByTestId } = render(
-      <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => {}} />
+      <TestProvidersComponent>
+        <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => {}} />
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(
       `Indicator: ${displayValue(mockIndicator)}`
     );
     expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
-      `First seen: ${new Date(
+      `First seen: ${fullDateFormatter(
         unwrapValue(mockIndicator, RawIndicatorFieldId.FirstSeen) as string
-      ).toDateString()}`
+      )}`
     );
   });
 
   it(`should render ${EMPTY_VALUE} in on invalid indicator first_seen value`, () => {
     const { getByTestId } = render(
-      <IndicatorsFlyout indicator={{ fields: {} }} closeFlyout={() => {}} />
+      <TestProvidersComponent>
+        <IndicatorsFlyout indicator={{ fields: {} }} closeFlyout={() => {}} />
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${EMPTY_VALUE}`);
@@ -42,10 +48,12 @@ describe('IndicatorsFlyout', () => {
 
   it(`should render ${EMPTY_VALUE} in title and subtitle on invalid indicator`, () => {
     const { getByTestId } = render(
-      <IndicatorsFlyout
-        indicator={{ fields: { 'threat.indicator.first_seen': ['abc'] } }}
-        closeFlyout={() => {}}
-      />
+      <TestProvidersComponent>
+        <IndicatorsFlyout
+          indicator={{ fields: { 'threat.indicator.first_seen': ['abc'] } }}
+          closeFlyout={() => {}}
+        />
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${EMPTY_VALUE}`);
