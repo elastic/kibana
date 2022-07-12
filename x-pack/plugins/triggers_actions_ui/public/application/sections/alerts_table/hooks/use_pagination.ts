@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { RowSelectionAction } from '../../../../types';
+import { BulkActionsContext } from '../bulk_actions/context';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  updateBulkActionsState: React.Dispatch<RowSelectionAction>;
 };
 
 export type UsePagination = (props: PaginationProps) => {
@@ -23,12 +22,8 @@ export type UsePagination = (props: PaginationProps) => {
   setFlyoutAlertIndex: (alertIndex: number) => void;
 };
 
-export function usePagination({
-  onPageChange,
-  pageIndex,
-  pageSize,
-  updateBulkActionsState,
-}: PaginationProps) {
+export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
+  const [, updateBulkActionsState] = useContext(BulkActionsContext);
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
@@ -41,7 +36,7 @@ export function usePagination({
         pageSize: _pageSize,
         pageIndex: 0,
       }));
-      updateBulkActionsState({ action: 'updatePageSize', pageSize: _pageSize });
+      updateBulkActionsState({ action: 'rowCountUpdate', rowCount: _pageSize });
       onPageChange({ pageIndex: 0, pageSize: _pageSize });
     },
     [updateBulkActionsState, onPageChange]

@@ -451,17 +451,26 @@ export interface AlertsTableConfigurationRegistry {
   };
 }
 
+enum BulkActionsVerbs {
+  Add = 'add',
+  Delete = 'delete',
+  Clear = 'clear',
+  SelectCurrentPage = 'selectCurrentPage',
+  SelectAll = 'selectAll',
+  RowCountUpdate = 'rowCountUpdate',
+}
+
 export interface BulkActionsReducerAction {
-  action: string;
+  action: BulkActionsVerbs;
   rowIndex?: number;
-  pageSize?: number;
+  rowCount?: number;
 }
 
 export interface BulkActionsState {
   rowSelection: Set<number>;
   isAllSelected: boolean;
-  isPageSelected: boolean;
-  pageSize: number;
+  areAllVisibleRowsSelected: boolean;
+  rowCount: number;
 }
 
 export interface AlertsTableFlyoutBaseProps {

@@ -71,6 +71,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const { render: renderBulkActions } = useBulkActions();
 
   const isBulkActionsColumnActive = Boolean(renderBulkActions);
+
+  useEffect(() => {
+    updateBulkActionsState({ action: 'rowCountUpdate', rowCount: alerts.length });
+  }, [alerts, updateBulkActionsState]);
+
   const {
     pagination,
     onChangePageSize,
@@ -82,7 +87,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     pageIndex: activePage,
     pageSize: props.pageSize,
-    updateBulkActionsState,
   });
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);

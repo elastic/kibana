@@ -44,29 +44,20 @@ describe('AlertsTable.BulkActions', () => {
       [AlertsField.reason]: ['four'],
       _id: 'alert1',
     },
-    {
-      [AlertsField.name]: ['five'],
-      [AlertsField.reason]: ['size'],
-      _id: 'alert2',
-    },
   ] as unknown as EcsFieldsResponse[];
 
-  const fetchAlertsData = {
+  const alertsData = {
     activePage: 0,
     alerts,
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
-    getInspectQuery: jest.fn().mockImplementation(() => ({ request: {}, response: {} })),
-    onColumnsChange: jest.fn(),
-    onPageChange: jest.fn(),
-    onSortChange: jest.fn(),
-    refresh: jest.fn(),
+    getInspectQuery: () => ({ request: {}, response: {} }),
+    onColumnsChange: () => {},
+    onPageChange: () => {},
+    onSortChange: () => {},
+    refresh: () => {},
     sort: [],
-  };
-
-  const useFetchAlertsData = () => {
-    return fetchAlertsData;
   };
 
   const alertsTableConfiguration = {
@@ -97,7 +88,7 @@ describe('AlertsTable.BulkActions', () => {
     showExpandToDetails: true,
     trailingControlColumns: [],
     alerts,
-    useFetchAlertsData,
+    useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
   };
@@ -120,8 +111,8 @@ describe('AlertsTable.BulkActions', () => {
   const defaultBulkActionsState = {
     rowSelection: new Set<number>(),
     isAllSelected: false,
-    isPageSelected: false,
-    pageSize: 2,
+    areAllVisibleRowsSelected: false,
+    rowCount: 2,
   };
 
   const AlertsTableWithBulkActionsContext: React.FunctionComponent<
@@ -172,7 +163,7 @@ describe('AlertsTable.BulkActions', () => {
           ...tablePropsWithBulkActions,
           initialBulkActionsState: {
             ...defaultBulkActionsState,
-            isPageSelected: true,
+            areAllVisibleRowsSelected: true,
             rowSelection: new Set([0, 1]),
           },
         };
@@ -189,7 +180,7 @@ describe('AlertsTable.BulkActions', () => {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
-              isPageSelected: true,
+              areAllVisibleRowsSelected: true,
               rowSelection: new Set([0, 1]),
             },
           };
@@ -201,20 +192,40 @@ describe('AlertsTable.BulkActions', () => {
           expect(columnHeader.checked).toBeTruthy();
 
           userEvent.click(bulkActionsCells[1]);
-
           expect(columnHeader.checked).toBeFalsy();
         });
       });
 
       describe('and its a page with count of alerts different than page size', () => {
-        it.only('should show the right amount of alerts selected', () => {
+        it('should show the right amount of alerts selected', () => {
+          const secondPageAlerts = [
+            {
+              [AlertsField.name]: ['five'],
+              [AlertsField.reason]: ['six'],
+              _id: 'alert2',
+            },
+          ] as unknown as EcsFieldsResponse[];
+          const props = {
+            ...tablePropsWithBulkActions,
+            alerts: secondPageAlerts,
+            useFetchAlertsData: () => {
+              return {
+                ...alertsData,
+                alerts: secondPageAlerts,
+                alertsCount: secondPageAlerts.length,
+              };
+            },
+            initialBulkActionsState: {
+              ...defaultBulkActionsState,
+              areAllVisibleRowsSelected: true,
+              rowSelection: new Set([0]),
+            },
+          };
           const { getByTestId, getAllByTestId } = render(
-            <AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />
+            <AlertsTableWithBulkActionsContext {...props} />
           );
-          userEvent.click(getByTestId('pagination-button-1'));
-          userEvent.click(getByTestId('bulk-actions-header'));
           const { getByText } = within(getByTestId('selectedShowBulkActionsButton'));
-          expect(getByText('Selected 1 alerts')).toBeDefined();
+          expect(getByText('Selected 1 alert')).toBeDefined();
           expect(getAllByTestId('bulk-actions-row-cell').length).toBe(1);
         });
       });
@@ -227,7 +238,7 @@ describe('AlertsTable.BulkActions', () => {
           ...tablePropsWithBulkActions,
           initialBulkActionsState: {
             ...defaultBulkActionsState,
-            isPageSelected: true,
+            areAllVisibleRowsSelected: true,
             rowSelection: new Set([0, 1]),
           },
         };
@@ -353,7 +364,7 @@ describe('AlertsTable.BulkActions', () => {
               ...tablePropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
-                isPageSelected: true,
+                areAllVisibleRowsSelected: true,
                 isAllSelected: true,
                 rowSelection: new Set([0, 1]),
               },
@@ -383,13 +394,12 @@ describe('AlertsTable.BulkActions', () => {
               ...tablePropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
-                isPageSelected: true,
+                areAllVisibleRowsSelected: true,
                 isAllSelected: true,
                 rowSelection: new Set([0, 1]),
               },
               alertsTableConfiguration: {
                 ...alertsTableConfiguration,
-
                 useBulkActions: () => {
                   return {
                     render: mockedFn,

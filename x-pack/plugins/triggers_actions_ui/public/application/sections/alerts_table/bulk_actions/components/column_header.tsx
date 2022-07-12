@@ -12,13 +12,14 @@ import { BulkActionsContext } from '../context';
 const BulkActionsHeaderComponent: React.FunctionComponent<{ pageSize: number }> = ({
   pageSize,
 }) => {
-  const [{ isAllSelected, isPageSelected }, updateSelectedRows] = useContext(BulkActionsContext);
+  const [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows] =
+    useContext(BulkActionsContext);
 
   return (
     <EuiCheckbox
       id="selection-toggle"
       aria-label="Select all rows"
-      checked={isAllSelected || isPageSelected}
+      checked={isAllSelected || areAllVisibleRowsSelected}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
           updateSelectedRows({ action: 'selectCurrentPage', pageSize });
