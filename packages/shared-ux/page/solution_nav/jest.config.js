@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { KibanaPageTemplateSolutionNavProps } from './solution_nav';
-export { KibanaPageTemplateSolutionNav } from './solution_nav';
-export type { KibanaPageTemplateSolutionNavCollapseButtonProps } from './solution_nav_collapse_button';
-export { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/page/solution_nav'],
+};
