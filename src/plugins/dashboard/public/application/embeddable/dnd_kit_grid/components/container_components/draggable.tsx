@@ -50,6 +50,7 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
     });
   };
 
+  // this should probably be stored as state as part of the GRID instead of for each panel
   window.addEventListener('resize', () => {
     updateColumnWidth();
   });
@@ -59,10 +60,9 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
   }, []);
 
   const { columnStart, columnEnd, rowStart, rowEnd } = useMemo(() => {
-    // We probably don't always want to use ceil here - we should instead wrap **to the closest** right OR left
-    // column - so if the decimal is < .5, go to the left and if the decimal is > .5, go to the right
-    const startC = Math.ceil(panelState.pos.x / columnSize.current) + 1;
-    const startR = Math.ceil(panelState.pos.y / 26) + 1;
+    // using round instead of ceil so that we wrap **to the closest** right OR left column
+    const startC = Math.round(panelState.pos.x / columnSize.current) + 1;
+    const startR = Math.round(panelState.pos.y / 26) + 1;
 
     return {
       columnStart: startC,
@@ -101,15 +101,13 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
             'style',
             'position: relative; user-select: auto; border: 1px dashed red; background: lightyellow; padding: 10px; width: 100%; height: 100%;'
           );
+          // ref.updateSize({ width: 200, height: 300 });
 
-          // similar to my note above, it would be better to do some "round to nearest column" math here rather than just ceil or floor
+          // using round instead of ceil so that we wrap **to the closest** right OR left column
           setPanelState({
             ...panelState,
-            w:
-              d.width >= 0
-                ? Math.ceil(pixelWidth / columnSize.current)
-                : Math.floor(pixelWidth / columnSize.current),
-            h: d.height >= 0 ? Math.ceil(pixelHeight / 26) : Math.floor(pixelHeight / 26),
+            w: Math.round(pixelWidth / columnSize.current),
+            h: Math.round(pixelHeight / 26),
           });
         }}
       >
