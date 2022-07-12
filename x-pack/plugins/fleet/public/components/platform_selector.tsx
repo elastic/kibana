@@ -113,7 +113,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <>
       <>
         <EuiButtonGroup
-          options={isFleet ? REDUCED_PLATFORM_OPTIONS: PLATFORM_OPTIONS}
+          options={isFleet ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
           idSelected={platform}
           onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
           legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
