@@ -136,7 +136,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           params: {},
           createdBy: null,
           scheduledTaskId: response.body.scheduledTaskId,
-          snoozeSchedule: response.body.snoozeSchedule,
           updatedBy: null,
           apiKeyOwner: null,
           throttle: '1m',

@@ -435,6 +435,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -641,6 +642,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
