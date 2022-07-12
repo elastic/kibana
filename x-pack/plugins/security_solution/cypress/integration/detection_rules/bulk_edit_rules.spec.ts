@@ -166,7 +166,7 @@ describe('Detection rules, bulk edit', () => {
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     openBulkEditAddIndexPatternsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
-      .should('have.text', 'Overwrite all selected rules index patterns')
+      .should('have.text', "Overwrite all selected rules' index patterns")
       .click();
     cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
       'have.text',
@@ -216,7 +216,7 @@ describe('Detection rules, bulk edit', () => {
     cy.log('Overwrite all tags');
     openBulkEditAddTagsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
-      .should('have.text', 'Overwrite all selected rules tags')
+      .should('have.text', "Overwrite all selected rules' tags")
       .click();
     cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
       'have.text',
