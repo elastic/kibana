@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CompleteTimeline } from '../../objects/timeline';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
   cy.request({
