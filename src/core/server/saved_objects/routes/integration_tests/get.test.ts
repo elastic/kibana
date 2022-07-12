@@ -9,7 +9,7 @@
 import supertest from 'supertest';
 import { registerGetRoute } from '../get';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-mocks-internal';
+import { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
