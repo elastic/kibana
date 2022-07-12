@@ -195,7 +195,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
-      <EuiSplitPanel.Inner color="subdued" className="RecurrenceScheduler">
+      <EuiSplitPanel.Inner color="subdued" className="ramRecurrenceScheduler">
         <EuiFormRow
           display="columnCompressed"
           style={{ alignItems: 'center' }}
