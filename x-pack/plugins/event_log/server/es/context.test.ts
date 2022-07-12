@@ -126,7 +126,7 @@ describe('createEsContext', () => {
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     expect(mockCreateReadySignal).toBeCalledTimes(1);
-    elasticsearchClient.indices.existsTemplate.mockResponse(true);
+    elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
     expect(signal).toBeCalledTimes(0);
     context.initialize();
     await context.shutdown();
