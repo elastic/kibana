@@ -8,6 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { Reducer, Store } from 'redux';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
@@ -135,6 +136,12 @@ export interface IEmbeddable<
    *   last name, your output state could be greeting.
    **/
   getOutput(): Readonly<O>;
+
+  /**
+   * Returns a Redux state for the embeddable instance.
+   * @param reducer A reducer to use. If not provided, a default reducer will be used.
+   */
+  getStore(reducer?: Reducer<I>): Store<I>;
 
   /**
    * Updates input state with the given changes.

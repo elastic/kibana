@@ -12,9 +12,11 @@ import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
+import type { Reducer, Store } from 'redux';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { createStore, slice } from './embeddable_store';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
@@ -51,6 +53,8 @@ export abstract class Embeddable<
   private parentSubscription?: Rx.Subscription;
 
   protected destroyed: boolean = false;
+
+  private cachedStore = new WeakMap<Reducer, Store<TEmbeddableInput>>();
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -198,6 +202,16 @@ export abstract class Embeddable<
       root = root.parent;
     }
     return root;
+  }
+
+  public getStore(
+    reducer: Reducer<TEmbeddableInput> = slice.reducer as Reducer
+  ): Store<TEmbeddableInput> {
+    if (!this.cachedStore.has(reducer)) {
+      this.cachedStore.set(reducer, createStore(this, reducer as Reducer) as Store);
+    }
+
+    return this.cachedStore.get(reducer)!;
   }
 
   public updateInput(changes: Partial<TEmbeddableInput>): void {
