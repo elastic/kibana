@@ -41,6 +41,7 @@ export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFi
         return <IpContent config={config} />;
 
       case JOB_FIELD_TYPES.KEYWORD:
+      case JOB_FIELD_TYPES.VERSION:
         return <KeywordContent config={config} />;
 
       case JOB_FIELD_TYPES.TEXT:

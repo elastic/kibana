@@ -394,7 +394,6 @@ export const useDataVisualizerGridData = (
 
     nonMetricFieldsToShow.forEach((field) => {
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
-
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
         fieldFormat: currentDataView.getFormatterForField(field),

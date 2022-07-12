@@ -201,6 +201,7 @@ export function getCompatibleLensDataType(type: FieldVisConfig['type']): string 
   let lensType: string | undefined;
   switch (type) {
     case JOB_FIELD_TYPES.KEYWORD:
+    case JOB_FIELD_TYPES.VERSION:
       lensType = 'string';
       break;
     case JOB_FIELD_TYPES.DATE:
@@ -234,7 +235,11 @@ function getColumnsAndLayer(
   if (fieldType === JOB_FIELD_TYPES.NUMBER) {
     return getNumberSettings(item, defaultDataView);
   }
-  if (fieldType === JOB_FIELD_TYPES.IP || fieldType === JOB_FIELD_TYPES.KEYWORD) {
+  if (
+    fieldType === JOB_FIELD_TYPES.IP ||
+    fieldType === JOB_FIELD_TYPES.KEYWORD ||
+    fieldType === JOB_FIELD_TYPES.VERSION
+  ) {
     return getKeywordSettings(item);
   }
   if (fieldType === JOB_FIELD_TYPES.BOOLEAN) {

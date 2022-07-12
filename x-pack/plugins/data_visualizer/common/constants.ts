@@ -40,6 +40,7 @@ export const JOB_FIELD_TYPES = {
   TEXT: 'text',
   HISTOGRAM: 'histogram',
   UNKNOWN: 'unknown',
+  VERSION: 'version',
 } as const;
 
 export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];

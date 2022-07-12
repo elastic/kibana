@@ -54,6 +54,9 @@ export const jobTypeLabels = {
   [JOB_FIELD_TYPES.UNKNOWN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeLabel', {
     defaultMessage: 'Unknown',
   }),
+  [JOB_FIELD_TYPES.VERSION]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.versionTypeLabel', {
+    defaultMessage: 'Version',
+  }),
 };
 
 // convert kibana types to ML Job types
@@ -62,9 +65,14 @@ export const jobTypeLabels = {
 export function kbnTypeToJobType(field: DataViewField) {
   // Return undefined if not one of the supported data visualizer field types.
   let type;
+
   switch (field.type) {
     case KBN_FIELD_TYPES.STRING:
       type = field.aggregatable ? JOB_FIELD_TYPES.KEYWORD : JOB_FIELD_TYPES.TEXT;
+
+      if (field.esTypes?.includes(JOB_FIELD_TYPES.VERSION)) {
+        type = JOB_FIELD_TYPES.VERSION;
+      }
       break;
     case KBN_FIELD_TYPES.NUMBER:
       type = JOB_FIELD_TYPES.NUMBER;

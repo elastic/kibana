@@ -35,6 +35,7 @@ export const getFieldsStats = (
       return fetchNumericFieldsStats(dataSearch, params, fields, options);
     case JOB_FIELD_TYPES.KEYWORD:
     case JOB_FIELD_TYPES.IP:
+    case JOB_FIELD_TYPES.VERSION:
       return fetchStringFieldsStats(dataSearch, params, fields, options);
     case JOB_FIELD_TYPES.DATE:
       return fetchDateFieldsStats(dataSearch, params, fields, options);

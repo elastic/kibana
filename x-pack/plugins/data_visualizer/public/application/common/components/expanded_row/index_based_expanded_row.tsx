@@ -74,6 +74,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
         return <IpContent config={config} onAddFilter={onAddFilter} />;
 
       case JOB_FIELD_TYPES.KEYWORD:
+      case JOB_FIELD_TYPES.VERSION:
         return <KeywordContent config={config} onAddFilter={onAddFilter} />;
 
       case JOB_FIELD_TYPES.TEXT:
