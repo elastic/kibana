@@ -247,6 +247,7 @@ export interface DocLinks {
     readonly blocklist: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
+      macos_system_ext: string;
     };
   };
   readonly query: {

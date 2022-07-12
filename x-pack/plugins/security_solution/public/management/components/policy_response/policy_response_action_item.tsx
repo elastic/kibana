@@ -38,7 +38,7 @@ export const PolicyResponseActionItem = memo(
           {policyResponseActionFormatter.linkText && policyResponseActionFormatter.linkUrl && (
             <EuiLink
               target="_blank"
-              href={`${policyResponseActionFormatter.linkUrl}`}
+              href={policyResponseActionFormatter.linkUrl}
               data-test-subj="endpointPolicyResponseErrorCallOutLink"
             >
               {policyResponseActionFormatter.linkText}
