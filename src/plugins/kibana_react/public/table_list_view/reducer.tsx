@@ -52,7 +52,7 @@ function getTableState<T>(state: State<T>, action: OnFetchItemsSuccessAction<T>)
   };
 }
 
-export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
+export function reducer<T extends { id?: string }>(state: State<T>, action: Action<T>): State<T> {
   switch (action.type) {
     case 'onFetchItems': {
       return {
@@ -141,9 +141,7 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
     case 'onSelectionChange': {
       return {
         ...state,
-        selectedIds: action.data
-          .map((item) => (item as unknown as { id?: string })?.id)
-          .filter((id): id is string => Boolean(id)),
+        selectedIds: action.data.map((item) => item?.id).filter((id): id is string => Boolean(id)),
       };
     }
   }

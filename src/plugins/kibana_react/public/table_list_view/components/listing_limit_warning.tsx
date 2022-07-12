@@ -27,7 +27,7 @@ export function ListingLimitWarning<T>({
   advancedSettingsLink,
 }: Props<T>) {
   return (
-    <React.Fragment>
+    <>
       <EuiCallOut
         title={
           <FormattedMessage
@@ -75,6 +75,6 @@ export function ListingLimitWarning<T>({
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </React.Fragment>
+    </>
   );
 }
