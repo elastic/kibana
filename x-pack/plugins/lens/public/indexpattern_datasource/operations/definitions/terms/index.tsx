@@ -19,7 +19,7 @@ import {
   EuiButtonGroup,
   EuiComboBox,
 } from '@elastic/eui';
-import { uniq } from 'lodash';
+import { truncate, uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../../../../common';
@@ -586,7 +586,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       undefined
     );
 
-    const [isPatternUsed, setIsPatternUsed] = useState<boolean>(false);
+    const [isPatternUsed, setIsPatternUsed] = useState({
+      include: false,
+      exclude: false,
+    });
 
     const hasRestrictions = indexPattern.hasRestrictions;
 
@@ -635,7 +638,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       selectedOptions: IncludeExcludeOptions[],
       operation: 'include' | 'exclude'
     ) => {
-      setIsPatternUsed(false);
+      const patternUsed = {
+        ...isPatternUsed,
+        [operation]: false,
+      };
+      setIsPatternUsed(patternUsed);
+      // setIsPatternUsed(false);
       const options = {
         ...includeExcludeSelectedOptions,
         [operation]: selectedOptions,
@@ -670,7 +678,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       // check if is regex
       const hasSpecialCharacters = isRegex(searchValue);
       if (hasSpecialCharacters) {
-        setIsPatternUsed(true);
+        const patternUsed = {
+          ...isPatternUsed,
+          [operation]: truncate,
+        };
+        setIsPatternUsed(patternUsed);
       }
 
       const newOption = {
@@ -1152,7 +1164,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       isClearable={true}
                       data-test-subj="demoComboBox"
                       autoFocus
-                      singleSelection={isPatternUsed}
+                      singleSelection={isPatternUsed.include}
                     />
                   </EuiFormRow>
                   <EuiSpacer size="m" />
@@ -1182,6 +1194,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       isClearable={true}
                       data-test-subj="demoComboBox"
                       autoFocus
+                      singleSelection={isPatternUsed.exclude}
                     />
                   </EuiFormRow>
                 </>
