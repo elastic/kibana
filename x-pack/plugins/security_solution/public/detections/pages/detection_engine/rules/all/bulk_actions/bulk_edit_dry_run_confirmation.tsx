@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
 import * as i18n from '../../translations';
@@ -24,17 +24,6 @@ const BulkEditDryRunConfirmationComponent = ({
   result,
 }: BulkEditDryRunConfirmationProps) => {
   const { failedRulesCount = 0, succeededRulesCount = 0, ruleErrors = [] } = result ?? {};
-  const hasAllSucceeded = failedRulesCount === 0;
-
-  // proceed straight to edit flyout if all rules can be edited successfully
-  useEffect(() => {
-    if (hasAllSucceeded) {
-      setTimeout(onConfirm, 0);
-    }
-  }, [hasAllSucceeded, onConfirm]);
-  if (hasAllSucceeded) {
-    return null;
-  }
 
   // if no rule can be edited, modal window that denies bulk edit action will be displayed
   if (succeededRulesCount === 0) {

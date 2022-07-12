@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import {
   EuiBasicTable,
   EuiConfirmModal,
@@ -16,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { AllRulesTabs } from './rules_table_toolbar';
-import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
 import { Loader } from '../../../../../common/components/loader';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -40,7 +37,6 @@ import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout'
 import { BulkEditDryRunConfirmation } from './bulk_actions/bulk_edit_dry_run_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
-import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -149,21 +145,16 @@ export const RulesTables = React.memo<RulesTableProps>(
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
 
-    const { getBulkItemsPopoverContent, bulkAction, bulkActionEdit } = useBulkActions({
+    const { bulkActionsDryRunResult, isBulkActionsDryRunLoading, executeBulkActionsDryRun } =
+      useBulkActionsDryRun();
+
+    const getBulkItemsPopoverContent = useBulkActions({
       filterOptions,
       confirmDeletion,
       confirmBulkEdit,
       completeBulkEditForm,
       reFetchTags,
-    });
-
-    const { bulkActionsDryRunResult, isBulkActionsDryRunLoading } = useBulkActionsDryRun({
-      searchParams: isAllSelected
-        ? { query: convertRulesFilterToKQL(filterOptions) }
-        : { ids: selectedRuleIds },
-      editAction: bulkActionEdit,
-      enabled: isBulkEditConfirmationVisible,
-      action: bulkAction === BulkAction.export ? undefined : bulkAction,
+      executeBulkActionsDryRun,
     });
 
     const paginationMemo = useMemo(
@@ -321,7 +312,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
           </EuiConfirmModal>
         )}
-        {isBulkEditConfirmationVisible && !isBulkActionsDryRunLoading && (
+        {isBulkEditConfirmationVisible && (
           <BulkEditDryRunConfirmation
             result={bulkActionsDryRunResult}
             onCancel={handleBulkEditCancel}

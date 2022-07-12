@@ -6,8 +6,7 @@
  */
 /* eslint-disable complexity */
 
-import React, { useCallback, useState } from 'react';
-import { useQueryClient } from 'react-query';
+import React, { useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -28,7 +27,7 @@ import * as i18n from '../../translations';
 import { executeRulesBulkAction } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { getBulkActionsDryRunFromCache } from './use_bulk_actions_dry_run';
+import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 import { prepareSearchParams } from './utils/prepare_search_params';
@@ -49,6 +48,7 @@ interface UseBulkActionsArgs {
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
   reFetchTags: () => void;
+  executeBulkActionsDryRun: ExecuteBulkActionsDryRun;
 }
 
 export const useBulkActions = ({
@@ -57,8 +57,8 @@ export const useBulkActions = ({
   confirmBulkEdit,
   completeBulkEditForm,
   reFetchTags,
+  executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
-  const queryClient = useQueryClient();
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
@@ -69,8 +69,6 @@ export const useBulkActions = ({
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
   const { startTransaction } = useStartTransaction();
-  const [bulkAction, setBulkAction] = useState<BulkAction | undefined>(undefined);
-  const [bulkActionEdit, setBulkActionEdit] = useState<BulkActionEditType | undefined>(undefined);
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -106,7 +104,6 @@ export const useBulkActions = ({
 
       const handleEnableAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
-        setBulkAction(BulkAction.enable);
         setIsRefreshOn(false);
         closePopover();
 
@@ -134,7 +131,6 @@ export const useBulkActions = ({
 
       const handleDisableActions = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
-        setBulkAction(BulkAction.disable);
         setIsRefreshOn(false);
         closePopover();
 
@@ -152,7 +148,6 @@ export const useBulkActions = ({
 
       const handleDuplicateAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
-        setBulkAction(BulkAction.duplicate);
         setIsRefreshOn(false);
         closePopover();
 
@@ -181,7 +176,6 @@ export const useBulkActions = ({
           }
         }
 
-        setBulkAction(BulkAction.delete);
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
 
         await executeRulesBulkAction({
@@ -200,7 +194,6 @@ export const useBulkActions = ({
 
       const handleExportAction = async () => {
         closePopover();
-        setBulkAction(BulkAction.export);
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
         await executeRulesBulkAction({
@@ -216,13 +209,22 @@ export const useBulkActions = ({
         let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
 
-        setBulkAction(BulkAction.edit);
-        setBulkActionEdit(bulkEditActionType);
         // disabling auto-refresh so user's selected rules won't disappear after table refresh
         closePopover();
 
-        // User has cancelled edit action or there are no custom rules to proceed
-        if ((await confirmBulkEdit()) === false) {
+        const dryRunResult = await executeBulkActionsDryRun({
+          action: BulkAction.edit,
+          editAction: bulkEditActionType,
+          searchParams: isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds },
+        });
+
+        // show bulk edit confirmation window only if there is at least one failed rule
+        const hasFailedRules = (dryRunResult?.failedRulesCount ?? 0) > 0;
+
+        if (hasFailedRules && (await confirmBulkEdit()) === false) {
+          // User has cancelled edit action or there are no custom rules to proceed
           return;
         }
 
@@ -252,7 +254,7 @@ export const useBulkActions = ({
                 <>
                   <p>
                     {i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(
-                      getBulkActionsDryRunFromCache(queryClient)?.succeededRulesCount ?? 0
+                      dryRunResult?.succeededRulesCount ?? 0
                     )}
                   </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -279,7 +281,7 @@ export const useBulkActions = ({
           onFinish: () => hideWarningToast(),
           search: prepareSearchParams({
             ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
-            dryRunResult: getBulkActionsDryRunFromCache(queryClient),
+            dryRunResult,
           }),
         });
 
@@ -452,19 +454,15 @@ export const useBulkActions = ({
       confirmDeletion,
       confirmBulkEdit,
       completeBulkEditForm,
-      queryClient,
       filterOptions,
       getIsMounted,
       resolveTagsRefetch,
       updateRulesCache,
       clearRulesSelection,
       setIsRefreshOn,
+      executeBulkActionsDryRun,
     ]
   );
 
-  return {
-    getBulkItemsPopoverContent,
-    bulkAction,
-    bulkActionEdit,
-  };
+  return getBulkItemsPopoverContent;
 };

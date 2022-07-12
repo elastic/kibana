@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { QueryClient } from 'react-query';
-import { useQuery } from 'react-query';
+import type { QueryClient, UseMutateAsyncFunction } from 'react-query';
+import { useMutation } from 'react-query';
 
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
@@ -62,56 +62,56 @@ const processDryRunResult = (response: BulkActionResponse | undefined): DryRunRe
   return processed;
 };
 
-interface UseBulkActionsDryRunProps {
-  action?: Exclude<BulkAction, BulkAction.export>;
-  searchParams: { query?: string } | { ids?: string[] };
-  enabled: boolean;
-  editAction?: BulkActionEditType;
-}
+export type ExecuteBulkActionsDryRun = UseMutateAsyncFunction<
+  DryRunResult | undefined,
+  unknown,
+  BulkActionsDryRunVariables
+>;
 
-type UseBulkActionsDryRun = (props: UseBulkActionsDryRunProps) => {
+export type UseBulkActionsDryRun = () => {
   bulkActionsDryRunResult?: DryRunResult;
   isBulkActionsDryRunLoading: boolean;
+  executeBulkActionsDryRun: ExecuteBulkActionsDryRun;
 };
 
-export const useBulkActionsDryRun: UseBulkActionsDryRun = ({
-  searchParams,
-  enabled,
-  action,
-  editAction,
-}) => {
-  const { data, isFetching } = useQuery<BulkActionResponse | undefined>(
-    [BULK_ACTIONS_DRY_RUN_QUERY_KEY],
-    async () => {
-      if (!action) {
-        return undefined;
-      }
+interface BulkActionsDryRunVariables {
+  action?: Exclude<BulkAction, BulkAction.export>;
+  editAction?: BulkActionEditType;
+  searchParams: { query?: string } | { ids?: string[] };
+}
 
-      let result: BulkActionResponse;
-      try {
-        result = await performBulkAction({
-          ...searchParams,
-          action,
-          edit: computeDryRunPayload(action, editAction),
-          isDryRun: true,
-        });
-      } catch (err) {
-        // if body doesn't have summary data, action failed altogether and no data available for dry run
-        if ((err.body as BulkActionResponse)?.attributes?.summary?.total === undefined) {
-          return;
-        }
-        result = err.body;
-      }
-
-      return result;
-    },
-    {
-      enabled,
+export const useBulkActionsDryRun: UseBulkActionsDryRun = () => {
+  const { data, mutateAsync, isLoading } = useMutation<
+    DryRunResult | undefined,
+    unknown,
+    BulkActionsDryRunVariables
+  >([BULK_ACTIONS_DRY_RUN_QUERY_KEY], async ({ searchParams, action, editAction }) => {
+    if (!action) {
+      return undefined;
     }
-  );
+
+    let result: BulkActionResponse;
+    try {
+      result = await performBulkAction({
+        ...searchParams,
+        action,
+        edit: computeDryRunPayload(action, editAction),
+        isDryRun: true,
+      });
+    } catch (err) {
+      // if body doesn't have summary data, action failed altogether and no data available for dry run
+      if ((err.body as BulkActionResponse)?.attributes?.summary?.total === undefined) {
+        return;
+      }
+      result = err.body;
+    }
+
+    return processDryRunResult(result);
+  });
 
   return {
-    bulkActionsDryRunResult: processDryRunResult(data),
-    isBulkActionsDryRunLoading: isFetching,
+    bulkActionsDryRunResult: data,
+    isBulkActionsDryRunLoading: isLoading,
+    executeBulkActionsDryRun: mutateAsync,
   };
 };
