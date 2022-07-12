@@ -7,7 +7,7 @@
 
 import type { UseQueryOptions, UseQueryResult } from 'react-query';
 import { useQuery } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core/public';
 import { useHttp } from '../../../common/lib/kibana';
 
 type UsersInfo = Array<{
@@ -26,11 +26,11 @@ const INTERNAL_USERS_ROUTE = '/internal/security/users';
  * @param options
  */
 export const useGetKibanaUsers = (
-  options: UseQueryOptions<UsersInfo, HttpFetchError> = {}
-): UseQueryResult<UsersInfo, HttpFetchError> => {
+  options: UseQueryOptions<UsersInfo, IHttpFetchError> = {}
+): UseQueryResult<UsersInfo, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<UsersInfo, HttpFetchError>({
+  return useQuery<UsersInfo, IHttpFetchError>({
     queryKey: ['get-kibana-users'],
     ...options,
     queryFn: async () => {

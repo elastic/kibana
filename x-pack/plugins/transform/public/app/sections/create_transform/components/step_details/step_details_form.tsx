@@ -27,6 +27,7 @@ import {
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
 import {
   isEsIndices,
@@ -41,7 +42,6 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { isHttpFetchError } from '../../../../common/request';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';

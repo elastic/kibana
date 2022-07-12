@@ -5,7 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   UpdateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -20,7 +20,7 @@ export function useBulkUpdateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   customOptions: UseMutationOptions<
     ExceptionListItemSchema[],
-    HttpFetchError,
+    IHttpFetchError,
     UpdateExceptionListItemSchema[],
     () => void
   > = DEFAULT_OPTIONS,
@@ -31,13 +31,13 @@ export function useBulkUpdateArtifact(
   }
 ): UseMutationResult<
   ExceptionListItemSchema[],
-  HttpFetchError,
+  IHttpFetchError,
   UpdateExceptionListItemSchema[],
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema[],
-    HttpFetchError,
+    IHttpFetchError,
     UpdateExceptionListItemSchema[],
     () => void
   >((exceptions: UpdateExceptionListItemSchema[]) => {

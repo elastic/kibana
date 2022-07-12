@@ -22,7 +22,6 @@ import {
   EuiCodeBlock,
   EuiToolTip,
   RIGHT_ALIGNMENT,
-  EuiFlexGrid,
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
@@ -57,17 +56,24 @@ const StyledFacetButton = euiStyled(EuiFacetButton)`
 `;
 
 const customDescriptionListCss = css`
-  dt,
-  dd {
-    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
-    font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
-  }
-  dt {
-    font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+  &.euiDescriptionList {
+    > .euiDescriptionList__title {
+      color: ${(props) => props.theme.eui.euiColorDarkShade};
+      font-size: ${(props) => props.theme.eui.euiFontSizeXS};
+      margin-top: ${(props) => props.theme.eui.euiSizeS};
+    }
+
+    > .euiDescriptionList__description {
+      font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+      margin-top: ${(props) => props.theme.eui.euiSizeS};
+    }
   }
 `;
 
-const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
+const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({
+  compressed: true,
+  type: 'column',
+})`
   ${customDescriptionListCss}
 `;
 
@@ -108,8 +114,8 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
     const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
       page: 1,
       pageSize: 10,
-      commands: [],
       agentIds,
+      commands: [],
       userIds: [],
     });
 
@@ -144,13 +150,13 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
       [setQueryParams]
     );
 
+    // handle on change users filter
     const onChangeUserIds = useCallback(
       (selectedUserIds: string[]) => {
         setQueryParams((prevState) => ({ ...prevState, userIds: selectedUserIds }));
       },
       [setQueryParams]
     );
-
     // total actions
     const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
@@ -178,38 +184,39 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
             : undefined;
 
           const command = getCommand(_command);
-          const descriptionListLeft = [
+          const dataList = [
             {
               title: OUTPUT_MESSAGES.expandSection.placedAt,
               description: `${startedAt}`,
             },
             {
-              title: OUTPUT_MESSAGES.expandSection.input,
-              description: `${command}`,
-            },
-          ];
-
-          const descriptionListCenter = [
-            {
               title: OUTPUT_MESSAGES.expandSection.startedAt,
               description: `${startedAt}`,
+            },
+            {
+              title: OUTPUT_MESSAGES.expandSection.completedAt,
+              description: `${completedAt ?? emptyValue}`,
+            },
+            {
+              title: OUTPUT_MESSAGES.expandSection.input,
+              description: `${command}`,
             },
             {
               title: OUTPUT_MESSAGES.expandSection.parameters,
               description: parametersList ? parametersList : emptyValue,
             },
-          ];
-
-          const descriptionListRight = [
-            {
-              title: OUTPUT_MESSAGES.expandSection.completedAt,
-              description: `${completedAt ?? emptyValue}`,
-            },
-          ];
+          ].map(({ title, description }) => {
+            return {
+              title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+              description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+            };
+          });
 
           const outputList = [
             {
-              title: OUTPUT_MESSAGES.expandSection.output,
+              title: (
+                <StyledEuiCodeBlock>{`${OUTPUT_MESSAGES.expandSection.output}:`}</StyledEuiCodeBlock>
+              ),
               description: (
                 // codeblock for output
                 <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
@@ -232,32 +239,10 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
                 direction="column"
                 style={{ maxHeight: 270, overflowY: 'auto' }}
                 className="eui-yScrollWithShadows"
+                gutterSize="s"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGrid columns={3}>
-                    {[descriptionListLeft, descriptionListCenter, descriptionListRight].map(
-                      (_list, i) => {
-                        const list = _list.map((l) => {
-                          const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
-                          return {
-                            title: l.title,
-                            description: isParameters ? (
-                              // codeblock for parameters
-                              <StyledEuiCodeBlock>{l.description}</StyledEuiCodeBlock>
-                            ) : (
-                              l.description
-                            ),
-                          };
-                        });
-
-                        return (
-                          <EuiFlexItem key={i}>
-                            <StyledDescriptionList listItems={list} />
-                          </EuiFlexItem>
-                        );
-                      }
-                    )}
-                  </EuiFlexGrid>
+                  <StyledDescriptionList listItems={dataList} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <StyledDescriptionListOutput listItems={outputList} />
@@ -270,6 +255,7 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
       },
       [getTestId, itemIdToExpandedRowMap]
     );
+
     // memoized callback for toggleDetails
     const onClickCallback = useCallback(
       (data: ActionDetails) => () => toggleDetails(data),

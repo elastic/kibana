@@ -11,15 +11,20 @@ import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
-import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
-import { DatatablesWithFormatInfo, getFormat } from '../helpers';
+import {
+  DatatablesWithFormatInfo,
+  getSeriesName,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+} from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
   onFilter: (data: FilterEvent['data']) => void,
-  formatFactory: FormatFactory,
-  formattedDatatables: DatatablesWithFormatInfo
+  fieldFormats: LayersFieldFormats,
+  formattedDatatables: DatatablesWithFormatInfo,
+  titles: LayersAccessorsTitles
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
@@ -36,36 +41,31 @@ export const getLegendAction = (
     }
 
     const layer = dataLayers[layerIndex];
-    if (!layer || !layer.splitAccessor) {
+    if (!layer || !layer.splitAccessors || !layer.splitAccessors.length) {
       return null;
     }
 
-    const splitLabel = series.seriesKeys[0] as string;
-
     const { table } = layer;
-    const accessor = getAccessorByDimension(layer.splitAccessor, table.columns);
-    const formatter = formatFactory(
-      accessor ? getFormat(table.columns, layer.splitAccessor) : undefined
-    );
 
-    const rowIndex = table.rows.findIndex((row) => {
-      if (formattedDatatables[layer.layerId]?.formattedColumns[accessor]) {
-        // stringify the value to compare with the chart value
-        return formatter.convert(row[accessor]) === splitLabel;
+    const data: FilterEvent['data']['data'] = [];
+
+    series.splitAccessors.forEach((value, accessor) => {
+      const rowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
+        return row[accessor] === value;
+      });
+      if (rowIndex !== -1) {
+        data.push({
+          row: rowIndex,
+          column: table.columns.findIndex((column) => column.id === accessor),
+          value: table.rows[rowIndex][accessor],
+          table,
+        });
       }
-      return row[accessor] === splitLabel;
     });
 
-    if (rowIndex < 0) return null;
-
-    const data = [
-      {
-        row: rowIndex,
-        column: table.columns.findIndex((col) => col.id === accessor),
-        value: accessor ? table.rows[rowIndex][accessor] : splitLabel,
-        table,
-      },
-    ];
+    if (data.length === 0) {
+      return null;
+    }
 
     const context: FilterEvent['data'] = {
       data,
@@ -74,9 +74,18 @@ export const getLegendAction = (
     return (
       <LegendActionPopover
         label={
-          !formattedDatatables[layer.layerId]?.formattedColumns[accessor] && formatter
-            ? formatter.convert(splitLabel)
-            : splitLabel
+          getSeriesName(
+            series,
+            {
+              splitAccessors: layer.splitAccessors,
+              accessorsCount: layer.accessors.length,
+              columns: table.columns,
+              splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
+              alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
+              columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+            },
+            titles
+          )?.toString() || ''
         }
         context={context}
         onFilter={onFilter}

@@ -11,6 +11,8 @@ import { fetchInstalledIntegrations } from '../../../containers/detection_engine
 // import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 // import * as i18n from './translations';
 
+const ONE_MINUTE = 60000;
+
 export interface UseInstalledIntegrationsArgs {
   packages?: string[];
 }
@@ -34,6 +36,7 @@ export const useInstalledIntegrations = ({ packages }: UseInstalledIntegrationsA
     },
     {
       keepPreviousData: true,
+      staleTime: ONE_MINUTE * 5,
       onError: (e) => {
         // Suppressing for now to prevent excessive errors when fleet isn't configured
         // addError(e, { title: i18n.INTEGRATIONS_FETCH_FAILURE });
