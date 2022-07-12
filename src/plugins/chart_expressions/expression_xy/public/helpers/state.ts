@@ -19,7 +19,7 @@ export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
 
 export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => {
   if (
-    (isDataLayer(layer) && layer.splitAccessor) ||
+    (isDataLayer(layer) && layer.splitAccessors) ||
     isAnnotationsLayer(layer) ||
     isReferenceLine(layer)
   ) {

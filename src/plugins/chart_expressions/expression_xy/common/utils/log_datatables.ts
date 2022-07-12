@@ -34,10 +34,10 @@ export const getLayerDimensions = (
   layer: CommonXYDataLayerConfig | ReferenceLineLayerConfig
 ): Dimension[] => {
   let xAccessor;
-  let splitAccessor;
+  let splitAccessors;
   if (layer.layerType === LayerTypes.DATA) {
     xAccessor = layer.xAccessor;
-    splitAccessor = layer.splitAccessor;
+    splitAccessors = layer.splitAccessors;
   }
 
   const { accessors, layerType } = layer;
@@ -47,6 +47,6 @@ export const getLayerDimensions = (
       layerType === LayerTypes.DATA ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
     ],
     [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
-    [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+    [splitAccessors ? splitAccessors : undefined, strings.getBreakdownHelp()],
   ];
 };

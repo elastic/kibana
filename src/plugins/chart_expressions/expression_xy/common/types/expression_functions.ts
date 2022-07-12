@@ -116,7 +116,7 @@ export interface DataLayerArgs {
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  splitAccessor?: string | ExpressionValueVisDimension;
+  splitAccessors?: Array<ExpressionValueVisDimension | string>;
   markSizeAccessor?: string | ExpressionValueVisDimension;
   lineWidth?: number;
   showPoints?: boolean;
@@ -142,7 +142,7 @@ export interface ExtendedDataLayerArgs {
   seriesType: SeriesType;
   xAccessor?: string;
   hide?: boolean;
-  splitAccessor?: string;
+  splitAccessors?: string[];
   markSizeAccessor?: string;
   lineWidth?: number;
   showPoints?: boolean;

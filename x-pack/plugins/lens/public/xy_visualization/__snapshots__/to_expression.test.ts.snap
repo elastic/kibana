@@ -67,7 +67,7 @@ Object {
                   "seriesType": Array [
                     "area",
                   ],
-                  "splitAccessor": Array [
+                  "splitAccessors": Array [
                     "d",
                   ],
                   "table": Array [
