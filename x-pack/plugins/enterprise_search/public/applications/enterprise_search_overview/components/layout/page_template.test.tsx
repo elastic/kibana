@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../shared/layout', () => ({
+jest.mock('../../../shared/layout/nav', () => ({
   useEnterpriseSearchNav: () => [],
 }));
 
