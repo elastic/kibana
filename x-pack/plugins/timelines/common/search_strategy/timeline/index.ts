@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -19,12 +19,7 @@ import {
   TimelineKpiStrategyResponse,
   EntityType,
 } from './events';
-import {
-  PaginationInputPaginated,
-  TimerangeInput,
-  SortField,
-  Maybe,
-} from '../common';
+import { PaginationInputPaginated, TimerangeInput, SortField, Maybe } from '../common';
 import {
   DataProviderType,
   TimelineType,

@@ -21,10 +21,6 @@ import type {
 } from '../../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
-<<<<<<< HEAD
-import type { DocValueFields } from '../../../../../common/search_strategy';
-=======
->>>>>>> 438edfc81dd (removed docvalueFields props and deps)
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 
 export interface UseTimelineLastEventTimeArgs {

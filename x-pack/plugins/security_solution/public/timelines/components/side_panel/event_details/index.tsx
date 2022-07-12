@@ -17,12 +17,12 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EntityType } from '@kbn/timelines-plugin/common';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import {
@@ -34,7 +34,8 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
+import type { HostRisk } from '../../../../risk_score/containers';
+import { useHostRiskScore } from '../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
