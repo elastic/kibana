@@ -10775,7 +10775,6 @@
     "xpack.dataVisualizer.searchPanel.sampleSizeAriaLabel": "Sélectionner le nombre de documents à échantillonner",
     "xpack.dataVisualizer.searchPanel.sampleSizeOptionLabel": "Taille de l'échantillon (par partition) : {wrappedValue}",
     "xpack.dataVisualizer.searchPanel.showEmptyFields": "Afficher les champs vides",
-    "xpack.dataVisualizer.searchPanel.totalDocCountLabel": "Total des documents : {strongTotalCount}",
     "xpack.dataVisualizer.searchPanel.totalDocCountNumber": "{totalCount, plural, other {#}}",
     "xpack.dataVisualizer.title": "Charger un fichier",
     "xpack.discover.FlyoutCreateDrilldownAction.displayName": "Explorer les données sous-jacentes",

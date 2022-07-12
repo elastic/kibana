@@ -10781,7 +10781,6 @@
     "xpack.dataVisualizer.searchPanel.sampleSizeAriaLabel": "选择要采样的文档数目",
     "xpack.dataVisualizer.searchPanel.sampleSizeOptionLabel": "样本大小（每分片）：{wrappedValue}",
     "xpack.dataVisualizer.searchPanel.showEmptyFields": "显示空字段",
-    "xpack.dataVisualizer.searchPanel.totalDocCountLabel": "文档总数：{strongTotalCount}",
     "xpack.dataVisualizer.searchPanel.totalDocCountNumber": "{totalCount, plural, other {#}}",
     "xpack.dataVisualizer.title": "上传文件",
     "xpack.discover.FlyoutCreateDrilldownAction.displayName": "浏览底层数据",

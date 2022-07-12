@@ -10766,7 +10766,6 @@
     "xpack.dataVisualizer.searchPanel.sampleSizeAriaLabel": "サンプリングするドキュメント数を選択してください",
     "xpack.dataVisualizer.searchPanel.sampleSizeOptionLabel": "サンプルサイズ（シャード単位）：{wrappedValue}",
     "xpack.dataVisualizer.searchPanel.showEmptyFields": "空のフィールドを表示",
-    "xpack.dataVisualizer.searchPanel.totalDocCountLabel": "合計ドキュメント数：{strongTotalCount}",
     "xpack.dataVisualizer.searchPanel.totalDocCountNumber": "{totalCount, plural, other  {#}}",
     "xpack.dataVisualizer.title": "ファイルをアップロード",
     "xpack.discover.FlyoutCreateDrilldownAction.displayName": "基本データを調査",
