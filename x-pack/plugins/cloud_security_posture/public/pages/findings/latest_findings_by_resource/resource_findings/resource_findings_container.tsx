@@ -17,7 +17,7 @@ import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcr
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
+import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
 import {
   getFindingsPageSizeInfo,
   addFilter,
@@ -37,7 +37,7 @@ const getDefaultQuery = ({
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query,
   filters,
-  sort: { field: '@timestamp', direction: 'desc' },
+  sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
   pageSize: 10,
 });
