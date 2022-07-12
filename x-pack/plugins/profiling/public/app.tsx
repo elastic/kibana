@@ -19,6 +19,7 @@ import { RedirectWithDefaultDateRange } from './components/redirect_with_default
 import { profilingRouter } from './routing';
 import { Services } from './services';
 import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -65,7 +66,9 @@ function App({
             <RouterProvider router={profilingRouter as any} history={history}>
               <ProfilingDependenciesContextProvider value={profilingDependencies}>
                 <RedirectWithDefaultDateRange>
-                  <RouteRenderer />
+                  <RouteBreadcrumbsContextProvider>
+                    <RouteRenderer />
+                  </RouteBreadcrumbsContextProvider>
                 </RedirectWithDefaultDateRange>
               </ProfilingDependenciesContextProvider>
             </RouterProvider>

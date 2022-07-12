@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
@@ -16,9 +17,11 @@ import type {
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
   observability: ObservabilityPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
 }
