@@ -59,6 +59,8 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
   }, []);
 
   const { columnStart, columnEnd, rowStart, rowEnd } = useMemo(() => {
+    // We probably don't always want to use ceil here - we should instead wrap **to the closest** right OR left
+    // column - so if the decimal is < .5, go to the left and if the decimal is > .5, go to the right
     const startC = Math.ceil(panelState.pos.x / columnSize.current) + 1;
     const startR = Math.ceil(panelState.pos.y / 26) + 1;
 
@@ -94,10 +96,13 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
           const pixelWidth = panelState.w * columnSize.current + d.width;
           const pixelHeight = panelState.h * 26 + d.height;
 
+          // had to do this to overwrite the default resize so that I could force snap to the grid
           ref.setAttribute(
             'style',
             'position: relative; user-select: auto; border: 1px dashed red; background: lightyellow; padding: 10px; width: 100%; height: 100%;'
           );
+
+          // similar to my note above, it would be better to do some "round to nearest column" math here rather than just ceil or floor
           setPanelState({
             ...panelState,
             w:

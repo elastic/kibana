@@ -78,7 +78,7 @@ export const DroppableGrid = ({
                 padding: '10px',
               }}
             >
-              I am {childId}
+              I am the contents of {childId}
             </div>
           </Draggable>
         ))}
