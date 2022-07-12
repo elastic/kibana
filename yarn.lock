@@ -3208,6 +3208,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-server-internal@link:bazel-bin/packages/core/http/core-http-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-server-mocks@link:bazel-bin/packages/core/http/core-http-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
@@ -6783,6 +6791,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser@link:bazel-bin/packages/core/http/core-http-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-http-context-server-internal@link:bazel-bin/packages/core/http/core-http-context-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6799,23 +6823,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-server-internal@link:bazel-bin/packages/core/http/core-http-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server-mocks@link:bazel-bin/packages/core/http/core-http-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__core-http-browser@link:bazel-bin/packages/core/http/core-http-browser/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
   version "0.0.0"
   uid ""
 
