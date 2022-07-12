@@ -53,7 +53,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
-    const classes = classNames({
+    const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
