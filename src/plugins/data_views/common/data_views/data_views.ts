@@ -821,7 +821,8 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByName(this.savedObjectsClient, dataView.name);
+    const dupe = await findByName(this.savedObjectsClient, dataView.getName());
+
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);

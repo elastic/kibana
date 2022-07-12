@@ -20,14 +20,12 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
  */
 export async function findByName(client: SavedObjectsClientCommon, name: string) {
   if (name) {
-    const savedObjects = await client.find<DataViewSavedObjectAttrs>({
+    return client.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      perPage: 10,
+      perPage: 100,
       search: `"${name}"`,
       searchFields: ['name'],
       fields: ['name'],
     });
-
-    return savedObjects.find((obj) => obj.attributes.name === name);
   }
 }
