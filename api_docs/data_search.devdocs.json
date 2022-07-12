@@ -2460,13 +2460,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
               {
                 "pluginId": "data",
@@ -3044,13 +3038,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "IScopedSearchSessionsClient",
               "<T>"
@@ -3784,13 +3772,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
@@ -13147,13 +13129,7 @@
         "description": [],
         "signature": [
           "(getStartDependencies: (getKibanaRequest: (() => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
           {
             "pluginId": "data",
@@ -13183,13 +13159,7 @@
             "description": [],
             "signature": [
               "(getKibanaRequest: (() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",
               {
                 "pluginId": "data",

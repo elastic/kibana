@@ -6710,13 +6710,7 @@
             ],
             "signature": [
               "(() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -17170,13 +17164,7 @@
             ],
             "signature": [
               "(() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -28261,13 +28249,7 @@
             ],
             "signature": [
               "(() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -29807,13 +29789,7 @@
               "\nMakes a `KibanaRequest` object available to expression functions. Useful for\nfunctions which are running on the server and need to perform operations that\nare scoped to a specific user."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
