@@ -34,8 +34,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { trackLensOperationsEvents, trackUiCounterEvents } from '../../../lens_ui_telemetry';
-import { IndexPatternLayer } from '../../..';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -478,6 +477,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         application={core.application}
         datasourceMap={datasourceMap}
         activeDatasourceId={activeDatasourceId}
+        visualizationMap={visualizationMap}
       />
     );
   };
@@ -552,6 +552,7 @@ export const VisualizationWrapper = ({
   application,
   activeDatasourceId,
   datasourceMap,
+  visualizationMap,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -572,6 +573,7 @@ export const VisualizationWrapper = ({
   application: ApplicationStart;
   activeDatasourceId: string | null;
   datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -588,6 +590,7 @@ export const VisualizationWrapper = ({
   const searchSessionId = useLensSelector(selectSearchSessionId);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const visualization = useLensSelector(selectVisualization);
   const dispatchLens = useLensDispatch();
   const [defaultLayerId] = Object.keys(datasourceLayers);
 
@@ -611,14 +614,28 @@ export const VisualizationWrapper = ({
   );
 
   const onRender$ = useCallback(() => {
-    if (activeDatasourceId) {
-      const { layers } = datasourceStates[activeDatasourceId].state as {
-        layers?: Record<string, IndexPatternLayer>;
-      };
-      trackLensOperationsEvents(layers);
+    const datasourceEvents = Object.values(datasourceMap).reduce<string[]>(
+      (acc, datasource) => [
+        ...acc,
+        ...datasource.getRenderEventCounters(datasourceStates[datasource.id].state),
+      ],
+      []
+    );
+    let visualizationEvents: string[] = [];
+    if (visualization.activeId) {
+      visualizationEvents = visualizationMap[visualization.activeId].getRenderEventCounters(
+        visualization.state
+      );
     }
-    trackUiCounterEvents('vis_editor');
-  }, [activeDatasourceId, datasourceStates]);
+
+    trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
+  }, [
+    datasourceMap,
+    datasourceStates,
+    visualization.activeId,
+    visualization.state,
+    visualizationMap,
+  ]);
 
   function renderFixAction(
     validationError:

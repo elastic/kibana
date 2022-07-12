@@ -466,6 +466,10 @@ export const getDatatableVisualization = ({
     return undefined;
   },
 
+  getRenderEventCounters(state) {
+    return [];
+  },
+
   renderToolbar(domElement, props) {
     render(
       <KibanaThemeProvider theme$={theme.theme$}>

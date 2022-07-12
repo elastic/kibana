@@ -52,12 +52,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { IndexPatternLayer } from '..';
-import {
-  trackLensOperationsEvents,
-  trackUiCounterEvents,
-  trackExecutionContextEvents,
-} from '../lens_ui_telemetry';
+import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
@@ -482,14 +477,32 @@ export class Embeddable
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (activeDatasourceId) {
-      const { layers } = this.savedVis?.state.datasourceStates[activeDatasourceId] as {
-        layers?: Record<string, IndexPatternLayer>;
-      };
-      trackLensOperationsEvents(layers);
+    let datasourceEvents: string[] = [];
+    let visualizationEvents: string[] = [];
+
+    if (this.savedVis) {
+      datasourceEvents = Object.values(this.deps.datasourceMap).reduce<string[]>(
+        (acc, datasource) => [
+          ...acc,
+          ...datasource.getRenderEventCounters(
+            this.savedVis!.state.datasourceStates[datasource.id]
+          ),
+        ],
+        []
+      );
+
+      if (this.savedVis.visualizationType) {
+        visualizationEvents = this.deps.visualizationMap[
+          this.savedVis.visualizationType
+        ].getRenderEventCounters(this.savedVis!.state.visualization);
+      }
     }
-    trackExecutionContextEvents(this.getExecutionContext());
+
+    trackUiCounterEvents([
+      ...datasourceEvents,
+      ...visualizationEvents,
+      ...getExecutionContextEvents(this.getExecutionContext()),
+    ]);
 
     this.renderComplete.dispatchComplete();
   };

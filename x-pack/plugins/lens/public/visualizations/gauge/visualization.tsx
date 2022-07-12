@@ -198,6 +198,10 @@ export const getGaugeVisualization = ({
     return CHART_NAMES.verticalBullet;
   },
 
+  getRenderEventCounters(state) {
+    return [];
+  },
+
   switchVisualizationType: (visualizationTypeId, state) => {
     return {
       ...state,

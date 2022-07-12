@@ -259,6 +259,10 @@ export const getHeatmapVisualization = ({
     return update;
   },
 
+  getRenderEventCounters(state) {
+    return [];
+  },
+
   renderDimensionEditor(domElement, props) {
     render(
       <KibanaThemeProvider theme$={theme.theme$}>

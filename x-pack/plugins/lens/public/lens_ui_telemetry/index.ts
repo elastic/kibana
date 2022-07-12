@@ -10,6 +10,5 @@ export {
   setUsageCollectionStart,
   getUsageCollectionStart,
   trackUiCounterEvents,
-  trackLensOperationsEvents,
-  trackExecutionContextEvents,
+  getExecutionContextEvents,
 } from './track_counter_events';
