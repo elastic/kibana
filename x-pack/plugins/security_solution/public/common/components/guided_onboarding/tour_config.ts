@@ -107,7 +107,7 @@ export const tourConfig: TourConfig = [
       defaultMessage: `Start gathering your data!`,
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourContent', {
-      defaultMessage: `Collect data from your endpoints using the Elastic Agent and a variety of third-party integrations.`,
+      defaultMessage: `Collect data from your endpoints using Elastic Agent and a variety of third-party integrations.`,
     }),
     anchor: `[data-test-subj="add-data"]`,
     anchorPosition: 'rightUp',
