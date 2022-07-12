@@ -85,13 +85,13 @@ Create filters from your map to focus in on just the data you want. *Maps* provi
 
 To filter your dashboard by your map bounds as you pan and zoom your map:
 
-* Open the main menu, and then click *Dashboard*.
-* Select your dashboard from the list or click *Create dashboard*.
-* If your dashboard does not have a map, add a map panel.
-* Click the gear icon image:maps/images/gear_icon.png[gear icon] to open the map panel menu.
-* Select *More* to view all panel options.
-* Select *Filter dashboard by map bounds*.
-* In the "Filter dashboard by map bounds" modal, select the checkbox for your map panel.
+. Open the main menu, and then click *Dashboard*.
+. Select your dashboard from the list or click *Create dashboard*.
+. If your dashboard does not have a map, add a map panel.
+. Click the gear icon image:maps/images/gear_icon.png[gear icon] to open the map panel menu.
+. Select *More* to view all panel options.
+. Select *Filter dashboard by map bounds*.
+. Select the checkbox for your map panel.
 
 [float]
 [[maps-spatial-filters]]

@@ -28,7 +28,9 @@ function getContainerLabel(embeddable: Embeddable<FilterByMapExtentInput>) {
     ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.dashboardLabel', {
         defaultMessage: 'dashboard',
       })
-    : '';
+    : i18n.translate('xpack.maps.filterByMapExtentMenuItem.pageLabel', {
+        defaultMessage: 'page',
+      });
 }
 
 function getDisplayName(embeddable: Embeddable<FilterByMapExtentInput>) {
@@ -48,7 +50,7 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
   getDisplayNameTooltip: (context: FilterByMapExtentActionContext) => {
     return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayNameTooltip', {
       defaultMessage:
-        'As you zoom and pan your map, update {containerLabel} panels to only include data that is visible in your map',
+        'As you zoom and pan the map, the {containerLabel} updates to display only the data visible in the map bounds.',
       values: { containerLabel: getContainerLabel(context.embeddable) },
     });
   },
