@@ -31,7 +31,7 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
-import { getCommandNameWithArgs } from '../utils';
+import { getCommandNameWithArgs } from '../service/utils';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`

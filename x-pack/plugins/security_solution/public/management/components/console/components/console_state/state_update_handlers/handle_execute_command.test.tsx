@@ -35,7 +35,7 @@ describe('When a Console command is entered by the user', () => {
       expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
         // `+2` to account for builtin commands
         // `+2` to account for builtin generic args
-        commands.length + 2 + 2
+        commands.length + 4
       );
     });
   });

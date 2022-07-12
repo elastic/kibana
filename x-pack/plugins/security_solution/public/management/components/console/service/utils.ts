@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CommandArgs, CommandDefinition } from './types';
+import type { CommandArgs, CommandDefinition } from '../types';
 
 export const getCommandNameWithArgs = (command: Partial<CommandDefinition>) => {
   if (!command.mustHaveArgs || !command.args) {
