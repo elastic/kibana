@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import {
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-
-import { SEARCH_INDICES_PATH } from '../routes';
+import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
 
 import { generateNavLink } from './nav_link_helpers';
 
@@ -27,16 +27,12 @@ export const useEnterpriseSearchNav = () => {
         defaultMessage: 'Overview',
       }),
       ...generateNavLink({
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
         shouldNotCreateHref: true,
+        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       }),
     },
     {
       id: 'content',
-      emphasize: true,
-      name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
-        defaultMessage: 'Content',
-      }),
       items: [
         {
           id: 'search_indices',
@@ -44,18 +40,18 @@ export const useEnterpriseSearchNav = () => {
             defaultMessage: 'Indices',
           }),
           ...generateNavLink({
-            to: SEARCH_INDICES_PATH,
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
           }),
         },
       ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
+        defaultMessage: 'Content',
+      }),
     },
     {
       id: 'search_experiences',
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-        defaultMessage: 'Search experiences',
-      }),
       items: [
         {
           id: 'elasticsearch',
@@ -63,8 +59,8 @@ export const useEnterpriseSearchNav = () => {
             defaultMessage: 'Elasticsearch',
           }),
           ...generateNavLink({
-            to: ELASTICSEARCH_PLUGIN.URL,
             shouldNotCreateHref: true,
+            to: ELASTICSEARCH_PLUGIN.URL,
           }),
         },
         {
@@ -73,8 +69,8 @@ export const useEnterpriseSearchNav = () => {
             defaultMessage: 'App Search',
           }),
           ...generateNavLink({
-            to: APP_SEARCH_PLUGIN.URL,
             shouldNotCreateHref: true,
+            to: APP_SEARCH_PLUGIN.URL,
           }),
         },
         {
@@ -83,11 +79,14 @@ export const useEnterpriseSearchNav = () => {
             defaultMessage: 'Workplace Search',
           }),
           ...generateNavLink({
-            to: WORKPLACE_SEARCH_PLUGIN.URL,
             shouldNotCreateHref: true,
+            to: WORKPLACE_SEARCH_PLUGIN.URL,
           }),
         },
       ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+        defaultMessage: 'Search experiences',
+      }),
     },
   ];
 

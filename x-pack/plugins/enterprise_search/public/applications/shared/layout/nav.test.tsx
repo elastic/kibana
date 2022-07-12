@@ -15,45 +15,41 @@ describe('useEnterpriseSearchContentNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {
     expect(useEnterpriseSearchNav()).toEqual([
       {
+        href: '/app/enterprise_search/overview',
         id: 'es_overview',
         name: 'Overview',
-        emphasize: true,
-        items: undefined,
-        href: '/app/enterprise_search/overview',
       },
       {
         id: 'content',
-        name: 'Content',
-        emphasize: true,
-        href: '/',
         items: [
           {
-            href: '/search_indices',
+            href: '/app/enterprise_search/content/search_indices',
             id: 'search_indices',
-            items: [],
-            name: 'Search indices',
-          },
-          {
-            href: '/settings',
-            id: 'settings',
-            items: undefined,
-            name: 'Settings',
+            name: 'Indices',
           },
         ],
+        name: 'Content',
       },
       {
-        id: 'app_search',
-        name: 'App Search',
-        emphasize: true,
-        items: undefined,
-        href: '/app/enterprise_search/app_search',
-      },
-      {
-        id: 'workplace_search',
-        name: 'Workplace Search',
-        emphasize: true,
-        items: undefined,
-        href: '/app/enterprise_search/workplace_search',
+        id: 'search_experiences',
+        name: 'Search experiences',
+        items: [
+          {
+            href: '/app/enterprise_search/elasticsearch',
+            id: 'elasticsearch',
+            name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/app_search',
+            id: 'app_search',
+            name: 'App Search',
+          },
+          {
+            href: '/app/enterprise_search/workplace_search',
+            id: 'workplace_search',
+            name: 'Workplace Search',
+          },
+        ],
       },
     ]);
   });
