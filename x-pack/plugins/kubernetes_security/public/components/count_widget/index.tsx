@@ -54,7 +54,7 @@ export const CountWidget = ({
   );
 
   const countValue = useMemo((): number => {
-    return data ? data?.pages[0] : 0;
+    return data ? Number(data?.pages[0]) : 0;
   }, [data]);
 
   const formattedNumber = useMemo((): string => {
