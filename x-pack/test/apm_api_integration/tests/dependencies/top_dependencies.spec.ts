@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../../utils';
 
-type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_backends'>;
+type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_dependencies'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/dependencies/top_backends',
+      endpoint: 'GET /internal/apm/dependencies/top_dependencies',
       params: {
         query: {
           start: new Date(start).toISOString(),
@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles empty state', async () => {
         const { status, body } = await callApi();
         expect(status).to.be(200);
-        expect(body.backends).to.empty();
+        expect(body.dependencies).to.empty();
       });
     }
   );
@@ -65,12 +65,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         after(() => synthtraceEsClient.clean());
 
         it('returns an array of dependencies', () => {
-          expect(topDependencies).to.have.property('backends');
-          expect(topDependencies.backends).to.have.length(1);
+          expect(topDependencies).to.have.property('dependencies');
+          expect(topDependencies.dependencies).to.have.length(1);
         });
 
         it('returns correct dependency information', () => {
-          const location = topDependencies.backends[0].location as BackendNode;
+          const location = topDependencies.dependencies[0].location as BackendNode;
           const { span } = dataConfig;
 
           expect(location.type).to.be(NodeType.backend);
@@ -81,24 +81,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('returns the correct stats', () => {
-          let backends: TopDependencies['backends'][number];
+          let dependencies: TopDependencies['dependencies'][number];
 
           before(() => {
-            backends = topDependencies.backends[0];
+            dependencies = topDependencies.dependencies[0];
           });
 
           it("doesn't have previous stats", () => {
-            expect(backends.previousStats).to.be(null);
+            expect(dependencies.previousStats).to.be(null);
           });
 
           it('has an "impact" property', () => {
-            expect(backends.currentStats).to.have.property('impact');
+            expect(dependencies.currentStats).to.have.property('impact');
           });
 
           it('returns the correct latency', () => {
             const {
               currentStats: { latency },
-            } = backends;
+            } = dependencies;
 
             const { transaction } = dataConfig;
 
@@ -111,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('returns the correct throughput', () => {
             const {
               currentStats: { throughput },
-            } = backends;
+            } = dependencies;
             const { rate } = dataConfig;
 
             expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
@@ -120,7 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('returns the correct total time', () => {
             const {
               currentStats: { totalTime },
-            } = backends;
+            } = dependencies;
             const { rate, transaction } = dataConfig;
 
             expect(
@@ -131,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('returns the correct error rate', () => {
             const {
               currentStats: { errorRate },
-            } = backends;
+            } = dependencies;
             expect(errorRate.value).to.be(0);
             expect(errorRate.timeseries.every(({ y }) => y === 0)).to.be(true);
           });

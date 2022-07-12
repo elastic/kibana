@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const [topBackendsAPIResponse, backendThroughputChartAPIResponse, upstreamServicesApiResponse] =
       await Promise.all([
         apmApiClient.readUser({
-          endpoint: `GET /internal/apm/dependencies/top_backends`,
+          endpoint: `GET /internal/apm/dependencies/top_dependencies`,
           params: {
             query: {
               ...commonQuery,

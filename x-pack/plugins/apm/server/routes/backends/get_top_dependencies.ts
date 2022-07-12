@@ -12,7 +12,7 @@ import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { Setup } from '../../lib/helpers/setup_request';
 
-export async function getTopBackends({
+export async function getTopDependencies({
   setup,
   start,
   end,

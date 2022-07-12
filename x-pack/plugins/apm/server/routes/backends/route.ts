@@ -12,7 +12,7 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getMetadataForBackend } from './get_metadata_for_backend';
 import { getLatencyChartsForBackend } from './get_latency_charts_for_backend';
-import { getTopBackends } from './get_top_backends';
+import { getTopDependencies } from './get_top_dependencies';
 import { getUpstreamServicesForBackend } from './get_upstream_services_for_backend';
 import { getThroughputChartsForBackend } from './get_throughput_charts_for_backend';
 import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
@@ -27,7 +27,7 @@ import { OverallLatencyDistributionResponse } from '../latency_distribution/type
 import { BackendSpan, getTopBackendSpans } from './get_top_backend_spans';
 
 const topDependenciesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/dependencies/top_backends',
+  endpoint: 'GET /internal/apm/dependencies/top_dependencies',
   params: t.intersection([
     t.type({
       query: t.intersection([
@@ -47,7 +47,7 @@ const topDependenciesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    backends: Array<{
+    dependencies: Array<{
       currentStats: {
         latency: {
           value: number | null;
@@ -103,16 +103,16 @@ const topDependenciesRoute = createApmServerRoute({
 
     const opts = { setup, start, end, numBuckets, environment, kuery };
 
-    const [currentBackends, previousBackends] = await Promise.all([
-      getTopBackends(opts),
-      offset ? getTopBackends({ ...opts, offset }) : Promise.resolve([]),
+    const [currentDependencies, previousDependencies] = await Promise.all([
+      getTopDependencies(opts),
+      offset ? getTopDependencies({ ...opts, offset }) : Promise.resolve([]),
     ]);
 
     return {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      backends: currentBackends.map((backend) => {
+      dependencies: currentDependencies.map((backend) => {
         const { stats, ...rest } = backend;
-        const prev = previousBackends.find(
+        const prev = previousDependencies.find(
           (item): boolean => item.location.id === backend.location.id
         );
         return {

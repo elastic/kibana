@@ -39,7 +39,7 @@ export function BackendInventoryDependenciesTable() {
         return;
       }
 
-      return callApmApi('GET /internal/apm/dependencies/top_backends', {
+      return callApmApi('GET /internal/apm/dependencies/top_dependencies', {
         params: {
           query: {
             start,
@@ -59,7 +59,7 @@ export function BackendInventoryDependenciesTable() {
   );
 
   const dependencies =
-    data?.backends.map((dependency) => {
+    data?.dependencies.map((dependency) => {
       const { location } = dependency;
       const name = getNodeName(location);
 
