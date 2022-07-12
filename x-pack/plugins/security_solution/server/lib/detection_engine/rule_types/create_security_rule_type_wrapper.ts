@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import agent from 'elastic-apm-node';
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -79,7 +80,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let hasError = false;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
+          const {
+            from,
+            maxSignals,
+            meta,
+            ruleId,
+            timestampOverride,
+            timestampOverrideFallbackDisabled,
+            to,
+          } = params;
           const {
             alertWithPersistence,
             savedObjectsClient,
@@ -142,6 +151,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
+          const primaryTimestamp = timestampOverride ?? TIMESTAMP;
+          const secondaryTimestamp =
+            primaryTimestamp !== TIMESTAMP && !timestampOverrideFallbackDisabled
+              ? TIMESTAMP
+              : undefined;
+
           /**
            * Data Views Logic
            * Use of data views is supported for all rules other than ML.
@@ -180,8 +195,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // so that we can use it in create rules route, bulk, etc.
           try {
             if (!isMachineLearningParams(params)) {
-              const hasTimestampOverride = !!timestampOverride;
-
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
               wroteWarningStatus = await hasReadIndexPrivileges({
@@ -197,9 +210,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   services.scopedClusterClient.asCurrentUser.fieldCaps(
                     {
                       index: inputIndex,
-                      fields: hasTimestampOverride
-                        ? ['@timestamp', timestampOverride]
-                        : ['@timestamp'],
+                      fields: secondaryTimestamp
+                        ? [primaryTimestamp, secondaryTimestamp]
+                        : [primaryTimestamp],
                       include_unmapped: true,
                       runtime_mappings: runtimeMappings,
                     },
@@ -208,7 +221,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 );
 
                 wroteWarningStatus = await hasTimestampFields({
-                  timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
+                  timestampField: primaryTimestamp,
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
@@ -309,6 +322,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   wrapHits,
                   wrapSequences,
                   ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                  primaryTimestamp,
+                  secondaryTimestamp,
                 },
               });
 

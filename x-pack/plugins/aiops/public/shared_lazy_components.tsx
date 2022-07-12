@@ -11,7 +11,9 @@ import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
 
 import type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
 
-const ExplainLogRateSpikesLazy = React.lazy(() => import('./components/explain_log_rate_spikes'));
+const ExplainLogRateSpikesWrapperLazy = React.lazy(
+  () => import('./components/explain_log_rate_spikes')
+);
 
 const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
@@ -25,6 +27,6 @@ const LazyWrapper: FC = ({ children }) => (
  */
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => (
   <LazyWrapper>
-    <ExplainLogRateSpikesLazy {...props} />
+    <ExplainLogRateSpikesWrapperLazy {...props} />
   </LazyWrapper>
 );
