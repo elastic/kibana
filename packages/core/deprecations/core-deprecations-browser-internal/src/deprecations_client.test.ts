@@ -8,7 +8,7 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { DeprecationsClient } from './deprecations_client';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common-internal';
+import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 
 describe('DeprecationsClient', () => {
   const http = httpServiceMock.createSetupContract();

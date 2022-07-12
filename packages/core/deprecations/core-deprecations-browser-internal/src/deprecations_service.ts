@@ -7,7 +7,7 @@
  */
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
-import { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { DeprecationsClient } from './deprecations_client';
 
