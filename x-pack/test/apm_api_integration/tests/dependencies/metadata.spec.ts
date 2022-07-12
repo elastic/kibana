@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/backends/metadata`,
+      endpoint: `GET /internal/apm/dependencies/metadata`,
       params: {
         query: {
           backendName: dataConfig.span.destination,

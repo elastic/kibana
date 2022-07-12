@@ -39,7 +39,7 @@ export function BackendInventoryDependenciesTable() {
         return;
       }
 
-      return callApmApi('GET /internal/apm/backends/top_backends', {
+      return callApmApi('GET /internal/apm/dependencies/top_backends', {
         params: {
           query: {
             start,

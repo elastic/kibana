@@ -47,7 +47,7 @@ export function BackendOperationDistributionChart() {
 
   const { status, data } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/backends/charts/distribution', {
+      return callApmApi('GET /internal/apm/dependencies/charts/distribution', {
         params: {
           query: {
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,

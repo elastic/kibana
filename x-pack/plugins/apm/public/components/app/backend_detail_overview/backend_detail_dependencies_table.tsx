@@ -41,7 +41,7 @@ export function BackendDetailDependenciesTable() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/backends/upstream_services', {
+      return callApmApi('GET /internal/apm/dependencies/upstream_services', {
         params: {
           query: {
             backendName,

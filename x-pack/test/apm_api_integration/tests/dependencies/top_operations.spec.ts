@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';
 
-type TopOperations = APIReturnType<'GET /internal/apm/backends/operations'>['operations'];
+type TopOperations = APIReturnType<'GET /internal/apm/dependencies/operations'>['operations'];
 
 const {
   ES_BULK_DURATION,
@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }) {
     return await apmApiClient
       .readUser({
-        endpoint: 'GET /internal/apm/backends/operations',
+        endpoint: 'GET /internal/apm/dependencies/operations',
         params: {
           query: {
             start: new Date(start).toISOString(),

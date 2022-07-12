@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     sampleRangeTo?: number;
   }) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/backends/operations/spans`,
+      endpoint: `GET /internal/apm/dependencies/operations/spans`,
       params: {
         query: {
           backendName,

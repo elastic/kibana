@@ -52,7 +52,7 @@ export function BackendDetailTemplate({ children }: Props) {
         return;
       }
 
-      return callApmApi('GET /internal/apm/backends/metadata', {
+      return callApmApi('GET /internal/apm/dependencies/metadata', {
         params: {
           query: {
             backendName,

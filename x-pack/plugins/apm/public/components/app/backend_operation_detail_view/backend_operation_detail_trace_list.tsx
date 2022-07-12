@@ -29,7 +29,7 @@ import { ServiceLink } from '../../shared/service_link';
 import { TimestampTooltip } from '../../shared/timestamp_tooltip';
 
 type BackendSpan = ValuesType<
-  APIReturnType<'GET /internal/apm/backends/operations/spans'>['spans']
+  APIReturnType<'GET /internal/apm/dependencies/operations/spans'>['spans']
 >;
 
 export function BackendOperationDetailTraceList() {
@@ -237,7 +237,7 @@ export function BackendOperationDetailTraceList() {
 
   const { data = { spans: [] }, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/backends/operations/spans', {
+      return callApmApi('GET /internal/apm/dependencies/operations/spans', {
         params: {
           query: {
             backendName,

@@ -49,7 +49,7 @@ export function BackendLatencyChart({
         return;
       }
 
-      return callApmApi('GET /internal/apm/backends/charts/latency', {
+      return callApmApi('GET /internal/apm/dependencies/charts/latency', {
         params: {
           query: {
             backendName,

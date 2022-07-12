@@ -51,7 +51,7 @@ export function BackendFailedTransactionRateChart({
         return;
       }
 
-      return callApmApi('GET /internal/apm/backends/charts/error_rate', {
+      return callApmApi('GET /internal/apm/dependencies/charts/error_rate', {
         params: {
           query: {
             backendName,

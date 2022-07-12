@@ -68,7 +68,7 @@ export function BackendDetailOperationsList() {
 
   const primaryStatsFetch = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/backends/operations', {
+      return callApmApi('GET /internal/apm/dependencies/operations', {
         params: {
           query: {
             backendName,
@@ -90,7 +90,7 @@ export function BackendDetailOperationsList() {
           operations: [],
         });
       }
-      return callApmApi('GET /internal/apm/backends/operations', {
+      return callApmApi('GET /internal/apm/dependencies/operations', {
         params: {
           query: {
             backendName,

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../../utils';
 
-type TopDependencies = APIReturnType<'GET /internal/apm/backends/top_backends'>;
+type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_backends'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/backends/top_backends',
+      endpoint: 'GET /internal/apm/dependencies/top_backends',
       params: {
         query: {
           start: new Date(start).toISOString(),

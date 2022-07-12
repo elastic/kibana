@@ -46,9 +46,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     metric: TMetricName;
     kuery?: string;
     environment?: string;
-  }): Promise<SupertestReturnType<`GET /internal/apm/backends/charts/${TMetricName}`>> {
+  }): Promise<SupertestReturnType<`GET /internal/apm/dependencies/charts/${TMetricName}`>> {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/backends/charts/${
+      endpoint: `GET /internal/apm/dependencies/charts/${
         metric as 'latency' | 'throughput' | 'error_rate'
       }`,
       params: {
