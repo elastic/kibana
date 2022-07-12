@@ -356,7 +356,6 @@ describe('benchmarks API', () => {
       it('should build benchmark entry agent policy and package policy', async () => {
         const packagePolicy = createPackagePolicyMock();
         const agentPolicy = createMockAgentPolicy();
-        // @ts-expect-error
         agentPolicy.agents = 3;
 
         const cspRulesStatus = {
