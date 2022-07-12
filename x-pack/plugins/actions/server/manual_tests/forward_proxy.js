@@ -15,7 +15,7 @@ const https = require('https');
 const proxySetup = require('proxy');
 
 const PROGRAM = path.basename(__filename).replace(/.js$/, '');
-const CertDir = path.resolve(__dirname, '../../../../../packages/kbn-dev-utils/certs', )
+const CertDir = path.resolve(__dirname, '../../../../../packages/kbn-dev-utils/certs');
 
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');
@@ -51,18 +51,18 @@ async function createServer(protocol, port, auth) {
 
   proxySetup(proxyServer);
 
-  let authLabel = ''
+  let authLabel = '';
   if (auth) {
-    authLabel = `${Auth}@`
+    authLabel = `${Auth}@`;
     proxyServer.authenticate = (req, callback) => {
       const auth = req.headers['proxy-authorization'];
       callback(null, auth === `Basic ${AuthB64}`);
     };
   }
 
-  const serverLabel = `${protocol}://${authLabel}localhost:${port}`
+  const serverLabel = `${protocol}://${authLabel}localhost:${port}`;
   proxyServer.listen(port, 'localhost', () => {
-    console.log(`proxy server started on ${serverLabel}`)
+    console.log(`proxy server started on ${serverLabel}`);
   });
 }
 

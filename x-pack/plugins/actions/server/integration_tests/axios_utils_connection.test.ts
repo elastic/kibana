@@ -22,10 +22,7 @@ import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
 import { ActionsConfig } from '../config';
-import {
-  ActionsConfigurationUtilities,
-  getActionsConfigurationUtilities,
-} from '../actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -246,12 +243,14 @@ describe('axios connections', () => {
             }
 
             if (targetHttps) {
-              test(`missing CA;                ${testName}`, async () => await missingCaProxyTest(opts));
+              test(`missing CA;                ${testName}`, async () =>
+                await missingCaProxyTest(opts));
 
               test(`rejectUnauthorized target; ${testName}`, async () =>
                 await rejectUnauthorizedTargetProxyTest(opts));
 
-              test(`custom CA target;          ${testName}`, async () => await customCAProxyTest(opts));
+              test(`custom CA target;          ${testName}`, async () =>
+                await customCAProxyTest(opts));
 
               test(`verModeNone target;        ${testName}`, async () =>
                 await verModeNoneTargetProxyTest(opts));
