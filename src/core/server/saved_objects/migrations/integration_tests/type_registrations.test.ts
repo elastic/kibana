@@ -99,6 +99,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'space',
   'spaces-usage-stats',
+  'synthetics-privates-locations',
   'tag',
   'task',
   'telemetry',
