@@ -32,10 +32,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: functionalConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      useDedicatedTaskRunner: true,
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--server.uuid=66674e49-541a-4621-9fe0-9ef4a876842b',
         '--telemetry.optIn=true',
         `--plugin-path=${path.resolve(__dirname, './fixtures/plugins/analytics_plugin_a')}`,
         `--plugin-path=${path.resolve(__dirname, './fixtures/plugins/analytics_ftr_helpers')}`,
