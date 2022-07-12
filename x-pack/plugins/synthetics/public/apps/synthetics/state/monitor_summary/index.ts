@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+
 import { getMonitorStatusAction, setMonitorSummaryLocationAction } from './actions';
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 export interface MonitorSummaryState {
   data: Ping | null;

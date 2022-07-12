@@ -73,7 +73,6 @@ const RulesPageComponent: React.FC = () => {
   const {
     createPrePackagedRules,
     loadingCreatePrePackagedRules,
-    refetchPrePackagedRulesStatus,
     rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
@@ -106,9 +105,8 @@ const RulesPageComponent: React.FC = () => {
     if (createPrePackagedRules != null) {
       startTransaction({ name: RULES_TABLE_ACTIONS.LOAD_PREBUILT });
       await createPrePackagedRules();
-      invalidateRules();
     }
-  }, [createPrePackagedRules, invalidateRules, startTransaction]);
+  }, [createPrePackagedRules, startTransaction]);
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
   // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
@@ -124,14 +122,6 @@ const RulesPageComponent: React.FC = () => {
       await handleCreatePrePackagedRules();
     }
   }, [handleCreatePrePackagedRules, legacyJobsInstalled.length]);
-
-  const handleRefetchPrePackagedRulesStatus = useCallback(() => {
-    if (refetchPrePackagedRulesStatus != null) {
-      return refetchPrePackagedRulesStatus();
-    } else {
-      return Promise.resolve();
-    }
-  }, [refetchPrePackagedRulesStatus]);
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
@@ -208,9 +198,7 @@ const RulesPageComponent: React.FC = () => {
         showCheckBox
       />
 
-      <RulesTableContextProvider
-        refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
-      >
+      <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
