@@ -28,6 +28,9 @@
         ],
         "summary": "Synchronizes Kibana saved objects for machine learning jobs and trained models.",
         "description": "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
+        "tags": [
+          "ml"
+        ],
         "parameters": [
           {
             "name": "simulate",
@@ -62,6 +65,9 @@
         ],
         "summary": "Synchronizes Kibana saved objects for machine learning jobs and trained models.",
         "description": "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
+        "tags": [
+          "ml"
+        ],
         "parameters": [
           {
             "name": "simulate",

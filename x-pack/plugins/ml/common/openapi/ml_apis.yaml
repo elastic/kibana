@@ -19,6 +19,8 @@ paths:
         Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
+      tags:
+        - ml
       parameters:
         - $ref: '#/components/parameters/spaceParam'
         - $ref: '#/components/parameters/simulateParam'
@@ -34,10 +36,12 @@ paths:
                   $ref: '#/components/examples/syncExample'
   /api/ml/saved_objects/sync:
     get:
+      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
       description: >
-        Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
+      tags:
+        - ml
       parameters:
         - $ref: '#/components/parameters/simulateParam'
       responses:

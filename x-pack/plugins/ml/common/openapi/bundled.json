@@ -25,6 +25,9 @@
       "get": {
         "summary": "Synchronizes Kibana saved objects for machine learning jobs and trained models.",
         "description": "Synchronizes Kibana saved objects for machine learning jobs and trained models. You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
+        "tags": [
+          "ml"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/spaceParam"
@@ -54,7 +57,11 @@
     },
     "/api/ml/saved_objects/sync": {
       "get": {
-        "description": "Synchronizes Kibana saved objects for machine learning jobs and trained models. You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
+        "summary": "Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.",
+        "description": "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
+        "tags": [
+          "ml"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/simulateParam"
