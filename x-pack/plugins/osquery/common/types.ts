@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type {
-  PackagePolicy,
-  PackagePolicyInput,
-  PackagePolicyInputStream,
-} from '@kbn/fleet-plugin/common';
-
 export const savedQuerySavedObjectType = 'osquery-saved-query';
 export const packSavedObjectType = 'osquery-pack';
 export const packAssetSavedObjectType = 'osquery-pack-asset';

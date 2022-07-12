@@ -19,7 +19,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { OsqueryManagerPackagePolicy } from '../../../common/types';
 import {
   Form,
   useForm,
@@ -71,9 +70,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const { form } = useForm<
-    PackItem
-  >({
+  const { form } = useForm<PackItem>({
     id: FORM_ID,
     schema: {
       name: {

@@ -26,10 +26,7 @@ export const convertPackQueriesToSO = (queries) =>
     []
   );
 
-export const convertSOQueriesToPack = (
-  queries: P,
-  options?: { removeMultiLines?: boolean }
-) =>
+export const convertSOQueriesToPack = (queries: P, options?: { removeMultiLines?: boolean }) =>
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention
