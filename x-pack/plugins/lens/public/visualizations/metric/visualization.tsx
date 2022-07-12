@@ -21,8 +21,9 @@ import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
+import { MetricDimensionEditor } from './dimension_editor';
 
-interface MetricVisualizationState {
+export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
   metricAccessor?: string;
@@ -323,7 +324,7 @@ export const getMetricVisualization = ({
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
-          <div>Im a dimension editor</div>
+          <MetricDimensionEditor {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
