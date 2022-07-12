@@ -10,7 +10,7 @@ import type { ConsoleTestSetup } from '../../mocks';
 import { getConsoleTestSetup } from '../../mocks';
 import type { ConsoleProps } from '../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('When entering data into the Console input', () => {
@@ -90,6 +90,30 @@ describe('When entering data into the Console input', () => {
     enterCommand('abc ', { inputOnly: true });
 
     expect(getFooterText()).toEqual('Unknown command abc');
+  });
+
+  it('should show the arrow button as not disabled if input has text entered', () => {
+    render();
+    enterCommand('cm ', { inputOnly: true });
+
+    const arrowButton = renderResult.getByTestId('inputTextSubmitButton');
+    expect(arrowButton).not.toBeDisabled();
+  });
+
+  it('should show the arrow button as disabled if input area is blank', () => {
+    render();
+
+    const arrowButton = renderResult.getByTestId('inputTextSubmitButton');
+    expect(arrowButton).toBeDisabled();
+  });
+
+  it('should execute correct command if arrow button is clicked', () => {
+    render();
+    enterCommand('isolate', { inputOnly: true });
+    act(() => {
+      renderResult.getByTestId('inputTextSubmitButton').click();
+    });
+    expect(renderResult.getByTestId('test-userCommandText').textContent).toEqual('isolate');
   });
 
   it('should display the input history popover when UP key is pressed', async () => {
