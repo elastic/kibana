@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-shared-ux-components"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-components"
+PKG_DIRNAME = "solution_nav"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-page-solution-nav"
 
 SOURCE_FILES = glob(
   [
@@ -11,10 +11,10 @@ SOURCE_FILES = glob(
     "src/**/*.tsx",
     "src/**/*.scss",
     "src/**/*.mdx",
-    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -41,23 +41,12 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
   "@npm//classnames",
-  "@npm//react-use",
-  "@npm//react",
-  "@npm//rxjs",
-  "@npm//url-loader",
+  "@npm//enzyme",
+  "@npm//react",\
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
-  "//packages/kbn-shared-ux-services",
-  "//packages/kbn-shared-ux-storybook",
-  "//packages/kbn-shared-ux-utility",
   "//packages/shared-ux/avatar/solution",
-  "//packages/shared-ux/card/no_data",
-  "//packages/shared-ux/link/redirect_app",
-  "//packages/shared-ux/page/solution_nav",
-  "//packages/shared-ux/prompt/no_data_views",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -71,25 +60,15 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
   "@npm//@types/classnames",
+  "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
-  "@npm//react-use",
-  "@npm//rxjs",
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
-  "//packages/kbn-shared-ux-utility:npm_module_types",
   "//packages/shared-ux/avatar/solution:npm_module_types",
-  "//packages/shared-ux/card/no_data:npm_module_types",
-  "//packages/shared-ux/link/redirect_app:npm_module_types",
-  "//packages/shared-ux/page/solution_nav:npm_module_types",
-  "//packages/shared-ux/prompt/no_data_views:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -124,7 +103,6 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

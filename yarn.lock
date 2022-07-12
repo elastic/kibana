@@ -3560,6 +3560,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views":
   version "0.0.0"
   uid ""
@@ -7136,6 +7140,10 @@
   uid ""
 
 "@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav/npm_module_types":
   version "0.0.0"
   uid ""
 
