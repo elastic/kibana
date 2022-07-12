@@ -21,17 +21,17 @@ export const DASHBOARDS_PAGE_TITLE = i18n.translate(
   }
 );
 
-export const DASHBOARDS_PAGE_SECTION_FAVORITE = i18n.translate(
-  'xpack.securitySolution.landing.dashboards.section.favorite',
+export const DASHBOARDS_PAGE_SECTION_DEFAULT = i18n.translate(
+  'xpack.securitySolution.landing.dashboards.section.default',
   {
-    defaultMessage: 'FAVORITE',
+    defaultMessage: 'DEFAULT',
   }
 );
 
-export const DASHBOARDS_PAGE_SECTION_ALL = i18n.translate(
-  'xpack.securitySolution.landing.dashboards.section.all',
+export const DASHBOARDS_PAGE_SECTION_CUSTOM = i18n.translate(
+  'xpack.securitySolution.landing.dashboards.section.custom',
   {
-    defaultMessage: 'ALL',
+    defaultMessage: 'CUSTOM',
   }
 );
 

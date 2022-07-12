@@ -24,14 +24,14 @@ export const DashboardsLandingPage = () => {
       <EuiSpacer size="s" />
 
       <EuiTitle size="xxxs">
-        <h2>{i18n.DASHBOARDS_PAGE_SECTION_FAVORITE}</h2>
+        <h2>{i18n.DASHBOARDS_PAGE_SECTION_DEFAULT}</h2>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="xxl" />
 
       <EuiTitle size="xxxs">
-        <h2>{i18n.DASHBOARDS_PAGE_SECTION_ALL}</h2>
+        <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <EuiSpacer size="m" />
