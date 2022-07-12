@@ -340,7 +340,7 @@ export const AvailablePackages: React.FC<{
               })}
               description={i18n.translate('xpack.fleet.featuredObsDesc', {
                 defaultMessage:
-                  'Monitor, detect and diagnose complex application performance issues',
+                  'Monitor, detect, and diagnose complex application performance issues.',
               })}
               href={addBasePath('/app/home#/tutorial/apm')}
               icon={<EuiIcon type="logoObservability" size="xxl" />}
