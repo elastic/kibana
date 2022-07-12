@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _, { each, reject } from 'lodash';
+import _, { cloneDeep, each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
@@ -285,13 +285,13 @@ export class DataView implements DataViewBase {
       version: this.version,
       title: this.title,
       timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters,
+      sourceFilters: [...(this.sourceFilters || [])],
       fields,
       typeMeta: this.typeMeta,
       type: this.type,
-      fieldFormats: this.fieldFormatMap,
-      runtimeFieldMap: this.runtimeFieldMap,
-      fieldAttrs: this.fieldAttrs,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs: cloneDeep(this.fieldAttrs),
       allowNoIndex: this.allowNoIndex,
       name: this.name,
     };
