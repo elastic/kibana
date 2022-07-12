@@ -410,7 +410,7 @@ export type {
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
 } from './deprecations';
-
+export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 export type { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
