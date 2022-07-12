@@ -47,7 +47,6 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-
   const agent = await getAgentById(esClient, request.params.agentId);
 
   if (agent.unenrollment_started_at || agent.unenrolled_at) {

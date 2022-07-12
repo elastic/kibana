@@ -145,37 +145,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
       });
-      it('should write default source_uri to actions if is not passed as parameter', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        await es.update({
-          id: 'agent1',
-          refresh: 'wait_for',
-          index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
-          },
-        });
-        await supertest
-          .post(`/api/fleet/agents/agent1/upgrade`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            version: kibanaVersion,
-          })
-          .expect(200);
-        const res = await supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx');
-        expect(typeof res.body.item.upgrade_started_at).to.be('string');
-        const actionsRes = await es.search({
-          index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
-        });
-        const action: any = actionsRes.hits.hits[0]._source;
-
-        expect(action.data.source_uri).contain('http://custom-registry-test');
-      });
       it('should respond 200 if trying to upgrade with source_uri set', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await es.update({
@@ -899,51 +868,6 @@ export default function (providerContext: FtrProviderContext) {
         const action: any = actionsRes.hits.hits[0]._source;
 
         expect(action.data.source_uri).contain('http://path/to/download');
-      });
-
-      it('should write default source_uri to actions if is not passed as parameter', async () => {
-        await es.update({
-          id: 'agent1',
-          refresh: 'wait_for',
-          index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
-          },
-        });
-        await es.update({
-          id: 'agent2',
-          refresh: 'wait_for',
-          index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: false, version: '0.0.0' },
-                },
-              },
-            },
-          },
-        });
-        await supertest
-          .post(`/api/fleet/agents/bulk_upgrade`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            version: fleetServerVersion,
-            agents: ['agent1', 'agent2'],
-          })
-          .expect(200);
-
-        const actionsRes = await es.search({
-          index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
-        });
-        const action: any = actionsRes.hits.hits[0]._source;
-
-        expect(action.data.source_uri).contain('http://custom-registry-test');
       });
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
