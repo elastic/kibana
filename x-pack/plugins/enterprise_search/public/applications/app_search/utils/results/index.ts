@@ -6,7 +6,19 @@
  */
 
 function isFieldValueWrapper(object: object): boolean {
-  return object && (object.hasOwnProperty('raw') || object.hasOwnProperty('snippet'));
+  return object && Object.entries(object).reduce((isValueWrapper: boolean, [k, v]) => {
+    if ((k !== 'raw' && k !== 'snippet')) {
+      return false;
+    }
+
+    if (v === null) {
+      return isValueWrapper;
+    }
+
+    return (Array.isArray(v) ? v : []).reduce((isScalar, currentValue) => {
+      return isScalar && typeof currentValue !== 'object'
+    }, isValueWrapper);
+  }, true);
 }
 
 // Returns true for objects like this:
@@ -18,7 +30,7 @@ function isFieldValueWrapper(object: object): boolean {
 // objectField: { raw: "one" }
 function isNestedFieldValue(fiedlValue: object | object[]): boolean {
   if (Array.isArray(fiedlValue)) {
-    fiedlValue.map(isNestedFieldValue).reduce((acc, current) => acc || current, false);
+    return fiedlValue.reduce((acc: boolean, current) => acc || isNestedFieldValue(current), false);
   }
 
   return typeof fiedlValue === "object" && !isFieldValueWrapper(fiedlValue);
@@ -32,7 +44,7 @@ function cleanValueWrappers(value: object | object[]) : object {
     return value.map(cleanValueWrappers);
   }
 
-  if (isFieldValueWrapper(value)) {
+  if (typeof value === 'object' && isFieldValueWrapper(value)) {
     return (value as { raw: object }).raw;
   }
 
