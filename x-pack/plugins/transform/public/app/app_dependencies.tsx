@@ -27,6 +27,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
@@ -48,6 +49,7 @@ export interface AppDependencies {
   ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  savedObjectTagging?: SavedObjectTaggingPluginStart;
 }
 
 export const useAppDependencies = () => {

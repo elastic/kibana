@@ -19,7 +19,8 @@
     "security",
     "usageCollection",
     "spaces",
-    "alerting"
+    "alerting",
+    "savedObjectsTagging"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [

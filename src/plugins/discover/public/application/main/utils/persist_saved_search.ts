@@ -82,7 +82,12 @@ export async function persistSavedSearch(
       : undefined;
 
   try {
-    const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
+    const id = await saveSavedSearch(
+      savedSearch,
+      saveOptions,
+      services.core.savedObjects.client,
+      services.savedObjectsTagging
+    );
     if (id) {
       onSuccess(id);
     }

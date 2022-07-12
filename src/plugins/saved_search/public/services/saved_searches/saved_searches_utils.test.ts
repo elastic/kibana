@@ -25,13 +25,12 @@ describe('saved_searches_utils', () => {
         sort: [],
         columns: ['a', 'b'],
         description: 'foo',
-        tags: [],
         grid: {},
         hideChart: true,
         isTextBasedQuery: false,
       };
 
-      expect(fromSavedSearchAttributes('id', attributes, createSearchSourceMock(), {}))
+      expect(fromSavedSearchAttributes('id', attributes, [], createSearchSourceMock(), {}))
         .toMatchInlineSnapshot(`
         Object {
           "columns": Array [

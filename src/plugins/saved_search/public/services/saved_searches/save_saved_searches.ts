@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { SavedObjectsStart } from '@kbn/core/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchAttributes } from './types';
 
 import { SAVED_SEARCH_TYPE } from './constants';
@@ -42,7 +43,8 @@ const hasDuplicatedTitle = async (
 export const saveSavedSearch = async (
   savedSearch: SavedSearch,
   options: SaveSavedSearchOptions,
-  savedObjectsClient: SavedObjectsStart['client']
+  savedObjectsClient: SavedObjectsStart['client'],
+  savedObjectsTagging: SavedObjectsTaggingApi | undefined
 ): Promise<string | undefined> => {
   const isNew = options.copyOnSave || !savedSearch.id;
 
@@ -58,7 +60,10 @@ export const saveSavedSearch = async (
     }
   }
 
-  const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
+  const { searchSourceJSON, references: originalReferences } = savedSearch.searchSource.serialize();
+  const references = savedObjectsTagging
+    ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
+    : originalReferences;
   const resp = isNew
     ? await savedObjectsClient.create<SavedSearchAttributes>(
         SAVED_SEARCH_TYPE,

@@ -28,7 +28,6 @@ export interface SavedSearchAttributes {
   sort: Array<[string, string]>;
   columns: string[];
   description: string;
-  tags: string[];
   grid: {
     columns?: Record<string, DiscoverGridSettingsColumn>;
   };

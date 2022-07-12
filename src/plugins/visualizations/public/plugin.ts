@@ -88,6 +88,7 @@ import {
   setTheme,
   setExecutionContext,
   setFieldFormats,
+  setSavedObjectTagging,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 
@@ -376,6 +377,10 @@ export class VisualizationsPlugin
 
     if (spaces) {
       setSpaces(spaces);
+    }
+
+    if (savedObjectsTaggingOss) {
+      setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
     return {
