@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiLink,
   EuiTitle,
   EuiFlexGroup,

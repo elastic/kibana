@@ -120,6 +120,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           ],
         },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         discover_alert: {
           kibana: [
             {
@@ -128,6 +138,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 stackAlerts: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
+                indexPatterns: ['all'],
               },
               spaces: ['*'],
             },

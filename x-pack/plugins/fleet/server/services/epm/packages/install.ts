@@ -19,31 +19,41 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
 
+import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
+
 import type {
   BulkInstallPackageInfo,
   EpmPackageInstallStatus,
+  EsAssetReference,
   InstallablePackage,
+  Installation,
+  InstallResult,
   InstallSource,
-} from '../../../../common';
+  InstallType,
+  KibanaAssetType,
+  PackageVerificationResult,
+} from '../../../types';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../..';
-import type { Installation, EsAssetReference, InstallType, InstallResult } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
   unpackBufferToCache,
+  deleteVerificationResult,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
+
+import { formatVerificationResultForSO } from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
@@ -214,6 +224,13 @@ interface InstallRegistryPackageParams {
   force?: boolean;
   ignoreConstraints?: boolean;
 }
+interface InstallUploadedArchiveParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  archiveBuffer: Buffer;
+  contentType: string;
+  spaceId: string;
+}
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
   return {
@@ -268,11 +285,11 @@ async function installPackageFromRegistry({
     });
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo }] = await Promise.all([
+    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
       }),
-      Registry.getRegistryPackage(pkgName, pkgVersion),
+      Registry.getRegistryPackage(pkgName, pkgVersion, { ignoreUnverified: force }),
     ]);
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -343,6 +360,7 @@ async function installPackageFromRegistry({
       packageInfo,
       installType,
       spaceId,
+      verificationResult,
       installSource: 'registry',
     })
       .then(async (assets) => {
@@ -389,14 +407,6 @@ async function installPackageFromRegistry({
   }
 }
 
-interface InstallUploadedArchiveParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  archiveBuffer: Buffer;
-  contentType: string;
-  spaceId: string;
-}
-
 async function installPackageByUpload({
   savedObjectsClient,
   esClient,
@@ -434,10 +444,11 @@ async function installPackageByUpload({
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     const installSource = 'upload';
+    // as we do not verify uploaded packages, we must invalidate the verification cache
+    deleteVerificationResult(packageInfo);
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
       version: packageInfo.version,
-      installSource,
       archiveBuffer,
       contentType,
     });
@@ -579,13 +590,41 @@ export const updateInstallStatus = async ({
   });
 };
 
+export async function restartInstallation(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  pkgVersion: string;
+  installSource: InstallSource;
+  verificationResult?: PackageVerificationResult;
+}) {
+  const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
+
+  let savedObjectUpdate: Partial<Installation> = {
+    install_version: pkgVersion,
+    install_status: 'installing',
+    install_started_at: new Date().toISOString(),
+    install_source: installSource,
+  };
+
+  if (verificationResult) {
+    savedObjectUpdate = {
+      ...savedObjectUpdate,
+      verification_key_id: null, // unset any previous verification key id
+      ...formatVerificationResultForSO(verificationResult),
+    };
+  }
+
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
+}
+
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
   installSource: InstallSource;
   spaceId: string;
+  verificationResult?: PackageVerificationResult;
 }) {
-  const { savedObjectsClient, packageInfo, installSource } = options;
+  const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
@@ -598,22 +637,30 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
+  let savedObject: Installation = {
+    installed_kibana: [],
+    installed_kibana_space_id: options.spaceId,
+    installed_es: [],
+    package_assets: [],
+    es_index_patterns: toSaveESIndexPatterns,
+    name: pkgName,
+    version: pkgVersion,
+    install_version: pkgVersion,
+    install_status: 'installing',
+    install_started_at: new Date().toISOString(),
+    install_source: installSource,
+    install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+    keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
+    verification_status: 'unknown',
+  };
+
+  if (verificationResult) {
+    savedObject = { ...savedObject, ...formatVerificationResultForSO(verificationResult) };
+  }
+
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    {
-      installed_kibana: [],
-      installed_kibana_space_id: options.spaceId,
-      installed_es: [],
-      package_assets: [],
-      es_index_patterns: toSaveESIndexPatterns,
-      name: pkgName,
-      version: pkgVersion,
-      install_version: pkgVersion,
-      install_status: 'installing',
-      install_started_at: new Date().toISOString(),
-      install_source: installSource,
-      keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
-    },
+    savedObject,
     { id: pkgName, overwrite: true }
   );
 

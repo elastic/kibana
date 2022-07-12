@@ -8,7 +8,10 @@
 import mustache from 'mustache';
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
-import { RuleAction, ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  RuleAction,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import * as I18n from './translations';
 
 export const getActionTypeName = (actionTypeId: RuleAction['actionTypeId']) => {

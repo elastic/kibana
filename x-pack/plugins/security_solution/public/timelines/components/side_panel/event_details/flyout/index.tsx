@@ -10,7 +10,8 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { buildHostNamesFilter } from '../../../../../../common/search_strategy';
-import { HostRisk, useHostRiskScore } from '../../../../../risk_score/containers';
+import type { HostRisk } from '../../../../../risk_score/containers';
+import { useHostRiskScore } from '../../../../../risk_score/containers';
 import { useHostIsolationTools } from '../use_host_isolation_tools';
 import { FlyoutHeaderContent } from './header';
 import { FlyoutBody } from './body';

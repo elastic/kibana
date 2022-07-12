@@ -8,17 +8,18 @@
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
-import {
+import type {
   BaseRuleParams,
   CompleteRule,
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
+  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../signals/__mocks__/es_results';
 
 const getBaseRuleParams = (): BaseRuleParams => {
@@ -122,6 +123,27 @@ export const getQueryRuleParams = (): QueryRuleParams => {
       },
     ],
     savedId: undefined,
+  };
+};
+
+export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'saved_query',
+    language: 'kuery',
+    query: 'user.name: root or user.name: admin',
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
+    savedId: 'some-id',
   };
 };
 

@@ -17,9 +17,9 @@ import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { bufferCount, takeUntil } from 'rxjs/operators';
 import { mount, shallow } from 'enzyme';
 
-import { httpServiceMock } from '../http/http_service.mock';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
@@ -796,46 +796,6 @@ describe('#start()', () => {
 
       await navigateToApp('app2', { state: 'my-state' });
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path', 'my-state');
-    });
-
-    it('updates currentApp$ after mounting', async () => {
-      service.setup(setupDeps);
-
-      const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject<void>();
-      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
-
-      await navigateToApp('alpha');
-      await navigateToApp('beta');
-      await navigateToApp('gamma');
-      await navigateToApp('delta');
-      stop$.next();
-
-      const appIds = await promise;
-
-      expect(appIds).toMatchInlineSnapshot(`
-        Array [
-          "alpha",
-          "beta",
-          "gamma",
-          "delta",
-        ]
-      `);
-    });
-
-    it("when openInNewTab is true it doesn't update currentApp$ after mounting", async () => {
-      service.setup(setupDeps);
-
-      const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject<void>();
-      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
-
-      await navigateToApp('delta', { openInNewTab: true });
-      stop$.next();
-
-      const appIds = await promise;
-
-      expect(appIds).toBeUndefined();
     });
 
     it('updates httpLoadingCount$ while mounting', async () => {

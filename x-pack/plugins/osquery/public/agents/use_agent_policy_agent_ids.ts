@@ -9,7 +9,8 @@ import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { AGENTS_PREFIX, Agent } from '@kbn/fleet-plugin/common';
+import type { Agent } from '@kbn/fleet-plugin/common';
+import { AGENTS_PREFIX } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 

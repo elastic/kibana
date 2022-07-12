@@ -7,8 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  flashSuccessToast,
+} from '../../../../shared/flash_messages';
 
 import {
   ConnectorConfigurationApiLogic,
@@ -54,6 +60,13 @@ export const ConnectorConfigurationLogic = kea<
   },
   listeners: {
     apiError: (error) => flashAPIErrors(error),
+    apiSuccess: () =>
+      flashSuccessToast(
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
+          { defaultMessage: 'Configuration successfully updated' }
+        )
+      ),
     makeRequest: () => clearFlashMessages(),
   },
   reducers: ({ props }) => ({

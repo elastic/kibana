@@ -39,6 +39,10 @@ export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;
 
+export const INTEGRATIONS_POPOVER = '[data-test-subj="IntegrationsDisplayPopover"]';
+
+export const INTEGRATIONS_POPOVER_TITLE = '[data-test-subj="IntegrationsPopoverTitle"]';
+
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
 export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
@@ -126,3 +130,11 @@ export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWr
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
+
+export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+
+export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
+
+export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
+
+export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
