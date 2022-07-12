@@ -15,7 +15,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
-import { stepAboutDefaultValue, stepDefineStepMLRule } from './default_value';
+import { stepAboutDefaultValue } from './default_value';
 import type {
   AboutStepRule,
   RuleStepsFormHooks,
@@ -39,6 +39,22 @@ jest.mock('@elastic/eui', () => {
     },
   };
 });
+
+export const stepDefineStepMLRule: DefineStepRule = {
+  ruleType: 'machine_learning',
+  index: [],
+  queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
+  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip'],
+  anomalyThreshold: 50,
+  threshold: { cardinality: { value: '', field: [] }, value: '100', field: [] },
+  threatIndex: [],
+  threatQueryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
+  requiredFields: [],
+  relatedIntegrations: [],
+  threatMapping: [],
+  timeline: { id: null, title: null },
+  eqlOptions: {},
+};
 
 describe('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AboutStepRule, DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
 export const threatDefault = [
@@ -32,20 +32,4 @@ export const stepAboutDefaultValue: AboutStepRule = {
   timestampOverride: '',
   threat: threatDefault,
   note: '',
-};
-
-export const stepDefineStepMLRule: DefineStepRule = {
-  ruleType: 'machine_learning',
-  index: [],
-  queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
-  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip'],
-  anomalyThreshold: 50,
-  threshold: { cardinality: { value: '', field: [] }, value: '100', field: [] },
-  threatIndex: [],
-  threatQueryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
-  requiredFields: [],
-  relatedIntegrations: [],
-  threatMapping: [],
-  timeline: { id: null, title: null },
-  eqlOptions: {},
 };
