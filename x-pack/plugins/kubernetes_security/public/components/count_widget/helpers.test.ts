@@ -6,13 +6,20 @@
  */
 
 import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
-import { CountResult } from '../../../common/types/count';
 
-const TEST_DATA_ARRAY: CountResult[] = [
-  32 as unknown as CountResult,
-  2200 as unknown as CountResult,
-  999232 as unknown as CountResult,
-  1310000 as unknown as CountResult,
+const TEST_DATA_ARRAY: number[] = [
+  32,
+  2200,
+  999232,
+  1310000,
+  999999999,
+  999999999999,
+  1230000000000,
+  Infinity,
+  NaN,
+  -1,
+  -Infinity,
+  1e15 - 1,
 ];
 
 const TEST_QUERY = `{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}`;
@@ -28,6 +35,14 @@ describe('Testing Helper functions', () => {
     expect(numberFormatter(TEST_DATA_ARRAY[1])).toBe('2K');
     expect(numberFormatter(TEST_DATA_ARRAY[2])).toBe('999K');
     expect(numberFormatter(TEST_DATA_ARRAY[3])).toBe('1.3M');
+    expect(numberFormatter(TEST_DATA_ARRAY[4])).toBe('999M');
+    expect(numberFormatter(TEST_DATA_ARRAY[5])).toBe('999B');
+    expect(numberFormatter(TEST_DATA_ARRAY[6])).toBe('1.2T');
+    expect(numberFormatter(TEST_DATA_ARRAY[7])).toBe('NaN');
+    expect(numberFormatter(TEST_DATA_ARRAY[8])).toBe('NaN');
+    expect(numberFormatter(TEST_DATA_ARRAY[9])).toBe('NaN');
+    expect(numberFormatter(TEST_DATA_ARRAY[10])).toBe('NaN');
+    expect(numberFormatter(TEST_DATA_ARRAY[11])).toBe('999T');
   });
 
   it('Testing addResourceTypeToFilterQuery helper function', () => {

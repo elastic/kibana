@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
-import { CountResult } from '../../../common/types/count';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
@@ -54,8 +53,8 @@ export const CountWidget = ({
     indexPattern?.title
   );
 
-  const countValue = useMemo((): CountResult => {
-    return data ? data?.pages[0] : (0 as unknown as CountResult);
+  const countValue = useMemo((): number => {
+    return data ? data?.pages[0] : 0;
   }, [data]);
 
   const formattedNumber = useMemo((): string => {
