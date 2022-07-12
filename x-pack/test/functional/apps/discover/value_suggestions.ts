@@ -16,6 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'timePicker', 'settings', 'context']);
 
+  const from = 'Mar 1, 2020 @ 00:00:00.000';
+  const to = 'Nov 1, 2020 @ 00:00:00.000';
+
   async function setAutocompleteUseTimeRange(value: boolean) {
     await PageObjects.settings.navigateTo();
     await PageObjects.settings.clickKibanaSettings();
@@ -41,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.uiSettings.unset('doc_table:legacy');
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
     });
 
     describe('useTimeRange enabled', () => {
@@ -49,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
+        await PageObjects.common.setTime({ from, to });
         await PageObjects.common.navigateToApp('discover');
       });
 
@@ -58,11 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('dont show up if outside of range', async () => {
-          await PageObjects.timePicker.setAbsoluteRange(
-            'Mar 1, 2020 @ 00:00:00.000',
-            'Nov 1, 2020 @ 00:00:00.000'
-          );
-
           await queryBar.setQuery('extension.raw : ');
           await queryBar.expectSuggestions({ count: 0 });
         });
