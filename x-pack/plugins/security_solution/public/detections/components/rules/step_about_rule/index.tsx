@@ -45,6 +45,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useRuleIndices } from '../../../containers/detection_engine/rules/use_rule_indices';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -102,15 +103,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
 
+  const { ruleIndices } = useRuleIndices(
+    defineRuleData?.machineLearningJobId,
+    defineRuleData?.index
+  );
+
   /**
    * 1. if not null, fetch data view from id saved on rule form
    * 2. Create a state to set the indexPattern to be used
    * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
    */
 
-  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(
-    defineRuleData?.index ?? []
-  );
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(ruleIndices);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
 
