@@ -92,6 +92,7 @@ export function getServiceNowITSMActionType(
     id: ServiceNowITSMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITSM,
+    allowedFeatureIds: ['alerting', 'cases'],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -120,6 +121,7 @@ export function getServiceNowSIRActionType(
     id: ServiceNowSIRActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_SIR,
+    allowedFeatureIds: ['alerting', 'cases'],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -148,6 +150,7 @@ export function getServiceNowITOMActionType(
     id: ServiceNowITOMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
+    allowedFeatureIds: ['alerting'],
     validate: {
       config: schema.object(ExternalIncidentServiceConfigurationBase, {
         validate: curry(validate.config)(configurationUtilities),

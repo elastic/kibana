@@ -254,6 +254,38 @@ describe('list()', () => {
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
     expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
   });
+
+  test('returns list of connector types filtered by feature id if provided', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      allowedFeatureIds: ['alerting'],
+      executor,
+    });
+    actionTypeRegistry.register({
+      id: 'another-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      allowedFeatureIds: ['cases'],
+      executor,
+    });
+    const actionTypes = actionTypeRegistry.list('alerting');
+    expect(actionTypes).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+      },
+    ]);
+    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+  });
 });
 
 describe('has()', () => {

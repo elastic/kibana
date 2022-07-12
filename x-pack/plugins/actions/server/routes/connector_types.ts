@@ -6,10 +6,15 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { ActionType, BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
+
+const querySchema = schema.object({
+  feature_id: schema.maybe(schema.string()),
+});
 
 const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
   return results.map(({ enabledInConfig, enabledInLicense, minimumLicenseRequired, ...res }) => ({
@@ -27,13 +32,15 @@ export const connectorTypesRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connector_types`,
-      validate: {},
+      validate: {
+        query: querySchema,
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         return res.ok({
-          body: rewriteBodyRes(await actionsClient.listTypes()),
+          body: rewriteBodyRes(await actionsClient.listTypes(req.query?.feature_id)),
         });
       })
     )

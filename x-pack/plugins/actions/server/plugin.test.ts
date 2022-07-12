@@ -145,6 +145,7 @@ describe('Actions Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        allowedFeatureIds: ['alerting'],
         async executor(options) {
           return { status: 'ok', actionId: options.actionId };
         },
@@ -431,6 +432,7 @@ describe('Actions Plugin', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',
+        allowedFeatureIds: ['alerting'],
         executor: jest.fn(),
       };
 
@@ -453,6 +455,7 @@ describe('Actions Plugin', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',
+        allowedFeatureIds: ['alerting'],
         executor: jest.fn(),
       };
 

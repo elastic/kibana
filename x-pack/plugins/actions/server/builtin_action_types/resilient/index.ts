@@ -55,6 +55,7 @@ export function getActionType(
     id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
+    allowedFeatureIds: ['alerting', 'cases'],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),

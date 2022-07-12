@@ -142,6 +142,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',
     }),
+    allowedFeatureIds: ['alerting'],
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

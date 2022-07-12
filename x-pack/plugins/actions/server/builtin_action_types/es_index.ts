@@ -60,6 +60,7 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
+    allowedFeatureIds: ['alerting'],
     validate: {
       config: ConfigSchema,
       params: ParamsSchema,

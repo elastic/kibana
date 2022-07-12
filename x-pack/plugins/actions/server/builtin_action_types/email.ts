@@ -213,6 +213,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
+    allowedFeatureIds: ['alerting'],
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

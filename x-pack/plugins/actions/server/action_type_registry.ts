@@ -187,14 +187,18 @@ export class ActionTypeRegistry {
   /**
    * Returns a list of registered action types [{ id, name, enabled }]
    */
-  public list(): CommonActionType[] {
-    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
-      id: actionTypeId,
-      name: actionType.name,
-      minimumLicenseRequired: actionType.minimumLicenseRequired,
-      enabled: this.isActionTypeEnabled(actionTypeId),
-      enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-      enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-    }));
+  public list(featureId?: string): CommonActionType[] {
+    return Array.from(this.actionTypes)
+      .filter(([_, actionType]) =>
+        featureId ? actionType.allowedFeatureIds.includes(featureId) : true
+      )
+      .map(([actionTypeId, actionType]) => ({
+        id: actionTypeId,
+        name: actionType.name,
+        minimumLicenseRequired: actionType.minimumLicenseRequired,
+        enabled: this.isActionTypeEnabled(actionTypeId),
+        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+      }));
   }
 }

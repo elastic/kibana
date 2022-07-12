@@ -48,6 +48,7 @@ export function getActionType({ logger }: { logger: Logger }): ServerLogActionTy
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',
     }),
+    allowedFeatureIds: ['alerting'],
     validate: {
       params: ParamsSchema,
     },

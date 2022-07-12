@@ -70,6 +70,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
+    allowedFeatureIds: ['alerting'],
     validate: {
       secrets: schema.object(secretsSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

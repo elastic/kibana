@@ -51,6 +51,7 @@ export function getActionType(
     name: i18n.translate('xpack.actions.builtin.swimlaneTitle', {
       defaultMessage: 'Swimlane',
     }),
+    allowedFeatureIds: ['alerting', 'cases'],
     validate: {
       config: schema.object(SwimlaneServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
