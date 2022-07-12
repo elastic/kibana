@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { setup } from '@kbn/core-test-helpers-browser';
-
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
+export type { SetupTap } from './http_test_setup';
+export { setup } from './http_test_setup';

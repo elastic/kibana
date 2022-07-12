@@ -3260,6 +3260,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -3269,6 +3273,10 @@
   uid ""
 
 "@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-browser-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-internal":
   version "0.0.0"
   uid ""
 
@@ -6871,6 +6879,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-test-helpers-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6880,6 +6892,10 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-browser-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
