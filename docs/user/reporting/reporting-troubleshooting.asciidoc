@@ -122,7 +122,16 @@ all, the full logs from Reporting will be the first place to look. In `kibana.ym
 
 [source,yaml]
 --------------------------------------------------------------------------------
-logging.root.level: all
+logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [default, console_appender]
+    level: debug
 --------------------------------------------------------------------------------
 
 For more information about logging, see <<logging-root-level,Kibana configuration settings>>.

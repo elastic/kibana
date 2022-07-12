@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.17.5",
+  "version": "7.17.6",
   "branch": "7.17",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -66,7 +66,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.14.2",
+    "node": "16.16.0",
     "yarn": "^1.21.1"
   },
   "resolutions": {
@@ -294,7 +294,7 @@
     "mime-types": "^2.1.27",
     "mini-css-extract-plugin": "1.1.0",
     "minimatch": "^3.1.2",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.27",
     "monaco-editor": "^0.22.3",
