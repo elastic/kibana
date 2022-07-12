@@ -120,16 +120,16 @@ export interface DetailPanelOrchestrator {
 
 export interface DetailPanelCloud {
   instance: {
-    name:string;
+    name: string;
   };
   account: {
-    id:string;
+    id: string;
   };
   project: {
-    id:string;
-  }
-  provider:string;
-  region:string;
+    id: string;
+  };
+  provider: string;
+  region: string;
 }
 
 export interface SessionViewStart {

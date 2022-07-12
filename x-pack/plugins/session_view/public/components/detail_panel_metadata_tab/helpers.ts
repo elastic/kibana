@@ -12,7 +12,12 @@ import {
   ProcessEventCloud,
 } from '../../../common/types/process_tree';
 import { DASH } from '../../constants';
-import { DetailPanelHost, DetailPanelContainer, DetailPanelOrchestrator, DetailPanelCloud } from '../../types';
+import {
+  DetailPanelHost,
+  DetailPanelContainer,
+  DetailPanelOrchestrator,
+  DetailPanelCloud,
+} from '../../types';
 import { dataOrDash } from '../../utils/data_or_dash';
 
 export const getHostData = (host: ProcessEventHost | undefined): DetailPanelHost => {
@@ -115,21 +120,19 @@ export const getOrchestratorData = (
   return detailPanelOrchestrator;
 };
 
-export const getCloudData = (
-  cloud: ProcessEventCloud | undefined
-): DetailPanelCloud => {
+export const getCloudData = (cloud: ProcessEventCloud | undefined): DetailPanelCloud => {
   const detailPanelCloud: DetailPanelCloud = {
     instance: {
-      name:DASH,
+      name: DASH,
     },
     account: {
-      id:DASH,
+      id: DASH,
     },
     project: {
-      id:DASH,
+      id: DASH,
     },
-    provider:DASH,
-    region:DASH,
+    provider: DASH,
+    region: DASH,
   };
 
   if (!cloud) {
