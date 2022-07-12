@@ -33,6 +33,32 @@ interface Props {
   showButtonTitle?: boolean;
 }
 
+const Wrapper = ({
+  children,
+  wrapField,
+  formRowProps,
+  button,
+}: {
+  wrapField: boolean;
+  children: React.ReactElement;
+  button: React.ReactElement;
+  formRowProps?: {
+    describedByIds?: string[];
+    error: string | null;
+    fullWidth: boolean;
+    helpText: string;
+    isInvalid: boolean;
+    label?: string;
+  };
+}) =>
+  wrapField ? (
+    <EuiFormRow {...formRowProps} labelAppend={button}>
+      {children}
+    </EuiFormRow>
+  ) : (
+    <>{children}</>
+  );
+
 export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   buttonTitle,
   messageVariables,
@@ -77,20 +103,9 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
     ),
     [buttonTitle, messageVariables, onSelectMessageVariable, paramsProperty, showButtonTitle]
   );
-  const Wrapper = useCallback(
-    ({ children }: { children: React.ReactElement }) =>
-      wrapField ? (
-        <EuiFormRow {...formRowProps} labelAppend={VariableButton}>
-          {children}
-        </EuiFormRow>
-      ) : (
-        <>{children}</>
-      ),
-    [VariableButton, formRowProps, wrapField]
-  );
 
   return (
-    <Wrapper>
+    <Wrapper wrapField={wrapField} formRowProps={formRowProps} button={VariableButton}>
       <EuiFieldText
         fullWidth
         name={paramsProperty}
