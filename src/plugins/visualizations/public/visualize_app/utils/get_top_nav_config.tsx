@@ -666,6 +666,7 @@ export const getTopNavConfig = (
               const saveOptions = {
                 confirmOverwrite: false,
                 returnToOrigin: true,
+                saveFilters: true,
               };
               return doSave(saveOptions);
             },
