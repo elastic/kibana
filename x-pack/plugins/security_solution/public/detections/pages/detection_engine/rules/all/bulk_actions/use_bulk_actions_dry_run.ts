@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { useQuery, QueryClient } from 'react-query';
+import type { QueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
+import type { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
 
-import {
+import type {
   BulkAction,
   BulkActionEditType,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  performBulkAction,
-  BulkActionResponse,
-} from '../../../../../containers/detection_engine/rules';
+import type { BulkActionResponse } from '../../../../../containers/detection_engine/rules';
+import { performBulkAction } from '../../../../../containers/detection_engine/rules';
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 
 const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
 import * as i18n from '../../translations';
-import { DryRunResult } from './use_bulk_actions_dry_run';
+import type { DryRunResult } from './use_bulk_actions_dry_run';
 import { BulkEditRuleErrorsList } from './bulk_edit_rule_errors_list';
 
 interface BulkEditDryRunConfirmationProps {
