@@ -10,7 +10,7 @@ import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/asset
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { isEmpty } from 'lodash/fp';
 
-import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
+import type { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];

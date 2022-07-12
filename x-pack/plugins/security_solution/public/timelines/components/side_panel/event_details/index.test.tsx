@@ -18,10 +18,7 @@ import {
   useKibana,
   useGetUserCasesPermissions,
 } from '../../../../common/lib/kibana';
-import {
-  mockBrowserFields,
-  mockRuntimeMappings,
-} from '../../../../common/containers/source/mock';
+import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 

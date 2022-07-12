@@ -129,8 +129,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { indicesExist, indexPattern, selectedPatterns, loading } =
-    useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -197,10 +196,7 @@ const HostsComponent = () => {
             <Display show={!globalFullScreen}>
               <HeaderPage
                 subtitle={
-                  <LastEventTime
-                    indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
-                  />
+                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
                 }
                 title={i18n.PAGE_TITLE}
                 border

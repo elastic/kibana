@@ -11,8 +11,6 @@ import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../common/components/navigation/types';
 
-import type { DocValueFields } from '../../../common/containers/source';
-
 import type { UsersTableType } from '../../store/model';
 import type { usersModel } from '../../store';
 

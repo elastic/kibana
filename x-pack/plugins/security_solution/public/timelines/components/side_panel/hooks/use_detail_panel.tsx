@@ -40,8 +40,7 @@ export const useDetailPanel = ({
   timelineId,
   tabType,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
-  const { browserFields, selectedPatterns, runtimeMappings } =
-    useSourcererDataView(sourcererScope);
+  const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dispatch = useDispatch();
 
