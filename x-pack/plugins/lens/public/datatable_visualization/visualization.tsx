@@ -467,7 +467,26 @@ export const getDatatableVisualization = ({
   },
 
   getRenderEventCounters(state) {
-    return [];
+    const events = {
+      color_by_value: false,
+      summary_row: false,
+    };
+
+    state.columns.forEach((column) => {
+      if (column.summaryRow && column.summaryRow !== 'none') {
+        events.summary_row = true;
+      }
+      if (column.colorMode && column.colorMode !== 'none') {
+        events.color_by_value = true;
+      }
+    });
+
+    return Object.entries(events).reduce<string[]>((acc, [key, isActive]) => {
+      if (isActive) {
+        acc.push(`dimension_${key}`);
+      }
+      return acc;
+    }, []);
   },
 
   renderToolbar(domElement, props) {
