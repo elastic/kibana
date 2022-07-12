@@ -7,7 +7,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 
 /**
  * UI element type to represent the settings.

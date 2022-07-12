@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { PublicUiSettingsParams, UserProvidedValues } from '../../server/types';
+import { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 
 /** @public */
 export interface UiSettingsState {
