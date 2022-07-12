@@ -458,6 +458,7 @@ export const useBulkActions = ({
       resolveTagsRefetch,
       updateRulesCache,
       clearRulesSelection,
+      setIsRefreshOn,
     ]
   );
 
