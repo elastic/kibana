@@ -33,3 +33,9 @@ export const ORCHESTRATOR_NAMESPACE = 'orchestrator.namespace';
 export const ORCHESTRATOR_RESOURCE_ID = 'orchestrator.resource.id';
 export const CONTAINER_IMAGE_NAME = 'container.image.name';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
+
+export const COUNT_WIDGET_KEY_CLUSTERS = 'CountClustersWidget';
+export const COUNT_WIDGET_KEY_NAMESPACE = 'CountNamespaceWidgets';
+export const COUNT_WIDGET_KEY_NODES = 'CountNodesWidgets';
+export const COUNT_WIDGET_KEY_PODS = 'CountPodsWidgets';
+export const COUNT_WIDGET_KEY_CONTAINER_IMAGES = 'CountContainerImagesWidgets';

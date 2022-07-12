@@ -24,6 +24,10 @@ import {
   ORCHESTRATOR_RESOURCE_ID,
   CONTAINER_IMAGE_NAME,
   CLOUD_INSTANCE_NAME,
+  COUNT_WIDGET_KEY_CLUSTERS,
+  COUNT_WIDGET_KEY_NAMESPACE,
+  COUNT_WIDGET_KEY_NODES,
+  COUNT_WIDGET_KEY_CONTAINER_IMAGES,
 } from '../../../common/constants';
 import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
@@ -33,6 +37,13 @@ import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { WidgetsToggle } from '../widgets_toggle';
+import {
+  COUNT_WIDGET_CLUSTERS,
+  COUNT_WIDGET_NAMESPACE,
+  COUNT_WIDGET_NODES,
+  COUNT_WIDGET_PODS,
+  COUNT_WIDGET_CONTAINER_IMAGES,
+} from '../../../common/translations';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
@@ -102,46 +113,46 @@ const KubernetesSecurityRoutesComponent = ({
                     <EuiFlexGroup gutterSize="l">
                       <EuiFlexItem>
                         <CountWidget
-                          title="Clusters"
+                          title={COUNT_WIDGET_CLUSTERS}
                           indexPattern={indexPattern}
                           globalFilter={globalFilter}
-                          widgetKey="CountClustersWidget"
+                          widgetKey={COUNT_WIDGET_KEY_CLUSTERS}
                           groupedBy={ORCHESTRATOR_CLUSTER_ID}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <CountWidget
-                          title="Namespace"
+                          title={COUNT_WIDGET_NAMESPACE}
                           indexPattern={indexPattern}
                           globalFilter={globalFilter}
-                          widgetKey="CountNamespaceWidgets"
+                          widgetKey={COUNT_WIDGET_KEY_NAMESPACE}
                           groupedBy={ORCHESTRATOR_NAMESPACE}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <CountWidget
-                          title="Nodes"
+                          title={COUNT_WIDGET_NODES}
                           indexPattern={indexPattern}
                           globalFilter={globalFilter}
-                          widgetKey="CountNodesWidgets"
+                          widgetKey={COUNT_WIDGET_KEY_NODES}
                           groupedBy={CLOUD_INSTANCE_NAME}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <CountWidget
-                          title="Pods"
+                          title={COUNT_WIDGET_PODS}
                           indexPattern={indexPattern}
                           globalFilter={globalFilter}
-                          widgetKey="CountPodsWidgets"
+                          widgetKey={COUNT_WIDGET_KEY_NODES}
                           groupedBy={ORCHESTRATOR_RESOURCE_ID}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <CountWidget
-                          title="Container Images"
+                          title={COUNT_WIDGET_CONTAINER_IMAGES}
                           indexPattern={indexPattern}
                           globalFilter={globalFilter}
-                          widgetKey="CountContainerImagesWidgets"
+                          widgetKey={COUNT_WIDGET_KEY_CONTAINER_IMAGES}
                           groupedBy={CONTAINER_IMAGE_NAME}
                         />
                       </EuiFlexItem>

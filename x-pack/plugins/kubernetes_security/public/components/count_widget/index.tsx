@@ -12,6 +12,7 @@ import type { IndexPattern, GlobalFilter } from '../../types';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchCountWidgetData } from './hooks';
 import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
+import { COUNT_WIDGET_KEY_PODS } from '../../../common/constants';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:countWidgetLoading';
 export const TOOLTIP_TEST_ID = 'kubernetesSecurity:countWidgetTooltip';
@@ -36,11 +37,7 @@ export const CountWidget = ({
   const filterQueryWithTimeRange = useMemo(() => {
     let globalFilterModified = globalFilter.filterQuery;
 
-    if (widgetKey === 'CountNodesWidgets') {
-      globalFilterModified = addResourceTypeToFilterQuery(globalFilter.filterQuery, 'node');
-    }
-
-    if (widgetKey === 'CountPodsWidgets') {
+    if (widgetKey === COUNT_WIDGET_KEY_PODS) {
       globalFilterModified = addResourceTypeToFilterQuery(globalFilter.filterQuery, 'pod');
     }
     return addTimerangeToQuery(globalFilterModified, globalFilter.startDate, globalFilter.endDate);
