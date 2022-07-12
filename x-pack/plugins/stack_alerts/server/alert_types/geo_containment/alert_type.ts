@@ -229,6 +229,7 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
         defaultMessage: 'No longer contained',
       }),
     },
+    doesSetRecoveryContext: true,
     defaultActionGroupId: ActionGroupId,
     executor: getGeoContainmentExecutor(logger),
     producer: STACK_ALERTS_FEATURE_ID,

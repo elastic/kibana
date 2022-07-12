@@ -144,6 +144,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     alertId,
     state,
   }): Promise<GeoContainmentState> {
+    console.log('alertId: ', alertId);
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -193,6 +194,16 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
       shapesIdsNamesMap,
       currIntervalEndTime
     );
+
+    const { getRecoveredAlerts } = services.alertFactory.done();
+    for (const recoveredAlert of getRecoveredAlerts()) {
+      const recoveredAlertId = recoveredAlert.getId();
+      console.log(`recoveredAlertId: ${recoveredAlertId}`);
+      //const testResult = executionResult.find((v) => v.name === recoveredAlertId);
+      //if (testResult) {
+        //recoveredAlert.setContext(testResult.context);
+      //}
+    }
 
     return {
       shapesFilters,
