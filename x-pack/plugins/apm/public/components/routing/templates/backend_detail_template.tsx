@@ -29,7 +29,7 @@ interface Props {
 export function BackendDetailTemplate({ children }: Props) {
   const {
     query,
-    query: { backendName, rangeFrom, rangeTo, environment },
+    query: { dependencyName, rangeFrom, rangeTo, environment },
   } = useApmParams('/backends');
 
   const router = useApmRouter();
@@ -43,7 +43,7 @@ export function BackendDetailTemplate({ children }: Props) {
 
   const kueryBarBoolFilter = getKueryBarBoolFilter({
     environment,
-    backendName,
+    dependencyName,
   });
 
   const backendMetadataFetch = useFetcher(
@@ -55,14 +55,14 @@ export function BackendDetailTemplate({ children }: Props) {
       return callApmApi('GET /internal/apm/dependencies/metadata', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
           },
         },
       });
     },
-    [backendName, start, end]
+    [dependencyName, start, end]
   );
 
   const { data: { metadata } = {} } = backendMetadataFetch;
@@ -101,7 +101,7 @@ export function BackendDetailTemplate({ children }: Props) {
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
-                <h1>{backendName}</h1>
+                <h1>{dependencyName}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

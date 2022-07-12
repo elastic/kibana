@@ -34,11 +34,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   async function callApi({
-    backendName,
+    dependencyName,
     environment = ENVIRONMENT_ALL.value,
     kuery = '',
   }: {
-    backendName: string;
+    dependencyName: string;
     environment?: string;
     kuery?: string;
   }) {
@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             end: new Date(end).toISOString(),
             environment,
             kuery,
-            backendName,
+            dependencyName,
           },
         },
       })
@@ -60,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Top operations when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const operations = await callApi({ backendName: 'elasticsearch' });
+      const operations = await callApi({ dependencyName: 'elasticsearch' });
       expect(operations).to.empty();
     });
   });
@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let bulkOperation: ValuesType<TopOperations>;
 
         before(async () => {
-          response = await callApi({ backendName: 'elasticsearch' });
+          response = await callApi({ dependencyName: 'elasticsearch' });
           searchOperation = response.find((op) => op.spanName === '/_search')!;
           bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
         });
@@ -151,7 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let setOperation: ValuesType<TopOperations>;
 
         before(async () => {
-          response = await callApi({ backendName: 'redis' });
+          response = await callApi({ dependencyName: 'redis' });
           setOperation = response.find((op) => op.spanName === 'SET')!;
         });
 
@@ -177,7 +177,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           response = await callApi({
-            backendName: 'elasticsearch',
+            dependencyName: 'elasticsearch',
             kuery: `service.name:"synth-go"`,
           });
           searchOperation = response.find((op) => op.spanName === '/_search')!;
@@ -199,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           response = await callApi({
-            backendName: 'elasticsearch',
+            dependencyName: 'elasticsearch',
             environment: 'development',
           });
           searchOperation = response.find((op) => op.spanName === '/_search');

@@ -11,42 +11,45 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
 
-export async function getMetadataForBackend({
+export async function getMetadataForDependency({
   setup,
-  backendName,
+  dependencyName,
   start,
   end,
 }: {
   setup: Setup;
-  backendName: string;
+  dependencyName: string;
   start: number;
   end: number;
 }) {
   const { apmEventClient } = setup;
 
-  const sampleResponse = await apmEventClient.search('get_backend_sample', {
-    apm: {
-      events: [ProcessorEvent.span],
-    },
-    body: {
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName,
+  const sampleResponse = await apmEventClient.search(
+    'get_metadata_for_dependency',
+    {
+      apm: {
+        events: [ProcessorEvent.span],
+      },
+      body: {
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName,
+                },
               },
-            },
-            ...rangeQuery(start, end),
-          ],
+              ...rangeQuery(start, end),
+            ],
+          },
+        },
+        sort: {
+          '@timestamp': 'desc',
         },
       },
-      sort: {
-        '@timestamp': 'desc',
-      },
-    },
-  });
+    }
+  );
 
   const sample = maybe(sampleResponse.hits.hits[0])?._source;
 

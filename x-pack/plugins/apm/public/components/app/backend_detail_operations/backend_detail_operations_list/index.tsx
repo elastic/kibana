@@ -44,7 +44,7 @@ export function BackendDetailOperationsList() {
     query: {
       rangeFrom,
       rangeTo,
-      backendName,
+      dependencyName,
       environment,
       kuery,
       comparisonEnabled: urlComparisonEnabled,
@@ -71,7 +71,7 @@ export function BackendDetailOperationsList() {
       return callApmApi('GET /internal/apm/dependencies/operations', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
             environment,
@@ -80,7 +80,7 @@ export function BackendDetailOperationsList() {
         },
       });
     },
-    [backendName, start, end, environment, kuery]
+    [dependencyName, start, end, environment, kuery]
   );
 
   const comparisonStatsFetch = useFetcher(
@@ -93,7 +93,7 @@ export function BackendDetailOperationsList() {
       return callApmApi('GET /internal/apm/dependencies/operations', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
             offset,
@@ -103,7 +103,7 @@ export function BackendDetailOperationsList() {
         },
       });
     },
-    [backendName, start, end, offset, environment, kuery, comparisonEnabled]
+    [dependencyName, start, end, offset, environment, kuery, comparisonEnabled]
   );
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [

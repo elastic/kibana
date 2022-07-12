@@ -18,9 +18,9 @@ import { Setup } from '../../lib/helpers/setup_request';
 import { getOverallLatencyDistribution } from '../latency_distribution/get_overall_latency_distribution';
 import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 
-export async function getBackendLatencyDistribution({
+export async function getDependencyLatencyDistribution({
   setup,
-  backendName,
+  dependencyName,
   spanName,
   kuery,
   environment,
@@ -29,7 +29,7 @@ export async function getBackendLatencyDistribution({
   percentileThreshold,
 }: {
   setup: Setup;
-  backendName: string;
+  dependencyName: string;
   spanName: string;
   kuery: string;
   environment: Environment;
@@ -54,7 +54,7 @@ export async function getBackendLatencyDistribution({
     bool: {
       filter: [
         ...termQuery(SPAN_NAME, spanName),
-        ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, backendName),
+        ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
       ],
     },
   };

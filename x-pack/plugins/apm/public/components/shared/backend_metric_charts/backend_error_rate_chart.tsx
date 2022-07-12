@@ -27,7 +27,7 @@ function yLabelFormat(y?: number | null) {
 
 export function BackendFailedTransactionRateChart({
   height,
-  backendName,
+  dependencyName,
   kuery,
   environment,
   rangeFrom,
@@ -54,7 +54,7 @@ export function BackendFailedTransactionRateChart({
       return callApmApi('GET /internal/apm/dependencies/charts/error_rate', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
             offset:
@@ -70,7 +70,7 @@ export function BackendFailedTransactionRateChart({
       });
     },
     [
-      backendName,
+      dependencyName,
       start,
       end,
       offset,

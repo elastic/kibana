@@ -28,7 +28,7 @@ import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';
 import { TimestampTooltip } from '../../shared/timestamp_tooltip';
 
-type BackendSpan = ValuesType<
+type DependencySpan = ValuesType<
   APIReturnType<'GET /internal/apm/dependencies/operations/spans'>['spans']
 >;
 
@@ -39,7 +39,7 @@ export function BackendOperationDetailTraceList() {
 
   const {
     query: {
-      backendName,
+      dependencyName,
       spanName,
       comparisonEnabled,
       environment,
@@ -101,7 +101,7 @@ export function BackendOperationDetailTraceList() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const columns: Array<ITableColumn<BackendSpan>> = [
+  const columns: Array<ITableColumn<DependencySpan>> = [
     {
       name: i18n.translate(
         'xpack.apm.backendOperationDetailTraceListOutcomeColumn',
@@ -240,7 +240,7 @@ export function BackendOperationDetailTraceList() {
       return callApmApi('GET /internal/apm/dependencies/operations/spans', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             spanName,
             start,
             end,
@@ -253,7 +253,7 @@ export function BackendOperationDetailTraceList() {
       });
     },
     [
-      backendName,
+      dependencyName,
       spanName,
       start,
       end,

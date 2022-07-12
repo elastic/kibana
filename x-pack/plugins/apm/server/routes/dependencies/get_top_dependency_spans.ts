@@ -34,7 +34,7 @@ import { Setup } from '../../lib/helpers/setup_request';
 
 const MAX_NUM_SPANS = 1000;
 
-export interface BackendSpan {
+export interface DependencySpan {
   '@timestamp': number;
   spanName: string;
   serviceName: string;
@@ -47,9 +47,9 @@ export interface BackendSpan {
   outcome: EventOutcome;
 }
 
-export async function getTopBackendSpans({
+export async function getTopDependencySpans({
   setup,
-  backendName,
+  dependencyName,
   spanName,
   start,
   end,
@@ -59,7 +59,7 @@ export async function getTopBackendSpans({
   sampleRangeTo,
 }: {
   setup: Setup;
-  backendName: string;
+  dependencyName: string;
   spanName: string;
   start: number;
   end: number;
@@ -67,11 +67,11 @@ export async function getTopBackendSpans({
   kuery: string;
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
-}): Promise<BackendSpan[]> {
+}): Promise<DependencySpan[]> {
   const { apmEventClient } = setup;
 
   const spans = (
-    await apmEventClient.search('get_top_backend_spans', {
+    await apmEventClient.search('get_top_dependency_spans', {
       apm: {
         events: [ProcessorEvent.span],
       },
@@ -83,7 +83,7 @@ export async function getTopBackendSpans({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, backendName),
+              ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
               ...termQuery(SPAN_NAME, spanName),
               ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
                 ? [
@@ -118,7 +118,7 @@ export async function getTopBackendSpans({
   const transactionIds = compact(spans.map((span) => span.transaction?.id));
 
   const transactions = (
-    await apmEventClient.search('get_transactions_for_backend_spans', {
+    await apmEventClient.search('get_transactions_for_dependency_spans', {
       apm: {
         events: [ProcessorEvent.transaction],
       },
@@ -142,7 +142,7 @@ export async function getTopBackendSpans({
     (transaction) => transaction.transaction.id
   );
 
-  return spans.map((span): BackendSpan => {
+  return spans.map((span): DependencySpan => {
     const transaction = span.transaction
       ? transactionsById[span.transaction.id]
       : undefined;

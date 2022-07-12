@@ -23,7 +23,7 @@ import { useSearchServiceDestinationMetrics } from '../../../context/time_range_
 
 export function BackendThroughputChart({
   height,
-  backendName,
+  dependencyName,
   rangeFrom,
   rangeTo,
   kuery,
@@ -48,7 +48,7 @@ export function BackendThroughputChart({
       return callApmApi('GET /internal/apm/dependencies/charts/throughput', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
             offset:
@@ -64,7 +64,7 @@ export function BackendThroughputChart({
       });
     },
     [
-      backendName,
+      dependencyName,
       start,
       end,
       offset,

@@ -27,7 +27,7 @@ export function BackendOperationDistributionChart() {
 
   const {
     query: {
-      backendName,
+      dependencyName,
       spanName,
       environment,
       kuery,
@@ -51,7 +51,7 @@ export function BackendOperationDistributionChart() {
         params: {
           query: {
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-            backendName,
+            dependencyName,
             spanName,
             environment,
             kuery,
@@ -61,7 +61,7 @@ export function BackendOperationDistributionChart() {
         },
       });
     },
-    [backendName, spanName, environment, kuery, start, end]
+    [dependencyName, spanName, environment, kuery, start, end]
   );
 
   const hasData =

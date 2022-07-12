@@ -31,7 +31,7 @@ import { calculateImpactBuilder } from '../traces/calculate_impact_builder';
 
 const MAX_NUM_OPERATIONS = 500;
 
-export interface BackendOperation {
+export interface DependencyOperation {
   spanName: string;
   latency: number | null;
   throughput: number;
@@ -43,9 +43,9 @@ export interface BackendOperation {
   >;
 }
 
-export async function getTopBackendOperations({
+export async function getTopDependencyOperations({
   setup,
-  backendName,
+  dependencyName,
   start,
   end,
   offset,
@@ -53,7 +53,7 @@ export async function getTopBackendOperations({
   kuery,
 }: {
   setup: Setup;
-  backendName: string;
+  dependencyName: string;
   start: number;
   end: number;
   offset?: string;
@@ -90,48 +90,51 @@ export async function getTopBackendOperations({
     },
   };
 
-  const response = await apmEventClient.search('get_top_backend_operations', {
-    apm: {
-      events: [ProcessorEvent.span],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, backendName),
-          ],
-        },
+  const response = await apmEventClient.search(
+    'get_top_dependency_operations',
+    {
+      apm: {
+        events: [ProcessorEvent.span],
       },
-      aggs: {
-        operationName: {
-          terms: {
-            field: SPAN_NAME,
-            size: MAX_NUM_OPERATIONS,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(startWithOffset, endWithOffset),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+            ],
           },
-          aggs: {
-            over_time: {
-              date_histogram: getMetricsDateHistogramParams({
-                start: startWithOffset,
-                end: endWithOffset,
-                metricsInterval: 60,
-              }),
-              aggs,
+        },
+        aggs: {
+          operationName: {
+            terms: {
+              field: SPAN_NAME,
+              size: MAX_NUM_OPERATIONS,
             },
-            ...aggs,
-            total_time: {
-              sum: {
-                field: SPAN_DURATION,
+            aggs: {
+              over_time: {
+                date_histogram: getMetricsDateHistogramParams({
+                  start: startWithOffset,
+                  end: endWithOffset,
+                  metricsInterval: 60,
+                }),
+                aggs,
+              },
+              ...aggs,
+              total_time: {
+                sum: {
+                  field: SPAN_DURATION,
+                },
               },
             },
           },
         },
       },
-    },
-  });
+    }
+  );
 
   const getImpact = calculateImpactBuilder(
     response.aggregations?.operationName.buckets.map(
@@ -141,8 +144,8 @@ export async function getTopBackendOperations({
 
   return (
     response.aggregations?.operationName.buckets.map(
-      (bucket): BackendOperation => {
-        const timeseries: BackendOperation['timeseries'] = {
+      (bucket): DependencyOperation => {
+        const timeseries: DependencyOperation['timeseries'] = {
           latency: [],
           throughput: [],
           failureRate: [],

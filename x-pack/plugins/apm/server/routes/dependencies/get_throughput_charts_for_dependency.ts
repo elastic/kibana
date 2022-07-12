@@ -24,8 +24,8 @@ import {
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
-export async function getThroughputChartsForBackend({
-  backendName,
+export async function getThroughputChartsForDependency({
+  dependencyName,
   spanName,
   setup,
   start,
@@ -35,7 +35,7 @@ export async function getThroughputChartsForBackend({
   searchServiceDestinationMetrics,
   offset,
 }: {
-  backendName: string;
+  dependencyName: string;
   spanName: string;
   setup: Setup;
   start: number;
@@ -59,56 +59,59 @@ export async function getThroughputChartsForBackend({
     minBucketSize: 60,
   });
 
-  const response = await apmEventClient.search('get_throughput_for_backend', {
-    apm: {
-      events: [
-        getProcessorEventForServiceDestinationStatistics(
-          searchServiceDestinationMetrics
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...termQuery(SPAN_NAME, spanName || null),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
-            ),
-            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
-          ],
-        },
+  const response = await apmEventClient.search(
+    'get_throughput_for_dependency',
+    {
+      apm: {
+        events: [
+          getProcessorEventForServiceDestinationStatistics(
+            searchServiceDestinationMetrics
+          ),
+        ],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(startWithOffset, endWithOffset),
+              ...termQuery(SPAN_NAME, spanName || null),
+              ...getDocumentTypeFilterForServiceDestinationStatistics(
+                searchServiceDestinationMetrics
+              ),
+              { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
+            ],
           },
-          aggs: {
-            throughput: {
-              rate: {
-                ...(searchServiceDestinationMetrics
-                  ? {
-                      field: getDocCountFieldForServiceDestinationStatistics(
-                        searchServiceDestinationMetrics
-                      ),
-                    }
-                  : {}),
-                unit: 'minute',
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: { min: startWithOffset, max: endWithOffset },
+            },
+            aggs: {
+              throughput: {
+                rate: {
+                  ...(searchServiceDestinationMetrics
+                    ? {
+                        field: getDocCountFieldForServiceDestinationStatistics(
+                          searchServiceDestinationMetrics
+                        ),
+                      }
+                    : {}),
+                  unit: 'minute',
+                },
               },
             },
           },
         },
       },
-    },
-  });
+    }
+  );
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {

@@ -27,7 +27,7 @@ import { useSearchServiceDestinationMetrics } from '../../../context/time_range_
 
 export function BackendLatencyChart({
   height,
-  backendName,
+  dependencyName,
   rangeFrom,
   rangeTo,
   kuery,
@@ -52,7 +52,7 @@ export function BackendLatencyChart({
       return callApmApi('GET /internal/apm/dependencies/charts/latency', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
             offset:
@@ -68,7 +68,7 @@ export function BackendLatencyChart({
       });
     },
     [
-      backendName,
+      dependencyName,
       start,
       end,
       offset,

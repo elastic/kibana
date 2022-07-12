@@ -10,21 +10,24 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getMetadataForBackend } from './get_metadata_for_backend';
-import { getLatencyChartsForBackend } from './get_latency_charts_for_backend';
+import { getMetadataForDependency } from './get_metadata_for_dependency';
+import { getLatencyChartsForDependency } from './get_latency_charts_for_dependency';
 import { getTopDependencies } from './get_top_dependencies';
 import { getUpstreamServicesForDependency } from './get_upstream_services_for_dependency';
-import { getThroughputChartsForBackend } from './get_throughput_charts_for_backend';
-import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
+import { getThroughputChartsForDependency } from './get_throughput_charts_for_dependency';
+import { getErrorRateChartsForDependency } from './get_error_rate_charts_for_dependency';
 import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { offsetRt } from '../../../common/comparison_rt';
 import {
-  BackendOperation,
-  getTopBackendOperations,
-} from './get_top_backend_operations';
-import { getBackendLatencyDistribution } from './get_backend_latency_distribution';
+  DependencyOperation,
+  getTopDependencyOperations,
+} from './get_top_dependency_operations';
+import { getDependencyLatencyDistribution } from './get_dependency_latency_distribution';
 import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
-import { BackendSpan, getTopBackendSpans } from './get_top_backend_spans';
+import {
+  DependencySpan,
+  getTopDependencySpans,
+} from './get_top_dependency_spans';
 
 const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',
@@ -110,10 +113,10 @@ const topDependenciesRoute = createApmServerRoute({
 
     return {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      dependencies: currentDependencies.map((backend) => {
-        const { stats, ...rest } = backend;
+      dependencies: currentDependencies.map((dependency) => {
+        const { stats, ...rest } = dependency;
         const prev = previousDependencies.find(
-          (item): boolean => item.location.id === backend.location.id
+          (item): boolean => item.location.id === dependency.location.id
         );
         return {
           ...rest,
@@ -251,7 +254,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
 const dependencyMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/metadata',
   params: t.type({
-    query: t.intersection([t.type({ backendName: t.string }), rangeRt]),
+    query: t.intersection([t.type({ dependencyName: t.string }), rangeRt]),
   }),
   options: {
     tags: ['access:apm'],
@@ -264,10 +267,10 @@ const dependencyMetadataRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
 
-    const { backendName, start, end } = params.query;
+    const { dependencyName, start, end } = params.query;
 
-    const metadata = await getMetadataForBackend({
-      backendName,
+    const metadata = await getMetadataForDependency({
+      dependencyName,
       setup,
       start,
       end,
@@ -282,7 +285,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       t.type({
-        backendName: t.string,
+        dependencyName: t.string,
         spanName: t.string,
         searchServiceDestinationMetrics: toBooleanRt,
       }),
@@ -304,7 +307,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const {
-      backendName,
+      dependencyName,
       searchServiceDestinationMetrics,
       spanName,
       kuery,
@@ -315,8 +318,8 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
     } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
-      getLatencyChartsForBackend({
-        backendName,
+      getLatencyChartsForDependency({
+        dependencyName,
         spanName,
         searchServiceDestinationMetrics,
         setup,
@@ -326,8 +329,8 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
         environment,
       }),
       offset
-        ? getLatencyChartsForBackend({
-            backendName,
+        ? getLatencyChartsForDependency({
+            dependencyName,
             spanName,
             searchServiceDestinationMetrics,
             setup,
@@ -349,7 +352,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       t.type({
-        backendName: t.string,
+        dependencyName: t.string,
         spanName: t.string,
         searchServiceDestinationMetrics: toBooleanRt,
       }),
@@ -371,7 +374,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const {
-      backendName,
+      dependencyName,
       searchServiceDestinationMetrics,
       spanName,
       kuery,
@@ -382,8 +385,8 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
     } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
-      getThroughputChartsForBackend({
-        backendName,
+      getThroughputChartsForDependency({
+        dependencyName,
         spanName,
         setup,
         start,
@@ -393,8 +396,8 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
         searchServiceDestinationMetrics,
       }),
       offset
-        ? getThroughputChartsForBackend({
-            backendName,
+        ? getThroughputChartsForDependency({
+            dependencyName,
             spanName,
             setup,
             start,
@@ -416,7 +419,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       t.type({
-        backendName: t.string,
+        dependencyName: t.string,
         spanName: t.string,
         searchServiceDestinationMetrics: toBooleanRt,
       }),
@@ -438,7 +441,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const {
-      backendName,
+      dependencyName,
       spanName,
       searchServiceDestinationMetrics,
       kuery,
@@ -449,8 +452,8 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
     } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
-      getErrorRateChartsForBackend({
-        backendName,
+      getErrorRateChartsForDependency({
+        dependencyName,
         spanName,
         setup,
         start,
@@ -460,8 +463,8 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
         searchServiceDestinationMetrics,
       }),
       offset
-        ? getErrorRateChartsForBackend({
-            backendName,
+        ? getErrorRateChartsForDependency({
+            dependencyName,
             spanName,
             setup,
             start,
@@ -489,19 +492,21 @@ const dependencyOperationsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       offsetRt,
-      t.type({ backendName: t.string }),
+      t.type({ dependencyName: t.string }),
     ]),
   }),
-  handler: async (resources): Promise<{ operations: BackendOperation[] }> => {
+  handler: async (
+    resources
+  ): Promise<{ operations: DependencyOperation[] }> => {
     const setup = await setupRequest(resources);
 
     const {
-      query: { backendName, start, end, environment, kuery, offset },
+      query: { dependencyName, start, end, environment, kuery, offset },
     } = resources.params;
 
-    const operations = await getTopBackendOperations({
+    const operations = await getTopDependencyOperations({
       setup,
-      backendName,
+      dependencyName,
       start,
       end,
       offset,
@@ -518,7 +523,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       t.type({
-        backendName: t.string,
+        dependencyName: t.string,
         spanName: t.string,
         percentileThreshold: toNumberRt,
       }),
@@ -539,7 +544,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const {
-      backendName,
+      dependencyName,
       spanName,
       percentileThreshold,
       kuery,
@@ -548,9 +553,9 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    return getBackendLatencyDistribution({
+    return getDependencyLatencyDistribution({
       setup,
-      backendName,
+      dependencyName,
       spanName,
       percentileThreshold,
       kuery,
@@ -571,16 +576,16 @@ const topDependencySpansRoute = createApmServerRoute({
       rangeRt,
       environmentRt,
       kueryRt,
-      t.type({ backendName: t.string, spanName: t.string }),
+      t.type({ dependencyName: t.string, spanName: t.string }),
       t.partial({ sampleRangeFrom: toNumberRt, sampleRangeTo: toNumberRt }),
     ]),
   }),
-  handler: async (resources): Promise<{ spans: BackendSpan[] }> => {
+  handler: async (resources): Promise<{ spans: DependencySpan[] }> => {
     const setup = await setupRequest(resources);
 
     const {
       query: {
-        backendName,
+        dependencyName,
         spanName,
         start,
         end,
@@ -591,9 +596,9 @@ const topDependencySpansRoute = createApmServerRoute({
       },
     } = resources.params;
 
-    const spans = await getTopBackendSpans({
+    const spans = await getTopDependencySpans({
       setup,
-      backendName,
+      dependencyName,
       spanName,
       start,
       end,
@@ -607,7 +612,7 @@ const topDependencySpansRoute = createApmServerRoute({
   },
 });
 
-export const backendsRouteRepository = {
+export const dependencisRouteRepository = {
   ...topDependenciesRoute,
   ...upstreamServicesForDependencyRoute,
   ...dependencyMetadataRoute,

@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: `GET /internal/apm/dependencies/metadata`,
       params: {
         query: {
-          backendName: dataConfig.span.destination,
+          dependencyName: dataConfig.span.destination,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
         },

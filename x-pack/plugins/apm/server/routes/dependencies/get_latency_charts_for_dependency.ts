@@ -25,8 +25,8 @@ import {
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
-export async function getLatencyChartsForBackend({
-  backendName,
+export async function getLatencyChartsForDependency({
+  dependencyName,
   spanName,
   searchServiceDestinationMetrics,
   setup,
@@ -36,7 +36,7 @@ export async function getLatencyChartsForBackend({
   kuery,
   offset,
 }: {
-  backendName: string;
+  dependencyName: string;
   spanName: string;
   searchServiceDestinationMetrics: boolean;
   setup: Setup;
@@ -54,7 +54,7 @@ export async function getLatencyChartsForBackend({
     offset,
   });
 
-  const response = await apmEventClient.search('get_latency_for_backend', {
+  const response = await apmEventClient.search('get_latency_for_dependency', {
     apm: {
       events: [
         getProcessorEventForServiceDestinationStatistics(
@@ -74,7 +74,7 @@ export async function getLatencyChartsForBackend({
             ...getDocumentTypeFilterForServiceDestinationStatistics(
               searchServiceDestinationMetrics
             ),
-            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
           ],
         },
       },

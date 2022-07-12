@@ -12,7 +12,7 @@ import type {
 import { PickByValue } from 'utility-types';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';
-import { backendsRouteRepository } from '../backends/route';
+import { dependencisRouteRepository } from '../dependencies/route';
 import { correlationsRouteRepository } from '../correlations/route';
 import { dataViewRouteRepository } from '../data_view/route';
 import { debugTelemetryRoute } from '../debug_telemetry/route';
@@ -65,7 +65,7 @@ function getTypedGlobalApmServerRouteRepository() {
     ...customLinkRouteRepository,
     ...sourceMapsRouteRepository,
     ...apmFleetRouteRepository,
-    ...backendsRouteRepository,
+    ...dependencisRouteRepository,
     ...correlationsRouteRepository,
     ...fallbackToTransactionsRouteRepository,
     ...historicalDataRouteRepository,
