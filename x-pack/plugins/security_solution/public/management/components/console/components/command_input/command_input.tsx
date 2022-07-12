@@ -81,7 +81,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
-  console.log(rightOfCursor, textEntered);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
@@ -110,6 +109,20 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       active: isKeyInputBeingCaptured,
     });
   }, [isKeyInputBeingCaptured]);
+
+  const handleSubmitButton = useCallback<MouseEventHandler>(
+    (ev) => {
+      setCommandToExecute(textEntered + rightOfCursor.text);
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: {
+          textEntered: '',
+          rightOfCursor: undefined,
+        },
+      });
+    },
+    [dispatch, textEntered, rightOfCursor.text]
+  );
 
   const handleKeyCaptureOnStateChange = useCallback<NonNullable<KeyCaptureProps['onStateChange']>>(
     (isCapturing) => {
@@ -296,7 +309,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 () => textEntered.length === 0 && rightOfCursor.text.length === 0,
                 [rightOfCursor.text.length, textEntered.length]
               )}
-              // onClick={}
+              onClick={handleSubmitButton}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
