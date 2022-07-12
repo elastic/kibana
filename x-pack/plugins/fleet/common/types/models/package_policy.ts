@@ -63,6 +63,7 @@ export interface NewPackagePolicy {
   description?: string;
   namespace: string;
   enabled: boolean;
+  is_externally_managed?: boolean;
   policy_id: string;
   output_id: string;
   package?: PackagePolicyPackage;

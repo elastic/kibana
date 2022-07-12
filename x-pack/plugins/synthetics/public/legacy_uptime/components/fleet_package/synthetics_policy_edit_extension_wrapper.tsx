@@ -6,7 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PolicyConfig, MonitorFields } from './types';
 import { ConfigKey, DataStream, TLSFields } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
@@ -95,6 +98,20 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       return getDefaultConfig();
     }, [currentPolicy]);
 
+    const { http } = useKibana().services;
+
+    if (currentPolicy.is_externally_managed) {
+      return (
+        <EuiCallOut>
+          <p>{EDIT_IN_UPTIME_DESC}</p>
+          {/* TODO Add a link to exact monitor*/}
+          <EuiButton href={`${http?.basePath.get()}/app/uptime/manage-monitors/all`}>
+            {EDIT_IN_UPTIME_LABEL}
+          </EuiButton>
+        </EuiCallOut>
+      );
+    }
+
     return (
       <PolicyConfigContextProvider
         defaultMonitorType={monitorType}
@@ -122,3 +139,11 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
   }
 );
 SyntheticsPolicyEditExtensionWrapper.displayName = 'SyntheticsPolicyEditExtensionWrapper';
+
+const EDIT_IN_UPTIME_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.inUptime', {
+  defaultMessage: 'Edit in uptime',
+});
+
+const EDIT_IN_UPTIME_DESC = i18n.translate('xpack.synthetics.editPackagePolicy.inUptimeDesc', {
+  defaultMessage: 'This is externally managed integration policy, and cannot be edited here.',
+});

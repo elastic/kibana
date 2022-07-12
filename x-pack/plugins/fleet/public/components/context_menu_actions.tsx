@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiButtonProps } from '@elastic/eui/src/components/button/button';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -24,6 +25,7 @@ type Props = {
     children: JSX.Element;
   };
   isOpen?: boolean;
+  isExternallyManaged?: boolean;
   onChange?: (isOpen: boolean) => void;
 } & (
   | {
@@ -51,24 +53,33 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
     }
   }, [isOpenState, onChange, isOpen]);
 
+  const actionButton = button ? (
+    <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isExternallyManaged}>
+      {button.children}
+    </EuiButton>
+  ) : (
+    <EuiButtonIcon
+      isDisabled={props.isExternallyManaged}
+      iconType="boxesHorizontal"
+      onClick={handleToggleMenu}
+      aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
+        defaultMessage: 'Open',
+      })}
+      data-test-subj="agentActionsBtn"
+    />
+  );
+
   return (
     <EuiPopover
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
-        button ? (
-          <EuiButton {...button.props} onClick={handleToggleMenu}>
-            {button.children}
-          </EuiButton>
+        props.isExternallyManaged ? (
+          <EuiToolTip title={'This is externally managed integration policy.'}>
+            {actionButton}
+          </EuiToolTip>
         ) : (
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
-              defaultMessage: 'Open',
-            })}
-            data-test-subj="agentActionsBtn"
-          />
+          actionButton
         )
       }
       isOpen={isOpen === undefined ? isOpenState : isOpen}

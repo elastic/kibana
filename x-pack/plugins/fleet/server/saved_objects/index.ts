@@ -143,6 +143,7 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         enabled: { type: 'boolean' },
+        is_externally_managed: { type: 'boolean' },
         policy_id: { type: 'keyword' },
         output_id: { type: 'keyword' },
         package: {
