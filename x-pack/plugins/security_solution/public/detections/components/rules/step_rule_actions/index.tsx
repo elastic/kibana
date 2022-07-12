@@ -165,13 +165,18 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             componentProps={{
               messageVariables: actionMessageParams,
               hasErrorOnCreationCaseAction,
-              isOsqueryDisabled: !isOsqueryEnabled,
             }}
           />
           <EuiSpacer />
           <EuiSpacer />
 
-          <UseField path="response_actions" component={RuleResponseActionsField} />
+          <UseField
+            path="response_actions"
+            component={RuleResponseActionsField}
+            componentProps={{
+              isOsqueryDisabled: !isOsqueryEnabled,
+            }}
+          />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />

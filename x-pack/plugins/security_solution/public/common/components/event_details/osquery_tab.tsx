@@ -22,18 +22,16 @@ const TabContentWrapper = styled.div`
 export const useOsqueryTab = ({
   rawEventData,
   id,
-  isOsqueryDetectionActionEnabled,
 }: {
   rawEventData?: AlertRawEventData;
   id: string;
-  isOsqueryDetectionActionEnabled: boolean;
 }) => {
   const {
     services: { osquery },
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
 
-  if (!isOsqueryDetectionActionEnabled || !osquery) {
+  if (!osquery) {
     return;
   }
 

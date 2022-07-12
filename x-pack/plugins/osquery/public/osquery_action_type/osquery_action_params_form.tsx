@@ -12,13 +12,14 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/t
 import { QueryClientProvider } from 'react-query';
 import { isEmpty, pickBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { isDeepEqual } from 'react-use/lib/util';
 import uuid from 'uuid';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { createGlobalStyle } from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
-  MISSING_KIBANA_PRIVILLEGES,
   NOT_AVAILABLE,
   PERMISSION_DENIED,
   SHORT_EMPTY_TITLE,
@@ -173,7 +174,18 @@ const OsqueryActionParamsForm: React.FunctionComponent<ActionParamsProps<Osquery
         <EuiEmptyPrompt
           title={<h2>{PERMISSION_DENIED}</h2>}
           titleSize="xs"
-          body={MISSING_KIBANA_PRIVILLEGES}
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.osquery.action.missingPrivilleges"
+                defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{
+                  osquery: <EuiCode>osquery</EuiCode>,
+                }}
+              />
+            </p>
+          }
         />
       </>
     );

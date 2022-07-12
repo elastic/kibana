@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiCode } from '@elastic/eui';
-import React from 'react';
 
 export const SHORT_EMPTY_TITLE = i18n.translate('xpack.osquery.action.shortEmptyTitle', {
   defaultMessage: 'Osquery is not available',
@@ -29,10 +27,3 @@ export const AGENT_STATUS_ERROR = i18n.translate('xpack.osquery.action.agentStat
   defaultMessage:
     'To run queries on this host, the Elastic Agent must be active. Check the status of this agent in Fleet.',
 });
-
-// TODO find a way to pass <EuiCode>
-export const MISSING_KIBANA_PRIVILLEGES = (
-  <p>
-    To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana privileges.
-  </p>
-);

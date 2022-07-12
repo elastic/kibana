@@ -21,7 +21,6 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import { useOsqueryTab } from './osquery_tab';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -47,6 +46,7 @@ import { RelatedCases } from './related_cases';
 
 type EventViewTab = EuiTabbedContentTab;
 
+// TODO ADJUST TO RESPONSE_ACTIONS
 export interface AlertRawEventData {
   fields: {
     ['agent.id']?: string[];
@@ -162,8 +162,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     setRange,
     range,
   } = useInvestigationTimeEnrichment(eventFields);
-
-  const isOsqueryDetectionActionEnabled = useIsExperimentalFeatureEnabled('osqueryDetectionAction');
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -350,7 +348,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useOsqueryTab({
-    isOsqueryDetectionActionEnabled,
     rawEventData: rawEventData as AlertRawEventData,
     id,
   });

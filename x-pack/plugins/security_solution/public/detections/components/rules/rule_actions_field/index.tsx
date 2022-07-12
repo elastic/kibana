@@ -25,7 +25,6 @@ interface Props {
   field: FieldHook;
   hasErrorOnCreationCaseAction: boolean;
   messageVariables: ActionVariables;
-  isOsqueryDisabled: boolean;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -59,20 +58,12 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-interface ActionEnabledMap {
-  '.case'?: boolean;
-  '.osquery'?: boolean;
-}
-
 export const getSupportedActions = (
   actionTypes: ActionType[],
-  actionEnabledMap: ActionEnabledMap
+  hasErrorOnCreationCaseAction: boolean
 ): ActionType[] => {
   return actionTypes.filter((actionType) => {
-    if (actionType.id === '.case' && actionEnabledMap['.case']) {
-      return false;
-    }
-    if (actionType.id === '.osquery' && actionEnabledMap['.osquery']) {
+    if (actionType.id === '.case' && hasErrorOnCreationCaseAction) {
       return false;
     }
     return NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id);
@@ -82,7 +73,6 @@ export const getSupportedActions = (
 export const RuleActionsField: React.FC<Props> = ({
   field,
   hasErrorOnCreationCaseAction,
-  isOsqueryDisabled,
   messageVariables,
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
@@ -170,16 +160,11 @@ export const RuleActionsField: React.FC<Props> = ({
   useEffect(() => {
     (async function () {
       const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
-
-      const actionEnabledMap: ActionEnabledMap = {
-        '.case': hasErrorOnCreationCaseAction,
-        '.osquery': isOsqueryDisabled,
-      };
-      const supportedTypes = getSupportedActions(actionTypes, actionEnabledMap);
+      const supportedTypes = getSupportedActions(actionTypes, hasErrorOnCreationCaseAction);
       setSupportedActionTypes(supportedTypes);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasErrorOnCreationCaseAction, isOsqueryDisabled]);
+  }, [hasErrorOnCreationCaseAction]);
 
   useEffect(() => {
     if (isSubmitting || !field.errors.length) {
