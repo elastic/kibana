@@ -9,16 +9,11 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../../constants';
 
-import type { Agent, AgentPolicy, DownloadSource } from '../../types';
+import type { AgentPolicy, DownloadSource } from '../../types';
 
-import { agentPolicyService } from '../../services/agent_policy';
-
-import { getSourceUriForAgentPolicy, getSourceUriForAgent } from './source_uri_utils';
+import { getSourceUriForAgentPolicy } from './source_uri_utils';
 
 const soClientMock = savedObjectsClientMock.create();
-
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-jest.mock('../../services/agent_policy');
 
 jest.mock('../download_source', () => {
   return {
@@ -54,22 +49,6 @@ function mockDownloadSourceSO(id: string, attributes: any = {}) {
       ...attributes,
     },
   };
-}
-
-function mockAgentPolicy(data?: Partial<AgentPolicy>) {
-  mockedAgentPolicyService.get.mockImplementation((soClient, id, withPackagePolicies) =>
-    Promise.resolve({
-      id: 'agent-policy-id',
-      status: 'active',
-      is_managed: false,
-      namespace: 'default',
-      revision: 1,
-      name: 'Policy',
-      updated_at: '2022-01-01',
-      updated_by: 'qwerty',
-      ...data,
-    } as AgentPolicy)
-  );
 }
 describe('helpers', () => {
   beforeEach(() => {
@@ -147,44 +126,5 @@ describe('helpers', () => {
         'http://default-registry.co'
       );
     });
-  });
-
-  describe('getSourceUriForAgent', () => {
-    beforeEach(() => {
-      mockedAgentPolicyService.get.mockReset();
-    });
-    it('should return the source_uri set on an agent policy for that agent', async () => {
-      mockAgentPolicy({ download_source_id: 'test-ds-1' });
-      const agent: Agent = {
-        id: 'de9006e1-54a7-4320-b24e-927e6fe518a8',
-        active: true,
-        policy_id: 'agent-policy-id',
-        type: 'PERMANENT',
-        enrolled_at: '2022-09-30T20:24:08.347Z',
-        user_provided_metadata: {},
-        local_metadata: {},
-        packages: ['system'],
-        status: 'online',
-      };
-
-      expect(await getSourceUriForAgent(soClientMock, agent)).toEqual(
-        'http://custom-registry-test'
-      );
-    });
-  });
-  it('should return the default source_uri set if there is none set on that policy', async () => {
-    mockAgentPolicy();
-    const agent: Agent = {
-      id: 'de9006e1-54a7-4320-b24e-927e6fe518a8',
-      active: true,
-      policy_id: 'agent-policy-id',
-      type: 'PERMANENT',
-      enrolled_at: '2022-09-30T20:24:08.347Z',
-      user_provided_metadata: {},
-      local_metadata: {},
-      packages: ['system'],
-      status: 'online',
-    };
-    expect(await getSourceUriForAgent(soClientMock, agent)).toEqual('http://default-registry.co');
   });
 });

@@ -7,19 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { downloadSourceService, agentPolicyService } from '../../services';
-import type { Agent, AgentPolicy } from '../../types';
-
-export const getSourceUriForAgent = async (soClient: SavedObjectsClientContract, agent: Agent) => {
-  if (!agent.policy_id) {
-    throw new Error('Agent.policy_id not found');
-  }
-  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
-  if (!agentPolicy) {
-    throw new Error('Agent Policy not found');
-  }
-  return getSourceUriForAgentPolicy(soClient, agentPolicy);
-};
+import { downloadSourceService } from '../../services';
+import type { AgentPolicy } from '../../types';
 
 export const getSourceUriForAgentPolicy = async (
   soClient: SavedObjectsClientContract,
