@@ -191,7 +191,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               stackByField0={riskChartStackBy0}
               stackByField1={riskChartStackBy1}
               title={title}
-              riskSubAggregationField="signal.rule.risk_score" // TODO: 'kibana.alert.rule.risk_score' returns no values
+              riskSubAggregationField="kibana.alert.risk_score"
               runtimeMappings={runtimeMappings}
             />
           )}

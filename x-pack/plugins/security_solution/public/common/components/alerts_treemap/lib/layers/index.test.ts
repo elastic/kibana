@@ -32,6 +32,22 @@ describe('layers', () => {
 
       expect(getGroupFromPath(datumWithUndefinedPath)).toBeUndefined();
     });
+
+    it('returns undefined when path is an empty array', () => {
+      expect(
+        getGroupFromPath({
+          path: [],
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when path is an array with only one value', () => {
+      expect(
+        getGroupFromPath({
+          path: [{ index: 0, value: '__null_small_multiples_key__' }],
+        })
+      ).toBeUndefined();
+    });
   });
 
   describe('getLayersOneDimension', () => {

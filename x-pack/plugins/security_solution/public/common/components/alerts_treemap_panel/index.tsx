@@ -153,11 +153,11 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         hasBorder
         height={isPanelExpanded ? height : COLLAPSED_HEIGHT}
         $overflowY="auto"
-        $toggleStatus={true}
+        $toggleStatus
       >
         <HeaderSection
           alignHeader={alignHeader}
-          hideSubtitle={true}
+          hideSubtitle
           id={uniqueQueryId}
           outerDirection="row"
           showInspectButton={chartOptionsContextMenu == null}

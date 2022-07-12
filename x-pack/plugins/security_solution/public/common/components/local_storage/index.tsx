@@ -7,20 +7,21 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { useKibana } from '../../lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 
+import { useKibana } from '../../lib/kibana';
 interface Props<T> {
   defaultValue: T;
   isInvalidDefault?: (value: T) => boolean;
   key: string;
-  plugin: string;
+  plugin?: string;
 }
 
 /** Reads and writes settings from local storage */
 export const useLocalStorage = <T,>({
   defaultValue,
   key,
-  plugin,
+  plugin = APP_ID,
   isInvalidDefault,
 }: Props<T>): [T, (value: T) => void] => {
   const { storage } = useKibana().services;

@@ -10,7 +10,7 @@ import {
   getSettingKey,
   isDefaultWhenEmptyString,
 } from '../../../../../common/components/local_storage/helpers';
-import { APP_ID } from '../../../../../../common/constants';
+
 import {
   ALERTS_PAGE,
   ALERT_VIEW_SELECTION_SETTING_NAME,
@@ -39,7 +39,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: ALERT_VIEW_SELECTION_SETTING_NAME,
     }),
-    plugin: APP_ID,
     isInvalidDefault: isDefaultWhenEmptyString,
   });
 
@@ -50,7 +49,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: EXPAND_SETTING_NAME,
     }),
-    plugin: APP_ID,
   });
 
   const [riskChartStackBy0, setRiskChartStackBy0] = useLocalStorage<string>({
@@ -60,7 +58,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: STACK_BY_0_SETTING_NAME,
     }),
-    plugin: APP_ID,
     isInvalidDefault: isDefaultWhenEmptyString,
   });
 
@@ -71,7 +68,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: STACK_BY_1_SETTING_NAME,
     }),
-    plugin: APP_ID,
   });
 
   const [countTableStackBy0, setCountTableStackBy0] = useLocalStorage<string>({
@@ -81,7 +77,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: STACK_BY_0_SETTING_NAME,
     }),
-    plugin: APP_ID,
     isInvalidDefault: isDefaultWhenEmptyString,
   });
 
@@ -92,7 +87,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: STACK_BY_1_SETTING_NAME,
     }),
-    plugin: APP_ID,
   });
 
   const [trendChartStackBy, setTrendChartStackBy] = useLocalStorage<string>({
@@ -102,7 +96,6 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       page: ALERTS_PAGE,
       setting: STACK_BY_SETTING_NAME,
     }),
-    plugin: APP_ID,
     isInvalidDefault: isDefaultWhenEmptyString,
   });
 
