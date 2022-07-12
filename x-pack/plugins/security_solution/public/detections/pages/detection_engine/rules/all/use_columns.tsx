@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiBasicTableColumn,
-  EuiLink,
-  EuiTableActionsColumnType,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
@@ -33,7 +27,7 @@ import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import { PopoverTooltip } from './popover_tooltip';
@@ -42,12 +36,14 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { getRulesTableActions } from './rules_table_actions';
 import { RuleStatusBadge } from '../../../../components/rules/rule_execution_status';
-import {
+import type {
   DurationMetric,
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidateRules } from '../../../../containers/detection_engine/rules/use_find_rules_query';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -178,22 +174,33 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
-  const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
+  const { setLoadingRules } = useRulesTableContext().actions;
   const { startTransaction } = useStartTransaction();
+  const invalidateRules = useInvalidateRules();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
 
   return useMemo(
     () => ({
-      actions: getRulesTableActions(
+      actions: getRulesTableActions({
         toasts,
         navigateToApp,
-        reFetchRules,
-        hasActionsPrivileges,
+        invalidateRules,
+        invalidatePrePackagedRulesStatus,
+        actionsPrivileges: hasActionsPrivileges,
         setLoadingRules,
-        startTransaction
-      ),
+        startTransaction,
+      }),
       width: '40px',
     }),
-    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, startTransaction, toasts]
+    [
+      hasActionsPrivileges,
+      invalidatePrePackagedRulesStatus,
+      invalidateRules,
+      navigateToApp,
+      setLoadingRules,
+      startTransaction,
+      toasts,
+    ]
   );
 };
 

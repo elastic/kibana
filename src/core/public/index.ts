@@ -34,6 +34,7 @@ import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { ExecutionContextSetup, ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
 import type {
@@ -41,7 +42,7 @@ import type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-import {
+import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
@@ -63,21 +64,21 @@ import {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import { HttpSetup, HttpStart } from './http';
-import { NotificationsSetup, NotificationsStart } from './notifications';
-import { OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { SavedObjectsStart } from './saved_objects';
-import { DeprecationsServiceStart } from './deprecations';
+import type { NotificationsSetup, NotificationsStart } from './notifications';
+import type { OverlayStart } from './overlays';
+import type {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginOpaqueId,
+} from './plugins';
+import type { UiSettingsState, IUiSettingsClient } from './ui_settings';
+import type { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import type { SavedObjectsStart } from './saved_objects';
+import type { DeprecationsServiceStart } from './deprecations';
 
-export type {
-  PackageInfo,
-  EnvironmentMode,
-  IExternalUrlPolicy,
-  DomainDeprecationDetails,
-} from '../server/types';
+export type { PackageInfo, EnvironmentMode } from '@kbn/config';
+export type { DomainDeprecationDetails } from '../server/types';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
@@ -95,8 +96,8 @@ export type {
   OptInConfig,
   ContextProviderOpts,
   TelemetryCounter,
+  TelemetryCounterType,
 } from '@kbn/analytics-client';
-export { TelemetryCounterType } from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -163,8 +164,6 @@ export type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
-export { HttpFetchError } from './http';
-
 export type {
   HttpHeadersInit,
   HttpRequestInit,
@@ -181,9 +180,10 @@ export type {
   IExternalUrl,
   IHttpInterceptController,
   ResponseErrorBody,
-  IHttpFetchError,
   IHttpResponseInterceptorOverrides,
-} from './http';
+} from '@kbn/core-http-browser';
+
+export type { IHttpFetchError } from '@kbn/core-http-browser';
 
 export type {
   OverlayStart,

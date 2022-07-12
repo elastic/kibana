@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -510,6 +512,8 @@ export default function (providerContext: FtrProviderContext) {
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
+        install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        verification_status: 'unknown',
       });
     });
   });

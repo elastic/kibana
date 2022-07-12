@@ -68,6 +68,7 @@ export interface MetricOption {
   showPercentileAnnotations?: boolean;
   formula?: string;
   metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette'>;
+  palette?: PaletteOutput;
 }
 
 export interface SeriesConfig {
@@ -160,3 +161,5 @@ export interface BuilderItem {
   series: SeriesUrl;
   seriesConfig?: SeriesConfig;
 }
+
+export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';

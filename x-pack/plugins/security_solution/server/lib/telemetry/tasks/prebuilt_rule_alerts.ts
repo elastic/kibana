@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
-import type { ESClusterInfo, ESLicense } from '../types';
-import { TaskExecutionPeriod } from '../task';
+import type { Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
+import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
+import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
 import { batchTelemetryRecords } from '../helpers';
-import { TelemetryEvent } from '../types';
 import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {

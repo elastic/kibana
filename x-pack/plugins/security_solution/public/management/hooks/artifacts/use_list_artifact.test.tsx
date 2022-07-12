@@ -6,7 +6,7 @@
  */
 
 import { useListArtifact } from './use_list_artifact';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import type { StatItemsProps, StatItems } from '.';
 import {
   StatItemsComponent,
-  StatItemsProps,
   addValueToFields,
   addValueToAreaChart,
   addValueToBarChart,
   useKpiMatrixStatus,
-  StatItems,
 } from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
@@ -34,9 +34,10 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
-import { State, createStore } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';

@@ -7,9 +7,9 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { History, createMemoryHistory } from 'history';
-import { IBasePath } from '../../http';
-import { BasePath } from '../../http/base_path';
+import { type History, createMemoryHistory } from 'history';
+import { BasePath } from '@kbn/core-http-browser-internal';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ScopedHistory } from '../../application/scoped_history';
 import { applicationServiceMock } from '../../application/application_service.mock';
 

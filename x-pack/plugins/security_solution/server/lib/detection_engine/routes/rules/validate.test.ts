@@ -6,8 +6,8 @@
  */
 
 import { transformValidate, transformValidateBulkError } from './validate';
-import { BulkError } from '../utils';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { BulkError } from '../utils';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getRuleMock, getRuleExecutionSummarySucceeded } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
