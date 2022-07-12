@@ -78,7 +78,7 @@ export const Tooltip: FC<Props> = ({
   seriesIdentifier.splitAccessors.forEach((splitValue, key) => {
     const splitSeriesFormatter = formattedColumns[key]
       ? null
-      : formatFactory(layerFormats.splitSeriesAccessors[key]);
+      : layerFormats.splitSeriesAccessors[key].formatter;
 
     const label = layerTitles?.splitSeriesTitles?.[key];
     const value = splitSeriesFormatter ? splitSeriesFormatter.convert(splitValue) : `${splitValue}`;

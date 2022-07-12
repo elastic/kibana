@@ -8,20 +8,12 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import {
-  importRulesPayloadSchema,
-  ImportRulesPayloadSchema,
-  ImportRulesSchema,
-  importRulesSchema,
-  ImportRulesSchemaDecoded,
-} from './import_rules_schema';
+import type { ImportRulesPayloadSchema, ImportRulesSchema } from './import_rules_schema';
+import { importRulesPayloadSchema, importRulesSchema } from './import_rules_schema';
 import {
   getImportRulesSchemaMock,
-  getImportRulesSchemaDecodedMock,
   getImportThreatMatchRulesSchemaMock,
-  getImportThreatMatchRulesSchemaDecodedMock,
 } from './import_rules_schema.mock';
-import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
 describe('import rules schema', () => {
@@ -31,14 +23,21 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "description"',
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "rule_id"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "description"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "rule_id"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -63,13 +62,18 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "description"',
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "description"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -82,12 +86,15 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -101,12 +108,15 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -121,12 +131,15 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "name"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "name"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -142,11 +155,12 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "type"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "severity"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -163,10 +177,9 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "type"',
-    ]);
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "risk_score"'
+    );
     expect(message.schema).toEqual({});
   });
 
@@ -252,34 +265,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-      type: 'query',
-      query: 'some query',
-      index: ['index-1'],
-      interval: '5m',
-      references: [],
-      actions: [],
-      enabled: true,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-      immutable: false,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
@@ -326,35 +311,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-      references: [],
-      actions: [],
-      enabled: true,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-      immutable: false,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
@@ -378,36 +334,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      output_index: '.siem-signals',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-      references: [],
-      actions: [],
-      enabled: true,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-      immutable: false,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
@@ -428,33 +354,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      risk_score: 50,
-      references: [],
-      actions: [],
-      enabled: true,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-      immutable: false,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
@@ -476,34 +375,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      output_index: '.siem-signals',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      references: [],
-      actions: [],
-      enabled: true,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      threat: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-      immutable: false,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can send in an empty array to threat', () => {
@@ -516,11 +387,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      threat: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
@@ -559,50 +425,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      author: [],
-      severity_mapping: [],
-      risk_score_mapping: [],
-      rule_id: 'rule-1',
-      output_index: '.siem-signals',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      immutable: false,
-      threat: [
-        {
-          framework: 'someFramework',
-          tactic: {
-            id: 'fakeId',
-            name: 'fakeName',
-            reference: 'fakeRef',
-          },
-          technique: [
-            {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
-          ],
-        },
-      ],
-      references: [],
-      actions: [],
-      enabled: true,
-      false_positives: [],
-      max_signals: DEFAULT_MAX_SIGNALS,
-      tags: [],
-      throttle: null,
-      version: 1,
-      exceptions_list: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('allows references to be sent as valid', () => {
@@ -615,11 +437,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      references: ['index-1'],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('defaults references to an array if it is not sent in', () => {
@@ -628,11 +445,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(noReferences, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      references: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('references cannot be numbers', () => {
@@ -671,13 +483,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { interval: expectedInterval, ...expectedNoInterval } = getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoInterval,
-      interval: '5m',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('defaults max signals to 100', () => {
@@ -691,18 +496,10 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { max_signals: expectedMaxSignals, ...expectedNoMaxSignals } =
-      getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoMaxSignals,
-      max_signals: 100,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('saved_query type can have filters with it', () => {
-    const payload: ImportRulesSchema = {
+    const payload = {
       ...getImportRulesSchemaMock(),
       filters: [],
     };
@@ -711,11 +508,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      filters: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('filters cannot be a string', () => {
@@ -734,7 +526,7 @@ describe('import rules schema', () => {
   });
 
   test('language validates with kuery', () => {
-    const payload: ImportRulesSchema = {
+    const payload = {
       ...getImportRulesSchemaMock(),
       language: 'kuery',
     };
@@ -743,15 +535,10 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      language: 'kuery',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('language validates with lucene', () => {
-    const payload: ImportRulesSchema = {
+    const payload = {
       ...getImportRulesSchemaMock(),
       language: 'lucene',
     };
@@ -760,11 +547,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      language: 'lucene',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('language does not validate with something made up', () => {
@@ -820,11 +602,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      max_signals: 1,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of tags', () => {
@@ -837,11 +614,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      tags: ['tag_1', 'tag_2'],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
@@ -942,20 +714,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      threat: [
-        {
-          framework: 'fake',
-          tactic: {
-            id: 'fakeId',
-            name: 'fakeName',
-            reference: 'fakeRef',
-          },
-        },
-      ],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -968,11 +726,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      false_positives: ['false_1', 'false_2'],
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
@@ -1014,7 +767,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(getImportRulesSchemaDecodedMock());
   });
 
   test('You cannot set the immutable to be true', () => {
@@ -1083,11 +835,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      risk_score: 0,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can set the risk_score to 100', () => {
@@ -1100,11 +847,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      risk_score: 100,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You can set meta to any object you want', () => {
@@ -1119,13 +861,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      meta: {
-        somethingMadeUp: { somethingElse: true },
-      },
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot create meta as a string', () => {
@@ -1143,26 +878,6 @@ describe('import rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You can omit the query string when filters are present', () => {
-    const { query, ...noQuery } = getImportRulesSchemaMock();
-    const payload: ImportRulesSchema = {
-      ...noQuery,
-      filters: [],
-    };
-
-    const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { query: expectedQuery, ...expectedNoQuery } = getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoQuery,
-      filters: [],
-    };
-    expect(message.schema).toEqual(expected);
-  });
-
   test('validates with timeline_id and timeline_title', () => {
     const payload: ImportRulesSchema = {
       ...getImportRulesSchemaMock(),
@@ -1174,12 +889,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      timeline_id: 'timeline-id',
-      timeline_title: 'timeline-title',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('rule_id is required and you cannot get by with just id', () => {
@@ -1212,14 +921,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: ImportRulesSchemaDecoded = {
-      ...getImportRulesSchemaDecodedMock(),
-      created_at: '2020-01-09T06:15:24.749Z',
-      updated_at: '2020-01-09T06:15:24.749Z',
-      created_by: 'Braden Hassanabad',
-      updated_by: 'Evan Hassanabad',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('it does not validate with epoch strings for created_at', () => {
@@ -1300,13 +1001,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { from: expectedFrom, ...expectedNoFrom } = getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoFrom,
-      from: 'now-6m',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('The default for "to" will be "now"', () => {
@@ -1319,13 +1013,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { to: expectedTo, ...expectedNoTo } = getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoTo,
-      to: 'now',
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -1351,13 +1038,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { actions: expectedActions, ...expectedNoActions } = getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoActions,
-      actions: [],
-    };
-    expect(message.schema).toEqual(expected);
   });
   test('You cannot send in an array of actions that are missing "group"', () => {
     const payload: Omit<ImportRulesSchema['actions'], 'group'> = {
@@ -1451,13 +1131,6 @@ describe('import rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-
-    const { throttle: expectedThrottle, ...expectedNoThrottle } = getImportRulesSchemaDecodedMock();
-    const expected: ImportRulesSchemaDecoded = {
-      ...expectedNoThrottle,
-      throttle: null,
-    };
-    expect(message.schema).toEqual(expected);
   });
 
   describe('note', () => {
@@ -1471,11 +1144,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        ...getImportRulesSchemaDecodedMock(),
-        note: '# documentation markdown here',
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('You can set note to an empty string', () => {
@@ -1488,11 +1156,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        ...getImportRulesSchemaDecodedMock(),
-        note: '',
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('You cannot create note as an object', () => {
@@ -1531,34 +1194,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: true,
-        false_positives: [],
-        immutable: false,
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-      };
-      expect(message.schema).toEqual(expected);
     });
   });
 
@@ -1584,48 +1219,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: true,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        filters: [],
-        immutable: false,
-        exceptions_list: [
-          {
-            id: 'some_uuid',
-            list_id: 'list_id_single',
-            namespace_type: 'single',
-            type: 'detection',
-          },
-          {
-            id: 'endpoint_list',
-            list_id: 'endpoint_list',
-            namespace_type: 'agnostic',
-            type: 'endpoint',
-          },
-        ],
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
@@ -1649,41 +1242,10 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: true,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        immutable: false,
-        filters: [],
-        exceptions_list: [],
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
-      const payload: Omit<ImportRulesSchema, 'exceptions_list'> & {
-        exceptions_list: Array<{ id: string; namespace_type: string }>;
-      } = {
+      const payload = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1730,35 +1292,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        note: '# some markdown',
-        references: [],
-        actions: [],
-        enabled: true,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        immutable: false,
-        exceptions_list: [],
-        filters: [],
-      };
-      expect(message.schema).toEqual(expected);
     });
   });
 
@@ -1768,9 +1301,7 @@ describe('import rules schema', () => {
       const decoded = importRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      const expected = getImportThreatMatchRulesSchemaDecodedMock();
       expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
     });
   });
 
@@ -1795,35 +1326,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: [],
-        data_view_id: 'logs-*',
-        interval: '5m',
-        references: [],
-        actions: [],
-        enabled: true,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-        immutable: false,
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     // Both can be defined, but if a data_view_id is defined, rule will use that one
@@ -1847,35 +1349,6 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ImportRulesSchemaDecoded = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: ['auditbeat-*'],
-        data_view_id: 'logs-*',
-        interval: '5m',
-        references: [],
-        actions: [],
-        enabled: true,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-        immutable: false,
-      };
-      expect(message.schema).toEqual(expected);
     });
 
     test('data_view_id cannot be a number', () => {

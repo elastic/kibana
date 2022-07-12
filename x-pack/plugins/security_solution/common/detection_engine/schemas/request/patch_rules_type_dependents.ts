@@ -5,32 +5,7 @@
  * 2.0.
  */
 
-import { isMlRule } from '../../../machine_learning/helpers';
-import { PatchRulesSchema } from './patch_rules_schema';
-
-export const validateQuery = (rule: PatchRulesSchema): string[] => {
-  if (isMlRule(rule.type)) {
-    if (rule.query != null) {
-      return ['when "type" is "machine_learning", "query" cannot be set'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateLanguage = (rule: PatchRulesSchema): string[] => {
-  if (isMlRule(rule.type)) {
-    if (rule.language != null) {
-      return ['when "type" is "machine_learning", "language" cannot be set'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
+import type { PatchRulesSchema } from './patch_rules_schema';
 
 export const validateTimelineId = (rule: PatchRulesSchema): string[] => {
   if (rule.timeline_id != null) {
@@ -94,8 +69,6 @@ export const validateThreshold = (rule: PatchRulesSchema): string[] => {
 export const patchRuleValidateTypeDependents = (rule: PatchRulesSchema): string[] => {
   return [
     ...validateId(rule),
-    ...validateQuery(rule),
-    ...validateLanguage(rule),
     ...validateTimelineId(rule),
     ...validateTimelineTitle(rule),
     ...validateThreshold(rule),

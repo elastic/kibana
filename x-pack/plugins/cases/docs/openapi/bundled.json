@@ -2574,6 +2574,120 @@
         }
       ]
     },
+    "/api/cases/status": {
+      "get": {
+        "summary": "Returns the number of cases that are open, closed, and in progress.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count_closed_cases": {
+                      "type": "integer"
+                    },
+                    "count_in_progress_cases": {
+                      "type": "integer"
+                    },
+                    "count_open_cases": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "examples": {
+                  "getStatusResponse": {
+                    "$ref": "#/components/examples/get_status_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/api/cases/tags": {
+      "get": {
+        "summary": "Aggregates and returns a list of case tags.",
+        "description": "You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owner",
+            "description": "A filter to limit the retrieved case statistics to a specific set of applications. If this parameter is omitted, the response contains tags from all cases that the user has access to read.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/owners"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/owners"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "examples": {
+                  "getTagsResponse": {
+                    "$ref": "#/components/examples/get_tags_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case.",
@@ -3241,6 +3355,129 @@
                 "examples": {
                   "updateCaseCommentResponse": {
                     "$ref": "#/components/examples/update_comment_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves all the comments from a case.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/alert_comment_response_properties"
+                      },
+                      {
+                        "$ref": "#/components/schemas/user_comment_response_properties"
+                      }
+                    ]
+                  }
+                }
+              },
+              "examples": {}
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/api/cases/{caseId}/comments/{commentId}": {
+      "delete": {
+        "summary": "Deletes a comment or alert from a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/comment_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves a comment from a case.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/comment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/alert_comment_response_properties"
+                    },
+                    {
+                      "$ref": "#/components/schemas/user_comment_response_properties"
+                    }
+                  ]
+                },
+                "examples": {
+                  "getCaseCommentResponse": {
+                    "$ref": "#/components/examples/get_comment_response"
                   }
                 }
               }
@@ -5834,6 +6071,126 @@
         }
       ]
     },
+    "/s/{spaceId}/api/cases/status": {
+      "get": {
+        "summary": "Returns the number of cases that are open, closed, and in progress.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "deprecated": true,
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count_closed_cases": {
+                      "type": "integer"
+                    },
+                    "count_in_progress_cases": {
+                      "type": "integer"
+                    },
+                    "count_open_cases": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "examples": {
+                  "getStatusResponse": {
+                    "$ref": "#/components/examples/get_status_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/cases/tags": {
+      "get": {
+        "summary": "Aggregates and returns a list of case tags.",
+        "description": "You must have read privileges for the **Cases*** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "query",
+            "name": "owner",
+            "description": "A filter to limit the retrieved case statistics to a specific set of applications. If this parameter is omitted, the response contains tags from all cases that the user has access to read.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/owners"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/owners"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "examples": {
+                  "getTagsResponse": {
+                    "$ref": "#/components/examples/get_tags_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case.",
@@ -6522,6 +6879,138 @@
           }
         ]
       },
+      "get": {
+        "summary": "Retrieves all the comments from a case.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "deprecated": true,
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/alert_comment_response_properties"
+                      },
+                      {
+                        "$ref": "#/components/schemas/user_comment_response_properties"
+                      }
+                    ]
+                  }
+                }
+              },
+              "examples": {}
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/cases/{caseId}/comments/{commentId}": {
+      "delete": {
+        "summary": "Deletes a comment or alert from a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/comment_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves a comment from a case.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security*** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/comment_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/alert_comment_response_properties"
+                    },
+                    {
+                      "$ref": "#/components/schemas/user_comment_response_properties"
+                    }
+                  ]
+                },
+                "examples": {
+                  "getCaseCommentResponse": {
+                    "$ref": "#/components/examples/get_comment_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
       "servers": [
         {
           "url": "https://localhost:5601"
@@ -6611,6 +7100,16 @@
         "schema": {
           "type": "string",
           "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
+        }
+      },
+      "comment_id": {
+        "in": "path",
+        "name": "commentId",
+        "description": "The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs.\n",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "71ec1870-725b-11ea-a0b2-c51ea50a58e2"
         }
       },
       "space_id": {
@@ -7307,6 +7806,23 @@
           }
         ]
       },
+      "get_status_response": {
+        "summary": "Get the number of cases in each state.",
+        "value": {
+          "count_open_cases": 27,
+          "count_in_progress_cases": 50,
+          "count_closed_cases": 198
+        }
+      },
+      "get_tags_response": {
+        "summary": "A list of tags that are used in cases",
+        "value": [
+          "observability",
+          "security",
+          "tag 1",
+          "tag 2"
+        ]
+      },
       "add_comment_request": {
         "summary": "Adds a comment to a case.",
         "value": {
@@ -7448,6 +7964,26 @@
             "fields": null
           },
           "external_service": null
+        }
+      },
+      "get_comment_response": {
+        "summary": "A single user comment retrieved from a case",
+        "value": {
+          "id": "8048b460-fe2b-11ec-b15d-779a7c8bbcc3",
+          "version": "WzIzLDFd",
+          "type": "user",
+          "owner": "cases",
+          "comment": "A new comment",
+          "created_at": "2022-07-07T19:32:13.104Z",
+          "created_by": {
+            "email": null,
+            "full_name": null,
+            "username": "elastic"
+          },
+          "pushed_at": null,
+          "pushed_by": null,
+          "updated_at": null,
+          "updated_by": null
         }
       }
     }

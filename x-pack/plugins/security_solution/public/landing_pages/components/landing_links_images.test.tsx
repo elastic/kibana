@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 

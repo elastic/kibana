@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../../common/components/links';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingImagesProps {
   items: NavLinkItem[];
