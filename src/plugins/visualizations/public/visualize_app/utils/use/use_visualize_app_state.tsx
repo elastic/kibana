@@ -31,8 +31,7 @@ import { VisualizeConstants } from '../../../../common/constants';
 export const useVisualizeAppState = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
-  instance?: VisualizeEditorVisInstance,
-  preserveFilters?: boolean
+  instance?: VisualizeEditorVisInstance
 ) => {
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [appState, setAppState] = useState<VisualizeAppStateContainer | null>(null);
@@ -46,7 +45,7 @@ export const useVisualizeAppState = (
         stateDefaults,
         kbnUrlStateStorage: services.kbnUrlStateStorage,
         byValue,
-        filters: preserveFilters ? cloneDeep(filterManager.getAppFilters()) : undefined,
+        filters: [],
       });
 
       const currentAppState = stateContainer.getState();
@@ -152,7 +151,7 @@ export const useVisualizeAppState = (
         stopSyncingAppFilters();
       };
     }
-  }, [eventEmitter, instance, services, preserveFilters]);
+  }, [eventEmitter, instance, services]);
 
   return { appState, hasUnappliedChanges };
 };

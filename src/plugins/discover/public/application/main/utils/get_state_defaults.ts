@@ -63,7 +63,9 @@ export function getStateDefaults({
     columns,
     index: indexPattern?.id,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')),
+    filters: searchSource.getOwnField('filter')
+      ? cloneDeep(searchSource.getOwnField('filter'))
+      : [],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,

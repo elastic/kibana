@@ -25,7 +25,7 @@ import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
 
-export const VisualizeEditor = ({ onAppLeave, preserveFilters }: VisualizeAppProps) => {
+export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
@@ -53,8 +53,7 @@ export const VisualizeEditor = ({ onAppLeave, preserveFilters }: VisualizeAppPro
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
-    savedVisInstance,
-    preserveFilters
+    savedVisInstance
   );
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
