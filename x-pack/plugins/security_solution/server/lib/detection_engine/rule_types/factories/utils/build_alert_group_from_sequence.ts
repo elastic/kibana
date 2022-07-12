@@ -7,22 +7,22 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import type { ConfigType } from '../../../../../config';
-import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
+import type { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
-import { EqlSequence } from '../../../../../../common/detection_engine/types';
+import type { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
-import { BuildReasonMessage } from '../../../signals/reason_formatters';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { BuildReasonMessage } from '../../../signals/reason_formatters';
+import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
 } from '../../../../../../common/field_maps/field_names';
-import {
+import type {
   BaseFieldsLatest,
   EqlBuildingBlockFieldsLatest,
   EqlShellFieldsLatest,

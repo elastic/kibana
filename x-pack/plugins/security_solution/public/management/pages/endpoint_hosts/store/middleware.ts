@@ -6,8 +6,8 @@
  */
 
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { CoreStart, HttpStart } from '@kbn/core/public';
-import { Dispatch } from 'redux';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
@@ -18,7 +18,7 @@ import {
   METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import {
+import type {
   GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
@@ -30,8 +30,8 @@ import {
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
-import { AppAction } from '../../../../common/store/actions';
+import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import type { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
@@ -45,15 +45,15 @@ import {
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
-import { GetPolicyListResponse } from '../../policy/types';
-import {
+import type { GetPolicyListResponse } from '../../policy/types';
+import type {
   AgentIdsPendingActions,
   EndpointState,
   PolicyIds,
   TransformStats,
   TransformStatsResponse,
 } from '../types';
-import { EndpointPackageInfoStateChanged } from './action';
+import type { EndpointPackageInfoStateChanged } from './action';
 import {
   detailsData,
   endpointPackageInfo,

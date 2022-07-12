@@ -10,7 +10,8 @@ import React from 'react';
 import { TimelineId } from '../../../../common/types';
 import { HostsType } from '../../../hosts/store/model';
 import { TestProviders } from '../../mock';
-import { EventsQueryTabBody, EventsQueryTabBodyComponentProps } from './events_query_tab_body';
+import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
+import { EventsQueryTabBody } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
 
