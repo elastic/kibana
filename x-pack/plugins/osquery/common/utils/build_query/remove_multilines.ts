@@ -6,4 +6,4 @@
  */
 
 export const removeMultilines = (query: string): string =>
-  query.replaceAll('\n', ' ').replaceAll(/  +/g, ' ');
+  query.replaceAll('\r\n', ' ').replaceAll('\n', ' ').replaceAll(/  +/g, ' ');
