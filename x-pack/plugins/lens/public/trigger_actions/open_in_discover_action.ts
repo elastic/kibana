@@ -10,7 +10,7 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { execute, isCompatible } from './open_in_discover_helpers';
+import { execute, isCompatible, getHref } from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
@@ -32,6 +32,15 @@ export const createOpenInDiscoverAction = (
       i18n.translate('xpack.lens.app.exploreDataInDiscover', {
         defaultMessage: 'Explore data in Discover',
       }),
+    getHref: async (context: Context) => {
+      return getHref({
+        discover,
+        dataViews,
+        hasDiscoverAccess,
+        ...context,
+        embeddable: context.embeddable,
+      });
+    },
     isCompatible: async (context: Context) => {
       return isCompatible({
         hasDiscoverAccess,
