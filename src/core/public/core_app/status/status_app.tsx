@@ -10,9 +10,9 @@ import React, { Component } from 'react';
 import { EuiLoadingSpinner, EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup } from '../../http';
-import { NotificationsSetup } from '../../notifications';
-import { loadStatus, ProcessedServerResponse } from './lib';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { NotificationsSetup } from '../../notifications';
+import { loadStatus, type ProcessedServerResponse } from './lib';
 import { MetricTiles, ServerStatus, StatusSection, VersionHeader } from './components';
 
 interface StatusAppProps {
