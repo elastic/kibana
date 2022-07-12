@@ -1689,13 +1689,7 @@
         ],
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
