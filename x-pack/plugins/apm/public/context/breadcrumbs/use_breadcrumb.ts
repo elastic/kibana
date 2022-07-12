@@ -6,7 +6,7 @@
  */
 
 import { useCurrentRoute } from '@kbn/typed-react-router-config';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 
@@ -21,22 +21,19 @@ export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
 
   const matchedRoute = useRef(match?.route);
 
-  useEffect(() => {
-    if (matchedRoute.current && matchedRoute.current !== match?.route) {
+  if (matchedRoute.current && matchedRoute.current !== match?.route) {
+    api.unset(matchedRoute.current);
+  }
+
+  matchedRoute.current = match?.route;
+
+  if (matchedRoute.current) {
+    api.set(matchedRoute.current, castArray(breadcrumb));
+  }
+
+  return () => {
+    if (matchedRoute.current) {
       api.unset(matchedRoute.current);
     }
-
-    matchedRoute.current = match?.route;
-
-    if (matchedRoute.current) {
-      api.set(matchedRoute.current, castArray(breadcrumb));
-    }
-
-    return () => {
-      if (matchedRoute.current) {
-        api.unset(matchedRoute.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match]);
+  };
 }
