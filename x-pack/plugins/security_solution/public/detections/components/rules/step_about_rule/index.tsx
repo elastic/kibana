@@ -144,10 +144,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
-    form,
-    watch: ['severity'],
-  });
+  const [{ severity: formSeverity, timestampOverride: formTimestampOverride }] =
+    useFormData<AboutStepRule>({
+      form,
+      watch: ['severity', 'timestampOverride'],
+    });
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
@@ -403,6 +404,20 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
+            {!!formTimestampOverride && formTimestampOverride !== '@timestamp' && (
+              <>
+                <CommonUseField
+                  path="timestampOverrideFallbackDisabled"
+                  componentProps={{
+                    idAria: 'detectionTimestampOverrideFallbackDisabled',
+                    'data-test-subj': 'detectionTimestampOverrideFallbackDisabled',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                    },
+                  }}
+                />
+              </>
+            )}
           </EuiAccordion>
         </Form>
       </StepContentWrapper>

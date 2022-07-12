@@ -188,6 +188,19 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
 
+export const timestamp_override_fallback_disabled = t.boolean;
+export type TimestampOverrideFallbackDisabled = t.TypeOf<
+  typeof timestamp_override_fallback_disabled
+>;
+
+export const timestampOverrideFallbackDisabledOrUndefined = t.union([
+  timestamp_override_fallback_disabled,
+  t.undefined,
+]);
+export type TimestampOverrideFallbackDisabledOrUndefined = t.TypeOf<
+  typeof timestampOverrideFallbackDisabledOrUndefined
+>;
+
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
  * to be added to the meta object

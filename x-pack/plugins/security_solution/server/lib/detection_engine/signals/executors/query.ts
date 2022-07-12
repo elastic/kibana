@@ -45,6 +45,8 @@ export const queryExecutor = async ({
   buildRuleMessage,
   bulkCreate,
   wrapHits,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -61,6 +63,8 @@ export const queryExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -93,6 +97,8 @@ export const queryExecutor = async ({
       bulkCreate,
       wrapHits,
       runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
   });
 };

@@ -68,6 +68,8 @@ export interface CreateThreatSignalsOptions {
   type: Type;
   wrapHits: WrapHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface CreateThreatSignalOptions {
@@ -95,6 +97,8 @@ export interface CreateThreatSignalOptions {
   type: Type;
   wrapHits: WrapHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface CreateEventSignalOptions {
@@ -130,6 +134,8 @@ export interface CreateEventSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 type EntryKey = 'field' | 'value';
@@ -261,7 +267,8 @@ export interface EventsOptions {
   perPage?: number;
   logger: Logger;
   filters: unknown[];
-  timestampOverride?: string;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
   tuple: RuleRangeTuple;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
@@ -279,7 +286,8 @@ export interface EventCountOptions {
   query: string;
   filters: unknown[];
   tuple: RuleRangeTuple;
-  timestampOverride?: string;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface SignalMatch {

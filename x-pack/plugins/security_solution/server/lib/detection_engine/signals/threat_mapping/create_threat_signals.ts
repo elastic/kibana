@@ -52,6 +52,8 @@ export const createThreatSignals = async ({
   type,
   wrapHits,
   runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
@@ -84,6 +86,8 @@ export const createThreatSignals = async ({
     query,
     language,
     filters: allEventFilters,
+    primaryTimestamp,
+    secondaryTimestamp,
   });
 
   logger.debug(`Total event count: ${eventCount}`);
@@ -198,6 +202,8 @@ export const createThreatSignals = async ({
           perPage,
           tuple,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         }),
 
       createSignal: (slicedChunk) =>
@@ -233,6 +239,8 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         }),
     });
   } else {
@@ -283,6 +291,8 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         }),
     });
   }

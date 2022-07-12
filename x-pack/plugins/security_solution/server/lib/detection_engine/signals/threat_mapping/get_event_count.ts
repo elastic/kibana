@@ -25,7 +25,8 @@ export const getEventList = async ({
   buildRuleMessage,
   logger,
   tuple,
-  timestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
   runtimeMappings,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
@@ -51,7 +52,8 @@ export const getEventList = async ({
     logger,
     filter,
     pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
-    timestampOverride,
+    primaryTimestamp,
+    secondaryTimestamp,
     sortOrder: 'desc',
     trackTotalHits: false,
     runtimeMappings,
@@ -71,7 +73,8 @@ export const getEventCount = async ({
   index,
   exceptionItems,
   tuple,
-  timestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: EventCountOptions): Promise<number> => {
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
@@ -80,7 +83,8 @@ export const getEventCount = async ({
     to: tuple.to.toISOString(),
     filter,
     size: 0,
-    timestampOverride,
+    primaryTimestamp,
+    secondaryTimestamp,
     searchAfterSortIds: undefined,
     runtimeMappings: undefined,
   }).body.query;

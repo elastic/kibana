@@ -164,6 +164,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     rule_name_override: ruleNameOverride,
     severity_mapping: severityMapping,
     timestamp_override: timestampOverride,
+    timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     references,
     severity,
     false_positives: falsePositives,
@@ -180,6 +181,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
     timestampOverride: timestampOverride ?? '',
+    timestampOverrideFallbackDisabled,
     name,
     description,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
