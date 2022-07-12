@@ -10528,7 +10528,6 @@
     "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription": "Calculé à partir d'un échantillon de {topValuesSamplerShardSize} documents par partition",
     "xpack.dataVisualizer.dataGrid.field.topValuesLabel": "Valeurs les plus élevées",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel": "faux",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.summaryTableTitle": "Résumé",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel": "vrai",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription": "Calculé à partir d'un échantillon de {topValuesSamplerShardSize} documents par partition",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.countLabel": "compte",

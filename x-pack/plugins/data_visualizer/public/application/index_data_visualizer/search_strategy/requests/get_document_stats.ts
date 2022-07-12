@@ -94,5 +94,6 @@ export const processDocumentCountStats = (
     timeRangeEarliest: params.earliest,
     timeRangeLatest: params.latest,
     totalCount,
+    took: body.took,
   };
 };

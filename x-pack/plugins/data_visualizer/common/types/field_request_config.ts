@@ -29,11 +29,6 @@ export interface DocumentCounts {
   interval?: number;
 }
 
-export interface LatLongExample {
-  lat: number;
-  lon: number;
-}
-
 export interface GeoPointExample {
   coordinates: number[];
   type?: string;

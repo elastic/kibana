@@ -10534,7 +10534,6 @@
     "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription": "基于每个分片的 {topValuesSamplerShardSize} 文档样例计算",
     "xpack.dataVisualizer.dataGrid.field.topValuesLabel": "排名最前值",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel": "false",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.summaryTableTitle": "摘要",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel": "true",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription": "基于每个分片的 {topValuesSamplerShardSize} 文档样例计算",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.countLabel": "计数",

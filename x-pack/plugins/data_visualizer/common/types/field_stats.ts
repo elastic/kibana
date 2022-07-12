@@ -100,6 +100,7 @@ export interface DocumentCountStats {
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
+  took?: number;
 }
 
 export interface FieldExamples {
