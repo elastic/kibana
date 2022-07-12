@@ -22,6 +22,8 @@ import {
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
   isAggregatableFieldOverallStats,
+  isNonAggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
@@ -35,6 +37,7 @@ import type {
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { DocumentCountStats } from '../../../../common/types/field_stats';
 
 /**
  * Helper function to run forkJoin
@@ -89,7 +92,7 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
-  probability?: number
+  probability?: number | null
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -197,10 +200,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     );
 
     const sub = rateLimitingForkJoin<
-      AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
+      | DocumentCountStats
+      | AggregatableFieldOverallStats
+      | NonAggregatableFieldOverallStats
+      | undefined
     >(
       [
-        // @ts-ignore @TODO update type
         from(getDocumentCountStats(data.search, searchStrategyParams, searchOptions, probability)),
         ...aggregatableOverallStatsObs,
         ...nonAggregatableFieldsObs,
@@ -211,14 +216,16 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     searchSubscription$.current = sub.subscribe({
       next: (value) => {
         const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
-        const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
-        const documentCountStats = value[0];
+        const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
+        const documentCountStats = value[0] as DocumentCountStats;
 
         value.forEach((resp, idx) => {
           if (!resp || idx === 0) return;
           if (isAggregatableFieldOverallStats(resp)) {
             aggregatableOverallStatsResp.push(resp);
-          } else {
+          }
+
+          if (isNonAggregatableFieldOverallStats(resp)) {
             nonAggregatableOverallStatsResp.push(resp);
           }
         });

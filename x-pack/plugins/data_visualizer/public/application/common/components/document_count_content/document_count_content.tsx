@@ -18,7 +18,7 @@ import { DocumentCountStats } from '../../../../../common/types/field_stats';
 export interface Props {
   documentCountStats?: DocumentCountStats;
   totalCount: number;
-  samplingProbability?: number;
+  samplingProbability?: number | null;
   setSamplingProbability?: (value: number) => void;
 }
 

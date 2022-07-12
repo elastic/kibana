@@ -104,7 +104,7 @@ export const getDefaultDataVisualizerListState = (
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
-  probability: undefined,
+  probability: null,
   ...overrides,
 });
 

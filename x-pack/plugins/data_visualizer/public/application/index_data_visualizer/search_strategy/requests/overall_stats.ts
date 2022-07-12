@@ -90,10 +90,18 @@ export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
   aggregatableFields: string[];
 }
 
+export type NonAggregatableFieldOverallStats = IKibanaSearchResponse;
+
 export function isAggregatableFieldOverallStats(
   arg: unknown
 ): arg is AggregatableFieldOverallStats {
   return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
+export function isNonAggregatableFieldOverallStats(
+  arg: unknown
+): arg is NonAggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['rawResponse']);
 }
 
 export const processAggregatableFieldsExistResponse = (

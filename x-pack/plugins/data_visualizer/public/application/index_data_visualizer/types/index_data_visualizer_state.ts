@@ -27,5 +27,5 @@ export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlSta
   showAllFields?: boolean;
   showEmptyFields?: boolean;
   filters?: Filter[];
-  probability?: number | undefined;
+  probability?: number | null;
 }

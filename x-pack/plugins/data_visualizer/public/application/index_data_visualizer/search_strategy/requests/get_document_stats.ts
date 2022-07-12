@@ -64,20 +64,13 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
   };
 };
 
-interface DocumentStats extends DocumentCountStats {
-  randomlySampled: boolean;
-  took: number;
-  totalCount: number;
-  probability?: number;
-}
-
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
   searchOptions: ISearchOptions,
-  probability?: number,
+  probability?: number | null,
   minimumRandomSamplerDocCount?: number
-): Promise<DocumentStats> => {
+): Promise<DocumentCountStats> => {
   // @TODO: move this to user/browser session
   // Create a unique `seed` for browser session - To give repeatable results, the seed should be set based on the user's browser session
   const seed = Math.abs(seedrandom().int32());

@@ -15,7 +15,7 @@ export const TotalCountHeader = ({
   approximate,
 }: {
   totalCount: number;
-  approximate: boolean;
+  approximate?: boolean;
 }) => {
   return (
     <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
