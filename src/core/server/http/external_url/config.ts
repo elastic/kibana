@@ -8,7 +8,7 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import type { IExternalUrlPolicy } from '@kbn/core-http-server';
+import type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
 /**
  * @internal
