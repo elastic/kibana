@@ -18,12 +18,19 @@ interface Params {
   to: string;
 }
 
-export const generateNavLink = ({ to, items, ...rest }: Params & ReactRouterProps) => {
-  return {
+type NavLinkProps = Pick<EuiSideNavItemType<unknown>, 'isSelected' | 'href' | 'items'> &
+  Required<Pick<EuiSideNavItemType<unknown>, 'onClick'>>;
+
+export const generateNavLink = ({
+  to,
+  items,
+  ...rest
+}: Params & ReactRouterProps): NavLinkProps => {
+  const linkProps = {
     ...generateReactRouterProps({ to, ...rest }),
     isSelected: getNavLinkActive({ items, to, ...rest }),
-    items,
   };
+  return items ? { ...linkProps, items } : linkProps;
 };
 
 export const getNavLinkActive = ({

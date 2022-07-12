@@ -22,18 +22,18 @@ import { letBrowserHandleEvent, createHref } from '.';
  */
 
 export interface ReactRouterProps {
-  to: string;
   onClick?(): void;
   // Used to navigate outside of the React Router plugin basename but still within Kibana,
   // e.g. if we need to go from Enterprise Search to App Search
   shouldNotCreateHref?: boolean;
+  to: string;
 }
 
 export const generateReactRouterProps = ({
   to,
   onClick,
   shouldNotCreateHref,
-}: ReactRouterProps) => {
+}: ReactRouterProps): { href: string; onClick: (event: React.MouseEvent) => void } => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
 

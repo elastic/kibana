@@ -34,8 +34,8 @@ describe('generateReactRouterProps', () => {
     it('prevents default navigation and uses React Router history', () => {
       const mockEvent = {
         button: 0,
-        target: { getAttribute: () => '_self' },
         preventDefault: jest.fn(),
+        target: { getAttribute: () => '_self' },
       } as any;
 
       const { onClick } = generateReactRouterProps({ to: '/test' });
@@ -47,6 +47,7 @@ describe('generateReactRouterProps', () => {
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
       const mockEvent = {
+        preventDefault: jest.fn(),
         shiftKey: true,
         target: { getAttribute: () => '_blank' },
       } as any;
