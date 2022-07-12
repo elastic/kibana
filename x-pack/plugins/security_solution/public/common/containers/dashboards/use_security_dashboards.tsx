@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, MouseEventHandler } from 'react';
-import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
-import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
+import type { MouseEventHandler } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 

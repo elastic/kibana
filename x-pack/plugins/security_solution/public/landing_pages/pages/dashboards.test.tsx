@@ -10,7 +10,7 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { DashboardsLandingPage } from './dashboards';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 

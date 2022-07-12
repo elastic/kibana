@@ -8,12 +8,12 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { render } from '@testing-library/react';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock/test_providers';
+import type { DashboardTableItem } from './use_security_dashboards';
 import {
-  DashboardTableItem,
   useDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards';

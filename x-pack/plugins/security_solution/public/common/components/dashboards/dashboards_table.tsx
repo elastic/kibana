@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiInMemoryTable, Search } from '@elastic/eui';
+import type { Search } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import {
   useSecurityDashboardsTableItems,
   useDashboardsTableColumns,
