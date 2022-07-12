@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import { BoolQuery } from '@kbn/es-query';
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -40,3 +41,7 @@ export interface KubernetesSecurityDeps {
 export interface KubernetesSecurityStart {
   getKubernetesPage: (kubernetesSecurityDeps: KubernetesSecurityDeps) => JSX.Element;
 }
+
+export type QueryDslQueryContainerBool = {
+  bool: BoolQuery;
+};

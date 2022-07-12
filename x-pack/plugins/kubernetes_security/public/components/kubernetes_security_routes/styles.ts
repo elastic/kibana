@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font } = euiTheme;
+    const { size, font, border } = euiTheme;
 
     const titleSection: CSSObject = {
       marginBottom: size.l,
@@ -58,6 +58,22 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
+    const countWidgets: CSSObject = {
+      margin: size.l,
+    };
+
+    const widgetHolder: CSSObject = {
+      position: 'relative',
+      width: '332px',
+      height: '235px',
+      padding: size.base,
+      border: border.thin,
+      borderRadius: border.radius.medium,
+      fontWeight: font.weight.bold,
+      fontSize: size.m,
+      lineHeight: size.base,
+    };
+
     return {
       titleSection,
       titleActions,
@@ -66,6 +82,8 @@ export const useStyles = () => {
       treeViewContainer,
       percentageWidgets,
       percentageChartTitle,
+      countWidgets,
+      widgetHolder,
     };
   }, [euiTheme]);
 
