@@ -218,7 +218,7 @@ export default function (program) {
       silent: !!opts.silent,
       verbose: !!opts.verbose,
       watch: !!opts.watch,
-      runExamples: !!opts.runExamples,
+      runExamples: true,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
       // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
       // We can tell users they only have to run with `yarn start --run-examples` to get those
