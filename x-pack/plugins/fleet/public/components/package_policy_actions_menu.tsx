@@ -65,7 +65,6 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               setIsEnrollmentFlyoutOpen(true);
             }}
             key="addAgent"
-            disabled={isExternallyManaged}
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
@@ -76,7 +75,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies || isExternallyManaged}
+      disabled={!canWriteIntegrationPolicies}
       icon="pencil"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
@@ -90,7 +89,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsUpgradeItem"
-      disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies || isExternallyManaged}
+      disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies}
       icon="refresh"
       href={upgradePackagePolicyHref}
       key="packagePolicyUpgrade"
@@ -116,7 +115,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           return (
             <DangerEuiContextMenuItem
               data-test-subj="PackagePolicyActionsDeleteItem"
-              disabled={!canWriteIntegrationPolicies || !isExternallyManaged}
+              disabled={!canWriteIntegrationPolicies}
               icon="trash"
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {
