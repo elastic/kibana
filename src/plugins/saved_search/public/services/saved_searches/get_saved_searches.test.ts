@@ -23,7 +23,11 @@ describe('getSavedSearch', () => {
   });
 
   test('should return empty saved search in case of no id', async () => {
-    const savedSearch = await getSavedSearch(undefined, { savedObjectsClient, search });
+    const savedSearch = await getSavedSearch(undefined, {
+      savedObjectsClient,
+      search,
+      savedObjectsTagging: undefined,
+    });
 
     expect(search.searchSource.createEmpty).toHaveBeenCalled();
     expect(savedSearch).toHaveProperty('searchSource');
@@ -49,6 +53,7 @@ describe('getSavedSearch', () => {
       await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
         savedObjectsClient,
         search,
+        savedObjectsTagging: undefined,
       });
     } catch (error) {
       errorMessage = error.message;
@@ -91,6 +96,7 @@ describe('getSavedSearch', () => {
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
       savedObjectsClient,
       search,
+      savedObjectsTagging: undefined,
     });
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();

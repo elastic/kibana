@@ -51,7 +51,8 @@ describe('saveSavedSearch', () => {
           onTitleDuplicate,
           copyOnSave: true,
         },
-        savedObjectsClient
+        savedObjectsClient,
+        undefined
       );
 
       expect(onTitleDuplicate).toHaveBeenCalled();
@@ -69,7 +70,8 @@ describe('saveSavedSearch', () => {
           onTitleDuplicate,
           copyOnSave: false,
         },
-        savedObjectsClient
+        savedObjectsClient,
+        undefined
       );
 
       expect(onTitleDuplicate).not.toHaveBeenCalled();
@@ -79,7 +81,7 @@ describe('saveSavedSearch', () => {
   test('should call savedObjectsClient.create for saving new search', async () => {
     delete savedSearch.id;
 
-    await saveSavedSearch(savedSearch, {}, savedObjectsClient);
+    await saveSavedSearch(savedSearch, {}, savedObjectsClient, undefined);
 
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'search',
@@ -98,7 +100,7 @@ describe('saveSavedSearch', () => {
   });
 
   test('should call savedObjectsClient.update for saving existing search', async () => {
-    await saveSavedSearch(savedSearch, {}, savedObjectsClient);
+    await saveSavedSearch(savedSearch, {}, savedObjectsClient, undefined);
 
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'search',

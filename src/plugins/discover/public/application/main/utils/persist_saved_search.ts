@@ -70,7 +70,12 @@ export async function persistSavedSearch(
   }
 
   try {
-    const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
+    const id = await saveSavedSearch(
+      savedSearch,
+      saveOptions,
+      services.core.savedObjects.client,
+      services.savedObjectsTagging
+    );
     if (id) {
       onSuccess(id);
     }
