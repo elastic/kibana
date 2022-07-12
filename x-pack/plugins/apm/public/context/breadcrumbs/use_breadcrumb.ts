@@ -30,4 +30,10 @@ export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
   if (matchedRoute.current) {
     api.set(matchedRoute.current, castArray(breadcrumb));
   }
+
+  return () => {
+    if (matchedRoute.current) {
+      api.unset(matchedRoute.current);
+    }
+  };
 }
