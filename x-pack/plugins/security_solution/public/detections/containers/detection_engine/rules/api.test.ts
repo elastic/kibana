@@ -434,14 +434,13 @@ describe('Detections Rules API', () => {
     });
 
     test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules({ signal: abortCtrl.signal });
+      await createPrepackagedRules();
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        signal: abortCtrl.signal,
         method: 'PUT',
       });
     });
     test('happy path', async () => {
-      const resp = await createPrepackagedRules({ signal: abortCtrl.signal });
+      const resp = await createPrepackagedRules();
       expect(resp).toEqual({
         rules_installed: 0,
         rules_updated: 0,

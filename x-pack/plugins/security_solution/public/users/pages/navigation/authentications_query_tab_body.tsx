@@ -8,7 +8,7 @@
 import React from 'react';
 import { AuthenticationsUserTable } from '../../../common/components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../common/components/authentication/helpers';
-import { AuthenticationsUserTableProps } from '../../../common/components/authentication/types';
+import type { AuthenticationsUserTableProps } from '../../../common/components/authentication/types';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 export const ID = 'usersAuthenticationsQuery';
 

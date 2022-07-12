@@ -62,7 +62,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           127.0.0.1:9300
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
            127.0.0.1:9300
         </p>
@@ -92,7 +92,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           24.8k
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Documents 24.8k
         </p>
@@ -138,7 +138,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
           173.9 GB
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Free Disk Space 173.9 GB
         </p>
@@ -168,7 +168,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
           24.8k
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Documents 24.8k
         </p>
@@ -242,7 +242,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           173.9 GB
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Free Disk Space 173.9 GB
         </p>
@@ -272,7 +272,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           24.8k
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Documents 24.8k
         </p>

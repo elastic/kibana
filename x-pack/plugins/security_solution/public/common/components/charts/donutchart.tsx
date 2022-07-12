@@ -8,20 +8,18 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import type { Datum, NodeColorAccessor, PartialTheme } from '@elastic/charts';
 import {
   Chart,
-  Datum,
   Partition,
   Settings,
   PartitionLayout,
   defaultPartitionValueFormatter,
-  NodeColorAccessor,
-  PartialTheme,
 } from '@elastic/charts';
 import styled from 'styled-components';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
-import { LegendItem } from './draggable_legend_item';
+import type { LegendItem } from './draggable_legend_item';
 import { DonutChartEmpty } from './donutchart_empty';
 
 export const NO_LEGEND_DATA: LegendItem[] = [];
