@@ -15,6 +15,8 @@ import {
   // @ts-ignore not typed yet
 } from './functional_tests/cli';
 
+export { KbnClientRequesterError } from './kbn_client/kbn_client_requester_error';
+
 // @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
@@ -24,6 +26,8 @@ export { runTests, startServers } from './functional_tests/tasks';
 
 // @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
+
+export { getKibanaCliArg, getKibanaCliLoggers } from './functional_tests/lib/kibana_cli_args';
 
 export type {
   CreateTestEsClusterOptions,

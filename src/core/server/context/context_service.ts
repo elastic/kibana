@@ -8,7 +8,8 @@
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { IContextContainer, ContextContainer } from './container';
+import type { IContextContainer } from '@kbn/core-http-server';
+import { ContextContainer } from './context_container';
 
 type PrebootDeps = SetupDeps;
 
@@ -24,7 +25,7 @@ export class ContextService {
     return this.getContextContainerFactory(pluginDependencies);
   }
 
-  public setup({ pluginDependencies }: SetupDeps): ContextSetup {
+  public setup({ pluginDependencies }: SetupDeps): InternalContextSetup {
     return this.getContextContainerFactory(pluginDependencies);
   }
 
@@ -40,7 +41,7 @@ export class ContextService {
 }
 
 /** @internal */
-export type InternalContextPreboot = ContextSetup;
+export type InternalContextPreboot = InternalContextSetup;
 
 /**
  * {@inheritdoc IContextContainer}
@@ -102,9 +103,9 @@ export type InternalContextPreboot = ContextSetup;
  * }
  * ```
  *
- * @public
+ * @internal
  */
-export interface ContextSetup {
+export interface InternalContextSetup {
   /**
    * Creates a new {@link IContextContainer} for a service owner.
    */

@@ -6,19 +6,21 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
+import type {
   ThresholdNormalized,
+  TimestampOverride,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BuildRuleMessage } from '../rule_messages';
+import type { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import type { SignalSearchResponse } from '../types';
 
@@ -28,10 +30,12 @@ interface FindThresholdSignalsParams {
   inputIndexPattern: string[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
-  filter: unknown;
+  filter: ESBoolQuery;
   threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
-  timestampOverride: TimestampOverrideOrUndefined;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverrideOrUndefined;
 }
 
 export const findThresholdSignals = async ({
@@ -43,7 +47,9 @@ export const findThresholdSignals = async ({
   filter,
   threshold,
   buildRuleMessage,
-  timestampOverride,
+  runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: FindThresholdSignalsParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -53,12 +59,12 @@ export const findThresholdSignals = async ({
   const leafAggs = {
     max_timestamp: {
       max: {
-        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
+        field: primaryTimestamp,
       },
     },
     min_timestamp: {
       min: {
-        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
+        field: primaryTimestamp,
       },
     },
     ...(threshold.cardinality?.length
@@ -131,17 +137,18 @@ export const findThresholdSignals = async ({
 
   return singleSearchAfter({
     aggregations,
-    searchAfterSortId: undefined,
-    timestampOverride,
+    searchAfterSortIds: undefined,
     index: inputIndexPattern,
     from,
     to,
     services,
     logger,
-    // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
     pageSize: 0,
     sortOrder: 'desc',
     buildRuleMessage,
+    runtimeMappings,
+    primaryTimestamp,
+    secondaryTimestamp,
   });
 };

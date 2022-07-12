@@ -145,6 +145,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     isUninitialized,
     hasFailedLoadingSource: loadSourceRequest.state === 'rejected',
     loadSource,
+    loadSourceRequest,
     loadSourceFailureMessage:
       loadSourceRequest.state === 'rejected' ? `${loadSourceRequest.value}` : undefined,
     metricIndicesExist,

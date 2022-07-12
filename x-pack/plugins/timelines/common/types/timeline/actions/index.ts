@@ -7,13 +7,29 @@
 import { ComponentType, JSXElementConstructor } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 
+// Temporary import from triggers-actions-ui public types, it will not be needed after alerts table migrated
+import type {
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+
 import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
-import { FieldBrowserOptions } from '../../fields_browser';
 
+export {
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
+};
 export interface ActionProps {
   action?: RowCellRender;
   ariaRowindex: number;
@@ -79,6 +95,7 @@ export interface BulkActionsProps {
   customBulkActions?: CustomBulkActionProp[];
   timelineId?: string;
 }
+
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;

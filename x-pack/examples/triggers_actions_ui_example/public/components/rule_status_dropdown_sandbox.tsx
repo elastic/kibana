@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import moment from 'moment';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface SandboxProps {
@@ -29,12 +30,12 @@ export const RuleStatusDropdownSandbox = ({ triggersActionsUi }: SandboxProps) =
       setIsSnoozedUntil(null);
     },
     disableRule: async () => setEnabled(false),
-    snoozeRule: async (time) => {
-      if (time === -1) {
+    snoozeRule: async (schedule) => {
+      if (schedule.duration === -1) {
         setIsSnoozedUntil(null);
         setMuteAll(true);
       } else {
-        setIsSnoozedUntil(new Date(time));
+        setIsSnoozedUntil(moment(schedule.rRule.dtstart).add(schedule.duration, 'ms').toDate());
         setMuteAll(false);
       }
     },

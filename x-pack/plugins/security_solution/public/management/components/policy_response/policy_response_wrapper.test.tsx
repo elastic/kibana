@@ -7,56 +7,86 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { PolicyResponseWrapper, PolicyResponseWrapperProps } from './policy_response_wrapper';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { PolicyResponseWrapperProps } from './policy_response_wrapper';
+import { PolicyResponseWrapper } from './policy_response_wrapper';
 import { HostPolicyResponseActionStatus } from '../../../../common/search_strategy';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
-import {
+import type {
   HostPolicyResponse,
   HostPolicyResponseAppliedAction,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { useGetEndpointDetails } from '../../hooks';
 
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
+jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 
 describe('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
   const createPolicyResponse = (
-    overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
+    overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success,
+    extraActions: HostPolicyResponseAppliedAction[] = [
+      {
+        name: 'download_model',
+        message: 'Failed to apply a portion of the configuration (kernel)',
+        status: overallStatus,
+      },
+    ]
   ): HostPolicyResponse => {
     const policyResponse = docGenerator.generatePolicyResponse();
     const malwareResponseConfigurations =
       policyResponse.Endpoint.policy.applied.response.configurations.malware;
     policyResponse.Endpoint.policy.applied.status = overallStatus;
     malwareResponseConfigurations.status = overallStatus;
-    let downloadModelAction = policyResponse.Endpoint.policy.applied.actions.find(
-      (action) => action.name === 'download_model'
+
+    for (const extraAction of extraActions) {
+      let foundExtraAction = policyResponse.Endpoint.policy.applied.actions.find(
+        (action) => action.name === extraAction.name
+      );
+
+      if (!foundExtraAction) {
+        foundExtraAction = extraAction;
+        policyResponse.Endpoint.policy.applied.actions.push(foundExtraAction);
+      } else {
+        // Else, make sure the status of the generated action matches what was passed in
+        foundExtraAction.status = overallStatus;
+      }
+
+      if (
+        overallStatus === HostPolicyResponseActionStatus.failure ||
+        overallStatus === HostPolicyResponseActionStatus.warning
+      ) {
+        foundExtraAction.message = 'no action taken';
+      }
+
+      // Make sure that at least one configuration has the above action, else
+      // we get into an out-of-sync condition
+      if (malwareResponseConfigurations.concerned_actions.indexOf(foundExtraAction.name) === -1) {
+        malwareResponseConfigurations.concerned_actions.push(foundExtraAction.name);
+      }
+    }
+
+    // if extra actions exist more than once, remove dupes to maintain exact counts
+    Object.entries(policyResponse.Endpoint.policy.applied.response.configurations).forEach(
+      ([responseConfigurationKey, responseConfiguration]) => {
+        if (responseConfigurationKey === 'malware') {
+          return;
+        }
+
+        extraActions.forEach((extraAction) => {
+          const extraActionIndex = responseConfiguration.concerned_actions.indexOf(
+            extraAction.name
+          );
+          if (extraActionIndex === -1) {
+            return;
+          }
+
+          responseConfiguration.concerned_actions.splice(extraActionIndex, 1);
+        });
+      }
     );
-
-    if (!downloadModelAction) {
-      downloadModelAction = {
-        name: 'download_model',
-        message: 'Failed to apply a portion of the configuration (kernel)',
-        status: overallStatus,
-      };
-      policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
-    } else {
-      // Else, make sure the status of the generated action matches what was passed in
-      downloadModelAction.status = overallStatus;
-    }
-
-    if (
-      overallStatus === HostPolicyResponseActionStatus.failure ||
-      overallStatus === HostPolicyResponseActionStatus.warning
-    ) {
-      downloadModelAction.message = 'no action taken';
-    }
-
-    // Make sure that at least one configuration has the above action, else
-    // we get into an out-of-sync condition
-    if (malwareResponseConfigurations.concerned_actions.indexOf(downloadModelAction.name) === -1) {
-      malwareResponseConfigurations.concerned_actions.push(downloadModelAction.name);
-    }
 
     // Add an unknown Action Name - to ensure we handle the format of it on the UI
     const unknownAction: HostPolicyResponseAppliedAction = {
@@ -73,6 +103,7 @@ describe('when on the policy response', () => {
   let commonPolicyResponse: HostPolicyResponse;
 
   const useGetEndpointPolicyResponseMock = useGetEndpointPolicyResponse as jest.Mock;
+  const useGetEndpointDetailsMock = useGetEndpointDetails as jest.Mock;
   let render: (
     props?: Partial<PolicyResponseWrapperProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -81,6 +112,14 @@ describe('when on the policy response', () => {
     commonPolicyResponse = customPolicyResponse ?? createPolicyResponse();
     useGetEndpointPolicyResponseMock.mockReturnValue({
       data: { policy_response: commonPolicyResponse },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+    useGetEndpointDetailsMock.mockReturnValue({
+      data: {
+        metadata: { host: { os: { name: 'macOS' } } },
+      },
       isLoading: false,
       isFetching: false,
       isError: false,
@@ -218,5 +257,77 @@ describe('when on the policy response', () => {
 
     const component = await renderOpenedTree();
     expect(component.getByText('A New Unknown Action')).not.toBeNull();
+  });
+
+  it('should not display error callout if status success', async () => {
+    const policyResponse = createPolicyResponse();
+    policyResponse.Endpoint.policy.applied.actions.forEach(
+      (action) => (action.status = HostPolicyResponseActionStatus.success)
+    );
+    runMock(policyResponse);
+    const component = await renderOpenedTree();
+    expect(component.queryAllByTestId('endpointPolicyResponseErrorCallOut')).toHaveLength(0);
+  });
+
+  describe('error callout', () => {
+    let policyResponse: HostPolicyResponse;
+
+    beforeEach(() => {
+      policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure);
+      runMock(policyResponse);
+    });
+
+    it('should not display link if type is NOT mapped', async () => {
+      const component = await renderOpenedTree();
+      const calloutLink = component.queryByTestId('endpointPolicyResponseErrorCallOutLink');
+      expect(calloutLink).toBeNull();
+    });
+
+    it('should display link if type is mapped', async () => {
+      const action = {
+        name: 'full_disk_access',
+        message:
+          'You must enable full disk access for Elastic Endpoint on your machine. See our troubleshooting documentation for more information',
+        status: HostPolicyResponseActionStatus.failure,
+      };
+
+      policyResponse.Endpoint.policy.applied.actions.push(action);
+      policyResponse.Endpoint.policy.applied.response.configurations.malware.concerned_actions.push(
+        'full_disk_access'
+      );
+
+      const component = await renderOpenedTree();
+      const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+      expect(calloutLinks.length).toEqual(2);
+    });
+
+    it('should display correct description and link for macos_system_ext failure', async () => {
+      policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure, [
+        {
+          name: 'connect_kernel',
+          message: '',
+          status: HostPolicyResponseActionStatus.failure,
+        },
+      ]);
+      runMock(policyResponse);
+
+      const component = await renderOpenedTree();
+
+      const macosSystemExtTitle = 'Permissions required';
+      const calloutTitles = component
+        .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+        .filter((calloutTitle) => calloutTitle.innerHTML.includes(macosSystemExtTitle));
+      expect(calloutTitles.length).toEqual(2);
+
+      const macosSystemExtMessage =
+        'You must enable the Mac system extension for Elastic Endpoint on your machine.';
+      const calloutMessages = component
+        .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+        .filter((calloutMessage) => calloutMessage.innerHTML.includes(macosSystemExtMessage));
+      expect(calloutMessages.length).toEqual(2);
+
+      const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+      expect(calloutLinks.length).toEqual(2);
+    });
   });
 });

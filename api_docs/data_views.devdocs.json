@@ -284,6 +284,18 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -314,6 +326,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataView.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [
+              "\nGet name of Data View"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -398,6 +427,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.toSpec",
             "type": "Function",
             "tags": [],
@@ -406,7 +450,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -417,7 +461,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1391,13 +1452,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -1437,13 +1492,7 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -1516,18 +1565,31 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-public.DataViewField.spec",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "spec",
             "description": [],
             "signature": [
+              "DataViewFieldBase",
+              " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              "SerializableRecord",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              }
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1552,7 +1614,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.DataViewField.Unnamed.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "spec",
                 "description": [
@@ -1601,7 +1663,7 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-public.DataViewField.runtimeField",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeField",
             "description": [
@@ -1623,7 +1685,7 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-public.DataViewField.runtimeField",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeField",
             "description": [
@@ -2179,13 +2241,7 @@
                   "http dependency"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
                 "deprecated": false,
@@ -3399,7 +3455,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3425,10 +3481,8 @@
                 "id": "def-public.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -3630,7 +3684,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -3641,7 +3695,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>"
+              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -4650,6 +4712,21 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -4673,7 +4750,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nSaved object id"
+              "\nSaved object id (or generated id if in-memory only)"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
@@ -4741,267 +4818,18 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.DataViewSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataViewSpec",
-        "description": [
-          "\nStatic data view format\nSerialized data object, representing data view attributes and state"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
+          },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.id",
+            "id": "def-public.DataViewListItem.name",
             "type": "string",
             "tags": [],
-            "label": "id",
-            "description": [
-              "\nSaved object id"
-            ],
+            "label": "name",
+            "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.version",
-            "type": "string",
-            "tags": [],
-            "label": "version",
-            "description": [
-              "\nSaved object version string"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [
-              "\nData view title"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.timeFieldName",
-            "type": "string",
-            "tags": [],
-            "label": "timeFieldName",
-            "description": [
-              "\nName of timestamp field"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.sourceFilters",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceFilters",
-            "description": [
-              "\nList of filters which discover uses to hide fields"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SourceFilter",
-                "text": "SourceFilter"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.fields",
-            "type": "Object",
-            "tags": [],
-            "label": "fields",
-            "description": [
-              "\nMap of fields by name"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewFieldMap",
-                "text": "DataViewFieldMap"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.typeMeta",
-            "type": "Object",
-            "tags": [],
-            "label": "typeMeta",
-            "description": [
-              "\nMetadata about data view, only used by rollup data views"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.TypeMeta",
-                "text": "TypeMeta"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nDefault or rollup"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.fieldFormats",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldFormats",
-            "description": [
-              "\nMap of serialized field formats by field name"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              ">> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.runtimeFieldMap",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeFieldMap",
-            "description": [
-              "\nMap of runtime fields by field name"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.fieldAttrs",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldAttrs",
-            "description": [
-              "\nMap of field attributes by field name, currently customName and count"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.allowNoIndex",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowNoIndex",
-            "description": [
-              "\nDetermines whether failure to load field list should be reported as error"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataViewSpec.namespaces",
-            "type": "Array",
-            "tags": [],
-            "label": "namespaces",
-            "description": [
-              "\nArray of namespace ids"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
           }
         ],
@@ -5184,228 +5012,6 @@
       },
       {
         "parentPluginId": "dataViews",
-        "id": "def-public.FieldSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldSpec",
-        "description": [
-          "\nSerialized version of DataViewField"
-        ],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          " extends ",
-          "DataViewFieldBase"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [
-              "\nPopularity count is used by discover"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.conflictDescriptions",
-            "type": "Object",
-            "tags": [],
-            "label": "conflictDescriptions",
-            "description": [
-              "\nDescription of field type conflicts across indices"
-            ],
-            "signature": [
-              "Record<string, string[]> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.format",
-            "type": "Object",
-            "tags": [],
-            "label": "format",
-            "description": [
-              "\nField formatting in serialized format"
-            ],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
-            "description": [
-              "\nElasticsearch field types used by backing indices"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "\nTrue if field is searchable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [
-              "\nTrue if field is aggregatable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.readFromDocValues",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [
-              "\nTrue if can be read from doc values"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.indexed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "indexed",
-            "description": [
-              "\nTrue if field is indexed"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [
-              "\nCustom label for field, used for display in kibana"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.runtimeField",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeField",
-            "description": [
-              "\nRuntime field definition"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.shortDotsEnable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shortDotsEnable",
-            "description": [
-              "\nWhether short dots are enabled, based on uiSettings."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.FieldSpec.isMapped",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isMapped",
-            "description": [
-              "\nIs this field in the mapping? False if a scripted or runtime field defined on the data view."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
         "id": "def-public.HasDataViewsResponse",
         "type": "Interface",
         "tags": [],
@@ -5500,7 +5106,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.IIndexPatternFieldList.add.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "field",
                 "description": [
@@ -5793,7 +5399,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.IIndexPatternFieldList.update.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "field",
                 "description": [
@@ -6204,59 +5810,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.TypeMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "TypeMeta",
-        "description": [
-          "\nInterface for metadata about rollup indices"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.TypeMeta.aggs",
-            "type": "Object",
-            "tags": [],
-            "label": "aggs",
-            "description": [
-              "\nAggregation restrictions for rollup fields"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.AggregationRestrictions",
-                "text": "AggregationRestrictions"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.TypeMeta.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [
-              "\nParams for retrieving rollup field data"
-            ],
-            "signature": [
-              "{ rollup_index: string; } | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -6304,6 +5857,107 @@
           "\"index-pattern\""
         ],
         "path": "src/plugins/data_views/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.DataViewSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewSpec",
+        "description": [
+          "\nStatic data view format\nSerialized data object, representing data view attributes and state"
+        ],
+        "signature": [
+          "{ id?: string | undefined; version?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; sourceFilters?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.SourceFilter",
+            "text": "SourceFilter"
+          },
+          "[] | undefined; fields?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
+          },
+          " | undefined; typeMeta?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.TypeMeta",
+            "text": "TypeMeta"
+          },
+          " | undefined; type?: string | undefined; fieldFormats?: Record<string, ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          "SerializableRecord",
+          ">> | undefined; runtimeFieldMap?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          "> | undefined; fieldAttrs?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrs",
+            "text": "FieldAttrs"
+          },
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.FieldSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldSpec",
+        "description": [
+          "\nSerialized version of DataViewField"
+        ],
+        "signature": [
+          "DataViewFieldBase",
+          " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          "SerializableRecord",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6382,6 +6036,30 @@
         ],
         "signature": [
           "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.TypeMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "TypeMeta",
+        "description": [
+          "\nInterface for metadata about rollup indices"
+        ],
+        "signature": [
+          "{ aggs?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AggregationRestrictions",
+            "text": "AggregationRestrictions"
+          },
+          "> | undefined; params?: { rollup_index: string; } | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -6710,6 +6388,18 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-server.DataView.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-server.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -6740,6 +6430,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [
+              "\nGet name of Data View"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -6824,6 +6531,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-server.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-server.DataView.toSpec",
             "type": "Function",
             "tags": [],
@@ -6832,7 +6554,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6843,7 +6565,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -7817,13 +7556,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -7863,13 +7596,7 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -8159,13 +7886,7 @@
                 "text": "ElasticsearchClient"
               },
               ", request?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
@@ -9049,7 +8770,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -9075,10 +8796,8 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -9280,7 +8999,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -9291,7 +9010,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>"
+              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -9662,13 +9389,7 @@
             "text": "ElasticsearchClient"
           },
           ", request?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
           {
             "pluginId": "dataViews",
@@ -10154,228 +9875,6 @@
       },
       {
         "parentPluginId": "dataViews",
-        "id": "def-server.FieldSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldSpec",
-        "description": [
-          "\nSerialized version of DataViewField"
-        ],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          " extends ",
-          "DataViewFieldBase"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [
-              "\nPopularity count is used by discover"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.conflictDescriptions",
-            "type": "Object",
-            "tags": [],
-            "label": "conflictDescriptions",
-            "description": [
-              "\nDescription of field type conflicts across indices"
-            ],
-            "signature": [
-              "Record<string, string[]> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.format",
-            "type": "Object",
-            "tags": [],
-            "label": "format",
-            "description": [
-              "\nField formatting in serialized format"
-            ],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
-            "description": [
-              "\nElasticsearch field types used by backing indices"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "\nTrue if field is searchable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [
-              "\nTrue if field is aggregatable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.readFromDocValues",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [
-              "\nTrue if can be read from doc values"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.indexed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "indexed",
-            "description": [
-              "\nTrue if field is indexed"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [
-              "\nCustom label for field, used for display in kibana"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.runtimeField",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeField",
-            "description": [
-              "\nRuntime field definition"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.shortDotsEnable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shortDotsEnable",
-            "description": [
-              "\nWhether short dots are enabled, based on uiSettings."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.FieldSpec.isMapped",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isMapped",
-            "description": [
-              "\nIs this field in the mapping? False if a scripted or runtime field defined on the data view."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
         "id": "def-server.SavedObjectsClientCommon",
         "type": "Interface",
         "tags": [],
@@ -10724,6 +10223,41 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-server.FieldSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldSpec",
+        "description": [
+          "\nSerialized version of DataViewField"
+        ],
+        "signature": [
+          "DataViewFieldBase",
+          " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          "SerializableRecord",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-server.RUNTIME_FIELD_PATH",
         "type": "string",
         "tags": [],
@@ -10973,13 +10507,7 @@
               "text": "ElasticsearchClient"
             },
             ", request?: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
             {
               "pluginId": "dataViews",
@@ -11533,9 +11061,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ClosePointInTimeResponse",
-                ">; }; helpers: ",
+                ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
-                "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                "; helpers: ",
                 "default",
                 "; child: (opts: ",
                 "ClientOptions",
@@ -12540,13 +12068,7 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any> | undefined"
               ],
               "path": "src/plugins/data_views/server/types.ts",
@@ -12871,6 +12393,18 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataView.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -12901,6 +12435,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataView.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [
+              "\nGet name of Data View"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -12985,6 +12536,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataView.toSpec",
             "type": "Function",
             "tags": [],
@@ -12993,7 +12559,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13004,7 +12570,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -13978,13 +13561,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -14024,13 +13601,7 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -14103,18 +13674,31 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-common.DataViewField.spec",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "spec",
             "description": [],
             "signature": [
+              "DataViewFieldBase",
+              " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              "SerializableRecord",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              }
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -14139,7 +13723,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-common.DataViewField.Unnamed.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "spec",
                 "description": [
@@ -14188,7 +13772,7 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-common.DataViewField.runtimeField",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeField",
             "description": [
@@ -14210,7 +13794,7 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-common.DataViewField.runtimeField",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeField",
             "description": [
@@ -15639,7 +15223,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15665,10 +15249,8 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -15870,7 +15452,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -15881,7 +15463,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>"
+              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -16487,6 +16077,21 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewAttributes.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16510,7 +16115,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nSaved object id"
+              "\nSaved object id (or generated id if in-memory only)"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
@@ -16578,267 +16183,18 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.DataViewSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataViewSpec",
-        "description": [
-          "\nStatic data view format\nSerialized data object, representing data view attributes and state"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
+          },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.id",
+            "id": "def-common.DataViewListItem.name",
             "type": "string",
             "tags": [],
-            "label": "id",
-            "description": [
-              "\nSaved object id"
-            ],
+            "label": "name",
+            "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.version",
-            "type": "string",
-            "tags": [],
-            "label": "version",
-            "description": [
-              "\nSaved object version string"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [
-              "\nData view title"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.timeFieldName",
-            "type": "string",
-            "tags": [],
-            "label": "timeFieldName",
-            "description": [
-              "\nName of timestamp field"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.sourceFilters",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceFilters",
-            "description": [
-              "\nList of filters which discover uses to hide fields"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SourceFilter",
-                "text": "SourceFilter"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.fields",
-            "type": "Object",
-            "tags": [],
-            "label": "fields",
-            "description": [
-              "\nMap of fields by name"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewFieldMap",
-                "text": "DataViewFieldMap"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.typeMeta",
-            "type": "Object",
-            "tags": [],
-            "label": "typeMeta",
-            "description": [
-              "\nMetadata about data view, only used by rollup data views"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.TypeMeta",
-                "text": "TypeMeta"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nDefault or rollup"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.fieldFormats",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldFormats",
-            "description": [
-              "\nMap of serialized field formats by field name"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              ">> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.runtimeFieldMap",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeFieldMap",
-            "description": [
-              "\nMap of runtime fields by field name"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.fieldAttrs",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldAttrs",
-            "description": [
-              "\nMap of field attributes by field name, currently customName and count"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.allowNoIndex",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowNoIndex",
-            "description": [
-              "\nDetermines whether failure to load field list should be reported as error"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.namespaces",
-            "type": "Array",
-            "tags": [],
-            "label": "namespaces",
-            "description": [
-              "\nArray of namespace ids"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
           }
         ],
@@ -16990,13 +16346,7 @@
               " | ",
               "KBN_FIELD_TYPES",
               "; getInstance: (formatId: string, params?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -17010,13 +16360,7 @@
               ", esTypes?: ",
               "ES_FIELD_TYPES",
               "[] | undefined, params?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -17044,13 +16388,7 @@
               ", esTypes?: ",
               "ES_FIELD_TYPES",
               "[] | undefined, params?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -17079,7 +16417,7 @@
             "tags": [],
             "label": "onNotification",
             "description": [
-              "\nHander for service notifications"
+              "\nHandler for service notifications"
             ],
             "signature": [
               "(toastInputFields: ",
@@ -17232,6 +16570,23 @@
             "label": "getCanSave",
             "description": [
               "\nDetermines whether the user can save data views"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServiceDeps.getCanSaveAdvancedSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getCanSaveAdvancedSettings",
+            "description": [
+              "\nDetermines whether the user can save advancedSettings (used for defaultIndex)"
             ],
             "signature": [
               "() => Promise<boolean>"
@@ -18310,7 +17665,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number | undefined, ignoreErrors?: boolean | undefined) => Promise<void | Error>"
+              ", saveAttempts?: number | undefined, ignoreErrors?: boolean | undefined) => Promise<void | Error | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -18375,86 +17738,6 @@
       },
       {
         "parentPluginId": "dataViews",
-        "id": "def-common.FieldAttrs",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldAttrs",
-        "description": [
-          "\nSet of field attributes"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldAttrs.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: FieldAttrSet",
-            "description": [],
-            "signature": [
-              "[key: string]:  ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrSet",
-                "text": "FieldAttrSet"
-              }
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.FieldAttrSet",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldAttrSet",
-        "description": [
-          "\nField attributes that are stored on the data view"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldAttrSet.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [
-              "\nCustom field label"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldAttrSet.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [
-              "\nPopularity count - used for discover"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
         "id": "def-common.FieldConfiguration",
         "type": "Interface",
         "tags": [],
@@ -18483,13 +17766,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | null | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -18521,228 +17798,6 @@
             ],
             "signature": [
               "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.FieldSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldSpec",
-        "description": [
-          "\nSerialized version of DataViewField"
-        ],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          " extends ",
-          "DataViewFieldBase"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [
-              "\nPopularity count is used by discover"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.conflictDescriptions",
-            "type": "Object",
-            "tags": [],
-            "label": "conflictDescriptions",
-            "description": [
-              "\nDescription of field type conflicts across indices"
-            ],
-            "signature": [
-              "Record<string, string[]> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.format",
-            "type": "Object",
-            "tags": [],
-            "label": "format",
-            "description": [
-              "\nField formatting in serialized format"
-            ],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
-            "description": [
-              "\nElasticsearch field types used by backing indices"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "\nTrue if field is searchable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [
-              "\nTrue if field is aggregatable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.readFromDocValues",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [
-              "\nTrue if can be read from doc values"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.indexed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "indexed",
-            "description": [
-              "\nTrue if field is indexed"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [
-              "\nCustom label for field, used for display in kibana"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.runtimeField",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeField",
-            "description": [
-              "\nRuntime field definition"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.shortDotsEnable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shortDotsEnable",
-            "description": [
-              "\nWhether short dots are enabled, based on uiSettings."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.FieldSpec.isMapped",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isMapped",
-            "description": [
-              "\nIs this field in the mapping? False if a scripted or runtime field defined on the data view."
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -19045,7 +18100,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-common.IIndexPatternFieldList.add.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "field",
                 "description": [
@@ -19338,7 +18393,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-common.IIndexPatternFieldList.update.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "field",
                 "description": [
@@ -19445,13 +18500,57 @@
               "\nValue - DataViewSpec"
             ],
             "signature": [
+              "{ id?: string | undefined; version?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; sourceFilters?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              }
+                "section": "def-common.SourceFilter",
+                "text": "SourceFilter"
+              },
+              "[] | undefined; fields?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              },
+              " | undefined; typeMeta?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TypeMeta",
+                "text": "TypeMeta"
+              },
+              " | undefined; type?: string | undefined; fieldFormats?: Record<string, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              "SerializableRecord",
+              ">> | undefined; runtimeFieldMap?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              "> | undefined; fieldAttrs?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldAttrs",
+                "text": "FieldAttrs"
+              },
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false
@@ -19515,104 +18614,6 @@
                 "text": "RuntimeFieldSubField"
               },
               "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.RuntimeFieldBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuntimeFieldBase",
-        "description": [
-          "\nRuntime field definition"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.RuntimeFieldBase.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nType of runtime field"
-            ],
-            "signature": [
-              "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.RuntimeFieldBase.script",
-            "type": "Object",
-            "tags": [],
-            "label": "script",
-            "description": [
-              "\nRuntime field script"
-            ],
-            "signature": [
-              "{ source: string; } | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.RuntimeFieldSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuntimeFieldSpec",
-        "description": [
-          "\nThe RuntimeField that will be sent in the ES Query \"runtime_mappings\" object"
-        ],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.RuntimeFieldSpec",
-            "text": "RuntimeFieldSpec"
-          },
-          " extends ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.RuntimeFieldBase",
-            "text": "RuntimeFieldBase"
-          }
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.RuntimeFieldSpec.fields",
-            "type": "Object",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "Record<string, { type: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeTypeExceptComposite",
-                "text": "RuntimeTypeExceptComposite"
-              },
-              "; }> | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20255,29 +19256,6 @@
       },
       {
         "parentPluginId": "dataViews",
-        "id": "def-common.SourceFilter",
-        "type": "Interface",
-        "tags": [],
-        "label": "SourceFilter",
-        "description": [],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SourceFilter.value",
-            "type": "string",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
         "id": "def-common.TimeBasedDataView",
         "type": "Interface",
         "tags": [],
@@ -20393,59 +19371,6 @@
               ") | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.TypeMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "TypeMeta",
-        "description": [
-          "\nInterface for metadata about rollup indices"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.TypeMeta.aggs",
-            "type": "Object",
-            "tags": [],
-            "label": "aggs",
-            "description": [
-              "\nAggregation restrictions for rollup fields"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.AggregationRestrictions",
-                "text": "AggregationRestrictions"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.TypeMeta.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [
-              "\nParams for retrieving rollup field data"
-            ],
-            "signature": [
-              "{ rollup_index: string; } | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
           }
         ],
@@ -20680,7 +19605,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: (spec: ",
+          "{ create: ({ id, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20870,7 +19795,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; getDefaultDataView: () => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20881,6 +19814,112 @@
           " | null>; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.DataViewSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewSpec",
+        "description": [
+          "\nStatic data view format\nSerialized data object, representing data view attributes and state"
+        ],
+        "signature": [
+          "{ id?: string | undefined; version?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; sourceFilters?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.SourceFilter",
+            "text": "SourceFilter"
+          },
+          "[] | undefined; fields?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
+          },
+          " | undefined; typeMeta?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.TypeMeta",
+            "text": "TypeMeta"
+          },
+          " | undefined; type?: string | undefined; fieldFormats?: Record<string, ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          "SerializableRecord",
+          ">> | undefined; runtimeFieldMap?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          "> | undefined; fieldAttrs?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrs",
+            "text": "FieldAttrs"
+          },
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.FieldAttrs",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldAttrs",
+        "description": [
+          "\nSet of field attributes"
+        ],
+        "signature": [
+          "{ [key: string]: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrSet",
+            "text": "FieldAttrSet"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.FieldAttrSet",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldAttrSet",
+        "description": [
+          "\nField attributes that are stored on the data view"
+        ],
+        "signature": [
+          "{ customLabel?: string | undefined; count?: number | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -20901,14 +19940,43 @@
             "text": "SerializedFieldFormat"
           },
           "<",
+          "SerializableRecord",
+          ">; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.FieldSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldSpec",
+        "description": [
+          "\nSerialized version of DataViewField"
+        ],
+        "signature": [
+          "DataViewFieldBase",
+          " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
           },
-          ">; }"
+          "<",
+          "SerializableRecord",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -21132,6 +20200,53 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.RuntimeFieldBase",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeFieldBase",
+        "description": [
+          "\nRuntime field definition"
+        ],
+        "signature": [
+          "{ type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"long\" | \"double\" | \"composite\"; script?: { source: string; } | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.RuntimeFieldSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeFieldSpec",
+        "description": [
+          "\nThe RuntimeField that will be sent in the ES Query \"runtime_mappings\" object"
+        ],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldBase",
+            "text": "RuntimeFieldBase"
+          },
+          " & { fields?: Record<string, { type: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeTypeExceptComposite",
+            "text": "RuntimeTypeExceptComposite"
+          },
+          "; }> | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.RuntimeType",
         "type": "Type",
         "tags": [],
@@ -21161,9 +20276,278 @@
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.SourceFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "SourceFilter",
+        "description": [],
+        "signature": [
+          "{ value: string; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.TypeMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "TypeMeta",
+        "description": [
+          "\nInterface for metadata about rollup indices"
+        ],
+        "signature": [
+          "{ aggs?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AggregationRestrictions",
+            "text": "AggregationRestrictions"
+          },
+          "> | undefined; params?: { rollup_index: string; } | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.DataViewPersistableStateService",
+        "type": "Object",
+        "tags": [],
+        "label": "DataViewPersistableStateService",
+        "description": [],
+        "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              }
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.inject.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "; references: never[]; }"
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.extract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.getAllMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllMigrations",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.migrateToLatest",
+            "type": "Function",
+            "tags": [],
+            "label": "migrateToLatest",
+            "description": [],
+            "signature": [
+              "({ state }: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.VersionedState",
+                "text": "VersionedState"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ">) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              }
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.migrateToLatest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ state }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.VersionedState",
+                    "text": "VersionedState"
+                  },
+                  "<",
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.telemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dataViews",
         "id": "def-common.DEFAULT_ASSETS_TO_IGNORE",
@@ -21188,16 +20572,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_INDEX_PATTERN",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
@@ -21208,30 +20582,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
             "description": [],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false

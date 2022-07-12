@@ -14,11 +14,10 @@ import * as i18n from '../../../translations';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../../common/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
-import {
-  BulkActionEditType,
-  BulkActionEditPayload,
-} from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
+import type { FormSchema } from '../../../../../../../shared_imports';
 import {
   Field,
   getUseField,
@@ -26,7 +25,6 @@ import {
   useForm,
   FIELD_TYPES,
   fieldValidators,
-  FormSchema,
 } from '../../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
@@ -40,6 +38,7 @@ type IndexPatternsEditActions =
 interface IndexPatternsFormData {
   index: string[];
   overwrite: boolean;
+  overwriteDataViews: boolean;
 }
 
 const schema: FormSchema<IndexPatternsFormData> = {
@@ -58,9 +57,17 @@ const schema: FormSchema<IndexPatternsFormData> = {
     type: FIELD_TYPES.CHECKBOX,
     label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL,
   },
+  overwriteDataViews: {
+    type: FIELD_TYPES.CHECKBOX,
+    label: i18n.BULK_EDIT_FLYOUT_FORM_DATA_VIEWS_OVERWRITE_LABEL,
+  },
 };
 
-const initialFormData: IndexPatternsFormData = { index: [], overwrite: false };
+const initialFormData: IndexPatternsFormData = {
+  index: [],
+  overwrite: false,
+  overwriteDataViews: false,
+};
 
 const getFormConfig = (editAction: IndexPatternsEditActions) =>
   editAction === BulkActionEditType.add_index_patterns
@@ -95,7 +102,10 @@ const IndexPatternsFormComponent = ({
 
   const { indexHelpText, indexLabel, formTitle } = getFormConfig(editAction);
 
-  const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
+  const [{ overwrite, overwriteDataViews }] = useFormData({
+    form,
+    watch: ['overwrite', 'overwriteDataViews'],
+  });
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
@@ -108,6 +118,7 @@ const IndexPatternsFormComponent = ({
     const payload = {
       value: data.index,
       type: data.overwrite ? BulkActionEditType.set_index_patterns : editAction,
+      overwriteDataViews: data.overwriteDataViews,
     };
 
     onConfirm(payload);
@@ -139,13 +150,30 @@ const IndexPatternsFormComponent = ({
         />
       )}
       {overwrite && (
-        <EuiFormRow>
+        <EuiFormRow fullWidth>
           <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesIndexPatternsWarning">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWarningCallout"
               defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
               apply changes."
               values={{ rulesCount }}
+            />
+          </EuiCallOut>
+        </EuiFormRow>
+      )}
+      <CommonUseField
+        path="overwriteDataViews"
+        componentProps={{
+          idAria: 'bulkEditRulesOverwriteRulesWithDataViews',
+          'data-test-subj': 'bulkEditRulesOverwriteRulesWithDataViews',
+        }}
+      />
+      {overwriteDataViews && (
+        <EuiFormRow fullWidth>
+          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesDataViewsWarning">
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setDataViewsOverwriteWarningCallout"
+              defaultMessage="If you have selected rules which depend on a data view this action will force those rules to read from the index pattern as defined after this update, not the dataview, and may result in broken rules."
             />
           </EuiCallOut>
         </EuiFormRow>

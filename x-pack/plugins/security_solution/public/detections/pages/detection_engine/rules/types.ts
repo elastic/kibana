@@ -6,7 +6,8 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import {
+
+import type {
   RiskScoreMapping,
   ThreatIndex,
   ThreatMapping,
@@ -16,11 +17,13 @@ import {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
-import { RuleAction } from '@kbn/alerting-plugin/common';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
-import { FieldValueThreshold } from '../../../components/rules/threshold_input';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
+import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
+import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import type {
   Author,
   BuildingBlockType,
@@ -32,7 +35,7 @@ import type {
   SetupGuide,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -89,6 +92,7 @@ export interface RuleStepProps {
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
   setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
+  kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
 export interface AboutStepRule {
@@ -105,6 +109,7 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
+  timestampOverrideFallbackDisabled?: boolean;
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
@@ -128,11 +133,17 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
+/**
+ * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
+ * Maybe something with io-ts?
+ */
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  dataViewId?: string;
+  dataViewTitle?: string;
   relatedIntegrations: RelatedIntegrationArray;
   requiredFields: RequiredFieldArray;
   ruleType: Type;
@@ -164,6 +175,7 @@ export interface DefineStepRuleJson {
   machine_learning_job_id?: string[];
   saved_id?: string;
   query?: string;
+  data_view_id?: string;
   language?: string;
   threshold?: {
     field: string[];
@@ -204,6 +216,7 @@ export interface AboutStepRuleJson {
   threat: Threats;
   threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
+  timestamp_override_fallback_disabled?: boolean;
   note?: string;
 }
 

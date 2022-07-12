@@ -3360,13 +3360,7 @@
             "text": "NavigateToAppOptions"
           },
           " | undefined) => Promise<void>; basePath: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; mapping: string | Mapping; toastNotifications: ",
           {
             "pluginId": "core",
@@ -3384,13 +3378,7 @@
             "text": "SavedObjectNotFound"
           },
           ") => void) | undefined; theme: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
+          "ThemeServiceStart",
           "; }) => (error: ",
           {
             "pluginId": "kibanaUtils",
@@ -3490,13 +3478,7 @@
                 "label": "basePath",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.IBasePath",
-                    "text": "IBasePath"
-                  }
+                  "IBasePath"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -3731,13 +3713,7 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  }
+                  "ThemeServiceStart"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -7480,193 +7456,9 @@
           "\n"
         ],
         "signature": [
-          "(res: { custom: <T extends string | Record<string, any> | Error | ",
-          "Stream",
-          " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; } | Buffer | undefined>(options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.CustomHttpResponseOptions",
-            "text": "CustomHttpResponseOptions"
-          },
-          "<T>) => ",
-          "KibanaResponse",
-          "<T>; badRequest: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; unauthorized: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; forbidden: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; notFound: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; conflict: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; customError: (options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.CustomHttpResponseOptions",
-            "text": "CustomHttpResponseOptions"
-          },
-          "<",
-          "Stream",
-          " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
-          },
-          " | Buffer>) => ",
-          "KibanaResponse",
-          "<string | Error | ",
-          "Stream",
-          " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; } | Buffer>; redirected: (options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.RedirectResponseOptions",
-            "text": "RedirectResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Record<string, any> | ",
-          "Stream",
-          " | Buffer>; ok: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Record<string, any> | ",
-          "Stream",
-          " | Buffer>; accepted: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Record<string, any> | ",
-          "Stream",
-          " | Buffer>; noContent: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<undefined>; }, err: ",
+          "(res: ",
+          "KibanaResponseFactory",
+          ", err: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "server",
@@ -7675,18 +7467,8 @@
             "text": "KbnServerError"
           },
           ") => ",
-          "KibanaResponse",
-          "<string | Error | ",
-          "Stream",
-          " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; } | Buffer>"
+          "IKibanaResponse",
+          "<any>"
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
@@ -7694,200 +7476,14 @@
           {
             "parentPluginId": "kibanaUtils",
             "id": "def-server.reportServerError.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "res",
             "description": [
               "Formats a `KbnServerError` into a server error response"
             ],
             "signature": [
-              "{ custom: <T extends string | Record<string, any> | Error | ",
-              "Stream",
-              " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; } | Buffer | undefined>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
-              "<T>) => ",
-              "KibanaResponse",
-              "<T>; badRequest: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; unauthorized: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; forbidden: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; notFound: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; conflict: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; customError: (options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
-              "<",
-              "Stream",
-              " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
-              },
-              " | Buffer>) => ",
-              "KibanaResponse",
-              "<string | Error | ",
-              "Stream",
-              " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; } | Buffer>; redirected: (options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.RedirectResponseOptions",
-                "text": "RedirectResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Record<string, any> | ",
-              "Stream",
-              " | Buffer>; ok: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Record<string, any> | ",
-              "Stream",
-              " | Buffer>; accepted: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Record<string, any> | ",
-              "Stream",
-              " | Buffer>; noContent: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<undefined>; }"
+              "KibanaResponseFactory"
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
@@ -10335,9 +9931,7 @@
                 "section": "def-common.VersionedState",
                 "text": "VersionedState"
               },
-              "<",
-              "Serializable",
-              ">) => P) | undefined"
+              "<P>) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
@@ -10359,9 +9953,7 @@
                     "section": "def-common.VersionedState",
                     "text": "VersionedState"
                   },
-                  "<",
-                  "Serializable",
-                  ">"
+                  "<P>"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,

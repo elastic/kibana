@@ -22,15 +22,10 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { FieldValueQueryBar } from '../query_bar';
-import {
-  ERROR_CODE,
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  ValidationFunc,
-} from '../../../../shared_imports';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
@@ -44,6 +39,7 @@ import {
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
+    defaultValue: [],
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -59,9 +55,9 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const skipValidation = isMlRule(formData.ruleType) || formData.dataViewId != null;
 
-          if (!needsValidation) {
+          if (skipValidation) {
             return;
           }
 
@@ -73,6 +69,48 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             )
           )(...args);
+        },
+      },
+    ],
+  },
+  dataViewTitle: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
+    validations: [],
+  },
+  dataViewId: {
+    fieldsToValidateOnChange: ['dataViewId'],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          // the dropdown defaults the dataViewId to an empty string somehow on render..
+          // need to figure this out.
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+          const skipValidation =
+            isMlRule(formData.ruleType) ||
+            ((formData.index != null || notEmptyDataViewId) &&
+              !(formData.index != null && notEmptyDataViewId));
+
+          if (skipValidation) {
+            return;
+          }
+
+          return {
+            path,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
+              {
+                defaultMessage: 'Please select an available Data View or Index Pattern.',
+              }
+            ),
+          };
         },
       },
     ],

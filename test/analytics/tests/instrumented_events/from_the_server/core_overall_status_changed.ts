@@ -18,9 +18,9 @@ export default function ({ getService }: FtrProviderContext) {
     let secondEvent: Event;
 
     before(async () => {
-      [initialEvent, secondEvent] = await ebtServerHelper.getEvents(2, [
-        'core-overall_status_changed',
-      ]);
+      [initialEvent, secondEvent] = await ebtServerHelper.getEvents(2, {
+        eventTypes: ['core-overall_status_changed'],
+      });
     });
 
     it('should emit the initial "degraded" event with the context set to `initializing`', () => {

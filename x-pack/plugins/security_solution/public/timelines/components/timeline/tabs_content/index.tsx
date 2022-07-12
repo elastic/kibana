@@ -11,12 +11,8 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  RowRenderer,
-  TimelineTabs,
-  TimelineId,
-  TimelineType,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -26,8 +22,8 @@ import {
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
-import { CellValueElementProps } from '../cell_rendering';
-import { SessionViewConfig } from '../session_tab_content/use_session_view';
+import type { CellValueElementProps } from '../cell_rendering';
+import type { SessionViewConfig } from '../session_tab_content/use_session_view';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -214,7 +210,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const CountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const StyledEuiTab = styled(EuiTab)`

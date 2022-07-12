@@ -6,13 +6,42 @@
  */
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import { BoolQuery } from '@kbn/es-query';
 
-export type KubernetesSecurityServices = CoreStart;
+export interface StartPlugins {
+  data: DataPublicPluginStart;
+  timelines: TimelinesUIStart;
+  sessionView: SessionViewStart;
+}
+
+export type KubernetesSecurityServices = CoreStart & StartPlugins;
+
+export interface IndexPattern {
+  fields: FieldSpec[];
+  title: string;
+}
+
+export interface GlobalFilter {
+  filterQuery?: string;
+  startDate: string;
+  endDate: string;
+}
 
 export interface KubernetesSecurityDeps {
   filter: React.ReactNode;
+  renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
+  indexPattern?: IndexPattern;
+  globalFilter: GlobalFilter;
 }
 
 export interface KubernetesSecurityStart {
   getKubernetesPage: (kubernetesSecurityDeps: KubernetesSecurityDeps) => JSX.Element;
 }
+
+export type QueryDslQueryContainerBool = {
+  bool: BoolQuery;
+};

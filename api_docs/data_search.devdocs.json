@@ -22,13 +22,7 @@
             "text": "IKibanaSearchResponse"
           },
           "<any>, theme: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
+          "ThemeServiceStart",
           ") => ",
           {
             "pluginId": "data",
@@ -85,13 +79,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ThemeServiceStart",
-                "text": "ThemeServiceStart"
-              }
+              "ThemeServiceStart"
             ],
             "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
             "deprecated": false,
@@ -455,7 +443,15 @@
                 "section": "def-common.CreateAggConfigParams",
                 "text": "CreateAggConfigParams"
               },
-              "[] | undefined) => ",
+              "[] | undefined, options?: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigsOptions",
+                "text": "AggConfigsOptions"
+              },
+              "> | undefined) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -463,15 +459,39 @@
                 "section": "def-common.AggConfigs",
                 "text": "AggConfigs"
               },
-              "; types: ",
+              "; types: { get: (name: string) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggTypesRegistryStart",
-                "text": "AggTypesRegistryStart"
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
               },
-              "; }"
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>; getAll: () => { buckets: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any>[]; metrics: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>[]; }; }; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -2440,13 +2460,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
               {
                 "pluginId": "data",
@@ -3024,13 +3038,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "IScopedSearchSessionsClient",
               "<T>"
@@ -3764,13 +3772,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
@@ -4469,7 +4471,17 @@
               "\nReturns a serialized field format for the field used in this agg.\nThis can be passed to fieldFormats.deserialize to get the field\nformat instance.\n"
             ],
             "signature": [
-              "() => {}"
+              "<T extends ",
+              "SerializableRecord",
+              ">() => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<T>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -5020,32 +5032,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggConfigs.partialRows",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "partialRows",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggConfigs.hierarchical",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hierarchical",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.AggConfigs.timeZone",
             "type": "string",
             "tags": [],
@@ -5150,6 +5136,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggConfigs.hierarchical",
+            "type": "boolean",
+            "tags": [],
+            "label": "hierarchical",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggConfigs.partialRows",
+            "type": "boolean",
+            "tags": [],
+            "label": "partialRows",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "data",
@@ -5278,7 +5284,15 @@
             "label": "clone",
             "description": [],
             "signature": [
-              "({ enabledOnly }?: { enabledOnly?: boolean | undefined; }) => ",
+              "({ enabledOnly, opts, }?: { enabledOnly?: boolean | undefined; opts?: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigsOptions",
+                "text": "AggConfigsOptions"
+              },
+              "> | undefined; }) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -5295,14 +5309,46 @@
                 "id": "def-common.AggConfigs.clone.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ enabledOnly = true }",
+                "label": "{\n    enabledOnly = true,\n    opts,\n  }",
                 "description": [],
-                "signature": [
-                  "{ enabledOnly?: boolean | undefined; }"
-                ],
                 "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
                 "deprecated": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.AggConfigs.clone.$1.enabledOnly",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "enabledOnly",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.AggConfigs.clone.$1.opts",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "opts",
+                    "description": [],
+                    "signature": [
+                      "Partial<",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataSearchPluginApi",
+                        "section": "def-common.AggConfigsOptions",
+                        "text": "AggConfigsOptions"
+                      },
+                      "> | undefined"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -6193,6 +6239,36 @@
         "children": [
           {
             "parentPluginId": "data",
+            "id": "def-common.AggsCommonService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "aggExecutionContext",
+                "description": [],
+                "signature": [
+                  "{ shouldDetectTimeZone?: boolean | undefined; } | undefined"
+                ],
+                "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.AggsCommonService.setup",
             "type": "Function",
             "tags": [],
@@ -6250,7 +6326,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ getConfig, aggExecutionContext }: ",
+              "({ getConfig, fieldFormats, calculateBounds, }: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6275,7 +6351,7 @@
                 "id": "def-common.AggsCommonService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ getConfig, aggExecutionContext }",
+                "label": "{\n    getConfig,\n    fieldFormats,\n    calculateBounds,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -7040,7 +7116,9 @@
               "\nGet the serialized format for the values produced by this agg type,\noverridden by several metrics that always output a simple number.\nYou can pass this output to fieldFormatters.deserialize to get\nthe formatter instance.\n"
             ],
             "signature": [
-              "(agg: TAggConfig) => ",
+              "<T extends ",
+              "SerializableRecord",
+              ">(agg: TAggConfig) => ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -7048,15 +7126,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              ">"
+              "<T>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -7407,11 +7477,72 @@
             "label": "start",
             "description": [],
             "signature": [
-              "() => { get: (name: string) => any; getAll: () => { buckets: any[]; metrics: any[]; }; }"
+              "(aggTypesDependencies: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => { get: (name: string) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>; getAll: () => { buckets: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any>[]; metrics: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>[]; }; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypesRegistry.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "aggTypesDependencies",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.AggTypesDependencies",
+                    "text": "AggTypesDependencies"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -11208,52 +11339,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.checkColumnForPrecisionError",
-        "type": "Function",
-        "tags": [],
-        "label": "checkColumnForPrecisionError",
-        "description": [],
-        "signature": [
-          "(column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => ",
-          "Serializable"
-        ],
-        "path": "src/plugins/data/common/search/tabify/utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.checkColumnForPrecisionError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "column",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/tabify/utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.cidrToAst",
         "type": "Function",
         "tags": [],
@@ -12368,75 +12453,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.getDateHistogramMetaDataByDatatableColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "getDateHistogramMetaDataByDatatableColumn",
-        "description": [
-          "\nHelper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a date_histogram aggregation of the esaggs data source,\nthis function will return undefined."
-        ],
-        "signature": [
-          "(column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ", defaults?: Partial<{ timeZone: string; }>) => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; } | undefined"
-        ],
-        "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getDateHistogramMetaDataByDatatableColumn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "column",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getDateHistogramMetaDataByDatatableColumn.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "defaults",
-            "description": [],
-            "signature": [
-              "Partial<{ timeZone: string; }>"
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.getDateRangeBucketAgg",
         "type": "Function",
         "tags": [],
@@ -13113,13 +13129,7 @@
         "description": [],
         "signature": [
           "(getStartDependencies: (getKibanaRequest: (() => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
           {
             "pluginId": "data",
@@ -13149,13 +13159,7 @@
             "description": [],
             "signature": [
               "(getKibanaRequest: (() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",
               {
                 "pluginId": "data",
@@ -13331,53 +13335,6 @@
         "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
         "deprecated": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getNumberHistogramIntervalByDatatableColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "getNumberHistogramIntervalByDatatableColumn",
-        "description": [
-          "\nHelper function returning the used interval for data table column created by the histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a histogram aggregation of the esaggs data source,\nthis function will return undefined."
-        ],
-        "signature": [
-          "(column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => number | undefined"
-        ],
-        "path": "src/plugins/data/common/search/aggs/utils/get_number_histogram_interval.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getNumberHistogramIntervalByDatatableColumn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "column",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/get_number_histogram_interval.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -15830,13 +15787,39 @@
             "label": "typesRegistry",
             "description": [],
             "signature": [
+              "{ get: (name: string) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggTypesRegistryStart",
-                "text": "AggTypesRegistryStart"
-              }
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>; getAll: () => { buckets: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any>[]; metrics: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>[]; }; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
             "deprecated": false
@@ -20948,7 +20931,15 @@
                 "section": "def-common.CreateAggConfigParams",
                 "text": "CreateAggConfigParams"
               },
-              "[] | undefined) => ",
+              "[] | undefined, options?: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigsOptions",
+                "text": "AggConfigsOptions"
+              },
+              "> | undefined) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -21000,6 +20991,28 @@
                 "path": "src/plugins/data/common/search/aggs/types.ts",
                 "deprecated": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStart.createAggConfigs.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.AggConfigsOptions",
+                    "text": "AggConfigsOptions"
+                  },
+                  "> | undefined"
+                ],
+                "path": "src/plugins/data/common/search/aggs/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -21012,7 +21025,39 @@
             "label": "types",
             "description": [],
             "signature": [
-              "{ get: (name: string) => any; getAll: () => { buckets: any[]; metrics: any[]; }; }"
+              "{ get: (name: string) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>; getAll: () => { buckets: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any>[]; metrics: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>[]; }; }"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
             "deprecated": false
@@ -21030,6 +21075,44 @@
         "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggsCommonStartDependencies.getIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexPattern",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStartDependencies.getIndexPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
           {
             "parentPluginId": "data",
             "id": "def-common.AggsCommonStartDependencies.getConfig",
@@ -21071,54 +21154,174 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggsCommonStartDependencies.getIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "getIndexPattern",
-            "description": [],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">"
-            ],
-            "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggsCommonStartDependencies.getIndexPattern.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggsCommonStartDependencies.aggExecutionContext",
+            "id": "def-common.AggsCommonStartDependencies.fieldFormats",
             "type": "Object",
             "tags": [],
-            "label": "aggExecutionContext",
+            "label": "fieldFormats",
             "description": [],
             "signature": [
-              "{ shouldDetectTimeZone?: boolean | undefined; } | undefined"
+              "{ deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; getDefaultConfig: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ", esTypes?: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined) => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatConfig",
+                "text": "FieldFormatConfig"
+              },
+              "; getType: (formatId: string) => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatInstanceType",
+                "text": "FieldFormatInstanceType"
+              },
+              " | undefined; getTypeWithoutMetaParams: (formatId: string) => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatInstanceType",
+                "text": "FieldFormatInstanceType"
+              },
+              " | undefined; getDefaultType: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ", esTypes?: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined) => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatInstanceType",
+                "text": "FieldFormatInstanceType"
+              },
+              " | undefined; getTypeNameByEsTypes: (esTypes: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined) => ",
+              "ES_FIELD_TYPES",
+              " | undefined; getDefaultTypeName: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ", esTypes?: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined) => ",
+              "ES_FIELD_TYPES",
+              " | ",
+              "KBN_FIELD_TYPES",
+              "; getInstance: (formatId: string, params?: ",
+              "SerializableRecord",
+              ") => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormat",
+                "text": "FieldFormat"
+              },
+              "; getDefaultInstancePlain: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ", esTypes?: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined, params?: ",
+              "SerializableRecord",
+              ") => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormat",
+                "text": "FieldFormat"
+              },
+              "; getDefaultInstanceCacheResolver: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ", esTypes?: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined) => string; getByFieldType: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ") => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatInstanceType",
+                "text": "FieldFormatInstanceType"
+              },
+              "[]; getDefaultInstance: (fieldType: ",
+              "KBN_FIELD_TYPES",
+              ", esTypes?: ",
+              "ES_FIELD_TYPES",
+              "[] | undefined, params?: ",
+              "SerializableRecord",
+              ") => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormat",
+                "text": "FieldFormat"
+              },
+              "; parseDefaultTypeMap: (value: Record<string, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatConfig",
+                "text": "FieldFormatConfig"
+              },
+              ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggsCommonStartDependencies.calculateBounds",
+            "type": "Function",
+            "tags": [],
+            "label": "calculateBounds",
+            "description": [],
+            "signature": [
+              "(timeRange: ",
+              "TimeRange",
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStartDependencies.calculateBounds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -21469,13 +21672,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ">) | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
@@ -21776,98 +21973,6 @@
             ],
             "path": "src/plugins/data/common/search/aggs/agg_types.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.AggTypesRegistryStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "AggTypesRegistryStart",
-        "description": [
-          "\nAggsCommonStart returns the _unitialized_ agg type providers, but in our\nreal start contract we will need to return the initialized versions.\nSo we need to provide the correct typings so they can be overwritten\non client/server."
-        ],
-        "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggTypesRegistryStart.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [],
-            "signature": [
-              "(id: string) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.BucketAggType",
-                "text": "BucketAggType"
-              },
-              "<any> | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.MetricAggType",
-                "text": "MetricAggType"
-              },
-              "<any>"
-            ],
-            "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggTypesRegistryStart.get.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggTypesRegistryStart.getAll",
-            "type": "Function",
-            "tags": [],
-            "label": "getAll",
-            "description": [],
-            "signature": [
-              "() => { buckets: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.BucketAggType",
-                "text": "BucketAggType"
-              },
-              "<any>[]; metrics: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.MetricAggType",
-                "text": "MetricAggType"
-              },
-              "<any>[]; }"
-            ],
-            "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -25151,7 +25256,15 @@
                 "section": "def-common.CreateAggConfigParams",
                 "text": "CreateAggConfigParams"
               },
-              "[] | undefined) => ",
+              "[] | undefined, options?: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigsOptions",
+                "text": "AggConfigsOptions"
+              },
+              "> | undefined) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -25159,15 +25272,39 @@
                 "section": "def-common.AggConfigs",
                 "text": "AggConfigs"
               },
-              "; types: ",
+              "; types: { get: (name: string) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggTypesRegistryStart",
-                "text": "AggTypesRegistryStart"
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
               },
-              "; }"
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>; getAll: () => { buckets: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any>[]; metrics: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
+              "<any>[]; }; }; }"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false
@@ -26564,7 +26701,15 @@
             "section": "def-common.CreateAggConfigParams",
             "text": "CreateAggConfigParams"
           },
-          "[] | undefined) => ",
+          "[] | undefined, options?: Partial<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggConfigsOptions",
+            "text": "AggConfigsOptions"
+          },
+          "> | undefined) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -26572,15 +26717,39 @@
             "section": "def-common.AggConfigs",
             "text": "AggConfigs"
           },
-          "; types: ",
+          "; types: { get: (name: string) => ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.AggTypesRegistryStart",
-            "text": "AggTypesRegistryStart"
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
           },
-          "; }"
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>; getAll: () => { buckets: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any>[]; metrics: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>[]; }; }; }"
         ],
         "path": "src/plugins/data/common/search/aggs/types.ts",
         "deprecated": false,
@@ -26697,6 +26866,52 @@
             "text": "MetricAggType"
           },
           "<any>>(name: N, type: T) => void; }"
+        ],
+        "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggTypesRegistryStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AggTypesRegistryStart",
+        "description": [],
+        "signature": [
+          "{ get: (name: string) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>; getAll: () => { buckets: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any>[]; metrics: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>[]; }; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
         "deprecated": false,
@@ -29452,7 +29667,15 @@
           },
           "[] | undefined; fieldsFromSource?: ",
           "Fields",
-          " | undefined; index?: string | undefined; searchAfter?: ",
+          " | undefined; index?: string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          " | undefined; searchAfter?: ",
           {
             "pluginId": "data",
             "scope": "common",

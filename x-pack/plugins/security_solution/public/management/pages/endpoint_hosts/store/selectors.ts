@@ -10,14 +10,10 @@ import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from 'rison-node';
-import { Query } from '@kbn/es-query';
-import {
-  Immutable,
-  HostStatus,
-  ActivityLog,
-  HostMetadata,
-} from '../../../../../common/endpoint/types';
-import { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { Query } from '@kbn/es-query';
+import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
+import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -25,16 +21,15 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import {
-  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
 
-import { ServerApiError } from '../../../../common/types';
+import type { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -176,19 +171,6 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
   });
 
 /**
- * Returns the selected endpoint's elastic agent Id
- * used for fetching endpoint actions log
- */
-export const selectedAgent = (state: Immutable<EndpointState>): string => {
-  const hostList = state.hosts;
-  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
-  return (
-    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
-      .id || ''
-  );
-};
-
-/**
  * Returns the Host Status which is connected the fleet agent
  */
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
@@ -282,59 +264,6 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
-
-export const getActivityLogDataPaging = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
-  return state.endpointDetails.activityLog.paging;
-};
-
-export const getActivityLogData = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
-  state.endpointDetails.activityLog.logData;
-
-export const getLastLoadedActivityLogData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
-  return getLastLoadedResourceState(activityLog)?.data;
-});
-
-export const getActivityLogUninitialized: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isUninitialisedResourceState(activityLog));
-
-export const getActivityLogRequestLoading: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadingResourceState(activityLog));
-
-export const getActivityLogRequestLoaded: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadedResourceState(activityLog));
-
-export const getActivityLogIterableData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
-  const emptyArray: ActivityLog['data'] = [];
-  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
-});
-
-export const getActivityLogError: (state: Immutable<EndpointState>) => ServerApiError | undefined =
-  createSelector(getActivityLogData, (activityLog) => {
-    if (isFailedResourceState(activityLog)) {
-      return activityLog.error;
-    }
-  });
-
-// returns a true if either lgo is uninitialised
-// or if it has failed an api call after having fetched a non empty log list earlier
-export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(
-  getActivityLogUninitialized,
-  getLastLoadedActivityLogData,
-  getActivityLogError,
-  (isUninitialized, lastLoadedLogData, isAPIError) => {
-    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
-  }
-);
 
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;

@@ -7,16 +7,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import type { SavedObjectsUpdateOptions } from '../service/saved_objects_client';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerUpdateRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerUpdateRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   router.put(
     {
       path: '/{type}/{id}',

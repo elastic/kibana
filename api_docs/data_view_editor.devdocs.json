@@ -109,15 +109,22 @@
           },
           {
             "parentPluginId": "dataViewEditor",
-            "id": "def-public.DataViewEditorProps.showEmptyPrompt",
-            "type": "CompoundType",
+            "id": "def-public.DataViewEditorProps.editData",
+            "type": "Object",
             "tags": [],
-            "label": "showEmptyPrompt",
+            "label": "editData",
             "description": [
-              "\nIf set to false, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly\nto data view creation."
+              "\nPass the data view to be edited."
             ],
             "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false

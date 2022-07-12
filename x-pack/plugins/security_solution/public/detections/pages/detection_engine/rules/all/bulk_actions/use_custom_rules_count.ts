@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useQuery, QueryClient } from 'react-query';
+import type { QueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';

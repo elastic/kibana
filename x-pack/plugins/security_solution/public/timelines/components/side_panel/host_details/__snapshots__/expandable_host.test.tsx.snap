@@ -5,6 +5,10 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   color: #535966;
 }
 
+.c2 {
+  word-break: break-word;
+}
+
 .c2 dt {
   font-size: 12px !important;
 }
@@ -61,7 +65,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
 }
 
 .c4 {
-  padding: 16px;
+  padding: 12px;
   background: rgba(250,251,253,0.9);
   bottom: 0;
   left: 0;
@@ -112,10 +116,11 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -126,10 +131,11 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
       </dl>
     </div>
@@ -323,7 +329,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
             data-test-subj="loading-spinner"
             role="progressbar"
           />

@@ -17,14 +17,14 @@ import {
 import { StatusService } from './status_service';
 import { first, take, toArray } from 'rxjs/operators';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
-import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
-import { analyticsServiceMock } from '../analytics/analytics_service.mock';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { AnalyticsServiceSetup } from '..';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);

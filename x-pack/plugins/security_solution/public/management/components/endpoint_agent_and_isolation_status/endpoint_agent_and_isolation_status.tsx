@@ -9,16 +9,14 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { HostStatus } from '../../../../common/endpoint/types';
+import type { HostStatus } from '../../../../common/endpoint/types';
 import { AgentStatus } from '../../../common/components/endpoint/agent_status';
-import {
-  EndpointHostIsolationStatus,
-  EndpointHostIsolationStatusProps,
-} from '../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
+import { EndpointHostIsolationStatus } from '../../../common/components/endpoint/host_isolation';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
-    margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-left: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 

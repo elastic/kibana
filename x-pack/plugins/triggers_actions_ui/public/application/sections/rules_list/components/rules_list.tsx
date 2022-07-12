@@ -25,7 +25,6 @@ import {
   EuiText,
   EuiTableSortingType,
   EuiButtonIcon,
-  EuiHorizontalRule,
   EuiSelectableOption,
   EuiIcon,
   EuiDescriptionList,
@@ -49,6 +48,7 @@ import {
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
+  SnoozeSchedule,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -381,7 +381,9 @@ export const RulesList: React.FunctionComponent = () => {
 
   const getRuleTagFilter = () => {
     if (isRuleTagFilterEnabled) {
-      return [<RuleTagFilter tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />];
+      return [
+        <RuleTagFilter isGrouped tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />,
+      ];
     }
     return [];
   };
@@ -403,12 +405,12 @@ export const RulesList: React.FunctionComponent = () => {
     return enableRule({ http, id: rule.id });
   };
 
-  const onSnoozeRule = (rule: RuleTableItem, snoozeEndTime: string | -1) => {
-    return snoozeRule({ http, id: rule.id, snoozeEndTime });
+  const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
+    return snoozeRule({ http, id: rule.id, snoozeSchedule });
   };
 
-  const onUnsnoozeRule = (rule: RuleTableItem) => {
-    return unsnoozeRule({ http, id: rule.id });
+  const onUnsnoozeRule = (rule: RuleTableItem, scheduleIds?: string[]) => {
+    return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
   const toolsRight = [
@@ -644,7 +646,7 @@ export const RulesList: React.FunctionComponent = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiSpacer size="s" />
       <RulesListTable
         canExecuteActions={canExecuteActions}
         isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}

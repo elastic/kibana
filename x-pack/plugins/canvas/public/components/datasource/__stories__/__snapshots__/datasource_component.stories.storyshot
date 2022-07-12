@@ -35,22 +35,18 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
     <div
-      className="euiText euiText--small css-i7i3v9-euiCallOut__description"
+      className="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      style={Object {}}
     >
-      <div
-        className="euiTextColor euiTextColor--default"
-        style={Object {}}
-      >
-        <p>
-          The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
-        </p>
-      </div>
+      <p>
+        The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
+      </p>
     </div>
   </div>
 </div>
@@ -91,13 +87,13 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
     className="render_to_dom"
   />
   <hr
-    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-1y0qta5-euiHorizontalRule-full-m"
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
   />
   <div
     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"

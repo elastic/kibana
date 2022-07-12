@@ -123,6 +123,23 @@ describe('policy_config and licenses', () => {
       expect(valid).toBeTruthy();
     });
 
+    it('allows advanced rollback option when Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = { rollback: true }; // make policy change
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks advanced rollback option when below Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = { rollback: true }; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
     describe('ransomware protection checks', () => {
       it('blocks ransomware to be turned on for Gold and below licenses', () => {
         const policy = policyFactoryWithoutPaidFeatures();
@@ -472,6 +489,21 @@ describe('policy_config and licenses', () => {
       expect(['', DefaultPolicyRuleNotificationMessage]).toContain(
         retPolicy.linux.popup.behavior_protection.message
       );
+    });
+
+    it('resets Platinum-paid advanced fields for lower license tiers', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+
+      policy.windows.advanced = { rollback: true };
+      policy.windows.advanced = { another_advanced: true };
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.advanced?.rollback).toEqual(defaults.windows.advanced?.rollback);
+
+      // Preserves non-license gated advanced settings.
+      expect(retPolicy.windows.advanced?.another_advanced).toEqual(true);
     });
 
     it('sets ransomware supported field to false when license is below Platinum', () => {

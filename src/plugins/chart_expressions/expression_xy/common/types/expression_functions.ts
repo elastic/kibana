@@ -25,14 +25,11 @@ import {
   ValueLabelModes,
   XScaleTypes,
   XYCurveTypes,
-  YAxisModes,
   YScaleTypes,
+  AxisModes,
   REFERENCE_LINE,
-  Y_CONFIG,
-  AXIS_TITLES_VISIBILITY_CONFIG,
-  LABELS_ORIENTATION_CONFIG,
-  TICK_LABELS_CONFIG,
-  GRID_LINES_CONFIG,
+  DATA_DECORATION_CONFIG,
+  REFERENCE_LINE_DECORATION_CONFIG,
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
@@ -40,23 +37,24 @@ import {
   REFERENCE_LINE_LAYER,
   ANNOTATION_LAYER,
   EndValues,
-  EXTENDED_Y_CONFIG,
+  X_AXIS_CONFIG,
+  Y_AXIS_CONFIG,
   AvailableReferenceLineIcons,
   XY_VIS,
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
-  REFERENCE_LINE_Y_CONFIG,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
-export type YAxisMode = $Values<typeof YAxisModes>;
 export type LineStyle = $Values<typeof LineStyles>;
 export type FillStyle = $Values<typeof FillStyles>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export type YScaleType = $Values<typeof YScaleTypes>;
 export type XScaleType = $Values<typeof XScaleTypes>;
+export type AxisMode = $Values<typeof AxisModes>;
 export type XYCurveType = $Values<typeof XYCurveTypes>;
 export type IconPosition = $Values<typeof IconPositions>;
 export type ValueLabelMode = $Values<typeof ValueLabelModes>;
@@ -65,7 +63,6 @@ export type FittingFunction = $Values<typeof FittingFunctions>;
 export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 
 export interface AxesSettingsConfig {
-  x: boolean;
   yLeft: boolean;
   yRight: boolean;
 }
@@ -77,23 +74,41 @@ export interface AxisExtentConfig {
 }
 
 export interface AxisConfig {
-  title: string;
+  title?: string;
   hide?: boolean;
+  id?: string;
+  position?: Position;
+  labelColor?: string;
+  showOverlappingLabels?: boolean;
+  showDuplicates?: boolean;
+  labelsOrientation?: number;
+  truncate?: number;
+  showLabels?: boolean;
+  showTitle?: boolean;
+  showGridLines?: boolean;
+  extent?: AxisExtentConfigResult;
 }
 
-export interface ExtendedYConfig extends YConfig {
+export interface YAxisConfig extends AxisConfig {
+  mode?: AxisMode;
+  boundsMargin?: number;
+  scaleType?: YScaleType;
+}
+
+export interface ReferenceLineDecorationConfig extends DataDecorationConfig {
   icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+  position?: Position;
 }
 
-export interface YConfig {
+export interface DataDecorationConfig {
   forAccessor: string;
-  axisMode?: YAxisMode;
   color?: string;
+  axisId?: string;
 }
 
 export interface DataLayerArgs {
@@ -101,7 +116,7 @@ export interface DataLayerArgs {
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  splitAccessor?: string | ExpressionValueVisDimension;
+  splitAccessors?: Array<ExpressionValueVisDimension | string>;
   markSizeAccessor?: string | ExpressionValueVisDimension;
   lineWidth?: number;
   showPoints?: boolean;
@@ -110,8 +125,11 @@ export interface DataLayerArgs {
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;
+  isPercentage: boolean;
+  isStacked: boolean;
+  isHorizontal: boolean;
   palette: PaletteOutput;
-  yConfig?: YConfigResult[];
+  decorations?: DataDecorationConfigResult[];
 }
 
 export interface ValidLayer extends DataLayerConfigResult {
@@ -124,7 +142,7 @@ export interface ExtendedDataLayerArgs {
   seriesType: SeriesType;
   xAccessor?: string;
   hide?: boolean;
-  splitAccessor?: string;
+  splitAccessors?: string[];
   markSizeAccessor?: string;
   lineWidth?: number;
   showPoints?: boolean;
@@ -133,9 +151,12 @@ export interface ExtendedDataLayerArgs {
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;
+  isPercentage: boolean;
+  isStacked: boolean;
+  isHorizontal: boolean;
   palette: PaletteOutput;
   // palette will always be set on the expression
-  yConfig?: YConfigResult[];
+  decorations?: DataDecorationConfigResult[];
   table?: Datatable;
 }
 
@@ -185,21 +206,8 @@ export interface LegendConfig {
   legendSize?: LegendSize;
 }
 
-export interface LabelsOrientationConfig {
-  x: number;
-  yLeft: number;
-  yRight: number;
-}
-
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs extends DataLayerArgs {
-  xTitle: string;
-  yTitle: string;
-  yRightTitle: string;
-  yLeftExtent: AxisExtentConfigResult;
-  yRightExtent: AxisExtentConfigResult;
-  yLeftScale: YScaleType;
-  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -207,15 +215,13 @@ export interface XYArgs extends DataLayerArgs {
   referenceLines: ReferenceLineConfigResult[];
   annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
-  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
-  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
-  gridlinesVisibilitySettings?: GridlinesConfigResult;
-  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  yAxisConfigs?: YAxisConfigResult[];
+  xAxisConfig?: XAxisConfigResult;
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
@@ -227,28 +233,19 @@ export interface XYArgs extends DataLayerArgs {
 }
 
 export interface LayeredXYArgs {
-  xTitle: string;
-  yTitle: string;
-  yRightTitle: string;
-  yLeftExtent: AxisExtentConfigResult;
-  yRightExtent: AxisExtentConfigResult;
-  yLeftScale: YScaleType;
-  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
-  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
-  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
-  gridlinesVisibilitySettings?: GridlinesConfigResult;
-  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  yAxisConfigs?: YAxisConfigResult[];
+  xAxisConfig?: XAxisConfigResult;
   detailedTooltip?: boolean;
   addTimeMarker?: boolean;
   markSizeRatio?: number;
@@ -258,28 +255,19 @@ export interface LayeredXYArgs {
 }
 
 export interface XYProps {
-  xTitle: string;
-  yTitle: string;
-  yRightTitle: string;
-  yLeftExtent: AxisExtentConfigResult;
-  yRightExtent: AxisExtentConfigResult;
-  yLeftScale: YScaleType;
-  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
-  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
-  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
-  gridlinesVisibilitySettings?: GridlinesConfigResult;
-  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  yAxisConfigs?: YAxisConfigResult[];
+  xAxisConfig?: XAxisConfigResult;
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
@@ -309,7 +297,8 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor' | 'fill'> {
+export interface ReferenceLineArgs
+  extends Omit<ReferenceLineDecorationConfig, 'forAccessor' | 'fill'> {
   name?: string;
   value: number;
   fill: FillStyle;
@@ -319,7 +308,7 @@ export interface ReferenceLineLayerArgs {
   layerId?: string;
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: ExtendedYConfigResult[];
+  decorations?: ReferenceLineDecorationConfigResult[];
   table?: Datatable;
 }
 
@@ -335,15 +324,15 @@ export type XYExtendedLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedAnnotationLayerConfigResult;
 
-export interface ReferenceLineYConfig extends ReferenceLineArgs {
-  type: typeof REFERENCE_LINE_Y_CONFIG;
+export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {
+  type: typeof EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;
 }
 
 export interface ReferenceLineConfigResult {
   type: typeof REFERENCE_LINE;
   layerType: typeof LayerTypes.REFERENCELINE;
   lineLength: number;
-  yConfig: [ReferenceLineYConfig];
+  decorations: [ExtendedReferenceLineDecorationConfig];
 }
 
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
@@ -378,21 +367,18 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
   table: Datatable;
 };
 
-export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
-export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
-
-export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
-  type: typeof AXIS_TITLES_VISIBILITY_CONFIG;
+export type DataDecorationConfigResult = DataDecorationConfig & {
+  type: typeof DATA_DECORATION_CONFIG;
+};
+export type ReferenceLineDecorationConfigResult = ReferenceLineDecorationConfig & {
+  type: typeof REFERENCE_LINE_DECORATION_CONFIG;
 };
 
-export type LabelsOrientationConfigResult = LabelsOrientationConfig & {
-  type: typeof LABELS_ORIENTATION_CONFIG;
-};
+export type XAxisConfigResult = AxisConfig & { type: typeof X_AXIS_CONFIG };
+export type YAxisConfigResult = YAxisConfig & { type: typeof Y_AXIS_CONFIG };
 
 export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_CONFIG };
 export type AxisExtentConfigResult = AxisExtentConfig & { type: typeof AXIS_EXTENT_CONFIG };
-export type GridlinesConfigResult = AxesSettingsConfig & { type: typeof GRID_LINES_CONFIG };
-export type TickLabelsConfigResult = AxesSettingsConfig & { type: typeof TICK_LABELS_CONFIG };
 
 export type CommonXYLayerConfig = XYLayerConfig | XYExtendedLayerConfig;
 export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedDataLayerConfigResult;
@@ -438,12 +424,17 @@ export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
   Promise<ReferenceLineLayerConfigResult>
 >;
 
-export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;
-export type ExtendedYConfigFn = ExpressionFunctionDefinition<
-  typeof EXTENDED_Y_CONFIG,
+export type DataDecorationConfigFn = ExpressionFunctionDefinition<
+  typeof DATA_DECORATION_CONFIG,
   null,
-  ExtendedYConfig,
-  ExtendedYConfigResult
+  DataDecorationConfig,
+  DataDecorationConfigResult
+>;
+export type ReferenceLineDecorationConfigFn = ExpressionFunctionDefinition<
+  typeof REFERENCE_LINE_DECORATION_CONFIG,
+  null,
+  ReferenceLineDecorationConfig,
+  ReferenceLineDecorationConfigResult
 >;
 
 export type LegendConfigFn = ExpressionFunctionDefinition<
@@ -451,4 +442,18 @@ export type LegendConfigFn = ExpressionFunctionDefinition<
   null,
   LegendConfig,
   Promise<LegendConfigResult>
+>;
+
+export type XAxisConfigFn = ExpressionFunctionDefinition<
+  typeof X_AXIS_CONFIG,
+  null,
+  AxisConfig,
+  XAxisConfigResult
+>;
+
+export type YAxisConfigFn = ExpressionFunctionDefinition<
+  typeof Y_AXIS_CONFIG,
+  null,
+  YAxisConfig,
+  YAxisConfigResult
 >;

@@ -7,7 +7,8 @@
 
 import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { eqlExecutor } from './eql';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
@@ -15,7 +16,8 @@ import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schema
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { EqlRuleParams } from '../../schemas/rule_schemas';
+import type { EqlRuleParams } from '../../schemas/rule_schemas';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -47,6 +49,8 @@ describe('eql_executor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
         completeRule: eqlCompleteRule,
         tuple,
         exceptionItems,
@@ -57,6 +61,7 @@ describe('eql_executor', () => {
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
       });
       expect(response.warningMessages.length).toEqual(1);
     });

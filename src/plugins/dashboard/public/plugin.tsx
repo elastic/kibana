@@ -71,6 +71,7 @@ import {
   LibraryNotificationAction,
   CopyToDashboardAction,
   DashboardCapabilities,
+  DashboardLoadedEvent,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
@@ -138,6 +139,30 @@ export class DashboardPlugin
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
 
+  private registerEvents(analytics: CoreSetup['analytics']) {
+    analytics.registerEventType<DashboardLoadedEvent>({
+      eventType: 'dashboard-data-loaded',
+      schema: {
+        timeToData: {
+          type: 'long',
+          _meta: { description: 'Time all embeddables took to load data' },
+        },
+        timeToDone: {
+          type: 'long',
+          _meta: { description: 'Time all embeddables took to load data' },
+        },
+        status: {
+          type: 'keyword',
+          _meta: { description: 'Error  ok' },
+        },
+        numOfPanels: {
+          type: 'long',
+          _meta: { description: 'Number of panels loaded' },
+        },
+      },
+    });
+  }
+
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     {
@@ -172,6 +197,7 @@ export class DashboardPlugin
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,
         overlays: coreStart.overlays,
+        analytics: coreStart.analytics,
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,
@@ -285,6 +311,8 @@ export class DashboardPlugin
         });
       },
     };
+
+    this.registerEvents(core.analytics);
 
     core.application.register(app);
     urlForwarding.forwardApp(

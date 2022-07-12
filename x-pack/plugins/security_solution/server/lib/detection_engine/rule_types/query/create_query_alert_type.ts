@@ -9,9 +9,10 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import type { QueryRuleParams } from '../../schemas/rule_schemas';
+import { queryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
@@ -62,6 +63,8 @@ export const createQueryAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
+          inputIndex,
+          runtimeMappings,
           buildRuleMessage,
           bulkCreate,
           exceptionItems,
@@ -70,6 +73,8 @@ export const createQueryAlertType = (
           searchAfterSize,
           tuple,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -89,6 +94,10 @@ export const createQueryAlertType = (
         tuple,
         version,
         wrapHits,
+        inputIndex,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

@@ -5,78 +5,94 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiButtonGroup,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { XmattersActionConnector, XmattersAuthenticationType } from '../types';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { XmattersAuthenticationType } from '../types';
+import { ButtonGroupField } from '../../button_group_field';
+import * as i18n from './translations';
+import { PasswordField } from '../../password_field';
+import { HiddenField } from '../../hidden_field';
 
-const XmattersActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<XmattersActionConnector>
-> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { user, password, secretsUrl } = action.secrets;
-  const { configUrl, usesBasic } = action.config;
+const { emptyField, urlField } = fieldValidators;
+
+const isBasicAuth = (auth: { auth: string } | null | undefined) => {
+  if (auth == null) {
+    return true;
+  }
+
+  return auth.auth === XmattersAuthenticationType.Basic ? true : false;
+};
+
+const authenticationButtons = [
+  {
+    id: XmattersAuthenticationType.Basic,
+    label: i18n.BASIC_AUTH_BUTTON_LABEL,
+  },
+  {
+    id: XmattersAuthenticationType.URL,
+    label: i18n.URL_AUTH_BUTTON_LABEL,
+  },
+];
+
+const XmattersUrlField: React.FC<{ path: string; readOnly: boolean }> = ({ path, readOnly }) => {
+  return (
+    <UseField
+      path={path}
+      component={TextField}
+      config={{
+        label: i18n.URL_LABEL,
+        helpText: (
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.initiationUrlHelpText"
+            defaultMessage="Include the full xMatters url."
+          />
+        ),
+        validations: [
+          {
+            validator: urlField(i18n.URL_INVALID),
+          },
+        ],
+      }}
+      componentProps={{
+        euiFieldProps: { 'data-test-subj': path, readOnly },
+      }}
+    />
+  );
+};
+
+const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  readOnly,
+}) => {
+  const { setFieldValue, getFieldDefaultValue } = useFormContext();
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.usesBasic', '__internal__.auth'],
+  });
+
+  const usesBasicDefaultValue =
+    getFieldDefaultValue<boolean | undefined>('config.usesBasic') ?? true;
+
+  const selectedAuthDefaultValue = usesBasicDefaultValue
+    ? XmattersAuthenticationType.Basic
+    : XmattersAuthenticationType.URL;
+
+  const selectedAuth =
+    config != null && !config.usesBasic
+      ? XmattersAuthenticationType.URL
+      : XmattersAuthenticationType.Basic;
 
   useEffect(() => {
-    if (!action.id) {
-      editActionConfig('usesBasic', true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const isUrlInvalid: boolean = usesBasic
-    ? errors.configUrl !== undefined && errors.configUrl.length > 0 && configUrl !== undefined
-    : errors.secretsUrl !== undefined && errors.secretsUrl.length > 0 && secretsUrl !== undefined;
-  const isPasswordInvalid: boolean =
-    password !== undefined && errors.password !== undefined && errors.password.length > 0;
-  const isUserInvalid: boolean =
-    user !== undefined && errors.user !== undefined && errors.user.length > 0;
-
-  const authenticationButtons = [
-    {
-      id: XmattersAuthenticationType.Basic,
-      label: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.basicAuthLabel',
-        {
-          defaultMessage: 'Basic Authentication',
-        }
-      ),
-    },
-    {
-      id: XmattersAuthenticationType.URL,
-      label: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.urlAuthLabel',
-        {
-          defaultMessage: 'URL Authentication',
-        }
-      ),
-    },
-  ];
-
-  let initialState;
-  if (typeof usesBasic === 'undefined') {
-    initialState = XmattersAuthenticationType.Basic;
-  } else {
-    initialState = usesBasic ? XmattersAuthenticationType.Basic : XmattersAuthenticationType.URL;
-    if (usesBasic) {
-      editActionSecrets('secretsUrl', '');
-    } else {
-      editActionConfig('configUrl', '');
-    }
-  }
-  const [selectedAuth, setSelectedAuth] = useState(initialState);
+    setFieldValue('config.usesBasic', isBasicAuth(__internal__));
+  }, [__internal__, setFieldValue]);
 
   return (
     <>
@@ -89,92 +105,29 @@ const XmattersActionConnectorFields: React.FunctionComponent<
         </h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiFormRow fullWidth>
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.connectorSettingsLabel"
-            defaultMessage="Select the authentication method used when setting up the xMatters trigger."
-          />
-        </p>
-      </EuiFormRow>
-      <EuiSpacer size="l" />
-      <EuiButtonGroup
-        isFullWidth
-        buttonSize="m"
-        legend="Basic Authentication"
+      <ButtonGroupField
+        defaultValue={selectedAuthDefaultValue}
+        path={'__internal__.auth'}
+        label={i18n.BASIC_AUTH_LABEL}
+        legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
         options={authenticationButtons}
-        color="primary"
-        idSelected={selectedAuth}
-        onChange={(id: string) => {
-          if (id === XmattersAuthenticationType.Basic) {
-            setSelectedAuth(XmattersAuthenticationType.Basic);
-            editActionConfig('usesBasic', true);
-            editActionSecrets('secretsUrl', '');
-          } else {
-            setSelectedAuth(XmattersAuthenticationType.URL);
-            editActionConfig('usesBasic', false);
-            editActionConfig('configUrl', '');
-            editActionSecrets('user', '');
-            editActionSecrets('password', '');
-          }
-        }}
       />
+      <HiddenField path={'config.usesBasic'} config={{ defaultValue: true }} />
       <EuiSpacer size="m" />
       {selectedAuth === XmattersAuthenticationType.URL ? (
-        <>
-          {getEncryptedFieldNotifyLabel(
-            !action.id,
-            1,
-            action.isMissingSecrets ?? false,
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.reenterUrlAuthValuesLabel',
-              {
-                defaultMessage: 'URL is encrypted. Please reenter values for this field.',
-              }
-            )
-          )}
-        </>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <XmattersUrlField path="secrets.secretsUrl" readOnly={readOnly} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFormRow
-            id="url"
-            fullWidth
-            error={usesBasic ? errors.configUrl : errors.secretsUrl}
-            isInvalid={isUrlInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.connectorSettingsFieldLabel',
-              {
-                defaultMessage: 'Initiation URL',
-              }
-            )}
-            helpText={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.initiationUrlHelpText"
-                defaultMessage="Include the full xMatters url."
-              />
-            }
-          >
-            <EuiFieldText
-              name="url"
-              isInvalid={isUrlInvalid}
-              fullWidth
-              readOnly={readOnly}
-              value={usesBasic ? configUrl : secretsUrl}
-              data-test-subj="xmattersUrlText"
-              onChange={(e) => {
-                if (selectedAuth === XmattersAuthenticationType.Basic) {
-                  editActionConfig('configUrl', e.target.value);
-                } else {
-                  editActionSecrets('secretsUrl', e.target.value);
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       {selectedAuth === XmattersAuthenticationType.Basic ? (
         <>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <XmattersUrlField path="config.configUrl" readOnly={readOnly} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiTitle size="xxs">
             <h4>
@@ -186,83 +139,38 @@ const XmattersActionConnectorFields: React.FunctionComponent<
             </h4>
           </EuiTitle>
           <EuiSpacer size="xs" />
-          {getEncryptedFieldNotifyLabel(
-            !action.id,
-            2,
-            action.isMissingSecrets ?? false,
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.reenterBasicAuthValuesLabel',
-              {
-                defaultMessage:
-                  'User and password are encrypted. Please reenter values for these fields.',
-              }
-            )
-          )}
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiFormRow
-                id="xmattersUser"
-                fullWidth
-                error={errors.user}
-                isInvalid={isUserInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.userTextFieldLabel',
-                  {
-                    defaultMessage: 'Username',
-                  }
-                )}
-              >
-                <EuiFieldText
-                  fullWidth
-                  isInvalid={isUserInvalid}
-                  name="user"
-                  readOnly={readOnly}
-                  value={user || ''}
-                  data-test-subj="xmattersUserInput"
-                  onChange={(e) => {
-                    editActionSecrets('user', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!user) {
-                      editActionSecrets('user', '');
-                    }
-                  }}
-                />
-              </EuiFormRow>
+              <UseField
+                path="secrets.user"
+                component={TextField}
+                config={{
+                  label: i18n.USERNAME_LABEL,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.USERNAME_INVALID),
+                    },
+                  ],
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    disabled: readOnly,
+                    'data-test-subj': 'xmattersUserInput',
+                    readOnly,
+                  },
+                }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow
-                id="xmattersPassword"
-                fullWidth
-                error={errors.password}
-                isInvalid={isPasswordInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.passwordTextFieldLabel',
-                  {
-                    defaultMessage: 'Password',
-                  }
-                )}
-              >
-                <EuiFieldPassword
-                  fullWidth
-                  name="password"
-                  readOnly={readOnly}
-                  isInvalid={isPasswordInvalid}
-                  value={password || ''}
-                  data-test-subj="xmattersPasswordInput"
-                  onChange={(e) => {
-                    editActionSecrets('password', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!password) {
-                      editActionSecrets('password', '');
-                    }
-                  }}
-                />
-              </EuiFormRow>
+              <PasswordField
+                path="secrets.password"
+                label={i18n.PASSWORD_LABEL}
+                readOnly={readOnly}
+                data-test-subj="xmattersPasswordInput"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

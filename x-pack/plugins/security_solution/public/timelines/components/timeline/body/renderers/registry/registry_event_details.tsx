@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import { Details, isNillEmptyOrNotFinite } from '../helpers';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 
 import { RegistryEventDetailsLine } from './registry_event_details_line';
 

@@ -7,7 +7,11 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  FieldFormat,
+  FormatFactory,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   getAccessorByDimension,
@@ -17,7 +21,6 @@ import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   ReferenceLineLayerConfig,
-  SeriesType,
 } from '../../common/types';
 import { GroupsConfiguration } from './axes_configuration';
 import { getFormat } from './format';
@@ -35,11 +38,15 @@ interface SplitAccessors {
 }
 
 export type AccessorsFieldFormats = Record<string, SerializedFieldFormat | undefined>;
+export type SplitAccessorsFieldFormats = Record<
+  string,
+  { format: SerializedFieldFormat | undefined; formatter: FieldFormat }
+>;
 
 export interface LayerFieldFormats {
   xAccessors: AccessorsFieldFormats;
   yAccessors: AccessorsFieldFormats;
-  splitSeriesAccessors: AccessorsFieldFormats;
+  splitSeriesAccessors: SplitAccessorsFieldFormats;
   splitColumnAccessors: AccessorsFieldFormats;
   splitRowAccessors: AccessorsFieldFormats;
 }
@@ -64,7 +71,7 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
       let table: Datatable | undefined;
       let accessors: Array<ExpressionValueVisDimension | string> = [];
       let xAccessor: undefined | string | number;
-      let splitAccessor: undefined | string | number;
+      let splitAccessors: string[] = [];
 
       if (isDataLayer(layer) || isReferenceLayer(layer)) {
         table = layer.table;
@@ -74,22 +81,24 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
       if (isDataLayer(layer)) {
         xAccessor =
           layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
-        splitAccessor =
-          layer.splitAccessor &&
-          table &&
-          getAccessorByDimension(layer.splitAccessor, table.columns);
+        splitAccessors = table
+          ? layer.splitAccessors?.map((splitAccessor) =>
+              getAccessorByDimension(splitAccessor, table!.columns)
+            ) || []
+          : [];
       }
 
       return !(
         !accessors.length ||
         !table ||
         table.rows.length === 0 ||
-        (xAccessor &&
-          table.rows.every((row) => xAccessor && typeof row[xAccessor] === 'undefined')) ||
+        (xAccessor && table.rows.every((row) => xAccessor && row[xAccessor] === undefined)) ||
         // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
         (!xAccessor &&
-          splitAccessor &&
-          table.rows.every((row) => splitAccessor && typeof row[splitAccessor] === 'undefined'))
+          splitAccessors.length &&
+          table.rows.every((row) =>
+            splitAccessors.every((splitAccessor) => row[splitAccessor] === undefined)
+          ))
       );
     }
   );
@@ -110,7 +119,7 @@ const getAccessorWithFieldFormat = (
 const getYAccessorWithFieldFormat = (
   dimension: string | ExpressionValueVisDimension | undefined,
   columns: Datatable['columns'],
-  seriesType: SeriesType
+  isPercentage: boolean
 ) => {
   if (!dimension) {
     return {};
@@ -118,7 +127,7 @@ const getYAccessorWithFieldFormat = (
 
   const accessor = getAccessorByDimension(dimension, columns);
   let format = getFormat(columns, dimension) ?? { id: 'number' };
-  if (format?.id !== 'percent' && seriesType.includes('percentage')) {
+  if (format?.id !== 'percent' && isPercentage) {
     format = { id: 'percent', params: { pattern: '0.[00]%' } };
   }
 
@@ -126,20 +135,32 @@ const getYAccessorWithFieldFormat = (
 };
 
 export const getLayerFormats = (
-  { xAccessor, accessors, splitAccessor, table, seriesType }: CommonXYDataLayerConfig,
-  { splitColumnAccessor, splitRowAccessor }: SplitAccessors
+  { xAccessor, accessors, splitAccessors = [], table, isPercentage }: CommonXYDataLayerConfig,
+  { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
+  formatFactory: FormatFactory
 ): LayerFieldFormats => {
   const yAccessors: Array<string | ExpressionValueVisDimension> = accessors;
+  const splitColumnAccessors: Array<string | ExpressionValueVisDimension> = splitAccessors;
   return {
     xAccessors: getAccessorWithFieldFormat(xAccessor, table.columns),
     yAccessors: yAccessors.reduce(
       (formatters, a) => ({
         ...formatters,
-        ...getYAccessorWithFieldFormat(a, table.columns, seriesType),
+        ...getYAccessorWithFieldFormat(a, table.columns, isPercentage),
       }),
       {}
     ),
-    splitSeriesAccessors: getAccessorWithFieldFormat(splitAccessor, table.columns),
+    splitSeriesAccessors: splitColumnAccessors?.reduce((formatters, splitAccessor) => {
+      const formatObj = getAccessorWithFieldFormat(splitAccessor, table.columns);
+      const accessor = Object.keys(formatObj)[0];
+      return {
+        ...formatters,
+        [accessor]: {
+          format: formatObj[accessor],
+          formatter: formatFactory(formatObj[accessor]),
+        },
+      };
+    }, {}),
     splitColumnAccessors: getAccessorWithFieldFormat(splitColumnAccessor, table.columns),
     splitRowAccessors: getAccessorWithFieldFormat(splitRowAccessor, table.columns),
   };
@@ -147,12 +168,13 @@ export const getLayerFormats = (
 
 export const getLayersFormats = (
   layers: CommonXYDataLayerConfig[],
-  splitAccessors: SplitAccessors
+  splitAccessors: SplitAccessors,
+  formatFactory: FormatFactory
 ): LayersFieldFormats =>
   layers.reduce<LayersFieldFormats>(
     (formatters, layer) => ({
       ...formatters,
-      [layer.layerId]: getLayerFormats(layer, splitAccessors),
+      [layer.layerId]: getLayerFormats(layer, splitAccessors, formatFactory),
     }),
     {}
   );
@@ -160,28 +182,21 @@ export const getLayersFormats = (
 const getTitleForYAccessor = (
   layerId: string,
   yAccessor: string | ExpressionValueVisDimension,
-  { yTitle, yRightTitle }: Omit<CustomTitles, 'xTitle'>,
   groups: GroupsConfiguration,
   columns: Datatable['columns']
 ) => {
   const column = getColumnByAccessor(yAccessor, columns);
-  const isRight = groups.some((group) =>
-    group.series.some(
-      ({ accessor, layer }) =>
-        accessor === yAccessor && layer === layerId && group.groupId === 'right'
-    )
+  const axisGroup = groups.find((group) =>
+    group.series.some(({ accessor, layer }) => accessor === yAccessor && layer === layerId)
   );
-  if (isRight) {
-    return yRightTitle || column!.name;
-  }
 
-  return yTitle || column!.name;
+  return axisGroup?.title || column!.name;
 };
 
 export const getLayerTitles = (
-  { xAccessor, accessors, splitAccessor, table, layerId }: CommonXYDataLayerConfig,
+  { xAccessor, accessors, splitAccessors = [], table, layerId }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
-  { xTitle, yTitle, yRightTitle }: CustomTitles,
+  { xTitle }: CustomTitles,
   groups: GroupsConfiguration
 ): LayerAccessorsTitles => {
   const mapTitle = (dimension?: string | ExpressionValueVisDimension) => {
@@ -194,17 +209,12 @@ export const getLayerTitles = (
   };
 
   const getYTitle = (accessor: string) => ({
-    [accessor]: getTitleForYAccessor(
-      layerId,
-      accessor,
-      { yTitle, yRightTitle },
-      groups,
-      table.columns
-    ),
+    [accessor]: getTitleForYAccessor(layerId, accessor, groups, table.columns),
   });
 
   const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
   const yColumnIds = accessors.map((a) => a && getAccessorByDimension(a, table.columns));
+  const splitColumnAccessors: Array<string | ExpressionValueVisDimension> = splitAccessors;
 
   return {
     xTitles: xTitle && xColumnId ? { [xColumnId]: xTitle } : mapTitle(xColumnId),
@@ -212,7 +222,13 @@ export const getLayerTitles = (
       (titles, yAccessor) => ({ ...titles, ...(yAccessor ? getYTitle(yAccessor) : {}) }),
       {}
     ),
-    splitSeriesTitles: mapTitle(splitAccessor),
+    splitSeriesTitles: splitColumnAccessors.reduce(
+      (titles, splitAccessor) => ({
+        ...titles,
+        ...(splitAccessor ? mapTitle(splitAccessor) : {}),
+      }),
+      {}
+    ),
     splitColumnTitles: mapTitle(splitColumnAccessor),
     splitRowTitles: mapTitle(splitRowAccessor),
   };

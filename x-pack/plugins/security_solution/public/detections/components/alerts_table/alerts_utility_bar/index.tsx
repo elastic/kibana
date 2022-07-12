@@ -12,7 +12,7 @@ import numeral from '@elastic/numeral';
 import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Link } from '../../../../common/components/link_icon';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import {
@@ -25,8 +25,8 @@ import {
 } from '../../../../common/components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
-import { UpdateAlertsStatus } from '../types';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
+import type { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../alerts_filter_group';
 
 export interface AlertsUtilityBarProps {
@@ -51,7 +51,7 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const AdditionalFiltersItem = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const BuildingBlockContainer = styled(AdditionalFiltersItem)`

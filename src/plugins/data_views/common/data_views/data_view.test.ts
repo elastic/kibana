@@ -44,7 +44,7 @@ const runtimeField = {
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 // helper function to create index patterns
-function create(id: string) {
+function create(id: string, spec?: object) {
   const {
     type,
     version,
@@ -61,6 +61,7 @@ function create(id: string) {
       title,
       name,
       runtimeFieldMap,
+      ...spec,
     },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -391,6 +392,10 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    });
+
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
@@ -407,6 +412,14 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+    });
+
+    test('creating from spec does not contain references to spec', () => {
+      const sourceFilters = ['test'];
+      const spec = { sourceFilters };
+      const dataView1 = create('test1', spec);
+      const dataView2 = create('test2', spec);
+      expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
     });
   });
 });

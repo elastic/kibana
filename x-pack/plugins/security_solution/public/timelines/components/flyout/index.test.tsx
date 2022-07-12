@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
-import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '../../../common/mock/react_beautiful_dnd';
 
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { createStore, State } from '../../../common/store';
 import * as timelineActions from '../../store/timeline/actions';
 
 import { Flyout } from '.';
@@ -38,8 +31,6 @@ jest.mock('../timeline', () => ({
 }));
 
 describe('Flyout', () => {
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
   const props = {
     onAppLeave: jest.fn(),
     timelineId: TimelineId.test,
@@ -51,54 +42,32 @@ describe('Flyout', () => {
 
   describe('rendering', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
+      const { asFragment } = render(
         <TestProviders>
           <Flyout {...props} />
         </TestProviders>
       );
-      expect(wrapper.find('Flyout')).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders the default flyout state as a bottom bar', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <Flyout {...props} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="flyoutBottomBar"]').first().text()).toContain(
-        'Untitled timeline'
-      );
-    });
-
-    test('it does NOT render the fly out bottom bar when its state is set to flyout is true', () => {
-      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(
-        stateShowIsTrue,
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
-
-      const wrapper = mount(
-        <TestProviders store={storeShowIsTrue}>
-          <Flyout {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
-        false
-      );
+      expect(screen.getByText('Untitled timeline')).toBeInTheDocument();
     });
 
     test('should call the onOpen when the mouse is clicked for rendering', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <Flyout {...props} />
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');
+      userEvent.click(screen.getByTestId('flyoutOverlay'));
 
       expect(mockDispatch).toBeCalledWith(timelineActions.showTimeline({ id: 'test', show: true }));
     });

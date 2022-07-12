@@ -21,7 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
-  policyResponseInFleetEnabled: false,
+  policyResponseInFleetEnabled: true,
   groupedNavigation: true,
 
   /**
@@ -38,6 +38,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Endpoint response actions console in various areas of the app
    */
   responseActionsConsoleEnabled: false,
+  /**
+   * Enables the cloud security posture navigation inside the security solution
+   */
+  cloudSecurityPostureNavigation: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ListClient } from '@kbn/lists-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
-import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { BuildRuleMessage } from '../rule_messages';
+import type {
+  CompleteRule,
+  SavedQueryRuleParams,
+  QueryRuleParams,
+} from '../../schemas/rule_schemas';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 export const queryExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   listClient,
@@ -38,8 +45,12 @@ export const queryExecutor = async ({
   buildRuleMessage,
   bulkCreate,
   wrapHits,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
-  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -52,17 +63,12 @@ export const queryExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
@@ -90,6 +96,9 @@ export const queryExecutor = async ({
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
   });
 };

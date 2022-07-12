@@ -12,7 +12,6 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../constants';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -103,6 +102,7 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
+      getCanSaveAdvancedSettings: () => Promise.resolve(true),
     });
 
     indexPatternsNoAccess = new DataViewsService({
@@ -114,6 +114,7 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
+      getCanSaveAdvancedSettings: () => Promise.resolve(false),
     });
   });
 
@@ -139,6 +140,14 @@ describe('IndexPatterns', () => {
 
     expect(await indexPatternPromise).toBe(await indexPatterns.get(id));
     SOClientGetDelay = 0;
+  });
+
+  test('does cache ad-hoc data views', async () => {
+    const id = '1';
+    const dataView = await indexPatterns.create({ id });
+    const gettedDataView = await indexPatterns.get(id);
+
+    expect(dataView).toBe(gettedDataView);
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
@@ -235,6 +244,31 @@ describe('IndexPatterns', () => {
 
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
+    expect(indexPattern.id).toBeDefined();
+    expect(indexPattern.isPersisted()).toBe(false);
+  });
+
+  test('createSavedObject', async () => {
+    const title = 'kibana-*';
+    const version = '8.4.0';
+    const dataView = await indexPatterns.create({ title }, true);
+
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      id: dataView.id,
+      version,
+      attributes: {
+        ...savedObject.attributes,
+        title: dataView.title,
+      },
+    });
+
+    const indexPattern = await indexPatterns.createSavedObject(dataView);
+    expect(indexPattern).toBeInstanceOf(DataView);
+    expect(indexPattern.id).toBe(dataView.id);
+    expect(indexPattern.title).toBe(title);
+    expect(indexPattern.isPersisted()).toBe(true);
   });
 
   test('find', async () => {
@@ -378,40 +412,30 @@ describe('IndexPatterns', () => {
       expect(uiSettings.set).toBeCalledTimes(0);
     });
 
-    test('when setting default it prefers user created data views', async () => {
+    test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
       savedObjectsClient.find = jest.fn().mockResolvedValue([
         {
           id: 'id1',
           version: 'a',
-          attributes: { title: DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
+          attributes: { title: '1' },
         },
         {
           id: 'id2',
           version: 'a',
-          attributes: { title: DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
-        },
-        {
-          id: 'id3',
-          version: 'a',
-          attributes: { title: 'user-data-view' },
+          attributes: { title: '2' },
         },
       ]);
 
       savedObjectsClient.get = jest
         .fn()
         .mockImplementation((type: string, id: string) =>
-          Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
+          Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
         );
 
-      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
+      const defaultDataViewResult = await indexPatternsNoAccess.getDefaultDataView();
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
-      expect(defaultDataViewResult?.id).toBe('id3');
-
-      // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
-      expect(uiSettings.remove).toBeCalledTimes(0);
-      expect(uiSettings.set).toBeCalledTimes(1);
+      expect(defaultDataViewResult?.id).toBe('id1');
+      expect(uiSettings.set).toBeCalledTimes(0);
     });
   });
 });

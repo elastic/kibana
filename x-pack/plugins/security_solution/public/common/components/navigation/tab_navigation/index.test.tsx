@@ -11,10 +11,11 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
-import { RouteSpyState } from '../../../utils/route/types';
+import type { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from '.';
-import { TabNavigationProps } from './types';
+import type { TabNavigationProps } from './types';
+import { SecurityPageName } from '../../../../app/types';
 
 jest.mock('../../link_to');
 jest.mock('../../../lib/kibana/kibana_react', () => {
@@ -54,7 +55,7 @@ describe('Table Navigation', () => {
   const mockRiskyHostEnabled = true;
 
   const mockProps: TabNavigationProps & RouteSpyState = {
-    pageName: 'hosts',
+    pageName: SecurityPageName.hosts,
     pathName: '/hosts',
     detailName: hostName,
     search: '',
@@ -87,9 +88,6 @@ describe('Table Navigation', () => {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
-    [CONSTANTS.filters]: [],
-    [CONSTANTS.sourcerer]: {},
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EventCountOptions, EventsOptions, EventDoc } from './types';
+import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
@@ -25,7 +25,9 @@ export const getEventList = async ({
   buildRuleMessage,
   logger,
   tuple,
-  timestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
+  runtimeMappings,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -50,9 +52,11 @@ export const getEventList = async ({
     logger,
     filter,
     pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
-    timestampOverride,
+    primaryTimestamp,
+    secondaryTimestamp,
     sortOrder: 'desc',
     trackTotalHits: false,
+    runtimeMappings,
   });
 
   logger.debug(
@@ -69,7 +73,8 @@ export const getEventCount = async ({
   index,
   exceptionItems,
   tuple,
-  timestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: EventCountOptions): Promise<number> => {
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
@@ -78,8 +83,10 @@ export const getEventCount = async ({
     to: tuple.to.toISOString(),
     filter,
     size: 0,
-    timestampOverride,
+    primaryTimestamp,
+    secondaryTimestamp,
     searchAfterSortIds: undefined,
+    runtimeMappings: undefined,
   }).body.query;
   const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },

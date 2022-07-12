@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -34,7 +34,7 @@ import {
   ENABLE_CCS_READ_WARNING_SETTING,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../common/constants';
-import { ExperimentalFeatures } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
@@ -150,18 +150,19 @@ export const initUiSettings = (
       ? {
           [ENABLE_GROUPED_NAVIGATION]: {
             name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
-              defaultMessage: 'Enable grouped navigation',
+              defaultMessage: 'New streamlined navigation',
             }),
             value: false,
             type: 'boolean',
             description: i18n.translate(
               'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
               {
-                defaultMessage: '<p>Enables the grouped side navigation for Security Solution</p>',
+                defaultMessage:
+                  '<p>Improve your experience with the new navigation organized and optimized around the most important workflows.</p>',
               }
             ),
             category: [APP_ID],
-            requiresPageReload: true,
+            requiresPageReload: false,
             schema: schema.boolean(),
           },
         }

@@ -73,6 +73,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'cases')}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'internalAlertsTable',
           'ruleTagFilter',
@@ -118,6 +119,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           ],
         },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         discover_alert: {
           kibana: [
             {
@@ -126,6 +137,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 stackAlerts: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
+                indexPatterns: ['all'],
               },
               spaces: ['*'],
             },

@@ -7,11 +7,4 @@
  */
 
 export { ContextService } from './context_service';
-export type { InternalContextPreboot, ContextSetup } from './context_service';
-export type {
-  IContextContainer,
-  IContextProvider,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-} from './container';
+export type { InternalContextPreboot, InternalContextSetup } from './context_service';
