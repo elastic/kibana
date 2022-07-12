@@ -31,10 +31,15 @@ import {
 } from '@kbn/core-execution-context-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
+import {
+  HttpService,
+  config as httpConfig,
+  cspConfig,
+  externalUrlConfig,
+} from '@kbn/core-http-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { UiSettingsService } from './ui_settings';
@@ -46,7 +51,6 @@ import { CapabilitiesService } from './capabilities';
 import { StatusService } from './status/status_service';
 
 import { config as elasticsearchConfig } from './elasticsearch';
-import { config as httpConfig, cspConfig, externalUrlConfig } from './http';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
