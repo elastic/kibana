@@ -75,7 +75,11 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
       panelPaddingSize="none"
       button={
         props.isExternallyManaged ? (
-          <EuiToolTip title={'This is externally managed integration policy.'}>
+          <EuiToolTip
+            title={i18n.translate('xpack.fleet.externallyManagedLabel', {
+              defaultMessage: 'This is externally managed integration policy.',
+            })}
+          >
             {actionButton}
           </EuiToolTip>
         ) : (
