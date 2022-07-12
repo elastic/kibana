@@ -521,3 +521,47 @@ test('buffers log records for appenders created during config upgrade', async ()
   await upgradePromise;
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to a new context');
 });
+
+test('setGlobalMeta() applies meta to new and existing loggers', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const existingLogger = system.get('some-existing-context');
+  system.setGlobalMeta('a.b.c', true);
+  const newLogger = system.get('some-new-context');
+
+  existingLogger.info('You know, just for your info.');
+  newLogger.info('You know, just for your info.');
+  // @ts-expect-error Custom ECS field
+  existingLogger.warn('You have been warned.', { someMeta: 'goes here' });
+  // @ts-expect-error Custom ECS field
+  newLogger.warn('You have been warned.', { someMeta: 'goes here' });
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(4);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    log: { logger: 'some-existing-context' },
+    message: 'You know, just for your info.',
+    a: { b: { c: true } },
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchObject({
+    log: { logger: 'some-new-context' },
+    message: 'You know, just for your info.',
+    a: { b: { c: true } },
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[2][0])).toMatchObject({
+    log: { logger: 'some-existing-context' },
+    message: 'You have been warned.',
+    someMeta: 'goes here',
+    a: { b: { c: true } },
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[3][0])).toMatchObject({
+    log: { logger: 'some-new-context' },
+    message: 'You have been warned.',
+    someMeta: 'goes here',
+    a: { b: { c: true } },
+  });
+});
