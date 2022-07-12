@@ -88,3 +88,129 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
   expect(newInternalLogger.trace).toHaveBeenCalledTimes(1);
   expect(newInternalLogger.trace).toHaveBeenCalledWith('trace-message', undefined);
 });
+
+describe('global meta', () => {
+  let internalLogger: Logger;
+
+  beforeEach(() => {
+    internalLogger = {
+      debug: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+      info: jest.fn(),
+      log: jest.fn(),
+      trace: jest.fn(),
+      warn: jest.fn(),
+      get: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    Object.values(internalLogger).forEach((val) => (val as jest.Mock<() => void>).mockReset());
+  });
+
+  ['trace', 'debug', 'info', 'warn', 'error', 'fatal'].forEach((method) => {
+    test(`inserts global meta in ${method} entries`, () => {
+      const adapter = new LoggerAdapter(internalLogger, new Map([['a.b.c', `${method}: d`]]));
+
+      // @ts-expect-error Custom ECS field
+      adapter[method](`new ${method} message`, { hello: 'world' });
+      expect(internalLogger[method as keyof Logger]).toHaveBeenCalledTimes(1);
+      expect(internalLogger[method as keyof Logger]).toHaveBeenCalledWith(`new ${method} message`, {
+        hello: 'world',
+        a: { b: { c: `${method}: d` } },
+      });
+
+      adapter.setGlobalMeta(new Map([['e', true]]));
+
+      // @ts-expect-error Custom ECS field
+      adapter[method](`another new ${method} message`, { hello: 'world' });
+      expect(internalLogger[method as keyof Logger]).toHaveBeenCalledTimes(2);
+      expect(internalLogger[method as keyof Logger]).toHaveBeenCalledWith(
+        `another new ${method} message`,
+        {
+          hello: 'world',
+          e: true,
+        }
+      );
+    });
+  });
+
+  test('inserts global meta in log entries', () => {
+    const adapter = new LoggerAdapter(internalLogger, new Map([['a.b.c', 'd']]));
+
+    adapter.log({
+      message: 'message',
+      meta: {
+        // @ts-expect-error Custom ECS field
+        hello: 'world',
+      },
+    });
+    expect(internalLogger.log).toHaveBeenCalledTimes(1);
+    expect(internalLogger.log).toHaveBeenCalledWith({
+      message: 'message',
+      meta: {
+        hello: 'world',
+        a: { b: { c: 'd' } },
+      },
+    });
+
+    adapter.setGlobalMeta(new Map([['e', true]]));
+
+    adapter.log({
+      message: 'another message',
+      meta: {
+        // @ts-expect-error Custom ECS field
+        hello: 'world',
+      },
+    });
+    expect(internalLogger.log).toHaveBeenCalledTimes(2);
+    expect(internalLogger.log).toHaveBeenCalledWith({
+      message: 'another message',
+      meta: {
+        hello: 'world',
+        e: true,
+      },
+    });
+  });
+
+  test('does not overwrite user-provided meta with global meta if the path already exists', () => {
+    const adapter = new LoggerAdapter(internalLogger, new Map([['hello', 'there']]));
+
+    // @ts-expect-error Custom ECS field
+    adapter.info('message', { hello: 'world' });
+    expect(internalLogger.info).toHaveBeenCalledTimes(1);
+    expect(internalLogger.info).toHaveBeenCalledWith('message', {
+      hello: 'world',
+    });
+  });
+
+  test('does nothing if no global meta has been set', () => {
+    const adapter = new LoggerAdapter(internalLogger);
+
+    // @ts-expect-error Custom ECS field
+    adapter.info('message', { hello: 'world' });
+    expect(internalLogger.info).toHaveBeenCalledTimes(1);
+    expect(internalLogger.info).toHaveBeenCalledWith('message', {
+      hello: 'world',
+    });
+  });
+
+  test('adds global meta even if no user-provided meta exists', () => {
+    const adapter = new LoggerAdapter(internalLogger, new Map([['hello', 'there']]));
+
+    adapter.info('message');
+    expect(internalLogger.info).toHaveBeenCalledTimes(1);
+    expect(internalLogger.info).toHaveBeenCalledWith('message', {
+      hello: 'there',
+    });
+  });
+
+  test('does nothing if no global meta or user-provided meta has been set', () => {
+    const adapter = new LoggerAdapter(internalLogger);
+
+    adapter.info('message');
+    expect(internalLogger.info).toHaveBeenCalledTimes(1);
+    expect(internalLogger.info).toHaveBeenCalledWith('message', undefined);
+  });
+});
