@@ -15,7 +15,7 @@ import { templateActionVariable } from '../lib';
 const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningTitle',
   {
-    defaultMessage: 'Incomplete connector',
+    defaultMessage: 'Unable to share case comments',
   }
 );
 
@@ -23,7 +23,7 @@ const CREATE_COMMENT_WARNING_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningDesc',
   {
     defaultMessage:
-      'In order to update comments in external service, the connector needs to be updated with Create Comment URL and JSON',
+      'Configure the Create Comment URL and Create Comment Objects fields for the connector to share comments externally.',
   }
 );
 interface Props {

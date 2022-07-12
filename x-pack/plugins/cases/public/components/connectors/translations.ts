@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
   'xpack.cases.connectors.card.createCommentWarningTitle',
   {
-    defaultMessage: 'Incomplete connector',
+    defaultMessage: 'Unable to share case comments',
   }
 );
 
@@ -18,5 +18,5 @@ export const CREATE_COMMENT_WARNING_DESC = (connectorName: string) =>
   i18n.translate('xpack.cases.connectors.card.createCommentWarningDesc', {
     values: { connectorName },
     defaultMessage:
-      'In order to update comments in external service, the {connectorName} connector needs to be updated with Create Comment URL and JSON',
+      'Configure the Create Comment URL and Create Comment Objects fields for the {connectorName} connector to share comments externally.',
   });
