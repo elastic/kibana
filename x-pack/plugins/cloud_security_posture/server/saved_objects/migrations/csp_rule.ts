@@ -11,7 +11,6 @@ import {
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { CspRuleV830, CspRuleV840 } from '../../../common/schemas/csp_rule';
-import { CIS_INTEGRATION_INPUTS_MAP } from '../../../common/constants';
 
 function migrateCspRuleMetadata(
   doc: SavedObjectUnsanitizedDoc<CspRuleV830>,
@@ -29,7 +28,7 @@ function migrateCspRuleMetadata(
       policy_id,
       metadata: {
         ...metadata,
-        benchmark: { ...benchmark, id: CIS_INTEGRATION_INPUTS_MAP['cloudbeat/vanilla'] },
+        benchmark: { ...benchmark, id: 'cis_k8s' },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,

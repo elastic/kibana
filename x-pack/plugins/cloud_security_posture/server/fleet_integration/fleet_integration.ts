@@ -24,25 +24,23 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { CspRule, CspRuleTemplate } from '../../common/schemas';
+import type { CspRule, CspRuleMetadata, CspRuleTemplate } from '../../common/schemas';
 
-type InputsMap = typeof CIS_INTEGRATION_INPUTS_MAP;
-type Input = {
-  [K in keyof InputsMap]: { key: K; value: InputsMap[K] };
-}[keyof InputsMap];
+type CloudbeatInputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
+type BenchmarkId = CspRuleMetadata['benchmark']['id'];
 
-const getBenchmarkTypeFilter = (type: Input['value']): string =>
+const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
 
 const isEnabledBenchmarkInputType = (input: PackagePolicyInput) =>
   input.type in CIS_INTEGRATION_INPUTS_MAP && !!input.enabled;
 
-export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): Input['value'] => {
+export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): BenchmarkId => {
   const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
 
   // Use the only enabled input
   if (enabledInputs.length === 1)
-    return CIS_INTEGRATION_INPUTS_MAP[enabledInputs[0].type as Input['key']];
+    return CIS_INTEGRATION_INPUTS_MAP[enabledInputs[0].type as CloudbeatInputType];
 
   // Use the the default input for multiple/none selected
   return CIS_INTEGRATION_INPUTS_MAP[CLOUDBEAT_VANILLA];
