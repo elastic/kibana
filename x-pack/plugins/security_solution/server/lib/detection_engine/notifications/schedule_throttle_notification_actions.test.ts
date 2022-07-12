@@ -50,6 +50,7 @@ describe('schedule_throttle_notification_actions', () => {
       severityMapping: [],
       threat: [],
       timestampOverride: undefined,
+      timestampOverrideFallbackDisabled: undefined,
       dataViewId: undefined,
       to: 'now',
       type: 'query',
