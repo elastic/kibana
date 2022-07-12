@@ -19,7 +19,7 @@ export const isType = (...types: string[]) => {
 };
 
 const isRegex = (text: string) => {
-  const specialCharacters = /[`@#&*()+\=\[\]{}'"\\|.<>\/?~]/;
+  const specialCharacters = /[`@#&*()+\=\[\]{}"\\|.<>\/?~]/;
   return specialCharacters.test(text);
 };
 

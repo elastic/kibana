@@ -34,6 +34,7 @@ import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { IncludeExcludeRow } from './include_exclude_options';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -2025,6 +2026,53 @@ describe('terms', () => {
         const switchWithAccuracyDisabled = getSwitchComponent(false, true);
         expect(switchWithAccuracyDisabled.prop('disabled')).toEqual(true);
         expect(switchWithAccuracyDisabled.prop('checked')).toEqual(false);
+      });
+    });
+
+    describe('include/exclude', () => {
+      const renderWithIncludeExclude = (dataType: string, hasSecondaryFields: boolean) =>
+        shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            paramEditorUpdater={() => {}}
+            columnId="col1"
+            currentColumn={
+              {
+                ...layer.columns.col1,
+                dataType,
+                params: {
+                  ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+                  include: ['test'],
+                  exclude: ['pattern.*'],
+                  ...(hasSecondaryFields && { secondaryFields: ['field1'] }),
+                },
+              } as TermsIndexPatternColumn
+            }
+          />
+        );
+
+      const getComboboxes = (dataType: string, hasSecondaryFields: boolean) =>
+        renderWithIncludeExclude(dataType, hasSecondaryFields).find(IncludeExcludeRow);
+
+      it('should be present for a string dataType and not multifields', () => {
+        const combobox = getComboboxes('string', false);
+        expect(combobox.length).toBe(1);
+      });
+
+      it('should be present for a number dataType and not multifields', () => {
+        const combobox = getComboboxes('number', false);
+        expect(combobox.length).toBe(1);
+      });
+
+      it('should not be present for a boolean dataType and not multifields', () => {
+        const combobox = getComboboxes('boolean', false);
+        expect(combobox.length).toBe(0);
+      });
+
+      it('should not be present for multifields', () => {
+        const combobox = getComboboxes('string', true);
+        expect(combobox.length).toBe(0);
       });
     });
 

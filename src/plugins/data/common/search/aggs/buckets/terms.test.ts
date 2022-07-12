@@ -196,6 +196,66 @@ describe('Terms Agg', () => {
       expect(params.exclude).toBe('exclude value');
     });
 
+    test('accepts array of strings from string field type and writes this value', () => {
+      const aggConfigs = getAggConfigs({
+        include: ['include1', 'include2'],
+        exclude: ['exclude1'],
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toStrictEqual(['include1', 'include2']);
+      expect(params.exclude).toStrictEqual(['exclude1']);
+    });
+
+    test('accepts array of string with regex and returns the pattern', () => {
+      const aggConfigs = getAggConfigs({
+        include: ['include.*'],
+        exclude: ['exclude.*'],
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toBe('include.*');
+      expect(params.exclude).toBe('exclude.*');
+    });
+
+    test('accepts array of empty strings with regex and does not write a value', () => {
+      const aggConfigs = getAggConfigs({
+        include: [''],
+        exclude: [''],
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toBe(undefined);
+      expect(params.exclude).toBe(undefined);
+    });
+
     test('accepts empty array from number field type and does not write a value', () => {
       const aggConfigs = getAggConfigs({
         include: [],
