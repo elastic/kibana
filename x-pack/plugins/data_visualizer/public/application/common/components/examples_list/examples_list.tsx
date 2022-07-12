@@ -10,10 +10,11 @@ import React, { FC } from 'react';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GeoPointExample } from '../../../../../common/types/field_request_config';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 interface Props {
-  examples: Array<string | object>;
+  examples: Array<string | GeoPointExample | object>;
 }
 
 export const ExamplesList: FC<Props> = ({ examples }) => {
