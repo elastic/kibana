@@ -251,7 +251,7 @@ export const DetailPanelMetadataTab = ({
                     tooltipContent={cloudData.provider}
                   >
                     <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {containerData.id}
+                      {cloudData.provider}
                     </EuiTextColor>
                   </DetailPanelCopy>
                 ),
