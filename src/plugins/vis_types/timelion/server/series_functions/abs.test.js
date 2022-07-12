@@ -9,7 +9,7 @@
 import fn from './abs';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 const seriesList = require('./fixtures/series_list')();
 import invoke from './helpers/invoke_series_fn';
 
