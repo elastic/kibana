@@ -51,6 +51,9 @@ export const useStyles = (depth: number) => {
       '.euiTreeView__node--selected > .euiTreeView__nodeInner': {
         backgroundColor: transparentize(colors.darkestShade, 0.1),
       },
+      '.euiTreeView__node--expanded': {
+        maxHeight: '100%',
+      },
     });
 
     return {
