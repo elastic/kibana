@@ -29,6 +29,16 @@ export interface DocumentCounts {
   interval?: number;
 }
 
+export interface LatLongExample {
+  lat: number;
+  lon: number;
+}
+
+export interface GeoPointExample {
+  coordinates: number[];
+  type?: string;
+}
+
 export interface FieldVisStats {
   error?: Error;
   cardinality?: number;
@@ -56,7 +66,7 @@ export interface FieldVisStats {
   topValues?: Array<{ key: number | string; doc_count: number }>;
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
-  examples?: Array<string | object>;
+  examples?: Array<string | GeoPointExample | object>;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
 }

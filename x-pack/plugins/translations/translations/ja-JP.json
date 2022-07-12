@@ -10520,7 +10520,6 @@
     "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription": "1 つのシャードにつき {topValuesSamplerShardSize} のドキュメントのサンプルで計算されています",
     "xpack.dataVisualizer.dataGrid.field.topValuesLabel": "トップの値",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel": "false",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.summaryTableTitle": "まとめ",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel": "true",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription": "1 つのシャードにつき {topValuesSamplerShardSize} のドキュメントのサンプルで計算されています",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.countLabel": "カウント",

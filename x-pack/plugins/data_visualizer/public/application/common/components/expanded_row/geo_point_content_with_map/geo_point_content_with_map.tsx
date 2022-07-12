@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { getUniqCoordinates } from '../../../util/geo_utils';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -28,6 +28,8 @@ export const GeoPointContentWithMap: FC<{
   const {
     services: { maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
+
+  const uniqueExamples = useMemo(() => getUniqCoordinates(stats?.examples), [stats?.examples]);
 
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
@@ -64,7 +66,7 @@ export const GeoPointContentWithMap: FC<{
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
-      <ExamplesList examples={stats.examples} />
+      <ExamplesList examples={uniqueExamples} />
       <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
         <EmbeddedMapComponent layerList={layerList} />
       </ExpandedRowPanel>
