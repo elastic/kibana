@@ -34,6 +34,10 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
+import type {
+  SavedObjectsTaggingApi,
+  SavedObjectTaggingOssPluginStart,
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -82,10 +86,15 @@ export interface StartPlugins {
   security: SecurityPluginSetup;
 }
 
+export interface StartPluginsDependencies extends StartPlugins {
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
+}
+
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
     apm: ApmBase;
+    savedObjectsTagging?: SavedObjectsTaggingApi;
   };
 
 export interface PluginSetup {
