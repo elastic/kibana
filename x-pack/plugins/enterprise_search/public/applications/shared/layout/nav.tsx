@@ -29,7 +29,6 @@ export const useEnterpriseSearchNav = () => {
       ...generateNavLink({
         to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
         shouldNotCreateHref: true,
-        isRoot: true,
       }),
     },
     {

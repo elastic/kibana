@@ -50,13 +50,14 @@ describe('generateNavLink', () => {
       expect(isSelected).toEqual(false);
     });
 
-    describe('isRoot', () => {
-      it('returns true if the current path is "/"', () => {
-        mockKibanaValues.history.location.pathname = '/';
-        const isSelected = getNavLinkActive({ to: '/overview', isRoot: true });
-
-        expect(isSelected).toEqual(true);
+    it('returns true when to includes a basePath and shouldNotCreateHref=true', () => {
+      mockKibanaValues.history.location.pathname = '/test';
+      const isSelected = getNavLinkActive({
+        to: '/app/enterprise_search/test',
+        shouldNotCreateHref: true,
       });
+
+      expect(isSelected).toEqual(true);
     });
 
     describe('shouldShowActiveForSubroutes', () => {
@@ -96,6 +97,17 @@ describe('generateNavLink', () => {
         const isSelected = getNavLinkActive({ to: '/hello' });
 
         expect(isSelected).toEqual(false);
+      });
+
+      it('returns true when to includes a basePath and shouldNotCreateHref=true', () => {
+        mockKibanaValues.history.location.pathname = '/hello/world';
+        const isSelected = getNavLinkActive({
+          to: '/app/enterprise_search/hello',
+          shouldNotCreateHref: true,
+          shouldShowActiveForSubroutes: true,
+        });
+
+        expect(isSelected).toEqual(true);
       });
     });
   });

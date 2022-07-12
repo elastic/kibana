@@ -14,7 +14,6 @@ import { generateReactRouterProps, ReactRouterProps } from '../react_router_help
 
 interface Params {
   to: string;
-  isRoot?: boolean;
   shouldShowActiveForSubroutes?: boolean;
   items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
 }
@@ -29,23 +28,23 @@ export const generateNavLink = ({ to, items, ...rest }: Params & ReactRouterProp
 
 export const getNavLinkActive = ({
   to,
-  isRoot = false,
   shouldShowActiveForSubroutes = false,
   items = [],
-}: Params): boolean => {
+  shouldNotCreateHref = false,
+}: Params & ReactRouterProps): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
-  const basePath = KibanaLogic.values.history.basePath;
+  const basePath: string = KibanaLogic.values.history.basePath; // TODO: Where is basePath coming from?
   const currentPath = stripTrailingSlash(pathname);
 
-  if (isRoot && basePath === to) return true;
+  // If shouldNotCreateHref is true then `to` will include the react router basePath
+  // see x-pack/plugins/enterprise_search/public/applications/shared/react_router_helpers/create_href.ts
+  const path = shouldNotCreateHref ? basePath + currentPath : currentPath;
 
-  if (basePath === to) return true;
-
-  // if (to.endsWith(currentPath)) return true;
+  if (path === to) return true;
 
   if (shouldShowActiveForSubroutes) {
     if (items.length) return false; // If a nav link has sub-nav items open, never show it as active
-    if (currentPath !== '' && to.includes(currentPath.split('/')[0])) return true;
+    if (path.startsWith(to)) return true;
   }
 
   return false;
