@@ -26,7 +26,7 @@ import { getBackendLatencyDistribution } from './get_backend_latency_distributio
 import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 import { BackendSpan, getTopBackendSpans } from './get_top_backend_spans';
 
-const topBackendsRoute = createApmServerRoute({
+const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_backends',
   params: t.intersection([
     t.type({
@@ -125,7 +125,7 @@ const topBackendsRoute = createApmServerRoute({
   },
 });
 
-const upstreamServicesForBackendRoute = createApmServerRoute({
+const upstreamServicesForDependencyRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/upstream_services',
   params: t.intersection([
     t.type({
@@ -248,7 +248,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
   },
 });
 
-const backendMetadataRoute = createApmServerRoute({
+const dependencyMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/metadata',
   params: t.type({
     query: t.intersection([t.type({ backendName: t.string }), rangeRt]),
@@ -277,7 +277,7 @@ const backendMetadataRoute = createApmServerRoute({
   },
 });
 
-const backendLatencyChartsRoute = createApmServerRoute({
+const dependencyLatencyChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/charts/latency',
   params: t.type({
     query: t.intersection([
@@ -344,7 +344,7 @@ const backendLatencyChartsRoute = createApmServerRoute({
   },
 });
 
-const backendThroughputChartsRoute = createApmServerRoute({
+const dependencyThroughputChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/charts/throughput',
   params: t.type({
     query: t.intersection([
@@ -411,7 +411,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
   },
 });
 
-const backendFailedTransactionRateChartsRoute = createApmServerRoute({
+const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/charts/error_rate',
   params: t.type({
     query: t.intersection([
@@ -478,7 +478,7 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   },
 });
 
-const backendOperationsRoute = createApmServerRoute({
+const dependencyOperationsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/operations',
   options: {
     tags: ['access:apm'],
@@ -513,7 +513,7 @@ const backendOperationsRoute = createApmServerRoute({
   },
 });
 
-const backendLatencyDistributionChartsRoute = createApmServerRoute({
+const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/charts/distribution',
   params: t.type({
     query: t.intersection([
@@ -561,7 +561,7 @@ const backendLatencyDistributionChartsRoute = createApmServerRoute({
   },
 });
 
-const topBackendSpansRoute = createApmServerRoute({
+const topDependencySpansRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/operations/spans',
   options: {
     tags: ['access:apm'],
@@ -608,13 +608,13 @@ const topBackendSpansRoute = createApmServerRoute({
 });
 
 export const backendsRouteRepository = {
-  ...topBackendsRoute,
-  ...upstreamServicesForBackendRoute,
-  ...backendMetadataRoute,
-  ...backendLatencyChartsRoute,
-  ...backendThroughputChartsRoute,
-  ...backendFailedTransactionRateChartsRoute,
-  ...backendOperationsRoute,
-  ...backendLatencyDistributionChartsRoute,
-  ...topBackendSpansRoute,
+  ...topDependenciesRoute,
+  ...upstreamServicesForDependencyRoute,
+  ...dependencyMetadataRoute,
+  ...dependencyLatencyChartsRoute,
+  ...dependencyThroughputChartsRoute,
+  ...dependencyFailedTransactionRateChartsRoute,
+  ...dependencyOperationsRoute,
+  ...dependencyLatencyDistributionChartsRoute,
+  ...topDependencySpansRoute,
 };
