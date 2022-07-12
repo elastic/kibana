@@ -154,5 +154,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
     });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/135914
+    describe.skip('with folded/unfolded lines in request body', () => {
+      const enterRequestWithBody = async () => {
+        await PageObjects.console.enterRequest();
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.enterText('{\n\t\t"_source": []');
+      };
+
+      it('should save the state of folding/unfolding when navigating back to Console', async () => {
+        await PageObjects.console.clearTextArea();
+        await enterRequestWithBody();
+        await PageObjects.console.clickFoldWidget();
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.navigateToApp('console');
+        expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+
+      it('should save the state of folding/unfolding when the page reloads', async () => {
+        // blocks the close help button for several seconds so just retry until we can click it.
+        await retry.try(async () => {
+          await PageObjects.console.collapseHelp();
+        });
+        await PageObjects.console.clearTextArea();
+        await enterRequestWithBody();
+        await PageObjects.console.clickFoldWidget();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+    });
   });
 }

@@ -6,119 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import Boom from '@hapi/boom';
-
+import type { Request, ResponseToolkit } from '@hapi/hapi';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
 } from '@kbn/es-errors';
-import { KibanaRequest, CoreKibanaRequest } from './request';
-import {
-  KibanaResponseFactory,
-  kibanaResponseFactory,
-  IKibanaResponse,
+import type {
+  KibanaRequest,
   ErrorHttpResponseOptions,
-} from './response';
-import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
+  RouteConfig,
+  RouteMethod,
+  RequestHandlerContextBase,
+  RouterRoute,
+  IRouter,
+  RequestHandler,
+} from '@kbn/core-http-server';
+import { validBodyOutput } from '@kbn/core-http-server';
+import { CoreKibanaRequest } from './request';
+import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../..';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
-
-/** @internal */
-export interface RouterRoute {
-  method: RouteMethod;
-  path: string;
-  options: RouteConfigOptions<RouteMethod>;
-  handler: (
-    req: Request,
-    responseToolkit: ResponseToolkit
-  ) => Promise<ResponseObject | Boom.Boom<any>>;
-}
-
-/**
- * Route handler common definition
- *
- * @public
- */
-export type RouteRegistrar<
-  Method extends RouteMethod,
-  Context extends RequestHandlerContext = RequestHandlerContext
-> = <P, Q, B>(
-  route: RouteConfig<P, Q, B, Method>,
-  handler: RequestHandler<P, Q, B, Context, Method>
-) => void;
-
-/**
- * Registers route handlers for specified resource path and method.
- * See {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.
- *
- * @public
- */
-export interface IRouter<Context extends RequestHandlerContext = RequestHandlerContext> {
-  /**
-   * Resulted path
-   */
-  routerPath: string;
-
-  /**
-   * Register a route handler for `GET` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
-  get: RouteRegistrar<'get', Context>;
-
-  /**
-   * Register a route handler for `POST` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
-  post: RouteRegistrar<'post', Context>;
-
-  /**
-   * Register a route handler for `PUT` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
-  put: RouteRegistrar<'put', Context>;
-
-  /**
-   * Register a route handler for `PATCH` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
-  patch: RouteRegistrar<'patch', Context>;
-
-  /**
-   * Register a route handler for `DELETE` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
-  delete: RouteRegistrar<'delete', Context>;
-
-  /**
-   * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
-   * @param handler {@link RequestHandler} - a route handler to wrap
-   */
-  handleLegacyErrors: RequestHandlerWrapper;
-
-  /**
-   * Returns all routes registered with this router.
-   * @returns List of registered routes.
-   * @internal
-   */
-  getRoutes: () => RouterRoute[];
-}
 
 export type ContextEnhancer<
   P,
   Q,
   B,
   Method extends RouteMethod,
-  Context extends RequestHandlerContext
+  Context extends RequestHandlerContextBase
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
@@ -202,7 +119,7 @@ function validOptions(
 /**
  * @internal
  */
-export class Router<Context extends RequestHandlerContext = RequestHandlerContext>
+export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
   implements IRouter<Context>
 {
   public routes: Array<Readonly<RouterRoute>> = [];
@@ -307,78 +224,5 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
-  RequestHandler<P, Q, B, RequestHandlerContext, Method>
+  RequestHandler<P, Q, B, RequestHandlerContextBase, Method>
 >;
-
-/**
- * A function executed when route path matched requested resource path.
- * Request handler is expected to return a result of one of {@link KibanaResponseFactory} functions.
- * If anything else is returned, or an error is thrown, the HTTP service will automatically log the error
- * and respond `500 - Internal Server Error`.
- * @param context {@link RequestHandlerContext} - the core context exposed for this request.
- * @param request {@link KibanaRequest} - object containing information about requested resource,
- * such as path, method, headers, parameters, query, body, etc.
- * @param response {@link KibanaResponseFactory} - a set of helper functions used to respond to a request.
- *
- * @example
- * ```ts
- * const router = httpSetup.createRouter();
- * // creates a route handler for GET request on 'my-app/path/{id}' path
- * router.get(
- *   {
- *     path: 'path/{id}',
- *     // defines a validation schema for a named segment of the route path
- *     validate: {
- *       params: schema.object({
- *         id: schema.string(),
- *       }),
- *     },
- *   },
- *   // function to execute to create a responses
- *   async (context, request, response) => {
- *     const data = await context.findObject(request.params.id);
- *     // creates a command to respond with 'not found' error
- *     if (!data) return response.notFound();
- *     // creates a command to send found data to the client
- *     return response.ok(data);
- *   }
- * );
- * ```
- * @public
- */
-export type RequestHandler<
-  P = unknown,
-  Q = unknown,
-  B = unknown,
-  Context extends RequestHandlerContext = RequestHandlerContext,
-  Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
-> = (
-  context: Context,
-  request: KibanaRequest<P, Q, B, Method>,
-  response: ResponseFactory
-) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
-
-/**
- * Type-safe wrapper for {@link RequestHandler} function.
- * @example
- * ```typescript
- * export const wrapper: RequestHandlerWrapper = handler => {
- *   return async (context, request, response) => {
- *     // do some logic
- *     ...
- *   };
- * }
- * ```
- * @public
- */
-export type RequestHandlerWrapper = <
-  P,
-  Q,
-  B,
-  Context extends RequestHandlerContext = RequestHandlerContext,
-  Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
->(
-  handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>
-) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;

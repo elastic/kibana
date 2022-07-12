@@ -12,7 +12,7 @@ import type {
   UpdateExceptionListItemSchema,
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { Immutable } from '../../../../common/endpoint/types';
+import type { Immutable } from '../../../../common/endpoint/types';
 
 export interface EventFiltersPageLocation {
   page_index: number;

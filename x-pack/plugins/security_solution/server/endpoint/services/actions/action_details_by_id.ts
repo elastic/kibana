@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {

@@ -7,8 +7,9 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
+import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
 
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
@@ -20,7 +21,6 @@ import {
 
 import { SimpleSavedObject } from './simple_saved_object';
 import type { ResolvedSimpleSavedObject } from './types';
-import { HttpFetchOptions, HttpSetup } from '../http';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 

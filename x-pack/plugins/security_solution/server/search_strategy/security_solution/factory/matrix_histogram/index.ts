@@ -8,16 +8,18 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   FactoryQueryTypes,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
-  MatrixHistogramQuery,
-  MatrixHistogramType,
   MatrixHistogramDataConfig,
 } from '../../../../../common/search_strategy/security_solution';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramType,
+} from '../../../../../common/search_strategy/security_solution';
 import { inspectStringifyObject } from '../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { getGenericData } from './helpers';
 import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';

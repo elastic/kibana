@@ -1126,18 +1126,6 @@
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
           },
           {
@@ -1147,6 +1135,18 @@
           {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
           },
           {
             "plugin": "enterpriseSearch",
@@ -3775,8 +3775,8 @@
             "label": "fetchError",
             "description": [],
             "signature": [
-              "HttpFetchError",
-              " | undefined"
+              "IHttpFetchError",
+              "<Error> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false
@@ -4353,13 +4353,7 @@
           " | undefined; executionContext?: ",
           "ExecutionContextSetup",
           " | undefined; http?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           " | undefined; savedObjects?: ",
           {
             "pluginId": "core",
