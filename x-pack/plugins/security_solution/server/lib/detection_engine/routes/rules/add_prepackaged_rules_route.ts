@@ -31,6 +31,7 @@ import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_
 import { buildSiemResponse } from '../utils';
 
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { rulesToMap } from '../../rules/utils';
 
 export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.put(
@@ -106,18 +107,16 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRules = await getLatestPrepackagedRules(
+  const latestPrepackagedRulesMap = await getLatestPrepackagedRules(
     ruleAssetsClient,
     prebuiltRulesFromFileSystem,
     prebuiltRulesFromSavedObjects
   );
-  const prepackagedRules = await getExistingPrepackagedRules({
-    rulesClient,
-  });
-  const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
+  const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
+  const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
+  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall));
+  await installPrepackagedRules(rulesClient, rulesToInstall);
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
