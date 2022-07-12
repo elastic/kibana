@@ -7,9 +7,19 @@
 
 import uuid from 'uuid';
 import moment from 'moment';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-// @ts-expect-error update validation
-export const createActionHandler = async (esClient, soClient, params) => {
+export const createActionHandler = async (
+  esClient: ElasticsearchClient,
+  params: {
+    agents: string[];
+    query: {
+      id?: string;
+      query: string;
+      ecs_mapping: Record<string, Record<'field', string>>;
+    };
+  }
+) => {
   const action = {
     action_id: uuid.v4(),
     '@timestamp': moment().toISOString(),

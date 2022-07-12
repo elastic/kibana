@@ -19,6 +19,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleResponseActionsField } from '../response_action_field';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -167,6 +168,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               isOsqueryDisabled: !isOsqueryEnabled,
             }}
           />
+          <EuiSpacer />
+          <EuiSpacer />
+
+          <UseField path="response_actions" component={RuleResponseActionsField} />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />

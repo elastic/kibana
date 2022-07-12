@@ -71,6 +71,10 @@ export interface RuleAction {
   actionTypeId: string;
   params: RuleActionParams;
 }
+export interface RuleResponseAction {
+  type: string;
+  params: RuleActionParams;
+}
 
 export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
@@ -96,6 +100,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   consumer: string;
   schedule: IntervalSchedule;
   actions: RuleAction[];
+  responseActions: RuleResponseAction[];
   params: Params;
   mapped_params?: MappedParams;
   scheduledTaskId?: string;
@@ -127,6 +132,7 @@ export type SanitizedRuleConfig = Pick<
   | 'enabled'
   | 'schedule'
   | 'actions'
+  | 'responseActions'
   | 'createdBy'
   | 'updatedBy'
   | 'createdAt'

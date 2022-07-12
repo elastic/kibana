@@ -14,7 +14,7 @@ import type {
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import type { ConfigType } from '../config';
+import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<

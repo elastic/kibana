@@ -20,8 +20,16 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OsqueryPluginSetup {}
+export interface OsqueryActionPayload {
+  agentIds: string[];
+  query: string;
+  ecs_mapping?: Record<string, Record<'field', string>>;
+  id?: string;
+}
+export interface OsqueryPluginSetup {
+  osqueryCreateAction: (payload: OsqueryActionPayload) => void;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginStart {}
 

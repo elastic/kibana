@@ -15,15 +15,12 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
-import type { ConfigType } from '../common/config';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
-import { getActionType } from './osquery_action_type';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
   StartPlugins,
   AppPluginStartDependencies,
-  SetupPlugins,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
 import {
@@ -41,10 +38,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
+  public setup(core: CoreSetup): OsqueryPluginSetup {
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
-    const config = this.initializerContext.config.get<ConfigType>();
 
     // Register an application into the side navigation menu
     core.application.register({
@@ -69,11 +65,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         );
       },
     });
-
-    if (config.detectionAction) {
-      const actionType = getActionType();
-      plugins.triggersActionsUi.actionTypeRegistry.register(actionType);
-    }
 
     // Return methods that should be available to other plugins
     return {};

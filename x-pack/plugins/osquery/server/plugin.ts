@@ -16,6 +16,7 @@ import type {
 import { SavedObjectsClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { curry } from 'lodash';
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -24,7 +25,7 @@ import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
-import type { ConfigType } from './config';
+import type { ConfigType } from '../common/config';
 import {
   packSavedObjectType,
   packAssetSavedObjectType,
@@ -34,7 +35,7 @@ import { PLUGIN_ID } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
-import { getOsqueryActionType } from './handlers/action/get_action_type';
+import { OsqueryCreateAction } from './handlers/action';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -237,10 +238,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     defineRoutes(router, osqueryContext);
 
-    if (config.detectionAction) {
-      plugins.actions.registerType(getOsqueryActionType(osqueryContext));
-    }
-
     core.getStartServices().then(([, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
 
@@ -254,7 +251,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       this.telemetryUsageCounter
     );
 
-    return {};
+    return {
+      osqueryCreateAction: curry(OsqueryCreateAction)({
+        osqueryContext,
+      }),
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {

@@ -271,6 +271,7 @@ export const internalRuleUpdate = t.type({
     interval: t.string,
   }),
   actions: actionsCamel,
+  // response_actions,
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen,

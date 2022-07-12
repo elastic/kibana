@@ -29,9 +29,16 @@ export const action = t.exact(
   })
 );
 
+export const responseAction = t.exact(
+  t.type({
+    query: t.string,
+  })
+);
+
 export type Action = t.TypeOf<typeof action>;
 
 export const actions = t.array(action);
+export const response_actions = t.array(responseAction);
 export type Actions = t.TypeOf<typeof actions>;
 
 export const actionsCamel = t.array(

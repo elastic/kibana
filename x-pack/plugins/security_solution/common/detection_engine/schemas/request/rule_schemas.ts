@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 
 import {
   actions,
+  // response_actions,
   from,
   risk_score,
   machine_learning_job_id,
@@ -164,6 +165,7 @@ const baseParams = {
     rule_name_override,
     timestamp_override,
     namespace,
+    // response_actions,
   },
   defaultable: {
     tags,

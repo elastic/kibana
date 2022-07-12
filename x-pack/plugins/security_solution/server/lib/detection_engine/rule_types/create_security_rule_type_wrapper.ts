@@ -13,6 +13,7 @@ import agent from 'elastic-apm-node';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { scheduleNotificationResponseActions } from '../notifications/schedule_notification_response_actions';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
@@ -48,6 +49,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventLogService,
     ruleExecutionLoggerFactory,
     version,
+    osqueryCreateAction,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -104,7 +106,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           );
 
           const completeRule = {
-            ruleConfig: rule,
+            // TEMPORARY SOLUTION TO TEST AND SHOW
+            ruleConfig: {
+              ...rule,
+              responseActions: [
+                {
+                  type: 'osquery',
+                  params: {
+                    query: 'select * from uptime',
+                    ecs_mapping: {
+                      labels: { field: 'hours' },
+                    },
+                  },
+                },
+                {
+                  type: 'osquery',
+                  params: {
+                    query: 'select * from users',
+                  },
+                },
+              ],
+            },
             ruleParams: params,
             alertId,
           };
@@ -113,6 +135,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             actions,
             name,
             schedule: { interval },
+            responseActions,
           } = completeRule.ruleConfig;
 
           const refresh = actions.length ? 'wait_for' : false;
@@ -380,6 +403,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ruleParams: notificationRuleParams,
                 });
               }
+            }
+            if (responseActions.length && createdSignalsCount) {
+              scheduleNotificationResponseActions(
+                {
+                  signals: result.createdSignals,
+                  responseActions,
+                },
+                osqueryCreateAction
+              );
             }
 
             if (result.success) {

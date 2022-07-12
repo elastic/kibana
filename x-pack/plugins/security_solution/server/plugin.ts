@@ -236,6 +236,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
+    const { osquery } = plugins;
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       logger: this.logger,
@@ -244,6 +245,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       eventLogService,
       ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
       version: pluginContext.env.packageInfo.version,
+      ...(osquery ? { osqueryCreateAction: osquery.osqueryCreateAction } : {}),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);

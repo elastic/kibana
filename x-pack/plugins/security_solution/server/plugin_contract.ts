@@ -34,6 +34,7 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -50,6 +51,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   telemetry?: TelemetryPluginSetup;
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
+  osquery?: OsqueryPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
