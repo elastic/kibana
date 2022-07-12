@@ -25,6 +25,8 @@ import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
+const INDEX_LINK_NAME = 'logs-cloud_security_posture.findings_latest-default';
+
 const getDetailsList = (data: CspFinding, navigateToIndex: any) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
@@ -60,11 +62,7 @@ const getDetailsList = (data: CspFinding, navigateToIndex: any) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
       defaultMessage: 'Index',
     }),
-    description: (
-      <EuiLink onClick={navigateToIndex}>
-        {'logs-cloud_security_posture.findings_latest-default'}
-      </EuiLink>
-    ),
+    description: <EuiLink onClick={navigateToIndex}>{INDEX_LINK_NAME}</EuiLink>,
   },
 ];
 
@@ -131,7 +129,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
         throw new Error();
       }
 
-      return await discover.locator.navigate({
+      await discover.locator.navigate({
         indexPatternId: latestFindingsDataView.data.id,
         timeRange: {
           to: 'now',
