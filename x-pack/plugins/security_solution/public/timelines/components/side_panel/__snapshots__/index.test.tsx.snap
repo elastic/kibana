@@ -331,11 +331,10 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-           aria-label="Loading"
-            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-            data-test-subj="loading-spinner"
-            role="progressbar"
-          />
+            class="c3"
+          >
+            —
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -361,7 +360,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-           aria-label="Loading"
+            aria-label="Loading"
             class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             data-test-subj="loading-spinner"
             role="progressbar"
@@ -384,11 +383,10 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-            aria-label="Loading"
-            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-            data-test-subj="loading-spinner"
-            role="progressbar"
-          />
+            class="c3"
+          >
+            —
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -708,10 +706,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -722,10 +721,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
       </dl>
     </div>
