@@ -56,7 +56,8 @@ const toExpression = (
   state: MetricVisualizationState,
   datasourceLayers: DatasourceLayers,
   // attributes?:  Partial<{ title: string; description: string }>,
-  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {},
+  constrainDimensions: boolean = true
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
@@ -65,6 +66,8 @@ const toExpression = (
   if (!originalOrder || !state.metricAccessor) {
     return null;
   }
+
+  const sideLength = state.breakdownByAccessor ? 200 : 300;
 
   return {
     type: 'expression',
@@ -92,6 +95,8 @@ const toExpression = (
             : [],
           maxCols: state.maxCols ? [state.maxCols] : [],
           minTiles: state.minTiles ? [state.minTiles] : [],
+          maxTileWidth: constrainDimensions ? [sideLength] : [],
+          maxTileHeight: constrainDimensions ? [sideLength] : [],
         },
       },
     ],
@@ -266,7 +271,7 @@ export const getMetricVisualization = ({
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 
   toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers) =>
-    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
+    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, false),
 
   setDimension({ prevState, columnId, groupId }) {
     const updated = { ...prevState };

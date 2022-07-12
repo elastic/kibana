@@ -14,6 +14,7 @@ import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/cha
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import numeral from '@elastic/numeral';
+import { HtmlAttributes } from 'csstype';
 
 const mockDeserialize = jest.fn(() => ({
   getConverterFor: jest.fn(() => () => 'formatted duration'),
@@ -743,6 +744,49 @@ describe('MetricVisComponent', function () {
         ]
       `);
     });
+  });
+
+  it('should respect size constraints', () => {
+    const getContainerStyles = (width?: number, height?: number) =>
+      (
+        shallow(
+          <MetricVis
+            data={table}
+            renderComplete={() => {}}
+            config={{
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+                maxTileWidth: width,
+                maxTileHeight: height,
+              },
+              dimensions: {
+                metric: basePriceColumnId,
+              },
+            }}
+          />
+        )
+          .find('div')
+          .props() as HtmlAttributes & { css: { styles: string } }
+      ).css.styles;
+
+    expect(getContainerStyles()).toMatchInlineSnapshot(`
+      "
+              height: 100%;
+              width: 100%;
+              max-height: 100%;
+              max-width: 100%;
+            "
+    `);
+
+    expect(getContainerStyles(240, 1200)).toMatchInlineSnapshot(`
+      "
+              height: 1200px;
+              width: 240px;
+              max-height: 100%;
+              max-width: 100%;
+            "
+    `);
   });
 
   it('should report render complete', () => {

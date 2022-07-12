@@ -23,6 +23,7 @@ import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { css } from '@emotion/react';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -215,6 +216,14 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     grid.push(metricConfigs.slice(i, i + maxCols));
   }
 
+  const pixelHeight = config.metric.maxTileHeight
+    ? metricConfigs.length * config.metric.maxTileHeight
+    : undefined;
+
+  const pixelWidth = config.metric.maxTileWidth
+    ? metricConfigs.length * config.metric.maxTileWidth
+    : undefined;
+
   const chartTheme = getThemeService().useChartsTheme();
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -226,13 +235,22 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
   );
 
   return (
-    <Chart>
-      <Settings
-        theme={[{ background: { color: 'transparent' } }, chartTheme]}
-        onRenderChange={onRenderChange}
-      />
-      <Metric id="metric" data={grid} />
-    </Chart>
+    <div
+      css={css`
+        height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
+        width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
+        max-height: 100%;
+        max-width: 100%;
+      `}
+    >
+      <Chart>
+        <Settings
+          theme={[{ background: { color: 'transparent' } }, chartTheme]}
+          onRenderChange={onRenderChange}
+        />
+        <Metric id="metric" data={grid} />
+      </Chart>
+    </div>
   );
 };
 

@@ -92,6 +92,18 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
       }),
     },
+    maxTileWidth: {
+      types: ['number'],
+      help: i18n.translate('expressionMetricVis.function.pixelWidth.help', {
+        defaultMessage: 'The width of the visualization in pixels.',
+      }),
+    },
+    maxTileHeight: {
+      types: ['number'],
+      help: i18n.translate('expressionMetricVis.function.pixelHeight.help', {
+        defaultMessage: 'The height of the visualization in pixels.',
+      }),
+    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
@@ -156,6 +168,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
+            maxTileWidth: args.maxTileWidth,
+            maxTileHeight: args.maxTileHeight,
           },
           dimensions: {
             metric: args.metric,
