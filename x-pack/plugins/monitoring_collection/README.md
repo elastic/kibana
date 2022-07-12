@@ -86,7 +86,15 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
   }
   ```
 
-  * Lastly we can use the `metrics` object to instrument the code
+    `monitoring_collection` plugins has to be initialized before the plugin that will be instrumented. If for some reason the instrumentation doesn't record any metrics, make sure `monitoring_collection` is included in the list of `requiredPlugins`. e.g:
+
+    ```json
+    "requiredPlugins": [
+      "monitoringCollection"
+    ],
+    ```
+
+* Lastly we can use the `metrics` object to instrument the code
 
   ```ts
   export const initMetricsAPIRoute = (libs: { router: IRouter, metrics: FooApiMeters}) => {
@@ -101,3 +109,4 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
       }
     );
   ```
+
