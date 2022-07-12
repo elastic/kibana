@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { EuiSideNavItemType } from '@elastic/eui';
+
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 
@@ -22,18 +24,22 @@ import { letBrowserHandleEvent, createHref } from '.';
  */
 
 export interface ReactRouterProps {
+  to: string;
   onClick?(): void;
   // Used to navigate outside of the React Router plugin basename but still within Kibana,
   // e.g. if we need to go from Enterprise Search to App Search
   shouldNotCreateHref?: boolean;
-  to: string;
 }
+
+export type GeneratedReactRouterProps = Required<
+  Pick<EuiSideNavItemType<unknown>, 'href' | 'onClick'>
+>;
 
 export const generateReactRouterProps = ({
   to,
   onClick,
   shouldNotCreateHref,
-}: ReactRouterProps): { href: string; onClick: (event: React.MouseEvent) => void } => {
+}: ReactRouterProps): GeneratedReactRouterProps => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
 

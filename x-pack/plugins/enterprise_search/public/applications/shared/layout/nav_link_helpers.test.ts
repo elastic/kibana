@@ -27,8 +27,8 @@ describe('generateNavLink', () => {
 
     expect(navItem).toEqual({
       href: '/app/enterprise_search/test',
-      isSelected: false,
       onClick: expect.any(Function),
+      isSelected: false,
     });
 
     navItem.onClick({} as any);

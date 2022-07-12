@@ -11,24 +11,21 @@ import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
 import { generateReactRouterProps, ReactRouterProps } from '../react_router_helpers';
+import { GeneratedReactRouterProps } from '../react_router_helpers/generate_react_router_props';
 
 interface Params {
-  items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
-  shouldShowActiveForSubroutes?: boolean;
   to: string;
+  shouldShowActiveForSubroutes?: boolean;
+  items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
 }
 
-type NavLinkProps = Pick<EuiSideNavItemType<unknown>, 'isSelected' | 'href' | 'items'> &
-  Required<Pick<EuiSideNavItemType<unknown>, 'onClick'>>;
+type NavLinkProps = GeneratedReactRouterProps &
+  Pick<EuiSideNavItemType<unknown>, 'isSelected' | 'items'>;
 
-export const generateNavLink = ({
-  to,
-  items,
-  ...rest
-}: Params & ReactRouterProps): NavLinkProps => {
+export const generateNavLink = ({ items, ...rest }: Params & ReactRouterProps): NavLinkProps => {
   const linkProps = {
-    ...generateReactRouterProps({ to, ...rest }),
-    isSelected: getNavLinkActive({ items, to, ...rest }),
+    ...generateReactRouterProps({ ...rest }),
+    isSelected: getNavLinkActive({ items, ...rest }),
   };
   return items ? { ...linkProps, items } : linkProps;
 };

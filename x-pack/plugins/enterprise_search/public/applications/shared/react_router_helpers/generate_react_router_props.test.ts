@@ -34,8 +34,8 @@ describe('generateReactRouterProps', () => {
     it('prevents default navigation and uses React Router history', () => {
       const mockEvent = {
         button: 0,
-        preventDefault: jest.fn(),
         target: { getAttribute: () => '_self' },
+        preventDefault: jest.fn(),
       } as any;
 
       const { onClick } = generateReactRouterProps({ to: '/test' });
