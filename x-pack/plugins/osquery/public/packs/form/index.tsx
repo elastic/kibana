@@ -133,6 +133,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       policy_ids: payload.policy_ids ?? [],
       queries: convertPackQueriesToSO(payload.queries),
     }),
+    // @ts-expect-error update types
     serializer: (payload) => ({
       ...payload,
       queries: convertSOQueriesToPack(payload.queries),

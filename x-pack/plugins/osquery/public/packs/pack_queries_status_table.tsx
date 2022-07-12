@@ -37,7 +37,7 @@ import { useKibana } from '../common/lib/kibana';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { usePackQueryErrors } from './use_pack_query_errors';
-import type { PackItem } from './types';
+import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -641,7 +641,7 @@ const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
 
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
-  data: PackItem[];
+  data: PackQueryFormData[];
   packName: string;
 }
 
@@ -768,7 +768,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [agentIds, logsDataView, packName]
   );
 
-  const getItemId = useCallback((item: PackItem) => item.id, []);
+  const getItemId = useCallback((item: PackQueryFormData) => item.id ?? '', []);
 
   const columns = useMemo(
     () => [
@@ -849,7 +849,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof PackItem,
+        field: 'id' as keyof PackQueryFormData,
         direction: 'asc' as const,
       },
     }),
@@ -857,7 +857,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   return (
-    <EuiBasicTable<PackItem>
+    <EuiBasicTable<PackQueryFormData>
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data ?? []}
       itemId={getItemId}

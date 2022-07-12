@@ -25,7 +25,7 @@ const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
 
 interface ActiveStateSwitchProps {
   disabled?: boolean;
-  item: PackSavedObject;
+  item: PackSavedObject & { policy_ids: string[] };
 }
 
 const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) => {

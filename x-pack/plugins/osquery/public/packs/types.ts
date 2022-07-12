@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/public';
+import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 export interface IQueryPayload {
   attributes?: {
@@ -20,13 +21,21 @@ export interface PackItemQuery {
   query: string;
   platform?: string;
   version?: string;
-  ecs_mapping?: Record<string, unknown>;
+  ecs_mapping?: Array<
+    Record<
+      string,
+      {
+        field?: string;
+        value?: string;
+      }
+    >
+  >;
 }
 
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: PackItemQuery[];
+  queries: PackQueryFormData[];
   version?: number;
   enabled: boolean | undefined;
   created_at: string;

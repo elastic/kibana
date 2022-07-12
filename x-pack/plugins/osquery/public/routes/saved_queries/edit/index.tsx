@@ -129,6 +129,13 @@ const EditSavedQueryPageComponent = () => {
     [handleDeleteClick]
   );
 
+  const handleSubmit = useCallback(
+    async (payload) => {
+      await updateSavedQueryMutation.mutateAsync(payload);
+    },
+    [updateSavedQueryMutation]
+  );
+
   if (isLoading) return null;
 
   return (
@@ -140,7 +147,7 @@ const EditSavedQueryPageComponent = () => {
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          handleSubmit={updateSavedQueryMutation.mutateAsync}
+          handleSubmit={handleSubmit}
           viewMode={viewMode}
         />
       )}

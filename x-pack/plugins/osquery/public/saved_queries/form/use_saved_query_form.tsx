@@ -13,13 +13,26 @@ import { useMemo } from 'react';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useForm } from '../../shared_imports';
 import { createFormSchema } from '../../packs/queries/schema';
-import type { PackFormData } from '../../packs/queries/use_pack_query_form';
+import type {
+  PackQueryECSMapping,
+  PackQueryFormData,
+} from '../../packs/queries/use_pack_query_form';
 import { useSavedQueries } from '../use_saved_queries';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
 
+interface ReturnFormData {
+  id?: string;
+  description?: string;
+  query: string;
+  interval?: number;
+  platform?: string;
+  version?: string[];
+  ecs_mapping?: PackQueryECSMapping[] | undefined;
+}
+
 interface UseSavedQueryFormProps {
-  defaultValue?: unknown;
+  defaultValue?: PackQueryFormData;
   handleSubmit: (payload: unknown) => Promise<void>;
 }
 
@@ -31,17 +44,13 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
   );
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
-    // @ts-expect-error update types
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
 
     return res;
   }, [ids, defaultValue]);
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
-    () => createFormSchema(idSet),
-    [idSet]
-  );
+  const formSchema = useMemo(() => createFormSchema(idSet), [idSet]);
 
-  return useForm({
+  return useForm<PackQueryFormData, ReturnFormData>({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
@@ -52,8 +61,8 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         } catch (e) {}
       }
     },
-    // @ts-expect-error update types
     defaultValue,
+    // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {
         if (isArray(draft.version)) {
@@ -61,12 +70,12 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
             // @ts-expect-error update types
             draft.version = '';
           } else {
+            // @ts-expect-error update types
             draft.version = draft.version[0];
           }
         }
 
         if (isEmpty(payload.ecs_mapping)) {
-          // @ts-expect-error update types
           delete draft.ecs_mapping;
         } else {
           // @ts-expect-error update types
@@ -78,9 +87,8 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
 
         return draft;
       }),
-    // @ts-expect-error update types
     deserializer: (payload) => {
-      if (!payload) return {} as PackFormData;
+      if (!payload) return {} as ReturnFormData;
 
       return {
         id: payload.id,
@@ -89,16 +97,15 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         interval: payload.interval ?? 3600,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
-        ecs_mapping:
-          (!isEmpty(payload.ecs_mapping) &&
-            map(payload.ecs_mapping, (value, key) => ({
+        ecs_mapping: (!isEmpty(payload.ecs_mapping)
+          ? map(payload.ecs_mapping, (value, key: string) => ({
               key,
               result: {
                 type: Object.keys(value)[0],
                 value: Object.values(value)[0],
               },
-            }))) ??
-          [],
+            }))
+          : ([] as PackQueryECSMapping[])) as PackQueryECSMapping[],
       };
     },
   });

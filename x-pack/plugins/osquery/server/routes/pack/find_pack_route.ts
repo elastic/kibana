@@ -21,7 +21,7 @@ export const findPackRoute = (router: IRouter) => {
       validate: {
         query: schema.object(
           {
-            pageIndex: schema.maybe(schema.string()),
+            pageIndex: schema.maybe(schema.number()),
             pageSize: schema.maybe(schema.number()),
             sortField: schema.maybe(schema.string()),
             sortOrder: schema.maybe(schema.string()),
@@ -37,26 +37,27 @@ export const findPackRoute = (router: IRouter) => {
 
       const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
         type: packSavedObjectType,
-        page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
+        page: request.query.pageIndex ?? 0 + 1,
         perPage: request.query.pageSize ?? 20,
         sortField: request.query.sortField ?? 'updated_at',
         // @ts-expect-error sortOrder type must be union of ['asc', 'desc']
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 
-      soClientResponse.saved_objects.map((pack) => {
+      const responseBody = map(soClientResponse.saved_objects, (pack) => {
         const policyIds = map(
           filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
 
-        pack.policy_ids = policyIds;
-
-        return pack;
+        return {
+          ...pack,
+          policy_ids: policyIds,
+        };
       });
 
       return response.ok({
-        body: soClientResponse,
+        body: responseBody,
       });
     }
   );

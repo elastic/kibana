@@ -22,7 +22,7 @@ export interface PackSavedObjectAttributes {
     name: string;
     query: string;
     interval: number;
-    ecs_mapping: Record<string, unknown>;
+    ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;
   enabled: boolean | undefined;

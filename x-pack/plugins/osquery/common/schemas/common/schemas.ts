@@ -77,3 +77,6 @@ export const ecsMapping = t.record(
 export type ECSMapping = t.TypeOf<typeof ecsMapping>;
 export const ecsMappingOrUndefined = t.union([ecsMapping, t.undefined]);
 export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;
+
+export const stringArrayOrUndefined = t.union([t.array(t.string), t.undefined]);
+export type StringArrayOrUndefined = t.TypeOf<typeof stringArrayOrUndefined>;

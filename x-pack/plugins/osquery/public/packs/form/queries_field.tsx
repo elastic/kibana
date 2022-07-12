@@ -18,10 +18,11 @@ import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
 import type { PackItem } from '../types';
+import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
 interface QueriesFieldProps {
   handleNameChange: (name: string) => void;
-  field: FieldHook<PackItem['queries']>;
+  field: FieldHook<PackItem['queries'], PackQueryFormData[]>;
   euiFieldProps: EuiComboBoxProps<{}>;
 }
 
@@ -33,7 +34,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   const isReadOnly = !!euiFieldProps?.isDisabled;
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
-  const [tableSelectedItems, setTableSelectedItems] = useState<PackItem[]>([]);
+  const [tableSelectedItems, setTableSelectedItems] = useState<PackQueryFormData[]>([]);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
@@ -230,7 +231,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
-          // @ts-expect-error update types
           defaultValue={field.value[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}

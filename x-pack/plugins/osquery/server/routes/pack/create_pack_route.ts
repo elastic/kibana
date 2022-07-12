@@ -150,7 +150,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      packSO.attributes.queries = queries;
+      set(packSO, 'attributes.queries', queries);
 
       return response.ok({ body: packSO });
     }

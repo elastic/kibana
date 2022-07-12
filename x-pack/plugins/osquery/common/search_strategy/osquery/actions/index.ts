@@ -60,7 +60,7 @@ export interface ActionDetailsRequestOptions extends RequestOptions {
 export interface ActionResultsStrategyResponse
   extends IKibanaSearchResponse<
     estypes.SearchResponse<
-      {},
+      object,
       {
         aggs: {
           responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {

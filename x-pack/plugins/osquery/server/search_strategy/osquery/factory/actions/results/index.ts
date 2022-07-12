@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   ActionResultsRequestOptions,
+  ActionResultsStrategyResponse,
   OsqueryQueries,
 } from '../../../../../../common/search_strategy/osquery';
 
@@ -24,7 +24,11 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
 
     return buildActionResultsQuery(options);
   },
-  parse: async (options: ActionResultsRequestOptions, response: IEsSearchResponse<object>) => {
+  // @ts-expect-error update types
+  parse: async (
+    options,
+    response: ActionResultsStrategyResponse
+  ): Promise<ActionResultsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],
     };

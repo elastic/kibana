@@ -14,6 +14,7 @@ import {
   packIdOrUndefined,
   queryOrUndefined,
   executionContextOrUndefined,
+  stringArrayOrUndefined,
 } from '../../common/schemas';
 
 export const createLiveQueryRequestBodySchema = t.type({
@@ -23,6 +24,9 @@ export const createLiveQueryRequestBodySchema = t.type({
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,
   execution_context: executionContextOrUndefined,
+  alert_ids: stringArrayOrUndefined,
+  case_ids: stringArrayOrUndefined,
+  event_ids: stringArrayOrUndefined,
 });
 
 export type CreateLiveQueryRequestBodySchema = t.OutputOf<typeof createLiveQueryRequestBodySchema>;

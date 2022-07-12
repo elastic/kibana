@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type {
   ActionResultsRequestOptions,
@@ -29,7 +30,26 @@ export const getActionResponses = (
   successful: number;
 }> =>
   search
-    .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
+    .search<
+      ActionResultsRequestOptions,
+      ActionResultsStrategyResponse & {
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
+                rows_count: estypes.AggregationsSumAggregate;
+                responses: {
+                  buckets: Array<{
+                    key: string;
+                    doc_count: number;
+                  }>;
+                };
+              };
+            };
+          };
+        };
+      }
+    >(
       {
         actionId,
         factoryQueryType: OsqueryQueries.actionResults,

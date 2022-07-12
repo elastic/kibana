@@ -16,14 +16,15 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { PackQueryFormData } from '../../../packs/queries/use_pack_query_form';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { Form } from '../../../shared_imports';
 import { SavedQueryForm } from '../../../saved_queries/form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
 
 interface EditSavedQueryFormProps {
-  defaultValue?: unknown;
-  handleSubmit: () => Promise<{ attributes: { id: string } }>;
+  defaultValue?: PackQueryFormData;
+  handleSubmit: (payload: unknown) => Promise<void>;
   viewMode?: boolean;
 }
 

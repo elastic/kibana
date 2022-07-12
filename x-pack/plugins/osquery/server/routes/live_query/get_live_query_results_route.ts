@@ -25,7 +25,16 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
     {
       path: '/api/osquery/live_queries/{id}/results/{actionId}',
       validate: {
-        query: schema.object({}, { unknowns: 'allow' }),
+        query: schema.object(
+          {
+            filterQuery: schema.maybe(schema.string()),
+            pageIndex: schema.maybe(schema.number()),
+            pageSize: schema.maybe(schema.number()),
+            sortField: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.string()),
+          },
+          { unknowns: 'allow' }
+        ),
         params: schema.object(
           {
             id: schema.string(),
@@ -45,7 +54,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
           search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
             {
               actionId: request.params.id,
-              filterQuery: createFilter(request.params.query),
+              filterQuery: createFilter(request.query.filterQuery),
               factoryQueryType: OsqueryQueries.actionDetails,
             },
             { abortSignal, strategy: 'osquerySearchStrategy' }
@@ -67,15 +76,15 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
             {
               actionId: request.params.actionId,
               factoryQueryType: OsqueryQueries.results,
-              filterQuery: createFilter(request.params.filterQuery),
+              filterQuery: createFilter(request.query.filterQuery),
               pagination: generateTablePaginationOptions(
-                request.params.activePage ?? 0,
-                request.params.limit ?? 100
+                request.query.pageIndex ?? 0,
+                request.query.pageSize ?? 100
               ),
               sort: [
                 {
-                  direction: request.params.direction ?? 'desc',
-                  field: request.params.sortField ?? '@timestamp',
+                  direction: request.query.sortOrder ?? 'desc',
+                  field: request.query.sortField ?? '@timestamp',
                 },
               ],
             },

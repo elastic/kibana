@@ -17,6 +17,6 @@ export const initLiveQueryRoutes = (
   context: OsqueryAppContext
 ) => {
   createLiveQueryRoute(router, context);
-  getLiveQueryDetailsRoute(router, context);
-  getLiveQueryResultsRoute(router, context);
+  getLiveQueryDetailsRoute(router);
+  getLiveQueryResultsRoute(router);
 };

@@ -96,6 +96,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     onSubmit: async (formData, isValid) => {
       if (isValid) {
         try {
+          // @ts-expect-error update types
           await mutateAsync(formData);
           // eslint-disable-next-line no-empty
         } catch (e) {}
@@ -343,7 +344,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ]
   );
 
-  const singleQueryDetails = useMemo(() => liveQueryDetails?.queries[0], [liveQueryDetails]);
+  const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
 
   const resultsStepContent = useMemo(
     () =>
@@ -474,6 +475,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <UseField
                   path="packId"
                   component={SuperSelectField}
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   euiFieldProps={{
                     options: packOptions,
                     itemLayoutAlign: 'top',
@@ -484,7 +486,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               <EuiSpacer />
               {submitButtonContent}
               <EuiSpacer />
-              {(liveQueryDetails?.queries.length || selectedPackData?.attributes?.queries) && (
+              {(liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries) && (
                 <>
                   <EuiFlexItem>
                     <PackQueriesStatusTable

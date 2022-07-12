@@ -10,13 +10,14 @@ import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PlatformIcons } from './queries/platforms';
-import type { PackItem, PackItemQuery } from './types';
+import type { PackItem } from './types';
+import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 export interface PackQueriesTableProps {
   data: PackItem['queries'];
   isReadOnly?: boolean;
-  onDeleteClick?: (item: PackItemQuery) => void;
-  onEditClick?: (item: PackItemQuery) => void;
+  onDeleteClick?: (item: PackQueryFormData) => void;
+  onEditClick?: (item: PackQueryFormData) => void;
   selectedItems?: PackItem['queries'];
   setSelectedItems?: (selection: PackItem['queries']) => void;
 }
@@ -30,7 +31,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   setSelectedItems,
 }) => {
   const renderDeleteAction = useCallback(
-    (item: PackItemQuery) => (
+    (item: PackQueryFormData) => (
       <EuiButtonIcon
         color="danger"
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
@@ -48,7 +49,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   );
 
   const renderEditAction = useCallback(
-    (item: PackItemQuery) => (
+    (item: PackQueryFormData) => (
       <EuiButtonIcon
         color="primary"
         // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
@@ -158,14 +159,14 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof PackItemQuery,
+        field: 'id' as keyof PackQueryFormData,
         direction: 'asc' as const,
       },
     }),
     []
   );
 
-  const itemId = useCallback((item: PackItemQuery) => item.id, []);
+  const itemId = useCallback((item: PackQueryFormData) => item.id ?? '', []);
 
   const selection = useMemo(
     () => ({
@@ -176,7 +177,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   );
 
   return (
-    <EuiBasicTable<PackItemQuery>
+    <EuiBasicTable<PackQueryFormData>
       items={data}
       itemId={itemId}
       columns={columns}

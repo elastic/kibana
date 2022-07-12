@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
-
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { InspectResponse } from '../common/helpers';
@@ -97,7 +97,10 @@ export const useActionResults = ({
 
       const previousEdges = cachedData?.edges.length
         ? cachedData?.edges
-        : agentIds?.map((agentId) => ({ fields: { agent_id: [agentId] } })) ?? [];
+        : agentIds?.map(
+            (agentId) =>
+              ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
+          ) ?? [];
 
       return {
         ...responseData,
