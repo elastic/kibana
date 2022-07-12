@@ -42,6 +42,7 @@ import type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
+import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -72,7 +73,6 @@ import type {
   PluginInitializerContext,
   PluginOpaqueId,
 } from './plugins';
-import type { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import type { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import type { SavedObjectsStart } from './saved_objects';
 import type { DeprecationsServiceStart } from './deprecations';
@@ -82,7 +82,12 @@ export type { DomainDeprecationDetails } from '../server/types';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
-export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+export type { AppCategory } from '../types';
+export type {
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+} from '@kbn/core-ui-settings-common';
 
 export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {

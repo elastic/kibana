@@ -3272,6 +3272,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-ui-settings-browser@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-ui-settings-common@link:bazel-bin/packages/core/ui-settings/core-ui-settings-common":
   version "0.0.0"
   uid ""
@@ -6876,6 +6880,10 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-browser@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser/npm_module_types":
   version "0.0.0"
   uid ""
 

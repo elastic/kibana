@@ -10,8 +10,8 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { UserProvidedValues, PublicUiSettingsParams } from '../../server/types';
-import { IUiSettingsClient, UiSettingsState } from './types';
+import { UserProvidedValues, PublicUiSettingsParams } from '@kbn/core-ui-settings-common';
+import { IUiSettingsClient, UiSettingsState } from '@kbn/core-ui-settings-browser';
 
 import { UiSettingsApi } from './ui_settings_api';
 

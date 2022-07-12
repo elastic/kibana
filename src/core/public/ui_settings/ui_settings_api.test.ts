@@ -11,8 +11,37 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
-import { setup as httpSetup } from '../../test_helpers/http_test_setup';
+// import { setup as httpSetup } from '../../test_helpers/http_test_setup';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { HttpService } from '@kbn/core-http-browser-internal';
+
 import { UiSettingsApi } from './ui_settings_api';
+
+type SetupTap = (
+  injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>,
+  fatalErrors: ReturnType<typeof fatalErrorsServiceMock.createSetupContract>
+) => void;
+
+const defaultTap: SetupTap = (
+  injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>
+) => {
+  injectedMetadata.getBasePath.mockReturnValue('http://localhost/myBase');
+};
+
+function httpSetup(tap: SetupTap = defaultTap) {
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+
+  tap(injectedMetadata, fatalErrors);
+
+  const httpService = new HttpService();
+  const executionContext = executionContextServiceMock.createSetupContract();
+  const http = httpService.setup({ fatalErrors, injectedMetadata, executionContext });
+
+  return { httpService, injectedMetadata, fatalErrors, http };
+}
 
 function setup() {
   const { http } = httpSetup((injectedMetadata) => {

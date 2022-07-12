@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { UiSettingsService } from './ui_settings_service';
-export type { UiSettingsClient } from './ui_settings_client';
-export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type { UiSettingsState, IUiSettingsClient } from './types';

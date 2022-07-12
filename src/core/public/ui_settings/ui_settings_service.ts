@@ -11,9 +11,9 @@ import { Subject } from 'rxjs';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
-import type { IUiSettingsClient } from './types';
 
 export interface UiSettingsServiceDeps {
   http: HttpSetup;
