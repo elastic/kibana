@@ -7,8 +7,8 @@
  */
 
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObject } from '../../../types';
-import { httpServerMock } from '../../http/http_server.mocks';
 import { applyExportTransforms } from './apply_export_transforms';
 import { SavedObjectsExportTransform } from './types';
 

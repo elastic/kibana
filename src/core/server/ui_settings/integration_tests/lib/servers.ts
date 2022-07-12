@@ -18,7 +18,7 @@ import {
   HttpMethod,
   getSupertest,
 } from '../../../../test_helpers/kbn_server';
-import { httpServerMock } from '../../../http/http_server.mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;

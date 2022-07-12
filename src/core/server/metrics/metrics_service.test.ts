@@ -11,9 +11,9 @@ import moment from 'moment';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServiceMock } from '.@kbn/core-http-server-mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
-import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
 
 const testInterval = 100;

@@ -9,6 +9,8 @@
 export { config, HttpConfig } from './http_config';
 export type { HttpConfigType } from './http_config';
 export { HttpService } from './http_service';
+export { HttpServer } from './http_server';
+export type { HttpServerSetup, LifecycleRegistrar } from './http_server';
 export type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
@@ -19,3 +21,5 @@ export { BasePath } from './base_path_service';
 export { cspConfig, CspConfig } from './csp';
 
 export { externalUrlConfig, ExternalUrlConfig } from './external_url';
+
+export { createCookieSessionStorageFactory } from './cookie_session_storage';

@@ -19,10 +19,8 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-
-import { HttpService } from '../http_service';
-import { httpServerMock } from '../http_server.mocks';
-import { createCookieSessionStorageFactory } from '../cookie_session_storage';
+import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
 

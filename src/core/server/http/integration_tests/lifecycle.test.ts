@@ -13,10 +13,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-
-import { HttpService } from '../http_service';
-
-import { createHttpServer } from '../test_utils';
+import { HttpService } from '@kbn/core-http-server-internal';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
 

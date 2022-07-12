@@ -7,9 +7,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { Capabilities } from './types';
 import { resolveCapabilities } from './resolve_capabilities';
-import { httpServerMock } from '../http/http_server.mocks';
 
 describe('resolveCapabilities', () => {
   let defaultCaps: Capabilities;

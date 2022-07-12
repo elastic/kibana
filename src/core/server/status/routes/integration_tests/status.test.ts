@@ -11,10 +11,10 @@ import supertest from 'supertest';
 import { omit } from 'lodash';
 
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { createCoreContext, createHttpServer } from '../../../http/test_utils';
+import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
+import { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '../../../metrics/metrics_service.mock';
 import { MetricsServiceSetup } from '../../../metrics';
-import { HttpService, InternalHttpServiceSetup } from '../../../http';
 
 import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../types';
