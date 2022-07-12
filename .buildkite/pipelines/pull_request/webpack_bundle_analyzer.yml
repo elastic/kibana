@@ -1,4 +1,4 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
