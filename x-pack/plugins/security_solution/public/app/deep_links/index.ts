@@ -37,6 +37,7 @@ import {
   GETTING_STARTED,
   DASHBOARDS,
   CREATE_NEW_RULE,
+  THREAT_INTELLIGENCE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -63,6 +64,7 @@ import {
   DASHBOARDS_PATH,
   MANAGE_PATH,
   RULES_CREATE_PATH,
+  THREAT_INTELLIGENCE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
@@ -373,6 +375,18 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ],
       },
       {
+        id: SecurityPageName.threatIntelligence,
+        title: THREAT_INTELLIGENCE,
+        path: THREAT_INTELLIGENCE_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.threatIntelligence', {
+            defaultMessage: 'Threat Intelligence',
+          }),
+        ],
+        order: 9005,
+      },
+      {
         id: SecurityPageName.kubernetes,
         title: KUBERNETES,
         path: KUBERNETES_PATH,
@@ -383,7 +397,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             defaultMessage: 'Kubernetes',
           }),
         ],
-        order: 9005,
+        order: 9006,
       },
     ],
   },
@@ -409,7 +423,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             defaultMessage: 'Timelines',
           }),
         ],
-        order: 9006,
+        order: 9007,
         deepLinks: [
           {
             id: SecurityPageName.timelinesTemplates,
@@ -425,7 +439,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         extend: {
           [SecurityPageName.case]: {
             navLinkStatus: AppNavLinkStatus.visible,
-            order: 9007,
+            order: 9008,
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
@@ -455,7 +469,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.endpoints,
         navLinkStatus: AppNavLinkStatus.visible,
         title: ENDPOINTS,
-        order: 9008,
+        order: 9009,
         path: ENDPOINTS_PATH,
       },
       {

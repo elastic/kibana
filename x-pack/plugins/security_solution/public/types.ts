@@ -34,6 +34,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
+import { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -48,6 +49,7 @@ import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
 import { LandingPages } from './landing_pages';
+import { ThreatIntelligence } from './threat_intelligence';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -79,6 +81,7 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
+  threatIntelligence: ThreatIntelligencePluginStart;
 }
 
 export type StartServices = CoreStart &
@@ -114,6 +117,7 @@ export interface SubPlugins {
   timelines: Timelines;
   management: Management;
   landingPages: LandingPages;
+  threatIntelligence: ThreatIntelligence;
 }
 
 // TODO: find a better way to defined these types
@@ -130,4 +134,5 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
+  threatIntelligence: ReturnType<ThreatIntelligence['start']>;
 }
