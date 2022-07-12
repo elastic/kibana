@@ -6,12 +6,12 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import {
+import type {
   Direction,
   HostsRequestOptions,
   SortField,
-  HostsFields,
 } from '../../../../../../common/search_strategy';
+import { HostsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { HOSTS_FIELDS } from './helpers';

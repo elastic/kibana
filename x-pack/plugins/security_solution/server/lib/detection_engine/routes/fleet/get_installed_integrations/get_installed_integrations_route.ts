@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/constants';
-import { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
+import type { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
 import { createInstalledIntegrationSet } from './installed_integration_set';
 
 const MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY = 5;

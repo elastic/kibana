@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { LinkToApp } from './link_to_app';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 

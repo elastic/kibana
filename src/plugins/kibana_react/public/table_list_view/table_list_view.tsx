@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ThemeServiceStart, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { keyBy, uniq, get } from 'lodash';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
@@ -73,7 +74,7 @@ export interface State<T = unknown> {
   isFetchingItems: boolean;
   isDeletingItems: boolean;
   showDeleteModal: boolean;
-  fetchError?: HttpFetchError;
+  fetchError?: IHttpFetchError<Error>;
   searchQuery: string;
   selectedIds: string[];
   totalItems: number;

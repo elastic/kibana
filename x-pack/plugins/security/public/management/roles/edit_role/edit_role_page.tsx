@@ -22,12 +22,12 @@ import {
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   Capabilities,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
-  IHttpFetchError,
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';

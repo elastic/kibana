@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Immutable } from '../../../../../common/endpoint/types';
+import type { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { createLoadedResourceState, createUninitialisedResourceState } from '../../../state';
-import { EndpointState } from '../types';
+import type { EndpointState } from '../types';
 
 export const initialEndpointPageState = (): Immutable<EndpointState> => {
   return {

@@ -9,7 +9,7 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { Ecs } from '../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { plainRowRenderer } from './plain_row_renderer';
 
