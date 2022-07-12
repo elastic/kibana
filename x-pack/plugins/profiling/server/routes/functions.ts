@@ -13,7 +13,7 @@ import { createTopNFunctions } from '../../common/functions';
 import { getClient } from './compat';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
-import { createProjectTimeQuery, ProjectTimeQuery } from './query';
+import { createCommonFilter, ProjectTimeQuery } from './query';
 import {
   mgetExecutables,
   mgetStackFrames,
@@ -85,6 +85,7 @@ const querySchema = schema.object({
   timeTo: schema.string(),
   startIndex: schema.number(),
   endIndex: schema.number(),
+  kuery: schema.string(),
 });
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
@@ -100,12 +101,17 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
     },
     async (context, request, response) => {
       try {
-        const { index, projectID, timeFrom, timeTo, startIndex, endIndex }: QuerySchemaType =
+        const { index, projectID, timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType =
           request.query;
 
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
-        const filter = createProjectTimeQuery(projectID, timeFrom, timeTo);
+        const filter = createCommonFilter({
+          projectID,
+          timeFrom,
+          timeTo,
+          kuery,
+        });
 
         const topNFunctions = await queryTopNFunctions(
           logger,
