@@ -73,12 +73,17 @@ export const fetchIndices = async (
       return mapIndexStats(indexData, indexStats, indexName);
     })
     .flatMap(({ name, aliases, ...engineData }) => {
-      const engines = [];
-      engines.push({ name, ...engineData });
+      const indicesAndAliases = [];
+      indicesAndAliases.push({ name, ...engineData });
       aliases.forEach((alias) => {
-        engines.push({ name: alias, ...engineData });
+        indicesAndAliases.push({ name: alias, ...engineData });
       });
-      return engines;
+      return indicesAndAliases;
     })
-    .filter(({ name }) => name.match(indexRegExp));
+    .filter(({ name }, index, array) => {
+      return (
+        name.match(indexRegExp) &&
+        array.findIndex((engineData) => engineData.name === name) === index
+      );
+    });
 };
