@@ -65,7 +65,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       } catch (e) {
         toasts.addDanger(
           i18n.translate(
-            'xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',
+            'xpack.aiops.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',
             {
               defaultMessage: 'An error occurred setting the time range.',
             }
@@ -106,7 +106,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       {
         id: FROZEN_TIER_PREFERENCE.EXCLUDE,
         label: i18n.translate(
-          'xpack.aiOps.index.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel',
+          'xpack.aiops.index.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel',
           {
             defaultMessage: 'Exclude frozen data tier',
           }
@@ -115,7 +115,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       {
         id: FROZEN_TIER_PREFERENCE.INCLUDE,
         label: i18n.translate(
-          'xpack.aiOps.index.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel',
+          'xpack.aiops.index.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel',
           {
             defaultMessage: 'Include frozen data tier',
           }
@@ -163,7 +163,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
           data-test-subj="aiopsExplainLogRatesSpikeButtonUseFullData"
         >
           <FormattedMessage
-            id="xpack.aiOps.index.fullTimeRangeSelector.useFullDataButtonLabel"
+            id="xpack.aiops.index.fullTimeRangeSelector.useFullDataButtonLabel"
             defaultMessage="Use full data"
           />
         </EuiButton>
@@ -177,7 +177,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
               size="m"
               iconType="boxesVertical"
               aria-label={i18n.translate(
-                'xpack.aiOps.index.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
+                'xpack.aiops.index.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
                 {
                   defaultMessage: 'More options',
                 }

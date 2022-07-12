@@ -123,7 +123,7 @@ export const DocumentCountChart: FC<Props> = ({
   const timeZone = getTimezone(uiSettings);
 
   return (
-    <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
+    <div style={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
       <Chart
         size={{
           width: '100%',

@@ -49,7 +49,7 @@ export async function setFullTimeRange(
     });
   } else {
     toasts?.addWarning({
-      title: i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.noResults', {
+      title: i18n.translate('xpack.aiops.index.fullTimeRangeSelector.noResults', {
         defaultMessage: 'No results match your search criteria',
       }),
     });

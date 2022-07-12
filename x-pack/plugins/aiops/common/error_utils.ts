@@ -36,7 +36,7 @@ export interface EsErrorBody {
   status: number;
 }
 
-export interface DVResponseError {
+export interface AiOpsResponseError {
   statusCode: number;
   error: string;
   message: string;
@@ -62,7 +62,7 @@ export interface DVHttpFetchError<T> extends HttpFetchError {
 
 export type ErrorType =
   | WrappedError
-  | DVHttpFetchError<DVResponseError>
+  | DVHttpFetchError<AiOpsResponseError>
   | EsErrorBody
   | Boom.Boom
   | string
@@ -80,7 +80,7 @@ export function isErrorMessage(error: any): error is ErrorMessage {
   return error && error.message !== undefined && typeof error.message === 'string';
 }
 
-export function isDVResponseError(error: any): error is DVResponseError {
+export function isAiOpsResponseError(error: any): error is AiOpsResponseError {
   return typeof error.body === 'object' && 'message' in error.body;
 }
 
@@ -135,7 +135,7 @@ export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
     };
   }
 
-  if (isDVResponseError(error)) {
+  if (isAiOpsResponseError(error)) {
     if (
       typeof error.body.attributes === 'object' &&
       typeof error.body.attributes.body?.error?.reason === 'string'

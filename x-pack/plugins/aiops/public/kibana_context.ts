@@ -14,5 +14,5 @@ export type StartServices = CoreStart &
   AiOpsStartDependencies & {
     storage: IStorageWrapper;
   };
-export type DataVisualizerKibanaReactContextValue = KibanaReactContextValue<StartServices>;
+export type AiOpsKibanaReactContextValue = KibanaReactContextValue<StartServices>;
 export const useAiOpsKibana = () => useKibana<StartServices>();

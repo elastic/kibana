@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck // remove
+
 import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
-import type { OverallStatsSearchStrategyParams } from '../../../../../common/types/field_stats';
-
-export interface DocumentCountStats {
-  interval?: number;
-  buckets?: { [key: string]: number };
-  timeRangeEarliest?: number;
-  timeRangeLatest?: number;
-  totalCount: number;
-}
+import type {
+  DocumentCountStats,
+  OverallStatsSearchStrategyParams,
+} from '../../../../../common/types/field_stats';
 
 export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
   const {
@@ -59,7 +54,6 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     track_total_hits: true,
     size,
   };
-
   return {
     index,
     body: searchBody,

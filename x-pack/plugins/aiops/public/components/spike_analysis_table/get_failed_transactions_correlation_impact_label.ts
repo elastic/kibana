@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 
 // This is currently copied over from the APM plugin
 const CORRELATIONS_IMPACT_THRESHOLD = {
-  HIGH: i18n.translate('xpack.aiOps.correlations.highImpactText', {
+  HIGH: i18n.translate('xpack.aiops.correlations.highImpactText', {
     defaultMessage: 'High',
   }),
-  MEDIUM: i18n.translate('xpack.aiOps.correlations.mediumImpactText', {
+  MEDIUM: i18n.translate('xpack.aiops.correlations.mediumImpactText', {
     defaultMessage: 'Medium',
   }),
-  LOW: i18n.translate('xpack.aiOps.correlations.lowImpactText', {
+  LOW: i18n.translate('xpack.aiops.correlations.lowImpactText', {
     defaultMessage: 'Low',
   }),
-  VERY_LOW: i18n.translate('xpack.aiOps.correlations.veryLowImpactText', {
+  VERY_LOW: i18n.translate('xpack.aiops.correlations.veryLowImpactText', {
     defaultMessage: 'Very low',
   }),
 } as const;

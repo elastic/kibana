@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Suspense, useCallback } from 'react';
-import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+import React, { FC, useCallback } from 'react';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
@@ -19,25 +18,11 @@ import {
   isRisonSerializationRequired,
   getNestedProperty,
   SetUrlState,
-} from './hooks/url_state';
+} from '../../hooks/url_state';
 
-import type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
+import { ExplainLogRateSpikes, ExplainLogRateSpikesProps } from './explain_log_rate_spikes';
 
-const ExplainLogRateSpikesWrapperLazy = React.lazy(
-  () => import('./components/explain_log_rate_spikes')
-);
-
-const LazyWrapper: FC = ({ children }) => (
-  <EuiErrorBoundary>
-    <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
-  </EuiErrorBoundary>
-);
-
-/**
- * Lazy-wrapped ExplainLogRateSpikes React component
- * @param {ExplainLogRateSpikesProps}  props - properties specifying the data on which to run the analysis.
- */
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => {
+export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props) => {
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
 
@@ -104,10 +89,8 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => {
   );
 
   return (
-    <LazyWrapper>
-      <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-        <ExplainLogRateSpikesWrapperLazy {...props} />{' '}
-      </UrlStateContextProvider>
-    </LazyWrapper>
+    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+      <ExplainLogRateSpikes {...props} />{' '}
+    </UrlStateContextProvider>
   );
 };

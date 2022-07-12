@@ -18,7 +18,7 @@ import {
   OverallStatsSearchStrategyParams,
 } from '../get_document_stats';
 
-interface OverallStats {
+export interface OverallStats {
   totalCount: number;
   documentCountStats?: DocumentCountStats;
 }
