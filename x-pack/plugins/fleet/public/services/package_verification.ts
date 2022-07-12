@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FleetPackageErrorResponse } from '../../common';
+import type { FleetErrorResponse } from '../../common';
 
 import type { PackageInfo, PackageListItem } from '../types';
 
@@ -27,5 +27,5 @@ export function isPackageUnverified(
   return isPackageVerificationEnabled && isUnverified;
 }
 
-export const isVerificationError = (err?: FleetPackageErrorResponse) =>
+export const isVerificationError = (err?: FleetErrorResponse) =>
   err?.attributes?.type === 'verification_failed';
