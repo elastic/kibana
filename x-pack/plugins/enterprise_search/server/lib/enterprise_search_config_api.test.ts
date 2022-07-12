@@ -13,15 +13,11 @@ import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
-jest.mock('@kbn/utils', () => {
-  const actual = jest.requireActual('@kbn/utils');
-  return {
-    ...actual,
-    kibanaPackageJson: { version: '1.0.0' },
-  };
-});
+jest.mock('@kbn/utils', () => ({
+  kibanaPackageJson: { version: '1.0.0' },
+}));
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   callEnterpriseSearchConfigAPI,
