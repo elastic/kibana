@@ -143,7 +143,7 @@ export function LogExplorerLayout({
   });
 
   const onAddFilter = useCallback(
-    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
@@ -155,7 +155,7 @@ export function LogExplorerLayout({
     [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
   );
 
-  const onEditRuntimeField = useCallback(() => {
+  const onFieldEdited = useCallback(() => {
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
 
@@ -218,7 +218,7 @@ export function LogExplorerLayout({
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
-        onEditRuntimeField={onEditRuntimeField}
+        onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -241,7 +241,7 @@ export function LogExplorerLayout({
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
-              onEditRuntimeField={onEditRuntimeField}
+              onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
