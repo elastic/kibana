@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import Boom from '@hapi/boom';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
@@ -56,7 +56,7 @@ export interface AiOpsErrorObject {
   fullError?: EsErrorBody;
 }
 
-export interface AiOpsHttpFetchError<T> extends HttpFetchError {
+export interface AiOpsHttpFetchError<T> extends IHttpFetchError {
   body: T;
 }
 

@@ -27,6 +27,6 @@ const LazyWrapper: FC = ({ children }) => (
  */
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => (
   <LazyWrapper>
-    <ExplainLogRateSpikesWrapperLazy {...props} />{' '}
+    <ExplainLogRateSpikesWrapperLazy {...props} />
   </LazyWrapper>
 );
