@@ -8,12 +8,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import * as i18n from '../translations';
+
 import { NoData } from '.';
 
 describe('NoData', () => {
   test('renders the expected "no data" message', () => {
     render(<NoData />);
 
-    expect(screen.getByTestId('noDataLabel')).toHaveTextContent('No data to display');
+    expect(screen.getByText(i18n.NO_DATA_LABEL)).toBeInTheDocument();
   });
 });

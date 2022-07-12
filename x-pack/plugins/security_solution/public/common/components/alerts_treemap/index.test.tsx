@@ -13,6 +13,7 @@ import {
   mockAlertSearchResponse,
   mockNoDataAlertSearchResponse,
 } from './lib/mocks/mock_alert_search_response';
+import * as i18n from './translations';
 import type { Props } from '.';
 import { AlertsTreemap } from '.';
 
@@ -61,7 +62,7 @@ describe('AlertsTreemap', () => {
     });
 
     test('it renders the "no data" message', () => {
-      expect(screen.getByTestId('noDataLabel')).toHaveTextContent('No data to display');
+      expect(screen.getByText(i18n.NO_DATA_LABEL)).toBeInTheDocument();
     });
   });
 });
