@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../../common/constants';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { useKibana, useUiSetting$ } from '../../../../../../common/lib/kibana';
-import {
+import type {
   FilterOptions,
   PaginationOptions,
   Rule,
@@ -131,6 +139,10 @@ export interface RulesTableActions {
   setPerPage: React.Dispatch<React.SetStateAction<number>>;
   setSelectedRuleIds: React.Dispatch<React.SetStateAction<string[]>>;
   setSortingOptions: React.Dispatch<React.SetStateAction<SortingOptions>>;
+  /**
+   * clears rules selection on a page
+   */
+  clearRulesSelection: () => void;
 }
 
 export interface RulesTableContextType {
@@ -142,17 +154,13 @@ const RulesTableContext = createContext<RulesTableContextType | null>(null);
 
 interface RulesTableContextProviderProps {
   children: React.ReactNode;
-  refetchPrePackagedRulesStatus: () => Promise<void>;
 }
 
 const IN_MEMORY_STORAGE_KEY = 'detection-rules-table-in-memory';
 
 const DEFAULT_RULES_PER_PAGE = 20;
 
-export const RulesTableContextProvider = ({
-  children,
-  refetchPrePackagedRulesStatus,
-}: RulesTableContextProviderProps) => {
+export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
@@ -171,6 +179,7 @@ export const RulesTableContextProvider = ({
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
+  const autoRefreshBeforePause = useRef<boolean | null>(null);
 
   const toggleInMemorySorting = useCallback(
     (value: boolean) => {
@@ -201,6 +210,26 @@ export const RulesTableContextProvider = ({
     setIsAllSelected(false);
   }, []);
 
+  const clearRulesSelection = useCallback(() => {
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
+
+  useEffect(() => {
+    // pause table auto refresh when any of rule selected
+    // store current auto refresh value, to use it later, when all rules selection will be cleared
+    if (selectedRuleIds.length > 0) {
+      setIsRefreshOn(false);
+      if (autoRefreshBeforePause.current == null) {
+        autoRefreshBeforePause.current = isRefreshOn;
+      }
+    } else {
+      // if no rules selected, update auto refresh value, with previously stored value
+      setIsRefreshOn(autoRefreshBeforePause.current ?? isRefreshOn);
+      autoRefreshBeforePause.current = null;
+    }
+  }, [selectedRuleIds, isRefreshOn]);
+
   // Fetch rules
   const {
     data: { rules, total } = { rules: [], total: 0 },
@@ -217,13 +246,6 @@ export const RulesTableContextProvider = ({
     pagination,
     refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
   });
-
-  useEffect(() => {
-    // Synchronize re-fetching of rules and pre-packaged rule statuses
-    if (isFetched && isRefetching) {
-      refetchPrePackagedRulesStatus();
-    }
-  }, [isFetched, isRefetching, refetchPrePackagedRulesStatus]);
 
   // Paginate and sort rules
   const rulesToDisplay = isInMemorySorting
@@ -265,6 +287,7 @@ export const RulesTableContextProvider = ({
         setPerPage,
         setSelectedRuleIds,
         setSortingOptions,
+        clearRulesSelection,
       },
     }),
     [
@@ -289,7 +312,9 @@ export const RulesTableContextProvider = ({
       selectedRuleIds,
       sortingOptions,
       toggleInMemorySorting,
+      setSelectedRuleIds,
       total,
+      clearRulesSelection,
     ]
   );
 
