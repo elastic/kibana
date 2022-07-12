@@ -12,15 +12,14 @@ import React from 'react';
 import { NoDataCard } from './no_data_card';
 import { NoDataCardProvider } from './services';
 
-const services = {
-  addBasePath: (path: string) => path,
-  navigateToUrl: () => {},
-};
+import { getNoDataCardMockServices } from './jest';
 
 describe('NoDataCard', () => {
   const render = (element: React.ReactElement, canAccessFleet: boolean = true) =>
     enzymeRender(
-      <NoDataCardProvider {...{ canAccessFleet, ...services }}>{element}</NoDataCardProvider>
+      <NoDataCardProvider {...getNoDataCardMockServices({ canAccessFleet })}>
+        {element}
+      </NoDataCardProvider>
     );
 
   test('renders', () => {

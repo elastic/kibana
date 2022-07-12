@@ -9,19 +9,24 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { MouseEvent } from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
+import { Observable } from 'rxjs';
 
 import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
 import { RedirectAppLinks } from './redirect_app_links';
 import { RedirectAppLinks as ComposedWrapper } from '.';
-import { Observable } from 'rxjs';
+import { getRedirectAppLinksMockServices as getMockServices } from './jest';
 
 export type UnmountCallback = () => void;
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
 type Mount = (
   node: React.ReactElement
 ) => ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
-const commonTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => {
+const services = getMockServices();
+const { navigateToUrl } = services;
+
+const commonTests = (name: string, mount: Mount) => {
   beforeEach(() => {
     navigateToUrl.mockReset();
   });
@@ -213,7 +218,7 @@ const commonTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => {
   });
 };
 
-const targetedTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => {
+const targetedTests = (name: string, mount: Mount) => {
   beforeEach(() => {
     navigateToUrl.mockReset();
   });
@@ -245,8 +250,6 @@ const targetedTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => 
 };
 
 describe('RedirectAppLinks', () => {
-  const navigateToUrl = jest.fn();
-
   beforeEach(() => {
     navigateToUrl.mockReset();
   });
@@ -260,11 +263,6 @@ describe('RedirectAppLinks', () => {
         navigateToUrl,
       },
     },
-  };
-
-  const services = {
-    currentAppId: 'abc123',
-    navigateToUrl,
   };
 
   const provider = (node: React.ReactElement) =>
@@ -282,11 +280,11 @@ describe('RedirectAppLinks', () => {
     enzymeMount(<ComposedWrapper {...kibana}>{node}</ComposedWrapper>);
 
   describe('Test all Providers', () => {
-    commonTests('RedirectAppLinksProvider', provider, navigateToUrl);
-    targetedTests('RedirectAppLinksProvider', provider, navigateToUrl);
-    commonTests('RedirectAppLinksKibanaProvider', kibanaProvider, navigateToUrl);
-    targetedTests('RedirectAppLinksKibanaProvider', kibanaProvider, navigateToUrl);
-    commonTests('Provider Props', composedProvider, navigateToUrl);
-    commonTests('Kibana Props', composedKibanaProvider, navigateToUrl);
+    commonTests('RedirectAppLinksProvider', provider);
+    targetedTests('RedirectAppLinksProvider', provider);
+    commonTests('RedirectAppLinksKibanaProvider', kibanaProvider);
+    targetedTests('RedirectAppLinksKibanaProvider', kibanaProvider);
+    commonTests('Provider Props', composedProvider);
+    commonTests('Kibana Props', composedKibanaProvider);
   });
 });

@@ -40,10 +40,12 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
+  "@npm//@storybook/addon-actions",
   "@npm//react-use",
   "@npm//react",
   "@npm//rxjs",
   "//packages/kbn-shared-ux-utility",
+  "//packages/kbn-shared-ux-storybook",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -62,8 +64,10 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//rxjs",
   "@npm//react-use",
+  "@npm//@storybook/addon-actions",
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
+  "//packages/kbn-shared-ux-storybook:npm_module_types",
 ]
 
 jsts_transpiler(

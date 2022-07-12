@@ -14,11 +14,10 @@ import {
   getNoDataViewsPromptMockServices,
 } from '@kbn/shared-ux-prompt-no-data-views';
 
-import {
-  getNoDataCardMockServices,
-  getNoDataCardStoryArgTypes,
-  getNoDataCardStoryServices,
-} from '@kbn/shared-ux-card-no-data';
+// @ts-expect-error Pending updates to how Bazel can package storybook and jest mocks.
+import { NoDataCardStorybookMocks } from '@kbn/shared-ux-card-no-data/target_node/storybook';
+// @ts-expect-error Pending updates to how Bazel can package storybook and jest mocks.
+import { getNoDataCardMockServices } from '@kbn/shared-ux-card-no-data/target_node/jest';
 
 import { KibanaNoDataPageServices } from './services';
 
@@ -36,9 +35,10 @@ export type StoryParams = Record<keyof ReturnType<typeof getStoryArgTypes>, any>
  */
 export const getStoryServices = (params: StoryParams) => {
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
+    // @ts-expect-error This error is expected, because the type is not (yet) known.
     getNoDataViewsPromptStorybookServices(params);
 
-  const { addBasePath, canAccessFleet } = getNoDataCardStoryServices(params);
+  const { addBasePath, canAccessFleet } = NoDataCardStorybookMocks.getServices(params);
 
   // Workaround to leverage the services package.
   const { application, data, docLinks, editors, http, permissions, platform } =
@@ -85,7 +85,7 @@ export const getStoryArgTypes = () => ({
     defaultValue: false,
   },
   ...getNoDataViewsPromptStoryArgTypes(),
-  ...getNoDataCardStoryArgTypes(),
+  ...NoDataCardStorybookMocks.getServiceArgumentTypes(),
 });
 
 /**

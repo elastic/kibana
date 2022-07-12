@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard } from './no_data_card';
-export type { Props as NoDataCardProps } from './no_data_card';
+/**
+ * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
+ */
+export const getRedirectAppLinksMockServices = () => {
+  const services = {
+    navigateToUrl: jest.fn(),
+    currentAppId: 'currentAppId',
+  };
 
-export { NoDataCardKibanaProvider, NoDataCardProvider } from './services';
-export type { NoDataCardKibanaDependencies, NoDataCardServices } from './services';
+  return services;
+};

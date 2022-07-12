@@ -20,3 +20,6 @@ export {
 } from './services';
 
 export type { DataServiceFactoryConfig } from './services';
+
+export { AbstractStorybookMocks } from './mocks';
+export type { ActionHandler, Params } from './mocks';

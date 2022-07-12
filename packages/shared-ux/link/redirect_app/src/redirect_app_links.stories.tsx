@@ -11,7 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 
 import { RedirectAppLinks as Component } from '.';
-import { getStoryArgTypes, getStoryServices } from './mocks';
+import { RedirectAppLinksStorybookMocks } from './storybook';
 import mdx from '../README.mdx';
 
 export default {
@@ -28,7 +28,7 @@ export default {
 export const RedirectAppLinks = () => {
   return (
     <>
-      <Component {...getStoryServices(action)}>
+      <Component {...RedirectAppLinksStorybookMocks.getServices()}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -65,4 +65,4 @@ export const RedirectAppLinks = () => {
   );
 };
 
-RedirectAppLinks.argTypes = getStoryArgTypes();
+RedirectAppLinks.argTypes = RedirectAppLinksStorybookMocks.getArgumentTypes();
