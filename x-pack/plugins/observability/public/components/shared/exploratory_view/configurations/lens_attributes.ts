@@ -213,12 +213,24 @@ export class LensAttributes {
       isBucketed: true,
       params: {
         orderBy: isFormulaColumn
-          ? { type: 'alphabetical' }
+          ? { type: 'custom' }
           : { type: 'column', columnId: `y-axis-column-${layerId}` },
         size: 10,
         orderDirection: 'desc',
         otherBucket: true,
         missingBucket: false,
+        ...(isFormulaColumn
+          ? {
+              orderAgg: {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
+            }
+          : {}),
       },
     };
   }
