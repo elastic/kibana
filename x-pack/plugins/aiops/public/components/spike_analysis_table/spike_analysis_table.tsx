@@ -98,8 +98,6 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
 
     setPageIndex(index);
     setPageSize(size);
-
-    // onTableChange(tableSettings);
   }, []);
 
   const { pagination, pageOfItems } = useMemo(() => {

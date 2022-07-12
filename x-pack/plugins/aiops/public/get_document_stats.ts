@@ -18,7 +18,7 @@ export interface DocumentCountStats {
   totalCount: number;
 }
 
-export interface OverallStatsSearchStrategyParams {
+export interface DocumentStatsSearchStrategyParams {
   earliest?: number;
   latest?: number;
   intervalMs?: number;
@@ -28,7 +28,7 @@ export interface OverallStatsSearchStrategyParams {
   fieldsToFetch?: string[];
 }
 
-export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
+export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategyParams) => {
   const {
     index,
     timeFieldName,
@@ -78,7 +78,7 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
 
 export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
-  params: OverallStatsSearchStrategyParams
+  params: DocumentStatsSearchStrategyParams
 ): DocumentCountStats | undefined => {
   if (!body) return undefined;
 

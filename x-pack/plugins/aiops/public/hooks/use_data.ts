@@ -13,9 +13,9 @@ import { useAiOpsKibana } from '../kibana_context';
 import { useTimefilter } from './use_time_filter';
 import { aiOpsRefresh$ } from '../application/services/timefilter_refresh_service';
 import { TimeBuckets } from '../../common/time_buckets';
-import { useOverallStats } from './use_overall_stats';
+import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
-import { OverallStatsSearchStrategyParams } from '../get_document_stats';
+import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 export const useData = (
   currentDataView: DataView,
@@ -39,7 +39,7 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const fieldStatsRequest: OverallStatsSearchStrategyParams | undefined = useMemo(
+  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(
     () => {
       // Obtain the interval to use for date histogram aggregations
       // (such as the document count chart). Aim for 75 bars.
@@ -74,7 +74,7 @@ export const useData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [_timeBuckets, timefilter, currentDataView.id, lastRefresh]
   );
-  const { overallStats } = useOverallStats(fieldStatsRequest, lastRefresh);
+  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -96,7 +96,7 @@ export const useData = (
   });
 
   return {
-    overallStats,
+    docStats,
     timefilter,
   };
 };

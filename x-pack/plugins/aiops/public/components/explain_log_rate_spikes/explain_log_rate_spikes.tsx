@@ -53,7 +53,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
 
   const [globalState, setGlobalState] = useUrlState('_g');
 
-  const { overallStats, timefilter } = useData(dataView, setGlobalState);
+  const { docStats, timefilter } = useData(dataView, setGlobalState);
 
   const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,
@@ -141,11 +141,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
         <EuiHorizontalRule />
         <EuiPageContentBody>
           <EuiFlexGroup direction="column">
-            {overallStats?.totalCount !== undefined && (
+            {docStats?.totalCount !== undefined && (
               <EuiFlexItem>
                 <DocumentCountContent
-                  documentCountStats={overallStats.documentCountStats}
-                  totalCount={overallStats.totalCount}
+                  documentCountStats={docStats.documentCountStats}
+                  totalCount={docStats.totalCount}
                 />
               </EuiFlexItem>
             )}

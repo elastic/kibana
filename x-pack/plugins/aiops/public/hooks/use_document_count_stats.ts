@@ -15,10 +15,10 @@ import {
   DocumentCountStats,
   getDocumentCountStatsRequest,
   processDocumentCountStats,
-  OverallStatsSearchStrategyParams,
+  DocumentStatsSearchStrategyParams,
 } from '../get_document_stats';
 
-export interface OverallStats {
+export interface DocumentStats {
   totalCount: number;
   documentCountStats?: DocumentCountStats;
 }
@@ -49,11 +49,11 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
   }
 }
 
-export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
+export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
   lastRefresh: number
 ): {
-  overallStats: OverallStats;
+  docStats: DocumentStats;
 } {
   const {
     services: {
@@ -62,7 +62,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     },
   } = useAiOpsKibana();
 
-  const [stats, setOverallStats] = useState<OverallStats>({
+  const [stats, setStats] = useState<DocumentStats>({
     totalCount: 0,
   });
 
@@ -77,7 +77,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       );
       const documentCountStats = processDocumentCountStats(resp?.rawResponse, searchParams);
       const totalCount = documentCountStats?.totalCount ?? 0;
-      setOverallStats({
+      setStats({
         documentCountStats,
         totalCount,
       });
@@ -95,7 +95,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
   return useMemo(
     () => ({
-      overallStats: stats,
+      docStats: stats,
     }),
     [stats]
   );
