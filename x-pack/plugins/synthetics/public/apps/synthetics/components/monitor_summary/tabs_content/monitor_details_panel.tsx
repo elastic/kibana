@@ -20,26 +20,23 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { MonitorTags } from './monitor_tags';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { LocationsStatus } from './locations_status';
-import {
-  getSyntheticsMonitorAction,
-  selectMonitorStatus,
-  syntheticsMonitorSelector,
-} from '../../../state/monitor_summary';
+import { getMonitorAction, selectLatestPing } from '../../../state';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const MonitorDetailsPanel = () => {
-  const { data } = useSelector(selectMonitorStatus);
+  const latestPing = useSelector(selectLatestPing);
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const dispatch = useDispatch();
 
-  const { data: monitor, loading } = useSelector(syntheticsMonitorSelector);
+  const { monitor, loading } = useSelectedMonitor();
 
-  if (!data) {
+  if (!latestPing || latestPing.monitor.id !== monitorId) {
     return <EuiLoadingSpinner />;
   }
 
@@ -55,14 +52,14 @@ export const MonitorDetailsPanel = () => {
               id={monitorId}
               monitor={monitor}
               reloadPage={() => {
-                dispatch(getSyntheticsMonitorAction.get(monitorId));
+                dispatch(getMonitorAction.get({ monitorId }));
               }}
             />
           )}
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge>{capitalize(data.monitor.type)}</EuiBadge>
+          <EuiBadge>{capitalize(latestPing.monitor.type)}</EuiBadge>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
@@ -72,8 +69,8 @@ export const MonitorDetailsPanel = () => {
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
-          <EuiLink href={data.url?.full} external>
-            {data.url?.full}
+          <EuiLink href={latestPing.url?.full} external>
+            {latestPing.url?.full}
           </EuiLink>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>

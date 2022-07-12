@@ -11,7 +11,7 @@ import {
   syntheticsMonitorReducer,
   SyntheticsMonitorState,
 } from './monitor_summary/synthetics_montior_reducer';
-import { monitorStatusReducer, MonitorSummaryState } from './monitor_summary';
+import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
 import { indexStatusReducer, IndexStatusState } from './index_status';
 import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthetics_enablement';
@@ -25,7 +25,7 @@ export interface SyntheticsAppState {
   syntheticsEnablement: SyntheticsEnablementState;
   monitorList: MonitorListState;
   serviceLocations: ServiceLocationsState;
-  monitorStatus: MonitorSummaryState;
+  monitorDetails: MonitorDetailsState;
   syntheticsMonitor: SyntheticsMonitorState;
   overview: MonitorOverviewState;
 }
@@ -36,7 +36,7 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   syntheticsEnablement: syntheticsEnablementReducer,
   monitorList: monitorListReducer,
   serviceLocations: serviceLocationsReducer,
-  monitorStatus: monitorStatusReducer,
+  monitorDetails: monitorDetailsReducer,
   syntheticsMonitor: syntheticsMonitorReducer,
   overview: monitorOverviewReducer,
 });

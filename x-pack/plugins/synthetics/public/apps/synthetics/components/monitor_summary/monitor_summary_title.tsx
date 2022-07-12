@@ -4,37 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { useSelectedMonitor } from './hooks/use_selected_monitor';
+import { useSelectedLocation } from './hooks/use_selected_location';
+import { getMonitorRecentPingsAction, selectLatestPing } from '../../state';
 import { MonitorSummaryLastRunInfo } from './last_run_info';
-import { getMonitorStatusAction, selectMonitorStatus } from '../../state';
-import { RunTestManually } from './run_test_manually';
 
 export const MonitorSummaryTitle = () => {
   const dispatch = useDispatch();
 
-  const { data } = useSelector(selectMonitorStatus);
+  const latestPing = useSelector(selectLatestPing);
 
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { monitor } = useSelectedMonitor();
+  const location = useSelectedLocation();
 
   useEffect(() => {
-    dispatch(getMonitorStatusAction.get({ monitorId, dateStart: 'now-30d', dateEnd: 'now' }));
-  }, [dispatch, monitorId]);
+    const locationId = location?.label;
+    if (monitorId && locationId) {
+      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId }));
+    }
+  }, [dispatch, monitorId, location]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>{data?.monitor.name}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {data && <MonitorSummaryLastRunInfo ping={data} />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem>{monitor?.name}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <RunTestManually />
+        {!latestPing || latestPing.monitor.id !== monitorId ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <MonitorSummaryLastRunInfo ping={latestPing} />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

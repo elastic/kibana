@@ -7,13 +7,13 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectSelectedLocationId, setMonitorSummaryLocationAction } from '../../../state';
+import { selectSelectedLocationId, setMonitorDetailsLocationAction } from '../../../state';
 import { useUrlParams, useLocations } from '../../../hooks';
 
 export const useSelectedLocation = () => {
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { locations } = useLocations();
-  const selectedLocation = useSelector(selectSelectedLocationId);
+  const selectedLocationId = useSelector(selectSelectedLocationId);
   const dispatch = useDispatch();
 
   const { locationId: urlLocationId } = getUrlParams();
@@ -26,10 +26,10 @@ export const useSelectedLocation = () => {
       }
     }
 
-    if (urlLocationId && selectedLocation !== urlLocationId) {
-      dispatch(setMonitorSummaryLocationAction(urlLocationId));
+    if (urlLocationId && selectedLocationId !== urlLocationId) {
+      dispatch(setMonitorDetailsLocationAction(urlLocationId));
     }
-  }, [dispatch, updateUrlParams, locations, urlLocationId, selectedLocation]);
+  }, [dispatch, updateUrlParams, locations, urlLocationId, selectedLocationId]);
 
   return useMemo(
     () => locations.find((loc) => loc.id === urlLocationId) ?? null,

@@ -8,12 +8,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { MonitorSummaryTabs } from './monitor_summary_tabs';
-import { selectMonitorStatus } from '../../state/monitor_summary';
+import { selectLatestPing } from '../../state/monitor_details';
 
 export const MonitorSummaryHeaderContent = () => {
-  const { data } = useSelector(selectMonitorStatus);
+  const latestPing = useSelector(selectLatestPing);
 
-  if (!data) {
+  if (!latestPing) {
     return <></>;
   }
 

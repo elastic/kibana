@@ -6,22 +6,29 @@
  */
 
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { getSyntheticsMonitorAction, selectMonitorStatus } from '../../state/monitor_summary';
+import { useSelectedLocation } from './hooks/use_selected_location';
+import { getMonitorAction, getMonitorRecentPingsAction } from '../../state/monitor_details';
+import { selectLatestPing } from '../../state/monitor_details';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
 export const MonitorSummaryPage = () => {
-  const { data } = useSelector(selectMonitorStatus);
+  const latestPing = useSelector(selectLatestPing);
 
-  useMonitorListBreadcrumbs([{ text: data?.monitor.name ?? '' }]);
+  useMonitorListBreadcrumbs([{ text: latestPing?.monitor.name ?? '' }]);
 
   const dispatch = useDispatch();
 
+  const selectedLocation = useSelectedLocation();
   const { monitorId } = useParams<{ monitorId: string }>();
 
   useEffect(() => {
-    dispatch(getSyntheticsMonitorAction.get(monitorId));
-  }, [dispatch, monitorId]);
+    dispatch(getMonitorAction.get({ monitorId }));
+
+    if (selectedLocation) {
+      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: selectedLocation.id }));
+    }
+  }, [dispatch, monitorId, selectedLocation]);
 
   return <></>;
 };
