@@ -8,14 +8,14 @@
 import { get, getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   NetworkQueries,
   NetworkOverviewStrategyResponse,
   NetworkOverviewRequestOptions,
   OverviewNetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewNetworkQuery } from './query.overview_network.dsl';
 
 export const networkOverview: SecuritySolutionFactory<NetworkQueries.overview> = {

@@ -10,7 +10,7 @@ import {
   ACTION_STATUS_ROUTE,
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
-  GET_RUNNING_PROCESSES_ROUTE,
+  GET_PROCESSES_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'post',
-        path: GET_RUNNING_PROCESSES_ROUTE,
+        path: GET_PROCESSES_ROUTE,
         body: { endpoint_ids: ['one'] },
       },
       {

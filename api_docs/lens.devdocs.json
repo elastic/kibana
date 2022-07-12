@@ -3666,7 +3666,15 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FieldBasedIndexPatternColumn",
+                "text": "FieldBasedIndexPatternColumn"
+              },
+              " | undefined; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
               "ValueFormatConfig",
               " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],
@@ -8954,7 +8962,13 @@
         "description": [],
         "signature": [
           "(id: string | undefined, timeRange: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined) => string"
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
@@ -8982,7 +8996,13 @@
             "label": "timeRange",
             "description": [],
             "signature": [
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/constants.ts",

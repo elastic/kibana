@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
+  KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
@@ -22,7 +23,7 @@ export interface ActionResponseOutput<TOutputContent extends object = object> {
   };
 }
 
-export interface RunningProcessesEntry {
+export interface ProcessesEntry {
   command: string;
   pid: string;
   entity_id: string;
@@ -54,9 +55,9 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields {
+interface EndpointActionFields<TOutputContent extends object = object> {
   action_id: string;
-  data: EndpointActionData;
+  data: EndpointActionData<undefined, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -95,8 +96,7 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields &
-    ActionResponseFields & { output?: ActionResponseOutput<TOutputContent> };
+  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
   error?: EcsError;
 }
 
@@ -118,10 +118,14 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId;
 
-export interface EndpointActionData<T extends EndpointActionDataParameterTypes = never> {
+export interface EndpointActionData<
+  T extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   command: ResponseActions;
   comment?: string;
   parameters?: T;
+  output?: ActionResponseOutput<TOutputContent>;
 }
 
 export interface FleetActionResponseData {
@@ -217,11 +221,13 @@ export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.b
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
+export type KillOrSuspendProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
+
 export interface HostIsolationResponse {
   action: string;
 }
 
-export type RunningProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 export interface ResponseActionApiResponse<TOutput extends object = object> {
   action?: string;
   data: ActionDetails<TOutput>;
