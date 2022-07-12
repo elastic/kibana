@@ -13,7 +13,6 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { Visualization } from '../../../types';
-import { IndexPatternPrivateState } from '../../../indexpattern_datasource/types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
@@ -190,8 +189,7 @@ export function LayerPanels(
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
             const layerDatasource = datasourceMap[datasourceId];
-            const layerDatasourceState = datasourceStates?.[datasourceId]
-              ?.state as IndexPatternPrivateState;
+            const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
 
             const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
             const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
@@ -200,10 +198,10 @@ export function LayerPanels(
               trigger,
               toDataView: null,
               fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
-              usedDataViews: Object.values(
-                Object.values(layerDatasourceState.layers).map((layer) => layer.indexPatternId)
-              ),
-              defaultDataView: layerDatasourceState.currentIndexPatternId,
+              usedDataViews: layerDatasource
+                .getLayers(layerDatasourceState)
+                .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+              defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
             } as ActionExecutionContext);
 
             dispatchLens(

@@ -354,7 +354,7 @@ export interface Datasource<T = unknown, P = unknown> {
     references2: SavedObjectReference[]
   ) => boolean;
   /**
-   * Get the DataView value which was before replacement
+   * Get the used DataView value from state
    */
   getUsedDataView: (state: T, layerId: string) => string;
 }
