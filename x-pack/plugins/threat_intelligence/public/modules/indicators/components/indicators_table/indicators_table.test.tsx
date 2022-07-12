@@ -8,7 +8,7 @@
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsTable, IndicatorsTableProps } from './indicators_table';
-import { TestProvidersComponent } from '../../../../common/test_providers';
+import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 
 const stub = () => {};
 

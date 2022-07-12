@@ -12,7 +12,7 @@ import { generateMockIndicator, RawIndicatorFieldId } from '../../../../../commo
 import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
-import { TestProvidersComponent } from '../../../../common/test_providers';
+import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { fullDateFormatter } from '../../../../common/utils/dates';
 
 const mockIndicator = generateMockIndicator();

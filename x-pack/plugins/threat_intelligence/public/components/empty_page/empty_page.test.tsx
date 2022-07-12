@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { render, screen, queryByAttribute } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
-import { EmptyPage, displayName } from './empty_page';
-
-const queryByTestSubj = queryByAttribute.bind(null, 'data-test-subj');
+import { TestProvidersComponent } from '../../common/mocks/test_providers';
+import { EmptyPage, displayName, TEST_ID_EMPTY_PAGE_DOCS_LINK } from './empty_page';
 
 describe('<EmptyPage />', () => {
   describe('default state', () => {
     it('should render', () => {
-      const result = render(<EmptyPage integrationsPageLink="https://google.com" />);
-      const integrationsPageLink = queryByTestSubj(
-        result.container,
-        `${displayName}-integrations-page-link`
+      const { getByTestId } = render(
+        <TestProvidersComponent>
+          <EmptyPage integrationsPageLink="https://google.com" />
+        </TestProvidersComponent>
       );
+      const integrationsPageLink = getByTestId(`${displayName}-integrations-page-link`);
 
-      expect(
-        screen.queryByText('Get started with Elastic Threat intelligence')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Get started with Elastic Threat Intelligence')).toBeInTheDocument();
 
       expect(integrationsPageLink).toBeInTheDocument();
       expect(integrationsPageLink).toHaveAttribute('href', 'https://google.com');
+
+      expect(getByTestId(TEST_ID_EMPTY_PAGE_DOCS_LINK)).toBeInTheDocument();
     });
   });
 });

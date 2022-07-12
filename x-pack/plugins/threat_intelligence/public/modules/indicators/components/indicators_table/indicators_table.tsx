@@ -53,6 +53,8 @@ const columns: Column[] = [
 
 export type IndicatorsTableProps = UseIndicatorsValue;
 
+export const TEST_ID_INDICATORS_TABLE = 'tiIndicatorsTable';
+
 export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   indicators,
   indicatorCount,
@@ -130,6 +132,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           cellPadding: 'm',
           fontSize: 's',
         }}
+        data-test-subj={TEST_ID_INDICATORS_TABLE}
       />
     </div>
   );
