@@ -2179,10 +2179,10 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
-      ...(this.updateRuleAttrIsSnoozedUntil({
+      ...this.updateRuleAttrIsSnoozedUntil({
         ...newAttrs,
         isSnoozedUntil: attributes.isSnoozedUntil,
-      })),
+      }),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2253,11 +2253,11 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       snoozeSchedule,
-      ...(this.updateRuleAttrIsSnoozedUntil({
+      ...this.updateRuleAttrIsSnoozedUntil({
         isSnoozedUntil: attributes.isSnoozedUntil,
         snoozeSchedule,
         muteAll: !scheduleIds ? false : attributes.muteAll,
-      })),
+      }),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
       ...(!scheduleIds ? { muteAll: false } : {}),
@@ -2276,16 +2276,16 @@ export class RulesClient {
     muteAll: boolean;
     snoozeSchedule?: RuleSnooze;
     isSnoozedUntil?: Date | string | null;
-  }): { isSnoozedUntil?: string} | {} {
+  }): { isSnoozedUntil?: string } | {} {
     const isSnoozedUntil = getRuleSnoozeEndTime(rule);
 
     if (!isSnoozedUntil && !rule.isSnoozedUntil) return {};
 
     return isSnoozedUntil
       ? {
-        isSnoozedUntil: isSnoozedUntil.toISOString(),
-      }
-      : {}
+          isSnoozedUntil: isSnoozedUntil.toISOString(),
+        }
+      : {};
   }
 
   public async clearExpiredSnoozes({ id }: { id: string }): Promise<void> {
@@ -2307,14 +2307,13 @@ export class RulesClient {
 
     if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
 
-
     const updateAttributes = this.updateMeta({
       snoozeSchedule,
-      ...(this.updateRuleAttrIsSnoozedUntil({
+      ...this.updateRuleAttrIsSnoozedUntil({
         snoozeSchedule,
         isSnoozedUntil: attributes.isSnoozedUntil,
         muteAll: attributes.muteAll,
-      })),
+      }),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
