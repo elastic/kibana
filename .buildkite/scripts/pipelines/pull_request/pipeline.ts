@@ -127,7 +127,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
