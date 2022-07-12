@@ -87,6 +87,7 @@ export const mockState: SyntheticsAppState = {
       pages: {},
     },
     error: null,
+    loaded: false,
     loading: false,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
