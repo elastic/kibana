@@ -21,6 +21,7 @@ import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
 import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 import { TopErrors } from '../../../app/transaction_details/top_errors';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
 export function TransactionCharts({
   kuery,
@@ -41,6 +42,10 @@ export function TransactionCharts({
   comparisonEnabled?: boolean;
   offset?: string;
 }) {
+  // The default EuiFlexGroup breaks at 768, but we want to break at 1200
+  const { isLarge } = useBreakpoints();
+  const rowDirection = isLarge ? 'column' : 'row';
+
   const latencyChart = (
     <EuiFlexItem data-cy={`transaction-duration-charts`}>
       <EuiPanel hasBorder={true}>
@@ -96,11 +101,15 @@ export function TransactionCharts({
                 {coldStartRateOrBreakdownChart}
               </EuiFlexGrid>
               <EuiSpacer size="l" />
-              <EuiFlexGroup>
+              <EuiFlexGroup
+                direction={rowDirection}
+                gutterSize="s"
+                responsive={false}
+              >
                 {failedTransactionRateChart}
                 <EuiFlexItem grow={2}>
                   <EuiPanel hasBorder={true}>
-                    {transactionName && <TopErrors />}
+                    <TopErrors />
                   </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>
