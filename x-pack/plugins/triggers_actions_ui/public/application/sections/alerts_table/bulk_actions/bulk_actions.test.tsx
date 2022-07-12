@@ -6,7 +6,7 @@
  */
 import React, { useReducer } from 'react';
 
-import { render, waitFor, within } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
@@ -213,6 +213,7 @@ describe('AlertsTable.BulkActions', () => {
                 ...alertsData,
                 alerts: secondPageAlerts,
                 alertsCount: secondPageAlerts.length,
+                activePage: 1,
               };
             },
             initialBulkActionsState: {
@@ -329,8 +330,6 @@ describe('AlertsTable.BulkActions', () => {
 
           userEvent.click(getByTestId('selectedShowBulkActionsButton'));
 
-          await waitFor(() => expect(getByText('Fake Bulk Action')).toBeVisible());
-
           userEvent.click(getByText('Fake Bulk Action'));
           expect(mockedFn.mock.calls[mockedFn.mock.calls.length - 1]).toEqual([false, ['alert1']]);
         });
@@ -384,7 +383,7 @@ describe('AlertsTable.BulkActions', () => {
         });
 
         describe('and executing a bulk action', () => {
-          it('should return the are all selected flag set to true', async () => {
+          it('should return the are all selected flag set to true', () => {
             const mockedFn = jest.fn(() => [
               <EuiContextMenuItem key={'key'} onClick={() => {}}>
                 {'Fake Bulk Action'}
@@ -413,9 +412,6 @@ describe('AlertsTable.BulkActions', () => {
             );
 
             userEvent.click(getByTestId('selectedShowBulkActionsButton'));
-
-            await waitFor(() => expect(getByText('Fake Bulk Action')).toBeVisible());
-
             userEvent.click(getByText('Fake Bulk Action'));
             expect(mockedFn.mock.calls[mockedFn.mock.calls.length - 1]).toEqual([
               true,
