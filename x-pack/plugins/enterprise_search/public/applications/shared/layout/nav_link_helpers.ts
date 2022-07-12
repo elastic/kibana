@@ -13,15 +13,15 @@ import { KibanaLogic } from '../kibana';
 import { generateReactRouterProps, ReactRouterProps } from '../react_router_helpers';
 
 interface Params {
-  to: string;
-  shouldShowActiveForSubroutes?: boolean;
   items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
+  shouldShowActiveForSubroutes?: boolean;
+  to: string;
 }
 
 export const generateNavLink = ({ to, items, ...rest }: Params & ReactRouterProps) => {
   return {
     ...generateReactRouterProps({ to, ...rest }),
-    isSelected: getNavLinkActive({ to, items, ...rest }),
+    isSelected: getNavLinkActive({ items, to, ...rest }),
     items,
   };
 };
@@ -33,11 +33,11 @@ export const getNavLinkActive = ({
   shouldNotCreateHref = false,
 }: Params & ReactRouterProps): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
-  // @ts-ignore TODO: Not sure where this is coming from. Is Kibana inserting it?
+  // @ts-ignore TODO: Not sure where history.basePath is coming from. Is Kibana inserting it?
   const basePath: string = KibanaLogic.values.history.basePath;
   const currentPath = stripTrailingSlash(pathname);
 
-  // If shouldNotCreateHref is true then `to` will include the react router basePath
+  // If shouldNotCreateHref is true then we expect `to` to already include the react router basePath
   // see x-pack/plugins/enterprise_search/public/applications/shared/react_router_helpers/create_href.ts
   const path = shouldNotCreateHref ? basePath + currentPath : currentPath;
 

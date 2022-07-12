@@ -32,7 +32,6 @@ describe('useEnterpriseSearchContentNav', () => {
       },
       {
         id: 'search_experiences',
-        name: 'Search experiences',
         items: [
           {
             href: '/app/enterprise_search/elasticsearch',
@@ -50,6 +49,7 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Workplace Search',
           },
         ],
+        name: 'Search experiences',
       },
     ]);
   });

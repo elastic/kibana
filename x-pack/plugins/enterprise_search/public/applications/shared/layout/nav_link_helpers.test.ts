@@ -27,8 +27,8 @@ describe('generateNavLink', () => {
 
     expect(navItem).toEqual({
       href: '/app/enterprise_search/test',
-      onClick: expect.any(Function),
       isSelected: false,
+      onClick: expect.any(Function),
     });
 
     navItem.onClick({} as any);
@@ -53,8 +53,8 @@ describe('generateNavLink', () => {
     it('returns true when to includes a basePath and shouldNotCreateHref=true', () => {
       mockKibanaValues.history.location.pathname = '/test';
       const isSelected = getNavLinkActive({
-        to: '/app/enterprise_search/test',
         shouldNotCreateHref: true,
+        to: '/app/enterprise_search/test',
       });
 
       expect(isSelected).toEqual(true);
@@ -63,7 +63,7 @@ describe('generateNavLink', () => {
     describe('shouldShowActiveForSubroutes', () => {
       it('returns true if the current path is a subroute of the passed path', () => {
         mockKibanaValues.history.location.pathname = '/hello/world';
-        const isSelected = getNavLinkActive({ to: '/hello', shouldShowActiveForSubroutes: true });
+        const isSelected = getNavLinkActive({ shouldShowActiveForSubroutes: true, to: '/hello' });
 
         expect(isSelected).toEqual(true);
       });
@@ -77,9 +77,9 @@ describe('generateNavLink', () => {
       it('returns false if subroutes already have their own items subnav (with active state)', () => {
         mockKibanaValues.history.location.pathname = '/items/123/settings';
         const isSelected = getNavLinkActive({
-          to: '/items',
-          shouldShowActiveForSubroutes: true,
           items: [{ id: 'settings', name: 'Settings' }],
+          shouldShowActiveForSubroutes: true,
+          to: '/items',
         });
 
         expect(isSelected).toEqual(false);
@@ -87,7 +87,7 @@ describe('generateNavLink', () => {
 
       it('returns false if not a valid subroute', () => {
         mockKibanaValues.history.location.pathname = '/hello/world';
-        const isSelected = getNavLinkActive({ to: '/world', shouldShowActiveForSubroutes: true });
+        const isSelected = getNavLinkActive({ shouldShowActiveForSubroutes: true, to: '/world' });
 
         expect(isSelected).toEqual(false);
       });
@@ -102,9 +102,9 @@ describe('generateNavLink', () => {
       it('returns true when to includes a basePath and shouldNotCreateHref=true', () => {
         mockKibanaValues.history.location.pathname = '/hello/world';
         const isSelected = getNavLinkActive({
-          to: '/app/enterprise_search/hello',
           shouldNotCreateHref: true,
           shouldShowActiveForSubroutes: true,
+          to: '/app/enterprise_search/hello',
         });
 
         expect(isSelected).toEqual(true);
@@ -113,7 +113,7 @@ describe('generateNavLink', () => {
   });
 
   it('optionally passes items', () => {
-    const navItem = generateNavLink({ to: '/test', items: [] });
+    const navItem = generateNavLink({ items: [], to: '/test' });
 
     expect(navItem.items).toEqual([]);
   });
