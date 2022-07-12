@@ -9,18 +9,17 @@ import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { RuleAlertType } from '../../rules/types';
 
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
-  BulkActionsDryRunErrCode,
 } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -34,7 +33,6 @@ import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_conc
 import type { PromisePoolError, PromisePoolOutcome } from '../../../../utils/promise_pool';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwAuthzError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
@@ -45,7 +43,12 @@ import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
 import type { DryRunError } from '../../rules/bulk_actions/dry_run';
-import { throwDryRunError, dryRunBulkEdit } from '../../rules/bulk_actions/dry_run';
+import {
+  validateBulkEnableRule,
+  validateBulkDisableRule,
+  validateBulkDuplicateRule,
+  dryRunValidateBulkEditRule,
+} from '../../rules/bulk_actions/validations';
 import type { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
@@ -383,22 +386,15 @@ export const performBulkActionRoute = (
         let created: RuleAlertType[] = [];
         let deleted: RuleAlertType[] = [];
 
-        const throwDryRunMlAuth = (ruleType: Type) =>
-          throwDryRunError(
-            async () => throwAuthzError(await mlAuthz.validateRuleType(ruleType)),
-            BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH
-          );
-
         switch (body.action) {
           case BulkAction.enable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                // during dry run only validation is getting performed and rule is not saved in ES
                 if (isDryRun) {
-                  if (!rule.enabled) {
-                    await throwDryRunMlAuth(rule.params.type);
-                  }
+                  validateBulkEnableRule({ mlAuthz, rule });
                   return rule;
                 }
 
@@ -409,7 +405,7 @@ export const performBulkActionRoute = (
                 });
 
                 if (!migratedRule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  validateBulkEnableRule({ mlAuthz, rule: migratedRule });
                   await rulesClient.enable({ id: migratedRule.id });
                 }
 
@@ -429,10 +425,9 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                // during dry run only validation is getting performed and rule is not saved in ES
                 if (isDryRun) {
-                  if (rule.enabled) {
-                    await throwDryRunMlAuth(rule.params.type);
-                  }
+                  validateBulkDisableRule({ mlAuthz, rule });
                   return rule;
                 }
 
@@ -443,7 +438,7 @@ export const performBulkActionRoute = (
                 });
 
                 if (migratedRule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  validateBulkDisableRule({ mlAuthz, rule: migratedRule });
                   await rulesClient.disable({ id: migratedRule.id });
                 }
 
@@ -464,6 +459,7 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                // during dry run return early for delete, as no validations needed for this action
                 if (isDryRun) {
                   return null;
                 }
@@ -494,8 +490,9 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                // during dry run only validation is getting performed and rule is not saved in ES
                 if (isDryRun) {
-                  await throwDryRunMlAuth(rule.params.type);
+                  validateBulkDuplicateRule({ mlAuthz, rule });
                   return rule;
                 }
 
@@ -505,8 +502,7 @@ export const performBulkActionRoute = (
                   rule,
                 });
 
-                throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
-
+                validateBulkDuplicateRule({ mlAuthz, rule: migratedRule });
                 const createdRule = await rulesClient.create({
                   data: duplicateRule(migratedRule),
                 });
@@ -540,13 +536,13 @@ export const performBulkActionRoute = (
             });
 
           // will be processed only when isDryRun === true
+          // during dry run only validation is getting performed and rule is not saved in ES
           case BulkAction.edit:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                await throwDryRunMlAuth(rule.params.type);
-                await dryRunBulkEdit(rule, body.edit);
+                await dryRunValidateBulkEditRule({ mlAuthz, rule, edit: body.edit });
 
                 return rule;
               },

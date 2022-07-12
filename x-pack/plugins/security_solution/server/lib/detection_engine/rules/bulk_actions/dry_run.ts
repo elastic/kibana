@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { invariant } from '../../../../../common/utils/invariant';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { BulkActionsDryRunErrCode } from '../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/common/schemas';
-import type { RuleAlertType } from '../types';
-import { isIndexPatternsBulkEditAction } from './utils';
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 
 /**
  * Error instance that has properties: errorCode & statusCode to use within run_dry
@@ -42,28 +37,4 @@ export const throwDryRunError = async (
   } catch (e) {
     throw new DryRunError(e.message, errorCode, e.statusCode);
   }
-};
-
-/**
- * executes dry run validations for bulk edit of rule
- * @param rule {@link RuleAlertType} that should be validated
- * @param edit {@link  BulkActionEditPayload}[] bulk edit payload
- */
-export const dryRunBulkEdit = async (rule: RuleAlertType, edit: BulkActionEditPayload[]) => {
-  // if rule is immutable, it can't be edited
-  await throwDryRunError(
-    () => invariant(rule.params.immutable === false, "Elastic rule can't be edited"),
-    BulkActionsDryRunErrCode.IMMUTABLE
-  );
-
-  // if rule is machine_learning, index pattern action can't be applied to it
-  await throwDryRunError(
-    () =>
-      invariant(
-        !isMlRule(rule.params.type) ||
-          !edit.some((action) => isIndexPatternsBulkEditAction(action.type)),
-        "Machine learning rule doesn't have index patterns"
-      ),
-    BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN
-  );
 };
