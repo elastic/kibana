@@ -13,8 +13,8 @@ import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchCountWidgetData } from './hooks';
 import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
 
-export const LOADING_TEST_ID = 'kubernetesSecurity:count-widget-loading';
-export const TOOLTIP_TEST_ID = 'kubernetesSecurity:count-widget-tooltip';
+export const LOADING_TEST_ID = 'kubernetesSecurity:countWidgetLoading';
+export const TOOLTIP_TEST_ID = 'kubernetesSecurity:countWidgetTooltip';
 
 export interface CountWidgetDeps {
   title: string;
@@ -54,7 +54,7 @@ export const CountWidget = ({
   );
 
   const countValue = useMemo((): number => {
-    return data ? Number(data?.pages[0]) : 0;
+    return data ? data?.pages[0] : 0;
   }, [data]);
 
   const formattedNumber = useMemo((): string => {
@@ -70,7 +70,6 @@ export const CountWidget = ({
           data-test-subj={TOOLTIP_TEST_ID}
           aria-label="Info"
           position="top"
-          onMouseOut={() => {}}
         />
       </div>
       <EuiFlexGroup direction="column" gutterSize="m">

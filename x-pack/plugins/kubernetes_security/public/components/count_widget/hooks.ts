@@ -9,7 +9,6 @@ import { useInfiniteQuery } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QUERY_KEY_COUNT_WIDGET, COUNT_ROUTE } from '../../../common/constants';
-import { CountResult } from '../../../common/types/count';
 
 export const useFetchCountWidgetData = (
   widgetKey: string,
@@ -23,7 +22,7 @@ export const useFetchCountWidgetData = (
   const query = useInfiniteQuery(
     cachingKeys,
     async () => {
-      const res = await http.get<CountResult>(COUNT_ROUTE, {
+      const res = await http.get<number>(COUNT_ROUTE, {
         query: {
           query: filterQuery,
           field: groupedBy,
