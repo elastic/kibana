@@ -22,10 +22,10 @@ export const SEARCH_GROUP_SORT_BY = i18n.translate('xpack.kubernetesSecurity.sea
   defaultMessage: 'Sort by',
 });
 
-export const WIDGET_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.show', {
-  defaultMessage: 'Show widgets',
+export const CHART_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.chartsToggle.show', {
+  defaultMessage: 'Show charts',
 });
 
-export const WIDGET_TOGGLE_HIDE = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.hide', {
-  defaultMessage: 'Hide widgets',
+export const CHART_TOGGLE_HIDE = i18n.translate('xpack.kubernetesSecurity.chartsToggle.hide', {
+  defaultMessage: 'Hide charts',
 });

@@ -36,7 +36,7 @@ import { AggregateResult } from '../../../common/types/aggregate';
 import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
-import { WidgetsToggle } from '../widgets_toggle';
+import { ChartsToggle } from '../charts_toggle';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
@@ -44,7 +44,7 @@ const KubernetesSecurityRoutesComponent = ({
   globalFilter,
   renderSessionsView,
 }: KubernetesSecurityDeps) => {
-  const [shouldHideWidgets, setShouldHideWidgets] = useLocalStorage(
+  const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
     false
   );
@@ -75,9 +75,9 @@ const KubernetesSecurityRoutesComponent = ({
     []
   );
 
-  const handleToggleHideWidgets = useCallback(() => {
-    setShouldHideWidgets(!shouldHideWidgets);
-  }, [setShouldHideWidgets, shouldHideWidgets]);
+  const handleToggleHideCharts = useCallback(() => {
+    setShouldHideCharts(!shouldHideCharts);
+  }, [setShouldHideCharts, shouldHideCharts]);
 
   return (
     <Switch>
@@ -91,13 +91,13 @@ const KubernetesSecurityRoutesComponent = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
             <div css={styles.updatedAt}>{lastUpdated}</div>
-            <WidgetsToggle
-              shouldHideWidgets={shouldHideWidgets}
-              handleToggleHideWidgets={handleToggleHideWidgets}
+            <ChartsToggle
+              shouldHideCharts={shouldHideCharts}
+              handleToggleHideCharts={handleToggleHideCharts}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {!shouldHideWidgets && (
+        {!shouldHideCharts && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
