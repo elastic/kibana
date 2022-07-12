@@ -23,7 +23,7 @@ export const useEnterpriseSearchNav = () => {
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
       id: 'es_overview',
-      name: i18n.translate('xpack.enterpriseSearch.content.nav.enterpriseSearchOverviewTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
         defaultMessage: 'Overview',
       }),
       ...generateNavLink({
@@ -34,13 +34,13 @@ export const useEnterpriseSearchNav = () => {
     {
       id: 'content',
       emphasize: true,
-      name: i18n.translate('xpack.enterpriseSearch.content.nav.contentTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',
       }),
       items: [
         {
           id: 'search_indices',
-          name: i18n.translate('xpack.enterpriseSearch.content.nav.searchIndicesTitle', {
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle', {
             defaultMessage: 'Indices',
           }),
           ...generateNavLink({
@@ -59,7 +59,7 @@ export const useEnterpriseSearchNav = () => {
       items: [
         {
           id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearch', {
+          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
             defaultMessage: 'Elasticsearch',
           }),
           ...generateNavLink({
@@ -69,7 +69,7 @@ export const useEnterpriseSearchNav = () => {
         },
         {
           id: 'app_search',
-          name: i18n.translate('xpack.enterpriseSearch.content.nav.appSearchTitle', {
+          name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
             defaultMessage: 'App Search',
           }),
           ...generateNavLink({
@@ -79,7 +79,7 @@ export const useEnterpriseSearchNav = () => {
         },
         {
           id: 'workplace_search',
-          name: i18n.translate('xpack.enterpriseSearch.content.nav.workplaceSearchTitle', {
+          name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
             defaultMessage: 'Workplace Search',
           }),
           ...generateNavLink({
