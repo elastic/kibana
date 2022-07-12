@@ -95,8 +95,8 @@ export const sendEndpointActionResponse = async (
       data: {
         command: action.command as EndpointActionData['command'],
         comment: '',
+        ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       },
-      ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       started_at: action.startedAt,
     },
   });

@@ -142,10 +142,10 @@ export const getActionCompletionInfo = (
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
         if (
           normalizedAgentResponse.endpointResponse &&
-          normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output
+          normalizedAgentResponse.endpointResponse.item.data.EndpointActions.data.output
         ) {
           completedInfo.outputs[agentId] =
-            normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output;
+            normalizedAgentResponse.endpointResponse.item.data.EndpointActions.data.output;
         }
       }
 
