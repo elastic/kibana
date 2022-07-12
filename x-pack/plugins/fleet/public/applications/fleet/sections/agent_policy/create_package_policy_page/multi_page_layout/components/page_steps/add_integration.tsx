@@ -12,12 +12,14 @@ import { safeLoad } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
 
+import { isVerificationError } from '../../../../../../../../services';
+
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
 import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import { Error } from '../../../../../../components';
+import { Error, UnverifiedPackageModal } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
@@ -136,32 +138,45 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   );
 
   // Save package policy
-  const savePackagePolicy = async (pkgPolicy: NewPackagePolicy) => {
+  const savePackagePolicy = async ({
+    newPackagePolicy,
+    force,
+  }: {
+    newPackagePolicy: NewPackagePolicy;
+    force?: boolean;
+  }) => {
     setFormState('LOADING');
-    const result = await sendCreatePackagePolicy(pkgPolicy);
+    const result = await sendCreatePackagePolicy({ ...newPackagePolicy, force });
     setFormState('SUBMITTED');
     return result;
   };
 
-  const onSubmit = useCallback(async () => {
-    const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
+  const onSubmit = useCallback(
+    async ({ force = false }: { force?: boolean } = {}) => {
+      const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-    if (formState === 'VALID' && hasErrors) {
-      setFormState('INVALID');
-      return;
-    }
-    setFormState('LOADING');
+      if (formState === 'VALID' && hasErrors) {
+        setFormState('INVALID');
+        return;
+      }
+      setFormState('LOADING');
 
-    const { error } = await savePackagePolicy(packagePolicy);
-    if (error) {
-      notifications.toasts.addError(error, {
-        title: 'Error',
-      });
-      setFormState('VALID');
-    } else {
-      onNext();
-    }
-  }, [validationResults, formState, packagePolicy, notifications.toasts, onNext]);
+      const { error } = await savePackagePolicy({ newPackagePolicy: packagePolicy, force });
+      if (error) {
+        if (isVerificationError(error)) {
+          setFormState('CONFIRM_FAILED_VERIFICATION');
+          return;
+        }
+        notifications.toasts.addError(error, {
+          title: 'Error',
+        });
+        setFormState('VALID');
+      } else {
+        onNext();
+      }
+    },
+    [validationResults, formState, packagePolicy, notifications.toasts, onNext]
+  );
 
   useEffect(() => {
     const getBasePolicy = async () => {
@@ -197,6 +212,13 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
   return (
     <>
+      {formState === 'CONFIRM_FAILED_VERIFICATION' && agentPolicy && packageInfo && (
+        <UnverifiedPackageModal
+          onConfirm={() => onSubmit({ force: true })}
+          onCancel={() => setFormState('VALID')}
+          pkg={packageInfo}
+        />
+      )}
       {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} />}
       <EuiSpacer size={'l'} />
       <StepConfigurePackagePolicy
@@ -223,7 +245,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       <NotObscuredByBottomBar />
       <CreatePackagePolicyBottomBar
         cancelClickHandler={isManaged ? onBack : () => setIsManaged(true)}
-        onNext={onSubmit}
+        onNext={() => onSubmit()}
         isLoading={formState === 'LOADING'}
         isDisabled={formState === 'INVALID'}
         loadingMessage={
