@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -17,6 +17,7 @@ import {
   EuiIconTip,
   htmlIdGenerator,
   EuiButtonGroup,
+  EuiComboBox,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -59,6 +60,28 @@ export function supportsRarityRanking(field?: IndexPatternField) {
     ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
   );
 }
+
+const getTermsIncludeExcludeOptions = (include?: string[], exclude?: string[]) => {
+  const includeOptions = include?.map((term) => ({
+    label: String(term),
+  }));
+  const excludeOptions = exclude?.map((term) => ({
+    label: String(term),
+  }));
+  return {
+    ...(includeOptions?.length && { include: includeOptions }),
+    ...(excludeOptions?.length && { exclude: excludeOptions }),
+  };
+};
+
+interface IncludeExcludeOptions {
+  label: string;
+}
+
+const isRegex = (text: string) => {
+  const specialCharacters = /[`@#&*()+\=\[\]{}'"\\|.<>\/?~]/;
+  return specialCharacters.test(text);
+};
 
 export type { TermsIndexPatternColumn } from './types';
 
@@ -318,6 +341,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       orderAgg,
       size: column.params.size,
       shardSize,
+      ...(column.params.include?.length && { include: column.params.include }),
+      ...(column.params.exclude?.length && { exclude: column.params.exclude }),
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -547,11 +572,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     operationDefinitionMap,
     ReferenceEditor,
     paramEditorCustomProps,
+    activeData,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
       undefined
     );
+    const [includeExcludeSelectedOptions, setIncludeExcludeSelectedOptions] = useState(
+      getTermsIncludeExcludeOptions(currentColumn.params.include, currentColumn.params.exclude)
+    );
+
+    const [termsOptions, setTermsOptions] = useState<IncludeExcludeOptions[] | undefined>(
+      undefined
+    );
+
+    const [isPatternUsed, setIsPatternUsed] = useState<boolean>(false);
 
     const hasRestrictions = indexPattern.hasRestrictions;
 
@@ -579,6 +614,97 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         columnId: parts[1],
       };
     }
+
+    useEffect(() => {
+      if (includeExcludeSelectedOptions?.include?.length) return;
+
+      const tableRows = activeData?.[rest.layerId]?.rows;
+      const uniqueTerms = uniq(tableRows?.map((row) => row[columnId])).filter(
+        (row) => row !== '__other__'
+      );
+      const options = uniqueTerms?.map((row) => {
+        return {
+          label: String(row),
+        };
+      });
+      setTermsOptions(options);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeData, columnId, rest.layerId]);
+
+    const onChangeIncludeExcludeOptions = (
+      selectedOptions: IncludeExcludeOptions[],
+      operation: 'include' | 'exclude'
+    ) => {
+      setIsPatternUsed(false);
+      const options = {
+        ...includeExcludeSelectedOptions,
+        [operation]: selectedOptions,
+      };
+      setIncludeExcludeSelectedOptions(options);
+      const terms = selectedOptions.map((option) => {
+        if (!Number.isNaN(Number(option.label))) {
+          return Number(option.label);
+        }
+        return option.label;
+      });
+      paramEditorUpdater(
+        updateColumnParam({
+          layer,
+          columnId,
+          paramName: operation,
+          value: terms,
+        })
+      );
+    };
+
+    const onCreateOption = (
+      searchValue: string,
+      flattenedOptions: IncludeExcludeOptions[] = [],
+      operation: 'include' | 'exclude'
+    ) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      // check if is regex
+      const hasSpecialCharacters = isRegex(searchValue);
+      if (hasSpecialCharacters) {
+        setIsPatternUsed(true);
+      }
+
+      const newOption = {
+        label: searchValue,
+      };
+
+      let includeExcludeOptions = [];
+
+      const includeORExcludeSelectedOptions = hasSpecialCharacters
+        ? []
+        : includeExcludeSelectedOptions[operation] ?? [];
+      includeExcludeOptions = [...includeORExcludeSelectedOptions, newOption];
+      const options = {
+        ...includeExcludeSelectedOptions,
+        [operation]: includeExcludeOptions,
+      };
+      setIncludeExcludeSelectedOptions(options);
+
+      const terms = includeExcludeOptions.map((option) => {
+        if (!Number.isNaN(Number(option.label))) {
+          return Number(option.label);
+        }
+        return option.label;
+      });
+
+      paramEditorUpdater(
+        updateColumnParam({
+          layer,
+          columnId,
+          paramName: operation,
+          value: terms,
+        })
+      );
+    };
 
     const orderOptions = Object.entries(layer.columns)
       .filter(([sortId]) => isSortableByColumn(layer, sortId))
@@ -997,6 +1123,69 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
+              {(currentColumn.dataType === 'number' || currentColumn.dataType === 'string') && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiFormRow
+                    label={i18n.translate('xpack.lens.indexPattern.terms.include', {
+                      defaultMessage: 'Include terms',
+                    })}
+                    display="rowCompressed"
+                    fullWidth
+                  >
+                    <EuiComboBox
+                      aria-label={i18n.translate('xpack.lens.indexPattern.terms.include', {
+                        defaultMessage: 'Include terms',
+                      })}
+                      placeholder={i18n.translate(
+                        'xpack.lens.indexPattern.terms.includeExcludePlaceholder',
+                        {
+                          defaultMessage: 'Select existing terms or create a new one',
+                        }
+                      )}
+                      options={termsOptions}
+                      selectedOptions={includeExcludeSelectedOptions.include}
+                      onChange={(options) => onChangeIncludeExcludeOptions(options, 'include')}
+                      onCreateOption={(searchValue, options) =>
+                        onCreateOption(searchValue, options, 'include')
+                      }
+                      isClearable={true}
+                      data-test-subj="demoComboBox"
+                      autoFocus
+                      singleSelection={isPatternUsed}
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                  <EuiFormRow
+                    label={i18n.translate('xpack.lens.indexPattern.terms.exclude', {
+                      defaultMessage: 'Exclude terms',
+                    })}
+                    display="rowCompressed"
+                    fullWidth
+                  >
+                    <EuiComboBox
+                      aria-label={i18n.translate('xpack.lens.indexPattern.terms.exclude', {
+                        defaultMessage: 'Exclude terms',
+                      })}
+                      placeholder={i18n.translate(
+                        'xpack.lens.indexPattern.terms.includeExcludePlaceholder',
+                        {
+                          defaultMessage: 'Select existing terms or create a new one',
+                        }
+                      )}
+                      options={termsOptions}
+                      selectedOptions={includeExcludeSelectedOptions.exclude}
+                      onChange={(options) => onChangeIncludeExcludeOptions(options, 'exclude')}
+                      onCreateOption={(searchValue, options) =>
+                        onCreateOption(searchValue, options, 'exclude')
+                      }
+                      isClearable={true}
+                      data-test-subj="demoComboBox"
+                      autoFocus
+                    />
+                  </EuiFormRow>
+                </>
+              )}
             </EuiAccordion>
           </>
         )}

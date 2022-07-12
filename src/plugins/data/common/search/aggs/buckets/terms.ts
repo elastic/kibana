@@ -45,8 +45,8 @@ export interface AggParamsTerms extends BaseAggParams {
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string;
-  include?: string;
+  exclude?: string[] | number[];
+  include?: string[] | number[];
 }
 
 export const getTermsBucketAgg = () =>
