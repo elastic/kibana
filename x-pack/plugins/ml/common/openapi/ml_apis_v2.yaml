@@ -1,0 +1,144 @@
+swagger: "2.0"
+info:
+  title: Machine learning APIs
+  version: "0.1"
+  description: Kibana APIs for the machine learning feature
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+host: localhost:5601
+basePath: /
+schemes: 
+  - https
+tags:
+  - name: ml
+    description: Machine learning
+paths:
+  /s/{spaceId}/api/ml/saved_objects/sync:
+    get:
+      produces:
+      - application/json
+      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
+      description: >
+        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        This API runs automatically when you start Kibana and periodically thereafter.
+      parameters:
+      - name: simulate
+        description: When true, simulates the synchronization by returning only the list actions that would be performed.
+        in: query
+        required: false
+        type: string
+        x-example: "true"
+      - name: spaceId
+        description: An identifier for the space.
+        in: path
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Indicates a successful call
+          schema:
+            $ref: '#/definitions/SyncResponse'
+  /api/ml/saved_objects/sync:
+    get:
+      produces:
+      - application/json
+      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
+      description: >
+        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        This API runs automatically when you start Kibana and periodically thereafter.
+      parameters:
+      - name: simulate
+        description: When true, simulates the synchronization by returning only the list actions that would be performed.
+        in: query
+        required: false
+        type: string
+        x-example: "true"
+      responses:
+        "200":
+          description: Indicates a successful call
+          schema:
+            $ref: '#/definitions/SyncResponse'
+definitions:
+  DatafeedsAdded:
+    type: object
+    description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+    additionalProperties:
+      type: object
+      properties:
+        success:
+          type: boolean
+  DatafeedsRemoved:
+    type: object
+    description: If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+    additionalProperties:
+      type: object
+      properties:
+        success:
+          type: boolean
+  SavedObjectsCreated:
+    type: object
+    description: If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+    properties:
+      anomaly-detector:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+      data-frame-analytics:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+      trained-model:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+  SavedObjectsDeleted:
+    type: object
+    description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+    properties:
+      anomaly-detector:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+      data-frame-analytics:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+      trained-model:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+  SyncResponse:
+    properties:
+      savedObjectsCreated:
+        $ref: '#/definitions/SavedObjectsCreated'
+      savedObjectsDeleted:
+        $ref: '#/definitions/SavedObjectsDeleted'
+      datafeedsAdded:
+        $ref: '#/definitions/DatafeedsAdded'
+      datafeedsRemoved:
+        $ref: '#/definitions/DatafeedsRemoved'

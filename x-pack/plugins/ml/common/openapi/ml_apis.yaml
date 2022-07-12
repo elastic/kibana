@@ -14,6 +14,7 @@ servers:
 paths:
   /s/{spaceId}/api/ml/saved_objects/sync:
     get:
+      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
       description: >
         Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
