@@ -52,7 +52,7 @@ function getTableState<T>(state: State<T>, action: OnFetchItemsSuccessAction<T>)
   };
 }
 
-export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
+export function reducer<T extends { id?: string }>(state: State<T>, action: Action<T>): State<T> {
   switch (action.type) {
     case 'onFetchItems': {
       return {
@@ -74,9 +74,8 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         ...state,
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: !state.filter ? sortBy<T>(items, 'title') : items,
+        items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
         totalItems: action.data.response.total,
-        showLimitError: action.data.response.total > action.data.listingLimit,
         ...tableColumnState,
         pagination: {
           ...state.pagination,
@@ -91,14 +90,13 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
         isFetchingItems: false,
         items: [],
         totalItems: 0,
-        showLimitError: false,
         fetchError: action.data,
       };
     }
-    case 'onFilterChange': {
+    case 'onSearchQueryChange': {
       return {
         ...state,
-        filter: action.data,
+        searchQuery: action.data,
         isFetchingItems: true,
       };
     }
@@ -143,9 +141,7 @@ export function reducer<T>(state: State<T>, action: Action<T>): State<T> {
     case 'onSelectionChange': {
       return {
         ...state,
-        selectedIds: action.data
-          .map((item) => (item as unknown as { id?: string })?.id)
-          .filter((id): id is string => Boolean(id)),
+        selectedIds: action.data.map((item) => item?.id).filter((id): id is string => Boolean(id)),
       };
     }
   }

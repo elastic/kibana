@@ -19,7 +19,6 @@ export interface OnFetchItemsSuccessAction<T> {
       total: number;
       hits: T[];
     };
-    listingLimit: number;
   };
 }
 
@@ -47,7 +46,7 @@ export interface OnClickDeleteItemsAction {
 }
 
 export interface OnFilterChangeAction {
-  type: 'onFilterChange';
+  type: 'onSearchQueryChange';
   data: string;
 }
 
