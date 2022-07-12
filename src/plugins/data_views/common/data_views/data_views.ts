@@ -792,6 +792,8 @@ export class DataViewsService {
       await this.refreshFields(indexPattern);
     }
 
+    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
+
     return indexPattern;
   }
 
@@ -838,7 +840,6 @@ export class DataViewsService {
     )) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response);
-    this.dataViewCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
