@@ -6,35 +6,19 @@
  */
 
 import React from 'react';
-import {
-  AllSeries,
-  ALL_VALUES_SELECTED,
-} from '@kbn/observability-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
+import { AllSeries } from '@kbn/observability-plugin/public';
+import { useExpViewAttributes } from './use_exp_view_attrs';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 
 interface Props {
   breakdown: BreakdownItem | null;
   onPercentileChange: (min: number, max: number) => void;
-  start: string;
-  end: string;
-  uiFilters: UxUIFilters;
 }
 
-export function PageLoadDistChart({
-  onPercentileChange,
-  breakdown,
-  uiFilters,
-  start,
-  end,
-}: Props) {
+export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
   const { dataViewTitle } = useDataView();
 
   const kibana = useKibanaServices();
@@ -48,35 +32,28 @@ export function PageLoadDistChart({
     onPercentileChange(minX, maxX);
   };
 
+  const { reportDefinitions, time } = useExpViewAttributes();
+
   const allSeries: AllSeries = [
     {
+      time,
+      reportDefinitions,
       dataType: 'ux',
       name: 'page-load-distribution',
       selectedMetricField: TRANSACTION_DURATION,
-      reportDefinitions: {
-        [SERVICE_ENVIRONMENT]:
-          !uiFilters?.environment ||
-          uiFilters.environment === ENVIRONMENT_ALL.value
-            ? [ALL_VALUES_SELECTED]
-            : [uiFilters.environment],
-        [SERVICE_NAME]: uiFilters?.serviceName ?? [ALL_VALUES_SELECTED],
-      },
-      time: {
-        to: end,
-        from: start,
-      },
       breakdown: breakdown?.fieldName,
     },
   ];
 
   return (
     <ExploratoryViewEmbeddable
-      customHeight={'250px'}
+      customHeight={'300px'}
       attributes={allSeries}
       onBrushEnd={onBrushEnd}
       reportType="data-distribution"
       dataTypesIndexPatterns={{ ux: dataViewTitle }}
-      isSingleMetric={true}
+      legendIsVisible={Boolean(breakdown)}
+      axisTitlesVisibility={{ x: true, yLeft: true, yRight: false }}
     />
   );
 }

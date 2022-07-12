@@ -14,7 +14,7 @@ export function PageLoadAndViews() {
   return (
     <EuiFlexGroup gutterSize="s" wrap>
       <EuiFlexItem style={{ flexBasis: 650 }}>
-        <EuiPanel hasBorder={true}>
+        <EuiPanel hasBorder={true} style={{ paddingBottom: 0 }}>
           <PageLoadDistribution />
         </EuiPanel>
       </EuiFlexItem>
