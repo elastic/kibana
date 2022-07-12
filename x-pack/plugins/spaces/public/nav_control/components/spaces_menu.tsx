@@ -102,7 +102,7 @@ class SpacesMenuUI extends Component<Props> {
         noMatchesMessage={noSpacesMessage}
         emptyMessage={noSpacesMessage}
         options={spaceMenuOptions}
-        singleSelection={true}
+        singleSelection="always"
         style={{ width: 300 }}
         onChange={this.spaceSelectionChange}
         listProps={{
@@ -164,17 +164,17 @@ class SpacesMenuUI extends Component<Props> {
 
       if (event.shiftKey) {
         // Open in new window, shift is given priority over other modifiers
-        // console.log(`**** SHIFT CLICK`);
-        window.open(urlToSelectedSpace);
+        console.log(`**** SHIFT CLICK`);
+        // window.open(urlToSelectedSpace);
       } else if (event.ctrlKey || event.metaKey) {
         // Open in new tab - either a ctrl click or middle mouse button
-        // console.log(`**** CTRL/CMD CLICK`);
-        window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
+        console.log(`**** CTRL/CMD CLICK`);
+        // window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
       } else {
         // Force full page reload (usually not a good idea, but we need to in order to change spaces)
         // console.log(`**** URL: ${urlToSelectedSpace}`);
-        // console.log(`**** NORMAL CLICK`);
-        this.props.navigateToUrl(urlToSelectedSpace);
+        console.log(`**** NORMAL CLICK`);
+        // this.props.navigateToUrl(urlToSelectedSpace);
       }
     }
   };
