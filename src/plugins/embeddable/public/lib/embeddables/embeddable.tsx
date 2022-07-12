@@ -97,7 +97,7 @@ export abstract class Embeddable<
       );
   }
 
-  protected reportsEmbeddableLoad() {
+  public reportsEmbeddableLoad() {
     return false;
   }
 
