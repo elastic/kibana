@@ -27,6 +27,7 @@ export interface SaveModalDashboardProps {
   onClose: () => void;
   onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
+  showSaveFilters?: boolean;
 }
 
 /**

@@ -8,6 +8,7 @@
 
 import React from 'react';
 import moment from 'moment';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiBetaBadgeProps } from '@elastic/eui';
@@ -156,9 +157,12 @@ export const getTopNavConfig = (
     });
 
     savedVis.savedSearchId = vis.data.savedSearchId;
-    if (!Boolean(saveOptions.saveFilters) && vis.data.searchSource) {
+    const { returnToOrigin, saveFilters } = saveOptions;
+    if (!Boolean(saveFilters) && vis.data.searchSource && !returnToOrigin) {
       vis.data.searchSource.setField('filter', []);
       data.query.filterManager.setAppFilters([]);
+    } else if (Boolean(saveFilters) && vis.data.searchSource) {
+      vis.data.searchSource.setField('filter', cloneDeep(data.query.filterManager.getAppFilters()));
     }
     savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
@@ -588,6 +592,7 @@ export const getTopNavConfig = (
                           })
                         : undefined
                     }
+                    showSaveFilters={true}
                   />
                 );
               } else {
