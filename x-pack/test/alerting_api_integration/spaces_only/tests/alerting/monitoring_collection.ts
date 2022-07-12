@@ -19,13 +19,14 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createEsDocuments } from './builtin_alert_types/lib/create_test_data';
 
 const NODE_RULES_MONITORING_COLLECTION_URL = `/api/monitoring_collection/node_rules`;
+const CLUSTER_RULES_MONITORING_COLLECTION_URL = `/api/monitoring_collection/cluster_rules`;
 const RULE_INTERVAL_SECONDS = 6;
 const RULE_INTERVALS_TO_WRITE = 5;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 const ES_GROUPS_TO_WRITE = 3;
 
 // eslint-disable-next-line import/no-default-export
-export default function inMemoryMetricsAlertTests({ getService }: FtrProviderContext) {
+export default function alertingMonitoringCollectionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
@@ -33,7 +34,7 @@ export default function inMemoryMetricsAlertTests({ getService }: FtrProviderCon
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const waitForExecutionCount = createWaitForExecutionCount(supertest, Spaces.space1.id);
 
-  describe('inMemoryMetrics', () => {
+  describe('monitoring_collection', () => {
     let endDate: string;
     const objectRemover = new ObjectRemover(supertest);
 
@@ -48,7 +49,7 @@ export default function inMemoryMetricsAlertTests({ getService }: FtrProviderCon
 
     after(async () => await objectRemover.removeAll());
 
-    it('should count executions', async () => {
+    it('inMemoryMetrics should count executions', async () => {
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -67,7 +68,7 @@ export default function inMemoryMetricsAlertTests({ getService }: FtrProviderCon
       expect(getResponse.body.node_rules.executions).to.greaterThan(0);
     });
 
-    it('should count failures', async () => {
+    it('inMemoryMetrics should count failures', async () => {
       const pattern = [false]; // Once we start failing, the rule type doesn't update state so the failures have to be at the end
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -95,7 +96,7 @@ export default function inMemoryMetricsAlertTests({ getService }: FtrProviderCon
       expect(getResponse.body.node_rules.failures).to.greaterThan(0);
     });
 
-    it('should count timeouts', async () => {
+    it('inMemoryMetrics should count timeouts', async () => {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
@@ -144,6 +145,16 @@ export default function inMemoryMetricsAlertTests({ getService }: FtrProviderCon
       const getResponse = await supertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.node_rules.timeouts).to.greaterThan(0);
+    });
+
+    it('should calculate overdue task count and percentiles', async () => {
+      // We're not forcing any overdue tasks for this test, just testing that the
+      // route returns successfully and that the expected fields are there
+      const getResponse = await supertest.get(CLUSTER_RULES_MONITORING_COLLECTION_URL);
+      expect(getResponse.status).to.eql(200);
+      expect(typeof getResponse.body.cluster_rules.overdue.count).to.eql('number');
+      expect(typeof getResponse.body.cluster_rules.overdue.delay.p50).to.eql('number');
+      expect(typeof getResponse.body.cluster_rules.overdue.delay.p99).to.eql('number');
     });
   });
 }
