@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+
 import {
   Accessor,
   Dictionary,
@@ -19,10 +32,47 @@ import {
   getNestedProperty,
   SetUrlState,
 } from '../../hooks/url_state';
+import { useData } from '../../hooks/use_data';
+import { useUrlState } from '../../hooks/url_state';
+
+import { FullTimeRangeSelector } from '../full_time_range_selector';
+import { DocumentCountContent } from '../document_count_content/document_count_content';
+import { DatePickerWrapper } from '../date_picker_wrapper';
 
 import { ExplainLogRateSpikes, ExplainLogRateSpikesProps } from './explain_log_rate_spikes';
 
 export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props) => {
+  const { dataView } = props;
+
+  const [globalState, setGlobalState] = useUrlState('_g');
+
+  const { docStats, timefilter } = useData(dataView, setGlobalState);
+
+  const activeBounds = timefilter.getActiveBounds();
+  let earliest: number | undefined;
+  let latest: number | undefined;
+  if (activeBounds !== undefined) {
+    earliest = activeBounds.min?.valueOf();
+    latest = activeBounds.max?.valueOf();
+  }
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
+
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
+
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
 
@@ -88,9 +138,59 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props
     [history, urlSearchString]
   );
 
+  if (!dataView || !timefilter) return null;
+
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <ExplainLogRateSpikes {...props} />{' '}
+      <EuiPageBody data-test-subj="aiOpsIndexPage" paddingSize="none" panelled={false}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiPageContentHeader className="aiOpsPageHeader">
+              <EuiPageContentHeaderSection>
+                <div className="aiOpsTitleHeader">
+                  <EuiTitle size={'s'}>
+                    <h2>{dataView.title}</h2>
+                  </EuiTitle>
+                </div>
+              </EuiPageContentHeaderSection>
+
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="s"
+                data-test-subj="aiOpsTimeRangeSelectorSection"
+              >
+                {dataView.timeFieldName !== undefined && (
+                  <EuiFlexItem grow={false}>
+                    <FullTimeRangeSelector
+                      dataView={dataView}
+                      query={undefined}
+                      disabled={false}
+                      timefilter={timefilter}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageContentHeader>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule />
+        <EuiPageContentBody>
+          {docStats?.totalCount !== undefined && (
+            <DocumentCountContent
+              documentCountStats={docStats.documentCountStats}
+              totalCount={docStats.totalCount}
+            />
+          )}
+          {earliest !== undefined && latest !== undefined && (
+            <ExplainLogRateSpikes {...props} earliest={earliest} latest={latest} />
+          )}
+        </EuiPageContentBody>
+      </EuiPageBody>
     </UrlStateContextProvider>
   );
 };
