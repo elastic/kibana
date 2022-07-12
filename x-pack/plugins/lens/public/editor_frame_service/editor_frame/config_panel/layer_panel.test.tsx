@@ -164,6 +164,10 @@ describe('LayerPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       expect(cb).toHaveBeenCalled();
     });
   });
@@ -825,6 +829,7 @@ describe('LayerPanel', () => {
         .find(DragDrop)
         .at(1)
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .at(1)
         .instance();
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondButton);

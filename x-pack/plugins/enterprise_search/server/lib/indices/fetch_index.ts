@@ -9,6 +9,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
 import { Connector } from '../../types/connector';
+import { Crawler } from '../../types/crawler';
 
 import { mapIndexStats } from './fetch_indices';
 
@@ -21,17 +22,32 @@ export const fetchIndex = async (client: IScopedClusterClient, index: string) =>
   }
   const indexStats = indices[index];
   const indexResult = mapIndexStats(indexData, indexStats, index);
+
   const connectorResult = await client.asCurrentUser.search<Connector>({
     index: CONNECTORS_INDEX,
     query: { term: { 'index_name.keyword': index } },
   });
-  const connector = connectorResult.hits.hits[0] ? connectorResult.hits.hits[0]._source : undefined;
+  const connector = connectorResult.hits.hits[0]?._source ?? undefined;
+
   if (connector) {
     return {
       connector: { ...connector, id: connectorResult.hits.hits[0]._id },
       index: indexResult,
     };
-  } else {
-    return { index: indexResult };
   }
+
+  const crawlerResult = await client.asCurrentUser.search<Crawler>({
+    index: '.ent-search-actastic-crawler2_configurations',
+    query: { term: { index_name: index } },
+  });
+  const crawler = crawlerResult.hits.hits[0]?._source ?? undefined;
+
+  if (crawler) {
+    return {
+      crawler,
+      index: indexResult,
+    };
+  }
+
+  return { index: indexResult };
 };
