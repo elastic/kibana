@@ -1900,7 +1900,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendSize={130}
           noResults={
             <VisualizationNoResults
-              chartType="mosaic"
+              chartType="waffle"
               renderComplete={[Function]}
             />
           }
