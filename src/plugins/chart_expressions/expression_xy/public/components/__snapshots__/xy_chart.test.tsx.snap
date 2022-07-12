@@ -413,6 +413,62 @@ exports[`XYChart component it renders area 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={false}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -449,6 +505,11 @@ exports[`XYChart component it renders area 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -465,6 +526,31 @@ exports[`XYChart component it renders area 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -742,7 +828,9 @@ exports[`XYChart component it renders area 1`] = `
           },
           "seriesType": "area",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -1033,6 +1121,62 @@ exports[`XYChart component it renders bar 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -1069,6 +1213,11 @@ exports[`XYChart component it renders bar 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -1085,6 +1234,31 @@ exports[`XYChart component it renders bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -1362,7 +1536,9 @@ exports[`XYChart component it renders bar 1`] = `
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -1653,6 +1829,62 @@ exports[`XYChart component it renders horizontal bar 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -1689,6 +1921,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -1705,6 +1942,31 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -1982,7 +2244,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -2273,6 +2537,62 @@ exports[`XYChart component it renders line 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={false}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -2309,6 +2629,11 @@ exports[`XYChart component it renders line 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -2325,6 +2650,31 @@ exports[`XYChart component it renders line 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -2602,7 +2952,9 @@ exports[`XYChart component it renders line 1`] = `
           },
           "seriesType": "line",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -2893,6 +3245,62 @@ exports[`XYChart component it renders stacked area 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={false}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -2929,6 +3337,11 @@ exports[`XYChart component it renders stacked area 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -2945,6 +3358,31 @@ exports[`XYChart component it renders stacked area 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -3222,7 +3660,9 @@ exports[`XYChart component it renders stacked area 1`] = `
           },
           "seriesType": "area",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -3513,6 +3953,62 @@ exports[`XYChart component it renders stacked bar 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -3549,6 +4045,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -3565,6 +4066,31 @@ exports[`XYChart component it renders stacked bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -3842,7 +4368,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -4133,6 +4661,62 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -4169,6 +4753,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -4185,6 +4774,31 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -4462,7 +5076,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -4813,6 +5429,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -4829,6 +5450,31 @@ exports[`XYChart component split chart should render split chart if both, splitR
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -5054,6 +5700,73 @@ exports[`XYChart component split chart should render split chart if both, splitR
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+          "splitRowAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -5090,6 +5803,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -5106,6 +5824,31 @@ exports[`XYChart component split chart should render split chart if both, splitR
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -5383,7 +6126,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -5735,6 +6480,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -5751,6 +6501,31 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -5975,6 +6750,69 @@ exports[`XYChart component split chart should render split chart if splitColumnA
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+          "splitRowAccessors": Object {},
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -6011,6 +6849,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -6027,6 +6870,31 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -6304,7 +7172,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {
@@ -6654,6 +7524,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -6670,6 +7545,31 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -6894,6 +7794,69 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
     defaultXScaleType="ordinal"
+    fieldFormats={
+      Object {
+        "first": Object {
+          "splitColumnAccessors": Object {},
+          "splitRowAccessors": Object {
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+          "splitSeriesAccessors": Object {
+            "d": Object {
+              "format": Object {
+                "id": "string",
+              },
+              "formatter": Object {
+                "convert": [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      1652034840000,
+                    ],
+                    Array [
+                      1652122440000,
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 1652122440000,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          "xAccessors": Object {
+            "c": Object {
+              "id": "string",
+            },
+          },
+          "yAccessors": Object {
+            "a": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "b": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -6930,6 +7893,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           ],
           Array [
             Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
               "id": "number",
               "params": Object {
                 "pattern": "0,0.000",
@@ -6946,6 +7914,31 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -7223,7 +8216,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           },
           "seriesType": "bar",
           "showLines": true,
-          "splitAccessor": "d",
+          "splitAccessors": Array [
+            "d",
+          ],
           "table": Object {
             "columns": Array [
               Object {

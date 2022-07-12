@@ -37,8 +37,6 @@ jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
-    [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
-    [CONSTANTS.savedQuery]: '',
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
@@ -171,10 +169,10 @@ describe('useSecuritySolutionNavigation', () => {
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-href": "securitySolutionUI/cases?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "data-test-subj": "navigation-cases",
             "disabled": false,
-            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "href": "securitySolutionUI/cases?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "id": "cases",
             "isSelected": false,
             "name": "Cases",
