@@ -104,7 +104,6 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(false);
-              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -166,7 +165,6 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(false);
-              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -239,7 +237,6 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(false);
-              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -312,7 +309,6 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(false);
-              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
