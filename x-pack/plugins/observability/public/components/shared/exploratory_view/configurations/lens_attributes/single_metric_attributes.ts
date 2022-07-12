@@ -112,7 +112,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         format: {
           id: 'percent',
           params: {
-            decimals: 2,
+            decimals: 1,
           },
         },
       },
@@ -159,6 +159,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       layerId: 'layer0',
       layerType: 'data',
       ...(this.metricStateOptions ?? {}),
+      size: 's',
     };
   }
 
