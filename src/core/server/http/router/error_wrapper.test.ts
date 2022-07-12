@@ -7,10 +7,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
+import type {
+  KibanaResponseFactory,
+  RequestHandlerContextBase,
+  KibanaRequest,
+  RequestHandler,
+} from '@kbn/core-http-server';
+import { kibanaResponseFactory, KibanaResponse } from './response';
 import { wrapErrors } from './error_wrapper';
-import { RequestHandlerContextBase } from '../..';
-import { KibanaRequest, RequestHandler } from '..';
 
 const createHandler =
   (handler: () => any): RequestHandler<any, any, any> =>
