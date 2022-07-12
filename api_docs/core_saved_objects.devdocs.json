@@ -7808,13 +7808,7 @@
               "The http request initiating the export."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/server/saved_objects/export/types.ts",
@@ -9219,13 +9213,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
@@ -10045,13 +10033,7 @@
               "\nThe request that initiated the export request. Can be used to create scoped\nservices or client inside the {@link SavedObjectsExportTransform | transformation}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/server/saved_objects/export/types.ts",
@@ -12101,13 +12083,7 @@
             ],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
               {
                 "pluginId": "core",
@@ -12128,13 +12104,7 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
@@ -13144,13 +13114,7 @@
             ],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>, options?: ",
               {
                 "pluginId": "core",
@@ -13179,13 +13143,7 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
@@ -13227,13 +13185,7 @@
             ],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
               {
                 "pluginId": "core",
@@ -13256,13 +13208,7 @@
                   "- The request to create the scoped repository from."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
@@ -15333,13 +15279,7 @@
         ],
         "signature": [
           "({ request, includedHiddenTypes, }: { request: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }) => ",
           {
             "pluginId": "core",
@@ -15362,13 +15302,7 @@
             "description": [],
             "signature": [
               "{ request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }"
             ],
             "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
