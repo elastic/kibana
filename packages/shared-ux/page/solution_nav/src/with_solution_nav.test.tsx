@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
+
+import { SolutionNavProps } from './solution_nav';
 import { withSolutionNav } from './with_solution_nav';
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
 const TestComponent = () => {
   return <div>This is a wrapped component</div>;
 };
 
-const items: KibanaPageTemplateSolutionNavProps['items'] = [
+const items: SolutionNavProps['items'] = [
   {
     name: 'Ingest',
     id: '1',
