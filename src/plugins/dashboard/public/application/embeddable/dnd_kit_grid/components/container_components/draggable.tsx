@@ -11,14 +11,17 @@ import { DragMoveEvent, useDndMonitor, useDraggable } from '@dnd-kit/core';
 import { css } from '@emotion/react';
 import { EuiIcon } from '@elastic/eui';
 import { PanelState } from '../../types';
+// import { GridStackNode } from 'gridstack/dist/types';
+
 interface Props {
   id: string;
   startingPanelState: PanelState;
+  updatePanel: (itemId: string, partialItem: Partial<PanelState>) => void;
   element?: React.ElementType | string;
   children?: JSX.Element | JSX.Element[];
 }
 
-export const Draggable = ({ id, startingPanelState, element, children }: Props) => {
+export const Draggable = ({ id, startingPanelState, updatePanel, element, children }: Props) => {
   useDndMonitor({
     onDragEnd(event) {
       if (event.active.id === id) setElementPos(event);
@@ -41,13 +44,41 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
   };
 
   const setElementPos = (event: DragMoveEvent) => {
-    setPanelState({
+    const pixelX = panelState.x * columnSize.current + event.delta.x;
+    const pixelY = panelState.y * 26 + event.delta.y;
+
+    const column = Math.max(Math.round(pixelX / columnSize.current), 0);
+    const row = Math.max(Math.round(pixelY / 26), 0);
+
+    const newPanelState = {
       ...panelState,
-      pos: {
-        x: Math.max(panelState.pos.x + event.delta.x, 0),
-        y: Math.max(panelState.pos.y + event.delta.y, 0),
-      },
-    });
+      x: column,
+      y: row,
+    };
+    console.log('Set element position:', newPanelState);
+    setPanelState(newPanelState);
+    updatePanel(id, newPanelState);
+  };
+
+  const setElementSize = (ref: HTMLDivElement, delta: { width: number; height: number }) => {
+    const pixelWidth = panelState.w * columnSize.current + delta.width;
+    const pixelHeight = panelState.h * 26 + delta.height;
+
+    // had to do this to overwrite the default resize so that I could force snap to the grid
+    ref.setAttribute(
+      'style',
+      'position: relative; user-select: auto; border: 1px dashed red; background: lightyellow; padding: 10px; width: 100%; height: 100%;'
+    );
+
+    // using round instead of ceil so that we wrap **to the closest** right OR left column
+    const newPanelState = {
+      ...panelState,
+      w: Math.round(pixelWidth / columnSize.current),
+      h: Math.round(pixelHeight / 26),
+    };
+    console.log('Set element size:', newPanelState);
+    setPanelState(newPanelState);
+    updatePanel(id, newPanelState);
   };
 
   // this should probably be stored as state as part of the GRID instead of for each panel
@@ -59,29 +90,15 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
     updateColumnWidth();
   }, []);
 
-  const { columnStart, columnEnd, rowStart, rowEnd } = useMemo(() => {
-    // using round instead of ceil so that we wrap **to the closest** right OR left column
-    const startC = Math.round(panelState.pos.x / columnSize.current) + 1;
-    const startR = Math.round(panelState.pos.y / 26) + 1;
-
-    return {
-      columnStart: startC,
-      columnEnd: startC + panelState.w,
-      rowStart: startR,
-      rowEnd: startR + panelState.h,
-    };
-  }, [panelState]);
-
-  const positionStyles = useMemo(
-    () => css`
-      grid-column-start: ${columnStart};
-      grid-column-end: ${columnEnd};
-      grid-row-start: ${rowStart};
-      grid-row-end: ${rowEnd};
+  const positionStyles = useMemo(() => {
+    return css`
+      grid-column-start: ${panelState.x + 1};
+      grid-column-end: ${panelState.x + 1 + panelState.w};
+      grid-row-start: ${panelState.y + 1};
+      grid-row-end: ${panelState.y + 1 + panelState.h};
       opacity: ${isDragging ? '0.5' : ''};
-    `,
-    [columnStart, columnEnd, rowStart, rowEnd, isDragging]
-  );
+    `;
+  }, [panelState, isDragging]);
 
   return (
     <Element ref={setNodeRef} css={positionStyles}>
@@ -92,23 +109,13 @@ export const Draggable = ({ id, startingPanelState, element, children }: Props) 
           background: 'lightyellow',
           padding: '10px',
         }}
+        enable={{
+          bottom: true,
+          bottomRight: true,
+          right: true,
+        }}
         onResizeStop={(e, direction, ref, d) => {
-          const pixelWidth = panelState.w * columnSize.current + d.width;
-          const pixelHeight = panelState.h * 26 + d.height;
-
-          // had to do this to overwrite the default resize so that I could force snap to the grid
-          ref.setAttribute(
-            'style',
-            'position: relative; user-select: auto; border: 1px dashed red; background: lightyellow; padding: 10px; width: 100%; height: 100%;'
-          );
-          // ref.updateSize({ width: 200, height: 300 });
-
-          // using round instead of ceil so that we wrap **to the closest** right OR left column
-          setPanelState({
-            ...panelState,
-            w: Math.round(pixelWidth / columnSize.current),
-            h: Math.round(pixelHeight / 26),
-          });
+          setElementSize(ref, d);
         }}
       >
         <EuiIcon type="grab" {...listeners} {...attributes} />

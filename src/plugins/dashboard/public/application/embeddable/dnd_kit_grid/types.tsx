@@ -8,20 +8,14 @@
 
 export interface PanelState {
   id: string;
-  pos: {
-    x: number;
-    y: number;
-  };
+  x: number;
+  y: number;
   w: number;
   h: number;
-  // initPos: {
-  //   x: number;
-  //   y: number;
-  // };
-  // deltaPos: {
-  //   x: number;
-  //   y: number;
-  // };
+
+  // title?: string;
+  // render?: () => JSX.Element;
+  // isInGroup?: boolean;
 }
 
 export interface GridState {

@@ -5,23 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DndContext, DragMoveEvent, DragOverlay, useDroppable } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { css } from '@emotion/react';
 
 import { Draggable } from './draggable';
 import { PanelState } from '../../types';
+import { GridStackEngine } from 'gridstack/dist/gridstack-engine';
+import { GridStackNode } from 'gridstack/dist/types';
 
 export const DroppableGrid = ({
   id,
+  columns,
   startingState,
 }: {
   id: string;
+  columns: number;
   startingState: Record<string, PanelState>;
 }) => {
   const guttersize = 5;
-  const columns = 12;
   const maxRow = 30;
   const CELL_HEIGHT = 26;
 
@@ -32,12 +35,40 @@ export const DroppableGrid = ({
     id,
   });
 
+  // const engine = useMemo(
+  //   () =>
+  //     new GridStackEngine({
+  //       column: columns,
+  //       float: true,
+  //       nodes: Object.keys(gridState).map((panelId) => ({
+  //         ...gridState[panelId],
+  //         // maxH: item.isCollapsed ? 1 : undefined,
+  //       })),
+  //     }),
+  //   [columns, gridState]
+  // );
+
+  // engine.compact();
+  // console.log({ engine });
+
+  useEffect(() => {
+    console.log('GRID STATE CHANGED');
+    console.log({ gridState });
+  }, [gridState]);
+
   const handleDragStart = (event: DragMoveEvent) => {
     setDraggingId(event.active.id);
   };
 
   const handleDragEnd = (event: DragMoveEvent) => {
     setDraggingId(undefined);
+  };
+
+  const updateItem = (itemId: string, partialItem: Partial<PanelState>) => {
+    setGridState({
+      ...gridState,
+      [itemId]: { ...gridState[itemId], ...partialItem } as PanelState,
+    });
   };
 
   const gridStyles = useMemo(
@@ -69,8 +100,12 @@ export const DroppableGrid = ({
         className="dshGrid dshLayout--editing"
         css={gridStyles}
       >
-        {Object.keys(gridState).map((childId) => (
-          <Draggable id={childId} startingPanelState={gridState[childId]}>
+        {Object.keys(gridState).map((panelId) => (
+          <Draggable
+            id={panelId as string}
+            startingPanelState={gridState[panelId]}
+            updatePanel={updateItem}
+          >
             <div
               style={{
                 border: 'dashed 1px red',
@@ -78,7 +113,7 @@ export const DroppableGrid = ({
                 padding: '10px',
               }}
             >
-              I am the contents of {childId}
+              I am the contents of {panelId}
             </div>
           </Draggable>
         ))}

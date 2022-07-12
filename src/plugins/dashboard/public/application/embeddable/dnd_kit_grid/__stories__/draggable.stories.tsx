@@ -19,17 +19,19 @@ export const BasicSnapToGrid = () => {
   const gridState = {
     ['panel1']: {
       id: 'panel1',
-      pos: { x: 0, y: 0 },
+      x: 0,
+      y: 0,
       w: 3,
       h: 3,
     },
     ['panel2']: {
       id: 'panel2',
-      pos: { x: 50, y: 50 },
+      x: 5,
+      y: 5,
       w: 4,
       h: 6,
     },
   };
 
-  return <DroppableGrid id="basicGrid" startingState={gridState} />;
+  return <DroppableGrid id="basicGrid" columns={12} startingState={gridState} />;
 };
