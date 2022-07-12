@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import type { Filter } from '@kbn/es-query';
 
 import { SecurityPageName } from '../../../../app/types';
+import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { DEFAULT_WIDTH } from '../../../../common/components/charts/draggable_legend';
 import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
@@ -378,15 +379,15 @@ describe('AlertsHistogramPanel', () => {
       />
     );
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AlertsHistogramPanel {...defaultProps} chartOptionsContextMenu={chartOptionsContextMenu} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="chartSettingsPopoverButton"]').first().exists()).toBe(
-      true
-    );
+    expect(
+      screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL })
+    ).toBeInTheDocument();
   });
 
   describe('legend width', () => {

@@ -94,18 +94,16 @@ const ChartPanelsComponent: React.FC<Props> = ({
     [setCountTableStackBy1, setRiskChartStackBy1]
   );
 
-  const chartOptionsContextMenu = useMemo(
-    // eslint-disable-next-line react/display-name
-    () => (queryId: string) =>
-      (
-        <ChartContextMenu
-          defaultStackByField={DEFAULT_STACK_BY_FIELD}
-          defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
-          queryId={queryId}
-          setStackBy={updateCommonStackBy0}
-          setStackByField1={updateCommonStackBy1}
-        />
-      ),
+  const chartOptionsContextMenu = useCallback(
+    (queryId: string) => (
+      <ChartContextMenu
+        defaultStackByField={DEFAULT_STACK_BY_FIELD}
+        defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+        queryId={queryId}
+        setStackBy={updateCommonStackBy0}
+        setStackByField1={updateCommonStackBy1}
+      />
+    ),
     [updateCommonStackBy0, updateCommonStackBy1]
   );
 

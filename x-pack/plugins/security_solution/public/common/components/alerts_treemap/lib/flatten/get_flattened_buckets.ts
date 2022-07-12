@@ -17,13 +17,4 @@ export const getFlattenedBuckets = ({
   maxRiskSubAggregations: Record<string, number | undefined>;
   stackByField0: string;
 }): FlattenedBucket[] =>
-  buckets.reduce<FlattenedBucket[]>(
-    (acc, bucket) => [
-      ...acc,
-      ...flattenBucket({
-        bucket,
-        maxRiskSubAggregations,
-      }),
-    ],
-    []
-  );
+  buckets.flatMap((bucket) => flattenBucket({ bucket, maxRiskSubAggregations }));

@@ -84,7 +84,7 @@ const DraggableLegendItemComponent: React.FC<{
             </EuiFlexItem>
 
             {count != null && (
-              <CountFlexItem data-test-subj={`legendItemCount`} grow={false}>
+              <CountFlexItem data-test-subj="legendItemCount" grow={false}>
                 {numeral(count).format(defaultNumberFormat)}
               </CountFlexItem>
             )}

@@ -40,7 +40,6 @@ export const useChartSettingsPopoverConfiguration = ({
         id: defaultInitialPanelId,
         items: [
           {
-            'data-test-subj': 'inspectMenuItem',
             icon: 'inspect',
             name: i18n.INSPECT,
             onClick: () => {
@@ -49,7 +48,6 @@ export const useChartSettingsPopoverConfiguration = ({
             },
           },
           {
-            'data-test-subj': 'resetGroupByFieldsMenuItem',
             name: i18n.RESET_GROUP_BY_FIELDS,
             onClick: () => {
               setIsPopoverOpen(false);

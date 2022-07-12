@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SELECT_A_CHART_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.selectAChartAriaLabel',
+  {
+    defaultMessage: 'Select a chart',
+  }
+);
+
 export const TABLE = i18n.translate('xpack.securitySolution.components.chartSelect.tableOption', {
   defaultMessage: 'Table',
 });

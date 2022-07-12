@@ -8,6 +8,7 @@
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
+  MetricElementEvent,
   PartitionElementEvent,
   WordCloudElementEvent,
   XYChartElementEvent,
@@ -38,11 +39,12 @@ interface GetGroupByFieldsResult {
 
 export const getGroupByFieldsOnClick = (
   elements: Array<
-    | XYChartElementEvent
-    | PartitionElementEvent
     | FlameElementEvent
     | HeatmapElementEvent
+    | MetricElementEvent
+    | PartitionElementEvent
     | WordCloudElementEvent
+    | XYChartElementEvent
   >
 ): GetGroupByFieldsResult => {
   const flattened = elements.flat(2);

@@ -9,6 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
+import { SELECT_A_CHART_ARIA_LABEL, TREEMAP } from './translations';
 import { ChartSelect } from '.';
 
 describe('ChartSelect', () => {
@@ -19,7 +20,7 @@ describe('ChartSelect', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('chartSelect')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: SELECT_A_CHART_ARIA_LABEL })).toBeInTheDocument();
   });
 
   test('it invokes `setAlertViewSelection` with the expected value when a chart is selected', () => {
@@ -31,10 +32,10 @@ describe('ChartSelect', () => {
       </TestProviders>
     );
 
-    const selectButton = screen.getByTestId('chartSelect');
+    const selectButton = screen.getByRole('button', { name: SELECT_A_CHART_ARIA_LABEL });
     selectButton.click();
 
-    const treemapMenuItem = screen.getByTestId('treemap');
+    const treemapMenuItem = screen.getByRole('button', { name: TREEMAP });
     treemapMenuItem.click();
 
     expect(setAlertViewSelection).toBeCalledWith('treemap');

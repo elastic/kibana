@@ -188,7 +188,7 @@ describe('AlertsTreemapPanel', () => {
       </TestProviders>
     );
 
-    await waitFor(() => expect(screen.queryByTestId('fieldSelection')).toBeNull());
+    await waitFor(() => expect(screen.queryByTestId('fieldSelection')).not.toBeInTheDocument());
   });
 
   it('renders the progress bar when data is loading', async () => {
@@ -217,7 +217,7 @@ describe('AlertsTreemapPanel', () => {
       </TestProviders>
     );
 
-    await waitFor(() => expect(screen.queryByTestId('progress')).toBeNull());
+    await waitFor(() => expect(screen.queryByTestId('progress')).not.toBeInTheDocument());
   });
 
   it('renders the treemap when data is available and `isPanelExpanded` is true', async () => {
@@ -240,8 +240,6 @@ describe('AlertsTreemapPanel', () => {
       </TestProviders>
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId('treemap').querySelector('.echChart')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('treemap')).toBeInTheDocument());
   });
 });

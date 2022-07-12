@@ -11,6 +11,10 @@ import React from 'react';
 import { TestProviders } from '../../mock';
 import type { Props } from '.';
 import { FieldSelection } from '.';
+import {
+  GROUP_BY_LABEL,
+  GROUP_BY_TOP_LABEL,
+} from '../../../detections/components/alerts_kpis/common/translations';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -33,7 +37,7 @@ describe('FieldSelection', () => {
       </TestProviders>
     );
 
-    expect(screen.getAllByTestId('comboBoxInput')[0]).toHaveTextContent(defaultProps.stackByField0);
+    expect(screen.getByRole('combobox', { name: GROUP_BY_LABEL })).toBeInTheDocument();
   });
 
   test('it renders the (second) "Group by top" selection', () => {
@@ -43,17 +47,13 @@ describe('FieldSelection', () => {
       </TestProviders>
     );
 
-    expect(screen.getAllByTestId('comboBoxInput')[1]).toHaveTextContent(
-      defaultProps.stackByField1 ?? ''
-    );
+    expect(screen.getByRole('combobox', { name: GROUP_BY_TOP_LABEL })).toBeInTheDocument();
   });
 
   test('it renders the chart options context menu using the provided `uniqueQueryId`', () => {
     const propsWithContextMenu = {
       ...defaultProps,
-      chartOptionsContextMenu: (queryId: string) => (
-        <div data-test-subj="mock-context-menu">{queryId}</div>
-      ),
+      chartOptionsContextMenu: (queryId: string) => <div>{queryId}</div>,
     };
 
     render(
@@ -62,16 +62,16 @@ describe('FieldSelection', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('mock-context-menu')).toHaveTextContent(defaultProps.uniqueQueryId);
+    expect(screen.getByText(defaultProps.uniqueQueryId)).toBeInTheDocument();
   });
 
-  test('it does NOT the chart options context menu when `chartOptionsContextMenu` is undefined', () => {
+  test('it does NOT render the chart options context menu when `chartOptionsContextMenu` is undefined', () => {
     render(
       <TestProviders>
         <FieldSelection {...defaultProps} />
       </TestProviders>
     );
 
-    expect(screen.queryByTestId('mock-context-menu')).toBeNull();
+    expect(screen.queryByText(defaultProps.uniqueQueryId)).not.toBeInTheDocument();
   });
 });

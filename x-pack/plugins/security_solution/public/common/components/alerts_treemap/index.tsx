@@ -42,10 +42,6 @@ export interface Props {
   stackByField1: string | undefined;
 }
 
-const Wrapper = styled.div`
-  margin-top: -${({ theme }) => theme.eui.euiSizeS};
-`;
-
 const LegendContainer = styled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
@@ -168,7 +164,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   }
 
   return (
-    <Wrapper data-test-subj="treemap">
+    <div data-test-subj="treemap">
       <EuiFlexGroup gutterSize="none">
         <ChartFlexItem grow={true} $minChartHeight={minChartHeight}>
           <Chart>
@@ -200,7 +196,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
           </LegendContainer>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Wrapper>
+    </div>
   );
 };
 

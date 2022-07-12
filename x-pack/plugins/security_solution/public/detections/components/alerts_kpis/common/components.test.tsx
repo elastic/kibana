@@ -10,6 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
 import { KpiPanel, StackByComboBox } from './components';
+import * as i18n from './translations';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -108,7 +109,7 @@ describe('components', () => {
         </TestProviders>
       );
 
-      const comboBox = screen.getByTestId('comboBoxSearchInput');
+      const comboBox = screen.getByRole('combobox', { name: i18n.STACK_BY_ARIA_LABEL });
       comboBox.focus(); // display the combo box options
 
       const option = await screen.findByText(optionToSelect);
@@ -128,7 +129,9 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toHaveAttribute('disabled');
+      expect(screen.getByRole('combobox', { name: i18n.STACK_BY_ARIA_LABEL })).not.toHaveAttribute(
+        'disabled'
+      );
     });
 
     test('it disables the combo box when `isDisabled` is true', () => {
@@ -143,7 +146,27 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveAttribute('disabled');
+      expect(screen.getByRole('combobox', { name: i18n.STACK_BY_ARIA_LABEL })).toHaveAttribute(
+        'disabled'
+      );
+    });
+
+    test('overrides the default accessible name via the `aria-label` prop when provided', () => {
+      const customAccessibleName = 'custom';
+
+      render(
+        <TestProviders>
+          <StackByComboBox
+            aria-label={customAccessibleName}
+            data-test-subj="stackByComboBox"
+            isDisabled={true}
+            onSelect={jest.fn()}
+            selected="agent.ephemeral_id"
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByRole('combobox', { name: customAccessibleName })).toBeInTheDocument();
     });
 
     test('it renders the default label', () => {

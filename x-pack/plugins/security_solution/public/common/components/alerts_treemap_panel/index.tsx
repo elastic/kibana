@@ -24,7 +24,7 @@ import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
 
-const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 122; // px
+const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
 const COLLAPSED_HEIGHT = 64; // px
 

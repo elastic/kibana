@@ -41,6 +41,7 @@ const FieldSelectionComponent: React.FC<Props> = ({
   <EuiFlexGroup alignItems="flexStart" data-test-subj="fieldSelection" gutterSize="none">
     <EuiFlexItem grow={false}>
       <StackByComboBox
+        aria-label={GROUP_BY_LABEL}
         onSelect={setStackByField0}
         prepend={GROUP_BY_LABEL}
         selected={stackByField0}
@@ -48,6 +49,7 @@ const FieldSelectionComponent: React.FC<Props> = ({
       />
       <EuiSpacer size="s" />
       <StackByComboBox
+        aria-label={GROUP_BY_TOP_LABEL}
         onSelect={setStackByField1}
         prepend={GROUP_BY_TOP_LABEL}
         selected={stackByField1 ?? ''}

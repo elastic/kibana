@@ -8,6 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
+import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../../common/components/chart_settings_popover/translations';
+import { INSPECT } from '../../../../../common/components/inspect/translations';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
@@ -32,7 +35,9 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('chartSettingsPopoverButton')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL })
+    ).toBeInTheDocument();
   });
 
   test('it renders the Inspect menu item', () => {
@@ -48,10 +53,10 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    const menuButton = screen.getByTestId('chartSettingsPopoverButton');
+    const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     menuButton.click();
 
-    expect(screen.getByTestId('inspectMenuItem')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: INSPECT })).toBeInTheDocument();
   });
 
   test('it invokes `setStackBy` and `setStackByField1` when the Reset group by fields menu item selected', () => {
@@ -70,10 +75,10 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    const menuButton = screen.getByTestId('chartSettingsPopoverButton');
+    const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     menuButton.click();
 
-    const resetMenuItem = screen.getByTestId('resetGroupByFieldsMenuItem');
+    const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     resetMenuItem.click();
 
     expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');

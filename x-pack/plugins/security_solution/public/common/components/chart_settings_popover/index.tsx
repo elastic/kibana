@@ -36,7 +36,6 @@ const ChartSettingsPopoverComponent: React.FC<Props> = ({
     () => (
       <EuiButtonIcon
         aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
-        data-test-subj="chartSettingsPopoverButton"
         color="text"
         iconType="boxesHorizontal"
         onClick={onButtonClick}

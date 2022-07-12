@@ -46,58 +46,24 @@ describe('helpers', () => {
 
   describe('getContextMenuPanels', () => {
     const alertViewSelections: AlertViewSelection[] = ['trend', 'table', 'treemap'];
+    const closePopover = jest.fn();
     const setAlertViewSelection = jest.fn();
 
     alertViewSelections.forEach((alertViewSelection) => {
       test(`it returns the expected panel id when alertViewSelection is '${alertViewSelection}'`, () => {
         const panels = getContextMenuPanels({
           alertViewSelection,
+          closePopover,
           setAlertViewSelection,
         });
 
         expect(panels[0].id).toEqual(0);
       });
 
-      test(`it disables the '${alertViewSelection}' item when alertViewSelection is '${alertViewSelection}'`, () => {
-        const panels = getContextMenuPanels({
-          alertViewSelection,
-          setAlertViewSelection,
-        });
-
-        const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);
-
-        expect(item?.disabled).toBe(true);
-      });
-
-      test(`it invokes setAlertViewSelection  the '${alertViewSelection}' item when alertViewSelection is '${alertViewSelection}'`, () => {
-        const panels = getContextMenuPanels({
-          alertViewSelection,
-          setAlertViewSelection,
-        });
-
-        const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);
-
-        expect(item?.disabled).toBe(true);
-      });
-
-      test(`it enables all other items when alertViewSelection is '${alertViewSelection}'`, () => {
-        const panels = getContextMenuPanels({
-          alertViewSelection,
-          setAlertViewSelection,
-        });
-
-        const otherItems = panels[0].items?.filter(
-          (x) => x['data-test-subj'] !== alertViewSelection
-        );
-
-        otherItems?.forEach((x) => {
-          expect(x.disabled).toBe(false);
-        });
-      });
-
       test(`onClick invokes setAlertViewSelection with '${alertViewSelection}' item when alertViewSelection is '${alertViewSelection}'`, () => {
         const panels = getContextMenuPanels({
           alertViewSelection,
+          closePopover,
           setAlertViewSelection,
         });
 
@@ -105,6 +71,19 @@ describe('helpers', () => {
         (item?.onClick as () => void)();
 
         expect(setAlertViewSelection).toBeCalledWith(alertViewSelection);
+      });
+
+      test(`onClick invokes closePopover when alertViewSelection is '${alertViewSelection}'`, () => {
+        const panels = getContextMenuPanels({
+          alertViewSelection,
+          closePopover,
+          setAlertViewSelection,
+        });
+
+        const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);
+        (item?.onClick as () => void)();
+
+        expect(closePopover).toBeCalled();
       });
     });
   });

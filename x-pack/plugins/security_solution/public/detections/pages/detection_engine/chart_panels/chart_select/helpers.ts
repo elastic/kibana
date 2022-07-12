@@ -42,9 +42,11 @@ export const getButtonProperties = (alertViewSelection: AlertViewSelection): But
 
 export const getContextMenuPanels = ({
   alertViewSelection,
+  closePopover,
   setAlertViewSelection,
 }: {
   alertViewSelection: AlertViewSelection;
+  closePopover: () => void;
   setAlertViewSelection: (alertViewSelection: AlertViewSelection) => void;
 }): EuiContextMenuPanelDescriptor[] => [
   {
@@ -52,18 +54,24 @@ export const getContextMenuPanels = ({
     items: [
       {
         ...getButtonProperties('table'),
-        disabled: alertViewSelection === 'table',
-        onClick: () => setAlertViewSelection('table'),
+        onClick: () => {
+          closePopover();
+          setAlertViewSelection('table');
+        },
       },
       {
         ...getButtonProperties('trend'),
-        disabled: alertViewSelection === 'trend',
-        onClick: () => setAlertViewSelection('trend'),
+        onClick: () => {
+          closePopover();
+          setAlertViewSelection('trend');
+        },
       },
       {
         ...getButtonProperties('treemap'),
-        disabled: alertViewSelection === 'treemap',
-        onClick: () => setAlertViewSelection('treemap'),
+        onClick: () => {
+          closePopover();
+          setAlertViewSelection('treemap');
+        },
       },
     ],
   },

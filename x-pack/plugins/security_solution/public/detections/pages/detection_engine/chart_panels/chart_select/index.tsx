@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import type { AlertViewSelection } from './helpers';
 import { getButtonProperties, getContextMenuPanels } from './helpers';
+import * as i18n from './translations';
 
 interface Props {
   alertViewSelection: AlertViewSelection;
@@ -35,6 +36,7 @@ const ChartSelectComponent: React.FC<Props> = ({
 
     return (
       <EuiButton
+        aria-label={i18n.SELECT_A_CHART_ARIA_LABEL}
         className="kbnToolbarButton"
         color="text"
         data-test-subj="chartSelect"
@@ -49,8 +51,8 @@ const ChartSelectComponent: React.FC<Props> = ({
   }, [alertViewSelection, onButtonClick]);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => getContextMenuPanels({ alertViewSelection, setAlertViewSelection }),
-    [alertViewSelection, setAlertViewSelection]
+    () => getContextMenuPanels({ alertViewSelection, closePopover, setAlertViewSelection }),
+    [alertViewSelection, closePopover, setAlertViewSelection]
   );
 
   return (

@@ -49,6 +49,7 @@ export const KpiPanel = styled(EuiPanel)<{
   `}
 `;
 interface StackedBySelectProps {
+  'aria-label'?: string;
   'data-test-subj'?: string;
   isDisabled?: boolean;
   prepend?: string;
@@ -63,6 +64,7 @@ export const StackByComboBoxWrapper = styled.div<{ width: number }>`
 `;
 
 export const StackByComboBox: React.FC<StackedBySelectProps> = ({
+  'aria-label': ariaLabel = i18n.STACK_BY_ARIA_LABEL,
   'data-test-subj': dataTestSubj,
   isDisabled = false,
   onSelect,
@@ -91,7 +93,7 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({
     <StackByComboBoxWrapper width={width}>
       <EuiComboBox
         data-test-subj={dataTestSubj}
-        aria-label={i18n.STACK_BY_ARIA_LABEL}
+        aria-label={ariaLabel}
         isDisabled={isDisabled}
         placeholder={i18n.STACK_BY_PLACEHOLDER}
         prepend={prepend}

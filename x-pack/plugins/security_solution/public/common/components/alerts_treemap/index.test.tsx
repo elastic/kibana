@@ -53,11 +53,11 @@ describe('AlertsTreemap', () => {
     });
 
     test('it does NOT render the treemap', () => {
-      expect(screen.queryByTestId('treemap')).toBeNull();
+      expect(screen.queryByTestId('treemap')).not.toBeInTheDocument();
     });
 
     test('it does NOT render the legend', () => {
-      expect(screen.queryByTestId('draggable-legend')).toBeNull();
+      expect(screen.queryByTestId('draggable-legend')).not.toBeInTheDocument();
     });
 
     test('it renders the "no data" message', () => {
