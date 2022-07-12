@@ -118,13 +118,6 @@ const AlertsTableState = ({
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
 
-  const initialBulkActionsState = useReducer(bulkActionsReducer, {
-    rowSelection: new Set<number>(),
-    isAllSelected: false,
-    isPageSelected: false,
-    pageSize: pageSize || DefaultPagination.pageSize,
-  });
-
   const [
     isLoading,
     { alerts, isInitializing, getInspectQuery, refetch: refresh, totalAlerts: alertsCount },
@@ -140,6 +133,14 @@ const AlertsTableState = ({
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
   }, []);
+
+  const initialBulkActionsState = useReducer(bulkActionsReducer, {
+    rowSelection: new Set<number>(),
+    isAllSelected: false,
+    areAllVisibleRowsSelected: false,
+    rowCount: alerts.length,
+  });
+
   const onSortChange = useCallback(
     (_sort: EuiDataGridSorting['columns']) => {
       const newSort = _sort.map((sortItem) => {
