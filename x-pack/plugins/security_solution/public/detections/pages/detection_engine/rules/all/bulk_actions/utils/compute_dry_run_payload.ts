@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
