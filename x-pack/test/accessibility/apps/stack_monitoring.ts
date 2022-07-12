@@ -48,7 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('alerts-modal-remind-later-button');
     });
 
-    it('a11y tests for Kibana Overview', async function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/135196
+    it.skip('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
       await kibanaOverview.isOnOverview();
       await a11y.testAppSnapshot();
