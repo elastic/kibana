@@ -14,7 +14,9 @@ import { LogMeta } from '@kbn/logging';
 import { Logger } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 
-const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
+// If you are updating these, consider whether they should also be updated in the
+// elasticsearch service `getEcsResponseLog`
+const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie', 'x-elastic-app-auth'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 type HapiHeaders = Record<string, string | string[]>;
