@@ -7,20 +7,20 @@
 
 import { invariant } from '../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/common/schemas';
 import type { RuleAlertType } from '../types';
 import { isIndexPatternsBulkEditAction } from './utils';
 
 /**
  * Error instance that has properties: errorCode & statusCode to use within run_dry
- * errorCode({@link BULK_ACTIONS_DRY_RUN_ERR_CODE}) is used to categorize error and make possible to handle it later
+ * errorCode({@link BulkActionsDryRunErrCode}) is used to categorize error and make possible to handle it later
  */
 export class DryRunError extends Error {
-  public readonly errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE;
+  public readonly errorCode: BulkActionsDryRunErrCode;
   public readonly statusCode: number;
 
-  constructor(message: string, errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE, statusCode?: number) {
+  constructor(message: string, errorCode: BulkActionsDryRunErrCode, statusCode?: number) {
     super(message);
     this.name = 'BulkActionDryRunError';
     this.errorCode = errorCode;
@@ -31,11 +31,11 @@ export class DryRunError extends Error {
 /**
  * executes function, if error thrown, wraps this error into {@link DryRunError}
  * @param executor - function that can be executed
- * @param errorCode - enum error code {@link BULK_ACTIONS_DRY_RUN_ERR_CODE} to use in DryRunError wrapper
+ * @param errorCode - enum error code {@link BulkActionsDryRunErrCode} to use in DryRunError wrapper
  */
 export const throwDryRunError = async (
   executor: () => void,
-  errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE
+  errorCode: BulkActionsDryRunErrCode
 ) => {
   try {
     await executor();
@@ -53,7 +53,7 @@ export const dryRunBulkEdit = async (rule: RuleAlertType, edit: BulkActionEditPa
   // if rule is immutable, it can't be edited
   await throwDryRunError(
     () => invariant(rule.params.immutable === false, "Elastic rule can't be edited"),
-    BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE
+    BulkActionsDryRunErrCode.IMMUTABLE
   );
 
   // if rule is machine_learning, index pattern action can't be applied to it
@@ -64,6 +64,6 @@ export const dryRunBulkEdit = async (rule: RuleAlertType, edit: BulkActionEditPa
           !edit.some((action) => isIndexPatternsBulkEditAction(action.type)),
         "Machine learning rule doesn't have index patterns"
       ),
-    BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN
+    BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN
   );
 };

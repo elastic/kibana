@@ -447,7 +447,7 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
 /**
  * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
  */
-export enum BULK_ACTIONS_DRY_RUN_ERR_CODE {
+export enum BulkActionsDryRunErrCode {
   IMMUTABLE = 'IMMUTABLE',
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',

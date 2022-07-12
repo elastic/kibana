@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 
 import type { DryRunResult } from './use_bulk_actions_dry_run';
 import { BulkEditRuleErrorsList } from './bulk_edit_rule_errors_list';
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 const Wrapper: FC = ({ children }) => {
   return (
@@ -47,15 +48,15 @@ describe('Component BulkEditRuleErrorsList', () => {
 
   test.each([
     [
-      BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE,
+      BulkActionsDryRunErrCode.IMMUTABLE,
       '2 prebuilt Elastic rules (editing prebuilt rules is not supported)',
     ],
     [
-      BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN,
+      BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
       "2 custom Machine Learning rules (these rules don't have index patterns)",
     ],
     [
-      BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH,
+      BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
       "2 Machine Learning rules can't be edited (test failure)",
     ],
     [undefined, "2 rules can't be edited (test failure)"],

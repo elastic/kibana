@@ -8,7 +8,7 @@
 import type { QueryClient } from 'react-query';
 import { useQuery } from 'react-query';
 
-import type { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
+import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 import type {
   BulkAction,
@@ -37,7 +37,7 @@ export interface DryRunResult {
    */
   ruleErrors: Array<{
     message: string;
-    errorCode?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
+    errorCode?: BulkActionsDryRunErrCode;
     ruleIds: string[];
   }>;
 }

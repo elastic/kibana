@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   risk_score_mapping,
   threat_query,
@@ -20,7 +21,6 @@ import {
   type,
   severity_mapping,
   severity,
-  Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   SortOrder,
@@ -52,7 +52,7 @@ import type {
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../common/constants';
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -262,7 +262,7 @@ export interface BulkActionResult {
 export interface BulkActionAggregatedError {
   message: string;
   status_code: number;
-  err_code?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
+  err_code?: BulkActionsDryRunErrCode;
   rules: Array<{ id: string; name?: string }>;
 }
 

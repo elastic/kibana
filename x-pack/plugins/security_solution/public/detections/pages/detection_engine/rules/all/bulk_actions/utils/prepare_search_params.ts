@@ -9,7 +9,7 @@ import type { DryRunResult } from '../use_bulk_actions_dry_run';
 import type { FilterOptions } from '../../../../../../containers/detection_engine/rules/types';
 
 import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../../../../common/constants';
 
 type PrepareSearchFilterProps =
   | { selectedRuleIds: string[]; dryRunResult?: DryRunResult }
@@ -35,11 +35,11 @@ export const prepareSearchParams = ({ dryRunResult, ...props }: PrepareSearchFil
   let modifiedFilterOptions = { ...props.filterOptions };
   dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
     switch (errorCode) {
-      case BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE:
+      case BulkActionsDryRunErrCode.IMMUTABLE:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
-      case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN:
-      case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH:
+      case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
+      case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],

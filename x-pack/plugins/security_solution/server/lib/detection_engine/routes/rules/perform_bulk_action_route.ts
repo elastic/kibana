@@ -20,7 +20,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
-  BULK_ACTIONS_DRY_RUN_ERR_CODE,
+  BulkActionsDryRunErrCode,
 } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -59,7 +59,7 @@ interface RuleDetailsInError {
 interface NormalizedRuleError {
   message: string;
   status_code: number;
-  err_code?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
+  err_code?: BulkActionsDryRunErrCode;
   rules: RuleDetailsInError[];
 }
 
@@ -71,7 +71,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
   errors.forEach((errorObj) => {
     let message: string;
     let statusCode: number = 500;
-    let errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE | undefined;
+    let errorCode: BulkActionsDryRunErrCode | undefined;
     let rule: RuleDetailsInError;
     // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
     // to one common used in NormalizedRuleError
@@ -386,7 +386,7 @@ export const performBulkActionRoute = (
         const throwDryRunMlAuth = (ruleType: Type) =>
           throwDryRunError(
             async () => throwAuthzError(await mlAuthz.validateRuleType(ruleType)),
-            BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH
+            BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH
           );
 
         switch (body.action) {

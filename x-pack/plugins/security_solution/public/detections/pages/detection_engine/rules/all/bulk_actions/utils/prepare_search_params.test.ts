@@ -9,7 +9,7 @@ import type { DryRunResult } from '../use_bulk_actions_dry_run';
 import type { FilterOptions } from '../../../../../../containers/detection_engine/rules/types';
 
 import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../../../../common/constants';
 
 import { prepareSearchParams } from './prepare_search_params';
 
@@ -44,7 +44,7 @@ describe('prepareSearchParams', () => {
 
   test.each([
     [
-      BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN,
+      BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
       {
         filter: '',
         tags: [],
@@ -54,7 +54,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH,
+      BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
       {
         filter: '',
         tags: [],
@@ -64,7 +64,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE,
+      BulkActionsDryRunErrCode.IMMUTABLE,
       {
         filter: '',
         tags: [],

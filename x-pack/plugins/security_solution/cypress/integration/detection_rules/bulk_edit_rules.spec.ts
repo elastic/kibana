@@ -80,6 +80,10 @@ const customRule = {
   name: RULE_NAME,
 };
 
+const expectedNumberOfCustomRulesToBeEdited = 6;
+const expectedNumberOfMachineLearningRulesToBeEdited = 1;
+const numberOfRulesPerPage = 5;
+
 describe('Detection rules, bulk edit', () => {
   before(() => {
     cleanKibana();
@@ -111,23 +115,25 @@ describe('Detection rules, bulk edit', () => {
     waitForRulesTableToBeRefreshed();
 
     // check modal window for few selected rules
-    selectNumberOfRules(5);
+    selectNumberOfRules(numberOfRulesPerPage);
     clickAddIndexPatternsMenuItem();
-    checkElasticRulesCannotBeModified(5);
+    checkElasticRulesCannotBeModified(numberOfRulesPerPage);
     cy.get(MODAL_CONFIRMATION_BTN).click();
 
     // Select all rules(Elastic rules and custom)
     cy.get(ELASTIC_RULES_BTN).click();
     selectAllRules();
     clickAddIndexPatternsMenuItem();
-    waitForMixedRulesBulkEditModal(6);
+    waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
     // check rules that cannot be edited for index patterns: immutable and ML
     checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
-    checkMachineLearningRulesCannotBeModified(1);
+    checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
     // proceed with custom rule editing
-    cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Edit 6 Custom rules').click();
+    cy.get(MODAL_CONFIRMATION_BTN)
+      .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} Custom rules`)
+      .click();
 
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
@@ -142,15 +148,15 @@ describe('Detection rules, bulk edit', () => {
 
   it('should add/delete/overwrite index patterns in rules', () => {
     cy.log('Adds index patterns');
-    // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
+    // Switch to 5(numberOfRulesPerPage) rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
-    changeRowsPerPageTo(5);
+    changeRowsPerPageTo(numberOfRulesPerPage);
     selectAllRules();
 
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
     // check if rule has been updated
     changeRowsPerPageTo(20);
@@ -165,7 +171,7 @@ describe('Detection rules, bulk edit', () => {
     openBulkEditDeleteIndexPatternsForm();
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
     // check if rule has been updated
     goToTheRuleDetailsOf(RULE_NAME);
@@ -180,11 +186,11 @@ describe('Detection rules, bulk edit', () => {
       .click();
     cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
       'have.text',
-      'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
+      `You’re about to overwrite index patterns for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
     );
     typeIndexPatterns(OVERWRITE_INDEX_PATTERNS);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
     // check if rule has been updated
     goToTheRuleDetailsOf(RULE_NAME);
@@ -193,16 +199,16 @@ describe('Detection rules, bulk edit', () => {
 
   it('should add/delete/overwrite tags in rules', () => {
     cy.log('Add tags to all rules');
-    // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
+    // Switch to 5(numberOfRulesPerPage) rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
-    changeRowsPerPageTo(5);
+    changeRowsPerPageTo(numberOfRulesPerPage);
     selectAllRules();
 
     // open add tags form and add 2 new tags
     openBulkEditAddTagsForm();
     typeTags(TAGS);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
     // check if all rules have been updated with new tags
     changeRowsPerPageTo(20);
@@ -218,7 +224,7 @@ describe('Detection rules, bulk edit', () => {
     openBulkEditDeleteTagsForm();
     typeTags([TAGS[0]]);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
     testAllTagsBadges(TAGS.slice(1));
     cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
@@ -230,11 +236,11 @@ describe('Detection rules, bulk edit', () => {
       .click();
     cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
       'have.text',
-      'You’re about to overwrite tags for 6 selected rules, press Save to apply changes.'
+      `You’re about to overwrite tags for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
     );
     typeTags(['overwrite-tag']);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
     testAllTagsBadges(['overwrite-tag']);
   });
@@ -242,7 +248,7 @@ describe('Detection rules, bulk edit', () => {
   it('should not lose rules selection after edit action', () => {
     const rulesCount = 4;
     // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
-    changeRowsPerPageTo(5);
+    changeRowsPerPageTo(numberOfRulesPerPage);
     selectNumberOfRules(rulesCount);
 
     // open add tags form and add 2 new tags

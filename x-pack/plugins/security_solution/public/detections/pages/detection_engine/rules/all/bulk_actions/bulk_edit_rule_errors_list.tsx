@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DryRunResult } from './use_bulk_actions_dry_run';
-import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 interface BulkEditRuleErrorsListProps {
   ruleErrors: DryRunResult['ruleErrors'];
@@ -32,7 +32,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
         {ruleErrors.map(({ message, errorCode, ruleIds }) => {
           const rulesCount = ruleIds.length;
           switch (errorCode) {
-            case BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE:
+            case BulkActionsDryRunErrCode.IMMUTABLE:
               return (
                 <li key={message}>
                   <FormattedMessage
@@ -42,7 +42,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
                   />
                 </li>
               );
-            case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN:
+            case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
               return (
                 <li key={message}>
                   <FormattedMessage
@@ -52,7 +52,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
                   />
                 </li>
               );
-            case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH:
+            case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
               return (
                 <li key={message}>
                   <FormattedMessage
