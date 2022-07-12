@@ -96,13 +96,15 @@ class SpacesMenuUI extends Component<Props> {
                   }
                 ),
                 compressed: true,
+                isClearable: true,
+                id: 'headerSpacesMenuListSearch',
               } as any)
             : undefined
         }
         noMatchesMessage={noSpacesMessage}
         emptyMessage={noSpacesMessage}
         options={spaceMenuOptions}
-        singleSelection="always"
+        singleSelection={'always'}
         style={{ width: 300 }}
         onChange={this.spaceSelectionChange}
         listProps={{
@@ -131,6 +133,7 @@ class SpacesMenuUI extends Component<Props> {
     return this.props.spaces.map((space) => {
       return {
         'aria-label': space.name,
+        'aria-roledescription': 'space',
         label: space.name,
         key: space.id,
         prepend: (
@@ -161,20 +164,22 @@ class SpacesMenuUI extends Component<Props> {
       // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
       // console.log(`**** Event Class: ${event.constructor.name}`);
       // console.log(`**** Native Event: ${event.nativeEvent}`);
+      // console.log(`**** Event Type: ${event.type}`);
+      // console.log(`**** Event Default Prevented: ${event.defaultPrevented}`);
 
       if (event.shiftKey) {
         // Open in new window, shift is given priority over other modifiers
-        console.log(`**** SHIFT CLICK`);
-        // window.open(urlToSelectedSpace);
+        // console.log(`**** SHIFT CLICK`);
+        window.open(urlToSelectedSpace);
       } else if (event.ctrlKey || event.metaKey) {
         // Open in new tab - either a ctrl click or middle mouse button
-        console.log(`**** CTRL/CMD CLICK`);
-        // window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
+        // console.log(`**** CTRL/CMD CLICK`);
+        window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
       } else {
         // Force full page reload (usually not a good idea, but we need to in order to change spaces)
         // console.log(`**** URL: ${urlToSelectedSpace}`);
-        console.log(`**** NORMAL CLICK`);
-        // this.props.navigateToUrl(urlToSelectedSpace);
+        // console.log(`**** NORMAL CLICK`);
+        this.props.navigateToUrl(urlToSelectedSpace);
       }
     }
   };

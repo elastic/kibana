@@ -30,26 +30,24 @@ exports[`NavControlPopover renders without crashing 1`] = `
   hasArrow={true}
   id="spcMenuPopover"
   isOpen={false}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="none"
   repositionOnScroll={true}
 >
-  <EuiFocusTrap>
-    <SpacesDescription
-      capabilities={
-        Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-          "spaces": Object {
-            "manage": true,
-          },
-        }
+  <SpacesDescription
+    capabilities={
+      Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
       }
-      id="headerSpacesMenuContent"
-      navigateToApp={[MockFunction]}
-      onManageSpacesClick={[Function]}
-    />
-  </EuiFocusTrap>
+    }
+    id="headerSpacesMenuContent"
+    navigateToApp={[MockFunction]}
+    onManageSpacesClick={[Function]}
+  />
 </EuiPopover>
 `;

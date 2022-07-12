@@ -96,6 +96,8 @@ export class SpacesPopoverList extends Component<Props, State> {
                   }
                 ),
                 compressed: true,
+                isClearable: true,
+                id: 'spacesPopoverListSearch',
               } as any)
             : undefined
         }
@@ -143,7 +145,7 @@ export class SpacesPopoverList extends Component<Props, State> {
     return this.props.spaces.map((space) => {
       const icon = (
         <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-          <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />;
+          <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
         </Suspense>
       );
       return {

@@ -6,12 +6,7 @@
  */
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
-import {
-  EuiFocusTrap,
-  EuiHeaderSectionItemButton,
-  EuiLoadingSpinner,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
@@ -113,7 +108,7 @@ export class NavControlPopover extends Component<Props, State> {
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
         repositionOnScroll
-        // ownFocus={false}
+        ownFocus={true}
       >
         {element}
       </EuiPopover>
@@ -160,7 +155,7 @@ export class NavControlPopover extends Component<Props, State> {
         aria-controls={popoutContentId}
         aria-expanded={this.state.showSpaceSelector}
         aria-haspopup="true"
-        aria-label={i18n.translate('pack.spaces.navControl.popover.spacesNavigationLabel', {
+        aria-label={i18n.translate('xpack.spaces.navControl.popover.spacesNavigationLabel', {
           defaultMessage: 'Spaces navigation',
         })}
         aria-describedby="spacesNavDetails"
@@ -170,7 +165,7 @@ export class NavControlPopover extends Component<Props, State> {
       >
         {linkIcon}
         <p id="spacesNavDetails" hidden>
-          {i18n.translate('pack.spaces.navControl.popover.spaceNavigationDetails', {
+          {i18n.translate('xpack.spaces.navControl.popover.spaceNavigationDetails', {
             defaultMessage:
               '{space} is the currently selected space. Click this button to open a popover that allows you to select the active space.',
             values: {
