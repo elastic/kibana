@@ -49,20 +49,20 @@ export interface ErrorMessage {
   message: string;
 }
 
-export interface DVErrorObject {
+export interface AiOpsErrorObject {
   causedBy?: string;
   message: string;
   statusCode?: number;
   fullError?: EsErrorBody;
 }
 
-export interface DVHttpFetchError<T> extends HttpFetchError {
+export interface AiOpsHttpFetchError<T> extends HttpFetchError {
   body: T;
 }
 
 export type ErrorType =
   | WrappedError
-  | DVHttpFetchError<AiOpsResponseError>
+  | AiOpsHttpFetchError<AiOpsResponseError>
   | EsErrorBody
   | Boom.Boom
   | string
@@ -92,9 +92,9 @@ export function isWrappedError(error: any): error is WrappedError {
   return error && isBoomError(error.body?.message) === true;
 }
 
-export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
+export const extractErrorProperties = (error: ErrorType): AiOpsErrorObject => {
   // extract properties of the error object from within the response error
-  // coming from Kibana, Elasticsearch, and our own DV messages
+  // coming from Kibana, Elasticsearch, and our own AiOps messages
 
   // some responses contain raw es errors as part of a bulk response
   // e.g. if some jobs fail the action in a bulk request
@@ -140,7 +140,7 @@ export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
       typeof error.body.attributes === 'object' &&
       typeof error.body.attributes.body?.error?.reason === 'string'
     ) {
-      const errObj: DVErrorObject = {
+      const errObj: AiOpsErrorObject = {
         message: error.body.attributes.body.error.reason,
         statusCode: error.body.statusCode,
         fullError: error.body.attributes.body,

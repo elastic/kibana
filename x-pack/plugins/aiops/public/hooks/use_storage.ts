@@ -10,18 +10,18 @@ import { useAiOpsKibana } from '../kibana_context';
 
 export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiOps.frozenDataTierPreference';
 
-export type DV = Partial<{
+export type AiOps = Partial<{
   [AIOPS_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';
 }> | null;
 
-export type DVKey = keyof Exclude<DV, null>;
+export type AiOpsKey = keyof Exclude<AiOps, null>;
 
 /**
  * Hook for accessing and changing a value in the storage.
  * @param key - Storage key
  * @param initValue
  */
-export function useStorage<T>(key: DVKey, initValue?: T): [T, (value: T) => void] {
+export function useStorage<T>(key: AiOpsKey, initValue?: T): [T, (value: T) => void] {
   const {
     services: { storage },
   } = useAiOpsKibana();
