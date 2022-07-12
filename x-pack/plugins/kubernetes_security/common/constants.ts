@@ -28,9 +28,9 @@ export const ENTRY_LEADER_INTERACTIVE = 'process.entry_leader.interactive';
 export const ENTRY_LEADER_USER_ID = 'process.entry_leader.user.id';
 export const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
 
-export const ORCHESTRATOR_CLUSTER_ID = 'orchestrator.cluster.id';
+export const ORCHESTRATOR_CLUSTER_ID = 'orchestrator.cluster.name';
 export const ORCHESTRATOR_NAMESPACE = 'orchestrator.namespace';
-export const ORCHESTRATOR_RESOURCE_ID = 'orchestrator.resource.id';
+export const ORCHESTRATOR_RESOURCE_ID = 'orchestrator.resource.name';
 export const CONTAINER_IMAGE_NAME = 'container.image.name';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 
