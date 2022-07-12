@@ -7,7 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { DefaultPageLayout, displayName } from './layout';
+import { DefaultPageLayout, TITLE_TEST_ID } from './layout';
 import '@testing-library/jest-dom';
 
 describe('<Layout />', () => {
@@ -17,7 +17,7 @@ describe('<Layout />', () => {
     });
 
     it('should not render secondary heading', () => {
-      expect(screen.queryByTestId(`${displayName}-subheader`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`${TITLE_TEST_ID}`)).not.toBeInTheDocument();
     });
   });
 

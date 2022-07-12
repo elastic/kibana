@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { EmptyPage, displayName, TEST_ID_EMPTY_PAGE_DOCS_LINK } from './empty_page';
+import { EmptyPage, INTEGRATION_LINK_ID, DOCS_LINK_TEST_ID } from './empty_page';
 
 describe('<EmptyPage />', () => {
   describe('default state', () => {
@@ -19,14 +19,14 @@ describe('<EmptyPage />', () => {
           <EmptyPage integrationsPageLink="https://google.com" />
         </TestProvidersComponent>
       );
-      const integrationsPageLink = getByTestId(`${displayName}-integrations-page-link`);
+      const integrationsPageLink = getByTestId(`${INTEGRATION_LINK_ID}`);
 
       expect(screen.getByText('Get started with Elastic Threat Intelligence')).toBeInTheDocument();
 
       expect(integrationsPageLink).toBeInTheDocument();
       expect(integrationsPageLink).toHaveAttribute('href', 'https://google.com');
 
-      expect(getByTestId(TEST_ID_EMPTY_PAGE_DOCS_LINK)).toBeInTheDocument();
+      expect(getByTestId(DOCS_LINK_TEST_ID)).toBeInTheDocument();
     });
   });
 });

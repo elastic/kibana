@@ -13,7 +13,7 @@ export interface LayoutProps {
   border?: boolean;
 }
 
-export const displayName = 'DefaultPageLayout';
+export const TITLE_TEST_ID = 'tiDefaultPageLayoutTitle';
 
 export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle, border = true }) => {
   return (
@@ -22,7 +22,7 @@ export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle, border
         <EuiPageHeaderSection>
           {pageTitle && (
             <EuiText>
-              <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
+              <h2 data-test-subj={TITLE_TEST_ID}>{pageTitle}</h2>
             </EuiText>
           )}
         </EuiPageHeaderSection>
@@ -32,5 +32,3 @@ export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle, border
     </>
   );
 };
-
-DefaultPageLayout.displayName = displayName;

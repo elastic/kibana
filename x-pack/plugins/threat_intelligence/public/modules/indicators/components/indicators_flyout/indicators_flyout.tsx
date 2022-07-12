@@ -28,6 +28,7 @@ import { displayValue } from '../../lib/display_value';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
+export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
 
 const enum TAB_IDS {
   table,
@@ -93,7 +94,7 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
     <EuiFlyout onClose={closeFlyout} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId}>
+          <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId} data-cy={TITLE_TEST_ID}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelTitle"
               defaultMessage="Indicator: {title}"
@@ -112,7 +113,9 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
+        <EuiTabs data-test-subj={TABS_TEST_ID} style={{ marginBottom: '-25px' }}>
+          {renderTabs}
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>
     </EuiFlyout>

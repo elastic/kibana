@@ -13,9 +13,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import illustration from './integrations--light.svg';
 
-export const displayName = 'EmptyPage';
-export const TEST_ID_EMPTY_PAGE = 'tiEmptyPage';
-export const TEST_ID_EMPTY_PAGE_DOCS_LINK = 'tiEmptyPageDocsLink';
+export const DOCS_LINK_TEST_ID = 'tiEmptyPageDocsLink';
+export const EMPTY_PROMPT_TEST_ID = 'tiEmptyPage';
+export const INTEGRATION_LINK_ID = 'tiEmptyPageIntegrationsPageLink';
 
 interface EmptyPageProps {
   integrationsPageLink: string;
@@ -71,11 +71,7 @@ export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
             information, view the {docsLink}."
               values={{
                 docsLink: (
-                  <EuiLink
-                    href={docsLink}
-                    target="_blank"
-                    data-test-subj={TEST_ID_EMPTY_PAGE_DOCS_LINK}
-                  >
+                  <EuiLink href={docsLink} target="_blank" data-test-subj={DOCS_LINK_TEST_ID}>
                     <FormattedMessage
                       id="xpack.threatIntelligence.common.emptyPage.docsLinkText"
                       defaultMessage="Security app documentation"
@@ -89,7 +85,7 @@ export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
       }
       actions={
         <EuiButton
-          data-test-subj={`${displayName}-integrations-page-link`}
+          data-test-subj={INTEGRATION_LINK_ID}
           href={integrationsPageLink}
           color="primary"
           iconType="plusInCircle"
@@ -101,9 +97,7 @@ export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
           />
         </EuiButton>
       }
-      data-test-subj={TEST_ID_EMPTY_PAGE}
+      data-test-subj={EMPTY_PROMPT_TEST_ID}
     />
   );
 };
-
-EmptyPage.displayName = displayName;

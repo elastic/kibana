@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Indicator } from '../../../../../common/types/Indicator';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 
-export const BUTTON_TEST_ID = 'tiOpenIndicatorFlyoutButton';
+export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 
 export const OpenIndicatorFlyoutButton: VFC<{ indicator: Indicator }> = ({ indicator }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);

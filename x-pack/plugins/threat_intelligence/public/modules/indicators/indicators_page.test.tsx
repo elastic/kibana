@@ -11,8 +11,8 @@ import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { IndicatorsPage } from './indicators_page';
 import { useIndicators } from './hooks/use_indicators';
 import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
-import { TEST_ID_INDICATORS_TABLE } from './components/indicators_table/indicators_table';
-import { TEST_ID_EMPTY_PAGE } from '../../components/empty_page';
+import { TABLE_TEST_ID as INDICATORS_TABLE_TEST_ID } from './components/indicators_table/indicators_table';
+import { EMPTY_PROMPT_TEST_ID } from '../../components/empty_page';
 
 jest.mock('./hooks/use_indicators');
 jest.mock('./hooks/use_indicators_total_count');
@@ -47,7 +47,7 @@ describe('<IndicatorsPage />', () => {
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(TEST_ID_INDICATORS_TABLE)).toBeInTheDocument();
+    expect(getByTestId(INDICATORS_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render empty page when no indicators are found', async () => {
@@ -64,7 +64,7 @@ describe('<IndicatorsPage />', () => {
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(TEST_ID_EMPTY_PAGE)).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render indicators table when count is being loaded', async () => {
@@ -81,6 +81,6 @@ describe('<IndicatorsPage />', () => {
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(TEST_ID_INDICATORS_TABLE)).toBeInTheDocument();
+    expect(getByTestId(INDICATORS_TABLE_TEST_ID)).toBeInTheDocument();
   });
 });

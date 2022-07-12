@@ -23,7 +23,7 @@ import { displayValue } from '../../lib/display_value';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
-describe('IndicatorsFlyoutTable', () => {
+describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
     const { getByTestId, getByText } = render(
       <TestProvidersComponent>

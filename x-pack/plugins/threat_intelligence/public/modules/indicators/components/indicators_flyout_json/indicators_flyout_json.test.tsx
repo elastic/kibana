@@ -17,7 +17,7 @@ import {
 
 const mockIndicator: Indicator = generateMockIndicator();
 
-describe('IndicatorsFlyoutJson', () => {
+describe('<IndicatorsFlyoutJson />', () => {
   it('should render code block component on valid indicator', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>

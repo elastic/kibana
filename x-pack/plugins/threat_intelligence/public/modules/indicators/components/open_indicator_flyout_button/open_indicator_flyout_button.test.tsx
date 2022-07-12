@@ -13,7 +13,7 @@ import { TestProvidersComponent } from '../../../../common/mocks/test_providers'
 
 const mockIndicator = generateMockIndicator();
 
-describe('IndicatorsFlyout', () => {
+describe('<IndicatorsFlyout />', () => {
   it('should render expand button if flyout is closed', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>

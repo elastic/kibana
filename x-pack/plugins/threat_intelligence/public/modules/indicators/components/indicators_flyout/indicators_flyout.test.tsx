@@ -17,7 +17,7 @@ import { fullDateFormatter } from '../../../../common/utils/dates';
 
 const mockIndicator = generateMockIndicator();
 
-describe('IndicatorsFlyout', () => {
+describe('<IndicatorsFlyout />', () => {
   it('should render ioc id in title and first_seen in subtitle', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
