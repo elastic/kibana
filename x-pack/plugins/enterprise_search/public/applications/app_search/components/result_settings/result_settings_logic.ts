@@ -272,7 +272,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       actions.updateField(fieldName, {
         ...omit(field, ['snippetSize']),
         snippet,
-        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : {}),
+        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : { snippetFallback: false }),
       });
     },
     toggleSnippetFallbackForField: ({ fieldName }) => {
