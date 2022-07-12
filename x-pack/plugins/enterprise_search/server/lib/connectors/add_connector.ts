@@ -8,12 +8,9 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
+import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { Connector } from '../../types/connector';
-
-export const createConnectorsIndex = async (client: IScopedClusterClient): Promise<void> => {
-  const index = CONNECTORS_INDEX;
-  await client.asCurrentUser.indices.create({ index });
-};
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 const createConnector = async (
   index: string,
@@ -51,11 +48,10 @@ export const addConnector = async (
   try {
     return await createConnector(index, document, client);
   } catch (error) {
-    if (error.statusCode === 404) {
+    if (isIndexNotFoundException(error)) {
       // This means .ent-search-connectors index doesn't exist yet
       // So we first have to create it, and then try inserting the document again
-      // TODO: Move index creation to Kibana startup instead
-      await createConnectorsIndex(client);
+      await setupConnectorsIndices(client.asCurrentUser);
       return await createConnector(index, document, client);
     } else {
       throw error;
