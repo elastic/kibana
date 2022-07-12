@@ -9,13 +9,19 @@ import type {
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
   data: DataPublicPluginSetup;
+  dataViews: DataViewsPublicPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
   observability: ObservabilityPublicStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
