@@ -29,7 +29,7 @@ export const tourStepsConfig: TourStep[] = [
       defaultMessage:
         'Take a quick tour to learn the benefits of having all of your observability data in one stack.',
     }),
-    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
+    anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'overviewStep',
   },
