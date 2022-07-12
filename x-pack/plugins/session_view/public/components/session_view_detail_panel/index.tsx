@@ -69,6 +69,7 @@ export const SessionViewDetailPanel = ({
             processHost={selectedProcess?.events[0]?.host}
             processContainer={selectedProcess?.events[0]?.container}
             processOrchestrator={selectedProcess?.events[0]?.orchestrator}
+            processCloud={selectedProcess?.events[0]?.cloud}
           />
         ),
       },

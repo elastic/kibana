@@ -11,6 +11,7 @@ import {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common/types/process_tree';
 import { DetailPanelMetadataTab } from '.';
 
@@ -43,6 +44,13 @@ const TEST_ORCHESTRATOR_NAMESPACE = 'kube-system';
 const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
 const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
 const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
+
+// Cloud data
+const TEST_CLOUD_INSTANCE_NAME = 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2';
+const TEST_CLOUD_ACCOUNT_ID = 'PLACEHOLDER_FOR_CLOUD_ACCOUNT_ID';
+const TEST_CLOUD_PROJECT_ID = 'elastic-security-dev';
+const TEST_CLOUD_PROVIDER = 'gcp';
+const TEST_CLOUD_REGION = 'us-central1-c';
 
 const TEST_HOST: ProcessEventHost = {
   architecture: TEST_ARCHITECTURE,
@@ -89,6 +97,20 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
   },
 };
 
+const TEST_CLOUD: ProcessEventCloud = {
+  instance: {
+    name: TEST_CLOUD_INSTANCE_NAME,
+  },
+  account: {
+    id: TEST_CLOUD_ACCOUNT_ID,
+  },
+  project: {
+    id: TEST_CLOUD_PROJECT_ID,
+  },
+  provider: TEST_CLOUD_PROVIDER,
+  region: TEST_CLOUD_REGION,
+};
+
 describe('DetailPanelMetadataTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -133,6 +155,7 @@ describe('DetailPanelMetadataTab component', () => {
       // Orchestrator and Container should be missing if session came from a Non-cloud env
       expect(renderResult.queryByText('Container')).toBeNull();
       expect(renderResult.queryByText('Orchestrator')).toBeNull();
+      expect(renderResult.queryByText('Cloud')).toBeNull();
     });
 
     it('renders DetailPanelMetadataTab correctly (cloud environment)', async () => {
@@ -141,6 +164,7 @@ describe('DetailPanelMetadataTab component', () => {
           processHost={TEST_HOST}
           processContainer={TEST_CONTAINER}
           processOrchestrator={TEST_ORCHESTRATOR}
+          processCloud={TEST_CLOUD}
         />
       );
 
@@ -201,6 +225,17 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_PARENT_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_NAME)).toBeVisible();
+
+      // expand Cloud Accordion
+      renderResult.queryByText('Cloud')?.click();
+      expect(renderResult.queryByText('provider')).toBeVisible();
+      expect(renderResult.queryByText('region')).toBeVisible();
+      expect(renderResult.queryByText('account.id')).toBeVisible();
+      expect(renderResult.queryByText('project.id')).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_PROVIDER)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_REGION)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_ACCOUNT_ID)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_PROJECT_ID)).toBeVisible();
     });
   });
 });
