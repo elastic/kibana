@@ -6,11 +6,18 @@
  */
 
 import React, { VFC, useState, useMemo } from 'react';
-import { EuiDataGrid, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 
-import { RawIndicatorFieldId } from '../../../../../common/types/Indicator';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
 import { UseIndicatorsValue } from '../../hooks/use_indicators';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
+import { ActionsRowCell } from './actions_row_cell';
 
 interface Column {
   id: RawIndicatorFieldId | ComputedIndicatorFieldId;
@@ -69,10 +76,28 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     return <EuiLoadingSpinner size="m" />;
   }
 
+  const leadingControlColumns = [
+    {
+      id: 'Actions',
+      width: 72,
+      headerCellRender: () => (
+        <FormattedMessage
+          id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
+          defaultMessage="Actions"
+        />
+      ),
+      rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+        const indicator: Indicator = indicators[cveProps.rowIndex];
+        return <ActionsRowCell indicator={indicator} />;
+      },
+    },
+  ];
+
   return (
     <div>
       <EuiDataGrid
         aria-labelledby={'indicators-table'}
+        leadingControlColumns={leadingControlColumns}
         columns={columns}
         columnVisibility={{
           visibleColumns,

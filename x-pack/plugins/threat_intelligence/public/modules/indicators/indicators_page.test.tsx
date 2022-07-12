@@ -9,6 +9,7 @@ import { act, render } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsPage } from './indicators_page';
 import { useIndicators } from './hooks/use_indicators';
+import { TestProvidersComponent } from '../../common/test_providers';
 
 jest.mock('./hooks/use_indicators');
 
@@ -30,11 +31,13 @@ describe('<IndicatorsPage />', () => {
   it('should render the contents without crashing', async () => {
     await act(async () => {
       render(
-        <IndicatorsPage
-          history={undefined as any}
-          location={undefined as any}
-          match={undefined as any}
-        />
+        <TestProvidersComponent>
+          <IndicatorsPage
+            history={undefined as any}
+            location={undefined as any}
+            match={undefined as any}
+          />
+        </TestProvidersComponent>
       );
     });
   });
