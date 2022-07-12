@@ -71,7 +71,6 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
-    [ConfigKey.CONFIG_ID]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
@@ -80,6 +79,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.RUN_ONCE]: t.boolean,
+    [ConfigKey.CONFIG_ID]: t.string,
   }),
 ]);
 
