@@ -1504,10 +1504,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@60.0.0":
-  version "60.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-60.0.0.tgz#7b2cc45b4305abb0fb7081bd2adbd3ab41e55e8a"
-  integrity sha512-TLYttLSBrTw3QloXjRXrTkHZLSmTf3YNi0rakWslG25IkFkllY9yGSKjEUNBLHDDm0SfV9aBReM7Vc9Whzhw+g==
+"@elastic/eui@60.1.2":
+  version "60.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-60.1.2.tgz#9a07aab77743866f6df40468a2acf4f39ea38152"
+  integrity sha512-99RZpuFLbButUUS3JTGyHSsiSkkm4bdraDV0K4hDrbQJ7Wss0l9aUdx2FhUgI4pNQ1v41EHRQYykP37J9nolxg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3176,6 +3176,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-browser@link:bazel-bin/packages/core/http/core-http-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-common@link:bazel-bin/packages/core/http/core-http-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
@@ -3253,6 +3269,10 @@
   uid ""
 
 "@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/crypto-browser@link:bazel-bin/packages/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
@@ -6751,6 +6771,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-browser@link:bazel-bin/packages/core/http/core-http-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6832,6 +6868,10 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__crypto-browser@link:bazel-bin/packages/kbn-crypto-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -30947,11 +30987,6 @@ zip-stream@^4.1.0:
     archiver-utils "^2.1.0"
     compress-commons "^4.1.0"
     readable-stream "^3.6.0"
-
-zlib@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/zlib/-/zlib-1.0.5.tgz#6e7c972fc371c645a6afb03ab14769def114fcc0"
-  integrity sha1-bnyXL8NxxkWmr7A6sUdp3vEU/MA=
 
 zwitch@^1.0.0:
   version "1.0.5"

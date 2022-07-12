@@ -34,7 +34,7 @@ const UnverifiedCallout = () => (
   <>
     <EuiCallOut
       title={i18n.translate('xpack.fleet.epm.verificationWarningCalloutTitle', {
-        defaultMessage: 'This integration is not verified',
+        defaultMessage: 'Integration not verified',
       })}
       iconType="alert"
       color="warning"
@@ -42,7 +42,7 @@ const UnverifiedCallout = () => (
       <p>
         <FormattedMessage
           id="xpack.fleet.epm.verificationWarningCalloutIntroText"
-          defaultMessage="One or more of the installed integrations contains an unsigned package with unknown authenticity."
+          defaultMessage="This integration contains an unsigned package of unknown authenticity."
           // TODO: add documentation link
         />
       </p>
