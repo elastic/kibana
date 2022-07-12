@@ -86,6 +86,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkDoesNotEmit();
       });
 
+      it('does not emit on empty dashboard refreshed', async () => {
+        await queryBar.clickQuerySubmitButton();
+        await checkDoesNotEmit();
+      });
+
       /**
        * Saved search embeddable
        */
@@ -98,6 +103,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(event.properties.numOfPanels).to.be(1);
       });
 
+      it('emits on saved search refreshed', async () => {
+        await queryBar.clickQuerySubmitButton();
+        await checkEmitsOnce();
+      });
+
       it('doesnt emit when removing saved search panel', async () => {
         await dashboardPanelActions.removePanelByTitle(SAVED_SEARCH_PANEL_TITLE);
         await checkDoesNotEmit();
@@ -108,6 +118,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        */
       it('emits when visualization is added', async () => {
         await dashboardAddPanel.addVisualization(VIS_PANEL_TITLE);
+        await checkEmitsOnce();
+      });
+
+      it('emits on visualization refreshed', async () => {
+        await queryBar.clickQuerySubmitButton();
         await checkEmitsOnce();
       });
 
@@ -130,6 +145,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
+      it('emits on markup refreshed', async () => {
+        await queryBar.clickQuerySubmitButton();
+        await checkEmitsOnce();
+      });
+
+
       it('doesnt emit when removing markup panel', async () => {
         await dashboardPanelActions.removePanelByTitle(MARKDOWN_PANEL_TITLE);
         await checkDoesNotEmit();
@@ -145,27 +166,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      it('emits on map refreshed', async () => {
+        await queryBar.clickQuerySubmitButton();
+        await checkEmitsOnce();
+      });
+
+
       it('doesnt emit when removing map panel', async () => {
         await dashboardPanelActions.removePanelByTitle(MAP_PANEL_TITLE);
         await checkDoesNotEmit();
       });
 
-      /**
-       * Hit refresh
-       */
-      it('emits when hitting refresh', async () => {
-        await queryBar.clickQuerySubmitButton();
-        await checkEmitsOnce();
-      });
-
-      /**
-       * Add query
-       */
-      it('emits when query is set', async () => {
-        await queryBar.setQuery('Cancelled:false');
-        await queryBar.clickQuerySubmitButton();
-        await checkEmitsOnce();
-      });
     });
 
     describe('full loaded dashboard', () => {
@@ -183,6 +194,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(event.properties.timeToDone as number).to.be.greaterThan(
           event.properties.timeToData as number
         );
+      });
+
+      /**
+       * Hit refresh
+       */
+      it('emits when hitting refresh', async () => {
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await checkEmitsOnce();
+      });
+
+      /**
+       * Add query
+       */
+      it('emits when query is set', async () => {
+        await queryBar.setQuery('Cancelled:false');
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await checkEmitsOnce();
       });
     });
   });
