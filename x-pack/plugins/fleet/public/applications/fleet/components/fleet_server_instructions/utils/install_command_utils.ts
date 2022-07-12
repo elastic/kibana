@@ -50,9 +50,7 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
       ].join(`\n`),
     },
     kubernetes: {
-      fullUrl: '',
-      filename: '',
-      unpackedDir: '',
+      downloadCommand: '',
     },
   };
 
@@ -107,6 +105,7 @@ export function getInstallCommandForPlatform(
   }, '');
 
   const commands = {
+
     linux: `${artifact.downloadCommand}\nsudo ./elastic-agent install${commandArgumentsStr}`,
     mac: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
