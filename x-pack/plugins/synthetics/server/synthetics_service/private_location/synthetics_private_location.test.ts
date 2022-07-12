@@ -47,7 +47,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         location_name: {
           type: 'text',
-          value: 'test location',
+          value: 'Fleet managed',
         },
         name: {
           type: 'text',
