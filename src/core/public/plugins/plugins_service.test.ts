@@ -38,7 +38,7 @@ import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
-import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
