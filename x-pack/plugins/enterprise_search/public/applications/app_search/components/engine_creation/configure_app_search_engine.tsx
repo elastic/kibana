@@ -11,17 +11,20 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiPanel,
-  EuiStepsHorizontal,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiSpacer,
   EuiFormRow,
-  EuiTitle,
-  EuiFieldText,
+  EuiPanel,
   EuiSelect,
+  EuiSpacer,
+  EuiStepsHorizontal,
+  EuiTitle,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
@@ -37,8 +40,7 @@ import {
 } from './constants';
 
 export const ConfigureAppSearchEngine: React.FC = () => {
-  const { isLoading, isSubmitDisabled, language, name, rawName } =
-    useValues(EngineCreationLogic);
+  const { isLoading, isSubmitDisabled, language, name, rawName } = useValues(EngineCreationLogic);
   const { setCreationStep, setLanguage, setRawName, submitEngine } =
     useActions(EngineCreationLogic);
 
@@ -118,17 +120,39 @@ export const ConfigureAppSearchEngine: React.FC = () => {
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+
           <EuiSpacer />
-          <EuiButton
-            disabled={isSubmitDisabled}
-            isLoading={isLoading}
-            type="submit"
-            data-test-subj="NewEngineSubmitButton"
-            color="success"
-            fill
-          >
-            {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
-          </EuiButton>
+
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="NewEngineBackButton"
+                color="primary"
+                iconType="arrowLeft"
+                onClick={() => {
+                  setCreationStep(EngineCreationSteps.SelectStep);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.backButton.label',
+                  {
+                    defaultMessage: 'Back',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                disabled={isSubmitDisabled}
+                isLoading={isLoading}
+                type="submit"
+                data-test-subj="NewEngineSubmitButton"
+                fill
+              >
+                {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiForm>
       </EuiPanel>
     </>

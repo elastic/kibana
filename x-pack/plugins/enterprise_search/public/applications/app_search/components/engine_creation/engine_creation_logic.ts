@@ -103,7 +103,9 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       {
         setAliasName: (_, { aliasName }) => aliasName,
         setSelectedIndex: (_, { selectedIndexName }) => {
-          return selectedIndexName.startsWith('search-') ? '' : `search-${selectedIndexName}`;
+          return selectedIndexName.length === 0 || selectedIndexName.startsWith('search-')
+            ? ''
+            : `search-${selectedIndexName}`;
         },
       },
     ],
@@ -178,7 +180,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
   listeners: ({ values, actions }) => ({
     submitEngine: async () => {
       const { http } = HttpLogic.values;
-      const { name, language, engineType, selectedIndex } = values;
+      const { name, language, engineType, selectedIndex, aliasName } = values;
 
       try {
         if (engineType === 'appSearch') {
@@ -191,6 +193,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
             search_index: {
               type: 'elasticsearch',
               index_name: selectedIndex,
+              ...(aliasName.length === 0 ? {} : { alias_name: aliasName }),
             },
           });
           await http.post('/internal/app_search/elasticsearch/engines', { body });

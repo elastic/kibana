@@ -13,6 +13,7 @@ import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -188,7 +189,13 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
           <EuiSpacer />
 
           <EuiText color="subdued" textAlign="center">
-            Provide a unique name and an optional language analyzer for your App Search engine.
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+              {
+                defaultMessage:
+                  'Provide a unique name and an optional language analyzer for your App Search engine.',
+              }
+            )}
           </EuiText>
 
           <EuiSpacer />
@@ -338,16 +345,41 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
 
           <EuiSpacer />
 
-          <EuiButton
-            disabled={isSubmitDisabled}
-            isLoading={isLoading}
-            type="submit"
-            data-test-subj="NewEngineSubmitButton"
-            color="success"
-            fill
-          >
-            {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
-          </EuiButton>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="NewEngineBackButton"
+                color="primary"
+                iconType="arrowLeft"
+                onClick={() => {
+                  setCreationStep(EngineCreationSteps.SelectStep);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.backButton.label',
+                  {
+                    defaultMessage: 'Back',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                disabled={isSubmitDisabled}
+                isLoading={isLoading}
+                type="submit"
+                data-test-subj="NewEngineSubmitButton"
+                fill
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.continue.label',
+                  {
+                    defaultMessage: 'Continue',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiForm>
       </EuiPanel>
     </>

@@ -21,6 +21,7 @@ import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logi
 import { SelectEngineType } from './select_engine_type';
 import { ConfigureAppSearchEngine } from './configure_app_search_engine';
 import { ConfigureElasticsearchEngine } from './configure_elasticsearch_engine';
+import { ReviewElasticsearchEngine } from './review_elasticsearch_engine';
 
 export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;
@@ -46,7 +47,9 @@ export const EngineCreation: React.FC = () => {
         engineType === 'appSearch' && <ConfigureAppSearchEngine />}
       {currentEngineCreationStep === EngineCreationSteps.ConfigureStep &&
         engineType === 'elasticsearch' && <ConfigureElasticsearchEngine />}
-      {currentEngineCreationStep === EngineCreationSteps.ReviewStep && <>Review Step</>}
+      {currentEngineCreationStep === EngineCreationSteps.ReviewStep && (
+        <ReviewElasticsearchEngine />
+      )}
     </AppSearchPageTemplate>
   );
 };
