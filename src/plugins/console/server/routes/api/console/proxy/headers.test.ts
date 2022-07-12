@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-jest.mock('@kbn/core-http-router-server-internal', () => ({
-  ensureRawRequest: jest.fn(),
-}));
+jest.mock('@kbn/core-http-router-server-internal', () => {
+  const realModule = jest.requireActual('@kbn/core-http-router-server-internal');
+  return {
+    ...realModule,
+    ensureRawRequest: jest.fn(),
+  };
+});
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 
