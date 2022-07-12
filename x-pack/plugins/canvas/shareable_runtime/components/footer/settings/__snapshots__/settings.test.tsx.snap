@@ -20,7 +20,7 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
         style="left: 10px; top: 0px;"
       />
       <p
-        class="euiScreenReaderOnly"
+        class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
         You are in a dialog. To close this dialog, hit escape.
@@ -119,7 +119,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
         style="left: 10px; top: 0px;"
       />
       <p
-        class="euiScreenReaderOnly"
+        class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
         You are in a dialog. To close this dialog, hit escape.
@@ -371,7 +371,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
         style="left: 10px; top: 0px;"
       />
       <p
-        class="euiScreenReaderOnly"
+        class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
         You are in a dialog. To close this dialog, hit escape.
@@ -470,7 +470,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
         style="left: 10px; top: 0px;"
       />
       <p
-        class="euiScreenReaderOnly"
+        class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
         You are in a dialog. To close this dialog, hit escape.
@@ -655,7 +655,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
         style="left: 10px; top: 0px;"
       />
       <p
-        class="euiScreenReaderOnly"
+        class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
         You are in a dialog. To close this dialog, hit escape.

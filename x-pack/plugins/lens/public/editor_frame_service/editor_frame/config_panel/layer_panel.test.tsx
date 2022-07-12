@@ -829,6 +829,7 @@ describe('LayerPanel', () => {
         .find(DragDrop)
         .at(1)
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .at(1)
         .instance();
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondButton);
