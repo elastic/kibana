@@ -70,6 +70,7 @@ async function getDiscoverLocationParams({
     ...args,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
+    preserveFilters: true,
   };
 }
 

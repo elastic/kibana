@@ -462,6 +462,7 @@ export const LensTopNavMenu = ({
                 newCopyOnSave: false,
                 isTitleDuplicateConfirmed: false,
                 returnToOrigin: true,
+                saveFilters: true,
               },
               {
                 saveToLibrary:
