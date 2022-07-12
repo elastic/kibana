@@ -11,15 +11,16 @@ import {
   ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { containsChars, isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import * as i18n from './translations';
 import { casesVars, commentVars, urlVars, urlVarsExt } from './action_variables';
 import { templateActionVariable } from '../../../lib';
 
 const errorCode: ERROR_CODE = 'ERR_FIELD_MISSING';
 
-const missingVariable = (path: string, variable: string, plural?: boolean) => ({
+const missingVariable = (path: string, variables: string[]) => ({
   code: errorCode,
   path,
-  message: `Missing required ${variable} variable${plural ? 's' : ''}`,
+  message: i18n.MISSING_VARIABLES(variables),
 });
 
 export const containsTitleAndDesc =
@@ -38,17 +39,17 @@ export const containsTitleAndDesc =
       if (!error) {
         const { doesContain } = containsChars(title)(value);
         if (!doesContain) {
-          error = missingVariable(path, title);
+          error = missingVariable(path, [title]);
         }
       }
       if (!error) {
         const { doesContain } = containsChars(description)(value);
-        error = !doesContain ? missingVariable(path, description) : undefined;
+        error = !doesContain ? missingVariable(path, [description]) : undefined;
       } else {
         const { doesContain } = containsChars(description)(value);
         error = !doesContain
-          ? missingVariable(path, `${title} and ${description}`, true)
-          : missingVariable(path, title);
+          ? missingVariable(path, [title, description])
+          : missingVariable(path, [title]);
       }
     }
     return error;
@@ -66,7 +67,7 @@ export const containsExternalId =
     if (typeof value === 'string') {
       const { doesContain } = containsChars(id)(value);
       if (!doesContain) {
-        error = missingVariable(path, id);
+        error = missingVariable(path, [id]);
       }
     }
     return error;
@@ -83,7 +84,7 @@ export const containsExternalIdOrTitle =
     const title = templateActionVariable(
       urlVarsExt.find((actionVariable) => actionVariable.name === 'external.system.title')!
     );
-    const error = missingVariable(path, `${id} or ${title}`);
+    const error = missingVariable(path, [id, title]);
     if (typeof value === 'string') {
       const { doesContain: doesContainId } = containsChars(id)(value);
       const { doesContain: doesContainTitle } = containsChars(title)(value);
@@ -133,7 +134,7 @@ export const containsCommentsOrEmpty =
     if (typeof value === 'string') {
       const { doesContain } = containsChars(comment)(value);
       if (!doesContain) {
-        error = missingVariable(path, comment);
+        error = missingVariable(path, [comment]);
       }
     }
     return error;

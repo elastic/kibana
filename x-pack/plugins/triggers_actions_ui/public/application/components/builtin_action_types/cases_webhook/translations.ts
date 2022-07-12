@@ -105,14 +105,13 @@ export const GET_INCIDENT_VIEW_URL_REQUIRED = i18n.translate(
   }
 );
 
-export const URL_INVALID = (urlType: string) =>
+export const MISSING_VARIABLES = (variables: string[]) =>
   i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.invalidUrlTextField',
+    'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.missingVariables',
     {
-      defaultMessage: '{urlType} URL is invalid.',
-      values: {
-        urlType,
-      },
+      defaultMessage:
+        'Missing required {variableCount, plural, one {variable} other {variables}}: {variables}',
+      values: { variableCount: variables.length, variables: variables.join(', ') },
     }
   );
 
@@ -123,52 +122,10 @@ export const USERNAME_REQUIRED = i18n.translate(
   }
 );
 
-export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredAuthPasswordText',
-  {
-    defaultMessage: 'Password is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED_FOR_USER = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredPasswordText',
-  {
-    defaultMessage: 'Password is required when username is used.',
-  }
-);
-
-export const USERNAME_REQUIRED_FOR_PASSWORD = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredUserText',
-  {
-    defaultMessage: 'Username is required when password is used.',
-  }
-);
-
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookSummaryText',
   {
     defaultMessage: 'Summary is required.',
-  }
-);
-
-export const KEY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredHeaderKeyText',
-  {
-    defaultMessage: 'Key is required.',
-  }
-);
-
-export const VALUE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredHeaderValueText',
-  {
-    defaultMessage: 'Value is required.',
-  }
-);
-
-export const ADD_HEADER = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.addHeader',
-  {
-    defaultMessage: 'Add header',
   }
 );
 

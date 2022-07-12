@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const CreateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
-  <span style={{ display: display ? 'block' : 'none' }}>
+  <span data-test-subj="createStep" style={{ display: display ? 'block' : 'none' }}>
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <UseField

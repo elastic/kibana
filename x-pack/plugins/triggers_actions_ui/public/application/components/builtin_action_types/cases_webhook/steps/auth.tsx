@@ -44,7 +44,7 @@ export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
 
   return (
-    <span style={{ display: display ? 'block' : 'none' }}>
+    <span data-test-subj="authStep" style={{ display: display ? 'block' : 'none' }}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -59,6 +59,7 @@ export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
               euiFieldProps: {
                 label: i18n.HAS_AUTH,
                 disabled: readOnly,
+                'data-test-subj': 'hasAuthToggle',
               },
             }}
           />
@@ -120,7 +121,7 @@ export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 {items.map((item) => (
-                  <EuiFlexGroup key={item.id} data-test-subj="gobblegobble">
+                  <EuiFlexGroup key={item.id}>
                     <EuiFlexItem>
                       <UseField
                         path={`${item.path}.key`}

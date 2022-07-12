@@ -22,7 +22,7 @@ interface Props {
 }
 
 export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
-  <span style={{ display: display ? 'block' : 'none' }}>
+  <span data-test-subj="getStep" style={{ display: display ? 'block' : 'none' }}>
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <UseField

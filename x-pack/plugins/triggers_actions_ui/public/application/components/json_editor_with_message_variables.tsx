@@ -45,6 +45,7 @@ interface Props {
   helpText?: JSX.Element;
   onBlur?: () => void;
   showButtonTitle?: boolean;
+  euiCodeEditorProps?: { [key: string]: any };
 }
 
 const { useXJsonMode } = XJson;
@@ -66,6 +67,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   helpText,
   onBlur,
   showButtonTitle,
+  euiCodeEditorProps = {},
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -189,6 +191,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
             // Keep the documents in sync with the editor content
             onDocumentsChange(convertToJson(xjson));
           }}
+          {...euiCodeEditorProps}
         />
       </>
     </EuiFormRow>

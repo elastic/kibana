@@ -57,7 +57,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
 }) => {
   const { isValid, validateFields } = useFormContext();
   const [currentStep, setCurrentStep] = useState<PossibleStepNumbers>(1);
-  const [stati, setStati] = useState<Record<string, EuiStepStatus>>({
+  const [status, setStatus] = useState<Record<string, EuiStepStatus>>({
     step1: 'incomplete',
     step2: 'incomplete',
     step3: 'incomplete',
@@ -83,15 +83,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         };
       })
     );
-    setStati(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
+    setStatus(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
   }, [currentStep, isValid, validateFields]);
 
   useEffect(() => {
     updateStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValid, currentStep]);
-
-  const [hasConfigurationErrors, setHasConfigurationError] = useState(false);
 
   const onNextStep = useCallback(
     async (selectedStep?: PossibleStepNumbers) => {
@@ -101,7 +99,6 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           : currentStep === 4
           ? currentStep
           : ((currentStep + 1) as PossibleStepNumbers);
-      setHasConfigurationError(false);
       const fieldsToValidate: string[] =
         nextStep === 2
           ? fields.step1
@@ -113,7 +110,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
       const { areFieldsValid } = await validateFields(fieldsToValidate);
 
       if (!areFieldsValid) {
-        setHasConfigurationError(true);
+        setStatus((currentStatus) => ({
+          ...currentStatus,
+          [`step${currentStep}`]: 'danger',
+        }));
         return;
       }
       if (nextStep < 5) {
@@ -123,35 +123,39 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
     [currentStep, validateFields]
   );
 
-  const horizontalSteps = useMemo(() => {
-    return [
+  const horizontalSteps = useMemo(
+    () => [
       {
         title: i18n.STEP_1,
-        status: stati.step1,
+        status: status.step1,
         onClick: () => setCurrentStep(1),
+        ['data-test-subj']: `horizontalStep1-${status.step1}`,
       },
       {
         title: i18n.STEP_2,
-        status: stati.step2,
+        status: status.step2,
         onClick: () => onNextStep(2),
+        ['data-test-subj']: `horizontalStep2-${status.step2}`,
       },
       {
         title: i18n.STEP_3,
-        status: stati.step3,
+        status: status.step3,
         onClick: () => onNextStep(3),
+        ['data-test-subj']: `horizontalStep3-${status.step3}`,
       },
       {
         title: i18n.STEP_4,
-        status: stati.step4,
+        status: status.step4,
         onClick: () => onNextStep(4),
+        ['data-test-subj']: `horizontalStep4-${status.step4}`,
       },
-    ];
-  }, [onNextStep, stati]);
+    ],
+    [onNextStep, status]
+  );
 
   return (
     <>
       <EuiStepsHorizontal steps={horizontalSteps} />
-      {hasConfigurationErrors && <p>{'hasConfigurationErrors!!!!!'}</p>}
       <EuiSpacer size="l" />
       <AuthStep readOnly={readOnly} display={currentStep === 1} />
       <CreateStep readOnly={readOnly} display={currentStep === 2} />
