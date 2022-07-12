@@ -141,7 +141,7 @@ export type {
   ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 
-export { CspConfig } from './http';
+export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {

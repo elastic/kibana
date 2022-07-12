@@ -12,7 +12,7 @@ import {
   httpServiceMock,
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
-} from '../http/http_service.mock';
+} from '@kbn/core-http-server-mocks';
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 
 describe('CapabilitiesService', () => {

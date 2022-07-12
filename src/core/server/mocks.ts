@@ -19,6 +19,7 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -28,7 +29,6 @@ import type {
   RequestHandlerContext,
 } from '.';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
@@ -45,11 +45,9 @@ import { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-export { httpServerMock } from './http/http_server.mocks';
+export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
-export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-export { httpServiceMock } from './http/http_service.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';

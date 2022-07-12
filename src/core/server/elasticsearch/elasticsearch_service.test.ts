@@ -31,7 +31,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { httpServiceMock } from '../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
 import { elasticsearchClientMock } from './client/mocks';

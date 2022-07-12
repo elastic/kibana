@@ -13,8 +13,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
-import { HttpService } from '../../http';
-import { createHttpServer } from '../../http/test_utils';
+import { HttpService } from '@kbn/core-http-server-internal';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerRouteForBundle } from '../bundle_routes/bundles_route';
 import { FileHashCache } from '../bundle_routes/file_hash_cache';
 

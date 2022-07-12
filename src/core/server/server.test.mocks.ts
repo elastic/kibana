@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from './http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 export const mockHttpService = httpServiceMock.create();
-jest.doMock('./http/http_service', () => ({
+jest.doMock('@kbn/core-http-server-internal', () => ({
   HttpService: jest.fn(() => mockHttpService),
 }));
 
