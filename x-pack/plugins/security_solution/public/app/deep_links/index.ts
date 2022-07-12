@@ -439,27 +439,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
-            features: [
-              [
-                FEATURE.casesCreate,
-                FEATURE.casesRead,
-                FEATURE.casesUpdate,
-                FEATURE.casesDelete,
-                FEATURE.casesPush,
-              ],
-            ],
+            features: [FEATURE.casesUpdate],
             isPremium: true,
           },
           [SecurityPageName.caseCreate]: {
-            features: [
-              [
-                FEATURE.casesCreate,
-                FEATURE.casesRead,
-                FEATURE.casesUpdate,
-                FEATURE.casesDelete,
-                FEATURE.casesPush,
-              ],
-            ],
+            features: [FEATURE.casesCreate],
           },
         },
       }),

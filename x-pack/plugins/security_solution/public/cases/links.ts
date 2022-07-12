@@ -7,8 +7,6 @@
 
 import {
   CREATE_CASES_CAPABILITY,
-  DELETE_CASES_CAPABILITY,
-  PUSH_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '@kbn/cases-plugin/common';
@@ -26,29 +24,13 @@ export const getCasesLinkItems = (): LinkItem => {
         capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
       },
       [SecurityPageName.caseConfigure]: {
-        capabilities: [
-          [
-            `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
-          ],
-        ],
+        capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
         licenseType: 'gold',
         sideNavDisabled: true,
         hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
-        capabilities: [
-          [
-            `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
-            `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
-          ],
-        ],
+        capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
         sideNavDisabled: true,
         hideTimeline: true,
       },
