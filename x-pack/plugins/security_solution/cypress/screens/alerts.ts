@@ -78,7 +78,7 @@ export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
-export const SELECT_TABLE = '[data-test-subj="selectTable"]';
+export const SELECT_TABLE = '[data-test-subj="table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
