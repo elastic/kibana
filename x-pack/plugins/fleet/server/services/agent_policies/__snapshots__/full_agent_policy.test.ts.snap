@@ -3,6 +3,9 @@
 exports[`getFullAgentPolicy should support a different data output 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "source_uri": "http://default-registry.co",
+    },
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -65,6 +68,9 @@ Object {
 exports[`getFullAgentPolicy should support a different monitoring output 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "source_uri": "http://default-registry.co",
+    },
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -127,6 +133,9 @@ Object {
 exports[`getFullAgentPolicy should support both different outputs for data and monitoring  1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "source_uri": "http://default-registry.co",
+    },
     "monitoring": Object {
       "enabled": true,
       "logs": false,

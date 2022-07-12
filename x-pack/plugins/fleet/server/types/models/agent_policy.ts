@@ -34,6 +34,7 @@ export const AgentPolicyBaseSchema = {
   ),
   data_output_id: schema.maybe(schema.nullable(schema.string())),
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
+  download_source_id: schema.maybe(schema.nullable(schema.string())),
 };
 
 export const NewAgentPolicySchema = schema.object({
