@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-deprecations-common-internal"
-PKG_REQUIRE_NAME = "@kbn/core-deprecations-common-internal"
+PKG_DIRNAME = "core-deprecations-browser-mocks"
+PKG_REQUIRE_NAME = "@kbn/core-deprecations-browser-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -38,7 +38,8 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "@npm//react",
+  "//packages/core/deprecations/core-deprecations-browser-internal"
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -54,7 +55,9 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
-  "//packages/core/deprecations/core-deprecations-common:npm_module_types"
+  "//packages/kbn-utility-types:npm_module_types",
+  "//packages/core/deprecations/core-deprecations-browser:npm_module_types",
+  "//packages/core/deprecations/core-deprecations-browser-internal:npm_module_types"
 ]
 
 jsts_transpiler(

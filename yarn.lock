@@ -3108,11 +3108,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser":
+"@kbn/core-deprecations-browser-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-common-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-common-internal":
+"@kbn/core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser":
   version "0.0.0"
   uid ""
 
@@ -6715,11 +6715,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser/npm_module_types":
+"@types/kbn__core-deprecations-browser-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-deprecations-common-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-common-internal/npm_module_types":
+"@types/kbn__core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser/npm_module_types":
   version "0.0.0"
   uid ""
 

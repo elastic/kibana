@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/core-deprecations-common-internal",
+  "name": "@kbn/core-deprecations-browser-mocks",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",
