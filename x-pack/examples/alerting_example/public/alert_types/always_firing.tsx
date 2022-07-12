@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiExpression,
   EuiSpacer,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit, pick } from 'lodash';
@@ -69,6 +70,8 @@ export const AlwaysFiringExpression: React.FunctionComponent<
   const {
     instances = DEFAULT_INSTANCES_TO_GENERATE,
     thresholds = pick(DEFAULT_THRESHOLDS, defaultActionGroupId),
+    shouldFlapp = false,
+    shouldPersist = false,
   } = ruleParams;
 
   const actionGroupsWithConditions = actionGroups.map((actionGroup) =>
@@ -93,6 +96,38 @@ export const AlwaysFiringExpression: React.FunctionComponent<
               value={instances}
               onChange={(event) => {
                 setRuleParams('instances', event.target.valueAsNumber);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s" wrap direction="column">
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            label="Should alerts persist"
+            helpText="Should the always firing rule persist alerts across runs?"
+          >
+            <EuiCheckbox
+              name="shouldPersist"
+              id="shouldPersist"
+              checked={shouldPersist}
+              onChange={(event) => {
+                setRuleParams('shouldPersist', event.target.checked);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            label="Should alerts flap"
+            helpText="Shoudl the always firing rule simulate flapping?"
+          >
+            <EuiCheckbox
+              name="shouldFlapp"
+              id="shouldFlapp"
+              checked={shouldFlapp}
+              onChange={(event) => {
+                setRuleParams('shouldFlapp', event.target.checked);
               }}
             />
           </EuiFormRow>

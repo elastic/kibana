@@ -40,9 +40,9 @@ function getTShirtSizeByIdAndThreshold(
 export const alertType: RuleType<
   AlwaysFiringParams,
   never,
-  { count?: number },
+  { count?: number; instancesToRetains?: Array<{ id: string; ttl: number }> },
   { triggerdOnCycle: number },
-  never,
+  { ttl: number },
   AlwaysFiringActionGroupIds
 > = {
   id: 'example.always-firing',
@@ -57,22 +57,43 @@ export const alertType: RuleType<
   isExportable: true,
   async executor({
     services,
-    params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
+    params: {
+      instances = DEFAULT_INSTANCES_TO_GENERATE,
+      thresholds,
+      shouldFlapp = false,
+      shouldPersist = false,
+    },
     state,
   }) {
     const count = (state.count ?? 0) + 1;
+    const activeAlerts = shouldPersist ? state.instancesToRetains ?? [] : [];
 
-    range(instances)
-      .map(() => uuid.v4())
-      .forEach((id: string) => {
-        services.alertFactory
-          .create(id)
-          .replaceState({ triggerdOnCycle: count })
-          .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
-      });
+    if (activeAlerts.length < instances) {
+      range(instances - activeAlerts.length)
+        .map(() => uuid.v4())
+        .forEach((id: string) => {
+          activeAlerts.push({ id, ttl: shouldPersist ? Math.floor(Math.random() * 10) : 0 });
+        });
+    }
+
+    const instancesToRetains = activeAlerts
+      .map(({ id, ttl }) => {
+        if (!shouldFlapp || ttl % 2 === 0) {
+          services.alertFactory
+            .create(id)
+            .replaceState({ triggerdOnCycle: count })
+            .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds), { ttl });
+        }
+        return {
+          id,
+          ttl: ttl - 1,
+        };
+      })
+      .filter((alert) => alert.ttl > 0);
 
     return {
       count,
+      instancesToRetains,
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,

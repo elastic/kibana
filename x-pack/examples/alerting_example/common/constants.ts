@@ -19,6 +19,8 @@ export interface AlwaysFiringThresholds {
 export interface AlwaysFiringParams extends RuleTypeParams {
   instances?: number;
   thresholds?: AlwaysFiringThresholds;
+  shouldFlapp?: boolean;
+  shouldPersist?: boolean;
 }
 export type AlwaysFiringActionGroupIds = keyof AlwaysFiringThresholds;
 
