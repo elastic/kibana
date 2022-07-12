@@ -8,7 +8,11 @@
 import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations';
+import {
+  MonitorServiceLocationsCodec,
+  MonitorServiceLocationCodec,
+  ServiceLocationErrors,
+} from './locations';
 import {
   DataStream,
   DataStreamCodec,
@@ -355,19 +359,19 @@ export const MonitorManagementListResultCodec = t.type({
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
+export const MonitorOverviewItemCodec = t.interface({
+  name: t.string,
+  id: t.string,
+  location: MonitorServiceLocationCodec,
+  isEnabled: t.boolean,
+});
+
+export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
+
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
-  pages: t.record(
-    t.number,
-    t.array(
-      t.interface({
-        name: t.string,
-        id: t.string,
-        location: MonitorServiceLocationsCodec,
-      })
-    )
-  ),
+  pages: t.record(t.string, t.array(MonitorOverviewItemCodec)),
 });
 
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;

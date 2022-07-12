@@ -12,12 +12,13 @@ import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
 import { MonitorOverviewPageState } from './models';
-import { fetchMonitorOverviewAction } from './actions';
+import { fetchMonitorOverviewAction, setOverviewPerPageAction } from './actions';
 
 export interface MonitorOverviewState {
   data: MonitorOverviewResult;
   pageState: MonitorOverviewPageState;
   loading: boolean;
+  loaded: boolean;
   error: IHttpSerializedFetchError | null;
 }
 
@@ -31,6 +32,7 @@ const initialState: MonitorOverviewState = {
     perPage: 20,
   },
   loading: false,
+  loaded: false,
   error: null,
 };
 
@@ -43,10 +45,18 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorOverviewAction.success, (state, action) => {
       state.loading = false;
       state.data = action.payload;
+      state.loaded = true;
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {
       state.loading = false;
       state.error = serializeHttpFetchError(action.payload);
+    })
+    .addCase(setOverviewPerPageAction, (state, action) => {
+      state.pageState = {
+        ...state.pageState,
+        perPage: action.payload,
+      };
+      state.loaded = false;
     });
 });
 

@@ -51,6 +51,28 @@ export const SUMMARY_FILTER = {
   },
 };
 
+export const getLocationFilter = ({
+  locationName,
+  locationId,
+}: {
+  locationName: string;
+  locationId: string;
+}) => ({
+  minimum_should_match: 1,
+  should: [
+    {
+      term: {
+        'observer.name': locationId,
+      },
+    },
+    {
+      term: {
+        'observer.geo.name': `North America - ${locationName}`,
+      },
+    },
+  ],
+});
+
 export const getTimeSpanFilter = () => ({
   range: {
     'monitor.timespan': {
