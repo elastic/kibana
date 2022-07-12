@@ -151,6 +151,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         </EuiPortal>
       )}
       <ContextMenuActions
+        isExternallyManaged={isExternallyManaged}
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}

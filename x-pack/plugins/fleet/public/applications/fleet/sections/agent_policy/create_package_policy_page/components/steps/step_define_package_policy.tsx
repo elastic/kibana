@@ -159,6 +159,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoadingPackagePolicies,
     ]);
 
+    const isReadonly = packagePolicy.is_externally_managed;
+
     return validationResults ? (
       <FormGroupResponsiveFields
         title={
@@ -190,6 +192,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               }
             >
               <EuiFieldText
+                readOnly={isReadonly}
                 value={packagePolicy.name}
                 onChange={(e) =>
                   updatePackagePolicy({
@@ -222,6 +225,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               error={validationResults.description}
             >
               <EuiFieldText
+                readOnly={isReadonly}
                 value={packagePolicy.description}
                 onChange={(e) =>
                   updatePackagePolicy({
@@ -263,7 +267,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           })}
 
           {/* Advanced options toggle */}
-          {!noAdvancedToggle && (
+          {!noAdvancedToggle && !isReadonly && (
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
