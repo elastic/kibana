@@ -1410,7 +1410,7 @@ describe('setup contract', () => {
   });
 
   describe('#registerStaticDir', () => {
-    const assetFolder = join(__dirname, 'integration_tests', 'fixtures', 'static');
+    const assetFolder = join(__dirname, '__fixtures', 'static');
     let tempDir: string;
 
     beforeAll(async () => {
