@@ -31,5 +31,15 @@ export const NumberField: React.FC<
     [props, setDisplayValue, max, min]
   );
 
-  return <EuiFieldNumber {...props} value={displayValue} onChange={onChange} />;
+  const onBlur = useCallback(
+    (e) => {
+      if (isNaN(Number(displayValue)) || displayValue === '') {
+        setDisplayValue(props.value);
+      }
+      if (props.onBlur) props.onBlur(e);
+    },
+    [displayValue, props, setDisplayValue]
+  );
+
+  return <EuiFieldNumber {...props} value={displayValue} onChange={onChange} onBlur={onBlur} />;
 };
