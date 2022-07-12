@@ -26,6 +26,7 @@ const BulkActionsHeaderComponent: React.FunctionComponent<{ pageSize: number }> 
           updateSelectedRows({ action: 'clear' });
         }
       }}
+      data-test-subj="bulk-actions-header"
     />
   );
 };

@@ -13,6 +13,7 @@ import { BulkActionsContext } from '../context';
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
   const [{ rowSelection }, updateSelectedRows] = useContext(BulkActionsContext);
   const isChecked = rowSelection.has(rowIndex);
+
   return (
     <EuiCheckbox
       id={rowIndex.toString()}
@@ -24,6 +25,7 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
           updateSelectedRows({ action: 'delete', rowIndex });
         }
       }}
+      data-test-subj="bulk-actions-row-cell"
     />
   );
 };

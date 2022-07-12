@@ -43,10 +43,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import {
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
@@ -421,7 +418,6 @@ export interface AlertsTableProps {
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
   'data-test-subj': string;
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -455,13 +451,13 @@ export interface AlertsTableConfigurationRegistry {
   };
 }
 
-export interface RowSelectionAction {
+export interface BulkActionsReducerAction {
   action: string;
   rowIndex?: number;
   pageSize?: number;
 }
 
-export interface RowSelectionState {
+export interface BulkActionsState {
   rowSelection: Set<number>;
   isAllSelected: boolean;
   isPageSelected: boolean;

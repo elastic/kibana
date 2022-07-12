@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { RowSelectionAction, RowSelectionState } from '../../../../types';
+import { BulkActionsReducerAction, BulkActionsState } from '../../../../types';
 
 const getAllRowsInPage = (pageSize: number) => new Set(Array.from(Array(pageSize).keys()));
 
 export const bulkActionsReducer = (
-  { rowSelection, pageSize: currentPageSize }: RowSelectionState,
-  { action, rowIndex, pageSize }: RowSelectionAction
-): RowSelectionState => {
+  { rowSelection, pageSize: currentPageSize }: BulkActionsState,
+  { action, rowIndex, pageSize }: BulkActionsReducerAction
+): BulkActionsState => {
   const nextState = {
     rowSelection,
     isAllSelected: false,
@@ -40,8 +40,8 @@ export const bulkActionsReducer = (
     nextState.isAllSelected = false;
     nextState.isPageSelected = false;
   } else if (action === 'updatePageSize' && pageSize !== undefined) {
-    console.log('updating page size', pageSize);
     nextState.pageSize = pageSize;
   }
+
   return nextState;
 };
