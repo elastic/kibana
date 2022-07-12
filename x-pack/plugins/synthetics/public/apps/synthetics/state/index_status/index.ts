@@ -33,7 +33,7 @@ export const indexStatusReducer = createReducer(initialState, (builder) => {
       state.loading = false;
     })
     .addCase(getIndexStatusFail, (state, action) => {
-      state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
+      state.error = serializeHttpFetchError(action.payload);
       state.loading = false;
     });
 });
