@@ -12,6 +12,7 @@ import {
   Map as MbMap,
   MapGeoJSONFeature,
   MapMouseEvent,
+  MapSourceDataEvent,
   Point2D,
   PointLike,
 } from '@kbn/mapbox-gl';
@@ -19,7 +20,7 @@ import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { LON_INDEX, RawValue } from '../../../../common/constants';
+import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
 import { ILayer } from '../../../classes/layers/layer';
@@ -63,6 +64,7 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
+  updateOpenTooltips: (openTooltips: TooltipState[]) => void;
 }
 
 export class TooltipControl extends Component<Props, {}> {
@@ -73,6 +75,7 @@ export class TooltipControl extends Component<Props, {}> {
     this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.on('click', this._lockTooltip);
     this.props.mbMap.on('remove', this._setIsMapRemoved);
+    this.props.mbMap.on('sourcedata', this._onSourceData);
   }
 
   componentWillUnmount() {
@@ -80,11 +83,46 @@ export class TooltipControl extends Component<Props, {}> {
     this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.off('click', this._lockTooltip);
     this.props.mbMap.off('remove', this._setIsMapRemoved);
+    this.props.mbMap.off('sourcedata', this._onSourceData);
   }
 
   _setIsMapRemoved = () => {
     this._isMapRemoved = true;
   };
+
+  _onSourceData = (e: MapSourceDataEvent) => {
+    if (
+      e.sourceId &&
+      e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
+      e.dataType === 'source' &&
+      (e.source.type === 'vector' || e.source.type === 'geojson')
+    ) {
+      // map features changed, update tooltip state to match new map state.
+      this._updateOpentooltips();
+    }
+  };
+
+  _updateOpentooltips = _.debounce(() => {
+    if (this.props.openTooltips.length === 0) {
+      return;
+    }
+
+    const openTooltips = this.props.openTooltips
+      .map((tooltipState) => {
+        const mbFeatures = this._getMbFeaturesUnderPointer(
+          this.props.mbMap.project(tooltipState.location)
+        );
+        return {
+          ...tooltipState,
+          features: this._getTooltipFeatures(mbFeatures, tooltipState.isLocked, tooltipState.id),
+        };
+      })
+      .filter((tooltipState) => {
+        return tooltipState.features.length > 0;
+      });
+
+    this.props.updateOpenTooltips(openTooltips);
+  }, 300);
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();

@@ -7,15 +7,14 @@
 
 import React, { useMemo, useCallback, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import type { EuiBasicTableColumn, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiText,
   EuiLink,
   EuiHealth,
   EuiToolTip,
-  EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
   EuiFlexGroup,
@@ -27,11 +26,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import {
+import type {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
-  pagePathGetters,
 } from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
@@ -39,8 +38,12 @@ import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { CreateStructuredSelector } from '../../../../common/store';
-import { Immutable, HostInfo, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import type { CreateStructuredSelector } from '../../../../common/store';
+import type {
+  Immutable,
+  HostInfo,
+  PolicyDetailsRouteState,
+} from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -54,7 +57,7 @@ import {
 } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
-import { EndpointAction } from '../store/action';
+import type { EndpointAction } from '../store/action';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -64,10 +67,8 @@ import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
-import {
-  BackToExternalAppButton,
-  BackToExternalAppButtonProps,
-} from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;

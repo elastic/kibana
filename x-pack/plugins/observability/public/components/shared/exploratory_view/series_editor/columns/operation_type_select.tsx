@@ -47,6 +47,18 @@ export function OperationTypeComponent({
 }) {
   const options = [
     {
+      value: 'min' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.min', {
+        defaultMessage: 'Min',
+      }),
+    },
+    {
+      value: 'max' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.max', {
+        defaultMessage: 'Max',
+      }),
+    },
+    {
       value: 'average' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.average', {
         defaultMessage: 'Average',
