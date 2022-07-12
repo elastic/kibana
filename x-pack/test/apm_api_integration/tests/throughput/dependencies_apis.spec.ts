@@ -19,49 +19,55 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function getThroughputValues(overrides?: { serviceName?: string; backendName?: string }) {
+  async function getThroughputValues(overrides?: {
+    serviceName?: string;
+    dependencyName?: string;
+  }) {
     const commonQuery = {
       start: new Date(start).toISOString(),
       end: new Date(end).toISOString(),
       environment: 'ENVIRONMENT_ALL',
     };
-    const [topBackendsAPIResponse, backendThroughputChartAPIResponse, upstreamServicesApiResponse] =
-      await Promise.all([
-        apmApiClient.readUser({
-          endpoint: `GET /internal/apm/dependencies/top_dependencies`,
-          params: {
-            query: {
-              ...commonQuery,
-              numBuckets: 20,
-              kuery: '',
-            },
+    const [
+      topDependenciesAPIResponse,
+      backendThroughputChartAPIResponse,
+      upstreamServicesApiResponse,
+    ] = await Promise.all([
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/dependencies/top_dependencies`,
+        params: {
+          query: {
+            ...commonQuery,
+            numBuckets: 20,
+            kuery: '',
           },
-        }),
-        apmApiClient.readUser({
-          endpoint: `GET /internal/apm/dependencies/charts/throughput`,
-          params: {
-            query: {
-              ...commonQuery,
-              backendName: overrides?.backendName || 'elasticsearch',
-              spanName: '',
-              searchServiceDestinationMetrics: false,
-              kuery: '',
-            },
+        },
+      }),
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/dependencies/charts/throughput`,
+        params: {
+          query: {
+            ...commonQuery,
+            dependencyName: overrides?.dependencyName || 'elasticsearch',
+            spanName: '',
+            searchServiceDestinationMetrics: false,
+            kuery: '',
           },
-        }),
-        apmApiClient.readUser({
-          endpoint: `GET /internal/apm/dependencies/upstream_services`,
-          params: {
-            query: {
-              ...commonQuery,
-              backendName: overrides?.backendName || 'elasticsearch',
-              numBuckets: 20,
-              offset: '1d',
-              kuery: '',
-            },
+        },
+      }),
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/dependencies/upstream_services`,
+        params: {
+          query: {
+            ...commonQuery,
+            dependencyName: overrides?.dependencyName || 'elasticsearch',
+            numBuckets: 20,
+            offset: '1d',
+            kuery: '',
           },
-        }),
-      ]);
+        },
+      }),
+    ]);
     const backendThroughputChartMean = roundNumber(
       meanBy(backendThroughputChartAPIResponse.body.currentTimeseries, 'y')
     );
@@ -76,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     );
 
     return {
-      topBackends: topBackendsAPIResponse.body.backends.map((item) => [
+      topDependencies: topDependenciesAPIResponse.body.dependencies.map((item) => [
         (item.location as BackendNode).backendName,
         roundNumber(item.currentStats.throughput.value),
       ]),
@@ -178,7 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('compare throughput value between top backends, backend throughput chart and upstream services apis', () => {
           describe('elasticsearch dependency', () => {
             before(async () => {
-              throughputValues = await getThroughputValues({ backendName: 'elasticsearch' });
+              throughputValues = await getThroughputValues({ dependencyName: 'elasticsearch' });
             });
 
             it('matches throughput values between throughput chart and top dependency', () => {
@@ -204,7 +210,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
           describe('postgresql dependency', () => {
             before(async () => {
-              throughputValues = await getThroughputValues({ backendName: 'postgresql' });
+              throughputValues = await getThroughputValues({ dependencyName: 'postgresql' });
             });
 
             it('matches throughput values between throughput chart and top dependency', () => {

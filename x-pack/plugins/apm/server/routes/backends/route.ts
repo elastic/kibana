@@ -13,7 +13,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getMetadataForBackend } from './get_metadata_for_backend';
 import { getLatencyChartsForBackend } from './get_latency_charts_for_backend';
 import { getTopDependencies } from './get_top_dependencies';
-import { getUpstreamServicesForBackend } from './get_upstream_services_for_backend';
+import { getUpstreamServicesForDependency } from './get_upstream_services_for_dependency';
 import { getThroughputChartsForBackend } from './get_throughput_charts_for_backend';
 import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
 import { ConnectionStatsItemWithImpact } from '../../../common/connections';
@@ -130,7 +130,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
   params: t.intersection([
     t.type({
       query: t.intersection([
-        t.type({ backendName: t.string }),
+        t.type({ dependencyName: t.string }),
         rangeRt,
         t.type({ numBuckets: toNumberRt }),
       ]),
@@ -198,7 +198,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const {
       query: {
-        backendName,
+        dependencyName,
         environment,
         offset,
         numBuckets,
@@ -209,7 +209,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
     } = resources.params;
 
     const opts = {
-      backendName,
+      dependencyName,
       setup,
       start,
       end,
@@ -219,9 +219,9 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
     };
 
     const [currentServices, previousServices] = await Promise.all([
-      getUpstreamServicesForBackend(opts),
+      getUpstreamServicesForDependency(opts),
       offset
-        ? getUpstreamServicesForBackend({ ...opts, offset })
+        ? getUpstreamServicesForDependency({ ...opts, offset })
         : Promise.resolve([]),
     ]);
 

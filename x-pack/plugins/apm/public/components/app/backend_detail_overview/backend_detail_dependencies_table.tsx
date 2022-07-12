@@ -20,7 +20,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 export function BackendDetailDependenciesTable() {
   const {
     query: {
-      backendName,
+      dependencyName,
       rangeFrom,
       rangeTo,
       kuery,
@@ -44,7 +44,7 @@ export function BackendDetailDependenciesTable() {
       return callApmApi('GET /internal/apm/dependencies/upstream_services', {
         params: {
           query: {
-            backendName,
+            dependencyName,
             start,
             end,
             environment,
@@ -58,7 +58,7 @@ export function BackendDetailDependenciesTable() {
         },
       });
     },
-    [start, end, environment, offset, backendName, kuery, comparisonEnabled]
+    [start, end, environment, offset, dependencyName, kuery, comparisonEnabled]
   );
 
   const dependencies =

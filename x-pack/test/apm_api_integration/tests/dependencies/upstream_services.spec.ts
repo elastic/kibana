@@ -15,14 +15,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const backendName = 'elasticsearch';
+  const dependencyName = 'elasticsearch';
 
   async function callApi() {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/dependencies/upstream_services',
       params: {
         query: {
-          backendName,
+          dependencyName,
           environment: 'production',
           kuery: '',
           numBuckets: 20,

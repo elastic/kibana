@@ -12,11 +12,11 @@ import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { Setup } from '../../lib/helpers/setup_request';
 
-export async function getUpstreamServicesForBackend({
+export async function getUpstreamServicesForDependency({
   setup,
   start,
   end,
-  backendName,
+  dependencyName,
   numBuckets,
   kuery,
   environment,
@@ -25,7 +25,7 @@ export async function getUpstreamServicesForBackend({
   setup: Setup;
   start: number;
   end: number;
-  backendName: string;
+  dependencyName: string;
   numBuckets: number;
   kuery: string;
   environment: string;
@@ -36,7 +36,7 @@ export async function getUpstreamServicesForBackend({
     start,
     end,
     filter: [
-      { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+      { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
       ...environmentQuery(environment),
       ...kqlQuery(kuery),
     ],
