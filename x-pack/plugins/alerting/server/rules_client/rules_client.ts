@@ -2177,15 +2177,12 @@ export class RulesClient {
             muteAll: false,
           };
 
-    const isRuleSnoozedUntil = this.calculateRuleIsSnoozedUntil(newAttrs);
-
     const updateAttributes = this.updateMeta({
       ...newAttrs,
-      ...(isRuleSnoozedUntil !== undefined
-        ? {
-            isSnoozedUntil: isRuleSnoozedUntil,
-          }
-        : {}),
+      ...(this.updateRuleAttrIsSnoozedUntil({
+        ...newAttrs,
+        isSnoozedUntil: attributes.isSnoozedUntil,
+      })),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2254,19 +2251,13 @@ export class RulesClient {
       ? clearScheduledSnoozesById(attributes, scheduleIds)
       : clearCurrentActiveSnooze(attributes);
 
-    const isRuleSnoozedUntil = this.calculateRuleIsSnoozedUntil({
-      ...attributes,
-      snoozeSchedule,
-      muteAll: !scheduleIds ? false : attributes.muteAll,
-    });
-
     const updateAttributes = this.updateMeta({
       snoozeSchedule,
-      ...(isRuleSnoozedUntil !== undefined
-        ? {
-            isSnoozedUntil: isRuleSnoozedUntil,
-          }
-        : {}),
+      ...(this.updateRuleAttrIsSnoozedUntil({
+        isSnoozedUntil: attributes.isSnoozedUntil,
+        snoozeSchedule,
+        muteAll: !scheduleIds ? false : attributes.muteAll,
+      })),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
       ...(!scheduleIds ? { muteAll: false } : {}),
@@ -2281,16 +2272,20 @@ export class RulesClient {
     );
   }
 
-  public calculateRuleIsSnoozedUntil(rule: {
+  public updateRuleAttrIsSnoozedUntil(rule: {
     muteAll: boolean;
     snoozeSchedule?: RuleSnooze;
     isSnoozedUntil?: Date | string | null;
-  }): string | null | undefined {
+  }): { isSnoozedUntil?: string} | {} {
     const isSnoozedUntil = getRuleSnoozeEndTime(rule);
 
-    if (!isSnoozedUntil && !rule.isSnoozedUntil) return;
+    if (!isSnoozedUntil && !rule.isSnoozedUntil) return {};
 
-    return isSnoozedUntil ? isSnoozedUntil.toISOString() : null;
+    return isSnoozedUntil
+      ? {
+        isSnoozedUntil: isSnoozedUntil.toISOString(),
+      }
+      : {}
   }
 
   public async clearExpiredSnoozes({ id }: { id: string }): Promise<void> {
@@ -2312,8 +2307,14 @@ export class RulesClient {
 
     if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
 
+
     const updateAttributes = this.updateMeta({
       snoozeSchedule,
+      ...(this.updateRuleAttrIsSnoozedUntil({
+        snoozeSchedule,
+        isSnoozedUntil: attributes.isSnoozedUntil,
+        muteAll: attributes.muteAll,
+      })),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2324,7 +2325,7 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    ).then(() => this.updateSnoozedUntilTime({ id }));
+    );
   }
 
   public async muteAll({ id }: { id: string }): Promise<void> {

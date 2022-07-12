@@ -43,7 +43,7 @@ export type RuleTaskStateAndMetrics = RuleTaskState & {
 export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
   rulesClient: RulesClientApi;
   stateWithMetrics: RuleTaskStateAndMetrics;
-  isRuleSnoozedUntil?: string | null;
+  isRuleSnoozedUntil?: { isSnoozedUntil?: string } | {};
 };
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {
