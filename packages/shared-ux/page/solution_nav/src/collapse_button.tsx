@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './solution_nav_collapse_button.scss';
+import './collapse_button.scss';
 
 import React from 'react';
 import classNames from 'classnames';
@@ -13,34 +13,33 @@ import classNames from 'classnames';
 import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type KibanaPageTemplateSolutionNavCollapseButtonProps =
-  Partial<EuiButtonIconPropsForButton> & {
-    /**
-     * Boolean state of current collapsed status
-     */
-    isCollapsed: boolean;
-  };
+export type SolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {
+  /**
+   * Boolean state of current collapsed status
+   */
+  isCollapsed: boolean;
+};
 
-const collapseLabel = i18n.translate('sharedUXComponents.solutionNav.collapsibleLabel', {
+const collapseLabel = i18n.translate('sharedUXPackages.solutionNav.collapsibleLabel', {
   defaultMessage: 'Collapse side navigation',
 });
 
-const openLabel = i18n.translate('sharedUXComponents.solutionNav.openLabel', {
+const openLabel = i18n.translate('sharedUXPackages.solutionNav.openLabel', {
   defaultMessage: 'Open side navigation',
 });
 
 /**
  * Creates the styled icon button for showing/hiding solution nav
  */
-export const KibanaPageTemplateSolutionNavCollapseButton = ({
+export const SolutionNavCollapseButton = ({
   className,
   isCollapsed,
   ...rest
-}: KibanaPageTemplateSolutionNavCollapseButtonProps) => {
+}: SolutionNavCollapseButtonProps) => {
   const classes = classNames(
-    'kbnPageTemplateSolutionNavCollapseButton',
+    'kbnSolutionNavCollapseButton',
     {
-      'kbnPageTemplateSolutionNavCollapseButton-isCollapsed': isCollapsed,
+      'kbnSolutionNavCollapseButton-isCollapsed': isCollapsed,
     },
     className
   );

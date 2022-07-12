@@ -3,7 +3,7 @@
 exports[`WithSolutionNav renders wrapped component 1`] = `
 <TestComponent
   pageSideBar={
-    <KibanaPageTemplateSolutionNav
+    <SolutionNav
       icon="logoKibana"
       isOpenOnDesktop={true}
       items={
@@ -52,7 +52,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnPageTemplate__pageSideBar",
+      "className": "kbnSolutionNav__sidebar",
       "paddingSize": "none",
     }
   }
@@ -62,7 +62,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
 exports[`WithSolutionNav with children 1`] = `
 <TestComponent
   pageSideBar={
-    <KibanaPageTemplateSolutionNav
+    <SolutionNav
       icon="logoKibana"
       isOpenOnDesktop={true}
       items={
@@ -111,7 +111,7 @@ exports[`WithSolutionNav with children 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnPageTemplate__pageSideBar",
+      "className": "kbnSolutionNav__sidebar",
       "paddingSize": "none",
     }
   }
