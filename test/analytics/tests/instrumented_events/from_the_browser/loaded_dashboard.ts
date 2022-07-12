@@ -150,7 +150,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
-
       it('doesnt emit when removing markup panel', async () => {
         await dashboardPanelActions.removePanelByTitle(MARKDOWN_PANEL_TITLE);
         await checkDoesNotEmit();
@@ -171,12 +170,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
-
       it('doesnt emit when removing map panel', async () => {
         await dashboardPanelActions.removePanelByTitle(MAP_PANEL_TITLE);
         await checkDoesNotEmit();
       });
-
     });
 
     describe('full loaded dashboard', () => {
