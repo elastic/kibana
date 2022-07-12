@@ -122,15 +122,25 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
 };
 
 export const ConfigureElasticsearchEngine: React.FC = () => {
-  const { indicesFormatted, isLoading, isLoadingIndices, isSubmitDisabled, name, rawName } =
-    useValues(EngineCreationLogic);
-  const { loadIndices, setRawName, setCreationStep, setSelectedIndex } =
+  const {
+    aliasName,
+    indicesFormatted,
+    isAliasRequired,
+    isLoading,
+    isLoadingIndices,
+    isSubmitDisabled,
+    name,
+    rawName,
+  } = useValues(EngineCreationLogic);
+  const { loadIndices, setAliasName, setCreationStep, setRawName, setSelectedIndex } =
     useActions(EngineCreationLogic);
 
   const onChange = (options: SearchIndexSelectableOption[]) => {
     const selected = options.find((option) => option.checked === 'on');
     setSelectedIndex(selected?.label ?? '');
   };
+
+  const aliasOptionalOrRequired = isAliasRequired ? 'Required' : 'Optional';
 
   useEffect(() => {
     loadIndices();
@@ -183,34 +193,6 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
 
           <EuiSpacer />
 
-          <EuiCallOut
-            size="m"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.title',
-              { defaultMessage: 'About index and alias names' }
-            )}
-            iconType="iInCircle"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body',
-                {
-                  defaultMessage: `
-                    Enterprise Search requires an index or alias name to be
-                    prefixed with "search-." If you select an index whose name
-                    does not match that pattern, an alias will be generated for
-                    you and your search engine will be attached to the alias
-                    instead. If you wish to connect an alias whose name does not
-                    match the required pattern, you'll need to create a new
-                    alias on your own.
-                  `,
-                }
-              )}
-            </p>
-          </EuiCallOut>
-
-          <EuiSpacer />
-
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
@@ -243,14 +225,45 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
 
           <EuiSpacer />
 
+          <EuiCallOut
+            size="m"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.title',
+              { defaultMessage: 'About index and alias names' }
+            )}
+            iconType="iInCircle"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body',
+                {
+                  defaultMessage: `
+                    Enterprise Search requires an index or alias name to be
+                    prefixed with "search-." If you select an index whose name
+                    does not match that pattern, an alias will be generated for
+                    you and your search engine will be attached to the alias
+                    instead. If you wish to connect an alias whose name does not
+                    match the required pattern, you'll need to create a new
+                    alias on your own.
+                  `,
+                }
+              )}
+            </p>
+          </EuiCallOut>
+
+          <EuiSpacer />
+
           <EuiFormRow
             label={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engineCreation.searchIndexSelectable.label',
-              { defaultMessage: 'Select an Elasticsearch index to use' }
+              { defaultMessage: 'Select the Elasticsearch index you’d like to use' }
             )}
             helpText={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engineCreation.searchIndexSelectable.helpText',
-              { defaultMessage: "Only indices aliased with 'search-' can be selected" }
+              {
+                defaultMessage:
+                  "Select an index or alias prefixed with 'search-' or create a new alias below",
+              }
             )}
             fullWidth
           >
@@ -261,7 +274,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.indexSelectorAriaLabel',
                 {
-                  defaultMessage: 'Select an Elasticsearch index',
+                  defaultMessage: 'Select the Elasticsearch index you’d like to use',
                 }
               )}
               isLoading={isLoadingIndices}
@@ -288,6 +301,43 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               )}
             </EuiSelectable>
           </EuiFormRow>
+
+          <EuiSpacer />
+
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                data-test-subj="AliasNameFormRow"
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.aliasName.label',
+                  {
+                    defaultMessage: 'Alias name',
+                  }
+                )}
+                helpText={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.aliasName.helpText',
+                  {
+                    defaultMessage:
+                      "Alias names must be prefixed with 'search-' in order to be used with App Search engines",
+                  }
+                )}
+                fullWidth
+              >
+                <EuiFieldText
+                  name="alias-name"
+                  value={aliasName}
+                  onChange={(event) => setAliasName(event.currentTarget.value)}
+                  autoComplete="off"
+                  fullWidth
+                  data-test-subj="AliasNameInput"
+                  prepend={aliasOptionalOrRequired}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer />
+
           <EuiButton
             disabled={isSubmitDisabled}
             isLoading={isLoading}

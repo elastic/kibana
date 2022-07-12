@@ -29,6 +29,7 @@ interface EngineCreationActions {
   setIngestionMethod(method: string): { method: string };
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
+  setAliasName(aliasName: string): { aliasName: string };
   setCreationStep(creationStep: EngineCreationSteps): EngineCreationSteps;
   submitEngine(): void;
   onSubmitError(): void;
@@ -45,11 +46,13 @@ interface EngineCreationValues {
   language: string;
   name: string;
   rawName: string;
+  aliasName: string;
   isLoadingIndices: boolean;
   indices: ElasticsearchIndex[];
   indicesFormatted: SearchIndexSelectableOption[];
   selectedIndex: string;
   engineType: EngineType;
+  isAliasRequired: boolean;
   isSubmitDisabled: boolean;
 }
 
@@ -60,6 +63,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setIngestionMethod: (method) => ({ method }),
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
+    setAliasName: (aliasName) => ({ aliasName }),
     submitEngine: true,
     onSubmitError: true,
     loadIndices: true,
@@ -94,6 +98,15 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         setRawName: (_, { rawName }) => rawName,
       },
     ],
+    aliasName: [
+      '',
+      {
+        setAliasName: (_, { aliasName }) => aliasName,
+        setSelectedIndex: (_, { selectedIndexName }) => {
+          return selectedIndexName.startsWith('search-') ? '' : `search-${selectedIndexName}`;
+        },
+      },
+    ],
     isLoadingIndices: [
       false,
       {
@@ -125,8 +138,8 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       EngineCreationSteps.SelectStep,
       {
         setCreationStep: (_, currentEngineCreationStep) => currentEngineCreationStep,
-      }
-    ]
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
@@ -136,10 +149,30 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         formatIndicesToSelectable(indices, selectedIndexName),
     ],
     isSubmitDisabled: [
-      () => [selectors.name, selectors.engineType, selectors.selectedIndex],
-      (name: string, engineType: EngineType, selectedIndex: string) =>
-        (name.length === 0 && engineType === 'appSearch') ||
-        ((name.length === 0 || selectedIndex.length === 0) && engineType === 'elasticsearch'),
+      () => [selectors.name, selectors.engineType, selectors.selectedIndex, selectors.aliasName],
+      (name: string, engineType: EngineType, selectedIndex: string, aliasName: string) => {
+        if (name.length === 0) {
+          return true;
+        }
+
+        if (engineType === 'elasticsearch') {
+          if (selectedIndex.length === 0) {
+            return true;
+          }
+
+          if (aliasName.length === 0) {
+            return !selectedIndex.startsWith('search-');
+          } else {
+            return !aliasName.startsWith('search-');
+          }
+        }
+
+        return false;
+      },
+    ],
+    isAliasRequired: [
+      () => [selectors.selectedIndex],
+      (selectedIndex: string) => !selectedIndex.startsWith('search-'),
     ],
   }),
   listeners: ({ values, actions }) => ({
