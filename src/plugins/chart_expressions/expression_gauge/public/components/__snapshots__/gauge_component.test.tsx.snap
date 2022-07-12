@@ -7,6 +7,13 @@ exports[`GaugeComponent renders the chart 1`] = `
   <Settings
     ariaUseDefaultSummary={true}
     debugState={false}
+    noResults={
+      <EmptyPlaceholder
+        icon={[Function]}
+        renderComplete={[Function]}
+      />
+    }
+    onRenderChange={[Function]}
     theme={
       Array [
         Object {

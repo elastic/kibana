@@ -12,23 +12,23 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel } from '../../../common/store';
+import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
-import {
+import type {
   FlowTargetSourceDest,
-  NetworkQueries,
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
+import { NetworkQueries } from '../../../../common/search_strategy/security_solution/network';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
-import { PageInfoPaginated } from '../../../../common/search_strategy';
+import type { InspectResponse } from '../../../types';
+import type { PageInfoPaginated } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'networkUsersQuery';

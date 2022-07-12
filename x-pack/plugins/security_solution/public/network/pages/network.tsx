@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
-import { UpdateDateRange } from '../../common/components/charts/common';
+import type { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -37,7 +37,7 @@ import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import * as i18n from './translations';
-import { NetworkComponentProps } from './types';
+import type { NetworkComponentProps } from './types';
 import { NetworkRouteType } from './navigation/types';
 import {
   onTimelineTabKeyPressed,
@@ -168,7 +168,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <HeaderPage
                   subtitle={
                     <LastEventTime
-                      docValueFields={docValueFields}
                       indexKey={LastEventIndexKey.network}
                       indexNames={selectedPatterns}
                     />

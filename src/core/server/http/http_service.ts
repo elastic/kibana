@@ -14,11 +14,16 @@ import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type {
+  RequestHandlerContextBase,
+  IRouter,
+  IContextContainer,
+  IContextProvider,
+} from '@kbn/core-http-server';
 
-import type { RequestHandlerContext } from '..';
-import type { InternalExecutionContextSetup } from '../execution_context';
-import { ContextSetup, InternalContextPreboot } from '../context';
-import { CspConfigType, config as cspConfig } from '../csp';
+import { InternalContextSetup, InternalContextPreboot } from '../context';
+import { CspConfigType, cspConfig } from './csp';
 
 import { Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
@@ -26,26 +31,20 @@ import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 import {
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
 
 import { registerCoreHandlers } from './lifecycle_handlers';
-import {
-  ExternalUrlConfigType,
-  config as externalUrlConfig,
-  ExternalUrlConfig,
-} from '../external_url';
+import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
 }
 
 export interface SetupDeps {
-  context: ContextSetup;
+  context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
 }
 
@@ -64,7 +63,7 @@ export class HttpService
   private readonly env: Env;
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
-  private requestHandlerContext?: RequestHandlerContextContainer;
+  private requestHandlerContext?: IContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -118,8 +117,13 @@ export class HttpService
       server: prebootSetup.server,
       registerRouteHandlerContext: (pluginOpaqueId, contextName, provider) =>
         prebootServerRequestHandlerContext.registerContext(pluginOpaqueId, contextName, provider),
-      registerRoutes: (path, registerCallback) => {
-        const router = new Router(
+      registerRoutes: <
+        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+      >(
+        path: string,
+        registerCallback: (router: IRouter<DefaultRequestHandlerType>) => void
+      ) => {
+        const router = new Router<DefaultRequestHandlerType>(
           path,
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId)
@@ -161,7 +165,7 @@ export class HttpService
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
-      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+      createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
         pluginId: PluginOpaqueId = this.coreContext.coreId
       ) => {
@@ -172,12 +176,12 @@ export class HttpService
       },
 
       registerRouteHandlerContext: <
-        Context extends RequestHandlerContext,
+        Context extends RequestHandlerContextBase,
         ContextName extends keyof Context
       >(
         pluginOpaqueId: PluginOpaqueId,
         contextName: ContextName,
-        provider: RequestHandlerContextProvider<Context, ContextName>
+        provider: IContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
 
       registerPrebootRoutes: this.internalPreboot!.registerRoutes,

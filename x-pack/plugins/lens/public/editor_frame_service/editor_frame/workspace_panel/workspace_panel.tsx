@@ -374,46 +374,48 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         data-test-subj="workspace-drag-drop-prompt"
         size="s"
       >
-        <DropIllustration
-          aria-hidden={true}
-          className={classNames(
-            'lnsWorkspacePanel__promptIllustration',
-            'lnsWorkspacePanel__dropIllustration'
-          )}
-        />
-        <h2>
-          <strong>
-            {!expressionExists
-              ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
-                  defaultMessage: 'Drop some fields here to start',
-                })
-              : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
-                  defaultMessage: 'Drop field here',
-                })}
-          </strong>
-        </h2>
-        {!expressionExists && (
-          <>
-            <EuiTextColor color="subdued" component="div">
-              <p>
-                {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
-                  defaultMessage: 'Lens is the recommended editor for creating visualizations',
-                })}
+        <div>
+          <DropIllustration
+            aria-hidden={true}
+            className={classNames(
+              'lnsWorkspacePanel__promptIllustration',
+              'lnsWorkspacePanel__dropIllustration'
+            )}
+          />
+          <h2>
+            <strong>
+              {!expressionExists
+                ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
+                    defaultMessage: 'Drop some fields here to start',
+                  })
+                : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
+                    defaultMessage: 'Drop field here',
+                  })}
+            </strong>
+          </h2>
+          {!expressionExists && (
+            <>
+              <EuiTextColor color="subdued" component="div">
+                <p>
+                  {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                    defaultMessage: 'Lens is the recommended editor for creating visualizations',
+                  })}
+                </p>
+              </EuiTextColor>
+              <p className="lnsWorkspacePanel__actions">
+                <EuiLink
+                  href="https://www.elastic.co/products/kibana/feedback"
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
+                    defaultMessage: 'Make requests and give feedback',
+                  })}
+                </EuiLink>
               </p>
-            </EuiTextColor>
-            <p className="lnsWorkspacePanel__actions">
-              <EuiLink
-                href="https://www.elastic.co/products/kibana/feedback"
-                target="_blank"
-                external
-              >
-                {i18n.translate('xpack.lens.editorFrame.goToForums', {
-                  defaultMessage: 'Make requests and give feedback',
-                })}
-              </EuiLink>
-            </p>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </EuiText>
     );
   };
@@ -430,30 +432,32 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         data-test-subj="workspace-apply-changes-prompt"
         size="s"
       >
-        <img
-          aria-hidden={true}
-          src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
-          alt={applyChangesString}
-          className="lnsWorkspacePanel__promptIllustration"
-        />
-        <h2>
-          <strong>
-            {i18n.translate('xpack.lens.editorFrame.applyChangesWorkspacePrompt', {
-              defaultMessage: 'Apply changes to render visualization',
-            })}
-          </strong>
-        </h2>
-        <p className="lnsWorkspacePanel__actions">
-          <EuiButtonEmpty
-            size="s"
-            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-            iconType="checkInCircleFilled"
-            onClick={() => dispatchLens(applyChanges())}
-            data-test-subj="lnsApplyChanges__workspace"
-          >
-            {applyChangesString}
-          </EuiButtonEmpty>
-        </p>
+        <div>
+          <img
+            aria-hidden={true}
+            src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
+            alt={applyChangesString}
+            className="lnsWorkspacePanel__promptIllustration"
+          />
+          <h2>
+            <strong>
+              {i18n.translate('xpack.lens.editorFrame.applyChangesWorkspacePrompt', {
+                defaultMessage: 'Apply changes to render visualization',
+              })}
+            </strong>
+          </h2>
+          <p className="lnsWorkspacePanel__actions">
+            <EuiButtonEmpty
+              size="s"
+              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+              iconType="checkInCircleFilled"
+              onClick={() => dispatchLens(applyChanges())}
+              data-test-subj="lnsApplyChanges__workspace"
+            >
+              {applyChangesString}
+            </EuiButtonEmpty>
+          </p>
+        </div>
       </EuiText>
     );
   };

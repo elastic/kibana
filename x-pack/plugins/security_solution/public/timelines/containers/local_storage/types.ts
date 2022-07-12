@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TimelineModel } from '../../store/timeline/model';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TimelineModel } from '../../store/timeline/model';
+import type { TimelineIdLiteral } from '../../../../common/types/timeline';
 
 export interface TimelinesStorage {
   getAllTimelines: () => Record<TimelineIdLiteral, TimelineModel>;

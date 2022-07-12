@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MaybeImmutable, NewTrustedApp, UpdateTrustedApp } from '../../types';
+import type { MaybeImmutable, NewTrustedApp, UpdateTrustedApp } from '../../types';
 
 const NEW_TRUSTED_APP_KEYS: Array<keyof UpdateTrustedApp> = [
   'name',

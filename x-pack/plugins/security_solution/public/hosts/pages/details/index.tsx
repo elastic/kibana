@@ -12,9 +12,10 @@ import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
+import type { HostItem } from '../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -38,7 +39,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
-import { HostDetailsProps } from './types';
+import type { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
@@ -99,7 +100,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { docValueFields, indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
+  const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -140,7 +141,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 border
                 subtitle={
                   <LastEventTime
-                    docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hostDetails}
                     hostName={detailName}
                     indexNames={selectedPatterns}
@@ -157,13 +157,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               >
                 {({ isLoadingAnomaliesData, anomaliesData }) => (
                   <HostOverviewManage
-                    docValueFields={docValueFields}
                     id={id}
                     isInDetailsSidePanel={false}
                     data={hostOverview as HostItem}
                     anomaliesData={anomaliesData}
                     isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    indexNames={selectedPatterns}
                     loading={loading}
                     startDate={from}
                     endDate={to}
@@ -179,6 +177,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     refetch={refetch}
                     inspect={inspect}
                     hostName={detailName}
+                    indexNames={selectedPatterns}
                   />
                 )}
               </AnomalyTableProvider>

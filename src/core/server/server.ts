@@ -24,6 +24,12 @@ import {
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
+import {
+  ExecutionContextService,
+  executionContextConfig,
+} from '@kbn/core-execution-context-server-internal';
+import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
@@ -35,14 +41,11 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
-import { ExecutionContextService } from './execution_context';
 
-import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
-import { config as httpConfig } from './http';
+import { config as httpConfig, cspConfig, externalUrlConfig } from './http';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
@@ -52,11 +55,9 @@ import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './int
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { config as externalUrlConfig } from './external_url';
-import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
-import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -208,9 +209,13 @@ export class Server {
 
     await this.plugins.preboot(corePreboot);
 
-    httpPreboot.registerRouteHandlerContext(coreId, 'core', (() => {
-      return new PrebootCoreRouteHandlerContext(corePreboot);
-    }) as any);
+    httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      () => {
+        return new PrebootCoreRouteHandlerContext(corePreboot);
+      }
+    );
 
     this.coreApp.preboot(corePreboot, uiPlugins);
 
@@ -413,9 +418,13 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req, res) => {
-      return new CoreRouteHandlerContext(this.coreStart!, req);
-    });
+    coreSetup.http.registerRouteHandlerContext<RequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      (context, req) => {
+        return new CoreRouteHandlerContext(this.coreStart!, req);
+      }
+    );
   }
 
   public setupCoreConfig() {

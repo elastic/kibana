@@ -32,7 +32,6 @@ import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  disableScrollZoom,
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
@@ -48,6 +47,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getLayerList,
   getGoto,
   getMapCenter,
   getMapBuffer,
@@ -147,6 +147,10 @@ export class MapEmbeddable
     this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   private async _initializeSaveMap() {
     try {
       await this._savedMap.whenReady();
@@ -177,9 +181,9 @@ export class MapEmbeddable
     const store = this._savedMap.getStore();
 
     store.dispatch(setReadOnly(true));
-    store.dispatch(disableScrollZoom());
     store.dispatch(
       setMapSettings({
+        keydownScrollZoom: true,
         showTimesliderToggleButton: false,
       })
     );
@@ -705,6 +709,40 @@ export class MapEmbeddable
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
       });
+    }
+
+    if (areLayersLoaded(this._savedMap.getStore().getState())) {
+      const layers = getLayerList(this._savedMap.getStore().getState());
+      const isLoading =
+        layers.length === 0 ||
+        layers.some((layer) => {
+          return layer.isLayerLoading();
+        });
+      const firstLayerWithError = layers.find((layer) => {
+        return layer.hasErrors();
+      });
+      const output = this.getOutput();
+      if (
+        output.loading !== isLoading ||
+        firstLayerWithError?.getErrors() !== output.error?.message
+      ) {
+        /**
+         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+         * This means that the dashboard-loaded event might be fired while a map is still rendering in some cases.
+         * For more details please contact the maps team.
+         */
+        this.updateOutput({
+          ...output,
+          loading: isLoading,
+          rendered: !isLoading && firstLayerWithError === undefined,
+          error: firstLayerWithError
+            ? {
+                name: 'EmbeddableError',
+                message: firstLayerWithError.getErrors(),
+              }
+            : undefined,
+        });
+      }
     }
   }
 }

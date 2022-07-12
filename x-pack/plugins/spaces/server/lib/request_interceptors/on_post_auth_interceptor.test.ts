@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 // @ts-ignore
-import type { CoreSetup, IBasePath, IRouter } from '@kbn/core/server';
+import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
@@ -153,7 +153,7 @@ describe.skip('onPostAuthInterceptor', () => {
       getSpacesService: () => spacesServiceStart,
     });
 
-    const router = http.createRouter('/');
+    const router = http.createRouter<RequestHandlerContext>('/');
 
     initKbnServer(router, http.basePath);
 

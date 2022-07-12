@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { getCommandNameFromTextInput } from '../../../service/parsed_command_input';
-import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
@@ -54,25 +54,32 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
       };
 
     case 'updateInputTextEnteredState':
-      const newTextEntered =
-        typeof payload.textEntered === 'function'
-          ? payload.textEntered(state.input.textEntered)
-          : payload.textEntered;
+      const { textEntered: newTextEntered, rightOfCursor: newRightOfCursor = { text: '' } } =
+        typeof payload === 'function'
+          ? payload({
+              textEntered: state.input.textEntered,
+              rightOfCursor: state.input.rightOfCursor,
+            })
+          : payload;
 
-      if (state.input.textEntered !== newTextEntered) {
-        const textEntered = newTextEntered;
+      if (
+        state.input.textEntered !== newTextEntered ||
+        state.input.rightOfCursor !== newRightOfCursor
+      ) {
+        const fullCommandText = newTextEntered + newRightOfCursor.text;
         const commandEntered =
           // If the user has typed a command (some text followed by at space),
           // then parse it to get the command name.
-          textEntered.trimStart().indexOf(' ') !== -1
-            ? getCommandNameFromTextInput(newTextEntered)
+          fullCommandText.trimStart().indexOf(' ') !== -1
+            ? getCommandNameFromTextInput(fullCommandText)
             : '';
 
         return {
           ...state,
           input: {
             ...state.input,
-            textEntered,
+            textEntered: newTextEntered,
+            rightOfCursor: newRightOfCursor,
             commandEntered,
           },
         };

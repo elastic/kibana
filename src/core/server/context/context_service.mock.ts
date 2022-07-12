@@ -8,8 +8,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ContextService, ContextSetup, InternalContextPreboot } from './context_service';
-import { contextMock } from './container/context.mock';
+import { ContextService, InternalContextSetup, InternalContextPreboot } from './context_service';
+import { contextMock } from './context_container.mock';
 
 const createPrebootContractMock = (mockContext = {}) => {
   const prebootContract: jest.Mocked<InternalContextPreboot> = {
@@ -19,7 +19,7 @@ const createPrebootContractMock = (mockContext = {}) => {
 };
 
 const createSetupContractMock = (mockContext = {}) => {
-  const setupContract: jest.Mocked<ContextSetup> = {
+  const setupContract: jest.Mocked<InternalContextSetup> = {
     createContextContainer: jest.fn().mockImplementation(() => contextMock.create(mockContext)),
   };
   return setupContract;

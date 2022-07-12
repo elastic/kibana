@@ -12,6 +12,8 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TAGS_FILTER_BTN,
+  RULE_CHECKBOX,
+  RULES_TAGS_POPOVER_BTN,
   RULES_TABLE_REFRESH_INDICATOR,
 } from '../../screens/alerts_detection_rules';
 
@@ -30,6 +32,8 @@ import {
   waitForRulesTableToBeRefreshed,
   selectNumberOfRules,
   testAllTagsBadges,
+  testTagsBadge,
+  testMultipleSelectedRulesLabel,
 } from '../../tasks/alerts_detection_rules';
 
 import {
@@ -162,7 +166,7 @@ describe('Detection rules, bulk edit', () => {
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     openBulkEditAddIndexPatternsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
-      .should('have.text', 'Overwrite all selected rules index patterns')
+      .should('have.text', "Overwrite all selected rules' index patterns")
       .click();
     cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
       'have.text',
@@ -212,7 +216,7 @@ describe('Detection rules, bulk edit', () => {
     cy.log('Overwrite all tags');
     openBulkEditAddTagsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
-      .should('have.text', 'Overwrite all selected rules tags')
+      .should('have.text', "Overwrite all selected rules' tags")
       .click();
     cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
       'have.text',
@@ -223,5 +227,29 @@ describe('Detection rules, bulk edit', () => {
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
     testAllTagsBadges(['overwrite-tag']);
+  });
+
+  it('should not lose rules selection after edit action', () => {
+    const rulesCount = 4;
+    // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
+    changeRowsPerPageTo(5);
+    selectNumberOfRules(rulesCount);
+
+    // open add tags form and add 2 new tags
+    openBulkEditAddTagsForm();
+    typeTags(TAGS);
+    confirmBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount });
+
+    testMultipleSelectedRulesLabel(rulesCount);
+    // check if first four(rulesCount) rules still selected and tags are updated
+    for (let i = 0; i < rulesCount; i += 1) {
+      cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+      cy.get(RULES_TAGS_POPOVER_BTN)
+        .eq(i)
+        .each(($el) => {
+          testTagsBadge($el, TAGS);
+        });
+    }
   });
 });

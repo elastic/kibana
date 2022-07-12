@@ -13,6 +13,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type SuperTest from 'supertest';
 import {
@@ -1311,3 +1312,8 @@ export const getSOFromKibanaIndex = async ({
 
   return esResponse;
 };
+
+export const getReferenceFromEsResponse = (
+  esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
+  id: string
+) => esResponse.body._source?.references?.find((r) => r.id === id);

@@ -9,7 +9,13 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
 
+import { setupConnectorsIndices } from '../../index_management/setup_indices';
+
 import { addConnector } from './add_connector';
+
+jest.mock('../../index_management/setup_indices', () => ({
+  setupConnectorsIndices: jest.fn(),
+}));
 
 describe('addConnector lib function', () => {
   const mockClient = {
@@ -40,7 +46,7 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         last_seen: null,
         last_synced: null,
-        scheduling: { enabled: false, interval: null },
+        scheduling: { enabled: false, interval: '* * * * *' },
         service_type: null,
         status: 'not connected',
         sync_error: null,
@@ -54,14 +60,15 @@ describe('addConnector lib function', () => {
 
   it('should create index if no connectors index exists', async () => {
     mockClient.asCurrentUser.index.mockImplementationOnce(() => {
-      return Promise.reject({ statusCode: 404 });
+      return Promise.reject({
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+        statusCode: 404,
+      });
     });
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
-    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
-      index: CONNECTORS_INDEX,
-    });
+    expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         api_key_id: null,
@@ -70,7 +77,7 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         last_seen: null,
         last_synced: null,
-        scheduling: { enabled: false, interval: null },
+        scheduling: { enabled: false, interval: '* * * * *' },
         service_type: null,
         status: 'not connected',
         sync_error: null,
@@ -88,7 +95,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
     ).rejects.toEqual({ statusCode: 500 });
-    expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
+    expect(setupConnectorsIndices).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(1);
   });
 });

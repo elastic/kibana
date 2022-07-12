@@ -7,8 +7,8 @@
 
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
@@ -18,7 +18,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 
-import {
+import type {
   BulkCreate,
   WrapHits,
   WrapSequences,
@@ -27,11 +27,11 @@ import {
   SignalSource,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
-import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import {
+import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
@@ -49,6 +49,8 @@ export const eqlExecutor = async ({
   bulkCreate,
   wrapHits,
   wrapSequences,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -62,6 +64,8 @@ export const eqlExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -74,20 +78,21 @@ export const eqlExecutor = async ({
       result.warning = true;
     }
 
-    const request = buildEqlSearchRequest(
-      ruleParams.query,
-      inputIndex,
-      tuple.from.toISOString(),
-      tuple.to.toISOString(),
-      completeRule.ruleParams.maxSignals,
-      ruleParams.filters,
-      ruleParams.timestampOverride,
-      exceptionItems,
+    const request = buildEqlSearchRequest({
+      query: ruleParams.query,
+      index: inputIndex,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      size: completeRule.ruleParams.maxSignals,
+      filters: ruleParams.filters,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionLists: exceptionItems,
       runtimeMappings,
-      ruleParams.eventCategoryOverride,
-      ruleParams.timestampField,
-      ruleParams.tiebreakerField
-    );
+      eventCategoryOverride: ruleParams.eventCategoryOverride,
+      timestampField: ruleParams.timestampField,
+      tiebreakerField: ruleParams.tiebreakerField,
+    });
 
     const eqlSignalSearchStart = performance.now();
     logger.debug(`EQL query request: ${JSON.stringify(request)}`);

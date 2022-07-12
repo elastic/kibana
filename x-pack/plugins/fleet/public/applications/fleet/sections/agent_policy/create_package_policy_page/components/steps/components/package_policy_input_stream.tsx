@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,9 +33,14 @@ import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelin
 import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+import { useDataStreamId } from './hooks';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
+`;
+
+const ScrollAnchor = styled.div`
+  scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
 `;
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
@@ -59,11 +64,23 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     const {
       params: { packagePolicyId },
     } = useRouteMatch<{ packagePolicyId?: string }>();
+    const defaultDataStreamId = useDataStreamId();
+    const containerRef = useRef<HTMLDivElement>(null);
 
+    const isDefaultDatstream =
+      !!defaultDataStreamId &&
+      !!packagePolicyInputStream.id &&
+      packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
 
+    useEffect(() => {
+      if (isDefaultDatstream && containerRef.current) {
+        containerRef.current.scrollIntoView();
+      }
+    }, [isDefaultDatstream, containerRef]);
+
     // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>();
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatstream);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -94,7 +111,8 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     );
 
     return (
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={2} id={isDefaultDatstream ? 'test123' : 'asas'}>
+        <ScrollAnchor ref={containerRef} />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
@@ -154,7 +172,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
               );
             })}
             {/* Advanced section */}
-            {(isPackagePolicyEdit || advancedVars.length) && (
+            {(isPackagePolicyEdit || !!advancedVars.length) && (
               <Fragment>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -218,13 +236,13 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                       <>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamPipelines
-                            dataStream={packageInputStream.data_stream}
+                            packageInputStream={packagePolicyInputStream}
                             packageInfo={packageInfo}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamMappings
-                            dataStream={packageInputStream.data_stream}
+                            packageInputStream={packagePolicyInputStream}
                             packageInfo={packageInfo}
                           />
                         </EuiFlexItem>

@@ -68,10 +68,10 @@ import { RenderingService, mockRenderingService } from './rendering/__mocks__/re
 export { mockRenderingService };
 jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
 
-import { environmentServiceMock } from './environment/environment_service.mock';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 
 export const mockEnvironmentService = environmentServiceMock.create();
-jest.doMock('./environment/environment_service', () => ({
+jest.doMock('@kbn/core-environment-server-internal', () => ({
   EnvironmentService: jest.fn(() => mockEnvironmentService),
 }));
 
@@ -110,10 +110,10 @@ jest.doMock('./i18n/i18n_service', () => ({
   I18nService: jest.fn(() => mockI18nService),
 }));
 
-import { prebootServiceMock } from './preboot/preboot_service.mock';
+import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 
 export const mockPrebootService = prebootServiceMock.create();
-jest.doMock('./preboot/preboot_service', () => ({
+jest.doMock('@kbn/core-preboot-server-internal', () => ({
   PrebootService: jest.fn(() => mockPrebootService),
 }));
 

@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -53,6 +53,7 @@ describe('When using `getActionDetailsById()', () => {
       comment: doc?.EndpointActions.data.comment,
       createdBy: doc?.user.id,
       parameters: doc?.EndpointActions.data.parameters,
+      outputs: {},
     });
   });
 

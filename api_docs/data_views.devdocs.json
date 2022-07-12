@@ -450,7 +450,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -461,7 +461,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -2224,13 +2241,7 @@
                   "http dependency"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
                 "deprecated": false,
@@ -6543,7 +6554,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6554,7 +6565,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -7858,13 +7886,7 @@
                 "text": "ElasticsearchClient"
               },
               ", request?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
@@ -9367,13 +9389,7 @@
             "text": "ElasticsearchClient"
           },
           ", request?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
           {
             "pluginId": "dataViews",
@@ -10491,13 +10507,7 @@
               "text": "ElasticsearchClient"
             },
             ", request?: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
             {
               "pluginId": "dataViews",
@@ -12058,13 +12068,7 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any> | undefined"
               ],
               "path": "src/plugins/data_views/server/types.ts",
@@ -12555,7 +12559,7 @@
               "\nCreates static representation of the data view."
             ],
             "signature": [
-              "() => ",
+              "(includeFields?: boolean) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12566,7 +12570,24 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataView.toSpec.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
+                "description": [
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

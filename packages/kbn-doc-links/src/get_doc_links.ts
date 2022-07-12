@@ -341,6 +341,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
       policyResponseTroubleshooting: {
         full_disk_access: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/deploy-elastic-endpoint.html#enable-fda-endpoint`,
+        macos_system_ext: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/deploy-elastic-endpoint.html#system-extension-endpoint`,
       },
     },
     query: {
@@ -395,6 +396,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
       trainedModels: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-trained-models.html`,
+      startTrainedModelsDeploymentQueryParams: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/start-trained-model-deployment.html#start-trained-model-deployment-query-params`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,

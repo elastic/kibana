@@ -9,6 +9,8 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+
 import {
   EuiSelectable,
   EuiPanel,
@@ -25,10 +27,9 @@ import { EngineCreationLogic } from './engine_creation_logic';
 
 import './search_index_selectable.scss';
 
-export type HealthStrings = 'red' | 'green' | 'yellow' | 'unavailable';
 export interface SearchIndexSelectableOption {
   label: string;
-  health: HealthStrings;
+  health?: HealthStatus;
   status?: string;
   total: {
     docs: {
@@ -44,9 +45,11 @@ export interface SearchIndexSelectableOption {
 
 const healthColorsMap = {
   red: 'danger',
+  RED: 'danger',
   green: 'success',
+  GREEN: 'success',
   yellow: 'warning',
-  unavailable: '',
+  YELLOW: 'warning',
 };
 
 const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: string) => {
@@ -57,7 +60,7 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
       <EuiTextColor color="subdued">
         <small>
           <span className="selectableSecondaryContentLabel">
-            <EuiIcon type="dot" color={healthColorsMap[option.health] ?? ''} />
+            <EuiIcon type="dot" color={option.health ? healthColorsMap[option.health] : ''} />
             &nbsp;{option.health ?? '-'}
           </span>
           <span className="selectableSecondaryContentLabel" data-test-subj="optionStatus">
