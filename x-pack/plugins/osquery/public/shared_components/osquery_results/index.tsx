@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useInView } from 'react-intersection-observer';
@@ -24,16 +24,16 @@ import { useInView } from 'react-intersection-observer';
 import { map } from 'lodash';
 import styled from 'styled-components';
 import { AGENT, AGENT_QUERY, ATTACHED_QUERY } from '../../agents/translations';
-import { OsqueryActionType } from '../../../common/types';
+import type { OsqueryActionType } from '../../../common/types';
 import { useInfiniteAllActions } from '../../actions/use_all_actions';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { KibanaContextProvider } from '../../common/lib/kibana';
 
 import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
-import { StartPlugins } from '../../types';
+import type { StartPlugins } from '../../types';
 import { Direction } from '../../../common/search_strategy';
-import { OsqueryActionResultsProps } from './types';
+import type { OsqueryActionResultsProps } from './types';
 
 const StyledScrolledEuiFlexItem = styled(EuiFlexItem)`
   overflow-y: auto;

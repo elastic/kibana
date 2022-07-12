@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { useKibana } from '../../lib/kibana';
 
 const TimelineComponent = React.memo((props) => {

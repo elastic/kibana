@@ -9,7 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { useKibana } from '../../lib/kibana';
-import { AlertRawEventData, EventsViewType } from './event_details';
+import type { AlertRawEventData } from './event_details';
+import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 import { useHandleAddToTimeline } from './add_to_timeline_button';
 

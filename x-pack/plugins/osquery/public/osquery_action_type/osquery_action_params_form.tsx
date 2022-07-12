@@ -8,10 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { QueryClientProvider } from 'react-query';
 import { isEmpty, pickBy } from 'lodash';
-import { EuiAccordionProps, EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { isDeepEqual } from 'react-use/lib/util';
 import uuid from 'uuid';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
@@ -25,10 +26,10 @@ import {
 import { useFetchStatus } from '../fleet_integration/use_fetch_status';
 import { StyledEuiAccordion } from '../components/accordion';
 import { ECSMappingEditorField } from '../packs/queries/lazy_ecs_mapping_editor_field';
+import type { EcsMappingFormValueArray } from '../../common/schemas/common/utils';
 import {
   convertECSMappingToFormValue,
   convertECSMappingToObject,
-  EcsMappingFormValueArray,
 } from '../../common/schemas/common/utils';
 import { Form, UseField, useForm } from '../shared_imports';
 import { queryClient } from '../query_client';

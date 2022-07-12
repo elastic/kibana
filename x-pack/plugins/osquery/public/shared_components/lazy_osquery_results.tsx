@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { OsqueryActionResultsProps } from './osquery_results/types';
-import { StartServices } from '../types';
+import type { OsqueryActionResultsProps } from './osquery_results/types';
+import type { StartServices } from '../types';
 
 interface BigServices extends StartServices {
   kibanaVersion: string;
