@@ -10,7 +10,8 @@
     "core": [
       "src/core",
       "packages/core/i18n/core-i18n-browser-internal",
-      "packages/core/fatal-errors/core-fatal-errors-browser-internal"
+      "packages/core/fatal-errors/core-fatal-errors-browser-internal",
+      "packages/core/deprecations/core-deprecations-browser-internal"
     ],
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
