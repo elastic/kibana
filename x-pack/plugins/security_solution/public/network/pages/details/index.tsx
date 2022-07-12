@@ -90,7 +90,7 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
@@ -141,7 +141,6 @@ const NetworkDetailsComponent: React.FC = () => {
               draggableArguments={headerDraggableArguments}
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.ipDetails}
                   indexNames={selectedPatterns}
                   ip={ip}

@@ -118,7 +118,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     indexPattern,
     runtimeMappings,
     selectedPatterns,
@@ -225,7 +224,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             defaultCellActions,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
             end,
             entityType,
             fieldBrowserOptions,

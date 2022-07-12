@@ -542,7 +542,6 @@ export const sendAlertToTimelineAction = async ({
           >(
             {
               defaultIndex: [],
-              docValueFields: [],
               indexName: ecsData._index ?? '',
               eventId: ecsData._id,
               factoryQueryType: TimelineEventsQueries.details,

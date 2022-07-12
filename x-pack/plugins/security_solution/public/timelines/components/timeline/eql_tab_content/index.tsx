@@ -177,7 +177,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     loading: loadingSourcerer,
     runtimeMappings,
     selectedPatterns,
@@ -211,7 +210,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       dataViewId,
-      docValueFields,
       endDate: end,
       eqlOptions: restEqlOption,
       fields: getTimelineQueryFields(),
@@ -355,7 +353,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
                 browserFields={browserFields}
-                docValueFields={docValueFields}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
                 timelineId={timelineId}
