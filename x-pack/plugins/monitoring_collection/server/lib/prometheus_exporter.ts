@@ -14,19 +14,19 @@ import {
 import { KibanaResponseFactory } from '@kbn/core/server';
 
 export class PrometheusExporter extends MetricReader {
-  private readonly _prefix?: string;
-  private readonly _appendTimestamp: boolean;
-  private _serializer: PrometheusSerializer;
+  private readonly prefix?: string;
+  private readonly appendTimestamp: boolean;
+  private serializer: PrometheusSerializer;
 
   constructor(config: ExporterConfig = {}) {
     super();
-    this._prefix = config.prefix || OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.prefix;
-    this._appendTimestamp =
+    this.prefix = config.prefix || OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.prefix;
+    this.appendTimestamp =
       typeof config.appendTimestamp === 'boolean'
         ? config.appendTimestamp
         : OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.appendTimestamp;
 
-    this._serializer = new PrometheusSerializer(this._prefix, this._appendTimestamp);
+    this.serializer = new PrometheusSerializer(this.prefix, this.appendTimestamp);
   }
 
   selectAggregationTemporality(): AggregationTemporality {
@@ -54,7 +54,7 @@ export class PrometheusExporter extends MetricReader {
           body: `PrometheusExporter: Metrics collection errors ${errors}`,
         });
       }
-      const result = this._serializer.serialize(resourceMetrics);
+      const result = this.serializer.serialize(resourceMetrics);
       if (result === '') {
         return res.noContent();
       }
