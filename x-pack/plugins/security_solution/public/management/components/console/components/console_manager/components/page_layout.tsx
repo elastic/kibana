@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ReactNode, useMemo } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { EuiPanelProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
   EuiPanel,
-  EuiPanelProps,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import classnames from 'classnames';
-import { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
+import type { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const EuiPanelStyled = styled(EuiPanel)`
@@ -38,6 +39,7 @@ const EuiPanelStyled = styled(EuiPanel)`
 export type PageLayoutProps = PropsWithChildren<{
   pageTitle?: ReactNode;
   pageDescription?: ReactNode;
+  pageBody?: ReactNode;
   actions?: ReactNode | ReactNode[];
   headerHasBottomBorder?: boolean;
   restrictWidth?: boolean | number | string;
@@ -51,6 +53,7 @@ export const PageLayout = memo<PageLayoutProps>(
   ({
     pageTitle,
     pageDescription,
+    pageBody,
     actions,
     headerHasBottomBorder,
     restrictWidth,
@@ -74,7 +77,7 @@ export const PageLayout = memo<PageLayoutProps>(
       };
     }, []);
 
-    const bodyClassName = useMemo(() => {
+    const consoleBodyClassName = useMemo(() => {
       return classnames({
         'is-scrollable': scrollableBody,
         'is-not-scrollable': !scrollableBody,
@@ -84,7 +87,13 @@ export const PageLayout = memo<PageLayoutProps>(
 
     const headerTitleContainer = useMemo(() => {
       return hideHeader ? null : (
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart" wrap={false}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          alignItems="flexStart"
+          wrap={false}
+          responsive={false}
+        >
           {headerBackComponent && <EuiFlexItem grow={false}>{headerBackComponent}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
@@ -125,7 +134,12 @@ export const PageLayout = memo<PageLayoutProps>(
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem grow className={bodyClassName} data-test-subj={getTestId('body')}>
+          <EuiFlexItem grow={false}>{pageBody}</EuiFlexItem>
+          <EuiFlexItem
+            grow
+            className={consoleBodyClassName}
+            data-test-subj={getTestId('consoleBody')}
+          >
             <div role="main" className="full-height">
               {children}
             </div>

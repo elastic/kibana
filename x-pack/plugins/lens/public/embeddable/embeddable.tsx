@@ -9,19 +9,20 @@ import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
   ExecutionContextSearch,
   TimefilterContract,
   FilterManager,
+  getEsQueryConfig,
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { RenderMode } from '@kbn/expressions-plugin';
+import { ErrorLike, RenderMode } from '@kbn/expressions-plugin';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -46,6 +47,7 @@ import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public'
 import type {
   Capabilities,
   IBasePath,
+  IUiSettingsClient,
   KibanaExecutionContext,
   ThemeServiceStart,
 } from '@kbn/core/public';
@@ -134,6 +136,7 @@ export interface LensEmbeddableDeps {
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface ViewUnderlyingDataArgs {
@@ -164,6 +167,7 @@ function getViewUnderlyingDataArgs({
   query,
   filters,
   timeRange,
+  esQueryConfig,
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
@@ -173,6 +177,7 @@ function getViewUnderlyingDataArgs({
   query: ExecutionContextSearch['query'];
   filters: Filter[];
   timeRange: TimeRange;
+  esQueryConfig: EsQueryConfig;
 }) {
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
@@ -190,7 +195,8 @@ function getViewUnderlyingDataArgs({
     query,
     filters,
     meta,
-    dataViews
+    dataViews,
+    esQueryConfig
   );
 
   return {
@@ -344,6 +350,10 @@ export class Embeddable
     );
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   public supportedTriggers() {
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
@@ -463,16 +473,27 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData: ExpressionWrapperProps['onData$'] = (_, adapters) => {
+  private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
     }
+
+    const { type, error } = data as { type: string; error: ErrorLike };
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: false,
+      error: type === 'error' ? error : undefined,
+    });
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
     this.renderComplete.dispatchComplete();
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   };
 
   /**
@@ -492,6 +513,11 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      error: undefined,
+    });
     this.renderComplete.dispatchInProgress();
 
     const parentContext = this.input.executionContext;
@@ -714,6 +740,7 @@ export class Embeddable
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
       timeRange: mergedSearchContext.timeRange,
+      esQueryConfig: getEsQueryConfig(this.deps.uiSettings),
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';

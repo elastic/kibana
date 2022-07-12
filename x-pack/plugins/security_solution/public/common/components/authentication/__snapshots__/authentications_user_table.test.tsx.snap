@@ -57,7 +57,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
 }
 
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 css-khmtme-euiPanel-grow-m-m-plain-hasBorder"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="table-users-authentications-loading-false"
 >
   <header
@@ -107,7 +107,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                     class="euiFlexItem"
                   >
                     <h4
-                      class="euiTitle css-1w464ad-euiTitle-m"
+                      class="euiTitle emotion-euiTitle-m"
                       data-test-subj="header-section-title"
                     >
                       <span
@@ -183,7 +183,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -413,7 +413,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         <span
           aria-atomic="true"
           aria-relevant="additions text"
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
           role="status"
         >
           Page 1 of 5

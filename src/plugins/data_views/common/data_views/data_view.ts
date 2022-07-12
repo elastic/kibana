@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _, { each, reject } from 'lodash';
+import _, { cloneDeep, each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
@@ -145,7 +145,7 @@ export class DataView implements DataViewBase {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     // set dependencies
-    this.fieldFormats = fieldFormats;
+    this.fieldFormats = { ...fieldFormats };
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
@@ -162,13 +162,13 @@ export class DataView implements DataViewBase {
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
-    this.sourceFilters = spec.sourceFilters;
+    this.sourceFilters = [...(spec.sourceFilters || [])];
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = spec.fieldAttrs || {};
+    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
     this.allowNoIndex = spec.allowNoIndex || false;
-    this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
   }
@@ -271,24 +271,33 @@ export class DataView implements DataViewBase {
 
   /**
    * Creates static representation of the data view.
+   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
+   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public toSpec(): DataViewSpec {
-    return {
+  public toSpec(includeFields = true): DataViewSpec {
+    const fields =
+      includeFields && this.fields
+        ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
+        : undefined;
+
+    const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-
       title: this.title,
       timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
+      sourceFilters: [...(this.sourceFilters || [])],
+      fields,
       typeMeta: this.typeMeta,
       type: this.type,
-      fieldFormats: this.fieldFormatMap,
-      runtimeFieldMap: this.runtimeFieldMap,
-      fieldAttrs: this.fieldAttrs,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs: cloneDeep(this.fieldAttrs),
       allowNoIndex: this.allowNoIndex,
       name: this.name,
     };
+
+    // Filter any undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
   /**

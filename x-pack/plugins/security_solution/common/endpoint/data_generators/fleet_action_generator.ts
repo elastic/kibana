@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
-import {
+import type {
   ActivityLogAction,
   ActivityLogActionResponse,
-  ActivityLogItemTypes,
   EndpointAction,
   EndpointActionResponse,
-  RESPONSE_ACTION_COMMANDS,
 } from '../types';
+import { ActivityLogItemTypes, RESPONSE_ACTION_COMMANDS } from '../types';
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -39,6 +36,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
           command: this.randomResponseActionCommand(),
           comment: this.randomString(15),
           parameter: undefined,
+          output: undefined,
         },
       },
       overrides
@@ -65,6 +63,14 @@ export class FleetActionGenerator extends BaseDataGenerator {
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
+      );
+    });
+
     return merge(
       {
         action_data: {
@@ -74,9 +80,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
         },
         action_id: this.seededUUIDv4(),
         agent_id: this.seededUUIDv4(),
-        started_at: this.randomPastDate(),
+        started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
         completed_at: timeStamp.toISOString(),
-        error: 'some error happened',
+        error: undefined,
         '@timestamp': timeStamp.toISOString(),
       },
       overrides

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  Direction,
+import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   RiskScoreRequestOptions,
-  RiskScoreFields,
   RiskScoreSortField,
 } from '../../../../../../common/search_strategy';
+import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;

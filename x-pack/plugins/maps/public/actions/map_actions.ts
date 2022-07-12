@@ -49,7 +49,6 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
@@ -71,7 +70,6 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
@@ -233,14 +231,6 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       } as MapViewContext,
     });
 
-    if (prevZoom !== nextZoom) {
-      getLayerList(getState()).map((layer) => {
-        if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(updateTooltipStateForLayer(layer));
-        }
-      });
-    }
-
     dispatch(syncDataForAllLayers(false));
   };
 }
@@ -264,10 +254,6 @@ export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) 
 
 export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
-}
-
-export function disableScrollZoom() {
-  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
 }
 
 export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {

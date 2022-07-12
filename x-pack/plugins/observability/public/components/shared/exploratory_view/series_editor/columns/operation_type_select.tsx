@@ -47,6 +47,18 @@ export function OperationTypeComponent({
 }) {
   const options = [
     {
+      value: 'min' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.min', {
+        defaultMessage: 'Min',
+      }),
+    },
+    {
+      value: 'max' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.max', {
+        defaultMessage: 'Max',
+      }),
+    },
+    {
       value: 'average' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.average', {
         defaultMessage: 'Average',
@@ -68,6 +80,12 @@ export function OperationTypeComponent({
       value: 'last_value' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.lastValue', {
         defaultMessage: 'Last value',
+      }),
+    },
+    {
+      value: '25th' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.25thPercentile', {
+        defaultMessage: '25th Percentile',
       }),
     },
     {

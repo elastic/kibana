@@ -420,7 +420,7 @@ tr:hover .c3:focus::before {
                                 data-test-subj="draggable-content-event.duration"
                               >
                                 <div
-                                  class="euiText css-1utxlgq-euiText-xs"
+                                  class="euiText emotion-euiText-xs"
                                 >
                                   <span
                                     class="c6"
@@ -492,7 +492,7 @@ tr:hover .c3:focus::before {
                                 data-test-subj="draggable-content-event.start"
                               >
                                 <div
-                                  class="euiText css-1utxlgq-euiText-xs"
+                                  class="euiText emotion-euiText-xs"
                                 >
                                   <span
                                     class="c6"
@@ -560,7 +560,7 @@ tr:hover .c3:focus::before {
                                 data-test-subj="draggable-content-event.end"
                               >
                                 <div
-                                  class="euiText css-1utxlgq-euiText-xs"
+                                  class="euiText emotion-euiText-xs"
                                 >
                                   <span
                                     class="c6"
@@ -796,7 +796,7 @@ tr:hover .c3:focus::before {
                                       class="euiToolTipAnchor"
                                     >
                                       <div
-                                        class="euiText c8 css-1utxlgq-euiText-xs"
+                                        class="euiText c8 emotion-euiText-xs"
                                       >
                                         <span>
                                           100B
@@ -862,7 +862,7 @@ tr:hover .c3:focus::before {
                                       class="euiToolTipAnchor"
                                     >
                                       <div
-                                        class="euiText c8 css-1utxlgq-euiText-xs"
+                                        class="euiText c8 emotion-euiText-xs"
                                       >
                                         <span>
                                           3 pkts
@@ -1121,7 +1121,7 @@ tr:hover .c3:focus::before {
                                                         class="euiToolTipAnchor"
                                                       >
                                                         <a
-                                                          class="euiLink css-102pf9n-euiLink-primary"
+                                                          class="euiLink emotion-euiLink-primary"
                                                           data-test-subj="network-details"
                                                           href="/ip/192.168.1.2/source"
                                                           rel="noreferrer"
@@ -1162,7 +1162,7 @@ tr:hover .c3:focus::before {
                                           class="c13"
                                         >
                                           <a
-                                            class="euiLink css-102pf9n-euiLink-primary"
+                                            class="euiLink emotion-euiLink-primary"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=9987"
                                             rel="noopener noreferrer"
@@ -1170,13 +1170,13 @@ tr:hover .c3:focus::before {
                                           >
                                             9987
                                             <span
-                                              class="css-q4vwwx-euiLink__externalIcon"
+                                              class="emotion-euiLink__externalIcon"
                                               data-euiicon-type="popout"
                                             >
                                               External link
                                             </span>
                                             <span
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                             >
                                               (opens in a new tab or window)
                                             </span>
@@ -1618,7 +1618,7 @@ tr:hover .c3:focus::before {
                                             class="euiToolTipAnchor"
                                           >
                                             <div
-                                              class="euiText c18 css-1utxlgq-euiText-xs"
+                                              class="euiText c18 emotion-euiText-xs"
                                             >
                                               <span
                                                 class="c19"
@@ -1697,7 +1697,7 @@ tr:hover .c3:focus::before {
                                             class="euiToolTipAnchor"
                                           >
                                             <div
-                                              class="euiText c18 css-1utxlgq-euiText-xs"
+                                              class="euiText c18 emotion-euiText-xs"
                                             >
                                               <span>
                                                 2 pkts
@@ -1805,7 +1805,7 @@ tr:hover .c3:focus::before {
                                             class="euiToolTipAnchor"
                                           >
                                             <div
-                                              class="euiText c18 css-1utxlgq-euiText-xs"
+                                              class="euiText c18 emotion-euiText-xs"
                                             >
                                               <span
                                                 class="c19"
@@ -1884,7 +1884,7 @@ tr:hover .c3:focus::before {
                                             class="euiToolTipAnchor"
                                           >
                                             <div
-                                              class="euiText c18 css-1utxlgq-euiText-xs"
+                                              class="euiText c18 emotion-euiText-xs"
                                             >
                                               <span>
                                                 1 pkts
@@ -2000,7 +2000,7 @@ tr:hover .c3:focus::before {
                                                         class="euiToolTipAnchor"
                                                       >
                                                         <a
-                                                          class="euiLink css-102pf9n-euiLink-primary"
+                                                          class="euiLink emotion-euiLink-primary"
                                                           data-test-subj="network-details"
                                                           href="/ip/10.1.2.3/source"
                                                           rel="noreferrer"
@@ -2041,7 +2041,7 @@ tr:hover .c3:focus::before {
                                           class="c13"
                                         >
                                           <a
-                                            class="euiLink css-102pf9n-euiLink-primary"
+                                            class="euiLink emotion-euiLink-primary"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80"
                                             rel="noopener noreferrer"
@@ -2049,13 +2049,13 @@ tr:hover .c3:focus::before {
                                           >
                                             80
                                             <span
-                                              class="css-q4vwwx-euiLink__externalIcon"
+                                              class="emotion-euiLink__externalIcon"
                                               data-euiicon-type="popout"
                                             >
                                               External link
                                             </span>
                                             <span
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                             >
                                               (opens in a new tab or window)
                                             </span>
@@ -2508,7 +2508,7 @@ tr:hover .c3:focus::before {
                                       ja3
                                     </span>
                                     <a
-                                      class="euiLink css-102pf9n-euiLink-primary"
+                                      class="euiLink emotion-euiLink-primary"
                                       data-test-subj="ja3-fingerprint-link"
                                       href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
                                       rel="noopener noreferrer"
@@ -2516,13 +2516,13 @@ tr:hover .c3:focus::before {
                                     >
                                       tls.fingerprints.ja3.hash-value
                                       <span
-                                        class="css-q4vwwx-euiLink__externalIcon"
+                                        class="emotion-euiLink__externalIcon"
                                         data-euiicon-type="popout"
                                       >
                                         External link
                                       </span>
                                       <span
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                       >
                                         (opens in a new tab or window)
                                       </span>
@@ -2610,7 +2610,7 @@ tr:hover .c3:focus::before {
                                       client cert
                                     </span>
                                     <a
-                                      class="euiLink css-102pf9n-euiLink-primary"
+                                      class="euiLink emotion-euiLink-primary"
                                       data-test-subj="certificate-fingerprint-link"
                                       href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
                                       rel="noopener noreferrer"
@@ -2618,13 +2618,13 @@ tr:hover .c3:focus::before {
                                     >
                                       tls.client_certificate.fingerprint.sha1-value
                                       <span
-                                        class="css-q4vwwx-euiLink__externalIcon"
+                                        class="emotion-euiLink__externalIcon"
                                         data-euiicon-type="popout"
                                       >
                                         External link
                                       </span>
                                       <span
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                       >
                                         (opens in a new tab or window)
                                       </span>
@@ -2712,7 +2712,7 @@ tr:hover .c3:focus::before {
                                       server cert
                                     </span>
                                     <a
-                                      class="euiLink css-102pf9n-euiLink-primary"
+                                      class="euiLink emotion-euiLink-primary"
                                       data-test-subj="certificate-fingerprint-link"
                                       href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
                                       rel="noopener noreferrer"
@@ -2720,13 +2720,13 @@ tr:hover .c3:focus::before {
                                     >
                                       tls.server_certificate.fingerprint.sha1-value
                                       <span
-                                        class="css-q4vwwx-euiLink__externalIcon"
+                                        class="emotion-euiLink__externalIcon"
                                         data-euiicon-type="popout"
                                       >
                                         External link
                                       </span>
                                       <span
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                       >
                                         (opens in a new tab or window)
                                       </span>

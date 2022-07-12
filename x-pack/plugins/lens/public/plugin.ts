@@ -285,6 +285,7 @@ export class LensPlugin {
         inspector: plugins.inspector,
         spaces: plugins.spaces,
         theme: core.theme,
+        uiSettings: core.uiSettings,
       };
     };
 
@@ -293,13 +294,13 @@ export class LensPlugin {
     }
 
     visualizations.registerAlias(getLensAliasConfig());
-
     if (discover) {
       uiActionsEnhanced.registerDrilldown(
         new OpenInDiscoverDrilldown({
           discover,
           dataViews: () => this.dataViewsService!,
           hasDiscoverAccess: () => this.hasDiscoverAccess,
+          application: () => startServices().core.application,
         })
       );
     }

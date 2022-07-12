@@ -54,23 +54,24 @@ const tourStepsConfig: TourStep[] = [
       <EuiText>
         {i18n.translate('xpack.observability.tour.observabilityOverviewStep.tourContent', {
           defaultMessage:
-            'Take a quick tour of the Observability solution to get a feel for how it works.',
+            'Take a quick tour to learn the benefits of having all of your observability data in one stack.',
         })}
       </EuiText>
     ),
-    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
+    anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'overviewStep',
     showOverlay: true,
   },
   {
     title: i18n.translate('xpack.observability.tour.streamStep.tourTitle', {
-      defaultMessage: 'View all your infrastructure logs in real time',
+      defaultMessage: 'Tail your infrastructure logs in real time',
     }),
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.streamStep.tourContent', {
-          defaultMessage: 'Verify your data is flowing correctly.',
+          defaultMessage:
+            'Monitor, filter, and inspect log events flowing in from your applications, servers, virtual machines, and containers.',
         })}
       </EuiText>
     ),
@@ -81,12 +82,13 @@ const tourStepsConfig: TourStep[] = [
   },
   {
     title: i18n.translate('xpack.observability.tour.metricsExplorerStep.tourTitle', {
-      defaultMessage: 'Inspect your overall infrastructure performance',
+      defaultMessage: 'Monitor your infrastructure health',
     }),
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.metricsExplorerStep.tourContent', {
-          defaultMessage: 'Check the health of your infrastructure.',
+          defaultMessage:
+            'Stream, group, and visualize metrics from your systems, cloud, network, and other infrastructure sources.',
         })}
       </EuiText>
     ),
@@ -97,12 +99,13 @@ const tourStepsConfig: TourStep[] = [
   },
   {
     title: i18n.translate('xpack.observability.tour.tracesStep.tourTitle', {
-      defaultMessage: 'Understand the entire lifecycle of a request/action',
+      defaultMessage: 'Identify and resolve application issues',
     }),
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.tracesStep.tourContent', {
-          defaultMessage: 'Track down any issues affecting your infrastructure.',
+          defaultMessage:
+            'Find and fix performance problems quickly by collecting detailed information about your services.',
         })}
       </EuiText>
     ),
@@ -113,12 +116,13 @@ const tourStepsConfig: TourStep[] = [
   },
   {
     title: i18n.translate('xpack.observability.tour.alertsStep.tourTitle', {
-      defaultMessage: 'Get notified when something goes wrong',
+      defaultMessage: 'Get notified when something changes',
     }),
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.alertsStep.tourContent', {
-          defaultMessage: 'Configure how you want to be notified when a problem occurs.',
+          defaultMessage:
+            'Define and detect conditions that trigger alerts with third-party platform integrations like email, PagerDuty, and Slack.',
         })}
       </EuiText>
     ),
@@ -129,12 +133,13 @@ const tourStepsConfig: TourStep[] = [
   },
   {
     title: i18n.translate('xpack.observability.tour.guidedSetupStep.tourTitle', {
-      defaultMessage: `You're ready!`,
+      defaultMessage: 'Now add your data!',
     }),
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.guidedSetupStep.tourContent', {
-          defaultMessage: 'View the guided setup to learn about next steps.',
+          defaultMessage:
+            'The easiest way to get going with Elastic Observability is to follow the Guided setup.',
         })}
       </EuiText>
     ),
@@ -161,10 +166,11 @@ const getSteps = ({
           onClick={() => endTour()}
           size="xs"
           color="text"
-          data-test-subj="skipButton"
+          // Used for testing and to track FS usage
+          data-test-subj="onboarding--observTourSkipButton"
         >
           {i18n.translate('xpack.observability.tour.skipButtonLabel', {
-            defaultMessage: 'Skip',
+            defaultMessage: 'Skip tour',
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -173,7 +179,8 @@ const getSteps = ({
           onClick={() => incrementStep()}
           size="s"
           color="success"
-          data-test-subj="nextButton"
+          // Used for testing and to track FS usage
+          data-test-subj="onboarding--observTourNextStepButton"
         >
           {i18n.translate('xpack.observability.tour.nextButtonLabel', {
             defaultMessage: 'Next',
@@ -184,7 +191,13 @@ const getSteps = ({
   );
 
   const lastStepFooterAction = (
-    <EuiButtonEmpty size="xs" color="text" onClick={() => endTour()} data-test-subj="endButton">
+    // data-test-subj is used for testing and to track FS usage
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      onClick={() => endTour()}
+      data-test-subj="onboarding--observTourEndButton"
+    >
       {i18n.translate('xpack.observability.tour.endButtonLabel', {
         defaultMessage: 'End tour',
       })}

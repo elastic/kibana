@@ -1,0 +1,16 @@
+{
+  "vocabulary": [
+    "[PAD]",
+    "[UNK]",
+    "[CLS]",
+    "[SEP]",
+    "[MASK]",
+    "Hello",
+    "world",
+    "car",
+    "bike",
+    "bee",
+    "bird",
+    "and"
+ ]
+}
