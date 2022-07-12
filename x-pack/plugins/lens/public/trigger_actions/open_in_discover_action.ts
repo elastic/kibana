@@ -38,7 +38,6 @@ export const createOpenInDiscoverAction = (
         dataViews,
         hasDiscoverAccess,
         ...context,
-        embeddable: context.embeddable,
       });
     },
     isCompatible: async (context: Context) => {
