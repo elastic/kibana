@@ -15,6 +15,9 @@ import { ChangePoint } from '../../../common/types';
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
+// TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
+// `x-pack/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
+
 export const getChangePointRequest = (
   params: AiopsExplainLogRateSpikesSchema,
   fieldName: string
