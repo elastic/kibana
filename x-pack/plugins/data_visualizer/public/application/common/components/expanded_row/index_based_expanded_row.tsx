@@ -55,7 +55,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
         return <NumberContent config={config} onAddFilter={onAddFilter} />;
 
       case JOB_FIELD_TYPES.BOOLEAN:
-        return <BooleanContent config={config} />;
+        return <BooleanContent config={config} onAddFilter={onAddFilter} />;
 
       case JOB_FIELD_TYPES.DATE:
         return <DateContent config={config} />;
