@@ -617,15 +617,15 @@ export const VisualizationWrapper = ({
     const datasourceEvents = Object.values(datasourceMap).reduce<string[]>(
       (acc, datasource) => [
         ...acc,
-        ...datasource.getRenderEventCounters(datasourceStates[datasource.id].state),
+        ...(datasource.getRenderEventCounters?.(datasourceStates[datasource.id].state) ?? []),
       ],
       []
     );
     let visualizationEvents: string[] = [];
     if (visualization.activeId) {
-      visualizationEvents = visualizationMap[visualization.activeId].getRenderEventCounters(
-        visualization.state
-      );
+      visualizationEvents =
+        visualizationMap[visualization.activeId].getRenderEventCounters?.(visualization.state) ??
+        [];
     }
 
     trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);

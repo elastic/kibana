@@ -357,7 +357,7 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * Get RenderEventCounters events for telemetry
    */
-  getRenderEventCounters: (state: T) => string[];
+  getRenderEventCounters?: (state: T) => string[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -961,7 +961,7 @@ export interface Visualization<T = unknown> {
   /**
    * Get RenderEventCounters events for telemetry
    */
-  getRenderEventCounters: (state: T) => string[];
+  getRenderEventCounters?: (state: T) => string[];
 }
 
 // Use same technique as TriggerContext

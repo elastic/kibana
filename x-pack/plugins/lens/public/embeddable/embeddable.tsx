@@ -484,17 +484,18 @@ export class Embeddable
       datasourceEvents = Object.values(this.deps.datasourceMap).reduce<string[]>(
         (acc, datasource) => [
           ...acc,
-          ...datasource.getRenderEventCounters(
+          ...(datasource.getRenderEventCounters?.(
             this.savedVis!.state.datasourceStates[datasource.id]
-          ),
+          ) ?? []),
         ],
         []
       );
 
       if (this.savedVis.visualizationType) {
-        visualizationEvents = this.deps.visualizationMap[
-          this.savedVis.visualizationType
-        ].getRenderEventCounters(this.savedVis!.state.visualization);
+        visualizationEvents =
+          this.deps.visualizationMap[this.savedVis.visualizationType].getRenderEventCounters?.(
+            this.savedVis!.state.visualization
+          ) ?? [];
       }
     }
 

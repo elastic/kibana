@@ -99,10 +99,6 @@ export const getPieVisualization = ({
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
-  getRenderEventCounters(state) {
-    return [];
-  },
-
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {

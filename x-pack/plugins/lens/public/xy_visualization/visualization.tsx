@@ -152,10 +152,6 @@ export const getXyVisualization = ({
     };
   },
 
-  getRenderEventCounters(state) {
-    return [];
-  },
-
   getSuggestions,
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],

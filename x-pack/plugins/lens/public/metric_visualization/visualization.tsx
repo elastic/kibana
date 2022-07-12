@@ -270,10 +270,6 @@ export const getMetricVisualization = ({
     ];
   },
 
-  getRenderEventCounters() {
-    return [];
-  },
-
   getLayerType(layerId, state) {
     if (state?.layerId === layerId) {
       return state.layerType;
