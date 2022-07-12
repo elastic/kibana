@@ -88,6 +88,11 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
   });
 
   useEffect(() => {
+    if (!topNType) {
+      setTopN({ samples: [], subcharts: [] });
+      return;
+    }
+
     fetchTopN(
       topNType,
       index,

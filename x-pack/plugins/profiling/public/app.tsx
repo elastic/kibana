@@ -19,6 +19,7 @@ import { RedirectWithDefaultDateRange } from './components/redirect_with_default
 import { profilingRouter } from './routing';
 import { Services } from './services';
 import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -59,13 +60,15 @@ function App({
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-          <RouterProvider router={profilingRouter as any} history={history}>
-            <ProfilingDependenciesContextProvider value={profilingDependencies}>
+          <ProfilingDependenciesContextProvider value={profilingDependencies}>
+            <RouterProvider router={profilingRouter as any} history={history}>
               <RedirectWithDefaultDateRange>
-                <RouteRenderer />
+                <RouteBreadcrumbsContextProvider>
+                  <RouteRenderer />
+                </RouteBreadcrumbsContextProvider>
               </RedirectWithDefaultDateRange>
-            </ProfilingDependenciesContextProvider>
-          </RouterProvider>
+            </RouterProvider>
+          </ProfilingDependenciesContextProvider>
         </RedirectAppLinks>
       </KibanaContextProvider>
     </KibanaThemeProvider>
