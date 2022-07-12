@@ -88,7 +88,6 @@ export class EditPanelAction implements Action<ActionContext> {
         const options = {
           path: appTarget.path,
           state: appTarget.state,
-          filters: context.embeddable?.getInput().filters,
         };
         await this.stateTransfer.navigateToEditor(appTarget.app, options);
       } else {
