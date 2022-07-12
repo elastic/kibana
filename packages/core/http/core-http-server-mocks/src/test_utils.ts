@@ -21,59 +21,64 @@ const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
 const logger = loggingSystemMock.create();
 
-const configService = configServiceMock.create();
-configService.atPath.mockImplementation((path) => {
-  if (path === 'server') {
-    return new BehaviorSubject({
-      hosts: ['localhost'],
-      maxPayload: new ByteSizeValue(1024),
-      autoListen: true,
-      ssl: {
-        enabled: false,
-      },
-      cors: {
-        enabled: false,
-      },
-      compression: { enabled: true },
-      xsrf: {
-        disableProtection: true,
-        allowlist: [],
-      },
-      securityResponseHeaders: {},
-      customResponseHeaders: {},
-      requestId: {
-        allowFromAnyIp: true,
-        ipAllowlist: [],
-      },
-      shutdownTimeout: moment.duration(30, 'seconds'),
-      keepaliveTimeout: 120_000,
-      socketTimeout: 120_000,
-    } as any);
-  }
-  if (path === 'externalUrl') {
-    return new BehaviorSubject({
-      policy: [],
-    } as any);
-  }
-  if (path === 'csp') {
-    return new BehaviorSubject({
-      strict: false,
-      disableEmbedding: false,
-      warnLegacyBrowsers: true,
-    });
-  }
-  throw new Error(`Unexpected config path: ${path}`);
-});
+const createConfigService = () => {
+  const configService = configServiceMock.create();
+  configService.atPath.mockImplementation((path) => {
+    if (path === 'server') {
+      return new BehaviorSubject({
+        hosts: ['localhost'],
+        maxPayload: new ByteSizeValue(1024),
+        autoListen: true,
+        ssl: {
+          enabled: false,
+        },
+        cors: {
+          enabled: false,
+        },
+        compression: { enabled: true },
+        xsrf: {
+          disableProtection: true,
+          allowlist: [],
+        },
+        securityResponseHeaders: {},
+        customResponseHeaders: {},
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: [],
+        },
+        shutdownTimeout: moment.duration(30, 'seconds'),
+        keepaliveTimeout: 120_000,
+        socketTimeout: 120_000,
+      } as any);
+    }
+    if (path === 'externalUrl') {
+      return new BehaviorSubject({
+        policy: [],
+      } as any);
+    }
+    if (path === 'csp') {
+      return new BehaviorSubject({
+        strict: false,
+        disableEmbedding: false,
+        warnLegacyBrowsers: true,
+      });
+    }
+    throw new Error(`Unexpected config path: ${path}`);
+  });
+  return configService;
+};
 
-const defaultContext: CoreContext = {
-  coreId,
-  env,
-  logger,
-  configService,
+const createDefaultContext = (): CoreContext => {
+  return {
+    coreId,
+    env,
+    logger,
+    configService: createConfigService(),
+  };
 };
 
 export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext => ({
-  ...defaultContext,
+  ...createDefaultContext(),
   ...overrides,
 });
 

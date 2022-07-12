@@ -10,9 +10,13 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
-jest.mock('@kbn/utils', () => ({
-  getLogsPath: () => '/mock/kibana/logs/path',
-}));
+jest.mock('@kbn/utils', () => {
+  const actual = jest.requireActual('@kbn/utils');
+  return {
+    ...actual,
+    getLogsPath: () => '/mock/kibana/logs/path',
+  };
+});
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
