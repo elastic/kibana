@@ -98,7 +98,7 @@ export class Env {
     this.pluginSearchPaths = getPluginSearchPaths({
       rootDir: this.homeDir,
       oss: options.cliArgs.oss,
-      examples: options.cliArgs.runExamples,
+      examples: true,
     });
 
     this.cliArgs = Object.freeze(options.cliArgs);
