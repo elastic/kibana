@@ -36,8 +36,7 @@ export const TotalCountHeader = ({
             ),
           }}
         />
-      </EuiText>
-      ]{' '}
+      </EuiText>{' '}
       <EuiIconTip
         content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
           defaultMessage:
