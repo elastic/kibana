@@ -8,21 +8,21 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
+import { SolutionNavCollapseButton } from './collapse_button';
 
-describe('KibanaPageTemplateSolutionNavCollapseButton', () => {
+describe('SolutionNavCollapseButton', () => {
   test('renders', () => {
-    const component = shallow(<KibanaPageTemplateSolutionNavCollapseButton isCollapsed={false} />);
+    const component = shallow(<SolutionNavCollapseButton isCollapsed={false} />);
     expect(component).toMatchSnapshot();
-    expect(component.find('.kbnPageTemplateSolutionNavCollapseButton').prop('title')).toBe(
+    expect(component.find('.kbnSolutionNavCollapseButton').prop('title')).toBe(
       'Collapse side navigation'
     );
   });
 
   test('isCollapsed', () => {
-    const component = shallow(<KibanaPageTemplateSolutionNavCollapseButton isCollapsed={true} />);
+    const component = shallow(<SolutionNavCollapseButton isCollapsed={true} />);
     expect(component).toMatchSnapshot();
-    expect(component.find('.kbnPageTemplateSolutionNavCollapseButton').prop('title')).toBe(
+    expect(component.find('.kbnSolutionNavCollapseButton').prop('title')).toBe(
       'Open side navigation'
     );
   });
