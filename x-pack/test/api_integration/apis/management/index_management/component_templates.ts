@@ -454,14 +454,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body).to.eql({ data_streams: [] });
         });
-
-        it('should allow rollover', async () => {
-          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams_rollover`;
-
-          const { body } = await supertest.post(uri).set('kbn-xsrf', 'xxx').expect(200);
-
-          expect(body).to.eql({ data_streams: [] });
-        });
       });
 
       describe('with datastreams', () => {
@@ -472,14 +464,6 @@ export default function ({ getService }: FtrProviderContext) {
           const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams`;
 
           const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
-
-          expect(body).to.eql({ data_streams: ['logs-test-component-template-default'] });
-        });
-
-        it('should allow rollover', async () => {
-          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams_rollover`;
-
-          const { body } = await supertest.post(uri).set('kbn-xsrf', 'xxx').expect(200);
 
           expect(body).to.eql({ data_streams: ['logs-test-component-template-default'] });
         });

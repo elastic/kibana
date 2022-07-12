@@ -7,13 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import pMap from 'p-map';
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-
-const MAX_CONCURRENT_ROLLOVER = 5;
 
 const paramsSchema = schema.object({
   name: schema.string(),
@@ -48,54 +45,6 @@ async function getDatastreamsForComponentTemplate(
 
   return dataStreams;
 }
-
-export const registerPostDatastreamRollover = ({
-  router,
-  lib: { handleEsError },
-}: RouteDependencies): void => {
-  router.post(
-    {
-      path: addBasePath('/component_templates/{name}/datastreams_rollover'),
-      validate: {
-        params: paramsSchema,
-      },
-    },
-    async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-
-      const { name } = request.params;
-
-      try {
-        const dataStreams = await getDatastreamsForComponentTemplate(client.asCurrentUser, name);
-
-        // rollover
-        await pMap(
-          dataStreams,
-          (ds) => {
-            if (ds.replicated) {
-              // rollover is not possible on replicated datastream
-              return;
-            }
-            return client.asCurrentUser.indices.rollover({
-              alias: ds.name,
-            });
-          },
-          {
-            concurrency: MAX_CONCURRENT_ROLLOVER,
-          }
-        );
-
-        return response.ok({
-          body: {
-            data_streams: dataStreams.map((ds) => ds.name),
-          },
-        });
-      } catch (error) {
-        return handleEsError({ error, response });
-      }
-    }
-  );
-};
 
 export const registerGetDatastreams = ({
   router,
