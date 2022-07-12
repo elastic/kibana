@@ -42,7 +42,8 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
     logout();
   });
 
-  describe('When there are agent policies', () => {
+  // Skipped due to unrelated failures starting in https://github.com/elastic/kibana/pull/136114
+  describe.skip('When there are agent policies', () => {
     before(() => {
       navigateTo(FLEET);
       createAgentPolicy();
