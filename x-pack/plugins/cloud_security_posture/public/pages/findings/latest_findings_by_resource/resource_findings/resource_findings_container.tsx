@@ -37,6 +37,7 @@ const getDefaultQuery = ({
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query,
   filters,
+  sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
   pageSize: 10,
 });
@@ -77,6 +78,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       pageSize: urlQuery.pageSize,
       pageIndex: urlQuery.pageIndex,
     }),
+    sort: urlQuery.sort,
     query: baseEsQuery.query,
     resourceId: params.resourceId,
     enabled: !baseEsQuery.error,
@@ -138,8 +140,11 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 pageIndex: urlQuery.pageIndex,
                 totalItemCount: resourceFindings.data?.total || 0,
               })}
-              setTableOptions={({ page }) =>
-                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              sorting={{
+                sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+              }}
+              setTableOptions={({ page, sort }) =>
+                setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
               }
               onAddFilter={(field, value, negate) =>
                 setUrlQuery({
