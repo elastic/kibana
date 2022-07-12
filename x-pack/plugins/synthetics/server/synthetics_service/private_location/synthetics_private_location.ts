@@ -70,29 +70,29 @@ export class SyntheticsPrivateLocation {
   async editMonitor(config: SyntheticsMonitorWithId) {
     const { locations } = config;
 
-    const privateLocations = await getSyntheticsPrivateLocations(
+    const allPrivateLocations = await getSyntheticsPrivateLocations(
       this.server.authSavedObjectsClient!
     );
 
-    const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
+    const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-    for (const privateLocation of fleetManagedLocations) {
-      const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
-      const newPolicy = await this.generateNewPolicy(config, location);
+    for (const privateLocation of allPrivateLocations) {
+      const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
+      const currId = config.id + '-' + privateLocation.id;
+      const hasPolicy = await this.getMonitor(currId);
 
-      const currId = config.id + '-' + location.id;
+      if (hasLocation) {
+        const newPolicy = await this.generateNewPolicy(config, privateLocation);
 
-      if (location) {
-        await this.updatePolicy(newPolicy, currId);
-      } else {
-        const hasPolicy = await this.getMonitor(currId);
         if (hasPolicy) {
-          const soClient = this.server.authSavedObjectsClient!;
-          const esClient = this.server.uptimeEsClient.baseESClient;
-          await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId]);
+          await this.updatePolicy(newPolicy, currId);
         } else {
           await this.createPolicy(newPolicy, currId);
         }
+      } else if (hasPolicy) {
+        const soClient = this.server.authSavedObjectsClient!;
+        const esClient = this.server.uptimeEsClient.baseESClient;
+        await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId]);
       }
     }
   }
