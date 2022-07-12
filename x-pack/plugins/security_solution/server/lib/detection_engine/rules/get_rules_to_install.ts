@@ -9,10 +9,10 @@ import type { AddPrepackagedRulesSchema } from '../../../../common/detection_eng
 import type { RuleAlertType } from './types';
 
 export const getRulesToInstall = (
-  rulesFromFileSystem: AddPrepackagedRulesSchema[],
-  installedRules: RuleAlertType[]
+  latestPrePackagedRules: Map<string, AddPrepackagedRulesSchema>,
+  installedRules: Map<string, RuleAlertType>
 ) => {
-  return rulesFromFileSystem.filter(
-    (rule) => !installedRules.some((installedRule) => installedRule.params.ruleId === rule.rule_id)
+  return Array.from(latestPrePackagedRules.values()).filter(
+    (rule) => !installedRules.has(rule.rule_id)
   );
 };
