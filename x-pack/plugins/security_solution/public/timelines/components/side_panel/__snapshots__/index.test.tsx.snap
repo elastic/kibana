@@ -20,26 +20,6 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
 />
 `;
 
-exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set: 
-        <DetailsPanel
-          browserFields={Object {}}
-          handleOnPanelClosed={[MockFunction]}
-          isFlyoutView={false}
-          runtimeMappings={Object {}}
-          tabType="query"
-          timelineId="test"
-        />
-       1`] = `
-<DetailsPanel
-  browserFields={Object {}}
-  handleOnPanelClosed={[MockFunction]}
-  isFlyoutView={false}
-  runtimeMappings={Object {}}
-  tabType="query"
-  timelineId="test"
-/>
-`;
-
 exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if no expanded detail has been set in the reducer 1`] = `
 <DetailsPanel
   browserFields={Object {}}
@@ -351,10 +331,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+           aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -365,10 +346,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -379,10 +361,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+           aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
       </dl>
     </div>
@@ -401,10 +384,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -813,7 +797,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                 External link
               </span>
               <span
-                class="euiScreenReaderOnly"
+                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
               >
                 (opens in a new tab or window)
               </span>
