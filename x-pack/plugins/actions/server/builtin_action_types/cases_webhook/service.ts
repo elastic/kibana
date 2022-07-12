@@ -164,7 +164,7 @@ export const createExternalService = (
   };
 
   const updateIncident = async ({
-    externalId,
+    incidentId,
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
@@ -175,7 +175,7 @@ export const createExternalService = (
         url: renderMustacheStringNoEscape(updateIncidentUrl, {
           external: {
             system: {
-              id: externalId,
+              id: incidentId,
             },
           },
         }),
@@ -195,15 +195,15 @@ export const createExternalService = (
         res,
       });
 
-      const updatedIncident = await getIncident(externalId as string);
+      const updatedIncident = await getIncident(incidentId as string);
 
       return {
-        id: externalId,
+        id: incidentId,
         title: updatedIncident.title,
         url: renderMustacheStringNoEscape(incidentViewUrl, {
           external: {
             system: {
-              id: externalId,
+              id: incidentId,
               title: updatedIncident.title,
             },
           },
@@ -215,7 +215,7 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async ({ externalId, comment }: CreateCommentParams): Promise<unknown> => {
+  const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
     try {
       if (!createCommentUrl || !createCommentJson) {
         return {};
@@ -226,7 +226,7 @@ export const createExternalService = (
         url: renderMustacheStringNoEscape(createCommentUrl, {
           external: {
             system: {
-              id: externalId,
+              id: incidentId,
             },
           },
         }),
