@@ -10,7 +10,7 @@ import { type DiagnosticResult } from '@elastic/elasticsearch';
 import { type LogMeta } from '@kbn/logging';
 
 // If you are updating these, consider whether they should also be updated in the
-// http service `getEcsResponseLog`
+// http service `getResponseLog`
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie', 'x-elastic-app-auth'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
