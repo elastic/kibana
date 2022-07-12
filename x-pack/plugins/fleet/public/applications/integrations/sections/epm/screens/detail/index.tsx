@@ -128,6 +128,13 @@ export function Detail() {
     return getPackageInstallStatus(packageInfo.name).status;
   }, [packageInfo, getPackageInstallStatus]);
 
+  const isInstalled = useMemo(
+    () =>
+      packageInstallStatus === InstallStatus.installed ||
+      packageInstallStatus === InstallStatus.reinstalling,
+    [packageInstallStatus]
+  );
+
   const updateAvailable =
     packageInfo &&
     'savedObject' in packageInfo &&
@@ -326,7 +333,7 @@ export function Detail() {
                   </EuiFlexGroup>
                 ),
               },
-              ...(packageInstallStatus === 'installed'
+              ...(isInstalled
                 ? [
                     { isDivider: true },
                     {
@@ -376,15 +383,15 @@ export function Detail() {
     [
       packageInfo,
       updateAvailable,
-      packageInstallStatus,
+      isInstalled,
       userCanInstallPackages,
       getHref,
       pkgkey,
       integration,
       agentPolicyIdFromContext,
-      handleAddIntegrationPolicyClick,
       missingSecurityConfiguration,
       integrationInfo?.title,
+      handleAddIntegrationPolicyClick,
     ]
   );
 
@@ -412,7 +419,7 @@ export function Detail() {
       },
     ];
 
-    if (canReadIntegrationPolicies && packageInstallStatus === InstallStatus.installed) {
+    if (canReadIntegrationPolicies && isInstalled) {
       tabs.push({
         id: 'policies',
         name: (
@@ -430,7 +437,7 @@ export function Detail() {
       });
     }
 
-    if (packageInstallStatus === InstallStatus.installed && (packageInfo.assets || CustomAssets)) {
+    if (isInstalled && (packageInfo.assets || CustomAssets)) {
       tabs.push({
         id: 'assets',
         name: (
@@ -491,9 +498,9 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
-    canReadPackageSettings,
-    packageInstallStatus,
+    isInstalled,
     CustomAssets,
+    canReadPackageSettings,
     showCustomTab,
   ]);
 

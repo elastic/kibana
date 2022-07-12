@@ -12,19 +12,39 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import { PackagePolicy, DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import {
+  PackagePolicy,
+  DeletePackagePoliciesResponse,
+  PackagePolicyInput,
+} from '@kbn/fleet-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
+  CLOUDBEAT_VANILLA,
+  CIS_INTEGRATION_INPUTS_MAP,
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { CspRule, CspRuleTemplate } from '../../common/schemas';
+import type { CspRule, CspRuleMetadata, CspRuleTemplate } from '../../common/schemas';
 
-type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
-  infer ElementType
->
-  ? ElementType
-  : never;
+type CloudbeatInputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
+type BenchmarkId = CspRuleMetadata['benchmark']['id'];
+
+const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+
+const isEnabledBenchmarkInputType = (input: PackagePolicyInput) =>
+  input.type in CIS_INTEGRATION_INPUTS_MAP && !!input.enabled;
+
+export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): BenchmarkId => {
+  const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
+
+  // Use the only enabled input
+  if (enabledInputs.length === 1)
+    return CIS_INTEGRATION_INPUTS_MAP[enabledInputs[0].type as CloudbeatInputType];
+
+  // Use the the default input for multiple/none selected
+  return CIS_INTEGRATION_INPUTS_MAP[CLOUDBEAT_VANILLA];
+};
 
 /**
  * Callback to handle creation of PackagePolicies in Fleet
@@ -34,14 +54,18 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
+
   // Create csp-rules from the generic asset
   const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
     await savedObjectsClient.find({
       type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       perPage: 10000,
+      filter: getBenchmarkTypeFilter(benchmarkType),
     });
 
   if (existingRuleTemplates.total === 0) {
+    logger.warn(`expected CSP rule templates to exists for type: ${benchmarkType}`);
     return;
   }
 
@@ -64,7 +88,7 @@ export const onPackagePolicyPostCreateCallback = async (
  * Callback to handle deletion of PackagePolicies in Fleet
  */
 export const removeCspRulesInstancesCallback = async (
-  deletedPackagePolicy: ArrayElement<DeletePackagePoliciesResponse>,
+  deletedPackagePolicy: DeletePackagePoliciesResponse[number],
   soClient: ISavedObjectsRepository,
   logger: Logger
 ): Promise<void> => {
