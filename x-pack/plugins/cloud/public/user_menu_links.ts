@@ -17,7 +17,7 @@ export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => 
   if (baseUrl && profileUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloud.userMenuLinks.profileLinkText', {
-        defaultMessage: 'Edit Profile',
+        defaultMessage: 'Edit profile',
       }),
       iconType: 'user',
       href: getFullCloudUrl(baseUrl, profileUrl),

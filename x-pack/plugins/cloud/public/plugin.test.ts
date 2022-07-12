@@ -532,7 +532,7 @@ describe('Cloud Plugin', () => {
             Object {
               "href": "https://cloud.elastic.co/profile/alice",
               "iconType": "user",
-              "label": "Edit Profile",
+              "label": "Edit profile",
               "order": 100,
               "setAsProfile": true,
             },
@@ -564,7 +564,7 @@ describe('Cloud Plugin', () => {
             Object {
               "href": "https://cloud.elastic.co/profile/alice",
               "iconType": "user",
-              "label": "Edit Profile",
+              "label": "Edit profile",
               "order": 100,
               "setAsProfile": true,
             },

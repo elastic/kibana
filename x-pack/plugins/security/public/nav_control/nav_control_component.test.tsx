@@ -201,7 +201,7 @@ describe('SecurityNavControl', () => {
                 type="user"
               />,
               "name": <FormattedMessage
-                defaultMessage="Edit Profile"
+                defaultMessage="Edit profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
                 values={Object {}}
               />,
@@ -315,7 +315,7 @@ describe('SecurityNavControl', () => {
                 type="user"
               />,
               "name": <FormattedMessage
-                defaultMessage="Edit Profile"
+                defaultMessage="Edit profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
                 values={Object {}}
               />,
@@ -384,7 +384,7 @@ describe('SecurityNavControl', () => {
     `);
   });
 
-  it('should not render Edit Profile for cloud user', async () => {
+  it('should not render Edit profile for cloud user', async () => {
     useCurrentUserMock.mockReturnValue({
       loading: false,
       value: mockAuthenticatedUser({
@@ -421,7 +421,7 @@ describe('SecurityNavControl', () => {
     `);
   });
 
-  it('should render Edit Profile for non-cloud user', () => {
+  it('should render Edit profile for non-cloud user', () => {
     useCurrentUserMock.mockReturnValue({
       loading: false,
       value: mockAuthenticatedUser({
@@ -446,7 +446,7 @@ describe('SecurityNavControl', () => {
                 type="user"
               />,
               "name": <FormattedMessage
-                defaultMessage="Edit Profile"
+                defaultMessage="Edit profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
                 values={Object {}}
               />,
