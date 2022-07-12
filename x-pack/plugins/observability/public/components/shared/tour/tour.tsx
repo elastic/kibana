@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiTourStep,
   EuiTourStepProps,
-  // EuiImage,
-  // EuiSpacer,
+  EuiImage,
+  EuiSpacer,
   EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -116,7 +116,7 @@ const getSteps = ({
             <EuiText size="s">
               <p>{content}</p>
             </EuiText>
-            {/* {imageConfig && prependBasePath && (
+            {imageConfig && prependBasePath && (
               <>
                 <EuiSpacer size="m" />
                 <EuiImage
@@ -125,7 +125,7 @@ const getSteps = ({
                   size="fullWidth"
                 />
               </>
-            )} */}
+            )}
           </>
         }
       />

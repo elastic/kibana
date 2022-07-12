@@ -30,6 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await pageObjects.common.navigateToApp('observability');
+      // Need to increase the browser height so the tour steps fit to screen
+      await browser.setWindowSize(1600, 1400);
     });
 
     after(async () => {
@@ -45,22 +47,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Step 1: Overview
         await pageObjects.infraHome.waitForTourStep('overviewStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
 
         // Step 2: Streams
         await pageObjects.infraHome.waitForTourStep('streamStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('streamStep');
 
         // Step 3: Metrics explorer
         await pageObjects.infraHome.waitForTourStep('metricsExplorerStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('metricsExplorerStep');
 
         // Step 4: Traces
         await pageObjects.infraHome.waitForTourStep('tracesStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('tracesStep');
 
         // Step 5: Alerts
         await pageObjects.infraHome.waitForTourStep('alertStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
 
         // Step 6: Guided setup
         await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
@@ -92,6 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Step 5: Alerts
         await pageObjects.infraHome.waitForTourStep('alertStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
 
         // Step 6: Guided setup
         await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
