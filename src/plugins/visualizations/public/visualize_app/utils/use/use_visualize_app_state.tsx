@@ -45,7 +45,6 @@ export const useVisualizeAppState = (
         stateDefaults,
         kbnUrlStateStorage: services.kbnUrlStateStorage,
         byValue,
-        filters: [],
       });
 
       const currentAppState = stateContainer.getState();

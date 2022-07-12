@@ -29,6 +29,7 @@ export interface OriginSaveModalProps {
   onClose: () => void;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
+  showSaveFilters?: boolean;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
@@ -109,6 +110,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       options={getReturnToOriginSwitch}
       description={documentInfo.description}
       showDescription={true}
+      showSaveFilters={props.showSaveFilters}
     />
   );
 }

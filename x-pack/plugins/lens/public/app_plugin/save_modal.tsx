@@ -76,6 +76,7 @@ export const SaveModal = (props: Props) => {
           defaultMessage: 'Lens visualization',
         })}
         data-test-subj="lnsApp_saveModalOrigin"
+        showSaveFilters={true}
       />
     );
   }

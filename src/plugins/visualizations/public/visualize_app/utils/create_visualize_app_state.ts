@@ -118,14 +118,9 @@ function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage, fil
   return { stateContainer, stopStateSync };
 }
 
-export function createVisualizeAppState({
-  stateDefaults,
-  kbnUrlStateStorage,
-  byValue,
-  filters,
-}: Arguments) {
+export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage, byValue }: Arguments) {
   if (byValue) {
     return createVisualizeByValueAppState(stateDefaults);
   }
-  return createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage, filters });
+  return createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage });
 }
