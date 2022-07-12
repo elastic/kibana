@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ActionType as CommonActionType } from '../common';
+import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import {
   ExecutorError,
@@ -120,6 +120,21 @@ export class ActionTypeRegistry {
             },
           }
         )
+      );
+    }
+
+    if (
+      actionType.allowedFeatureIds.length === 0 ||
+      !areValidFeatures(actionType.allowedFeatureIds)
+    ) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
+          defaultMessage: 'Invalid feature ids "{ids}" for connector type "{connectorTypeId}".',
+          values: {
+            connectorTypeId: actionType.id,
+            ids: actionType.allowedFeatureIds.join(','),
+          },
+        })
       );
     }
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
