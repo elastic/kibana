@@ -32,8 +32,9 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 
+import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -58,8 +59,8 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;
@@ -136,16 +137,10 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
     useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
-
-  const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
-    } else {
-      return ruleIndices;
-    }
-  }, [jobs, ruleIndices]);
+  const { mlJobLoading, ruleIndices: memoRuleIndices } = useRuleIndices(
+    maybeRule?.machine_learning_job_id,
+    ruleIndices
+  );
 
   const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
     useFetchIndex(memoRuleIndices);

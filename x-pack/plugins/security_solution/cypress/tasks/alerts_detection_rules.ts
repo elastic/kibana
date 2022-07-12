@@ -163,7 +163,7 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 
 export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN)
-    .should('exist')
+    .should('be.enabled')
     .pipe(($el) => $el.trigger('click'))
     .should('be.disabled');
 };

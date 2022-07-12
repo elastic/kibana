@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 

@@ -8,50 +8,30 @@
 
 import { modifyUrl } from '@kbn/std';
 import { Request } from '@hapi/hapi';
-import { ensureRawRequest, KibanaRequest } from './router';
+import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
+import { ensureRawRequest } from './router';
 
 /**
- * Access or manipulate the Kibana base path
+ * Core internal implementation of {@link IBasePath}
  *
- * @public
+ * @internal
  */
-export class BasePath {
+export class BasePath implements IBasePath {
   private readonly basePathCache = new WeakMap<Request, string>();
 
-  /**
-   * returns the server's basePath
-   *
-   * See {@link BasePath.get} for getting the basePath value for a specific request
-   */
   public readonly serverBasePath: string;
-  /**
-   * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
-   * {@link BasePath.serverBasePath}.
-   *
-   * @remarks
-   * Should be used for generating external URL links back to this Kibana instance.
-   */
   public readonly publicBaseUrl?: string;
 
-  /** @internal */
   constructor(serverBasePath: string = '', publicBaseUrl?: string) {
     this.serverBasePath = serverBasePath;
     this.publicBaseUrl = publicBaseUrl;
   }
 
-  /**
-   * returns `basePath` value, specific for an incoming request.
-   */
   public get = (request: KibanaRequest) => {
     const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  /**
-   * sets `basePath` value, specific for an incoming request.
-   *
-   * @privateRemarks should work only for KibanaRequest as soon as spaces migrate to NP
-   */
   public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
 
@@ -63,9 +43,6 @@ export class BasePath {
     this.basePathCache.set(rawRequest, requestSpecificBasePath);
   };
 
-  /**
-   * Prepends `path` with the basePath.
-   */
   public prepend = (path: string): string => {
     if (this.serverBasePath === '') return path;
     return modifyUrl(path, (parts) => {
@@ -75,9 +52,6 @@ export class BasePath {
     });
   };
 
-  /**
-   * Removes the prepended basePath from the `path`.
-   */
   public remove = (path: string): string => {
     if (this.serverBasePath === '') {
       return path;
@@ -94,11 +68,3 @@ export class BasePath {
     return path;
   };
 }
-
-/**
- * Access or manipulate the Kibana base path
- *
- * {@link BasePath}
- * @public
- */
-export type IBasePath = Pick<BasePath, keyof BasePath>;

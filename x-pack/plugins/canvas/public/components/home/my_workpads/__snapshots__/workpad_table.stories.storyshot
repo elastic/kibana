@@ -177,7 +177,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           tabIndex={-1}
         >
           <caption
-            className="euiScreenReaderOnly euiTableCaption"
+            className="euiTableCaption emotion-euiScreenReaderOnly"
           />
           <thead>
             <tr>
@@ -922,7 +922,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
               <span
                 aria-atomic="true"
                 aria-relevant="additions text"
-                className="euiScreenReaderOnly"
+                className="emotion-euiScreenReaderOnly"
                 role="status"
               >
                 Page 1 of 1
