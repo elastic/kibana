@@ -32,6 +32,7 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     benchmark: {
       name: 'CIS Kubernetes',
       version: '1.6.0',
+      id: 'cis_k8s',
     },
     default_value: chance.sentence(),
     description: chance.paragraph(),

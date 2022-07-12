@@ -8,13 +8,13 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { RuleAlertType } from '../../rules/types';
+import type { RuleAlertType } from '../../rules/types';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -27,16 +27,12 @@ import {
   performBulkActionSchema,
   performBulkActionQuerySchema,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
-
-import {
-  initPromisePool,
-  PromisePoolError,
-  PromisePoolOutcome,
-} from '../../../../utils/promise_pool';
+import type { PromisePoolError, PromisePoolOutcome } from '../../../../utils/promise_pool';
+import { initPromisePool } from '../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
@@ -48,8 +44,9 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
-import { DryRunError, throwDryRunError, dryRunBulkEdit } from '../../rules/bulk_actions/dry_run';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { DryRunError } from '../../rules/bulk_actions/dry_run';
+import { throwDryRunError, dryRunBulkEdit } from '../../rules/bulk_actions/dry_run';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;

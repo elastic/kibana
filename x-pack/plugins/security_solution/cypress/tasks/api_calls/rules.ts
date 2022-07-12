@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomRule, ThreatIndicatorRule, MachineLearningRule } from '../../objects/rule';
+import type { CustomRule, ThreatIndicatorRule, MachineLearningRule } from '../../objects/rule';
 
 export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'ml_rule_testing') =>
   cy.request({

@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesNotificationParams } from '../legacy_types';
+import type { LegacyRulesNotificationParams } from '../legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyExtractRuleId } from './legacy_extract_rule_id';
 

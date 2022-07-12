@@ -9,7 +9,7 @@
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { HttpService } from '../public/http';
+import { HttpService } from '@kbn/core-http-browser-internal';
 
 export type SetupTap = (
   injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>,

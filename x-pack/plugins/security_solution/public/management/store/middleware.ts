@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  substateMiddlewareFactory,
-  SecuritySubPluginMiddlewareFactory,
-  State,
-} from '../../common/store';
+import type { SecuritySubPluginMiddlewareFactory, State } from '../../common/store';
+import { substateMiddlewareFactory } from '../../common/store';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,

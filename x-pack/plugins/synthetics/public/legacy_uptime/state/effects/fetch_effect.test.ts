@@ -6,10 +6,10 @@
  */
 
 import { call, put } from 'redux-saga/effects';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { fetchEffectFactory } from './fetch_effect';
 import { indexStatusAction } from '../actions';
-import { HttpFetchError } from '@kbn/core/public';
-import { StatesIndexStatus } from '../../../../common/runtime_types';
+import type { StatesIndexStatus } from '../../../../common/runtime_types';
 import { fetchIndexStatus } from '../api';
 
 describe('fetch saga effect factory', () => {
@@ -44,11 +44,7 @@ describe('fetch saga effect factory', () => {
   });
 
   it('works with error workflow', () => {
-    const indexStatusResultError = new HttpFetchError(
-      'No heartbeat index found.',
-      'error',
-      {} as any
-    );
+    const indexStatusResultError = createHttpFetchError('No heartbeat index found.');
 
     fetchEffect = fetchEffectFactory(
       fetchIndexStatus,
@@ -68,11 +64,7 @@ describe('fetch saga effect factory', () => {
   });
 
   it('works with throw error workflow', () => {
-    const unExpectedError = new HttpFetchError(
-      'No url found for the call, so throw error.',
-      'error',
-      {} as any
-    );
+    const unExpectedError = createHttpFetchError('No url found for the call, so throw error.');
 
     fetchEffect = fetchEffectFactory(
       fetchIndexStatus,

@@ -8,22 +8,17 @@
 
 import React, { useCallback, useState } from 'react';
 import { useQueryClient } from 'react-query';
-import {
-  EuiTextColor,
-  EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { mountReactNode } from '@kbn/core/public/utils';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
@@ -44,6 +39,7 @@ import {
 } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -67,6 +63,7 @@ export const useBulkActions = ({
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
   const updateRulesCache = useUpdateRulesCache();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
@@ -90,8 +87,8 @@ export const useBulkActions = ({
   );
 
   const {
-    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds, isRefreshOn },
-    actions: { setLoadingRules, setIsRefreshOn },
+    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
+    actions: { setLoadingRules, clearRulesSelection },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -133,7 +130,6 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDisableActions = async () => {
@@ -152,7 +148,6 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDuplicateAction = async () => {
@@ -169,17 +164,19 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
-        setIsRefreshOn(isRefreshOn);
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
+        clearRulesSelection();
       };
 
       const handleDeleteAction = async () => {
-        setIsRefreshOn(false);
         closePopover();
 
         if (isAllSelected) {
           // User has cancelled deletion
           if ((await confirmDeletion()) === false) {
-            setIsRefreshOn(isRefreshOn);
             return;
           }
         }
@@ -195,11 +192,13 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
-        setIsRefreshOn(isRefreshOn);
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
       };
 
       const handleExportAction = async () => {
-        setIsRefreshOn(false);
         closePopover();
         setBulkAction(BulkAction.export);
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
@@ -211,7 +210,6 @@ export const useBulkActions = ({
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
-        setIsRefreshOn(isRefreshOn);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -221,18 +219,15 @@ export const useBulkActions = ({
         setBulkAction(BulkAction.edit);
         setBulkActionEdit(bulkEditActionType);
         // disabling auto-refresh so user's selected rules won't disappear after table refresh
-        setIsRefreshOn(false);
         closePopover();
 
         // User has cancelled edit action or there are no custom rules to proceed
         if ((await confirmBulkEdit()) === false) {
-          setIsRefreshOn(isRefreshOn);
           return;
         }
 
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
-          setIsRefreshOn(isRefreshOn);
           return;
         }
 
@@ -290,7 +285,6 @@ export const useBulkActions = ({
 
         isBulkEditFinished = true;
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(isRefreshOn);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
@@ -454,8 +448,8 @@ export const useBulkActions = ({
       toasts,
       filterQuery,
       invalidateRules,
+      invalidatePrePackagedRulesStatus,
       confirmDeletion,
-      setIsRefreshOn,
       confirmBulkEdit,
       completeBulkEditForm,
       queryClient,
@@ -463,7 +457,7 @@ export const useBulkActions = ({
       getIsMounted,
       resolveTagsRefetch,
       updateRulesCache,
-      isRefreshOn,
+      clearRulesSelection,
     ]
   );
 
