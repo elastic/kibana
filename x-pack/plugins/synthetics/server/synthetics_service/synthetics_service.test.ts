@@ -121,6 +121,7 @@ describe('SyntheticsService', () => {
           lon: 0,
         },
         id: 'localhost',
+        isInvalid: false,
         label: 'Local Synthetics Service',
         url: 'http://localhost',
         isServiceManaged: true,
