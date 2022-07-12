@@ -56,6 +56,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
+    getUsedDataView: jest.fn(),
   };
 }
 

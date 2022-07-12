@@ -353,6 +353,10 @@ export interface Datasource<T = unknown, P = unknown> {
     persistableState2: P,
     references2: SavedObjectReference[]
   ) => boolean;
+  /**
+   * Get the DataView value which was before replacement
+   */
+  getUsedDataView: (state: T, layerId: string) => string;
 }
 
 export interface DatasourceFixAction<T> {

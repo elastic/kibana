@@ -189,6 +189,7 @@ export function LayerPanels(
           onRemoveLayer={() => {
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
+            const layerDatasource = datasourceMap[datasourceId];
             const layerDatasourceState = datasourceStates?.[datasourceId]
               ?.state as IndexPatternPrivateState;
 
@@ -198,7 +199,7 @@ export function LayerPanels(
             action?.execute({
               trigger,
               toDataView: null,
-              fromDataView: layerDatasourceState.layers[layerId].indexPatternId,
+              fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
               usedDataViews: Object.values(
                 Object.values(layerDatasourceState.layers).map((layer) => layer.indexPatternId)
               ),
