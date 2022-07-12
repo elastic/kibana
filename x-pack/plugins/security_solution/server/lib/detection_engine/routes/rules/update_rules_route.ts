@@ -10,7 +10,7 @@ import { updateRulesSchema } from '../../../../../common/detection_engine/schema
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildSiemResponse } from '../utils';
@@ -44,7 +44,6 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
 
         const rulesClient = ctx.alerting.getRulesClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
-        const siemClient = ctx.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -66,7 +65,6 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
           rule: existingRule,
         });
         const rule = await updateRules({
-          defaultOutputIndex: siemClient.getSignalsIndex(),
           rulesClient,
           existingRule: migratedRule,
           ruleUpdate: request.body,

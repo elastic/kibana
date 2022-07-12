@@ -12,18 +12,18 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
+import type {
   HostItem,
-  HostsQueries,
   HostDetailsRequestOptions,
   HostDetailsStrategyResponse,
 } from '../../../../../common/search_strategy/security_solution/hosts';
+import { HostsQueries } from '../../../../../common/search_strategy/security_solution/hosts';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
+import type { InspectResponse } from '../../../../types';
 
 export const ID = 'hostsDetailsQuery';
 

@@ -1164,13 +1164,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ") => { createQuery: (attributes: ",
           {
             "pluginId": "data",
@@ -1240,13 +1234,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
             "deprecated": false,
@@ -1921,7 +1909,13 @@
             "label": "time",
             "description": [],
             "signature": [
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data/public/query/state_sync/types.ts",
@@ -2881,7 +2875,9 @@
               "RangeFilter",
               " | ",
               "ScriptedRangeFilter",
-              " | MatchAllRangeFilter | undefined; createRelativeFilter: (indexPattern: ",
+              " | ",
+              "MatchAllRangeFilter",
+              " | undefined; createRelativeFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2895,7 +2891,9 @@
               "RangeFilter",
               " | ",
               "ScriptedRangeFilter",
-              " | MatchAllRangeFilter | undefined; getBounds: () => ",
+              " | ",
+              "MatchAllRangeFilter",
+              " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3121,7 +3119,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined; createRelativeFilter: (indexPattern: ",
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined; createRelativeFilter: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3135,7 +3135,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined; getBounds: () => ",
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined; getBounds: () => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -3350,7 +3352,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -3454,7 +3458,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -3577,7 +3583,13 @@
         "description": [],
         "signature": [
           "(x: unknown) => x is ",
-          "TimeRange"
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
         ],
         "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
         "deprecated": false,
@@ -3831,7 +3843,13 @@
         ],
         "signature": [
           "{ time?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -3872,7 +3890,13 @@
         "label": "SavedQueryTimeFilter",
         "description": [],
         "signature": [
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " & { refreshInterval: ",
           {
             "pluginId": "data",
@@ -3884,6 +3908,20 @@
           "; }"
         ],
         "path": "src/plugins/data/common/query/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.TimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "signature": [
+          "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+        ],
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

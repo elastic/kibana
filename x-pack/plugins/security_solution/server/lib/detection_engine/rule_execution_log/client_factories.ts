@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { IEventLogClient, IEventLogService } from '@kbn/event-log-plugin/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IEventLogClient, IEventLogService } from '@kbn/event-log-plugin/server';
 
-import { IRuleExecutionLogForRoutes } from './client_for_routes/client_interface';
+import type { IRuleExecutionLogForRoutes } from './client_for_routes/client_interface';
 import { createClientForRoutes } from './client_for_routes/client';
 
-import {
+import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
 } from './client_for_executors/client_interface';
