@@ -183,7 +183,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -413,7 +413,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
         <span
           aria-atomic="true"
           aria-relevant="additions text"
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
           role="status"
         >
           Page 1 of 5

@@ -10,9 +10,11 @@ import React from 'react';
 import { act, waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import userEvent from '@testing-library/user-event';
-import { ArtifactFormComponentProps } from './types';
-import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ArtifactFormComponentProps } from './types';
+import type { ArtifactListPageProps } from './artifact_list_page';
+import { ArtifactListPage } from './artifact_list_page';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { trustedAppsAllHttpMocks } from '../../mocks';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_client';
 import { artifactListPageLabels } from './translations';

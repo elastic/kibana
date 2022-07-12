@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestCaseWithoutTimeline } from '../../objects/case';
+import type { TestCaseWithoutTimeline } from '../../objects/case';
 import { ALL_CASES_NAME } from '../../screens/all_cases';
 
 import { goToCreateNewCase } from '../../tasks/all_cases';

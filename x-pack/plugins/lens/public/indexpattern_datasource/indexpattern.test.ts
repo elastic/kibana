@@ -42,6 +42,9 @@ import { DatatableColumn } from '@kbn/expressions-plugin';
 jest.mock('./loader');
 jest.mock('../id_generator');
 jest.mock('./operations');
+jest.mock('./dimension_panel/reference_editor', () => ({
+  ReferenceEditor: () => null,
+}));
 
 const fieldsOne = [
   {

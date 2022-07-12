@@ -31,13 +31,6 @@ export type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
   IScopedClusterClient,
-  // responses
-  SearchResponse,
-  CountResponse,
-  ShardsInfo,
-  ShardsResponse,
-  GetResponse,
-  DeleteDocumentResponse,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,

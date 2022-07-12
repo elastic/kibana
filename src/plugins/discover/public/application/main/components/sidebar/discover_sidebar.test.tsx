@@ -70,7 +70,7 @@ function getCompProps(): DiscoverSidebarProps {
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
-    onEditRuntimeField: jest.fn(),
+    onFieldEdited: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     createNewDataView: jest.fn(),

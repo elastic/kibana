@@ -6,10 +6,10 @@
  */
 
 import { omit } from 'lodash/fp';
-import { DropResult } from 'react-beautiful-dnd';
+import type { DropResult } from 'react-beautiful-dnd';
 import { getTimelineIdFromColumnDroppableId } from '@kbn/timelines-plugin/public';
 
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
+import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 
 import {
   addProviderToTimeline,
