@@ -30,7 +30,7 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
 
   const {
     query,
-    query: { rangeFrom, rangeTo, projectID, n, index },
+    query: { rangeFrom, rangeTo, projectID, n, index, kuery },
   } = useProfilingParams('/stacktraces/*');
 
   const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
@@ -93,20 +93,21 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
       return;
     }
 
-    fetchTopN(
-      topNType,
+    fetchTopN({
+      type: topNType,
       index,
       projectID,
-      new Date(timeRange.start).getTime() / 1000,
-      new Date(timeRange.end).getTime() / 1000,
-      n
-    ).then((response: TopNSamples) => {
+      timeFrom: new Date(timeRange.start).getTime() / 1000,
+      timeTo: new Date(timeRange.end).getTime() / 1000,
+      n,
+      kuery,
+    }).then((response: TopNSamples) => {
       const samples = response.TopN;
       const subcharts = groupSamplesByCategory(samples);
       const samplesWithoutZero = samples.filter((sample: TopNSample) => sample.Count > 0);
       setTopN({ samples: samplesWithoutZero, subcharts });
     });
-  }, [topNType, timeRange.start, timeRange.end, fetchTopN, index, projectID, n]);
+  }, [topNType, timeRange.start, timeRange.end, fetchTopN, index, projectID, n, kuery]);
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>

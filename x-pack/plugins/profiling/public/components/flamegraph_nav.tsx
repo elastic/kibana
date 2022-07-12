@@ -14,28 +14,39 @@ interface Props {
   projectID: number;
   n: number;
   timeRange: TimeRange;
-  getter: (
-    index: string,
-    projectID: number,
-    unixStart: number,
-    unixEnd: number,
-    n: number
-  ) => Promise<ElasticFlameGraph>;
+  kuery: string;
+  getter: (params: {
+    index: string;
+    projectID: number;
+    timeFrom: number;
+    timeTo: number;
+    n: number;
+    kuery: string;
+  }) => Promise<ElasticFlameGraph>;
   setter: React.Dispatch<ElasticFlameGraph>;
 }
 
-export const FlameGraphNavigation = ({ index, projectID, n, timeRange, getter, setter }: Props) => {
+export const FlameGraphNavigation = ({
+  index,
+  projectID,
+  n,
+  timeRange,
+  getter,
+  setter,
+  kuery,
+}: Props) => {
   useEffect(() => {
-    getter(
+    getter({
       index,
       projectID,
-      new Date(timeRange.start).getTime() / 1000,
-      new Date(timeRange.end).getTime() / 1000,
-      n
-    ).then((response) => {
+      timeFrom: new Date(timeRange.start).getTime() / 1000,
+      timeTo: new Date(timeRange.end).getTime() / 1000,
+      n,
+      kuery,
+    }).then((response) => {
       setter(response);
     });
-  }, [index, projectID, n, timeRange.start, timeRange.end, getter, setter]);
+  }, [index, projectID, n, timeRange.start, timeRange.end, getter, setter, kuery]);
 
   return <></>;
 };

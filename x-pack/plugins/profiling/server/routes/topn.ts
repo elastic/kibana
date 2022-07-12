@@ -12,24 +12,36 @@ import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/
 import { createTopNSamples, TopNSamplesHistogramResponse } from '../../common/topn';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
-import { autoHistogramSumCountOnGroupByField, createProjectTimeQuery } from './query';
+import { autoHistogramSumCountOnGroupByField, createCommonFilter } from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 import { getClient, getAggs } from './compat';
 import { ProfilingRequestHandlerContext } from '../types';
 import { RouteRegisterParameters } from '.';
 
-export async function topNElasticSearchQuery(
-  client: ElasticsearchClient,
-  logger: Logger,
-  index: string,
-  projectID: string,
-  timeFrom: string,
-  timeTo: string,
-  topNItems: number,
-  searchField: string,
-  response: KibanaResponseFactory
-) {
-  const filter = createProjectTimeQuery(projectID, timeFrom, timeTo);
+export async function topNElasticSearchQuery({
+  client,
+  logger,
+  index,
+  projectID,
+  timeFrom,
+  timeTo,
+  n,
+  searchField,
+  response,
+  kuery,
+}: {
+  client: ElasticsearchClient;
+  logger: Logger;
+  index: string;
+  projectID: string;
+  timeFrom: string;
+  timeTo: string;
+  n: number;
+  searchField: string;
+  response: KibanaResponseFactory;
+  kuery: string;
+}) {
+  const filter = createCommonFilter({ projectID, timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
   const eventsIndex = await logExecutionLatency(
@@ -50,7 +62,7 @@ export async function topNElasticSearchQuery(
           size: 0,
           query: filter,
           aggs: {
-            histogram: autoHistogramSumCountOnGroupByField(searchField, topNItems),
+            histogram: autoHistogramSumCountOnGroupByField(searchField, n),
           },
         },
         {
@@ -131,15 +143,16 @@ export function queryTopNCommon(
           timeFrom: schema.string(),
           timeTo: schema.string(),
           n: schema.number(),
+          kuery: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo, n } = request.query;
+      const { index, projectID, timeFrom, timeTo, n, kuery } = request.query;
       const client = await getClient(context);
 
       try {
-        return await topNElasticSearchQuery(
+        return await topNElasticSearchQuery({
           client,
           logger,
           index,
@@ -148,8 +161,9 @@ export function queryTopNCommon(
           timeTo,
           n,
           searchField,
-          response
-        );
+          response,
+          kuery,
+        });
       } catch (e) {
         return response.customError({
           statusCode: e.statusCode ?? 500,

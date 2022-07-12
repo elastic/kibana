@@ -13,7 +13,7 @@ import { FlameGraph } from '../../common/flamegraph';
 import { getClient } from './compat';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
-import { createProjectTimeQuery, ProjectTimeQuery } from './query';
+import { createCommonFilter, ProjectTimeQuery } from './query';
 import {
   mgetExecutables,
   mgetStackFrames,
@@ -83,21 +83,27 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
       path: paths.FlamechartElastic,
       validate: {
         query: schema.object({
-          index: schema.maybe(schema.string()),
-          projectID: schema.maybe(schema.string()),
-          timeFrom: schema.maybe(schema.string()),
-          timeTo: schema.maybe(schema.string()),
-          n: schema.maybe(schema.number({ defaultValue: 200 })),
+          index: schema.string(),
+          projectID: schema.string(),
+          timeFrom: schema.string(),
+          timeTo: schema.string(),
+          n: schema.number({ defaultValue: 200 }),
+          kuery: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo } = request.query;
+      const { index, projectID, timeFrom, timeTo, kuery } = request.query;
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
         const esClient = await getClient(context);
-        const filter = createProjectTimeQuery(projectID!, timeFrom!, timeTo!);
+        const filter = createCommonFilter({
+          projectID,
+          timeFrom,
+          timeTo,
+          kuery,
+        });
 
         const flamegraph = await queryFlameGraph(
           logger,

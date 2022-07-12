@@ -21,7 +21,7 @@ import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
     query,
-    query: { rangeFrom, rangeTo, index, projectID, n },
+    query: { rangeFrom, rangeTo, index, projectID, n, kuery },
   } = useProfilingParams('/flamegraphs/*');
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -61,6 +61,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
           projectID={projectID}
           n={n}
           timeRange={timeRange}
+          kuery={kuery}
           getter={fetchElasticFlamechart}
           setter={setElasticFlamegraph}
         />
