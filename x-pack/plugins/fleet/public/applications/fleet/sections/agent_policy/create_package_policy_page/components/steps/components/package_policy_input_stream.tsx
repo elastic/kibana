@@ -172,7 +172,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
               );
             })}
             {/* Advanced section */}
-            {(isPackagePolicyEdit || advancedVars.length) && (
+            {(isPackagePolicyEdit || !!advancedVars.length) && (
               <Fragment>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
