@@ -145,7 +145,7 @@ export class DataView implements DataViewBase {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     // set dependencies
-    this.fieldFormats = fieldFormats;
+    this.fieldFormats = { ...fieldFormats };
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
@@ -162,13 +162,13 @@ export class DataView implements DataViewBase {
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
-    this.sourceFilters = spec.sourceFilters;
+    this.sourceFilters = [...(spec.sourceFilters || [])];
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = spec.fieldAttrs || {};
+    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
     this.allowNoIndex = spec.allowNoIndex || false;
-    this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
   }
@@ -285,13 +285,13 @@ export class DataView implements DataViewBase {
       version: this.version,
       title: this.title,
       timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters,
+      sourceFilters: [...(this.sourceFilters || [])],
       fields,
       typeMeta: this.typeMeta,
       type: this.type,
-      fieldFormats: this.fieldFormatMap,
-      runtimeFieldMap: this.runtimeFieldMap,
-      fieldAttrs: this.fieldAttrs,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs: cloneDeep(this.fieldAttrs),
       allowNoIndex: this.allowNoIndex,
       name: this.name,
     };

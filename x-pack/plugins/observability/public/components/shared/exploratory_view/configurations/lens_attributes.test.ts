@@ -497,8 +497,16 @@ describe('Lens Attribute', () => {
             operationType: 'terms',
             params: {
               missingBucket: false,
+              orderAgg: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Count of records',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
               orderBy: {
-                type: 'alphabetical',
+                type: 'custom',
               },
               orderDirection: 'desc',
               otherBucket: true,

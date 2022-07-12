@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { createAction } from '@reduxjs/toolkit';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
 

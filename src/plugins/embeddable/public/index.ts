@@ -19,6 +19,8 @@ export type {
   ContainerOutput,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddablePhaseEvent,
+  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,

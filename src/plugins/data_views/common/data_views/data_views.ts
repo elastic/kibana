@@ -793,6 +793,8 @@ export class DataViewsService {
     }
     this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
 
+    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
+
     return indexPattern;
   }
 

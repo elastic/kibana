@@ -38,14 +38,12 @@ export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   }
 }
 
-export async function execute({
+async function getDiscoverLocationParams({
   embeddable,
-  discover,
   filters,
-  openInSameTab,
   dataViews,
   timeFieldName,
-}: Context) {
+}: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
   if (!isLensEmbeddable(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
@@ -71,11 +69,73 @@ export async function execute({
       timeRangeToApply = timeRange;
     }
   }
-  const discoverUrl = discover.locator?.getRedirectUrl({
+
+  return {
     ...args,
     indexPatternId: args.indexPatternIdOrSpec,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
+  };
+}
+
+export async function getHref({
+  embeddable,
+  discover,
+  filters,
+  dataViews,
+  timeFieldName,
+}: Context) {
+  const params = await getDiscoverLocationParams({
+    embeddable,
+    filters,
+    dataViews,
+    timeFieldName,
+  });
+
+  const discoverUrl = discover.locator?.getRedirectUrl(params);
+
+  return discoverUrl;
+}
+
+export async function getLocation({
+  embeddable,
+  discover,
+  filters,
+  dataViews,
+  timeFieldName,
+}: Context) {
+  const params = await getDiscoverLocationParams({
+    embeddable,
+    filters,
+    dataViews,
+    timeFieldName,
+  });
+
+  const discoverLocation = discover.locator?.getLocation(params);
+
+  if (!discoverLocation) {
+    throw new Error('Discover location not found');
+  }
+
+  return discoverLocation;
+}
+
+export async function execute({
+  embeddable,
+  discover,
+  filters,
+  openInSameTab,
+  dataViews,
+  timeFieldName,
+  hasDiscoverAccess,
+}: Context) {
+  const discoverUrl = await getHref({
+    embeddable,
+    discover,
+    filters,
+    dataViews,
+    timeFieldName,
+    hasDiscoverAccess,
   });
   window.open(discoverUrl, !openInSameTab ? '_blank' : '_self');
 }
