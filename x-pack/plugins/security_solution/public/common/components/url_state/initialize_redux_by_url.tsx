@@ -6,25 +6,25 @@
  */
 
 import { get, isEmpty } from 'lodash/fp';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
-import {
+import type { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
+import type {
   UrlInputsModel,
   LinkTo,
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
-import { SetInitialStateFromUrl } from './types';
+import type { SetInitialStateFromUrl } from './types';
 import {
   queryTimelineById,
   dispatchUpdateTimeline,
