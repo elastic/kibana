@@ -46,7 +46,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
     timestampOverride: undefined,
-    disableTimestampFallback: undefined,
+    timestampOverrideFallbackDisabled: undefined,
     meta: {
       someMeta: 'someField',
     },

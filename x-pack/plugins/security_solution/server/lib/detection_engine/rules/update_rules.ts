@@ -54,7 +54,7 @@ export const updateRules = async ({
       severityMapping: ruleUpdate.severity_mapping ?? [],
       threat: ruleUpdate.threat ?? [],
       timestampOverride: ruleUpdate.timestamp_override,
-      disableTimestampFallback: ruleUpdate.disable_timestamp_fallback,
+      timestampOverrideFallbackDisabled: ruleUpdate.timestamp_override_fallback_disabled,
       to: ruleUpdate.to ?? 'now',
       references: ruleUpdate.references ?? [],
       namespace: ruleUpdate.namespace,

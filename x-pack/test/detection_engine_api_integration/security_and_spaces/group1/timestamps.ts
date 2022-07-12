@@ -191,7 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleForSignalTesting(['myfa*']),
             rule_id: 'rule-without-timestamp-fallback',
             timestamp_override: 'event.ingested',
-            disable_timestamp_fallback: true,
+            timestamp_override_fallback_disabled: true,
           };
 
           const { id } = await createRule(supertest, log, rule);
@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleForSignalTesting(['myfa*']),
             rule_id: 'rule-without-timestamp-fallback',
             timestamp_override: 'event.fakeingestfield',
-            disable_timestamp_fallback: true,
+            timestamp_override_fallback_disabled: true,
           };
 
           const createdRule = await createRule(supertest, log, rule);
@@ -337,7 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: EqlCreateSchema = {
             ...getEqlRuleForSignalTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
-            disable_timestamp_fallback: true,
+            timestamp_override_fallback_disabled: true,
           };
           const createdRule = await createRule(supertest, log, rule);
           const signalsOpen = await getOpenSignals(

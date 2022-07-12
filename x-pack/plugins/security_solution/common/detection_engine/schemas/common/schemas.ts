@@ -188,15 +188,17 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
 
-export const disable_timestamp_fallback = t.boolean;
-export type DisableTimestampFallback = t.TypeOf<typeof disable_timestamp_fallback>;
+export const timestamp_override_fallback_disabled = t.boolean;
+export type TimestampOverrideFallbackDisabled = t.TypeOf<
+  typeof timestamp_override_fallback_disabled
+>;
 
-export const disableTimestampFallbackOrUndefined = t.union([
-  disable_timestamp_fallback,
+export const timestampOverrideFallbackDisabledOrUndefined = t.union([
+  timestamp_override_fallback_disabled,
   t.undefined,
 ]);
-export type DisableTimestampFallbackOrUndefined = t.TypeOf<
-  typeof disableTimestampFallbackOrUndefined
+export type TimestampOverrideFallbackDisabledOrUndefined = t.TypeOf<
+  typeof timestampOverrideFallbackDisabledOrUndefined
 >;
 
 /**

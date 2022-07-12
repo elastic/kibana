@@ -78,7 +78,7 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
-  disableTimestampFallbackOrUndefined,
+  timestampOverrideFallbackDisabledOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
@@ -108,7 +108,7 @@ export const baseRuleParams = t.exact(
     severity,
     severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
-    disableTimestampFallback: disableTimestampFallbackOrUndefined,
+    timestampOverrideFallbackDisabled: timestampOverrideFallbackDisabledOrUndefined,
     threat: threats,
     to,
     references,

@@ -715,7 +715,7 @@ describe('helpers', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
         timestampOverride: 'event.ingest',
-        disableTimestampFallback: true,
+        timestampOverrideFallbackDisabled: true,
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -733,7 +733,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestamp_override: 'event.ingest',
-        disable_timestamp_fallback: true,
+        timestamp_override_fallback_disabled: true,
       };
 
       expect(result).toEqual(expected);

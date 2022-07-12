@@ -236,10 +236,10 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  disableTimestampFallback: {
+  timestampOverrideFallbackDisabled: {
     type: FIELD_TYPES.CHECKBOX,
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldDisableTimestampFallbackLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideFallbackDisabledLabel',
       {
         defaultMessage: 'Do not use @timestamp as a fallback timestamp field',
       }

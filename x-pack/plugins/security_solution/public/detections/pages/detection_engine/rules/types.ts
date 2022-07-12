@@ -101,7 +101,6 @@ export interface AboutStepRule {
   description: string;
   isAssociatedToEndpointList: boolean;
   isBuildingBlock: boolean;
-  disableTimestampFallback?: boolean;
   severity: AboutStepSeverity;
   riskScore: AboutStepRiskScore;
   references: string[];
@@ -110,6 +109,7 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
+  timestampOverrideFallbackDisabled?: boolean;
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
@@ -216,7 +216,7 @@ export interface AboutStepRuleJson {
   threat: Threats;
   threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
-  disable_timestamp_fallback?: boolean;
+  timestamp_override_fallback_disabled?: boolean;
   note?: string;
 }
 

@@ -86,7 +86,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             meta,
             ruleId,
             timestampOverride,
-            disableTimestampFallback,
+            timestampOverrideFallbackDisabled,
             to,
           } = params;
           const {
@@ -153,7 +153,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
           const secondaryTimestamp =
-            primaryTimestamp !== TIMESTAMP && !disableTimestampFallback ? TIMESTAMP : undefined;
+            primaryTimestamp !== TIMESTAMP && !timestampOverrideFallbackDisabled
+              ? TIMESTAMP
+              : undefined;
 
           /**
            * Data Views Logic
