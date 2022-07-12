@@ -7,7 +7,8 @@
  */
 
 import { createSHA256Hash } from '@kbn/crypto';
-import type { IExternalUrlPolicy, IExternalUrlConfig } from '@kbn/core-http-server';
+import type { IExternalUrlPolicy } from '@kbn/core-http-common';
+import type { IExternalUrlConfig } from '@kbn/core-http-server';
 import { externalUrlConfig } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(externalUrlConfig.schema.validate({}));

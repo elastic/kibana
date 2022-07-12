@@ -3,7 +3,7 @@ id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
 summary: Directory of public APIs available through plugins or packages.
-date: 2022-07-11
+date: 2022-07-12
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
@@ -12,13 +12,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 | Count | Plugins or Packages with a <br /> public API | Number of teams | 
 |--------------|----------|------------------------|
-| 324 | 266 | 36 |
+| 334 | 275 | 36 |
 
 ### Public API health stats
 
 | API Count | Any Count | Missing comments | Missing exports | 
 |--------------|----------|-----------------|--------|
-| 26847 | 172 | 19400 | 1322 |
+| 27391 | 172 | 19498 | 1433 |
 
 ## Plugin Directory
 
@@ -38,9 +38,9 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibCloudSecurityPosturePluginApi" text="cloudSecurityPosture"/> | [Cloud Security Posture](https://github.com/orgs/elastic/teams/cloud-posture-security) | The cloud security posture plugin | 6 | 0 | 6 | 0 |
 | <DocLink id="kibConsolePluginApi" text="console"/> | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 13 | 0 | 13 | 1 |
 | <DocLink id="kibControlsPluginApi" text="controls"/> | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | The Controls Plugin contains embeddable components intended to create a simple query interface for end users, and a powerful editing suite that allows dashboard authors to build controls | 206 | 0 | 198 | 7 |
-| <DocLink id="kibCorePluginApi" text="core"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 2506 | 14 | 887 | 27 |
+| <DocLink id="kibCorePluginApi" text="core"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 2489 | 9 | 746 | 25 |
 | crossClusterReplication | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 0 | 0 | 0 | 0 |
-| <DocLink id="kibCustomIntegrationsPluginApi" text="customIntegrations"/> | [Fleet](https://github.com/orgs/elastic/teams/fleet) | Add custom data integrations so they can be displayed in the Fleet integrations app | 101 | 0 | 82 | 1 |
+| <DocLink id="kibCustomIntegrationsPluginApi" text="customIntegrations"/> | [Fleet](https://github.com/orgs/elastic/teams/fleet) | Add custom data integrations so they can be displayed in the Fleet integrations app | 102 | 0 | 83 | 1 |
 | <DocLink id="kibDashboardPluginApi" text="dashboard"/> | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds the Dashboard app to Kibana | 143 | 0 | 141 | 12 |
 | <DocLink id="kibDashboardEnhancedPluginApi" text="dashboardEnhanced"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 52 | 0 | 51 | 0 |
 | <DocLink id="kibDataPluginApi" text="data"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters. | 3075 | 34 | 2402 | 21 |
@@ -221,6 +221,11 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKbnCoreExecutionContextServerMocksPluginApi" text="@kbn/core-execution-context-server-mocks"/> | [Owner missing] | - | 5 | 0 | 5 | 0 |
 | <DocLink id="kibKbnCoreFatalErrorsBrowserPluginApi" text="@kbn/core-fatal-errors-browser"/> | [Owner missing] | - | 9 | 0 | 2 | 0 |
 | <DocLink id="kibKbnCoreFatalErrorsBrowserMocksPluginApi" text="@kbn/core-fatal-errors-browser-mocks"/> | [Owner missing] | - | 4 | 0 | 4 | 0 |
+| <DocLink id="kibKbnCoreHttpBrowserPluginApi" text="@kbn/core-http-browser"/> | [Owner missing] | - | 111 | 4 | 37 | 0 |
+| <DocLink id="kibKbnCoreHttpBrowserInternalPluginApi" text="@kbn/core-http-browser-internal"/> | [Owner missing] | - | 10 | 0 | 10 | 0 |
+| <DocLink id="kibKbnCoreHttpBrowserMocksPluginApi" text="@kbn/core-http-browser-mocks"/> | [Owner missing] | - | 16 | 0 | 16 | 0 |
+| <DocLink id="kibKbnCoreHttpCommonPluginApi" text="@kbn/core-http-common"/> | [Owner missing] | - | 4 | 0 | 0 | 0 |
+| <DocLink id="kibKbnCoreHttpServerPluginApi" text="@kbn/core-http-server"/> | [Owner missing] | - | 392 | 1 | 154 | 0 |
 | <DocLink id="kibKbnCoreI18nBrowserPluginApi" text="@kbn/core-i18n-browser"/> | [Owner missing] | - | 4 | 0 | 2 | 0 |
 | <DocLink id="kibKbnCoreI18nBrowserMocksPluginApi" text="@kbn/core-i18n-browser-mocks"/> | [Owner missing] | - | 3 | 0 | 3 | 0 |
 | <DocLink id="kibKbnCoreInjectedMetadataBrowserPluginApi" text="@kbn/core-injected-metadata-browser"/> | [Owner missing] | - | 8 | 2 | 6 | 0 |
@@ -231,10 +236,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKbnCoreNodeServerPluginApi" text="@kbn/core-node-server"/> | [Owner missing] | - | 5 | 0 | 0 | 0 |
 | <DocLink id="kibKbnCoreNodeServerInternalPluginApi" text="@kbn/core-node-server-internal"/> | [Owner missing] | - | 3 | 0 | 3 | 0 |
 | <DocLink id="kibKbnCoreNodeServerMocksPluginApi" text="@kbn/core-node-server-mocks"/> | [Owner missing] | - | 3 | 0 | 3 | 0 |
+| <DocLink id="kibKbnCorePrebootServerPluginApi" text="@kbn/core-preboot-server"/> | [Owner missing] | - | 5 | 0 | 0 | 0 |
+| <DocLink id="kibKbnCorePrebootServerMocksPluginApi" text="@kbn/core-preboot-server-mocks"/> | [Owner missing] | - | 6 | 0 | 6 | 0 |
 | <DocLink id="kibKbnCoreThemeBrowserPluginApi" text="@kbn/core-theme-browser"/> | [Owner missing] | - | 6 | 0 | 4 | 0 |
 | <DocLink id="kibKbnCoreThemeBrowserInternalPluginApi" text="@kbn/core-theme-browser-internal"/> | [Owner missing] | - | 2 | 0 | 1 | 0 |
 | <DocLink id="kibKbnCoreThemeBrowserMocksPluginApi" text="@kbn/core-theme-browser-mocks"/> | [Owner missing] | - | 6 | 0 | 6 | 0 |
 | <DocLink id="kibKbnCryptoPluginApi" text="@kbn/crypto"/> | [Owner missing] | - | 13 | 0 | 7 | 0 |
+| <DocLink id="kibKbnCryptoBrowserPluginApi" text="@kbn/crypto-browser"/> | [Owner missing] | - | 10 | 0 | 10 | 0 |
 | <DocLink id="kibKbnDatemathPluginApi" text="@kbn/datemath"/> | [Owner missing] | elasticsearch datemath parser, used in kibana | 44 | 0 | 43 | 0 |
 | <DocLink id="kibKbnDevCliErrorsPluginApi" text="@kbn/dev-cli-errors"/> | [Owner missing] | - | 9 | 1 | 9 | 0 |
 | <DocLink id="kibKbnDevCliRunnerPluginApi" text="@kbn/dev-cli-runner"/> | [Owner missing] | - | 65 | 0 | 64 | 0 |
@@ -250,6 +258,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKbnFindUsedNodeModulesPluginApi" text="@kbn/find-used-node-modules"/> | [Owner missing] | - | 2 | 0 | 0 | 0 |
 | <DocLink id="kibKbnGeneratePluginApi" text="@kbn/generate"/> | [Owner missing] | - | 1 | 0 | 0 | 0 |
 | <DocLink id="kibKbnHandlebarsPluginApi" text="@kbn/handlebars"/> | [Owner missing] | - | 6 | 0 | 0 | 0 |
+| <DocLink id="kibKbnHapiMocksPluginApi" text="@kbn/hapi-mocks"/> | [Owner missing] | - | 3 | 0 | 3 | 0 |
 | <DocLink id="kibKbnHomeSampleDataCardsPluginApi" text="@kbn/home-sample-data-cards"/> | [Owner missing] | - | 10 | 0 | 4 | 2 |
 | <DocLink id="kibKbnI18nPluginApi" text="@kbn/i18n"/> | [Owner missing] | - | 51 | 0 | 48 | 0 |
 | <DocLink id="kibKbnImportResolverPluginApi" text="@kbn/import-resolver"/> | [Owner missing] | - | 43 | 0 | 36 | 0 |
@@ -311,7 +320,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKbnTypeSummarizerCorePluginApi" text="@kbn/type-summarizer-core"/> | [Owner missing] | - | 113 | 1 | 65 | 0 |
 | <DocLink id="kibKbnTypedReactRouterConfigPluginApi" text="@kbn/typed-react-router-config"/> | [Owner missing] | - | 83 | 0 | 83 | 1 |
 | <DocLink id="kibKbnUiThemePluginApi" text="@kbn/ui-theme"/> | [Owner missing] | - | 7 | 0 | 6 | 0 |
-| <DocLink id="kibKbnUtilityTypesPluginApi" text="@kbn/utility-types"/> | [Owner missing] | - | 29 | 0 | 10 | 1 |
+| <DocLink id="kibKbnUtilityTypesPluginApi" text="@kbn/utility-types"/> | [Owner missing] | - | 32 | 0 | 12 | 1 |
 | <DocLink id="kibKbnUtilityTypesJestPluginApi" text="@kbn/utility-types-jest"/> | [Owner missing] | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnUtilsPluginApi" text="@kbn/utils"/> | [Owner missing] | - | 31 | 1 | 21 | 0 |
 
