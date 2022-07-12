@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export const removeMultilines = (query: string): string =>
-  query.replaceAll('\r\n', ' ').replaceAll('\n', ' ').replaceAll(/  +/g, ' ');
+export { LayerStatsCollector } from './layer_stats_collector';
+export type {
+  EMS_BASEMAP_KEYS,
+  JOIN_KEYS,
+  LAYER_KEYS,
+  RESOLUTION_KEYS,
+  SCALING_KEYS,
+} from './types';
