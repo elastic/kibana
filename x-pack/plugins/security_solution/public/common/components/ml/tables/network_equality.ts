@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomaliesNetworkTableProps } from '../types';
+import type { AnomaliesNetworkTableProps } from '../types';
 import { anomaliesTableDefaultEquality } from './default_equality';
 
 export const networkEquality = (

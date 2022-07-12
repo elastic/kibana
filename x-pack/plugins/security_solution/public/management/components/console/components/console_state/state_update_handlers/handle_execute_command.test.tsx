@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
 import { waitFor } from '@testing-library/react';
-import { ConsoleProps } from '../../../types';
+import type { ConsoleProps } from '../../../types';
 
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -132,7 +132,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 argument is not support by this command: --foo'
+        'The following cmd2 argument is not supported by this command: --foo'
       );
     });
   });
@@ -143,7 +143,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 arguments are not support by this command: --foo, --bar'
+        'The following cmd2 arguments are not supported by this command: --foo, --bar'
       );
     });
   });

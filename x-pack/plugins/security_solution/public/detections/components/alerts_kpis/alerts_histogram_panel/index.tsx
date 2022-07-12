@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiTitleSize } from '@elastic/eui';
+import type { EuiTitleSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { Filter, buildEsQuery, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';

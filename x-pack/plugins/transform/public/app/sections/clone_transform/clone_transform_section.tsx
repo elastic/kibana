@@ -19,10 +19,10 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { TransformConfigUnion } from '../../../../common/types/transform';
 
-import { isHttpFetchError } from '../../common/request';
 import { useApi } from '../../hooks/use_api';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';

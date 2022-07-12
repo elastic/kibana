@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiDescriptionList, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
-import { NarrowDateRange, Anomaly } from '../types';
+import type { NarrowDateRange, Anomaly } from '../types';
 import { DraggableScore } from './draggable_score';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { createDescriptionList } from './create_description_list';
