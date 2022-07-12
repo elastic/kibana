@@ -26,31 +26,61 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-# In this array place runtime dependencies, including other packages and NPM packages
-# which must be available for this code to run.
-#
-#  To reference other packages use:
-#    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
-#
-#  To reference a NPM package use:
-#    "@npm//name-of-package"
-#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//lodash",
+  "@npm//rxjs",
+  "@npm//uuid",
+  "@npm//moment",
+  "@npm//@elastic/numeral",
+  "@npm//@hapi/boom",
+  "@npm//@hapi/cookie",
+  "@npm//@hapi/inert",
+  "@npm//elastic-apm-node",
+  "//packages/kbn-utils",
+  "//packages/kbn-std",
+  "//packages/kbn-config-schema",
+  "//packages/kbn-logging",
+  "//packages/kbn-crypto",
+  "//packages/kbn-server-http-tools",
+  "//packages/core/http/core-http-router-server-internal",
+  ### test dependencies
+  "@npm//supertest",
+  "@npm//chance",
+  "//packages/kbn-hapi-mocks",
+  "//packages/core/http/core-http-router-server-mocks",
+  "//packages/core/logging/core-logging-server-mocks",
+  "//packages/core/http/core-http-context-server-mocks",
 ]
 
-# In this array place dependencies necessary to build the types, which will include the
-# :npm_module_types target of other packages and packages from NPM, including @types/*
-# packages.
-#
-#  To reference the types for another package use:
-#    "//repo/relative/path/to/package:npm_module_types"
-#    eg. "//packages/kbn-utils:npm_module_types"
-#
-#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@types/uuid",
+  "@npm//rxjs",
+  "@npm//moment",
+  "@npm//@elastic/numeral",
+  "@npm//lodash",
+  "@npm//@hapi/hapi",
+  "@npm//@hapi/boom",
+  "@npm//@hapi/cookie",
+  "@npm//@hapi/inert",
+  "@npm//@types/hapi__hapi",
+  "@npm//@types/hapi__cookie",
+  "@npm//@types/hapi__inert",
+  "@npm//elastic-apm-node",
+  "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-server-http-tools:npm_module_types",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-crypto:npm_module_types",
+  "//packages/core/base/core-base-common:npm_module_types",
+  "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/execution-context/core-execution-context-server-internal:npm_module_types",
+  "//packages/core/http/core-http-common:npm_module_types",
+  "//packages/core/http/core-http-server:npm_module_types",
+  "//packages/core/http/core-http-context-server-internal:npm_module_types",
+  "//packages/core/http/core-http-router-server-internal:npm_module_types",
 ]
 
 jsts_transpiler(

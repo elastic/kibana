@@ -6,6 +6,18 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { sessionStorageMock } from './cookie_session_storage.mocks';
+export { httpServerMock } from './http_server.mocks';
+export { httpServiceMock } from './http_service.mock';
+export type {
+  HttpServicePrebootMock,
+  HttpServiceSetupMock,
+  HttpServiceStartMock,
+  InternalHttpServicePrebootMock,
+  InternalHttpServiceSetupMock,
+  InternalHttpServiceStartMock,
+} from './http_service.mock';
+
+export { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+
+export { createCoreContext, createHttpServer } from './test_utils';

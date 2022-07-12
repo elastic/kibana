@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { BasePath } from './base_path_service';
-import { httpServerMock } from './http_server.mocks';
 
 describe('BasePath', () => {
   describe('serverBasePath', () => {
@@ -36,7 +36,7 @@ describe('BasePath', () => {
 
   describe('#get()', () => {
     it('returns base path associated with an incoming KibanaRequest', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = mockRouter.createKibanaRequest();
       const basePath = new BasePath();
 
       basePath.set(request, '/baz/');
@@ -44,7 +44,7 @@ describe('BasePath', () => {
     });
 
     it('is based on server base path', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = mockRouter.createKibanaRequest();
       const basePath = new BasePath('/foo/bar');
 
       basePath.set(request, '/baz/');
@@ -54,7 +54,7 @@ describe('BasePath', () => {
 
   describe('#set()', () => {
     it('#set() cannot be set twice for one request', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = mockRouter.createKibanaRequest();
       const basePath = new BasePath('/foo/bar');
 
       const setPath = () => basePath.set(request, 'baz/');

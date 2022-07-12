@@ -6,16 +6,33 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest, RouteMethod, KibanaRouteOptions } from '@kbn/core-http-server';
+import type {
+  KibanaRequest,
+  RouteMethod,
+  KibanaRouteOptions,
+  OnPreResponseToolkit,
+  OnPostAuthToolkit,
+  OnPreRoutingToolkit,
+} from '@kbn/core-http-server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   createCustomHeadersPreResponseHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
-import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
 
+type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
+
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
+
+const createToolkit = (): ToolkitMock => {
+  return {
+    render: jest.fn(),
+    next: jest.fn(),
+    rewriteUrl: jest.fn(),
+  };
+};
 
 const forgeRequest = ({
   headers = {},
@@ -28,7 +45,7 @@ const forgeRequest = ({
   method: RouteMethod;
   kibanaRouteOptions: KibanaRouteOptions;
 }>): KibanaRequest => {
-  return httpServerMock.createKibanaRequest({
+  return mockRouter.createKibanaRequest({
     headers,
     path,
     method,
@@ -37,12 +54,12 @@ const forgeRequest = ({
 };
 
 describe('xsrf post-auth handler', () => {
-  let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
-  let responseFactory: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
+  let toolkit: ToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
 
   beforeEach(() => {
-    toolkit = httpServerMock.createToolkit();
-    responseFactory = httpServerMock.createLifecycleResponseFactory();
+    toolkit = createToolkit();
+    responseFactory = mockRouter.createResponseFactory();
   });
 
   describe('non destructive methods', () => {
@@ -165,12 +182,12 @@ describe('xsrf post-auth handler', () => {
 });
 
 describe('versionCheck post-auth handler', () => {
-  let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
-  let responseFactory: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
+  let toolkit: ToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
 
   beforeEach(() => {
-    toolkit = httpServerMock.createToolkit();
-    responseFactory = httpServerMock.createLifecycleResponseFactory();
+    toolkit = createToolkit();
+    responseFactory = mockRouter.createResponseFactory();
   });
 
   it('forward the request to the next interceptor if header matches', () => {
@@ -225,10 +242,10 @@ describe('versionCheck post-auth handler', () => {
 });
 
 describe('customHeaders pre-response handler', () => {
-  let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
+  let toolkit: ToolkitMock;
 
   beforeEach(() => {
-    toolkit = httpServerMock.createToolkit();
+    toolkit = createToolkit();
   });
 
   it('adds the kbn-name header to the response', () => {

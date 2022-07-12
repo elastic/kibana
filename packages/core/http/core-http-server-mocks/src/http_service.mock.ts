@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Server } from '@hapi/hapi';
+import type { Server } from '@hapi/hapi';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { configMock } from '@kbn/config-mocks';
 import type {
@@ -24,15 +24,14 @@ import type {
 import { AuthStatus } from '@kbn/core-http-server';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 
-import { CspConfig } from './csp';
-import {
+import { CspConfig, ExternalUrlConfig } from '@kbn/core-http-server-internal';
+import type {
+  HttpService,
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
-} from './types';
-import { HttpService } from './http_service';
+} from '@kbn/core-http-server-internal';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
-import { ExternalUrlConfig } from './external_url';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;

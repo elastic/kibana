@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Request } from '@hapi/hapi';
 import type { KibanaRequest, IsAuthenticated } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';

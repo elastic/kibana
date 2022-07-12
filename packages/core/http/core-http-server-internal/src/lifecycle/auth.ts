@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
+import type { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
   AuthenticationHandler,

@@ -16,7 +16,6 @@ import {
   getServerOptions,
   getRequestId,
 } from '@kbn/server-http-tools';
-import agent from 'elastic-apm-node';
 
 import type { Duration } from 'moment';
 import { firstValueFrom, Observable } from 'rxjs';
@@ -359,7 +358,7 @@ export class HttpServer {
         requestUuid: uuid.v4(),
         // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
         // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: agent.currentTraceIds['trace.id'],
+        traceId: apm.currentTraceIds['trace.id'],
       } as KibanaRequestState;
       return responseToolkit.continue;
     });

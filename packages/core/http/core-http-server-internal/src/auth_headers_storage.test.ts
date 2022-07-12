@@ -7,14 +7,14 @@
  */
 
 import { AuthHeadersStorage } from './auth_headers_storage';
-import { httpServerMock } from './http_server.mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 describe('AuthHeadersStorage', () => {
   describe('stores authorization headers', () => {
     it('retrieves a copy of headers associated with Kibana request', () => {
       const headers = { authorization: 'token' };
       const storage = new AuthHeadersStorage();
-      const request = httpServerMock.createKibanaRequest();
+      const request = mockRouter.createKibanaRequest();
       storage.set(request, headers);
       expect(storage.get(request)).toEqual(headers);
     });
