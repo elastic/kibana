@@ -36,7 +36,7 @@ export async function fetchEvents(
     }),
     filter((event) => {
       if (fromTimestamp) {
-        return new Date(event.timestamp).getTime() - new Date(fromTimestamp).getTime() >= 0;
+        return new Date(event.timestamp).getTime() - new Date(fromTimestamp).getTime() > 0;
       }
       return true;
     })

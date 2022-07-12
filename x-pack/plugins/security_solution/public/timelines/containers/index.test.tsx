@@ -108,7 +108,6 @@ describe('useTimelineEvents', () => {
   const endDate: string = '3000-01-01T00:00:00.000Z';
   const props: UseTimelineEventsProps = {
     dataViewId: 'data-view-id',
-    docValueFields: [],
     endDate: '',
     id: TimelineId.active,
     indexNames: ['filebeat-*'],
