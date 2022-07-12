@@ -27,8 +27,6 @@ import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 
-import { getSourceUriForAgent } from './helpers';
-
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
   undefined,
@@ -37,7 +35,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { version, source_uri: requestedSourceUri, force } = request.body;
+  const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkKibanaVersion(version, kibanaVersion);
@@ -51,22 +49,6 @@ export const postAgentUpgradeHandler: RequestHandler<
   }
 
   const agent = await getAgentById(esClient, request.params.agentId);
-
-  let sourceUri;
-  if (requestedSourceUri) {
-    sourceUri = requestedSourceUri;
-  } else {
-    try {
-      sourceUri = await getSourceUriForAgent(soClient, agent);
-    } catch (err) {
-      return response.customError({
-        statusCode: 400,
-        body: {
-          message: err.message,
-        },
-      });
-    }
-  }
 
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({

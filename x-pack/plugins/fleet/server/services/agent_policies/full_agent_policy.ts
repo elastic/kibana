@@ -22,7 +22,7 @@ import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
-import { getSourceUriForAgentPolicy } from '../../routes/agent/helpers';
+import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';

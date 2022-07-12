@@ -13,7 +13,7 @@ import type { Agent, AgentPolicy, DownloadSource } from '../../types';
 
 import { agentPolicyService } from '../../services/agent_policy';
 
-import { getSourceUriForAgentPolicy, getSourceUriForAgent, getDefaultSourceUri } from './helpers';
+import { getSourceUriForAgentPolicy, getSourceUriForAgent } from './source_uri_utils';
 
 const soClientMock = savedObjectsClientMock.create();
 
@@ -186,11 +186,5 @@ describe('helpers', () => {
       status: 'online',
     };
     expect(await getSourceUriForAgent(soClientMock, agent)).toEqual('http://default-registry.co');
-  });
-
-  describe('getDefaultSourceUri', () => {
-    it('should return the global default source_uri', async () => {
-      expect(await getDefaultSourceUri(soClientMock)).toEqual('http://default-registry.co');
-    });
   });
 });
