@@ -15,6 +15,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { fullDateFormatter } from '../../../../common/utils/dates';
@@ -84,12 +85,15 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
   const firstSeen = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen);
   const value = displayValue(indicator) || EMPTY_VALUE;
   const formattedFirstSeen: string = firstSeen ? fullDateFormatter(firstSeen) : EMPTY_VALUE;
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'simpleFlyoutTitle',
+  });
 
   return (
-    <EuiFlyout onClose={closeFlyout}>
+    <EuiFlyout onClose={closeFlyout} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 data-test-subj={TITLE_TEST_ID}>
+          <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelTitle"
               defaultMessage="Indicator: {title}"

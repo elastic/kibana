@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import { EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
+import { EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 
-interface LayoutProps {
+export interface LayoutProps {
   pageTitle?: string;
+  border?: boolean;
 }
 
 export const displayName = 'DefaultPageLayout';
 
-export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle }) => (
-  <EuiPageBody>
-    <EuiPageContent>
-      {pageTitle && (
-        <EuiText>
-          <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
-        </EuiText>
-      )}
-
+export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle, border = true }) => {
+  return (
+    <>
+      <EuiPageHeader alignItems="center" bottomBorder={border}>
+        <EuiPageHeaderSection>
+          {pageTitle && (
+            <EuiText>
+              <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
+            </EuiText>
+          )}
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiSpacer size="l" />
       {children}
-    </EuiPageContent>
-  </EuiPageBody>
-);
+    </>
+  );
+};
 
 DefaultPageLayout.displayName = displayName;
