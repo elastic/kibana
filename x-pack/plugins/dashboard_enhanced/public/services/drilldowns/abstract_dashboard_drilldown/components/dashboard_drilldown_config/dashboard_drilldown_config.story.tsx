@@ -61,4 +61,4 @@ storiesOf(
       isLoading={false}
     />
   ))
-  .add('test demo', () => <InteractiveDemo />);
+  .add('interactive demo', () => <InteractiveDemo />);

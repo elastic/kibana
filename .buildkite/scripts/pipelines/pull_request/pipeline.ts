@@ -127,7 +127,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
+      (await doAnyChangesMatch([/.*stories.*/])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml'));
