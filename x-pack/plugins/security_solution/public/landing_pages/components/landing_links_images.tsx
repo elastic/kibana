@@ -48,7 +48,7 @@ const SecuritySolutionLink = withSecuritySolutionLink(Link);
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
     {items.map(({ title, description, image, id }) => (
-      <EuiFlexItem key={id} data-test-subj="LandingItem" style={{ width: '25.7143rem;' }}>
+      <EuiFlexItem key={id} data-test-subj="LandingItem">
         <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
