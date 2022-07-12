@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
 import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import { initPromisePool } from '../../../utils/promise_pool';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 import { createRules } from './create_rules';
 
 export const installPrepackagedRules = (
   rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchema[]
-): Array<Promise<SanitizedRule<RuleTypeParams>>> =>
-  rules.reduce<Array<Promise<SanitizedRule<RuleTypeParams>>>>((acc, rule) => {
-    return [
-      ...acc,
-      createRules({
-        rulesClient,
-        params: rule,
-        immutable: true,
-        defaultEnabled: false,
-      }),
-    ];
-  }, []);
+) =>
+  withSecuritySpan('installPrepackagedRules', async () => {
+    const result = await initPromisePool({
+      concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+      items: rules,
+      executor: async (rule) => {
+        return createRules({
+          rulesClient,
+          params: rule,
+          immutable: true,
+          defaultEnabled: false,
+        });
+      },
+    });
+
+    if (result.errors.length > 0) {
+      throw new AggregateError(result.errors, 'Error installing prepackaged rules');
+    }
+  });

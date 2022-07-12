@@ -89,7 +89,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'kill-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.killProcess.about', {
-        defaultMessage: 'Kill a running process',
+        defaultMessage: 'Kill a running process. Accepts either a PID or an entity id.',
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
@@ -112,8 +112,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           allowMultiples: false,
           exclusiveOr: true,
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
-            defaultMessage:
-              'A PID representing the process to kill.  You can enter a pid or an entity id, but not both.',
+            defaultMessage: 'A PID representing the process to kill',
           }),
           validate: emptyArgumentValidator,
         },
@@ -124,8 +123,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate(
             'xpack.securitySolution.endpointConsoleCommands.entityId.arg.comment',
             {
-              defaultMessage:
-                'An entity id representing the process to kill.  You can enter a pid or an entity id, but not both.',
+              defaultMessage: 'An entity id representing the process to kill',
             }
           ),
           validate: emptyArgumentValidator,
@@ -138,7 +136,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'suspend-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.suspendProcess.about', {
-        defaultMessage: 'Suspend a running process',
+        defaultMessage: 'Suspend a running process. Accepts either a PID or an entity id.',
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
@@ -163,8 +161,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate(
             'xpack.securitySolution.endpointConsoleCommands.suspendProcess.pid.arg.comment',
             {
-              defaultMessage:
-                'A PID representing the process to suspend.  You can enter a pid or an entity id, but not both.',
+              defaultMessage: 'A PID representing the process to suspend',
             }
           ),
           validate: emptyArgumentValidator,
@@ -176,8 +173,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate(
             'xpack.securitySolution.endpointConsoleCommands.suspendProcess.entityId.arg.comment',
             {
-              defaultMessage:
-                'An entity id representing the process to suspend.  You can enter a pid or an entity id, but not both.',
+              defaultMessage: 'An entity id representing the process to suspend',
             }
           ),
           validate: emptyArgumentValidator,
