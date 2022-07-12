@@ -17,7 +17,7 @@ export const useSavedQueries = ({
   pageIndex = 0,
   pageSize = 10000,
   sortField = 'updated_at',
-  sortDirection = 'desc',
+  sortOrder = 'desc',
 }) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -26,10 +26,10 @@ export const useSavedQueries = ({
     { saved_objects: SavedQuerySO[]; total: number },
     { body: { error: string; message: string } }
   >(
-    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
+    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
       http.get('/api/osquery/saved_query', {
-        query: { pageIndex, pageSize, sortField, sortDirection },
+        query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {
       keepPreviousData: true,

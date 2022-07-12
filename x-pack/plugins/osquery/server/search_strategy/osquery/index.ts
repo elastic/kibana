@@ -58,8 +58,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         map((response) => ({
           ...response,
           ...{
-            rawResponse: shimHitsTotal(response.rawResponse),
+            rawResponse: shimHitsTotal(response.rawResponse, options),
           },
+          total: response.rawResponse.hits.total as number,
         })),
         mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
       );

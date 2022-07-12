@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
@@ -40,8 +41,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
         perPage: request.query.pageSize,
         sortField: request.query.sortField,
-        // @ts-expect-error update types
-        sortOrder: request.query.sortDirection ?? 'desc',
+        sortOrder: (request.query.sortOrder ?? 'desc') as unknown as estypes.SortOrder,
       });
 
       const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(osqueryContext);

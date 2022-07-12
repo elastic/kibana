@@ -17,19 +17,19 @@ export const usePacks = ({
   pageIndex = 0,
   pageSize = 100,
   sortField = 'updated_at',
-  sortDirection = 'desc',
+  sortOrder = 'desc',
 }) => {
   const { http } = useKibana().services;
 
   return useQuery(
-    [PACKS_ID, { pageIndex, pageSize, sortField, sortDirection }],
+    [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
     async () =>
       http.get<
         Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
           saved_objects: PackSavedObject[];
         }
       >('/api/osquery/packs', {
-        query: { pageIndex, pageSize, sortField, sortDirection },
+        query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {
       keepPreviousData: true,

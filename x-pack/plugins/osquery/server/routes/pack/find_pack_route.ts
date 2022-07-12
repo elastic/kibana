@@ -37,14 +37,14 @@ export const findPackRoute = (router: IRouter) => {
 
       const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
         type: packSavedObjectType,
-        page: request.query.pageIndex ?? 0 + 1,
+        page: (request.query.pageIndex ?? 0) + 1,
         perPage: request.query.pageSize ?? 20,
         sortField: request.query.sortField ?? 'updated_at',
         // @ts-expect-error sortOrder type must be union of ['asc', 'desc']
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 
-      const responseBody = map(soClientResponse.saved_objects, (pack) => {
+      const packSavedObjects = map(soClientResponse.saved_objects, (pack) => {
         const policyIds = map(
           filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
@@ -57,7 +57,10 @@ export const findPackRoute = (router: IRouter) => {
       });
 
       return response.ok({
-        body: responseBody,
+        body: {
+          ...soClientResponse,
+          saved_objects: packSavedObjects,
+        },
       });
     }
   );
