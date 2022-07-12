@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButtonGroup,
-  EuiFieldNumber,
-  EuiFormControlLayoutDelimited,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFormControlLayoutDelimited, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import deepEqual from 'fast-deep-equal';
 import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
+import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency } from '../../../../../../types';
 import { I18N_WEEKDAY_OPTIONS } from './constants';
 import {
@@ -146,11 +141,11 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
             }
           )}
           startControl={
-            <EuiFieldNumber
+            <NumberField
               data-test-subj="customRecurrenceSchedulerInterval"
               min={intervalMin}
               value={interval}
-              onChange={(e) => setInterval(Number(e.target.value))}
+              onChange={(value) => setInterval(Number(value))}
             />
           }
           endControl={

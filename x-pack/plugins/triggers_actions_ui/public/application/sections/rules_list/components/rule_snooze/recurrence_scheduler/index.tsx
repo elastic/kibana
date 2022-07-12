@@ -8,7 +8,6 @@
 import {
   EuiButtonGroup,
   EuiDatePicker,
-  EuiFieldNumber,
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
@@ -21,6 +20,7 @@ import { Moment } from 'moment';
 import React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency, RecurrenceSchedule } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import {
@@ -274,11 +274,11 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
                 }
               )}
             >
-              <EuiFieldNumber
+              <NumberField
                 compressed
                 min={1}
                 value={occurrences}
-                onChange={(e) => setOccurrrences(Number(e.target.value))}
+                onChange={(value) => setOccurrrences(Number(value))}
               />
             </EuiFormControlLayout>
           </EuiFormRow>
