@@ -45,7 +45,7 @@ const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
 const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
 const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
 
-//Cloud data
+// Cloud data
 const TEST_CLOUD_INSTANCE_NAME = 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2';
 const TEST_CLOUD_ACCOUNT_ID = 'PLACEHOLDER_FOR_CLOUD_ACCOUNT_ID';
 const TEST_CLOUD_PROJECT_ID = 'elastic-security-dev';
@@ -98,13 +98,13 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
 };
 
 const TEST_CLOUD: ProcessEventCloud = {
-  instance:{
-    name: TEST_CLOUD_INSTANCE_NAME
+  instance: {
+    name: TEST_CLOUD_INSTANCE_NAME,
   },
-  account:{
+  account: {
     id: TEST_CLOUD_ACCOUNT_ID,
   },
-  project:{
+  project: {
     id: TEST_CLOUD_PROJECT_ID,
   },
   provider: TEST_CLOUD_PROVIDER,

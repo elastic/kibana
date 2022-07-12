@@ -59,13 +59,13 @@ const MOCK_ORCHESTRATOR_DATA: ProcessEventOrchestrator = {
 };
 
 const MOCK_CLOUD_DATA: ProcessEventCloud = {
-  instance:{
+  instance: {
     name: 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2',
   },
-  account:{
+  account: {
     id: 'PLACEHOLDER_FOR_CLOUD_ACCOUNT_ID',
   },
-  project:{
+  project: {
     id: 'elastic-security-dev',
   },
   provider: 'gcp',
@@ -196,23 +196,23 @@ describe('detail panel host tab helpers tests', () => {
 
   it('getCloudData returns dashes for missing fields', () => {
     const result = getCloudData({
-      instance:{
+      instance: {
         name: 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2',
       },
-      account:{
+      account: {
         id: undefined,
       },
-      project:{
+      project: {
         id: 'elastic-security-dev',
       },
       provider: undefined,
       region: 'us-central1-c',
     });
-     expect(result.instance.name).toEqual(MOCK_CLOUD_DATA?.instance?.name);
-     expect(result.account.id).toEqual(DASH);
-     expect(result.project.id).toEqual(MOCK_CLOUD_DATA?.project?.id);
-     expect(result.provider).toEqual(DASH);
-     expect(result.region).toEqual(MOCK_CLOUD_DATA?.region);
+    expect(result.instance.name).toEqual(MOCK_CLOUD_DATA?.instance?.name);
+    expect(result.account.id).toEqual(DASH);
+    expect(result.project.id).toEqual(MOCK_CLOUD_DATA?.project?.id);
+    expect(result.provider).toEqual(DASH);
+    expect(result.region).toEqual(MOCK_CLOUD_DATA?.region);
   });
 
   it('getCloudData returns all data provided', () => {
@@ -223,5 +223,4 @@ describe('detail panel host tab helpers tests', () => {
     expect(result.provider).toEqual(MOCK_CLOUD_DATA?.provider);
     expect(result.region).toEqual(MOCK_CLOUD_DATA?.region);
   });
-
 });

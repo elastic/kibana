@@ -44,10 +44,7 @@ export const DetailPanelMetadataTab = ({
     () => getOrchestratorData(processOrchestrator),
     [processOrchestrator]
   );
-  const cloudData = useMemo(
-    () => getCloudData(processCloud),
-    [processCloud]
-  );
+  const cloudData = useMemo(() => getCloudData(processCloud), [processCloud]);
 
   return (
     <>
