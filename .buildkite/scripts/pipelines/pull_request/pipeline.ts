@@ -126,6 +126,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
+    if (
+      (await doAnyChangesMatch([/.*stories.*/])) ||
+      GITHUB_PR_LABELS.includes('ci:build-storybooks')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     uploadPipeline(pipeline.join('\n'));

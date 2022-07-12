@@ -58,13 +58,6 @@ steps:
       queue: c2-8
     timeout_in_minutes: 60
 
-  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-    label: 'Build Storybooks'
-    agents:
-      queue: c2-4
-    key: storybooks
-    timeout_in_minutes: 60
-
   - command: .buildkite/scripts/steps/build_api_docs.sh
     label: 'Build API Docs'
     agents:
