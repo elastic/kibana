@@ -67,6 +67,9 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       version: serializedVersion,
     } = serializedComponentTemplate;
 
+    const isFleetDatastreamsVisible =
+      datastreams?.length && componentTemplate._meta?.managed_by === 'fleet';
+
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
         <EuiSpacer size="m" />
@@ -121,7 +124,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
-          {datastreams?.length && (
+          {isFleetDatastreamsVisible && (
             <EuiFlexItem>
               {/* Datastream mappings */}
               <FormattedMessage
@@ -189,6 +192,20 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           <EuiCodeBlock language={language} isCopyable>
             {request}
           </EuiCodeBlock>
+
+          {isFleetDatastreamsVisible && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.datastreamNote"
+                    defaultMessage="Datastreams using that template need to be updated with aditionnal requests."
+                  />
+                </p>
+              </EuiText>
+            </>
+          )}
         </div>
       );
     };

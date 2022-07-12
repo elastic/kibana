@@ -86,12 +86,25 @@ const registerHttpRequestMockHelpers = (
   const setCreateComponentTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/component_templates`, response, error);
 
+  const setPostDatastreamMappingsFromTemplate = (
+    name: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'POST',
+      `${API_BASE_PATH}/data_streams/${name}/mappings_from_template`,
+      response,
+      error
+    );
+
   return {
     setLoadComponentTemplatesResponse,
     setDeleteComponentTemplateResponse,
     setLoadComponentTemplateResponse,
     setCreateComponentTemplateResponse,
     setGetComponentTemplateDatastream,
+    setPostDatastreamMappingsFromTemplate,
   };
 };
 
