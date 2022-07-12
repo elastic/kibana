@@ -7,7 +7,7 @@
 
 import { getOrEmptyTagFromValue } from '../empty_value';
 
-import { Columns, ItemsPerRow } from '.';
+import type { Columns, ItemsPerRow } from '.';
 
 export const mockData = {
   Hosts: {
