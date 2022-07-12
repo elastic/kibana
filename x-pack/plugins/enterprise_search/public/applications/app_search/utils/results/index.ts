@@ -33,7 +33,7 @@ function isNestedFieldValue(fiedlValue: object | object[]): boolean {
     return fiedlValue.reduce((acc: boolean, current) => acc || isNestedFieldValue(current), false);
   }
 
-  return typeof fiedlValue === "object" && !isFieldValueWrapper(fiedlValue);
+  return typeof fiedlValue === 'object' && !isFieldValueWrapper(fiedlValue);
 }
 
 // Takes any value and removes the wrapper around deepest values

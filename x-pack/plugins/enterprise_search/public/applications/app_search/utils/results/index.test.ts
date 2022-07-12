@@ -13,10 +13,10 @@ describe('formatResult', () => {
       'id': { raw: 'doc-id' },
       'text_field': { raw: 'text value' },
       'numeric_field': { raw: 21 },
-      'multivalued_field': { raw: ['value_1', 'value_2']},
-      'simple_object.flattened': { raw: ['value_1', 'value_2']},
-      'raw': { raw: 'raw_value'},
-      'snippet': { snippet: 'snippet_value'},
+      'multivalued_field': { raw: ['value_1', 'value_2'] },
+      'simple_object.flattened': { raw: ['value_1', 'value_2'] },
+      'raw': { raw: 'raw_value' },
+      'snippet': { snippet: 'snippet_value' },
     };
 
     expect(formatResult(data)).toEqual(data);
@@ -51,13 +51,13 @@ describe('formatResult', () => {
             {
               'subfield_1': { raw: ['value 1', 'value 2'] },
               'subfield_2': { raw: 'value 3' },
-              'raw': { raw: 'raw_value'},
-              'snippet': { raw: 'snippert_value'},
+              'raw': { raw: 'raw_value' },
+              'snippet': { raw: 'snippert_value' },
             },
             {
               'subfield_1': { raw: 'value 4' },
-              'raw': { raw: ['raw_value']},
-              'snippet': { raw: ['snippert_value']},
+              'raw': { raw: ['raw_value'] },
+              'snippet': { raw: ['snippert_value'] },
             },
           ],
         })).toEqual({
