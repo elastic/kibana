@@ -131,11 +131,6 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
 
       await discover.locator.navigate({
         indexPatternId: latestFindingsDataView.data.id,
-        timeRange: {
-          to: 'now',
-          from: 'now-15m',
-          mode: 'relative',
-        },
       });
     } catch (err) {
       toasts.danger({
