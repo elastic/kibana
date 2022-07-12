@@ -6,33 +6,27 @@
  */
 
 import React from 'react';
-import { EuiBasicTableColumn, EuiInMemoryTable, Search } from '@elastic/eui';
+import { EuiInMemoryTable, Search } from '@elastic/eui';
 import {
-  useSecurityDashboards,
-  SecurityDashboardItem,
-} from '../../../containers/dashboards/use_security_dashboards';
+  useSecurityDashboardsTableItems,
+  useDashboardsTableColumns,
+} from '../../containers/dashboards/use_security_dashboards';
 
 const DASHBOARDS_TABLE_SEARCH: Search = {
   box: {
     incremental: true,
   },
-};
-
-// TODO: translate
-const DASHBOARDS_TABLE_COLUMNS: Array<EuiBasicTableColumn<SecurityDashboardItem>> = [
-  { field: 'title', name: 'Title' },
-  { field: 'description', name: 'Description' },
-  { field: 'tags', name: 'Tags' },
-];
+} as const;
 
 export const DashboardsTable: React.FC = () => {
-  const items = useSecurityDashboards();
+  const items = useSecurityDashboardsTableItems();
+  const columns = useDashboardsTableColumns();
+
   return (
     <EuiInMemoryTable
       data-test-subj="dashboards-table"
       items={items}
-      //   itemId="name"
-      columns={DASHBOARDS_TABLE_COLUMNS}
+      columns={columns}
       search={DASHBOARDS_TABLE_SEARCH}
       pagination={true}
       sorting={true}

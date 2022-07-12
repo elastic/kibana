@@ -13,26 +13,25 @@ import { useAppRootNavLink } from '../../common/components/navigation/nav_links'
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../components/landing_links_images';
-import { DASHBOARDS_PAGE_TITLE } from './translations';
+import * as i18n from './translations';
 
 export const DashboardsLandingPage = () => {
   const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
 
-  // TODO: translate 2
   return (
     <SecuritySolutionPageWrapper>
-      <HeaderPage title={DASHBOARDS_PAGE_TITLE} />
+      <HeaderPage title={i18n.DASHBOARDS_PAGE_TITLE} />
       <EuiSpacer size="s" />
 
       <EuiTitle size="xxxs">
-        <h2>{'FAVORITE'}</h2>
+        <h2>{i18n.DASHBOARDS_PAGE_SECTION_FAVORITE}</h2>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="xxl" />
 
       <EuiTitle size="xxxs">
-        <h2>{'ALL'}</h2>
+        <h2>{i18n.DASHBOARDS_PAGE_SECTION_ALL}</h2>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <EuiSpacer size="m" />

@@ -80,9 +80,12 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   </EuiFlexGroup>
 );
 
-// Fit the large card image
 const LandingImageCardItem = styled(EuiFlexItem)`
-  width: 25.71429rem;
+  max-width: 364px;
+`;
+
+const LandingCardDescripton = styled(EuiText)`
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 // Needed to use the primary color in the title underlining on hover
@@ -92,48 +95,41 @@ const PrimaryTitleCard = styled(EuiCard)`
   }
 `;
 
-const LandingCardDescripton = styled(EuiText)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
 const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
-const LandingImageCardsComponent: React.FC<LandingImagesProps> = ({ items }) => (
-  <EuiFlexGroup direction="row">
-    {items.map(({ id, image, title, description }) => {
-      return (
-        <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
-          <SecuritySolutionCard
-            deepLinkId={id}
-            hasBorder
-            textAlign="left"
-            paddingSize="m"
-            image={
-              image && (
-                <EuiImage
-                  data-test-subj="LandingImageCard-image"
-                  size="l"
-                  role="presentation"
-                  alt={title}
-                  src={image}
-                />
-              )
-            }
-            title={
-              <PrimaryEuiTitle size="xs">
-                <h2>{title}</h2>
-              </PrimaryEuiTitle>
-            }
-            description={
-              <LandingCardDescripton size="xs" color="text">
-                {description}
-              </LandingCardDescripton>
-            }
-          />
-        </LandingImageCardItem>
-      );
-    })}
+export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
+  <EuiFlexGroup direction="row" wrap>
+    {items.map(({ id, image, title, description }) => (
+      <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
+        <SecuritySolutionCard
+          deepLinkId={id}
+          hasBorder
+          textAlign="left"
+          paddingSize="m"
+          image={
+            image && (
+              <EuiImage
+                data-test-subj="LandingImageCard-image"
+                role="presentation"
+                alt={title}
+                src={image}
+              />
+            )
+          }
+          title={
+            <PrimaryEuiTitle size="xs">
+              <h2>{title}</h2>
+            </PrimaryEuiTitle>
+          }
+          description={
+            <LandingCardDescripton size="xs" color="text">
+              {description}
+            </LandingCardDescripton>
+          }
+        />
+      </LandingImageCardItem>
+    ))}
   </EuiFlexGroup>
-);
+));
 
-export const LandingImageCards = React.memo(LandingImageCardsComponent);
+LandingImageCards.displayName = 'LandingImageCards';

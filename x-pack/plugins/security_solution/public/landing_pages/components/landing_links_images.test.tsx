@@ -10,7 +10,7 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
-import { LandingLinksImages } from './landing_links_images';
+import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
@@ -55,5 +55,32 @@ describe('LandingLinksImages', () => {
     );
 
     expect(getByTestId('LandingLinksImage')).toHaveAttribute('src', image);
+  });
+});
+
+describe('LandingImageCards', () => {
+  it('renders', () => {
+    const title = 'test label';
+
+    const { queryByText } = render(
+      <TestProviders>
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, title }]} />
+      </TestProviders>
+    );
+
+    expect(queryByText(title)).toBeInTheDocument();
+  });
+
+  it('renders image', () => {
+    const image = 'test_image.jpeg';
+    const title = 'TEST_LABEL';
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', image);
   });
 });
