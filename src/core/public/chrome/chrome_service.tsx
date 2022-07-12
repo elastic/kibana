@@ -8,23 +8,23 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '../utils/mount';
-import { InternalApplicationStart } from '../application';
-import { HttpStart } from '../http';
-import { NotificationsStart } from '../notifications';
+import type { InternalApplicationStart } from '../application';
+import type { NotificationsStart } from '../notifications';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
-import { ChromeDocTitle, DocTitleService } from './doc_title';
-import { ChromeNavControls, NavControlsService } from './nav_controls';
-import { NavLinksService, ChromeNavLink } from './nav_links';
-import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
+import { type ChromeDocTitle, DocTitleService } from './doc_title';
+import { type ChromeNavControls, NavControlsService } from './nav_controls';
+import { type ChromeNavLink, NavLinksService } from './nav_links';
+import { type ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import {
+import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
