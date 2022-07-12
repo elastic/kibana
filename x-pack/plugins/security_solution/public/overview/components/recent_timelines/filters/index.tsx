@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 
-import { FilterMode } from '../types';
+import type { FilterMode } from '../types';
 
 import * as i18n from '../translations';
 

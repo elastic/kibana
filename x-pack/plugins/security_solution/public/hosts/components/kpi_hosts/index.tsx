@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
-import { HostsKpiProps } from './types';
+import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';

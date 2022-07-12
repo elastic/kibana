@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy, isArray } from 'lodash';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
@@ -16,15 +16,14 @@ import {
   MATCHED_TYPE,
   FEED_NAME,
 } from '../../../../../common/cti/constants';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import {
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
+import type {
   CtiEnrichment,
   CtiEnrichmentIdentifiers,
   EventFields,
-  isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
+import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
@@ -32,21 +31,37 @@ export const isInvestigationTimeEnrichment = (type: string | undefined) =>
 export const parseExistingEnrichments = (
   data: TimelineEventsDetailsItem[]
 ): TimelineEventsDetailsItem[][] => {
-  const threatIndicatorField = data.find(
-    ({ field, originalValue }) => field === ENRICHMENT_DESTINATION_PATH && originalValue
+  const threatIndicatorFields = data.filter(
+    ({ field, originalValue }) =>
+      field.startsWith(`${ENRICHMENT_DESTINATION_PATH}.`) && originalValue
   );
-  if (!threatIndicatorField) {
+  if (threatIndicatorFields.length === 0) {
     return [];
   }
 
-  const { originalValue } = threatIndicatorField;
-  const enrichmentStrings = Array.isArray(originalValue) ? originalValue : [originalValue];
-
-  return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
-    (enrichments, enrichmentString) => {
+  return threatIndicatorFields.reduce<TimelineEventsDetailsItem[][]>(
+    (enrichments, enrichmentData) => {
       try {
-        const enrichment = getDataFromSourceHits(JSON.parse(enrichmentString));
-        enrichments.push(enrichment);
+        if (isArray(enrichmentData.values)) {
+          for (
+            let enrichmentIndex = 0;
+            enrichmentIndex < enrichmentData.values.length;
+            enrichmentIndex++
+          ) {
+            if (!isArray(enrichments[enrichmentIndex])) {
+              enrichments[enrichmentIndex] = [];
+            }
+            const fieldParts = enrichmentData.field.split('.');
+            enrichments[enrichmentIndex].push({
+              ...enrichmentData,
+              isObjectArray: false,
+              field: enrichmentData.field.replace(`${ENRICHMENT_DESTINATION_PATH}.`, ''),
+              category: fieldParts.length > 3 ? fieldParts[2] : enrichmentData.category,
+              values: [enrichmentData.values[enrichmentIndex]],
+              originalValue: [enrichmentData.originalValue[enrichmentIndex]],
+            });
+          }
+        }
       } catch (e) {
         // omit failed parse
       }

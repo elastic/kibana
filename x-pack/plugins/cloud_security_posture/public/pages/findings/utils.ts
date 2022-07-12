@@ -161,3 +161,15 @@ export const addFilter = ({
 
   return [...filters, filter].filter(isNonNullable);
 };
+
+const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
+  '@timestamp',
+  'resource.sub_type',
+  'resource.name',
+  'resource.id',
+  'rule.name',
+]);
+
+// NOTE: .keyword comes from the mapping we defined for the Findings index
+export const getSortKey = (key: string): string =>
+  FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;

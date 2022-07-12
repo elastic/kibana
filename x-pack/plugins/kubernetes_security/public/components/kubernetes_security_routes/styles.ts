@@ -6,14 +6,28 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font } = euiTheme;
+    const { size, font, border } = euiTheme;
+
+    const titleSection: CSSObject = {
+      marginBottom: size.l,
+    };
+
+    const titleActions: CSSObject = {
+      marginLeft: 'auto',
+      flexDirection: 'row',
+      alignItems: 'center',
+    };
+
+    const updatedAt: CSSObject = {
+      marginRight: size.m,
+    };
 
     const widgetBadge: CSSObject = {
       position: 'absolute',
@@ -44,11 +58,32 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
+    const countWidgets: CSSObject = {
+      margin: size.l,
+    };
+
+    const widgetHolder: CSSObject = {
+      position: 'relative',
+      width: '332px',
+      height: '235px',
+      //padding: size.base,
+      //border: border.thin,
+      borderRadius: border.radius.medium,
+      fontWeight: font.weight.bold,
+      fontSize: size.m,
+      lineHeight: size.base,
+    };
+
     return {
+      titleSection,
+      titleActions,
+      updatedAt,
       widgetBadge,
       treeViewContainer,
       percentageWidgets,
       percentageChartTitle,
+      countWidgets,
+      widgetHolder,
     };
   }, [euiTheme]);
 
