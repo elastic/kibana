@@ -17,7 +17,7 @@ import {
 
 import { SEARCH_INDICES_PATH } from '../routes';
 
-import { generateNavLink } from '.';
+import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
   const navItems: Array<EuiSideNavItemType<unknown>> = [

@@ -33,7 +33,8 @@ export const getNavLinkActive = ({
   shouldNotCreateHref = false,
 }: Params & ReactRouterProps): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
-  const basePath: string = KibanaLogic.values.history.basePath; // TODO: Where is basePath coming from?
+  // @ts-ignore TODO: Not sure where this is coming from. Is Kibana inserting it?
+  const basePath: string = KibanaLogic.values.history.basePath;
   const currentPath = stripTrailingSlash(pathname);
 
   // If shouldNotCreateHref is true then `to` will include the react router basePath

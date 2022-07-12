@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-jest.mock('../../../shared/layout', () => ({
+jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
-jest.mock('../search_index/index_nav', () => ({
-  useSearchIndicesNav: () => [],
-}));
 
-import { useEnterpriseSearchContentNav } from '.';
+import { useEnterpriseSearchNav } from './nav';
 
 describe('useEnterpriseSearchContentNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {
-    expect(useEnterpriseSearchContentNav()).toEqual([
+    expect(useEnterpriseSearchNav()).toEqual([
       {
         id: 'es_overview',
         name: 'Overview',
