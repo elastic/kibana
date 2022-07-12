@@ -8,24 +8,34 @@
 
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints } from '@elastic/eui';
-import { EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
-import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
-import { KibanaPageTemplateProps } from './types';
+import { useIsWithinBreakpoints, EuiPageTemplateProps } from '@elastic/eui';
+import { SolutionNav, SolutionNavProps } from './solution_nav';
+
+import './with_solution_nav.scss';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type SolutionNavProps = KibanaPageTemplateProps & {
-  solutionNav: KibanaPageTemplateSolutionNavProps;
+type TemplateProps = Pick<
+  EuiPageTemplateProps,
+  'pageSideBar' | 'pageSideBarProps' | 'template' | 'children'
+>;
+
+type ComponentProps = TemplateProps & {
+  isEmptyState?: boolean;
 };
+
+type Props<P> = P &
+  ComponentProps & {
+    solutionNav: SolutionNavProps;
+  };
 
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
-export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTemplateProps>) => {
-  const WithSolutionNav = (props: SolutionNavProps) => {
+export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: ComponentType<P>) => {
+  const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
@@ -33,6 +43,7 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     );
     const { solutionNav, ...propagatedProps } = props;
     const { children, isEmptyState, template } = propagatedProps;
+
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
       // Have to store it as the opposite of the default we want
@@ -42,9 +53,9 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
     const sideBarClasses = classNames(
-      'kbnPageTemplate__pageSideBar',
+      'kbnSolutionNav__sidebar',
       {
-        'kbnPageTemplate__pageSideBar--shrink':
+        'kbnSolutionNav__sidebar--shrink':
           isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
       },
       props.pageSideBarProps?.className
@@ -53,20 +64,27 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
 
     const pageSideBar = (
-      <KibanaPageTemplateSolutionNav
+      <SolutionNav
         isOpenOnDesktop={isSideNavOpenOnDesktop}
         onCollapse={toggleOpenOnDesktop}
         {...solutionNav}
       />
     );
+
     const pageSideBarProps = {
-      paddingSize: 'none',
+      paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       className: sideBarClasses,
-    } as EuiPageSideBarProps; // needed because for some reason 'none' is not recognized as a valid value for paddingSize
+    };
+
     return (
       <WrappedComponent
-        {...{ ...propagatedProps, pageSideBar, pageSideBarProps, template: templateToUse }}
+        {...{
+          ...(propagatedProps as P),
+          pageSideBar,
+          pageSideBarProps,
+          template: templateToUse,
+        }}
       >
         {children}
       </WrappedComponent>

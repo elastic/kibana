@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import classNames from 'classnames';
 import {
   EuiAvatarProps,
@@ -27,12 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 
-import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
+import { SolutionNavCollapseButton } from './collapse_button';
 
-export type KibanaPageTemplateSolutionNavProps = Omit<
-  EuiSideNavProps<{}>,
-  'children' | 'items' | 'heading'
-> & {
+/**
+ * Props for the `SolutionNav` component.
+ */
+export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 'heading'> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
@@ -58,6 +58,9 @@ export type KibanaPageTemplateSolutionNavProps = Omit<
    * Control the collapsed state
    */
   isOpenOnDesktop?: boolean;
+  /**
+   * Handler for when the navigation flyout is collapsed.
+   */
   onCollapse?: () => void;
   /**
    * Allows hiding of the navigation by the user.
@@ -77,14 +80,12 @@ const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) =>
   });
 };
 
-const generateId = htmlIdGenerator('KibanaPageTemplateSolutionNav');
+const generateId = htmlIdGenerator('SolutionNav');
 
 /**
- * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
+ * A wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo.
  */
-export const KibanaPageTemplateSolutionNav: FunctionComponent<
-  KibanaPageTemplateSolutionNavProps
-> = ({
+export const SolutionNav: FC<SolutionNavProps> = ({
   children,
   headingProps,
   icon,
@@ -101,7 +102,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
-  // This is used for both the EuiSideNav and EuiFlyout toggling
+  // This is used for both the `EuiSideNav` and `EuiFlyout` toggling
   const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
   const toggleOpenOnMobile = () => {
     setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
@@ -110,33 +111,28 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   const isHidden = isLargerBreakpoint && !isOpenOnDesktop && canBeCollapsed;
   const isCustomSideNav = !!children;
 
-  const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
-    'kbnPageTemplateSolutionNav--hidden': isHidden,
+  const sideNavClasses = classNames('kbnSolutionNav', {
+    'kbnSolutionNav--hidden': isHidden,
   });
 
-  /**
-   * Create the avatar and titles
-   */
+  // Create the avatar and titles.
   const headingID = headingProps?.id || generateId('heading');
   const HeadingElement = headingProps?.element || 'h2';
+
   const titleText = (
     <EuiTitle size="xs" id={headingID}>
       <HeadingElement>
         {icon && (
-          <KibanaSolutionAvatar
-            className="kbnPageTemplateSolutionNav__avatar"
-            iconType={icon}
-            name={name}
-          />
+          <KibanaSolutionAvatar className="kbnSolutionNav__avatar" iconType={icon} name={name} />
         )}
         <strong>
           <FormattedMessage
-            id="sharedUXComponents.solutionNav.mobileTitleText"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
             defaultMessage="{solutionName} {menuText}"
             values={{
               solutionName: name || 'Navigation',
               menuText: isSmallerBreakpoint
-                ? i18n.translate('sharedUXComponents.solutionNav.menuText', {
+                ? i18n.translate('sharedUXPackages.solutionNav.menuText', {
                     defaultMessage: 'menu',
                   })
                 : '',
@@ -147,16 +143,16 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
     </EuiTitle>
   );
 
-  /**
-   * Create the side nav content
-   */
+  // Create the side nav content
   const sideNavContent = useMemo(() => {
     if (isCustomSideNav) {
       return children;
     }
+
     if (!items) {
       return null;
     }
+
     return (
       <EuiSideNav
         aria-labelledby={headingID}
@@ -196,7 +192,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
               side="left"
               size={FLYOUT_SIZE}
               closeButtonPosition={closeFlyoutButtonPosition}
-              className="kbnPageTemplateSolutionNav__flyout"
+              className="kbnSolutionNav__flyout"
               hideCloseButton={!canBeCollapsed}
             >
               <div className={sideNavClasses}>
@@ -207,10 +203,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
             </EuiFlyout>
           )}
           {canBeCollapsed && (
-            <KibanaPageTemplateSolutionNavCollapseButton
-              isCollapsed={true}
-              onClick={toggleOpenOnMobile}
-            />
+            <SolutionNavCollapseButton isCollapsed={true} onClick={toggleOpenOnMobile} />
           )}
         </>
       )}
@@ -222,10 +215,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
             {sideNavContent}
           </div>
           {canBeCollapsed && (
-            <KibanaPageTemplateSolutionNavCollapseButton
-              isCollapsed={!isOpenOnDesktop}
-              onClick={onCollapse}
-            />
+            <SolutionNavCollapseButton isCollapsed={!isOpenOnDesktop} onClick={onCollapse} />
           )}
         </>
       )}

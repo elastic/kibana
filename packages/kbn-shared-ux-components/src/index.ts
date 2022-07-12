@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { KibanaPageTemplateSolutionNav } from './page_template/solution_nav';
-
 // TODO: clintandrewhall - NoDataPageProps is a temporary addition until it is split into its own package
 export type { KibanaPageTemplateProps, NoDataPageProps } from './page_template';
 
