@@ -108,9 +108,6 @@
         "description": [
           "\nThe interface for Storybook configuration in `main.ts` files."
         ],
-        "signature": [
-          "StorybookConfig"
-        ],
         "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
         "deprecated": false,
         "children": [

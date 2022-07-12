@@ -203,13 +203,7 @@
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>>; getApmIndices: () => Promise<",
               "ApmIndicesConfig",
               ">; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>; context: ",
               "ApmPluginRequestHandlerContext",
               "; }) => Promise<",
@@ -342,13 +336,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
@@ -543,13 +531,7 @@
                 "text": "LicensingApiRequestHandlerContext"
               },
               ">; }, request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
               "Annotation",
               "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
@@ -5340,13 +5322,7 @@
           "description": [],
           "signature": [
             "(params: { debug?: boolean | undefined; request: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>; context: ",
             "ApmPluginRequestHandlerContext",
             "; }) => Promise<",
@@ -5387,13 +5363,7 @@
                   "label": "request",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "core",
-                      "scope": "server",
-                      "docId": "kibCoreHttpPluginApi",
-                      "section": "def-server.KibanaRequest",
-                      "text": "KibanaRequest"
-                    },
+                    "KibanaRequest",
                     "<unknown, unknown, unknown, any>"
                   ],
                   "path": "x-pack/plugins/apm/server/types.ts",
