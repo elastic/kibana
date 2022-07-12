@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const defaultSettings = {
@@ -76,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should perform test query correctly', async function () {
         await PageObjects.discover.selectTextBaseLang('SQL');
-
         const testQuery = `SELECT "@tags", geo.dest, count(*) occurred FROM "logstash-*"
           GROUP BY "@tags", geo.dest
           HAVING occurred > 20
@@ -84,6 +84,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        // unselect all columns
+        const currentUrl = await browser.getCurrentUrl();
+        const [, hash] = currentUrl.split('#/');
+        const matchPhrase = hash.match(new RegExp(/columns:!\(.*utc_time\)/, 'i')) as string[];
+        await PageObjects.common.navigateToUrl(
+          'discover',
+          hash.replace(matchPhrase[0], 'columns:!()'),
+          {
+            useActualUrl: true,
+          }
+        );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const cell = await dataGrid.getCellElement(0, 3);
