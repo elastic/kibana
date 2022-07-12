@@ -154,7 +154,7 @@ describe('When using Actions service utilities', () => {
     });
 
     it('should return action outputs (if any) per agent id', () => {
-      const runningProcesses = endpointActionGenerator.randomResponseActionProcesses(3);
+      const processes = endpointActionGenerator.randomResponseActionProcesses(3);
       const endpointResponse = endpointActionGenerator.generateActivityLogActionResponse({
         item: {
           data: {
@@ -162,10 +162,12 @@ describe('When using Actions service utilities', () => {
             agent: { id: '123' },
             EndpointActions: {
               completed_at: COMPLETED_AT,
-              output: {
-                type: 'json',
-                content: {
-                  entries: runningProcesses,
+              data: {
+                output: {
+                  type: 'json',
+                  content: {
+                    entries: processes,
+                  },
                 },
               },
             },
@@ -181,7 +183,7 @@ describe('When using Actions service utilities', () => {
           '123': {
             type: 'json',
             content: {
-              entries: runningProcesses,
+              entries: processes,
             },
           },
         },

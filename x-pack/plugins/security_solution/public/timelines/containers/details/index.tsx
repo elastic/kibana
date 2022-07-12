@@ -16,7 +16,6 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
-  DocValueFields,
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
@@ -33,7 +32,6 @@ export interface EventsArgs {
 
 export interface UseTimelineEventsDetailsProps {
   entityType?: EntityType;
-  docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   runtimeMappings: MappingRuntimeFields;
@@ -42,7 +40,6 @@ export interface UseTimelineEventsDetailsProps {
 
 export const useTimelineEventsDetails = ({
   entityType = EntityType.EVENTS,
-  docValueFields,
   indexName,
   eventId,
   runtimeMappings,
@@ -125,7 +122,6 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        docValueFields,
         entityType,
         indexName,
         eventId,
@@ -137,7 +133,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, entityType, eventId, indexName, runtimeMappings]);
+  }, [entityType, eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
