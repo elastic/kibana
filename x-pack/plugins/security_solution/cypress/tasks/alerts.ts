@@ -68,7 +68,6 @@ export const closeAlerts = () => {
 
 export const expandFirstAlertActions = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).find('svg').should('have.attr', 'data-is-loaded');
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
 };
 
