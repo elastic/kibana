@@ -25,6 +25,7 @@ describe('saved_searches_utils', () => {
         sort: [],
         columns: ['a', 'b'],
         description: 'foo',
+        tags: [],
         grid: {},
         hideChart: true,
         isTextBasedQuery: false,
