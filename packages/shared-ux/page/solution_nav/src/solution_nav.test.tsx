@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
+import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -20,7 +20,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const items: KibanaPageTemplateSolutionNavProps['items'] = [
+const items: SolutionNavProps['items'] = [
   {
     name: 'Ingest',
     id: '1',
@@ -59,14 +59,11 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
   },
 ];
 
-describe('KibanaPageTemplateSolutionNav', () => {
+describe('SolutionNav', () => {
   describe('heading', () => {
     test('accepts more headingProps', () => {
       const component = shallow(
-        <KibanaPageTemplateSolutionNav
-          name="Solution"
-          headingProps={{ id: 'testID', element: 'h3' }}
-        />
+        <SolutionNav name="Solution" headingProps={{ id: 'testID', element: 'h3' }} />
       );
 
       expect(component).toMatchSnapshot();
@@ -74,37 +71,37 @@ describe('KibanaPageTemplateSolutionNav', () => {
   });
 
   test('renders', () => {
-    const component = shallow(<KibanaPageTemplateSolutionNav name="Solution" items={items} />);
+    const component = shallow(<SolutionNav name="Solution" items={items} />);
     expect(component).toMatchSnapshot();
   });
 
   test('renders with icon', () => {
-    const component = shallow(
-      <KibanaPageTemplateSolutionNav name="Solution" icon="logoElastic" items={items} />
-    );
+    const component = shallow(<SolutionNav name="Solution" icon="logoElastic" items={items} />);
     expect(component).toMatchSnapshot();
   });
 
   test('renders with children', () => {
     const component = shallow(
-      <KibanaPageTemplateSolutionNav name="Solution" data-test-subj="DTS">
+      <SolutionNav name="Solution" data-test-subj="DTS">
         <span id="dummy_component" />
-      </KibanaPageTemplateSolutionNav>
+      </SolutionNav>
     );
     expect(component.find('#dummy_component').length > 0).toBeTruthy();
   });
 
   test('accepts EuiSideNavProps', () => {
-    const component = shallow(
-      <KibanaPageTemplateSolutionNav name="Solution" data-test-subj="DTS" items={items} />
-    );
+    const component = shallow(<SolutionNav name="Solution" data-test-subj="DTS" items={items} />);
     expect(component).toMatchSnapshot();
   });
 
   test('accepts canBeCollapsed prop', () => {
-    const component = shallow(
-      <KibanaPageTemplateSolutionNav name="Solution" canBeCollapsed={true} items={items} />
+    const canBeCollapsed = shallow(
+      <SolutionNav name="Solution" canBeCollapsed={true} items={items} />
     );
-    expect(component).toMatchSnapshot();
+    expect(canBeCollapsed).toMatchSnapshot();
+    const noCollapse = shallow(
+      <SolutionNav name="Solution" canBeCollapsed={false} items={items} />
+    );
+    expect(noCollapse).toMatchSnapshot();
   });
 });

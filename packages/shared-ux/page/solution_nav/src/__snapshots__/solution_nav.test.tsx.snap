@@ -1,23 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
+exports[`SolutionNav accepts EuiSideNavProps 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -37,7 +37,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         data-test-subj="DTS"
         items={
           Array [
@@ -100,24 +100,24 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
+exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -137,7 +137,7 @@ exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         items={
           Array [
             Object {
@@ -199,11 +199,110 @@ exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
+exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
+    initialIsOpen={false}
+    isCollapsible={false}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="SolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    >
+      <EuiSideNav
+        aria-hidden={false}
+        aria-labelledby="SolutionNav_generated-id_heading"
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "items": Array [
+                Object {
+                  "id": "1.1",
+                  "items": undefined,
+                  "name": "Ingest Node Pipelines",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "1.2",
+                  "items": undefined,
+                  "name": "Logstash Pipelines",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "1.3",
+                  "items": undefined,
+                  "name": "Beats Central Management",
+                  "tabIndex": undefined,
+                },
+              ],
+              "name": "Ingest",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2",
+              "items": Array [
+                Object {
+                  "id": "2.1",
+                  "items": undefined,
+                  "name": "Index Management",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "2.2",
+                  "items": undefined,
+                  "name": "Index Lifecycle Policies",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "2.3",
+                  "items": undefined,
+                  "name": "Snapshot and Restore",
+                  "tabIndex": undefined,
+                },
+              ],
+              "name": "Data",
+              "tabIndex": undefined,
+            },
+          ]
+        }
+        mobileBreakpoints={Array []}
+      />
+    </EuiPanel>
+  </EuiCollapsibleNavGroup>
+</Fragment>
+`;
+
+exports[`SolutionNav heading accepts more headingProps 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -216,7 +315,7 @@ exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -238,24 +337,24 @@ exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav renders 1`] = `
+exports[`SolutionNav renders 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -275,7 +374,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         items={
           Array [
             Object {
@@ -337,29 +436,29 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
+exports[`SolutionNav renders with icon 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
           <KibanaSolutionAvatar
-            className="kbnPageTemplateSolutionNav__avatar"
+            className="kbnSolutionNav__avatar"
             iconType="logoElastic"
             name="Solution"
           />
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -379,7 +478,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         items={
           Array [
             Object {
