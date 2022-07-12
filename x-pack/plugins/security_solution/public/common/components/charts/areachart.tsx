@@ -6,16 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  Axis,
-  AreaSeries,
-  Chart,
-  Position,
-  ScaleType,
-  Settings,
-  AreaSeriesStyle,
-  RecursivePartial,
-} from '@elastic/charts';
+import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
+import { Axis, AreaSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 
@@ -23,10 +15,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import { useThrottledResizeObserver } from '../utils';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../lib/kibana';
+import type { ChartSeriesConfigs, ChartSeriesData } from './common';
 import {
   chartDefaultSettings,
-  ChartSeriesConfigs,
-  ChartSeriesData,
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
@@ -35,7 +26,7 @@ import {
   ChartWrapper,
 } from './common';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
-import { VisualizationActionsProps } from '../visualization_actions/types';
+import type { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 

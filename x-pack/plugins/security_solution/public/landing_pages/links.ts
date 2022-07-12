@@ -13,7 +13,7 @@ import {
   SERVER_APP_ID,
 } from '../../common/constants';
 import { DASHBOARDS, EXPLORE } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import { overviewLinks, detectionResponseLinks } from '../overview/links';
 import { links as hostsLinks } from '../hosts/links';
 import { links as networkLinks } from '../network/links';

@@ -17,7 +17,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CommandDefinition } from '../types';
+import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 

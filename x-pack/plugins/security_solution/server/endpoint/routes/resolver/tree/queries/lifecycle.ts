@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { JsonObject, JsonValue } from '@kbn/utility-types';
-import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
+import type { NodeID, TimeRange } from '../utils';
+import { docValueFields, validIDs } from '../utils';
 
 interface LifecycleParams {
   schema: ResolverSchema;

@@ -6,7 +6,7 @@
  */
 
 import * as i18n from './translations';
-import { MatrixHistogramOption, MatrixHistogramConfigs } from '../matrix_histogram/types';
+import type { MatrixHistogramOption, MatrixHistogramConfigs } from '../matrix_histogram/types';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution/matrix_histogram';
 import { getExternalAlertLensAttributes } from '../visualization_actions/lens_attributes/common/external_alert';
 

@@ -31,8 +31,8 @@ paths:
     $ref: paths/api@cases@configure@connectors@_find.yaml
   '/api/cases/reporters':
     $ref: 'paths/api@cases@reporters.yaml'
-#  '/api/cases/status':
-#    $ref: 'paths/api@cases@status.yaml'
+  '/api/cases/status':
+    $ref: 'paths/api@cases@status.yaml'
   '/api/cases/tags':
     $ref: 'paths/api@cases@tags.yaml'
 #  '/api/cases/{caseId}':
@@ -41,8 +41,8 @@ paths:
 #    $ref: 'paths/api@cases@{caseid}@alerts.yaml'
   '/api/cases/{caseId}/comments':
     $ref: 'paths/api@cases@{caseid}@comments.yaml'
-#  '/api/cases/{caseId}/comments/{commentId}':
-#    $ref: 'paths/api@cases@{caseid}@comments@{commentid}.yaml'
+  '/api/cases/{caseId}/comments/{commentId}':
+    $ref: 'paths/api@cases@{caseid}@comments@{commentid}.yaml'
 #  '/api/cases/{caseId}/connector/{connectorId}/_push':
 #    $ref: 'paths/api@cases@{caseid}@connector@{connectorid}@_push.yaml'
 #  '/api/cases/{caseId}/user_actions':
@@ -62,8 +62,8 @@ paths:
     $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
   '/s/{spaceId}/api/cases/reporters':
     $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
- # '/s/{spaceId}/api/cases/status':
- #   $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
+  '/s/{spaceId}/api/cases/status':
+    $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
   '/s/{spaceId}/api/cases/tags':
     $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
  # '/s/{spaceId}/api/cases/{caseId}':
@@ -72,8 +72,8 @@ paths:
  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@alerts.yaml'
   '/s/{spaceId}/api/cases/{caseId}/comments':
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments.yaml'
-#  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
-#    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
+  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
  # '/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push':
  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@connector@{connectorid}@_push.yaml'
  # '/s/{spaceId}/api/cases/{caseId}/user_actions':

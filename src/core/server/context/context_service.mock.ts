@@ -9,7 +9,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ContextService, InternalContextSetup, InternalContextPreboot } from './context_service';
-import { contextMock } from './container/context.mock';
+import { contextMock } from './context_container.mock';
 
 const createPrebootContractMock = (mockContext = {}) => {
   const prebootContract: jest.Mocked<InternalContextPreboot> = {
