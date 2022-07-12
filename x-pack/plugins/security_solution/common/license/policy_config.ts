@@ -250,3 +250,12 @@ export const unsetPolicyFeaturesAccordingToLicenseLevel = (
   // set any license-gated features back to the defaults
   return policyFactoryWithoutPaidFeatures(policy);
 };
+
+export const getDefaultPolicyConfigAccordingToLicenseLevel = (
+  license: ILicense | null
+): PolicyConfig => {
+  if (isAtLeast(license, 'platinum')) {
+    return policyFactoryWithSupportedFeatures();
+  }
+  return policyFactoryWithoutPaidFeatures();
+};

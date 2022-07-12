@@ -8,6 +8,7 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { merge } from 'lodash';
 import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
 import type { PolicyData } from '../../../common/endpoint/types';
 import type {
@@ -24,6 +25,8 @@ import {
   LIST_TRUSTED_APPLICATION,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
+import { getDefaultPolicyConfigAccordingToLicenseLevel } from '../../../common/license/policy_config';
+import { licenseService } from '../license';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -226,5 +229,10 @@ export const createUsageCounterLabel = (labelList: string[]): string => labelLis
  */
 export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
-  return epPolicyConfig ? epPolicyConfig : null;
+  const defaultPolicyConfig = getDefaultPolicyConfigAccordingToLicenseLevel(
+    licenseService.getLicenseInformation()
+  );
+  return epPolicyConfig != null
+    ? { value: merge(defaultPolicyConfig, epPolicyConfig.value) }
+    : { value: defaultPolicyConfig };
 };

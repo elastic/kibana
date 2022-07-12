@@ -297,7 +297,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
                   ? endpointMetadataById._source.Endpoint.capabilities
                   : [],
             },
-            policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
+            policy_config: endpointPolicyDetail,
             policy_response:
               failedPolicy !== null && failedPolicy !== undefined
                 ? {
