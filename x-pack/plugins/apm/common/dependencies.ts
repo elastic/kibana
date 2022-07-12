@@ -21,17 +21,17 @@ export const kueryBarPlaceholder = i18n.translate(
 );
 
 export const getKueryBarBoolFilter = ({
-  backendName,
+  dependencyName,
   environment,
 }: {
-  backendName?: string;
+  dependencyName?: string;
   environment: string;
 }) => {
   return [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
     { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-    ...(backendName
-      ? [{ term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } }]
+    ...(dependencyName
+      ? [{ term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } }]
       : []),
     ...environmentQuery(environment),
   ];

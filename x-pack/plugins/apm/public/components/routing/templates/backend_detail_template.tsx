@@ -19,7 +19,7 @@ import { SearchBar } from '../../shared/search_bar';
 import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
-} from '../../../../common/backends';
+} from '../../../../common/dependencies';
 import { useOperationBreakdownEnabledSetting } from '../../../hooks/use_operations_breakdown_enabled_setting';
 
 interface Props {

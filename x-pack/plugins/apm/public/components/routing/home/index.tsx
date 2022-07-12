@@ -255,11 +255,11 @@ export const home = {
           ]),
         }),
       }),
-      '/backends/{backendName}/overview': {
+      '/backends/{dependencyName}/overview': {
         element: <RedirectPathBackendDetailView />,
         params: t.type({
           path: t.type({
-            backendName: t.string,
+            dependencyName: t.string,
           }),
         }),
       },
@@ -269,7 +269,7 @@ export const home = {
           query: t.intersection([
             t.type({
               comparisonEnabled: toBooleanRt,
-              backendName: t.string,
+              dependencyName: t.string,
             }),
             offsetRt,
           ]),

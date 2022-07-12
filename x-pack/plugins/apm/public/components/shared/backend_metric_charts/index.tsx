@@ -21,7 +21,7 @@ export function BackendMetricCharts() {
   const {
     query,
     query: {
-      backendName,
+      dependencyName,
       rangeFrom,
       rangeTo,
       kuery,
@@ -34,7 +34,7 @@ export function BackendMetricCharts() {
   const spanName = 'spanName' in query ? query.spanName : undefined;
 
   const props: BackendMetricChartsRouteParams = {
-    backendName,
+    dependencyName,
     rangeFrom,
     rangeTo,
     kuery,

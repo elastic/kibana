@@ -10,7 +10,7 @@ import React from 'react';
 import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
-} from '../../../../common/backends';
+} from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { SearchBar } from '../../shared/search_bar';
 import { BackendInventoryDependenciesTable } from './backend_inventory_dependencies_table';

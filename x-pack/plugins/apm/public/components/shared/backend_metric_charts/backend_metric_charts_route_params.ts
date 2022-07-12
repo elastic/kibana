@@ -12,7 +12,7 @@ export type BackendMetricChartsRouteParams = Pick<
     ApmRoutes,
     '/backends/operation' | '/backends/overview'
   >['query'],
-  | 'backendName'
+  | 'dependencyName'
   | 'comparisonEnabled'
   | 'spanName'
   | 'rangeFrom'
