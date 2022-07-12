@@ -20,7 +20,7 @@ export interface GetEventsOptions {
    */
   withTimeoutMs?: number;
   /**
-   * fromTimestamp (optional) if specified, only the events that are greater or equal to the provided timestamp will be returned.
+   * fromTimestamp (optional) if specified, only the events that are greater than the provided timestamp will be returned.
    * @remarks Useful when we need to retrieve the events after a specific action, and we don't care about anything prior to that.
    */
   fromTimestamp?: string;

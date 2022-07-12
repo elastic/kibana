@@ -22,7 +22,7 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { RenderMode } from '@kbn/expressions-plugin';
+import { ErrorLike, RenderMode } from '@kbn/expressions-plugin';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -350,6 +350,10 @@ export class Embeddable
     );
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   public supportedTriggers() {
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
@@ -469,16 +473,27 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData: ExpressionWrapperProps['onData$'] = (_, adapters) => {
+  private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
     }
+
+    const { type, error } = data as { type: string; error: ErrorLike };
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: false,
+      error: type === 'error' ? error : undefined,
+    });
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
     this.renderComplete.dispatchComplete();
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   };
 
   /**
@@ -498,6 +513,11 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      error: undefined,
+    });
     this.renderComplete.dispatchInProgress();
 
     const parentContext = this.input.executionContext;

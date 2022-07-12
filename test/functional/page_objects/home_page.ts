@@ -44,6 +44,11 @@ export class HomePageObject extends FtrService {
     return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
   }
 
+  async goToSampleDataPage() {
+    await this.testSubjects.click('addSampleData');
+    await this.doesSampleDataSetExist('ecommerce');
+  }
+
   async addSampleDataSet(id: string) {
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
