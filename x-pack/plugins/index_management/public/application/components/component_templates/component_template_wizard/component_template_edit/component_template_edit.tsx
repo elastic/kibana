@@ -70,6 +70,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const decodedName = attemptToURIDecode(name)!;
 
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
+  const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
+  const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
 
   useEffect(() => {
     breadcrumbs.setEditBreadcrumbs();
@@ -88,26 +90,37 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    if (updatedComponentTemplate._meta?.managed_by === 'fleet') {
-      const { data } = await api.getComponentTemplateDatastreams(updatedComponentTemplate.name);
-      if (!data?.data_streams.length) {
-        return;
+    if (updatedComponentTemplate._meta?.managed_by === 'fleet' && dataStreams.length) {
+      const dataStreamsToRollover: string[] = [];
+      for (const dataStream of dataStreams) {
+        try {
+          const { error: applyMappingError } = await api.postDataStreamMappingsFromTemplate(
+            dataStream
+          );
+          if (applyMappingError) {
+            throw applyMappingError;
+          }
+        } catch (err) {
+          dataStreamsToRollover.push(dataStream);
+        }
       }
 
-      const ref = overlays.openModal(
-        toMountPoint(
-          <MappingsDatastreamRolloverModal
-            componentTemplatename={updatedComponentTemplate.name}
-            datastreams={data.data_streams}
-            api={api}
-            onClose={() => {
-              ref.close();
-            }}
-          />
-        )
-      );
+      if (dataStreamsToRollover.length) {
+        const ref = overlays.openModal(
+          toMountPoint(
+            <MappingsDatastreamRolloverModal
+              componentTemplatename={updatedComponentTemplate.name}
+              dataStreams={dataStreamsToRollover}
+              api={api}
+              onClose={() => {
+                ref.close();
+              }}
+            />
+          )
+        );
 
-      await ref.onClose;
+        await ref.onClose;
+      }
     }
     redirectTo({
       pathname: encodeURI(
@@ -165,6 +178,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
+        datastreams={dataStreams}
         defaultActiveWizardSection={defaultActiveStep}
         onStepChange={updateStep}
         onSave={onSave}

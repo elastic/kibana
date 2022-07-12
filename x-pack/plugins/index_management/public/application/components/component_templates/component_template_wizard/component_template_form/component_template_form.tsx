@@ -40,6 +40,7 @@ interface Props {
   isEditing?: boolean;
   defaultActiveWizardSection?: WizardSection;
   onStepChange?: (stepId: string) => void;
+  datastreams?: string[];
 }
 
 const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
@@ -85,6 +86,7 @@ export const ComponentTemplateForm = ({
       isManaged: false,
     },
   },
+  datastreams,
   isEditing,
   isSaving,
   saveError,
@@ -243,6 +245,7 @@ export const ComponentTemplateForm = ({
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
         <StepReviewContainer
           getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
+          datastreams={datastreams}
         />
       </FormWizardStep>
     </FormWizard>

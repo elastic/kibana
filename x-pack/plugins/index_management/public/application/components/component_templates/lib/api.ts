@@ -33,6 +33,13 @@ export const getApi = (
     });
   }
 
+  function useLoadComponentTemplatesDatastream(name: string) {
+    return useRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/datastreams`,
+      method: 'get',
+    });
+  }
+
   function deleteComponentTemplates(names: string[]) {
     const result = sendRequest({
       path: `${apiBasePath}/component_templates/${names
@@ -88,9 +95,16 @@ export const getApi = (
     });
   }
 
-  async function postComponentTemplateDatastreamsRollover(name: string) {
+  async function postDataStreamRollover(name: string) {
     return sendRequest<ComponentTemplateDatastreams>({
-      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/datastreams_rollover`,
+      path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover`,
+      method: 'post',
+    });
+  }
+
+  async function postDataStreamMappingsFromTemplate(name: string) {
+    return sendRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/mappings_from_template`,
       method: 'post',
     });
   }
@@ -101,7 +115,9 @@ export const getApi = (
     useLoadComponentTemplate,
     createComponentTemplate,
     updateComponentTemplate,
+    useLoadComponentTemplatesDatastream,
     getComponentTemplateDatastreams,
-    postComponentTemplateDatastreamsRollover,
+    postDataStreamRollover,
+    postDataStreamMappingsFromTemplate,
   };
 };

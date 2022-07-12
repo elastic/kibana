@@ -13,14 +13,14 @@ import type { useComponentTemplatesContext } from '../../component_templates_con
 
 interface Props {
   componentTemplatename: string;
-  datastreams: string[];
+  dataStreams: string[];
   onClose: () => void;
   api: ReturnType<typeof useComponentTemplatesContext>['api'];
 }
 
 export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = ({
   componentTemplatename,
-  datastreams,
+  dataStreams,
   onClose,
   api,
 }) => {
@@ -31,7 +31,9 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
     async function confirm() {
       try {
         setIsLoading(true);
-        await api.postComponentTemplateDatastreamsRollover(componentTemplatename);
+        for (const dataStream of dataStreams) {
+          await api.postDataStreamRollover(dataStream);
+        }
         await onClose();
       } catch (err) {
         setError(err);
@@ -41,7 +43,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
     }
 
     confirm();
-  }, [api, onClose, componentTemplatename]);
+  }, [api, onClose, dataStreams]);
 
   return (
     <EuiConfirmModal
@@ -96,7 +98,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
               <>
                 <EuiSpacer size="m" />
                 <ul>
-                  {datastreams.map((datastream) => (
+                  {dataStreams.map((datastream) => (
                     <li>
                       <EuiCode>{datastream}</EuiCode>
                       <br />
