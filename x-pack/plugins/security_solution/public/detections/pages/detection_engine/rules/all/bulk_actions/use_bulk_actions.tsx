@@ -86,7 +86,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { setLoadingRules, clearRulesSelection, setIsRefreshOn },
+    actions: { setLoadingRules, clearRulesSelection },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -131,7 +131,6 @@ export const useBulkActions = ({
 
       const handleDisableActions = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
-        setIsRefreshOn(false);
         closePopover();
 
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
@@ -148,7 +147,6 @@ export const useBulkActions = ({
 
       const handleDuplicateAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
-        setIsRefreshOn(false);
         closePopover();
 
         await executeRulesBulkAction({
@@ -459,7 +457,6 @@ export const useBulkActions = ({
       resolveTagsRefetch,
       updateRulesCache,
       clearRulesSelection,
-      setIsRefreshOn,
       executeBulkActionsDryRun,
     ]
   );
