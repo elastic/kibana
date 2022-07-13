@@ -374,6 +374,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
               defaultMessage="Agent Binary Download"
+              data-test-subj="agentPolicyForm.downloadSource.label"
             />
           </h4>
         }
@@ -403,6 +404,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               });
             }}
             options={dataDownloadSourceOptions}
+            data-test-subj="agentPolicyForm.downloadSource.select"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -429,6 +431,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 {(deleteAgentPolicyPrompt) => {
                   return (
                     <EuiButton
+                      data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
                       color="danger"
                       onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
                     >
