@@ -52,7 +52,7 @@ export function getSwitchIndexPatternAppState(
   }
 
   return {
-    index: nextIndexPattern.isPersisted() ? nextIndexPattern.id : nextIndexPattern.toSpec(),
+    index: nextIndexPattern.id,
     columns,
     sort: nextSort,
   };

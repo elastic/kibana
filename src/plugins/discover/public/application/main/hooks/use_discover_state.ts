@@ -135,14 +135,8 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        if (typeof nextState.index === 'string') {
-          const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-          savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
-        } else {
-          const { runtimeFieldMap, ...nextStateIndex } = nextState.index;
-          const nextIndexPattern = await services.data.dataViews.create(nextStateIndex);
-          savedSearch.searchSource.setField('index', nextIndexPattern);
-        }
+        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
+        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
 
         reset();
       }
@@ -163,7 +157,6 @@ export function useDiscoverState({
     data$,
     reset,
     savedSearch.searchSource,
-    services.data.dataViews,
   ]);
 
   /**

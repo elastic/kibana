@@ -399,11 +399,9 @@ export class DataViewsService {
    * Clear index pattern list cache.
    * @param id optionally clear a single id
    */
-  clearCache = (id?: string) => {
+  clearCache = (id?: boolean) => {
     this.savedObjectsCache = null;
     if (id) {
-      this.dataViewCache.clear(id);
-    } else {
       this.dataViewCache.clearAll();
     }
   };

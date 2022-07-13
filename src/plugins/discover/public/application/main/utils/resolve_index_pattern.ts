@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObject, ToastsStart } from '@kbn/core/public';
 export type IndexPatternSavedObject = SavedObject & { title: string };
@@ -75,27 +75,23 @@ export function getIndexPatternId(
  * Function to load the given index pattern by id, providing a fallback if it doesn't exist
  */
 export async function loadIndexPattern(
-  id: string | DataViewSpec,
-  dataViews: DataViewsContract,
+  id: string,
+  indexPatterns: DataViewsContract,
   config: IUiSettingsClient
 ): Promise<IndexPatternData> {
-  const indexPatternList = (await dataViews.getCache()) as unknown as IndexPatternSavedObject[];
-
-  if (typeof id === 'string') {
-    const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
-    return {
-      list: indexPatternList || [],
-      loaded: await dataViews.get(actualId),
-      stateVal: id,
-      stateValFound: !!id && actualId === id,
-    };
+  let dataView;
+  try {
+    dataView = await indexPatterns.get(id);
+  } catch (e) {
+    dataView = await config.get('defaultIndex');
   }
-  const dataView = await dataViews.create(id);
+  const indexPatternList = (await indexPatterns.getCache()) as unknown as IndexPatternSavedObject[];
+
   return {
     list: indexPatternList || [],
     loaded: dataView,
-    stateVal: dataView.id!,
-    stateValFound: true,
+    stateVal: id,
+    stateValFound: !!id && dataView.id === id,
   };
 }
 

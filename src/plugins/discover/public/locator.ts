@@ -8,7 +8,6 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -25,7 +24,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set index pattern ID.
    */
-  indexPatternId?: string | DataViewSpec;
+  indexPatternId?: string;
 
   /**
    * Optionally set the time range in the time picker.
@@ -119,7 +118,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     const appState: {
       query?: Query;
       filters?: Filter[];
-      index?: string | DataViewSpec;
+      index?: string;
       columns?: string[];
       interval?: string;
       sort?: string[][];

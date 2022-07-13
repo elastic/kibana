@@ -77,6 +77,8 @@ export function DiscoverMainRoute(props: Props) {
   const loadDefaultOrCurrentIndexPattern = useCallback(
     async (searchSource: ISearchSource) => {
       try {
+        debugger;
+
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
           .catch(() => false);

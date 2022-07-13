@@ -33,7 +33,7 @@ import {
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
@@ -61,7 +61,7 @@ export interface AppState {
   /**
    * id of the used index pattern
    */
-  index?: string | DataViewSpec;
+  index?: string;
   /**
    * Used interval of the histogram
    */
@@ -260,10 +260,7 @@ export function getState({
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
-      const dataViewId = !isDataViewSpec(appStateContainer.getState().index)
-        ? appStateContainer.getState().index
-        : '';
-      if (dataViewId && dataViewId !== indexPattern.id) {
+      if (appStateContainer.getState().index !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: indexPattern.id });
       }
@@ -422,8 +419,4 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
   };
-}
-
-function isDataViewSpec(dataView: string | DataViewSpec | undefined): dataView is DataViewSpec {
-  return Boolean(dataView) && typeof dataView !== 'string';
 }
