@@ -20,7 +20,7 @@ interface Props {
 }
 
 const EMPTY_EXAMPLE = i18n.translate(
-  'xpack.dataVisualizer.dataGrid.field.examplesList.noExamplesMessage',
+  'xpack.dataVisualizer.dataGrid.field.examplesList.emptyExampleMessage',
   { defaultMessage: '(empty)' }
 );
 export const ExamplesList: FC<Props> = ({ examples }) => {

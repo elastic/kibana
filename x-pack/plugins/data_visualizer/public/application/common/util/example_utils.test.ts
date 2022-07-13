@@ -7,7 +7,7 @@
 
 import { getUniqGeoOrStrExamples } from './example_utils';
 
-describe('geo type utils', () => {
+describe('example utils', () => {
   describe('getUniqGeoOrStrExamples', () => {
     test('should remove duplicated strings up to maxExamples', () => {
       expect(
