@@ -21,19 +21,22 @@ import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
 } from '@kbn/core-execution-context-server-internal';
-import { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
+import type { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
+import type {
+  InternalContextPreboot,
+  InternalContextSetup,
+} from '@kbn/core-http-context-server-internal';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart,
+} from '@kbn/core-http-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { InternalContextPreboot, InternalContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './elasticsearch';
-import {
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
-  InternalHttpServiceStart,
-} from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,

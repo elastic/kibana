@@ -14,8 +14,11 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
+import type {
+  InternalHttpServiceSetup,
+  InternalHttpServicePreboot,
+} from '@kbn/core-http-server-internal';
 import { RequestHandlerContext } from '..';
-import { InternalHttpServiceSetup, InternalHttpServicePreboot } from '../http';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import {
   InternalHttpResourcesSetup,

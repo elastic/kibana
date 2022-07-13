@@ -7,12 +7,12 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
   mockOsCollector,
   mockProcessCollector,
   mockServerCollector,
 } from './ops_metrics_collector.test.mocks';
-import { httpServiceMock } from '../http/http_service.mock';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 
 describe('OpsMetricsCollector', () => {
