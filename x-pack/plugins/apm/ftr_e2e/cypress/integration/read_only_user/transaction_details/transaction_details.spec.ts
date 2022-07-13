@@ -20,13 +20,6 @@ describe('Transaction details', () => {
   before(async () => {
     cy.loginAsViewerUser();
 
-    cy.visit(
-      `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
-        ...timeRange,
-        transactionName: 'GET /api/product',
-      })}`
-    );
-
     await synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
@@ -39,22 +32,35 @@ describe('Transaction details', () => {
     await synthtrace.clean();
   });
 
-  it('shows transaction name', () => {
-    cy.contains('h2', 'GET /api/product');
-  });
+  describe('shows header, charts and tables', () => {
+    before(async () => {
+      cy.visit(
+        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams(
+          {
+            ...timeRange,
+            transactionName: 'GET /api/product',
+          }
+        )}`
+      );
+    });
 
-  it('shows transaction charts', () => {
-    cy.get('[data-test-subj="latencyChart"]');
-    cy.get('[data-test-subj="throughput"]');
-    cy.get('[data-test-subj="transactionBreakdownChart"]');
-    cy.get('[data-test-subj="errorRate"]');
-  });
+    it('shows transaction name', () => {
+      cy.contains('h2', 'GET /api/product');
+    });
 
-  it('shows top errors table', () => {
-    cy.contains('Top 5 errors');
-    cy.get('[data-test-subj="topErrorsForTransactionTable"]')
-      .contains('a', '[MockError] Foo')
-      .click();
-    cy.url().should('include', 'opbeans-java/errors');
+    it('shows transaction charts', () => {
+      cy.get('[data-test-subj="latencyChart"]');
+      cy.get('[data-test-subj="throughput"]');
+      cy.get('[data-test-subj="transactionBreakdownChart"]');
+      cy.get('[data-test-subj="errorRate"]');
+    });
+
+    it('shows top errors table', () => {
+      cy.contains('Top 5 errors');
+      cy.get('[data-test-subj="topErrorsForTransactionTable"]')
+        .contains('a', '[MockError] Foo')
+        .click();
+      cy.url().should('include', 'opbeans-java/errors');
+    });
   });
 });
