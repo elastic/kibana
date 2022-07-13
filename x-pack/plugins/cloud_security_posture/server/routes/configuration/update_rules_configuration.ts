@@ -21,7 +21,7 @@ import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 import { CspAppContext } from '../../plugin';
-import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
+import type { CspRule, CspRuleMetadata, CspRulesConfiguration } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   UPDATE_RULES_CONFIG_ROUTE_PATH,
@@ -68,16 +68,22 @@ export const getCspRules = (
 export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRule>
 ): CspRulesConfiguration => {
-  const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
+  const benchmarkType = cspRules.saved_objects[0]?.attributes.metadata.benchmark.id;
+
+  if (!benchmarkType) throw new Error('Expected benchmark type to exists');
+
+  const activatedRules = cspRules.saved_objects
+    .filter((cspRule) => cspRule.attributes.enabled)
+    .map((activatedRule) => activatedRule.attributes.metadata.rego_rule_id);
+
   const config = {
     data_yaml: {
       activated_rules: {
-        cis_k8s: activatedRules.map(
-          (activatedRule) => activatedRule.attributes.metadata.rego_rule_id
-        ),
-      },
+        [benchmarkType]: activatedRules,
+      } as Record<CspRuleMetadata['benchmark']['id'], string[]>,
     },
   };
+
   return config;
 };
 
