@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { DocLinks } from '@kbn/doc-links';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import type {
-  HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
@@ -320,6 +321,12 @@ const policyResponseTitles = Object.freeze(
         defaultMessage: 'Full Disk Access',
       }),
     ],
+    [
+      'macos_system_ext',
+      i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.macos_system_ext', {
+        defaultMessage: 'Permissions required',
+      }),
+    ],
   ])
 );
 
@@ -328,25 +335,25 @@ type PolicyResponseStatus = `${HostPolicyResponseActionStatus}`;
 const policyResponseStatuses = Object.freeze(
   new Map<PolicyResponseStatus, string>([
     [
-      'success',
+      HostPolicyResponseActionStatus.success,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.success', {
         defaultMessage: 'Success',
       }),
     ],
     [
-      'warning',
+      HostPolicyResponseActionStatus.warning,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.warning', {
         defaultMessage: 'Warning',
       }),
     ],
     [
-      'failure',
+      HostPolicyResponseActionStatus.failure,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.failed', {
         defaultMessage: 'Failed',
       }),
     ],
     [
-      'unsupported',
+      HostPolicyResponseActionStatus.unsupported,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.unsupported', {
         defaultMessage: 'Unsupported',
       }),
@@ -361,7 +368,17 @@ const descriptions = Object.freeze(
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.description.full_disk_access',
         {
-          defaultMessage: 'You must enable full disk access for Elastic Endpoint on your machine. ',
+          defaultMessage: 'You must enable full disk access for Elastic Endpoint on your machine.',
+        }
+      ),
+    ],
+    [
+      'macos_system_ext',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.description.macos_system_ext',
+        {
+          defaultMessage:
+            'You must enable the Mac system extension for Elastic Endpoint on your machine.',
         }
       ),
     ],
@@ -375,17 +392,33 @@ const linkTexts = Object.freeze(
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.link.text.full_disk_access',
         {
-          defaultMessage: 'Learn more.',
+          defaultMessage: ' Learn more.',
+        }
+      ),
+    ],
+    [
+      'macos_system_ext',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.link.text.macos_system_ext',
+        {
+          defaultMessage: ' Learn more.',
         }
       ),
     ],
   ])
 );
 
-/**
- * An array with errors we want to bubble up in policy response
- */
-const GENERIC_ACTION_ERRORS: readonly string[] = Object.freeze(['full_disk_access']);
+function isMacosFullDiskAccessError(os: string, policyAction: HostPolicyResponseAppliedAction) {
+  return os === 'macos' && policyAction.name === 'full_disk_access';
+}
+
+function isMacosSystemExtensionError(os: string, policyAction: HostPolicyResponseAppliedAction) {
+  return (
+    os === 'macos' &&
+    policyAction.name === 'connect_kernel' &&
+    policyAction.status === HostPolicyResponseActionStatus.failure
+  );
+}
 
 export class PolicyResponseActionFormatter {
   public key: string;
@@ -396,28 +429,49 @@ export class PolicyResponseActionFormatter {
   public errorDescription?: string;
   public status?: string;
   public linkText?: string;
-  public linkUrl?: string;
 
   constructor(
-    policyResponseAppliedAction: ImmutableObject<HostPolicyResponseAppliedAction>,
-    link?: string
+    private policyResponseAppliedAction: ImmutableObject<HostPolicyResponseAppliedAction>,
+    private docLinks: DocLinks['securitySolution']['policyResponseTroubleshooting'],
+    private os: string = ''
   ) {
     this.key = policyResponseAppliedAction.name;
     this.title =
-      policyResponseTitles.get(this.key) ??
+      policyResponseTitles.get(this.errorKey || this.key) ??
       this.key.replace(/_/g, ' ').replace(/\b(\w)/g, (m) => m.toUpperCase());
     this.hasError =
-      policyResponseAppliedAction.status === 'failure' ||
-      policyResponseAppliedAction.status === 'warning';
+      policyResponseAppliedAction.status === HostPolicyResponseActionStatus.failure ||
+      policyResponseAppliedAction.status === HostPolicyResponseActionStatus.warning;
     this.description = descriptions.get(this.key) || policyResponseAppliedAction.message;
-    this.errorDescription = descriptions.get(this.key) || policyResponseAppliedAction.message;
+    this.errorDescription =
+      descriptions.get(this.errorKey || this.key) || this.policyResponseAppliedAction.message;
     this.errorTitle = this.errorDescription ? this.title : policyResponseAppliedAction.name;
     this.status = policyResponseStatuses.get(policyResponseAppliedAction.status);
-    this.linkText = linkTexts.get(this.key);
-    this.linkUrl = link;
+    this.linkText = linkTexts.get(this.errorKey || this.key);
   }
 
-  public isGeneric(): boolean {
-    return GENERIC_ACTION_ERRORS.includes(this.key);
+  public get linkUrl(): string {
+    return this.docLinks[this.errorKey];
+  }
+
+  public get isGeneric(): boolean {
+    if (isMacosFullDiskAccessError(this.os, this.policyResponseAppliedAction)) {
+      return true;
+    }
+
+    if (isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private get errorKey(): keyof DocLinks['securitySolution']['policyResponseTroubleshooting'] {
+    if (isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction)) {
+      return 'macos_system_ext';
+    }
+
+    return this.policyResponseAppliedAction
+      .name as keyof DocLinks['securitySolution']['policyResponseTroubleshooting'];
   }
 }
