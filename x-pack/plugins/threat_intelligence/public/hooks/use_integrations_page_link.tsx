@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
+import { useKibanaBasePath } from './use_kibana_base_path';
 
-export const EMPTY_VALUE = '-';
-
-export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
+export const useIntegrationsPageLink = () =>
+  `${useKibanaBasePath()}/app/integrations/browse?q=threat%20intelligence`;
