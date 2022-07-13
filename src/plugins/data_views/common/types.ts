@@ -210,7 +210,7 @@ export interface UiSettingsCommon {
    * Get a setting value
    * @param key name of value
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = unknown>(key: string) => Promise<T | undefined>;
   /**
    * Get all settings values
    */
@@ -220,7 +220,7 @@ export interface UiSettingsCommon {
    * @param key name of value
    * @param value value to set
    */
-  set: <T = any>(key: string, value: T) => Promise<void>;
+  set: <T = unknown>(key: string, value: T) => Promise<void>;
   /**
    * Remove a setting value
    * @param key name of value

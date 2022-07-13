@@ -435,7 +435,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get('defaultIndex');
+    const defaultIndexPatternId = await this.config.get<string | null>('defaultIndex');
     return defaultIndexPatternId ?? null;
   };
 
@@ -463,7 +463,7 @@ export class DataViewsService {
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
-    const metaFields = await this.config.get(META_FIELDS);
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
@@ -773,8 +773,8 @@ export class DataViewsService {
    * @returns DataView
    */
   async create({ id, ...restOfSpec }: DataViewSpec, skipFetchFields = false): Promise<DataView> {
-    const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(META_FIELDS);
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
 
     const spec = {
       id: id ?? uuid.v4(),
