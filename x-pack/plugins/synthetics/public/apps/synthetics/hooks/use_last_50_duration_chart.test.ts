@@ -10,7 +10,7 @@ import * as hooks from './use_last_x_checks';
 import { useLast50DurationChart } from './use_last_50_duration_chart';
 import { WrappedHelper } from '../utils/testing';
 
-describe('useMonitorListFilters', () => {
+describe('useLast50DurationChart', () => {
   const getMockHits = (): Array<{ 'monitor.duration.us': number[] | undefined }> => {
     const hits = [];
     for (let i = 0; i < 10; i++) {

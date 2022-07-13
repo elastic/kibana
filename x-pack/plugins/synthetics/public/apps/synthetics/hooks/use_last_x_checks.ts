@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useEsSearch, createEsParams } from '@kbn/observability-plugin/public';
 import { Ping } from '../../../../common/runtime_types';
@@ -31,7 +31,6 @@ export function useLastXChecks<Fields>({
   size?: number;
 }) {
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const [loaded, setLoaded] = useState(false);
   const { locationsLoaded, locations } = useSelector(selectServiceLocationsState);
 
   const params = createEsParams({
@@ -61,24 +60,16 @@ export function useLastXChecks<Fields>({
     },
   });
 
-  const { data } = useEsSearch<Ping, typeof params>(params, [lastRefresh, monitorId, locationId], {
+  const { data } = useEsSearch<Ping, typeof params>(params, [lastRefresh], {
     name: 'getLast50MonitorRunsByLocation',
   });
-
-  useEffect(() => {
-    if (data) {
-      // set loaded the first time we fetch data. This ensures that the metric item
-      // is not rerendered on every Overview refresh
-      setLoaded(true);
-    }
-  }, [data]);
 
   const dataAsJSON = JSON.stringify(data?.hits?.hits);
 
   return useMemo(() => {
     return {
       hits: (data?.hits?.hits.map((hit) => hit.fields) as Fields[]) || [],
-      loading: !loaded,
+      loading: !data,
     };
-  }, [dataAsJSON, loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dataAsJSON]); // eslint-disable-line react-hooks/exhaustive-deps
 }

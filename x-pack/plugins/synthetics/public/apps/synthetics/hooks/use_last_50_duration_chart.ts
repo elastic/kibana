@@ -8,6 +8,8 @@
 import { useMemo } from 'react';
 import { useLastXChecks } from './use_last_x_checks';
 
+const fields = ['monitor.duration.us'];
+
 export function useLast50DurationChart({
   monitorId,
   locationId,
@@ -20,7 +22,7 @@ export function useLast50DurationChart({
   }>({
     monitorId,
     locationId,
-    fields: ['monitor.duration.us'],
+    fields,
     size: 50,
   });
   const { data, averageDuration } = useMemo(() => {

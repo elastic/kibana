@@ -11,7 +11,7 @@ import { WrappedHelper } from '../utils/testing';
 import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
-describe('useMonitorListFilters', () => {
+describe('useLastXChecks', () => {
   const getMockHits = (): Array<{ fields: { 'monitor.duration.us': number[] | undefined } }> => {
     const hits = [];
     for (let i = 0; i < 10; i++) {
@@ -114,12 +114,11 @@ describe('useMonitorListFilters', () => {
   });
 
   it('returns loading properly', () => {
-    const loading = true;
     jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
       data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
         typeof searchHooks.useEsSearch
       >['data'],
-      loading,
+      loading: false,
     });
 
     const { result } = renderHook(
@@ -132,7 +131,26 @@ describe('useMonitorListFilters', () => {
         }),
       { wrapper: WrappedHelper }
     );
-    expect(result.current.loading).toEqual(loading);
+    expect(result.current.loading).toEqual(false);
+  });
+
+  it('returns loading true when there is no data', () => {
+    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
+      data: undefined as unknown as ReturnType<typeof searchHooks.useEsSearch>['data'],
+      loading: false,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useLastXChecks({
+          monitorId: 'mock-id',
+          locationId: 'loc',
+          size: 30,
+          fields: ['monitor.duration.us'],
+        }),
+      { wrapper: WrappedHelper }
+    );
+    expect(result.current.loading).toEqual(true);
   });
 
   it('calls useEsSearch with empty index when locations have not loaded, to prevent calling twice', () => {
@@ -164,6 +182,7 @@ describe('useMonitorListFilters', () => {
         }),
       { wrapper: WrapperWithState }
     );
+    expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(
       expect.objectContaining({ index: '' }),
       expect.anything(),
