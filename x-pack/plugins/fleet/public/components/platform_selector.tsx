@@ -114,7 +114,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     setCopyButtonClicked(true);
     if (onCopy) onCopy();
   };
-  
+
   return (
     <>
       <>
