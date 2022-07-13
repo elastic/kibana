@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiSettingsParams } from '../../../types';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { getNotificationsSettings } from './notifications';
 
 describe('notifications settings', () => {

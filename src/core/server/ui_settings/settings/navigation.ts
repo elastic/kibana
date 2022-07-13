@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
-import { UiSettingsParams } from '../../../types';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 
 export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
   return {
