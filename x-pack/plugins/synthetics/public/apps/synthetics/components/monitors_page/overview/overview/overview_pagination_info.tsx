@@ -24,7 +24,7 @@ export const OverviewPaginationInfo = ({ page }: { page: number }) => {
   }
 
   return loaded ? (
-    <EuiText>
+    <EuiText size="xs">
       <FormattedMessage
         id="xpack.synthetics.overview.pagination.description"
         defaultMessage="Showing {currentCount} of {total} {monitors}"
