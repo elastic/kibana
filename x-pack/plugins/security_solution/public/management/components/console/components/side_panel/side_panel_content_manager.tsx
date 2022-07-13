@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 import {
   EuiText,
   EuiIcon,
@@ -14,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +24,10 @@ import { useWithCommandList } from '../../hooks/state_selectors/use_with_command
 import { SidePanelContentLayout } from './side_panel_content_layout';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
+
+const StyledEuiTitle = styled(EuiTitle)`
+  color: ${({ theme: { eui } }) => eui.euiTextSubduedColor};
+`;
 
 export const SidePanelContentManager = memo(() => {
   const dispatch = useConsoleStateDispatch();
@@ -41,14 +47,14 @@ export const SidePanelContentManager = memo(() => {
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiText size="m">
-                <strong>
+              <StyledEuiTitle size="s">
+                <h3>
                   <FormattedMessage
                     id="xpack.securitySolution.console.sidePanel.helpTitle"
                     defaultMessage="Help"
                   />
-                </strong>
-              </EuiText>
+                </h3>
+              </StyledEuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -59,7 +65,7 @@ export const SidePanelContentManager = memo(() => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="m" />
           <EuiText size="s">
             <FormattedMessage
               id="xpack.securitySolution.console.sidePanel.helpDescription"

@@ -7,12 +7,15 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, transparentize } from '@elastic/eui';
 import { SidePanelContentManager } from './side_panel_content_manager';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 
 const StyledEuiFlexItemWhite = styled(EuiFlexItem)`
-  background-color: ${({ theme }) => theme.eui.euiHeaderBackgroundColor};
+  background-color: ${({ theme: { eui } }) => eui.euiHeaderBackgroundColor} !important;
+  border-radius: ${({ theme: { eui } }) => eui.euiSizeXS};
+  box-shadow: 0 ${({ theme: { eui } }) => eui.euiSizeXS} ${({ theme: { eui } }) => eui.euiSizeXS}
+    ${({ theme: { eui } }) => transparentize(eui.euiShadowColor, 0.04)};
 `;
 
 export const SidePanelFlexItem = memo((props) => {

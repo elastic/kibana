@@ -38,6 +38,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
   .euiTableHeaderCell {
     .euiTableCellContent__text {
+      color: ${({ theme: { eui } }) => eui.euiTextColor};
       font-size: ${({ theme: { eui } }) => eui.euiFontSize};
       padding-bottom: ${({ theme: { eui } }) => eui.euiSizeM};
       padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
@@ -46,9 +47,8 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
 `;
 
 const StyledEuiCallOut = styled(EuiCallOut)`
-  margin-left: ${({ theme: { eui } }) => eui.euiSize};
-  margin-right: ${({ theme: { eui } }) => eui.euiSizeS};
-  margin-bottom: ${({ theme: { eui } }) => eui.euiSize};
+  margin: ${({ theme: { eui } }) => eui.euiSize};
+  border-radius: ${({ theme: { eui } }) => eui.euiSizeXS};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -147,11 +147,17 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
               <StyledEuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={1}>
                   <EuiDescriptionList
-                    compressed
                     listItems={[
                       {
                         title: <EuiBadge>{commandNameWithArgs}</EuiBadge>,
-                        description: <>{command.about}</>,
+                        description: (
+                          <>
+                            <EuiSpacer size="s" />
+                            <EuiText color="subdued" size="xs">
+                              {command.about}
+                            </EuiText>
+                          </>
+                        ),
                       },
                     ]}
                     data-test-subj={getTestId('commandList-command')}
