@@ -10,7 +10,7 @@ export interface KeyValuePair {
   value: string;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | undefined>;
+export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
