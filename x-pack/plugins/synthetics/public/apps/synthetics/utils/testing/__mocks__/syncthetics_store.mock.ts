@@ -76,6 +76,7 @@ export const mockState: SyntheticsAppState = {
     },
     error: null,
     loading: false,
+    loaded: false,
   },
   overview: {
     pageState: {
