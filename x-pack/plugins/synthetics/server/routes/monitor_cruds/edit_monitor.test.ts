@@ -34,7 +34,7 @@ describe('syncEditedMonitor', () => {
 
   const fakePush = jest.fn();
 
-  jest.spyOn(syntheticsService, 'pushConfigs').mockImplementationOnce(fakePush);
+  jest.spyOn(syntheticsService, 'editConfig').mockImplementationOnce(fakePush);
 
   serverMock.syntheticsService = syntheticsService;
 
@@ -70,12 +70,9 @@ describe('syncEditedMonitor', () => {
     });
 
     expect(fakePush).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: 'saved-obj-id',
-        }),
-      ]),
-      true
+      expect.objectContaining({
+        id: 'saved-obj-id',
+      })
     );
   });
 });
