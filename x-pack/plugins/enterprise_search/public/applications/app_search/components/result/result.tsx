@@ -62,13 +62,18 @@ export const Result: React.FC<Props> = ({
   );
   const numResults = resultFields.length;
   const isAdvancedSchema = (schema: Schema | AdvancedSchema): schema is AdvancedSchema => {
-    return schema && Object.values(schema).reduce((isAdvanced, schemaField) => {
-      return isAdvanced && typeof schemaField !== 'string';
-    }, true);
+    return (
+      schema &&
+      Object.values(schema).reduce((isAdvanced, schemaField) => {
+        return isAdvanced && typeof schemaField !== 'string';
+      }, true)
+    );
   };
   const typeForField = (fieldName: string) => {
     if (schemaForTypeHighlights) {
-      return isAdvancedSchema(schemaForTypeHighlights) ? schemaForTypeHighlights[fieldName].type : schemaForTypeHighlights[fieldName];
+      return isAdvancedSchema(schemaForTypeHighlights)
+        ? schemaForTypeHighlights[fieldName].type
+        : schemaForTypeHighlights[fieldName];
     }
   };
 

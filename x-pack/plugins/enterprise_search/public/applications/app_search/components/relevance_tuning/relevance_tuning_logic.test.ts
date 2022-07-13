@@ -1046,7 +1046,7 @@ describe('RelevanceTuningLogic', () => {
         // consider a tunable field.
         mount({
           schema: {
-            id: { 'type': 'text', capabilities: {} },
+            id: { type: 'text', capabilities: {} },
           },
         });
         expect(RelevanceTuningLogic.values.engineHasSchemaFields).toEqual(false);
@@ -1055,8 +1055,8 @@ describe('RelevanceTuningLogic', () => {
       it('should return true otherwise', () => {
         mount({
           schema: {
-            id: { 'type': 'text', capabilities: {} },
-            text_field: { 'type': 'text', capabilities: { fulltext: true } },
+            id: { type: 'text', capabilities: {} },
+            text_field: { type: 'text', capabilities: { fulltext: true } },
           },
         });
         expect(RelevanceTuningLogic.values.engineHasSchemaFields).toEqual(true);
@@ -1068,34 +1068,38 @@ describe('RelevanceTuningLogic', () => {
         mount({
           schema: {
             fulltext_only_field: {
-              'type': 'text',
-              'capabilities': {
-                'fulltext': true,
-              }
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+              },
             },
             boost_only_field: {
-              'type': 'text',
-              'capabilities': {
-                'boost': true,
-              }
+              type: 'text',
+              capabilities: {
+                boost: true,
+              },
             },
             fulltext_and_boost_field: {
-              'type': 'text',
-              'capabilities': {
-                'fulltext': true,
-                'boost': true,
-              }
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+                boost: true,
+              },
             },
             ignored_field: {
-              'type': 'text',
-              'capabilities': {
-                'fulltext': false,
-                'boost': false,
-              }
-            }
+              type: 'text',
+              capabilities: {
+                fulltext: false,
+                boost: false,
+              },
+            },
           },
         });
-        expect(RelevanceTuningLogic.values.schemaFields).toEqual(['fulltext_only_field', 'boost_only_field', 'fulltext_and_boost_field']);
+        expect(RelevanceTuningLogic.values.schemaFields).toEqual([
+          'fulltext_only_field',
+          'boost_only_field',
+          'fulltext_and_boost_field',
+        ]);
       });
     });
 
@@ -1119,34 +1123,37 @@ describe('RelevanceTuningLogic', () => {
           filterInputValue: 'fu',
           schema: {
             fulltext_only_field: {
-              'type': 'text',
-              'capabilities': {
-                'fulltext': true,
-              }
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+              },
             },
             boost_only_field: {
-              'type': 'text',
-              'capabilities': {
-                'boost': true,
-              }
+              type: 'text',
+              capabilities: {
+                boost: true,
+              },
             },
             fulltext_and_boost_field: {
-              'type': 'text',
-              'capabilities': {
-                'fulltext': true,
-                'boost': true,
-              }
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+                boost: true,
+              },
             },
             ignored_field: {
-              'type': 'text',
-              'capabilities': {
-                'fulltext': false,
-                'boost': false,
-              }
-            }
-          }
+              type: 'text',
+              capabilities: {
+                fulltext: false,
+                boost: false,
+              },
+            },
+          },
         });
-        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual(['fulltext_only_field', 'fulltext_and_boost_field']);
+        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual([
+          'fulltext_only_field',
+          'fulltext_and_boost_field',
+        ]);
       });
     });
 
@@ -1154,7 +1161,7 @@ describe('RelevanceTuningLogic', () => {
       it('should return a list of schema field names that contain the text from filterInputValue, and if that field has a schema conflict', () => {
         mount({
           filterInputValue: 'ba',
-          schema: { },
+          schema: {},
           schemaConflicts: {
             bar: {
               text: ['source_engine_1'],

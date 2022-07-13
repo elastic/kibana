@@ -26,7 +26,7 @@ describe('RelevanceTuningForm', () => {
     filteredSchemaFieldsWithConflicts: [],
     schema: {
       foo: { type: 'text' },
-      bar: { type: 'number' } ,
+      bar: { type: 'number' },
     },
     searchSettings: {
       boosts: {
