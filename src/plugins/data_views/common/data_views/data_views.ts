@@ -870,7 +870,8 @@ export class DataViewsService {
     // get changed keys
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
-      if (value !== (originalBody as any)[key]) {
+      const realKey = key as keyof typeof originalBody;
+      if (value !== originalBody[realKey]) {
         originalChangedKeys.push(key);
       }
     });
@@ -897,7 +898,8 @@ export class DataViewsService {
 
           const serverChangedKeys: string[] = [];
           Object.entries(updatedBody).forEach(([key, value]) => {
-            if (value !== (body as any)[key] && value !== (originalBody as any)[key]) {
+            const realKey = key as keyof typeof originalBody;
+            if (value !== body[realKey] && value !== originalBody[realKey]) {
               serverChangedKeys.push(key);
             }
           });
@@ -930,6 +932,7 @@ export class DataViewsService {
 
           // Set the updated response on this object
           serverChangedKeys.forEach((key) => {
+            // FIXME: this overwrites read-only properties
             (indexPattern as any)[key] = (samePattern as any)[key];
           });
           indexPattern.version = samePattern.version;
