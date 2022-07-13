@@ -420,7 +420,13 @@
             ],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -2454,13 +2460,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
               {
                 "pluginId": "data",
@@ -3038,13 +3038,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "IScopedSearchSessionsClient",
               "<T>"
@@ -3778,13 +3772,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
@@ -6338,7 +6326,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ getConfig, fieldFormats, calculateBoundsOptions, }: ",
+              "({ getConfig, fieldFormats, calculateBounds, }: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6363,7 +6351,7 @@
                 "id": "def-common.AggsCommonService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    getConfig,\n    fieldFormats,\n    calculateBoundsOptions,\n  }",
+                "label": "{\n    getConfig,\n    fieldFormats,\n    calculateBounds,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -12276,7 +12264,13 @@
         "description": [],
         "signature": [
           "(getConfig: (key: string) => any) => (range: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => string | undefined"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
@@ -13135,13 +13129,7 @@
         "description": [],
         "signature": [
           "(getStartDependencies: (getKibanaRequest: (() => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
           {
             "pluginId": "data",
@@ -13171,13 +13159,7 @@
             "description": [],
             "signature": [
               "(getKibanaRequest: (() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",
               {
                 "pluginId": "data",
@@ -15709,7 +15691,13 @@
         "description": [],
         "signature": [
           "(timerange: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => ",
           {
             "pluginId": "expressions",
@@ -15730,7 +15718,13 @@
             "label": "timerange",
             "description": [],
             "signature": [
-              "TimeRange"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
             ],
             "path": "src/plugins/data/common/search/expressions/timerange_to_ast.ts",
             "deprecated": false,
@@ -20885,7 +20879,13 @@
             "description": [],
             "signature": [
               "(range: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -21287,16 +21287,41 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggsCommonStartDependencies.calculateBoundsOptions",
-            "type": "Object",
+            "id": "def-common.AggsCommonStartDependencies.calculateBounds",
+            "type": "Function",
             "tags": [],
-            "label": "calculateBoundsOptions",
+            "label": "calculateBounds",
             "description": [],
             "signature": [
-              "CalculateBoundsOptions"
+              "(timeRange: ",
+              "TimeRange",
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              }
             ],
             "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStartDependencies.calculateBounds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -25208,7 +25233,13 @@
             "description": [],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -26647,7 +26678,13 @@
         ],
         "signature": [
           "{ calculateAutoTimeExpression: (range: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
@@ -27325,7 +27362,13 @@
           " | ",
           "Query",
           "[] | undefined; timeRange?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
@@ -27925,7 +27968,13 @@
             "text": "ExpressionFunctionDefinition"
           },
           "<\"timerange\", null, ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ", ",
           {
             "pluginId": "data",
@@ -29431,7 +29480,13 @@
         "description": [],
         "signature": [
           "{ type: \"timerange\"; } & ",
-          "TimeRange"
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
         "deprecated": false,
@@ -32805,7 +32860,13 @@
             "description": [],
             "signature": [
               "(input: null, args: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => { type: \"timerange\"; from: string; to: string; mode: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -32833,7 +32894,13 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "TimeRange"
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  }
                 ],
                 "path": "src/plugins/data/common/search/expressions/timerange.ts",
                 "deprecated": false,
@@ -34936,7 +35003,13 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
@@ -35233,7 +35306,13 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  EndpointAgentAndIsolationStatus,
-  EndpointAgentAndIsolationStatusProps,
-} from './endpoint_agent_and_isolation_status';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { EndpointAgentAndIsolationStatusProps } from './endpoint_agent_and_isolation_status';
+import { EndpointAgentAndIsolationStatus } from './endpoint_agent_and_isolation_status';
 import { HostStatus } from '../../../../common/endpoint/types';
 import React from 'react';
 

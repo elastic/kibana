@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook as _renderHook, RenderHookResult, act } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook as _renderHook, act } from '@testing-library/react-hooks';
 import { useConsoleManager } from './console_manager';
 import React from 'react';
 import type {
@@ -13,10 +14,8 @@ import type {
   ConsoleRegistrationInterface,
   RegisteredConsoleClient,
 } from './types';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,

@@ -241,6 +241,43 @@
     "functions": [
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.aggregateTaskOverduePercentilesForType",
+        "type": "Function",
+        "tags": [],
+        "label": "aggregateTaskOverduePercentilesForType",
+        "description": [],
+        "signature": [
+          "(type: string) => { aggs: Record<string, ",
+          "AggregationsAggregationContainer",
+          ">; query: ",
+          "QueryDslQueryContainer",
+          "; runtime_mappings: ",
+          "MappingRuntimeFields",
+          "; }"
+        ],
+        "path": "x-pack/plugins/task_manager/server/queries/aggregate_task_overdue_percentiles_for_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.aggregateTaskOverduePercentilesForType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/task_manager/server/queries/aggregate_task_overdue_percentiles_for_type.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.asInterval",
         "type": "Function",
         "tags": [],
@@ -1400,7 +1437,7 @@
         "TaskScheduling",
         ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\"> & Pick<",
         "TaskStore",
-        ", \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+        ", \"aggregate\" | \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,

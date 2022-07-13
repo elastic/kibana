@@ -10,9 +10,10 @@ import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
@@ -39,8 +40,7 @@ export const useDetailPanel = ({
   timelineId,
   tabType,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
-  const { browserFields, docValueFields, selectedPatterns, runtimeMappings } =
-    useSourcererDataView(sourcererScope);
+  const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dispatch = useDispatch();
 
@@ -107,7 +107,6 @@ export const useDetailPanel = ({
       shouldShowDetailsPanel ? (
         <DetailsPanelComponent
           browserFields={browserFields}
-          docValueFields={docValueFields}
           entityType={entityType}
           handleOnPanelClosed={handleOnDetailsPanelClosed}
           isFlyoutView={isFlyoutView}
@@ -118,7 +117,6 @@ export const useDetailPanel = ({
       ) : null,
     [
       browserFields,
-      docValueFields,
       entityType,
       handleOnDetailsPanelClosed,
       isFlyoutView,

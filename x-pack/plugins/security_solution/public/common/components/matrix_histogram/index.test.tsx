@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';
@@ -33,10 +34,6 @@ jest.mock('../visualization_actions', () => ({
   VisualizationActions: jest.fn(({ className }: { className: string }) => (
     <div data-test-subj="mock-viz-actions" className={className} />
   )),
-}));
-
-jest.mock('../inspect', () => ({
-  InspectButton: jest.fn(() => <div data-test-subj="mock-inspect" />),
 }));
 
 jest.mock('./utils', () => ({
@@ -195,7 +192,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-inspect"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
     });
 
     test("it doesn't render Inspect button by default on Network page", () => {
@@ -214,7 +211,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-inspect"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
     });
 
     test('it render Inspect button by default on other pages', () => {
@@ -233,7 +230,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-inspect"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(true);
     });
   });
 

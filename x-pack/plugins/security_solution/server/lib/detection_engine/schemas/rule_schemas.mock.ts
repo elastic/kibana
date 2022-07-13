@@ -8,7 +8,7 @@
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
-import {
+import type {
   BaseRuleParams,
   CompleteRule,
   EqlRuleParams,
@@ -19,7 +19,7 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../signals/__mocks__/es_results';
 
 const getBaseRuleParams = (): BaseRuleParams => {
@@ -46,6 +46,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
     timestampOverride: undefined,
+    timestampOverrideFallbackDisabled: undefined,
     meta: {
       someMeta: 'someField',
     },

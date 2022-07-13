@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { OsqueryPlugin } from './plugin';
-import { ConfigSchema, ConfigType } from './config';
+import type { ConfigType } from './config';
+import { ConfigSchema } from './config';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,

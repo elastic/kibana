@@ -460,7 +460,7 @@ const dataLayerToExpression = (
           isPercentage: isPercentage ? [isPercentage] : [],
           isStacked: isStacked ? [isStacked] : [],
           isHorizontal: isHorizontal ? [isHorizontal] : [],
-          splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
+          splitAccessors: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
           decorations: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
                 yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)

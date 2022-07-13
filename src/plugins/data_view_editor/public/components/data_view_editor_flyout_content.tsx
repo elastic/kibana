@@ -20,10 +20,13 @@ import {
   useFormData,
   useKibana,
   GetFieldsOptions,
+  UseField,
 } from '../shared_imports';
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
+
+import { removeSpaces } from '../lib';
 
 import {
   MatchedItem,
@@ -53,7 +56,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (dataViewSpec: DataViewSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec, persist: boolean) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -61,6 +64,7 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
+  allowAdHoc: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -77,15 +81,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
+  allowAdHoc,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, searchClient, overlays },
+    services: { http, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      isAdHoc: false,
       ...(editData
         ? {
             title: editData.title,
@@ -106,7 +112,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       const indexPatternStub: DataViewSpec = {
-        title: formData.title,
+        title: removeSpaces(formData.title),
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
@@ -127,11 +133,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
-            await onSave(indexPatternStub);
+            await onSave(indexPatternStub, !formData.isAdHoc);
           },
         });
       } else {
-        await onSave(indexPatternStub);
+        await onSave(indexPatternStub, !formData.isAdHoc);
       }
     },
   });
@@ -268,7 +274,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
           ? await loadMatchedIndices(query, allowHidden, allSources, {
               isRollupIndex,
               http,
-              searchClient,
             })
           : {
               matchedIndicesResult: {
@@ -299,21 +304,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
+    [http, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
   );
 
   // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
   useEffect(() => {
     if (editData) {
       loadSources();
-      reloadMatchedIndices(editData.title);
+      reloadMatchedIndices(removeSpaces(editData.title));
     }
     // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
 
   useEffect(() => {
-    loadTimestampFieldOptions(editData ? editData.title : title);
+    const timeFieldQuery = editData ? editData.title : title;
+    loadTimestampFieldOptions(removeSpaces(timeFieldQuery));
     if (!editData) getFields().timestampField?.setValue('');
     // We use the below eslint-disable as adding editData as a dependency create an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -369,6 +375,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
         <Form form={form} className="indexPatternEditor__form">
+          <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
           <EuiFlexGroup>
@@ -407,9 +414,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </Form>
         <Footer
           onCancel={onCancel}
-          onSubmit={() => form.submit()}
+          onSubmit={(adhoc?: boolean) => {
+            form.setFieldValue('isAdHoc', adhoc || false);
+            form.submit();
+          }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          allowAdHoc={allowAdHoc}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>
@@ -442,11 +453,9 @@ const loadMatchedIndices = memoizeOne(
     {
       isRollupIndex,
       http,
-      searchClient,
     }: {
       isRollupIndex: (index: string) => boolean;
       http: DataViewEditorContext['http'];
-      searchClient: DataViewEditorContext['searchClient'];
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
