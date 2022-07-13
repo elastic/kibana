@@ -24,10 +24,9 @@ export async function getDataStreamsQueryMetadata({
     esClient.search({
       size: 1,
       index: dataStreamName,
-      // @ts-expect-error
-      sort: [{ 'event.ingested': { order: 'desc', unmapped_type: 'long' } }],
+      sort: '@timestamp:desc',
       _source: false,
-      fields: ['event.ingested'],
+      fields: ['@timestamp'],
     }),
     esClient.termsEnum({
       index: dataStreamName,
