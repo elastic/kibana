@@ -33,6 +33,7 @@ import {
   MinIndexPatternColumn,
   MaxIndexPatternColumn,
   FormulaPublicApi,
+  FormulaIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -404,10 +405,11 @@ export class LensAttributes {
     layerConfig: LayerConfig,
     layerId: string,
     columnFilter?: string
-  ): Record<string, FieldBasedIndexPatternColumn> {
+  ): Record<string, FieldBasedIndexPatternColumn | FormulaIndexPatternColumn> {
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
-    const lensColumns: Record<string, FieldBasedIndexPatternColumn> = {};
+    const lensColumns: Record<string, FieldBasedIndexPatternColumn | FormulaIndexPatternColumn> =
+      {};
 
     // start at 1, because main y axis will have the first percentile breakdown
     for (let i = 1; i < PERCENTILE_RANKS.length; i++) {
@@ -680,7 +682,10 @@ export class LensAttributes {
     forAccessorsKeys?: boolean
   ) {
     const { breakdown } = layerConfig;
-    const lensColumns: Record<string, FieldBasedIndexPatternColumn | SumIndexPatternColumn> = {};
+    const lensColumns: Record<
+      string,
+      FieldBasedIndexPatternColumn | SumIndexPatternColumn | FormulaIndexPatternColumn
+    > = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
 
