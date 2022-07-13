@@ -11,13 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiBasicTable,
   EuiFieldText,
   useGeneratedHtmlId,
@@ -28,7 +30,7 @@ import {
 
 import * as utils from './utils';
 
-export interface DevToolsVariablesModalProps {
+export interface DevToolsVariablesFlyoutProps {
   onClose: () => void;
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
   variables: [];
@@ -40,7 +42,7 @@ export interface DevToolsVariable {
   value: string;
 }
 
-export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
+export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => {
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const formId = useGeneratedHtmlId({ prefix: '__console' });
 
@@ -59,7 +61,7 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      props.onSaveVariables(variables.filter(({ name, value }) => name && value));
+      props.onSaveVariables(variables.filter(({ name, value }) => name.trim() && value));
     },
     [props, variables]
   );
@@ -80,17 +82,17 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
         defaultMessage: 'Variable',
       }),
       render: (name, { id }) => {
-        const textField = (
+        const isInvalid = !name.match(/^[-_a-zA-Z0-9:]+$/g);
+        return (
           <EuiFieldText
             data-test-subj="variablesNameInput"
-            placeholder="Add a new variable"
             fullWidth
             name="name"
             value={name}
             onChange={(e) => onChange(e, id)}
+            isInvalid={isInvalid}
           />
         );
-        return <>{textField}</>;
       },
     },
     {
@@ -98,55 +100,45 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
       name: i18n.translate('console.variablesPage.variablesTable.columns.valueHeader', {
         defaultMessage: 'Value',
       }),
-      render: (value, { id }) => {
-        const textField = (
-          <EuiFieldText
-            data-test-subj="variablesValueInput"
-            placeholder="Add a new variable"
-            fullWidth
-            name="value"
-            onChange={(e) => onChange(e, id)}
-            value={value}
-          />
-        );
-        return <>{textField}</>;
-      },
+      render: (value, { id }) => (
+        <EuiFieldText
+          data-test-subj="variablesValueInput"
+          fullWidth
+          name="value"
+          onChange={(e) => onChange(e, id)}
+          value={value}
+        />
+      ),
     },
     {
       field: 'id',
       name: '',
       width: '5%',
-      render: (id, item) => {
-        const button = (
-          <EuiButtonIcon
-            iconType="trash"
-            aria-label="Delete"
-            color="danger"
-            onClick={() => deleteVariable(id)}
-            data-test-subj="variablesRemoveButton"
-          />
-        );
-        return <>{button}</>;
-      },
+      render: (id: string) => (
+        <EuiButtonIcon
+          iconType="trash"
+          aria-label="Delete"
+          color="danger"
+          onClick={() => deleteVariable(id)}
+          data-test-subj="variablesRemoveButton"
+        />
+      ),
     },
   ];
 
   return (
-    <EuiModal
-      data-test-subj="devToolsVariablesModal"
-      onClose={props.onClose}
-      style={{ width: 800 }}
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="console.variablesPage.pageTitle"
-            defaultMessage="Console Variables"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
+    <EuiFlyout onClose={props.onClose} ownFocus={false}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="console.variablesPage.pageTitle"
+              defaultMessage="Console Variables"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiForm id={formId} component="form" onSubmit={onSubmit}>
           <EuiBasicTable items={variables} columns={columns} />
           <EuiButtonEmpty
@@ -157,17 +149,24 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
             <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add" />
           </EuiButtonEmpty>
         </EuiForm>
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="variablesCancelButton" onClick={props.onClose}>
-          <FormattedMessage id="console.variablesPage.cancelButtonLabel" defaultMessage="Cancel" />
-        </EuiButtonEmpty>
-
-        <EuiButton fill data-test-subj="variablesSaveButton" type="submit" form={formId}>
-          <FormattedMessage id="console.variablesPage.saveButtonLabel" defaultMessage="Save" />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty data-test-subj="variablesCancelButton" onClick={props.onClose}>
+              <FormattedMessage
+                id="console.variablesPage.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill data-test-subj="variablesSaveButton" type="submit" form={formId}>
+              <FormattedMessage id="console.variablesPage.saveButtonLabel" defaultMessage="Save" />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };

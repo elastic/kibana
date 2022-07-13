@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { DevToolsVariablesModal, DevToolsVariable } from '../components';
+import { DevToolsVariablesFlyout, DevToolsVariable } from '../components';
 import { useServicesContext } from '../contexts';
+import { StorageKeys } from '../../services';
 
 interface VariablesProps {
   onClose: () => void;
@@ -20,14 +21,14 @@ export function Variables({ onClose }: VariablesProps) {
   } = useServicesContext();
 
   const onSaveVariables = (newVariables: DevToolsVariable[]) => {
-    storage.set('variables', newVariables);
+    storage.set(StorageKeys.VARIABLES, newVariables);
     onClose();
   };
   return (
-    <DevToolsVariablesModal
+    <DevToolsVariablesFlyout
       onClose={onClose}
       onSaveVariables={onSaveVariables}
-      variables={storage.get('variables', [])}
+      variables={storage.get(StorageKeys.VARIABLES, [])}
     />
   );
 }

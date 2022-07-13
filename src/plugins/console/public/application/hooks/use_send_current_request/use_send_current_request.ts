@@ -17,6 +17,7 @@ import { StorageQuotaError } from '../../components/storage_quota_error';
 import { sendRequest } from './send_request';
 import { track } from './track';
 import { replaceVariables } from '../../../lib/utils';
+import { StorageKeys } from '../../../services';
 
 export const useSendCurrentRequest = () => {
   const {
@@ -29,7 +30,7 @@ export const useSendCurrentRequest = () => {
   return useCallback(async () => {
     try {
       const editor = registry.getInputEditor();
-      const variables = storage.get('variables', []);
+      const variables = storage.get(StorageKeys.VARIABLES, []);
       let requests = await editor.getRequestsInRange();
       requests = replaceVariables(requests, variables);
       if (!requests.length) {

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './variables_modal';
+export * from './variables_flyout';
 export * from './utils';

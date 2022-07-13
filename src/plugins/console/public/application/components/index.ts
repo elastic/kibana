@@ -38,18 +38,18 @@ export const DevToolsSettingsModalLazy = React.lazy(() =>
 export const DevToolsSettingsModal = withSuspense(DevToolsSettingsModalLazy);
 
 /**
- * The Lazily-loaded `DevToolsVariablesModal` component.  Consumers should use `React.Suspense` or
+ * The Lazily-loaded `DevToolsVariablesFlyout` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const DevToolsVariablesModalLazy = React.lazy(() =>
-  import('./variables').then(({ DevToolsVariablesModal }) => ({
-    default: DevToolsVariablesModal,
+export const DevToolsVariablesFlyoutLazy = React.lazy(() =>
+  import('./variables').then(({ DevToolsVariablesFlyout }) => ({
+    default: DevToolsVariablesFlyout,
   }))
 );
 
 /**
- * A `DevToolsSettingsModal` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `DevToolsVariablesModalLazy` component lazily with
+ * A `DevToolsVariablesFlyout` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DevToolsVariablesFlyoutLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const DevToolsVariablesModal = withSuspense(DevToolsVariablesModalLazy);
+export const DevToolsVariablesFlyout = withSuspense(DevToolsVariablesFlyoutLazy);

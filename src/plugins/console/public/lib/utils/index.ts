@@ -8,9 +8,11 @@
 
 import _ from 'lodash';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type { RequestResult } from '../../application/hooks/use_send_current_request/send_request';
+import type {
+  RequestArgs,
+  RequestResult,
+} from '../../application/hooks/use_send_current_request/send_request';
 import type { DevToolsVariable } from '../../application/components';
-import type { RequestArgs } from '../../application/hooks/use_send_current_request/send_request';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -109,7 +111,7 @@ export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[]
       .sort((a, b) => a.response.statusCode - b.response.statusCode)
       .pop();
   }
-}
+};
 
 export const replaceVariables = (
   requests: RequestArgs['requests'],
@@ -117,7 +119,7 @@ export const replaceVariables = (
 ) => {
   const urlRegex = /(\${\w+})/g;
   const bodyRegex = /("\${\w+}")/g;
-  const updatedRequests = requests.map((req) => {
+  return requests.map((req) => {
     if (urlRegex.test(req.url)) {
       req.url = req.url.replaceAll(urlRegex, (match) => {
         // Sanitize variable name
@@ -158,6 +160,4 @@ export const replaceVariables = (
 
     return req;
   });
-
-  return updatedRequests;
 };
