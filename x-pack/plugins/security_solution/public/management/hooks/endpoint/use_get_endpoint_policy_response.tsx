@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpFetchError } from '@kbn/core/public';
-import { UseQueryResult, useQuery, UseQueryOptions } from 'react-query';
+import type { HttpFetchError } from '@kbn/core/public';
+import type { UseQueryResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
 import { useHttp } from '../../../common/lib/kibana';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
-import { GetHostPolicyResponse } from '../../../../common/endpoint/types';
+import type { GetHostPolicyResponse } from '../../../../common/endpoint/types';
 
 export function useGetEndpointPolicyResponse(
   selectedEndpoint: string,

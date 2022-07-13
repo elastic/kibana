@@ -5,35 +5,29 @@
  * 2.0.
  */
 
-import React, {
+import type {
   ComponentProps,
   ComponentType,
   FunctionComponent,
   Key,
-  memo,
   ReactElement,
   ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
 } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import type { CommonProps, EuiTablePaginationProps, Pagination } from '@elastic/eui';
 import {
-  CommonProps,
   EuiEmptyPrompt,
   EuiIcon,
   EuiProgress,
   EuiSpacer,
   EuiTablePagination,
-  EuiTablePaginationProps,
   EuiText,
-  Pagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { MaybeImmutable } from '../../../../common/endpoint/types';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

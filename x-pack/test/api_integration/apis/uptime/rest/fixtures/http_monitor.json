@@ -49,16 +49,28 @@
     "TLSv1.2"
   ],
   "name": "test-monitor-name",
-  "locations": [{
-    "id": "eu-west-01",
-    "label": "Europe West",
-    "geo": {
-      "lat": 33.2343132435,
-      "lon": 73.2342343434
+  "locations": [
+    {
+      "id": "eu-west-01",
+      "label": "Europe West",
+      "geo": {
+        "lat": 33.2343132435,
+        "lon": 73.2342343434
+      },
+      "url": "https://example-url.com",
+      "isServiceManaged": true
     },
-    "url": "https://example-url.com",
-    "isServiceManaged": true
-  }],
+    {
+      "id": "eu-west-02",
+      "label": "Europe West",
+      "geo": {
+        "lat": 33.2343132435,
+        "lon": 73.2342343434
+      },
+      "url": "https://example-url.com",
+      "isServiceManaged": true
+    }
+  ],
   "namespace": "testnamespace",
   "revision": 1,
   "origin": "ui",

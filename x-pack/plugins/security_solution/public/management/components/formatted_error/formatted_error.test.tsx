@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { FormattedError } from './formatted_error';
 import React from 'react';
 import type { HttpFetchError } from '@kbn/core/public';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;

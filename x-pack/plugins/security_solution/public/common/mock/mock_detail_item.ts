@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 
 export const mockDetailItemDataId = 'Y-6TfmcB0WOhS6qyMv3s';
 

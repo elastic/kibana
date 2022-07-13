@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import reduceReducers from 'reduce-reducers';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith, pluck } from 'rxjs/operators';
-import { AnyAction, Reducer } from 'redux';
-import {
+import type { AnyAction, Reducer } from 'redux';
+import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
-  DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TimelineState } from '@kbn/timelines-plugin/public';
 import type {
@@ -49,24 +49,24 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import { LinksPermissions, updateAppLinks } from './common/links';
+import type { LinksPermissions } from './common/links';
+import { updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
-import { SecurityAppStore } from './common/store/store';
+import type { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
-import { SecuritySolutionUiConfigType } from './common/types';
+import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
-import { SecurityDataView } from './common/containers/sourcerer/api';
+import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
+import { initDataView } from './common/store/sourcerer/model';
+import type { SecurityDataView } from './common/containers/sourcerer/api';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;

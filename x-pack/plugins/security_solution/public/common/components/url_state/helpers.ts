@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
-import * as H from 'history';
+import type * as H from 'history';
 
 import type { Filter, Query } from '@kbn/es-query';
 
@@ -16,14 +16,16 @@ import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { inputsSelectors, State } from '../../store';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { State } from '../../store';
+import { inputsSelectors } from '../../store';
+import type { UrlInputsModel } from '../../store/inputs/model';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
-import { NavTab } from '../navigation/types';
-import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
+import type { NavTab } from '../navigation/types';
+import type { UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
+import type { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { RuleAlertType, isAlertTypes } from './types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RuleAlertType } from './types';
+import { isAlertTypes } from './types';
 import { findRules } from './find_rules';
 
 export const FILTER_NON_PREPACKED_RULES = 'alert.attributes.params.immutable: false';

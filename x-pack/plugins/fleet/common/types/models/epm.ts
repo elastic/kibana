@@ -335,7 +335,14 @@ export interface RegistryDataStreamPrivileges {
   indices?: string[];
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
+export type RegistryVarType =
+  | 'integer'
+  | 'bool'
+  | 'password'
+  | 'text'
+  | 'yaml'
+  | 'string'
+  | 'textarea';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -399,6 +406,8 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isUnverified?: boolean;
+  showLabels?: boolean;
 }
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';

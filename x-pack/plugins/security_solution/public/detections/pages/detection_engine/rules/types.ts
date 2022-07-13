@@ -7,7 +7,7 @@
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
+import type {
   RiskScoreMapping,
   ThreatIndex,
   ThreatMapping,
@@ -17,13 +17,13 @@ import {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
-import { RuleAction } from '@kbn/alerting-plugin/common';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
-import { FieldValueThreshold } from '../../../components/rules/threshold_input';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
+import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
+import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import type {
   Author,
   BuildingBlockType,
@@ -35,7 +35,7 @@ import type {
   SetupGuide,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
   field: string;

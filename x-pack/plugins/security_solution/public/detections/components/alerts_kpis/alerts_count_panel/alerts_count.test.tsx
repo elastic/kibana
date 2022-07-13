@@ -9,11 +9,11 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { AlertsCount } from './alerts_count';
-import { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import { TestProviders } from '../../../../common/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { AlertsCountAggregation } from './types';
+import type { AlertsCountAggregation } from './types';
 
 jest.mock('../../../../common/lib/kibana');
 const mockDispatch = jest.fn();

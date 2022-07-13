@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ListClient } from '@kbn/lists-plugin/server';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 

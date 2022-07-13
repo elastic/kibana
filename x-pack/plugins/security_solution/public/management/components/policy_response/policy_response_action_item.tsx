@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiLink, EuiCallOut, EuiText } from '@elastic/eui';
-import { PolicyResponseActionFormatter } from './policy_response_friendly_names';
+import type { PolicyResponseActionFormatter } from './policy_response_friendly_names';
 
 const StyledEuiCallout = styled(EuiCallOut)`
   padding: ${({ theme }) => theme.eui.euiSizeS};

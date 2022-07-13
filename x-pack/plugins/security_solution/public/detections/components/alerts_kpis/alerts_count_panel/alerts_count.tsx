@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiProgress, EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiProgress, EuiInMemoryTable } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import numeral from '@elastic/numeral';

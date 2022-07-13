@@ -26,11 +26,11 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorConfiguration } from './connector/connector_configuration';
+import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexDomainManagement } from './domain_management';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { SearchIndexOverview } from './overview';
-import { SearchIndexScheduling } from './scheduling';
 
 export enum SearchIndexTabId {
   // all indices
@@ -90,7 +90,7 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
-      content: <SearchIndexScheduling />,
+      content: <ConnectorSchedulingComponent />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',

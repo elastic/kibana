@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { SearchBarComponent } from '.';
 import { TestProviders } from '../../mock';
 import { FilterManager } from '@kbn/data-plugin/public';

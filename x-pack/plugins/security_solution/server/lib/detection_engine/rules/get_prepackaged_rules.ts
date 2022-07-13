@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { SavedObjectAttributes } from '@kbn/core/types';
-import {
-  addPrepackagedRulesSchema,
-  AddPrepackagedRulesSchema,
-} from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { SavedObjectAttributes } from '@kbn/core/types';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import { addPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
-import { RuleAssetSavedObjectsClient } from './rule_asset/rule_asset_saved_objects_client';
-import { IRuleAssetSOAttributes } from './types';
-import { ConfigType } from '../../../config';
+import type { RuleAssetSavedObjectsClient } from './rule_asset/rule_asset_saved_objects_client';
+import type { IRuleAssetSOAttributes } from './types';
+import type { ConfigType } from '../../../config';
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer

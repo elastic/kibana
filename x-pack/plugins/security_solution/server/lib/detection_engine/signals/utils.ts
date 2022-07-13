@@ -26,18 +26,18 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-  parseDuration,
 } from '@kbn/alerting-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import {
+import type {
   TimestampOverrideOrUndefined,
   Privilege,
-  RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -65,7 +65,7 @@ import type {
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
 interface SortExceptionsReturn {

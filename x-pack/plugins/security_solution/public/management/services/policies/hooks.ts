@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  GetAgentPoliciesResponse,
-  GetPackagesResponse,
-} from '@kbn/fleet-plugin/common';
+import type { QueryObserverResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
+import type { HttpFetchError } from '@kbn/core/public';
+import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
-import { GetPolicyListResponse } from '../../pages/policy/types';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
-import { ServerApiError } from '../../../common/types';
+import type { ServerApiError } from '../../../common/types';
 
 export function useGetEndpointSpecificPolicies(
   {

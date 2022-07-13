@@ -7,14 +7,14 @@
 
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { useQueryClient } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { HttpFetchError } from '@kbn/core/public';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback } from 'react';
 import { useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
 import { useToasts } from '../../../../../../common/lib/kibana';
-import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
+import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
-import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
+import type { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
 interface PolicyArtifactsDeleteModalProps {
   policyId: string;

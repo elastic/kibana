@@ -2691,6 +2691,193 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.FieldBrowserOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserOptions",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserOptions.createFieldButton",
+            "type": "Function",
+            "tags": [],
+            "label": "createFieldButton",
+            "description": [],
+            "signature": [
+              "CreateFieldComponent",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserOptions.getFieldTableColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldTableColumns",
+            "description": [],
+            "signature": [
+              "GetFieldTableColumns",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.FieldBrowserProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserProps",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.columnIds",
+            "type": "Array",
+            "tags": [],
+            "label": "columnIds",
+            "description": [
+              "The timeline's current column headers"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.browserFields",
+            "type": "Object",
+            "tags": [],
+            "label": "browserFields",
+            "description": [
+              "A map of categoryId -> metadata about the fields in that category"
+            ],
+            "signature": [
+              "{ readonly [x: string]: Partial<",
+              "BrowserField",
+              ">; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.isEventViewer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventViewer",
+            "description": [
+              "When true, this Fields Browser is being used as an \"events viewer\""
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.onResetColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "onResetColumns",
+            "description": [
+              "Callback to reset the default columns"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.onToggleColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggleColumn",
+            "description": [
+              "Callback to toggle a field column"
+            ],
+            "signature": [
+              "(columnId: string) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.FieldBrowserProps.onToggleColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "columnId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "The options to customize the field browser, supporting columns rendering and button to create fields"
+            ],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.FieldBrowserOptions",
+                "text": "FieldBrowserOptions"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserProps.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "The width of the field browser"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.IErrorObject",
         "type": "Interface",
         "tags": [],
@@ -3639,6 +3826,25 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
               }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -5505,6 +5711,58 @@
               "description": [],
               "signature": [
                 "AlertsTableStateProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getFieldBrowser",
+          "type": "Function",
+          "tags": [],
+          "label": "getFieldBrowser",
+          "description": [],
+          "signature": [
+            "(props: ",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.FieldBrowserProps",
+              "text": "FieldBrowserProps"
+            },
+            ") => React.ReactElement<",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.FieldBrowserProps",
+              "text": "FieldBrowserProps"
+            },
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getFieldBrowser.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "triggersActionsUi",
+                  "scope": "public",
+                  "docId": "kibTriggersActionsUiPluginApi",
+                  "section": "def-public.FieldBrowserProps",
+                  "text": "FieldBrowserProps"
+                }
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

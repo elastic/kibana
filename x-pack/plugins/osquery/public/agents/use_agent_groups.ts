@@ -10,11 +10,8 @@ import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from './use_agent_policies';
 
-import {
-  OsqueryQueries,
-  AgentsRequestOptions,
-  AgentsStrategyResponse,
-} from '../../common/search_strategy';
+import type { AgentsRequestOptions, AgentsStrategyResponse } from '../../common/search_strategy';
+import { OsqueryQueries } from '../../common/search_strategy';
 
 import { processAggregations } from './helpers';
 import { generateTablePaginationOptions } from '../common/helpers';

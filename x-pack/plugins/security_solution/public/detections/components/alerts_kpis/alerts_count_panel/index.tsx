@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
 import uuid from 'uuid';
 

@@ -9,14 +9,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elas
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { HeaderActions } from '../body/actions/header_actions';
-import { CellValueElementProps } from '../cell_rendering';
-import { Direction } from '../../../../../common/search_strategy';
+import type { CellValueElementProps } from '../cell_rendering';
+import type { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
@@ -27,15 +28,15 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { TimelineModel } from '../../../store/timeline/model';
-import { State } from '../../../../common/store';
+import type { TimelineModel } from '../../../store/timeline/model';
+import type { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
-import {
+import type {
   ControlColumnProps,
   RowRenderer,
-  TimelineTabs,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';

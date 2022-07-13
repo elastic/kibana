@@ -15,8 +15,10 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
-import { createStore, State } from '../../store';
-import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
+import type { State } from '../../store';
+import { createStore } from '../../store';
+import type { UpdateQueryParams } from '../../store/inputs/helpers';
+import { upsertQuery } from '../../store/inputs/helpers';
 
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';

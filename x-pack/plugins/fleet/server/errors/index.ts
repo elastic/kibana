@@ -8,13 +8,15 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import type { FleetErrorType } from '../../common';
+
 import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export { isESClientError } from './utils';
-
 export class IngestManagerError extends Error {
+  attributes?: { type?: FleetErrorType };
   constructor(message?: string, public readonly meta?: unknown) {
     super(message);
     this.name = this.constructor.name; // for stack traces
@@ -34,6 +36,9 @@ export class PackageOutdatedError extends IngestManagerError {}
 export class PackageFailedVerificationError extends IngestManagerError {
   constructor(pkgKey: string) {
     super(`${pkgKey} failed signature verification.`);
+    this.attributes = {
+      type: 'verification_failed',
+    };
   }
 }
 export class AgentPolicyError extends IngestManagerError {}

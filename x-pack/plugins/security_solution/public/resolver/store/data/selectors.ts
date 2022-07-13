@@ -8,7 +8,7 @@
 import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
-import {
+import type {
   DataState,
   Vector2,
   IndexedEntity,
@@ -25,7 +25,7 @@ import {
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
-import {
+import type {
   SafeResolverEvent,
   NewResolverTree,
   ResolverNode,

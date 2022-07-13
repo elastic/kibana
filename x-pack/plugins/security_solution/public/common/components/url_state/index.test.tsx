@@ -10,7 +10,7 @@ import React from 'react';
 
 import { HookWrapper } from '../../mock';
 import { SecurityPageName } from '../../../app/types';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../utils/route/types';
 import { CONSTANTS } from './constants';
 import {
   getMockPropsObj,
@@ -21,7 +21,7 @@ import {
   testCases,
   getMockProps,
 } from './test_dependencies';
-import { UrlStateContainerPropTypes } from './types';
+import type { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';

@@ -16,13 +16,13 @@ import {
   MATCHED_TYPE,
   FEED_NAME,
 } from '../../../../../common/cti/constants';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import {
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
+import type {
   CtiEnrichment,
   CtiEnrichmentIdentifiers,
   EventFields,
-  isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
+import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 

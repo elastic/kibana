@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useEffect, useState, Dispatch } from 'react';
+import type { Dispatch } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { createRule } from './api';
 import * as i18n from './translations';

@@ -8,7 +8,7 @@
 import type { UseQueryOptions, UseQueryResult } from 'react-query';
 import type { HttpFetchError } from '@kbn/core/public';
 import { useQuery } from 'react-query';
-import { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { useHttp } from '../../../common/lib/kibana';
 import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';

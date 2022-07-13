@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
-import { ConsoleProps } from '..';
+import type { ConsoleProps } from '..';
 
 const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
   defaultMessage: 'Show help',

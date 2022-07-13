@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import * as H from 'history';
-import { parse, ParsedQuery, stringify } from 'query-string';
+import type * as H from 'history';
+import type { ParsedQuery } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { url } from '@kbn/kibana-utils-plugin/public';

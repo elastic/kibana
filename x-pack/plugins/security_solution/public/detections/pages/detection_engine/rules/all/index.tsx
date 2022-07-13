@@ -7,7 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
-import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
+import type { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 

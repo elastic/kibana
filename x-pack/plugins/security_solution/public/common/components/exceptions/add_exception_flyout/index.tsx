@@ -9,6 +9,7 @@
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -24,7 +25,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
 } from '@elastic/eui';
 import type {
@@ -33,15 +33,15 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -63,8 +63,9 @@ import {
   retrieveAlertOsTypes,
   filterIndexPatterns,
 } from '../helpers';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData } from '../types';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
+import type { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
