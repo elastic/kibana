@@ -18,6 +18,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { EmptyLocations } from './empty_locations';
 import { getServiceLocations } from '../../../state/actions';
 import { LocationForm } from './location_form';
@@ -46,7 +47,7 @@ export const ManageLocationsFlyout = () => {
     <EuiFlyout onClose={closeFlyout}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>Manage private locations</h2>
+          <h2>{MANAGE_PRIVATE_LOCATIONS}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -74,7 +75,7 @@ export const ManageLocationsFlyout = () => {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton fill isLoading={loading} onClick={() => setIsAddingNew(true)}>
-                Add location
+                {ADD_LABEL}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -84,7 +85,7 @@ export const ManageLocationsFlyout = () => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              Close
+              {CLOSE_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -95,9 +96,24 @@ export const ManageLocationsFlyout = () => {
   return (
     <div>
       <EuiButtonEmpty onClick={() => setIsOpen(true)} iconType="visMapCoordinate">
-        Manage private locations
+        {MANAGE_PRIVATE_LOCATIONS}
       </EuiButtonEmpty>
       {isOpen ? flyout : null}
     </div>
   );
 };
+
+const MANAGE_PRIVATE_LOCATIONS = i18n.translate(
+  'xpack.synthetics.monitorManagement.managePrivateLocations',
+  {
+    defaultMessage: 'Manage private locations',
+  }
+);
+
+const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.closeLabel', {
+  defaultMessage: 'Close',
+});
+
+const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addLocation', {
+  defaultMessage: 'Add location',
+});

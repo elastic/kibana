@@ -95,7 +95,6 @@ export class SyntheticsService {
   }
 
   public async init() {
-    await this.privateLocationAPI.init();
     await this.registerServiceLocations();
 
     const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();

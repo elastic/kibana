@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const PolicyHostNeeded = () => {
@@ -14,12 +15,28 @@ export const PolicyHostNeeded = () => {
   return (
     <EuiCallOut title="Fleet policy host needed!" color="warning" iconType="help">
       <p>
-        To add a synthetics private location, a Fleet policy with active elastic Agent is needed.
-        <EuiLink href="#">Read the docs</EuiLink>.
+        {ADD_AGENT_POLICY_DESCRIPTION}
+        <EuiLink href="#">{READ_THE_DOCS}</EuiLink>.
       </p>
       <EuiButton href={`${basePath}/app/fleet/policies?create`} color="primary">
-        Add a fleet policy
+        {ADD_AGENT_POLICY}
       </EuiButton>
     </EuiCallOut>
   );
 };
+
+const ADD_AGENT_POLICY = i18n.translate('xpack.synthetics.monitorManagement.addAgentPolicy', {
+  defaultMessage: 'Add an agent policy',
+});
+
+const ADD_AGENT_POLICY_DESCRIPTION = i18n.translate(
+  'xpack.synthetics.monitorManagement.addAgentPolicyDesc',
+  {
+    defaultMessage:
+      'To add a synthetics private location, a Fleet policy with active elastic Agent is needed.',
+  }
+);
+
+const READ_THE_DOCS = i18n.translate('xpack.synthetics.monitorManagement.readDocs', {
+  defaultMessage: 'Read the docs',
+});

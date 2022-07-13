@@ -34,7 +34,6 @@ export const ProjectBrowserMonitorCodec = t.intersection([
     }),
     params: t.record(t.string, t.unknown),
     enabled: t.boolean,
-    config_id: t.string,
   }),
 ]);
 

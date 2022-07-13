@@ -18,12 +18,9 @@ export class SyntheticsPrivateLocation {
     this.server = _server;
   }
 
-  async init() {}
-
   async generateNewPolicy(
     config: SyntheticsMonitorWithId,
-    privateLocation: PrivateLocation,
-    runOnce = false
+    privateLocation: PrivateLocation
   ): Promise<NewPackagePolicy> {
     const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
       this.server.savedObjectsClient!,
@@ -40,12 +37,11 @@ export class SyntheticsPrivateLocation {
     newPolicy.output_id = '';
     newPolicy.namespace = 'default';
 
-    const { formattedPolicy } = formatSyntheticsPolicy(
-      newPolicy,
-      config.type,
-      { ...config, config_id: config.id, run_once: runOnce, location_name: privateLocation.name },
-      runOnce
-    );
+    const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
+      ...config,
+      config_id: config.id,
+      location_name: privateLocation.name,
+    });
 
     return formattedPolicy;
   }

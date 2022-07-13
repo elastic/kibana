@@ -54,7 +54,9 @@ export const PolicyHostsField = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
-              <p>Agents: {item.agents}</p>
+              <p>
+                {AGENTS_LABEL} {item.agents}
+              </p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -98,10 +100,14 @@ export const PolicyHostsField = ({
   );
 };
 
+const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentsLabel', {
+  defaultMessage: 'Agents: ',
+});
+
 const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.selectPolicyHost', {
-  defaultMessage: 'Select policy host',
+  defaultMessage: 'Select agent policy',
 });
 
 const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.policyHost', {
-  defaultMessage: 'Policy host',
+  defaultMessage: 'Agent policy',
 });

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { PolicyHostNeeded } from './policy_host_needed';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 import { PolicyHostsField } from './policy_hosts';
@@ -66,8 +67,11 @@ export const LocationForm = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Name">
-              <EuiFieldText aria-label="Location name" {...register('name', { required: true })} />
+            <EuiFormRow label={LOCATION_NAME_LABEL}>
+              <EuiFieldText
+                aria-label={LOCATION_NAME_LABEL}
+                {...register('name', { required: true })}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -85,12 +89,12 @@ export const LocationForm = ({
                 onDiscard?.();
               }}
             >
-              Discard
+              {DISCARD_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton size="s" type="submit" fill isLoading={loading} isDisabled={!isDirty}>
-              {location ? 'Update location' : 'Create location'}
+              {location ? UPDATE_LOCATION_LABEL : CREATE_LOCATION_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -98,3 +102,19 @@ export const LocationForm = ({
     </>
   );
 };
+
+const LOCATION_NAME_LABEL = i18n.translate('xpack.synthetics.monitorManagement.locationName', {
+  defaultMessage: 'Location name',
+});
+
+const DISCARD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.discard', {
+  defaultMessage: 'Discard',
+});
+
+const UPDATE_LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.updateLocation', {
+  defaultMessage: 'Update location',
+});
+
+const CREATE_LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
+  defaultMessage: 'Create location',
+});

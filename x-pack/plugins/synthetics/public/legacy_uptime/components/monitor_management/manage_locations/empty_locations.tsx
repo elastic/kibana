@@ -7,28 +7,55 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const EmptyLocations = ({ setIsAddingNew }: { setIsAddingNew: (val: boolean) => void }) => {
   return (
     <EuiEmptyPrompt
       iconType="visMapCoordinate"
-      title={<h2>Start adding private locations</h2>}
-      body={<p>Add your first private location to run monitors on premiss via Elastic agent.</p>}
+      title={<h2>{START_ADDING_LOCATIONS}</h2>}
+      body={<p>{START_ADDING_LOCATIONS_DESCRIPTION}</p>}
       actions={
         <EuiButton color="primary" fill onClick={() => setIsAddingNew(true)}>
-          Add location
+          {ADD_LOCATION}
         </EuiButton>
       }
       footer={
         <>
           <EuiTitle size="xxs">
-            <h3>Want to learn more?</h3>
+            <h3>{LEARN_MORE}</h3>
           </EuiTitle>
           <EuiLink href="#" target="_blank">
-            Read the docs
+            {READ_DOCS}
           </EuiLink>
         </>
       }
     />
   );
 };
+
+const START_ADDING_LOCATIONS = i18n.translate(
+  'xpack.synthetics.monitorManagement.startAddingLocations',
+  {
+    defaultMessage: 'Start adding private locations',
+  }
+);
+
+const START_ADDING_LOCATIONS_DESCRIPTION = i18n.translate(
+  'xpack.synthetics.monitorManagement.startAddingLocationsDescription',
+  {
+    defaultMessage: 'Add your first private location to run monitors on premiss via Elastic agent.',
+  }
+);
+
+const ADD_LOCATION = i18n.translate('xpack.synthetics.monitorManagement.addLocation', {
+  defaultMessage: 'Add location',
+});
+
+const READ_DOCS = i18n.translate('xpack.synthetics.monitorManagement.readDocs', {
+  defaultMessage: 'Read the docs',
+});
+
+const LEARN_MORE = i18n.translate('xpack.synthetics.monitorManagement.learnMore', {
+  defaultMessage: 'Want to learn more?',
+});

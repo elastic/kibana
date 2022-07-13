@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
@@ -78,7 +79,9 @@ export const PrivateLocationsList = ({
 
                     <EuiFlexItem>
                       <EuiText size="xs">
-                        <EuiTextColor color="subdued">Running monitors: {monCount}</EuiTextColor>
+                        <EuiTextColor color="subdued">
+                          {RUNNING_MONITORS}: {monCount}
+                        </EuiTextColor>
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -86,14 +89,14 @@ export const PrivateLocationsList = ({
                   <EuiText size="s">
                     <p>
                       <EuiTextColor color="subdued">
-                        Host policy:{' '}
+                        {AGENT_POLICY_LABEL}:{' '}
                         {policy ? (
                           <EuiLink href={`${basePath}/app/fleet/policies/${location.policyHostId}`}>
                             {policy?.name}
                           </EuiLink>
                         ) : (
                           <EuiText color="danger" size="s" className="eui-displayInline">
-                            Policy is deleted
+                            {POLICY_IS_DELETED}
                           </EuiText>
                         )}
                       </EuiTextColor>
@@ -105,14 +108,17 @@ export const PrivateLocationsList = ({
                 <EuiToolTip
                   title={
                     canDelete
-                      ? 'Delete location'
-                      : `it can't be deleted, because it has ${monCount} monitors running. Please delete them before you can delete this location`
+                      ? DELETE_LABEL
+                      : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete', {
+                          defaultMessage: `This location cannot be deleted, because it has {monCount} monitors running. Please remove this location from your monitors before deleting this location.`,
+                          values: { monCount },
+                        })
                   }
                 >
                   <EuiButtonIcon
                     iconType="trash"
                     color="danger"
-                    aria-label="Delete"
+                    aria-label={DELETE_LABEL}
                     onClick={() => onDelete(location.id)}
                     isDisabled={!canDelete}
                   />
@@ -137,3 +143,19 @@ const Wrapper = styled.div`
     }
   }
 `;
+
+const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.delete', {
+  defaultMessage: 'Delete location',
+});
+
+const RUNNING_MONITORS = i18n.translate('xpack.synthetics.monitorManagement.runningMonitors', {
+  defaultMessage: 'Running monitors',
+});
+
+const POLICY_IS_DELETED = i18n.translate('xpack.synthetics.monitorManagement.deletedPolicy', {
+  defaultMessage: 'Policy is deleted',
+});
+
+const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentPolicy', {
+  defaultMessage: 'Agent Policy',
+});

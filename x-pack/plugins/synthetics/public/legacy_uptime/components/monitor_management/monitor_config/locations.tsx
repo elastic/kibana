@@ -67,13 +67,13 @@ export const ServiceLocations = ({
         options={locations.map((location) => {
           let badge =
             location.status !== LocationStatus.GA ? (
-              <EuiBadge color="warning">Tech Preview</EuiBadge>
+              <EuiBadge color="warning">{TECH_PREVIEW_LABEL}</EuiBadge>
             ) : null;
           if (!location.isServiceManaged) {
-            badge = <EuiBadge color="primary">Private</EuiBadge>;
+            badge = <EuiBadge color="primary">{PRIVATE_LABEL}</EuiBadge>;
           }
           const invalidBadge = location.isInvalid ? (
-            <EuiBadge color="danger">Invalid</EuiBadge>
+            <EuiBadge color="danger">{INVALID_LABEL}</EuiBadge>
           ) : null;
           const label = (
             <EuiText size="s" data-test-subj={`syntheticsServiceLocationText--${location.id}`}>
@@ -109,3 +109,18 @@ export const LOCATIONS_LABEL = i18n.translate(
     defaultMessage: 'Monitor locations',
   }
 );
+
+export const TECH_PREVIEW_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.techPreviewLabel',
+  {
+    defaultMessage: 'Tech preview',
+  }
+);
+
+export const PRIVATE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.privateLabel', {
+  defaultMessage: 'Private',
+});
+
+export const INVALID_LABEL = i18n.translate('xpack.synthetics.monitorManagement.invalidLabel', {
+  defaultMessage: 'Invalid',
+});

@@ -19,7 +19,6 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.ENABLED]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.CONFIG_ID]: null,
-  [ConfigKey.RUN_ONCE]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,

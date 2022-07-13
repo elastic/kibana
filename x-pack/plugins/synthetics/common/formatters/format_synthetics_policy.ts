@@ -12,8 +12,7 @@ import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
   monitorType: DataStream,
-  config: Partial<MonitorFields & { location_name: string }>,
-  runOnce = false
+  config: Partial<MonitorFields & { location_name: string }>
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
@@ -41,15 +40,6 @@ export const formatSyntheticsPolicy = (
         configItem.value = formatters[key]?.(config);
       } else {
         configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
-      }
-
-      if (runOnce) {
-        if (key === 'run_once') {
-          configItem.value = true;
-        }
-        if (key === 'schedule') {
-          configItem.value = '"@every 1000h"';
-        }
       }
     }
   });
