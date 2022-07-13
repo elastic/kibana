@@ -83,7 +83,7 @@ export function ServiceOverviewDependenciesTable({
       const { location } = dependency;
       const name = getNodeName(location);
       const itemLink =
-        location.type === NodeType.backend ? (
+        location.type === NodeType.dependency ? (
           <BackendLink
             type={location.spanType}
             subtype={location.spanSubtype}

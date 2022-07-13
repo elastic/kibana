@@ -194,7 +194,7 @@ export const getStats = async ({
           dependencyName,
           spanType: sample[SPAN_TYPE] as string,
           spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
-          type: NodeType.backend as const,
+          type: NodeType.dependency as const,
         },
         value: {
           count: sum(

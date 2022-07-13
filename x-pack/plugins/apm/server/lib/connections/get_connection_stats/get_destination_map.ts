@@ -215,7 +215,7 @@ export const getDestinationMap = ({
           spanType: mergedDestination.spanType,
           spanSubtype: mergedDestination.spanSubtype,
           id: objectHash({ dependencyName: mergedDestination.dependencyName }),
-          type: NodeType.backend,
+          type: NodeType.dependency,
         };
       }
 

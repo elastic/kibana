@@ -63,7 +63,7 @@ export function DependenciesInventoryTable() {
       const { location } = dependency;
       const name = getNodeName(location);
 
-      if (location.type !== NodeType.backend) {
+      if (location.type !== NodeType.dependency) {
         throw new Error('Expected a dependency node');
       }
       const link = (
