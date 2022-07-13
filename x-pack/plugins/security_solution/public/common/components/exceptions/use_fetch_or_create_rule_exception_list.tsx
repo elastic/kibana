@@ -6,13 +6,15 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  ExceptionListSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionListById } from '@kbn/securitysolution-list-api';
-import { HttpStart } from '@kbn/core/public';
-import { ENDPOINT_LIST_DESCRIPTION, ENDPOINT_LIST_ID, ENDPOINT_LIST_NAME } from '@kbn/securitysolution-list-constants';
+import type { HttpStart } from '@kbn/core/public';
+import {
+  ENDPOINT_LIST_DESCRIPTION,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_LIST_NAME,
+} from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 
 import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
@@ -55,9 +57,7 @@ export const useFetchOrCreateRuleExceptionList = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function createExceptionList(
-      ruleResponse: Rule
-    ): Promise<ExceptionListSchema> {
+    async function createExceptionList(ruleResponse: Rule): Promise<ExceptionListSchema> {
       if (exceptionListType === 'endpoint') {
         return createAndAssociateExceptionList({
           ruleId: ruleResponse.rule_id,
@@ -71,7 +71,7 @@ export const useFetchOrCreateRuleExceptionList = ({
             list_id: ENDPOINT_LIST_ID,
             tags: [],
             meta: undefined,
-          }
+          },
         });
       } else {
         return createAndAssociateExceptionList({
@@ -98,7 +98,9 @@ export const useFetchOrCreateRuleExceptionList = ({
           id: ruleId,
           signal: abortCtrl.signal,
         });
-        const defaultList = (ruleResponse.exceptions_list ?? []).find(({ type }) => type === exceptionListType);
+        const defaultList = (ruleResponse.exceptions_list ?? []).find(
+          ({ type }) => type === exceptionListType
+        );
 
         if (defaultList != null) {
           const exceptionListToUse = await fetchExceptionListById({

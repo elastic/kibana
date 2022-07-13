@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   createRule,
@@ -19,6 +21,7 @@ import {
   fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
+  createAndAssociateExceptionList,
 } from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
@@ -708,6 +711,27 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const resp = await getPrePackagedRulesStatus({ signal: abortCtrl.signal });
       expect(resp).toEqual(prePackagedRulesStatus);
+    });
+  });
+
+  describe('createAndAssociateExceptionList', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
+    });
+
+    test('POSTs exception list to associate with rule', async () => {
+      await createAndAssociateExceptionList({
+        list: getCreateExceptionListDetectionSchemaMock(),
+        ruleSoId: '12345',
+        ruleId: 'my_rule',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/exceptions', {
+        body: '{"list":{"description":"some description","list_id":"some-list-id","name":"some name","type":"detection"},"rule_so_id":"12345","rule_id":"my_rule"}',
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
     });
   });
 });

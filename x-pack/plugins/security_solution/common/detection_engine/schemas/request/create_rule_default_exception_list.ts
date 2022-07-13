@@ -7,19 +7,20 @@
 
 import * as t from 'io-ts';
 
-import {
-  createExceptionListSchema,
-  CreateExceptionListSchemaDecoded,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { RequiredKeepUndefined } from '@kbn/osquery-plugin/common/types';
+import type { CreateExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import { createExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { RequiredKeepUndefined } from '@kbn/osquery-plugin/common/types';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-export const createRuleDefaultExceptionListSchema = t.exact(
+export const createRuleDefaultExceptionListSchema = t.intersection([
+  t.type({
+    rule_so_id: NonEmptyString,
+    list_type: NonEmptyString,
+  }),
   t.partial({
     list: createExceptionListSchema,
-    rule_so_id: t.string,
-    rule_id: t.string,
-  })
-);
+  }),
+]);
 
 export type CreateRuleDefaultExceptionListSchema = t.TypeOf<
   typeof createRuleDefaultExceptionListSchema

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { getCreateExceptionListDetectionSchemaMock, getCreateExceptionListMinimalSchemaMock, getCreateExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ENDPOINT_LIST_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -41,11 +41,11 @@ export default ({ getService }: FtrProviderContext) => {
       const rule = await createRule(supertest, log, getSimpleRule('rule-1'));
 
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/exceptions`)
+        .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({ 
           rule_so_id: rule.id,
-          rule_id: rule.rule_id,
+          list_type: ExceptionListTypeEnum.DETECTION,
           list: getCreateExceptionListDetectionSchemaMock(),
          })
         .expect(200);
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
         namespace_type: 'single',
         os_types: [],
         tags: [],
-        type: 'detection',
+        type: ExceptionListTypeEnum.DETECTION,
         updated_by: 'elastic',
         version: 1 
       });
@@ -70,11 +70,11 @@ export default ({ getService }: FtrProviderContext) => {
       const rule = await createRule(supertest, log, getSimpleRule('rule-2'));
 
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/exceptions`)
+        .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({ 
           rule_so_id: rule.id,
-          rule_id: rule.rule_id,
+          list_type: ExceptionListTypeEnum.RULE_DEFAULT,
           list: {
             ...getCreateExceptionListDetectionSchemaMock(),
             list_id: 'my-default-rule-list',
@@ -102,16 +102,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns 500 if no rule is found to add exception list to', async () => {
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/exceptions`)
+        .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({ 
           rule_so_id: '1234',
-          rule_id: 'rule-1',
+          list_type: ExceptionListTypeEnum.DETECTION,
           list: getCreateExceptionListDetectionSchemaMock(),
          })
         .expect(500);
 
-      expect(body).to.eql({ message: 'Unable to add exception list to rule - rule rule-1 not found',
+      expect(body).to.eql({ message: `Unable to add exception list to rule - rule with id:\"1234\" not found`,
       status_code: 500 });
     });
 
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateExceptionListMinimalSchemaMock(),
         list_id: 'i_exist',
         namespace_type: 'single',
-        type: 'detection',
+        type: ExceptionListTypeEnum.DETECTION,
       };
 
       // create an exception list
@@ -132,20 +132,19 @@ export default ({ getService }: FtrProviderContext) => {
       .expect(200);
       
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/exceptions`)
+        .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({ 
           rule_so_id: rule.id,
-          rule_id: rule.rule_id,
+          list_type: ExceptionListTypeEnum.DETECTION,
           list: exceptionList,
          })
         .expect(409);
 
-      expect(body).to.eql({ message: 'exception list id: "i_exist" already exists',
-      status_code: 409 });
+      expect(body).to.eql({ message: `exception list id: \"i_exist\" already exists`, status_code: 409 });
     });
 
-    it('returns 405 if trying to add a default rule exception list to a rule that already has one', async () => {
+    it('returns 409 if trying to add a default rule exception list to a rule that already has one', async () => {
       const rule = await createRule(supertest, log, { ...getSimpleRule('rule-4'), exceptions_list: [{ id: '1234', list_id: 'list_id', namespace_type: 'single', type: ExceptionListTypeEnum.RULE_DEFAULT }] });
       const exceptionList = {
         ...getCreateExceptionListMinimalSchemaMock(),
@@ -155,20 +154,20 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/exceptions`)
+        .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({ 
           rule_so_id: rule.id,
-          rule_id: rule.rule_id,
+          list_type: ExceptionListTypeEnum.RULE_DEFAULT,
           list: exceptionList,
          })
-        .expect(405);
+        .expect(409);
 
       expect(body).to.eql({ message: 'Rule already contains a default exception list.',
-      status_code: 405 });
+      status_code: 409 });
     });
 
-    it('returns 405 if trying to add an endpoint list when one already exists and is associated with rule', async () => {
+    it('returns 409 if trying to add an endpoint list when one already exists and is associated with rule', async () => {
       // create endpoint exception list
       const { body: endpointList } = await supertest
         .post(ENDPOINT_LIST_URL)
@@ -176,25 +175,18 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
      
       const rule = await createRule(supertest, log, { ...getSimpleRule('rule-5'), exceptions_list: [{ id: endpointList.id, list_id: endpointList.list_id, namespace_type: endpointList.namespace_type, type: ExceptionListTypeEnum.ENDPOINT }] });
-      const exceptionList = {
-        ...getCreateExceptionListSchemaMock(),
-        list_id: endpointList.list_id,
-        namespace_type: endpointList.namespace_type,
-        type: ExceptionListTypeEnum.ENDPOINT,
-      };
-
+ 
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/exceptions`)
+        .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({ 
           rule_so_id: rule.id,
-          rule_id: rule.rule_id,
-          list: exceptionList,
+          list_type: ExceptionListTypeEnum.ENDPOINT,
          })
-        .expect(405);
+        .expect(409);
 
       expect(body).to.eql({ message: 'Rule already contains a default exception list.',
-      status_code: 405 });
+      status_code: 409 });
     });
   });
 };

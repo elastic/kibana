@@ -8,13 +8,15 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { CreateRuleDefaultExceptionListSchema, createRuleDefaultExceptionListSchema } from './create_rule_default_exception_list';
+import type { CreateRuleDefaultExceptionListSchema } from './create_rule_default_exception_list';
+import { createRuleDefaultExceptionListSchema } from './create_rule_default_exception_list';
 
-import { getCreateExceptionListSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_schema.mock'
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 describe('createRuleDefaultExceptionListSchema', () => {
   test('empty objects do not validate', () => {
-    const payload: CreateRuleDefaultExceptionListSchema = {};
+    const payload: CreateRuleDefaultExceptionListSchema =
+      {} as CreateRuleDefaultExceptionListSchema;
 
     const decoded = createRuleDefaultExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -23,11 +25,24 @@ describe('createRuleDefaultExceptionListSchema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('endpoint list types validate', () => {
+    const payload: CreateRuleDefaultExceptionListSchema = {
+      list_type: 'endpoint',
+      rule_so_id: 'so_id',
+    };
+
+    const decoded = createRuleDefaultExceptionListSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('all values validate', () => {
     const payload: CreateRuleDefaultExceptionListSchema = {
-      list: { ...getCreateExceptionListSchemaMock(), list_id: 'my_list' },
+      list: { ...getCreateExceptionListDetectionSchemaMock(), list_id: 'my_list' },
+      list_type: 'detection',
       rule_so_id: 'so_id',
-      rule_id: 'rule_id',
     };
 
     const decoded = createRuleDefaultExceptionListSchema.decode(payload);
@@ -38,11 +53,11 @@ describe('createRuleDefaultExceptionListSchema', () => {
   });
 
   test('made up parameters do not validate', () => {
-    const payload: Partial<CreateRuleDefaultExceptionListSchema> & { madeUp: string } = { 
-      list: getCreateExceptionListSchemaMock(),
+    const payload: Partial<CreateRuleDefaultExceptionListSchema> & { madeUp: string } = {
+      list: getCreateExceptionListDetectionSchemaMock(),
       rule_so_id: 'so_id',
-      rule_id: 'rule_id',
-      madeUp: 'invalid value'
+      list_type: 'detection',
+      madeUp: 'invalid value',
     };
 
     const decoded = createRuleDefaultExceptionListSchema.decode(payload);

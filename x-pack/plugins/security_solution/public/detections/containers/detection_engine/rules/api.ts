@@ -11,6 +11,7 @@ import dateMath from '@kbn/datemath';
 import type { HttpStart } from '@kbn/core/public';
 
 import {
+  DETECTION_ENGINE_URL,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
@@ -114,12 +115,17 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
  *
  * @throws An error if response is not OK
  */
- export const createAndAssociateExceptionList = async ({ list, ruleSoId, ruleId, signal }: CreateRuleDefaultExceptionListSchema & { signal: AbortSignal }): Promise<RulesSchema> =>
- KibanaServices.get().http.fetch<RulesSchema>(`${DETECTION_ENGINE_RULES_URL}/exceptions`, {
-   method: 'POST',
-   body: JSON.stringify({ list, rule_so_id: ruleSoId, rule_id: ruleId }),
-   signal,
- });
+export const createAndAssociateExceptionList = async ({
+  list,
+  ruleSoId,
+  ruleId,
+  signal,
+}: CreateRuleDefaultExceptionListSchema & { signal: AbortSignal }): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(`${DETECTION_ENGINE_URL}/exceptions`, {
+    method: 'POST',
+    body: JSON.stringify({ list, rule_so_id: ruleSoId, rule_id: ruleId }),
+    signal,
+  });
 
 /**
  * Preview provided Rule

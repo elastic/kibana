@@ -70,7 +70,7 @@ import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
-import { createRuleExceptionListRoute } from '../lib/detection_engine/routes/rules/add_exception_list_to_rule_route';
+import { createRuleExceptionListRoute } from '../lib/detection_engine/routes/rules/create_rule_exception_list_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
