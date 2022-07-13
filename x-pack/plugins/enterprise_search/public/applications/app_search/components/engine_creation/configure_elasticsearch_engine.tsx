@@ -84,61 +84,78 @@ const healthColorsMap = {
   YELLOW: 'warning',
 };
 
+interface IndexStatusDetailsProps {
+  option: SearchIndexSelectableOption;
+}
+
+export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }) => (
+  <EuiTextColor color="subdued">
+    <EuiFlexGroup className="entSearch__indexListItem" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiHealth color={option.health ? healthColorsMap[option.health] : ''}>
+          {option.health ?? '-'}
+        </EuiHealth>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} data-test-subj="optionStatus">
+        <EuiI18n
+          token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status"
+          default="{status}"
+          values={{
+            status: (
+              <span>
+                <b>Status</b>: {option.status ?? '-'}
+              </span>
+            ),
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} data-test-subj="optionDocs">
+        <EuiI18n
+          token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount"
+          default="{docsCount}"
+          values={{
+            docsCount: (
+              <span>
+                <b>Docs count</b>: {option.total?.docs?.count ?? '-'}
+              </span>
+            ),
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem data-test-subj="optionStorage">
+        <EuiI18n
+          token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage"
+          default="{storageSize}"
+          values={{
+            storageSize: (
+              <span>
+                <b>Storage size</b>: {option.total?.store?.size_in_bytes ?? '-'}
+              </span>
+            ),
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} data-test-subj="optionStorage">
+        <EuiBadge color={option.badge.color} iconType={option.badge.icon}>
+          <EuiToolTip
+            position="left"
+            title={option.badge.toolTipTitle}
+            content={option.badge.toolTipContent}
+          >
+            <p>{option.badge.label}</p>
+          </EuiToolTip>
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiTextColor>
+);
+
 const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: string) => {
   return (
     <>
       <EuiHighlight search={searchValue}>{option.label ?? ''}</EuiHighlight>
       <EuiSpacer size="xs" />
-      <EuiTextColor color="subdued">
-        <EuiFlexGroup
-          className="entSearch__indexListItem"
-          alignItems="center"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiHealth color={option.health ? healthColorsMap[option.health] : ''}>
-              {option.health ?? '-'}
-            </EuiHealth>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="optionStatus">
-            <EuiI18n
-              token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status"
-              default="{status}"
-              values={{
-                status: <span><b>Status</b>: {option.status ?? '-'}</span>,
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="optionDocs">
-            <EuiI18n
-              token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount"
-              default="{docsCount}"
-              values={{
-                docsCount: <span><b>Docs count</b>: {option.total?.docs?.count ?? '-'}</span>,
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem data-test-subj="optionStorage">
-            <EuiI18n
-              token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage"
-              default="{storageSize}"
-              values={{
-                storageSize: <span><b>Storage size</b>: {option.total?.store?.size_in_bytes ?? '-'}</span>,
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="optionStorage">
-            <EuiBadge color={option.badge.color} iconType={option.badge.icon}>
-              <EuiToolTip
-                position="left"
-                title={option.badge.toolTipTitle}
-                content={option.badge.toolTipContent}
-              >
-                <p>{option.badge.label}</p>
-              </EuiToolTip>
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiTextColor>
+      <IndexStatusDetails option={option} />
     </>
   );
 };

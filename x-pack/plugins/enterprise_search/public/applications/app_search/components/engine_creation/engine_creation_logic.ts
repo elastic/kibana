@@ -52,6 +52,7 @@ interface EngineCreationValues {
   indices: ElasticsearchIndex[];
   indicesFormatted: SearchIndexSelectableOption[];
   selectedIndex: string;
+  selectedIndexFormatted: SearchIndexSelectableOption;
   engineType: EngineType;
   isAliasRequired: boolean;
   isSubmitDisabled: boolean;
@@ -184,6 +185,12 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     isAliasRequired: [
       () => [selectors.selectedIndex],
       (selectedIndex: string) => !selectedIndex.startsWith('search-'),
+    ],
+    selectedIndexFormatted: [
+      () => [selectors.selectedIndex, selectors.indicesFormatted],
+      (selectedIndex: string, indicesFormatted: SearchIndexSelectableOption[]) => {
+        return indicesFormatted.find((el) => el.label === selectedIndex);
+      },
     ],
   }),
   listeners: ({ values, actions }) => ({

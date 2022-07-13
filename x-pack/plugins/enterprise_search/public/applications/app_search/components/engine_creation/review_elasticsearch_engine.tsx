@@ -27,13 +27,15 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
+import { IndexStatusDetails } from './configure_elasticsearch_engine';
 
 export const ReviewElasticsearchEngine: React.FC = () => {
-  const { aliasName, engineType, name, selectedIndex } = useValues(EngineCreationLogic);
+  const { aliasName, engineType, name, selectedIndex, selectedIndexFormatted } =
+    useValues(EngineCreationLogic);
   const { setCreationStep, submitEngine } = useActions(EngineCreationLogic);
 
   return (
-    <>
+    <div className="entSearch__createEngineLayout">
       <EuiStepsHorizontal
         steps={[
           {
@@ -157,6 +159,10 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                   </h4>
                 </EuiText>
                 <EuiText>{selectedIndex}</EuiText>
+
+                <EuiSpacer size="s" />
+
+                <IndexStatusDetails option={selectedIndexFormatted} />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -230,6 +236,6 @@ export const ReviewElasticsearchEngine: React.FC = () => {
           </EuiFlexGroup>
         </EuiForm>
       </EuiPanel>
-    </>
+    </div>
   );
 };
