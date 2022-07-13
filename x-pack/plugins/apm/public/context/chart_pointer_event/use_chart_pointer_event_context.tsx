@@ -7,11 +7,11 @@
 
 import React, { useContext, useEffect, useCallback, useRef } from 'react';
 import { Chart } from '@elastic/charts';
+import { PointerEvent } from '@elastic/charts';
 import {
   ChartPointerEventContext,
   UPDATE_POINTER_EVENT,
 } from './chart_pointer_event_context';
-import { PointerEvent } from '@elastic/charts';
 
 export function useChartPointerEventContext() {
   const context = useContext(ChartPointerEventContext);
@@ -50,6 +50,6 @@ export function useChartPointerEventContext() {
         updatePointerEventHandler
       );
     };
-  }, [updatePointerEventHandler]);
+  }, [updatePointerEventHandler, pointerEventTargetRef]);
   return { ...context, chartRef };
 }
