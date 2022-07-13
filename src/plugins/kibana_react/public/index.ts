@@ -44,6 +44,9 @@ export { useExecutionContext } from './use_execution_context';
 export type { TableListViewProps, TableListViewState } from './table_list_view';
 export { TableListView } from './table_list_view';
 
+export type { UserContentCommonSchema } from './table_list_view/v2';
+export { TableListViewV2 } from './table_list_view/v2';
+
 export type { ToolbarButtonProps } from './toolbar_button';
 export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
 
