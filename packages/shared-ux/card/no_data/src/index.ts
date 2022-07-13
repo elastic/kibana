@@ -12,8 +12,4 @@ export type { Props as NoDataCardProps } from './no_data_card';
 export { NoDataCardKibanaProvider, NoDataCardProvider } from './services';
 export type { NoDataCardKibanaDependencies, NoDataCardServices } from './services';
 
-export {
-  getMockServices as getNoDataCardMockServices,
-  getStoryArgTypes as getNoDataCardStoryArgTypes,
-  getStoryServices as getNoDataCardStoryServices,
-} from './mocks';
+export { getMockServices as getNoDataCardMockServices } from './mocks';

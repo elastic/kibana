@@ -2,14 +2,12 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kibana_no_data"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-page-kibana-no-data"
+PKG_DIRNAME = "mock"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-storybook-mock"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.mdx",
   ],
   exclude = [
     "**/*.test.*",
@@ -39,15 +37,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
-  "@npm//react",
-  "//packages/kbn-i18n",
-  "//packages/kbn-shared-ux-components",
-  "//packages/kbn-shared-ux-services",
-  "//packages/shared-ux/prompt/no_data_views",
-  "//packages/shared-ux/storybook/stories",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,35 +49,15 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
-  "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/react",
-  "//packages/kbn-ambient-ui-types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-shared-ux-components:npm_module_types",
-  "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/shared-ux/prompt/no_data_views:npm_module_types",
-  "//packages/shared-ux/storybook/stories:npm_module_types",
+  "@npm//@types/jest",
+  "@npm//@storybook/react",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
-  additional_args = [
-    "--copy-files",
-    "--quiet"
-  ],
 )
 
 ts_config(
@@ -116,7 +85,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
