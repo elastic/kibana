@@ -221,12 +221,13 @@ export function XYChart({
   );
 
   const fieldFormats = useMemo(
-    () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }),
-    [dataLayers, splitColumnAccessor, splitRowAccessor]
+    () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }, formatFactory),
+    [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
+  const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
+
   if (dataLayers.length === 0) {
-    const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
     return (
       <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
     );
@@ -250,7 +251,9 @@ export function XYChart({
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
     filteredLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
+    filteredLayers.some(
+      (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
+    );
   const shouldRotate = isHorizontalChart(dataLayers);
 
   const yAxesConfiguration = getAxesConfiguration(
@@ -291,7 +294,9 @@ export function XYChart({
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
+    filteredBarLayers.some(
+      (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
+    );
 
   const isTimeViz = isTimeChart(dataLayers);
 
@@ -501,35 +506,31 @@ export function XYChart({
         row: rowIndex,
         column: table.columns.findIndex((col) => col.id === xAccessor),
         value: xAccessor ? table.rows[rowIndex][xAccessor] : xyGeometry.x,
+        table,
       },
     ];
 
+    const splitPoints: FilterEvent['data']['data'] = [];
+
     if (xySeries.seriesKeys.length > 1) {
-      const pointValue = xySeries.seriesKeys[0];
-      const splitAccessor = layer.splitAccessor
-        ? getAccessorByDimension(layer.splitAccessor, table.columns)
-        : undefined;
-
-      const splitFormat = splitAccessor
-        ? fieldFormats[layer.layerId].splitSeriesAccessors[splitAccessor]
-        : undefined;
-      const splitFormatter = formatFactory(splitFormat);
-
-      points.push({
-        row: table.rows.findIndex((row) => {
-          if (splitAccessor) {
-            if (formattedDatatables[layer.layerId]?.formattedColumns[splitAccessor]) {
-              return splitFormatter.convert(row[splitAccessor]) === pointValue;
-            }
-            return row[splitAccessor] === pointValue;
+      xySeries.splitAccessors.forEach((value, accessor) => {
+        const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
+          (row) => {
+            return row[accessor] === value;
           }
-        }),
-        column: table.columns.findIndex((col) => col.id === splitAccessor),
-        value: pointValue,
+        );
+        if (splitPointRowIndex !== -1) {
+          splitPoints.push({
+            row: splitPointRowIndex,
+            column: table.columns.findIndex((column) => column.id === accessor),
+            value: table.rows[splitPointRowIndex][accessor],
+            table,
+          });
+        }
       });
     }
     const context: FilterEvent['data'] = {
-      data: points.map(({ row, column, value }) => ({ row, column, value, table })),
+      data: [...points, ...splitPoints],
     };
     onClickValue(context);
   };
@@ -627,6 +628,13 @@ export function XYChart({
   return (
     <Chart ref={chartRef}>
       <Settings
+        noResults={
+          <EmptyPlaceholder
+            className="xyChart__empty"
+            icon={icon}
+            renderComplete={onRenderChange}
+          />
+        }
         onRenderChange={onRenderChange}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
@@ -703,7 +711,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables)
+            ? getLegendAction(dataLayers, onClickValue, fieldFormats, formattedDatatables, titles)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -790,7 +798,7 @@ export function XYChart({
           histogramMode={dataLayers.every(
             (layer) =>
               layer.isHistogram &&
-              (layer.isStacked || !layer.splitAccessor) &&
+              (layer.isStacked || !layer.splitAccessors || !layer.splitAccessors.length) &&
               (layer.isStacked ||
                 layer.seriesType !== SeriesTypes.BAR ||
                 !chartHasMoreThanOneBarSeries)
@@ -817,6 +825,7 @@ export function XYChart({
           formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
           defaultXScaleType={defaultXScaleType}
+          fieldFormats={fieldFormats}
         />
       )}
       {referenceLineLayers.length ? (

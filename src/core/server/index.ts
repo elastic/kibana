@@ -141,7 +141,8 @@ export type {
   ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 
-export { kibanaResponseFactory, CoreKibanaRequest, CspConfig } from './http';
+export { CspConfig } from '@kbn/core-http-server-internal';
+export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
@@ -205,7 +206,6 @@ export type {
   OnPreResponseInfo,
   ICspConfig,
   IExternalUrlConfig,
-  IExternalUrlPolicy,
   IBasePath,
   SessionStorage,
   SessionStorageCookieOptions,
@@ -221,6 +221,7 @@ export type {
   HttpServicePreboot,
   HttpServiceStart,
 } from '@kbn/core-http-server';
+export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
 export { validBodyOutput } from '@kbn/core-http-server';
 
