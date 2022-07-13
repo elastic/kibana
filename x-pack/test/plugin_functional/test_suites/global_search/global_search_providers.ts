@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can search for index patterns', async () => {
-        const results = await findResultsWithApi('type:index-pattern logstash-*');
+        const results = await findResultsWithApi('type:index-pattern logstash');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('index-pattern');
         expect(results[0].title).to.be('logstash-*');
