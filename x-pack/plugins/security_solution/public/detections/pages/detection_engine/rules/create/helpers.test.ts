@@ -710,6 +710,34 @@ describe('helpers', () => {
 
       expect(result).toEqual(expected);
     });
+
+    test('returns formatted object with timestamp override', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        timestampOverride: 'event.ingest',
+        timestampOverrideFallbackDisabled: true,
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        timestamp_override: 'event.ingest',
+        timestamp_override_fallback_disabled: true,
+      };
+
+      expect(result).toEqual(expected);
+    });
   });
 
   describe('formatActionsStepData', () => {
