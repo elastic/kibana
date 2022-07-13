@@ -81,4 +81,11 @@ export const schema = {
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
   },
+  isAdHoc: {
+    label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
+      defaultMessage: 'Creeate AdHoc DataView',
+    }),
+    defaultValue: false,
+    type: 'hidden',
+  },
 };

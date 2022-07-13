@@ -24,9 +24,10 @@ export const xyVisFunction: XyVisFn = {
       types: ['string', 'vis_dimension'],
       help: strings.getXAccessorHelp(),
     },
-    splitAccessor: {
+    splitAccessors: {
       types: ['string', 'vis_dimension'],
       help: strings.getSplitAccessorHelp(),
+      multi: true,
     },
     accessors: {
       types: ['string', 'vis_dimension'],

@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getArgumentsForCommand } from '../../../service/parsed_command_input';
-import { CommandDefinition } from '../../..';
+import type { CommandDefinition } from '../../..';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 import { useWithInputCommandEntered } from '../../../hooks/state_selectors/use_with_input_command_entered';

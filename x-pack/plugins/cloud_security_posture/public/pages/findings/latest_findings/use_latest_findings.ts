@@ -10,30 +10,28 @@ import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
-import type { Criteria, Pagination } from '@elastic/eui';
+import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
-import type { CspFinding } from '../types';
+import type { CspFinding, Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
+import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
-  sort: Sort;
+  sort: Sort<CspFinding>;
   enabled: boolean;
 }
-
-type Sort = NonNullable<Criteria<CspFinding>['sort']>;
 
 export interface FindingsGroupByNoneQuery {
   pageIndex: Pagination['pageIndex'];
   pageSize: Pagination['pageSize'];
-  sort: Sort;
+  sort: Sort<CspFinding>;
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
@@ -44,18 +42,6 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
-
-const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
-  '@timestamp',
-  'resource.sub_type',
-  'resource.name',
-  'resource.id',
-  'rule.name',
-]);
-
-// NOTE: .keyword comes from the mapping we defined for the Findings index
-const getSortKey = (key: string): string =>
-  FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;
 
 const SEARCH_FAILED_TEXT = i18n.translate(
   'xpack.csp.findings.findingsErrorToast.searchFailedTitle',

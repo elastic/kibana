@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandList } from '../command_list';

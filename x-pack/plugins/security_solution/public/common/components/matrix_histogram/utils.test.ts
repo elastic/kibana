@@ -12,10 +12,10 @@ import {
   formatToChartDataItem,
   getCustomChartData,
 } from './utils';
-import { UpdateDateRange } from '../charts/common';
+import type { UpdateDateRange } from '../charts/common';
 import { Position } from '@elastic/charts';
-import { MatrixHistogramData } from '../../../../common/search_strategy';
-import { BarchartConfigs } from './types';
+import type { MatrixHistogramData } from '../../../../common/search_strategy';
+import type { BarchartConfigs } from './types';
 
 describe('utils', () => {
   describe('getBarchartConfigs', () => {

@@ -6,13 +6,11 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import { Direction } from '../../../../../../common/search_strategy';
+import type { Direction } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
-import {
-  SortUsersField,
-  UsersFields,
-} from '../../../../../../common/search_strategy/security_solution/users/common';
+import type { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
+import type { SortUsersField } from '../../../../../../common/search_strategy/security_solution/users/common';
+import { UsersFields } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 export const buildUsersQuery = ({

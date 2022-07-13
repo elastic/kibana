@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { RuleAlertType } from '../types';
+import type { RuleAlertType } from '../types';
 
-import {
-  BulkActionEditForRuleParams,
-  BulkActionEditType,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditForRuleParams } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import { invariant } from '../../../../../common/utils/invariant';
 

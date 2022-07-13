@@ -10,8 +10,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
-import { CommandInput, CommandInputProps } from './components/command_input';
-import { ConsoleProps } from './types';
+import type { CommandInputProps } from './components/command_input';
+import { CommandInput } from './components/command_input';
+import type { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
@@ -84,10 +85,12 @@ const ConsoleWindow = styled.div`
     &.euiDescriptionList {
       > .euiDescriptionList__title {
         width: 20%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
 
       > .euiDescriptionList__description {
         width: 80%;
+        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
       }
     }
   }

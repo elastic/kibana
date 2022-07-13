@@ -13,8 +13,12 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
 import { useAppNavLinks } from '../nav_links';
 import { SolutionGroupedNav } from '../solution_grouped_nav';
-import { CustomSideNavItem, DefaultSideNavItem, SideNavItem } from '../solution_grouped_nav/types';
-import { NavLinkItem } from '../types';
+import type {
+  CustomSideNavItem,
+  DefaultSideNavItem,
+  SideNavItem,
+} from '../solution_grouped_nav/types';
+import type { NavLinkItem } from '../types';
 import { EuiIconLaunch } from './icons/launch';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
