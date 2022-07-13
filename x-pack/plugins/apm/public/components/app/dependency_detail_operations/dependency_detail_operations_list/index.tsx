@@ -21,7 +21,7 @@ import { EmptyMessage } from '../../../shared/empty_message';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { BackendOperationDetailLink } from '../../backend_operation_detail_view/backend_operation_detail_link';
+import { DependencyOperationDetailLink } from '../../backend_operation_detail_view/dependency_operation_detail_link';
 
 interface OperationStatisticsItem extends SpanMetricGroup {
   spanName: string;
@@ -34,12 +34,12 @@ function OperationLink({ spanName }: { spanName: string }) {
     <TruncateWithTooltip
       data-test-subj="apmOperationsListAppLink"
       text={spanName}
-      content={<BackendOperationDetailLink {...query} spanName={spanName} />}
+      content={<DependencyOperationDetailLink {...query} spanName={spanName} />}
     />
   );
 }
 
-export function BackendDetailOperationsList() {
+export function DependencyDetailOperationsList() {
   const {
     query: {
       rangeFrom,
@@ -109,10 +109,8 @@ export function BackendDetailOperationsList() {
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [
     {
       name: i18n.translate(
-        'xpack.apm.backendDetailOperationsList.spanNameColumnLabel',
-        {
-          defaultMessage: 'Span name',
-        }
+        'xpack.apm.dependencyDetailOperationsList.spanNameColumnLabel',
+        { defaultMessage: 'Span name' }
       ),
       field: 'spanName',
       sortable: true,
@@ -132,10 +130,8 @@ export function BackendDetailOperationsList() {
   const noItemsMessage = (
     <EmptyMessage
       heading={i18n.translate(
-        'xpack.apm.backendDetailOperationsList.notFoundLabel',
-        {
-          defaultMessage: 'No operations found',
-        }
+        'xpack.apm.dependencyDetailOperationsList.notFoundLabel',
+        { defaultMessage: 'No operations found' }
       )}
     />
   );

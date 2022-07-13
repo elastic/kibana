@@ -12,7 +12,7 @@ import { ApmRoutes } from '../../routing/apm_route_config';
 
 type Query = TypeOf<ApmRoutes, '/dependencies/operation'>['query'];
 
-export function BackendOperationDetailLink(query: Query) {
+export function DependencyOperationDetailLink(query: Query) {
   const router = useApmRouter();
 
   const { spanName } = query;

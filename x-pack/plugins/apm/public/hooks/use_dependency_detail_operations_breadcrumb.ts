@@ -10,7 +10,7 @@ import { useBreadcrumb } from '../context/breadcrumbs/use_breadcrumb';
 import { useAnyOfApmParams } from './use_apm_params';
 import { useApmRouter } from './use_apm_router';
 
-export function useBackendDetailOperationsBreadcrumb() {
+export function useDependencyDetailOperationsBreadcrumb() {
   const {
     query: {
       dependencyName,
@@ -29,7 +29,7 @@ export function useBackendDetailOperationsBreadcrumb() {
   useBreadcrumb([
     {
       title: i18n.translate(
-        'xpack.apm.backendDetailOperations.breadcrumbTitle',
+        'xpack.apm.dependencyDetailOperations.breadcrumbTitle',
         { defaultMessage: 'Operations' }
       ),
       href: apmRouter.link('/dependencies/operations', {

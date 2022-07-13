@@ -14,7 +14,7 @@ import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
 import { page } from '.';
 import { offsetRt } from '../../../../common/comparison_rt';
-import { BackendDetailOperations } from '../../app/backend_detail_operations';
+import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
 import { DependencyDetailView } from '../../app/dependency_detail_view';
 import { DependenciesInventory } from '../../app/dependencies_inventory';
@@ -66,7 +66,7 @@ export const dependencies = {
         element: <RedirectDependenciesToDependenciesOverview />,
       },
       '/dependencies/operations': {
-        element: <BackendDetailOperations />,
+        element: <DependencyDetailOperations />,
       },
       '/dependencies/operation': {
         params: t.type({

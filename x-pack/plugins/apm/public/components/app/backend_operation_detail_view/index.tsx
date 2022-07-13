@@ -10,7 +10,7 @@ import React from 'react';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useBackendDetailOperationsBreadcrumb } from '../../../hooks/use_backend_detail_operations_breadcrumb';
+import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_dependency_detail_operations_breadcrumb';
 import { BackendMetricCharts } from '../../shared/backend_metric_charts';
 import { DetailViewHeader } from '../../shared/detail_view_header';
 import { BackendOperationDistributionChart } from './backend_operation_distribution_chart';
@@ -23,7 +23,7 @@ export function BackendOperationDetailView() {
     query: { spanName, ...query },
   } = useApmParams('/dependencies/operation');
 
-  useBackendDetailOperationsBreadcrumb();
+  useDependencyDetailOperationsBreadcrumb();
 
   return (
     <EuiFlexGroup direction="column">
