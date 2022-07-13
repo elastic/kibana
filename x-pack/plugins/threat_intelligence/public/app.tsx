@@ -13,10 +13,12 @@ export interface AppProps {
   services: CoreStart;
 }
 
+export const TEST_ID = 'tiTestId';
+
 export const App: VFC<AppProps> = ({ services }) => {
   return (
     <KibanaContextProvider services={services}>
-      <p>Coming soon!</p>
+      <p data-test-subj={TEST_ID}>Coming Soon!</p>
     </KibanaContextProvider>
   );
 };
