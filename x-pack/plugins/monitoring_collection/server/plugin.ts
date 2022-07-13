@@ -128,6 +128,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     const otlpConfig = this.config.opentelemetry?.metrics.otlp;
     if (otlpConfig?.url) {
+      // Add OTLP exporter
       const url = otlpConfig.url;
 
       // Set Authorization headers
@@ -138,7 +139,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
       }
 
-      // Add OTLP exporter
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
       meterProvider.addMetricReader(
         new PeriodicExportingMetricReader({
