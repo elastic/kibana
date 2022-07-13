@@ -69,22 +69,15 @@ export const convertAttachmentsToCamelCase = (attachments: CommentResponse[]): C
 };
 
 export const convertAttachmentToCamelCase = (attachment: CommentRequest): Comment => {
-  let camelCaseAttachment = convertToCamelCase<CommentRequest, Comment>(attachment);
   if (isCommentRequestTypeExternalReference(attachment)) {
-    camelCaseAttachment = convertAttachmentToCamelExceptProperty(
-      attachment,
-      'externalReferenceMetadata'
-    );
+    return convertAttachmentToCamelExceptProperty(attachment, 'externalReferenceMetadata');
   }
 
   if (isCommentRequestTypePersistableState(attachment)) {
-    camelCaseAttachment = convertAttachmentToCamelExceptProperty(
-      attachment,
-      'persistableStateAttachmentState'
-    );
+    return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
   }
 
-  return camelCaseAttachment;
+  return convertToCamelCase<CommentRequest, Comment>(attachment);
 };
 
 export const convertUserActionsToCamelCase = (userActions: CaseUserActionsResponse) => {
