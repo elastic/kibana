@@ -8,7 +8,12 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  getIndexPatternFromSQLQuery,
+  AggregateQuery,
+  Query,
+} from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -27,7 +32,6 @@ import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
-import { isPlainRecord } from '../utils/get_raw_record_type';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -73,7 +77,9 @@ export function useDiscoverState({
 
   const { appStateContainer } = stateContainer;
 
-  const [state, setState] = useState(() => appStateContainer.getState());
+  const [state, setState] = useState(appStateContainer.getState());
+  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
+  const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
 
   /**
    * Search session logic
@@ -243,29 +249,29 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
-  const getAllColumns = useCallback(() => {
+  const fetchResults = useCallback(() => {
     if (documentState.result?.length) {
       const firstRow = documentState.result[0];
-      return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
+        return columns;
+      }
+      return [];
     }
     return [];
-  }, [documentState.result]);
+  }, [documentState.result, documentStateCols, sqlQuery, state.query]);
 
-  /**
-   * Select all columns for text based lang mode if they were not defined
-   */
   useEffect(() => {
-    async function selectAllColumns() {
-      if (
-        isPlainRecord(state.query) &&
-        documentState.fetchStatus === FetchStatus.COMPLETE &&
-        !state.columns?.length
-      ) {
+    async function fetchDataview() {
+      if (state.query && isOfAggregateQueryType(state.query)) {
         const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
         const idsTitles = await indexPatterns.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
         if (dataViewObj) {
-          const columns = getAllColumns();
+          const columns = fetchResults();
+          if (columns.length) {
+            setDocumentStateCols(columns);
+          }
           const nextState = {
             index: dataViewObj.id,
             ...(columns.length && { columns }),
@@ -274,9 +280,9 @@ export function useDiscoverState({
         }
       }
     }
-    selectAllColumns();
+    fetchDataview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, indexPatterns, documentState, state.columns]);
+  }, [config, documentState, indexPatterns]);
 
   return {
     data$,
