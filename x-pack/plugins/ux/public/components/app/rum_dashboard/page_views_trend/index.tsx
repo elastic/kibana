@@ -34,7 +34,7 @@ export function PageViewsTrend() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <PageViewsChart breakdown={breakdown} uiFilters={uxUiFilters} />
+      <PageViewsChart breakdown={breakdown} />
     </div>
   );
 }

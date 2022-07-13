@@ -54,9 +54,6 @@ export function PageLoadDistribution() {
       <PageLoadDistChart
         onPercentileChange={onPercentileChange}
         breakdown={breakdown}
-        start={start ?? ''}
-        end={end ?? ''}
-        uiFilters={uxUiFilters}
       />
     </div>
   );
