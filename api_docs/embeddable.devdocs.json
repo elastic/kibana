@@ -2515,6 +2515,21 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.reportsEmbeddableLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "reportsEmbeddableLoad",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.refreshInputFromParent",
             "type": "Function",
             "tags": [],
@@ -6200,6 +6215,50 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableChildPanelProps.onPanelStatusChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onPanelStatusChange",
+            "description": [],
+            "signature": [
+              "((info: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePhaseEvent",
+                "text": "EmbeddablePhaseEvent"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableChildPanelProps.onPanelStatusChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "info",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddablePhaseEvent",
+                    "text": "EmbeddablePhaseEvent"
+                  }
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6919,6 +6978,19 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableOutput.rendered",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rendered",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableOutput.error",
             "type": "CompoundType",
             "tags": [],
@@ -7111,6 +7183,72 @@
               "string | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddablePhaseEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddablePhaseEvent",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"loading\" | \"error\" | \"loaded\" | \"rendered\""
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ErrorLike",
+                "text": "ErrorLike"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.timeToEvent",
+            "type": "number",
+            "tags": [],
+            "label": "timeToEvent",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
             "deprecated": false
           }
         ],
@@ -8081,6 +8219,23 @@
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.reportsEmbeddableLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "reportsEmbeddableLoad",
+            "description": [
+              "\nThis method returns false by default.\nIt should be set to true for any embeddable type that utilizes the `loading` and `rendered`\noutput variables to notify a container of their loading progress. If set to false, a container should assume\nthe embeddable is loaded immediately."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "embeddable",
@@ -9195,6 +9350,20 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddablePhase",
+        "type": "Type",
+        "tags": [],
+        "label": "EmbeddablePhase",
+        "description": [],
+        "signature": [
+          "\"loading\" | \"error\" | \"loaded\" | \"rendered\""
+        ],
+        "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
