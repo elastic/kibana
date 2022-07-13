@@ -13,7 +13,6 @@ import uuid from 'uuid';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
-  EuiPanel,
   EuiComboBox,
   EuiFormRow,
   EuiHorizontalRule,
@@ -23,8 +22,10 @@ import {
   EuiSpacer,
   EuiButton,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiIcon,
   EuiLink,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
@@ -36,6 +37,7 @@ interface PanelOpts {
   onCancelSchedules: (ids: string[]) => void;
   initialSchedule: SnoozeSchedule | null;
   isLoading: boolean;
+  inPopover?: boolean;
 }
 
 export interface ComponentOpts extends PanelOpts {
@@ -93,6 +95,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   initialSchedule,
   isLoading,
   onCancelSchedules,
+  inPopover = false,
 }) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
   // - State A: After the user clicks a start date:
@@ -111,7 +114,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   const [selectingEndDate, setSelectingEndDate] = useState(false);
   const [selectingEndTime, setSelectingEndTime] = useState(false);
   const minDate = useMemo(
-    () => moment(initialSchedule?.rRule.dtstart ?? undefined),
+    // If the initial schedule is earlier than now, set minDate to it
+    // Set minDate to now if the initial schedule is in the future
+    () => moment.min(moment(), moment(initialSchedule?.rRule.dtstart ?? undefined)),
     [initialSchedule]
   );
 
@@ -240,7 +245,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   }, [initialSchedule, onCancelSchedules]);
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <>
       <EuiFlexGroup gutterSize="xs" alignItems="center" direction="column">
         <EuiFlexItem>
           <EuiDatePickerRange
@@ -272,13 +277,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel
-            paddingSize="none"
-            hasShadow={false}
-            hasBorder={true}
-            style={{ width: '400px' }}
-          >
-            <EuiPanel paddingSize="s" hasShadow={false}>
+          <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} style={{ width: '400px' }}>
+            <EuiSplitPanel.Inner paddingSize="s">
               <EuiDatePicker
                 inline
                 showTimeSelect
@@ -290,9 +290,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                 minDate={minDate}
                 adjustDateOnChange={false}
               />
-            </EuiPanel>
+            </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
-            <EuiPanel paddingSize="m" hasShadow={false}>
+            <EuiSplitPanel.Inner paddingSize="m">
               <EuiFormRow
                 display="columnCompressed"
                 style={{ alignItems: 'center' }}
@@ -310,8 +310,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                   isClearable={false}
                 />
               </EuiFormRow>
-            </EuiPanel>
-          </EuiPanel>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -325,7 +325,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       />
       {isRecurring && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <RecurrenceScheduler
             startDate={startDT}
             endDate={endDT}
@@ -348,18 +348,21 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       </EuiButton>
       {initialSchedule && (
         <>
-          <EuiHorizontalRule margin="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
-                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
-                  defaultMessage: 'Delete schedule',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {!inPopover && <EuiSpacer size="s" />}
+          <EuiPopoverFooter>
+            {!inPopover && <EuiSpacer size="s" />}
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
+                  {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
+                    defaultMessage: 'Delete schedule',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
         </>
       )}
-    </EuiPanel>
+    </>
   );
 };
