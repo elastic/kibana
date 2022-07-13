@@ -14,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import type { CspAppDeps } from '../application/app';
 
 export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
@@ -22,6 +23,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
     data: dataPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
+    discover: discoverPluginMock.createStartContract(),
   },
   params = coreMock.createAppMountParameters(),
   children,
