@@ -53,107 +53,34 @@ import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
 const getScheduleContent = (value: number) => {
-  let unit: string;
-  const minutes = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.minutes', {
-    defaultMessage: 'minutes',
-  });
-  const minute = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.minute', {
-    defaultMessage: 'minute',
-  });
-  const hours = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.hours', {
-    defaultMessage: 'hours',
-  });
-  const hour = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.hour', {
-    defaultMessage: 'hour',
-  });
-  switch (true) {
-    case value === 1:
-      unit = minute;
-      break;
-    case value / 60 === 1:
-      unit = hour;
-      break;
-    case value / 60 > 1:
-      unit = hours;
-      break;
-    default:
-      unit = minutes;
+  if (value > 60) {
+    return i18n.translate('xpack.synthetics.monitorConfig.schedule.label', {
+      defaultMessage: 'Every {value, number} {value, plural, one {hour} other {hours}}',
+      values: {
+        value: value / 60,
+        hour: 'hour',
+      },
+    });
+  } else {
+    return i18n.translate('xpack.synthetics.monitorConfig.schedule.minutes.label', {
+      defaultMessage: 'Every {value, number} {value, plural, one {minute} other {minutes}}',
+      values: {
+        value,
+      },
+    });
   }
-
-  return i18n.translate('xpack.synthetics.monitorConfig.schedule.label', {
-    defaultMessage: 'Every {number} {unit}',
-    values: {
-      number: value >= 60 ? value / 60 : value,
-      unit,
-    },
-  });
 };
 
-const BROWSER_SCHEDULES = [
-  {
-    value: '3',
-    text: getScheduleContent(3),
-  },
-  {
-    value: '5',
-    text: getScheduleContent(5),
-  },
-  {
-    value: '10',
-    text: getScheduleContent(10),
-  },
-  {
-    value: '15',
-    text: getScheduleContent(15),
-  },
-  {
-    value: '30',
-    text: getScheduleContent(30),
-  },
-  {
-    value: '60',
-    text: getScheduleContent(60),
-  },
-  {
-    value: '120',
-    text: getScheduleContent(120),
-  },
-  {
-    value: '240',
-    text: getScheduleContent(240),
-  },
-];
+const getScheduleConfig = (schedules: number[]) => {
+  return schedules.map((value) => ({
+    value: `${value}`,
+    text: getScheduleContent(value),
+  }));
+};
 
-const LIGHTWEIGHT_SCHEDULES = [
-  {
-    value: '1',
-    text: getScheduleContent(1),
-  },
-  {
-    value: '3',
-    text: getScheduleContent(3),
-  },
-  {
-    value: '5',
-    text: getScheduleContent(5),
-  },
-  {
-    value: '10',
-    text: getScheduleContent(10),
-  },
-  {
-    value: '15',
-    text: getScheduleContent(15),
-  },
-  {
-    value: '30',
-    text: getScheduleContent(30),
-  },
-  {
-    value: '60',
-    text: getScheduleContent(60),
-  },
-];
+const BROWSER_SCHEDULES = getScheduleConfig([3, 5, 10, 15, 30, 60, 120, 240]);
+
+const LIGHTWEIGHT_SCHEDULES = getScheduleConfig([1, 3, 5, 10, 15, 30, 60]);
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
