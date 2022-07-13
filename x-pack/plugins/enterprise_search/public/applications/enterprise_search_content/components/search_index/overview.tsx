@@ -44,7 +44,7 @@ export const SearchIndexOverview: React.FC = () => {
 
   const searchIndexApiUrl = cloudContext.cloudId
     ? getDeploymentUrls(cloudContext.cloudId).elasticUrl
-    : `http://${window.location.hostname}:9200/`;
+    : `http://${window.location.hostname}:9200/`; // TODO change
 
   const apiKeyExample = apiKey || '<Create an API Key>';
 
@@ -111,7 +111,7 @@ export const SearchIndexOverview: React.FC = () => {
                           {`\
 curl -X POST '${searchIndexApiUrl}${indexData.index.name}/_doc' \\
   -H 'Content-Type: application/json' \\
-  -H 'Authorization: Bearer ${apiKeyExample}' \\
+  -H 'Authorization: ApiKey ${apiKeyExample}' \\
   -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
 `}
                         </EuiCodeBlock>

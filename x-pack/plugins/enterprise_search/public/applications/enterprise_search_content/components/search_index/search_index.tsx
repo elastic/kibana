@@ -25,6 +25,8 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
+import { IndexCreatedCallout } from './components/index_created_callout/callout';
+import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { SearchIndexDocuments } from './documents';
@@ -47,6 +49,7 @@ export enum SearchIndexTabId {
 export const SearchIndex: React.FC = () => {
   const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
+  const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { indexName, tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     indexName: string;
     tabId?: string;
@@ -135,7 +138,10 @@ export const SearchIndex: React.FC = () => {
       isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
       pageHeader={{ pageTitle: indexName }}
     >
-      <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      <>
+        {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
+        <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      </>
     </EnterpriseSearchContentPageTemplate>
   );
 };
