@@ -34,6 +34,7 @@ RUNTIME_DEPS = [
   "@npm//yargs",
   "@npm//node-fetch",
   "@npm//semver",
+  "@npm//elastic-apm-http-client",
 ]
 
 TYPES_DEPS = [

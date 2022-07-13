@@ -57,7 +57,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
   private readonly name: string;
-  private readonly version: string;
+  public readonly version: string;
   private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors

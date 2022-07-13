@@ -32,6 +32,11 @@ function options(y: Argv) {
       describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
       string: true,
     })
+    .option('apm', {
+      describe:
+        'APM Server target. Send data to APM over the intake API instead of generating ES documents',
+      string: true,
+    })
     .option('cloudId', {
       describe:
         'Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration',
@@ -97,6 +102,11 @@ function options(y: Argv) {
     .option('forceLegacyIndices', {
       describe: 'Force writing to legacy indices',
       boolean: true,
+    })
+    .option('skipPackageInstall', {
+      describe: 'Skip automatically installing the package',
+      boolean: true,
+      default: false,
     })
     .option('scenarioOpts', {
       describe: 'Options specific to the scenario',
@@ -181,12 +191,14 @@ export function runSynthtrace() {
               kibanaUrl = await kibanaClient.discoverLocalKibana();
             }
             if (!kibanaUrl) throw Error('kibanaUrl could not be determined');
-            await kibanaClient.installApmPackage(
-              kibanaUrl,
-              version,
-              runOptions.username,
-              runOptions.password
-            );
+            if (!argv.skipPackageInstall) {
+              await kibanaClient.installApmPackage(
+                kibanaUrl,
+                version,
+                runOptions.username,
+                runOptions.password
+              );
+            }
           }
         }
 
