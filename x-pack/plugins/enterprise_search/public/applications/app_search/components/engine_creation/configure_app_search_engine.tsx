@@ -36,11 +36,10 @@ import {
   ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
   ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
   SUPPORTED_LANGUAGES,
-  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
 } from './constants';
 
 export const ConfigureAppSearchEngine: React.FC = () => {
-  const { isLoading, isSubmitDisabled, language, name, rawName } = useValues(EngineCreationLogic);
+  const { isSubmitDisabled, language, name, rawName } = useValues(EngineCreationLogic);
   const { setCreationStep, setLanguage, setRawName, submitEngine } =
     useActions(EngineCreationLogic);
 
@@ -144,12 +143,17 @@ export const ConfigureAppSearchEngine: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 disabled={isSubmitDisabled}
-                isLoading={isLoading}
                 type="submit"
                 data-test-subj="NewEngineSubmitButton"
+                iconType="arrowRight"
                 fill
               >
-                {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.continue.label',
+                  {
+                    defaultMessage: 'Create search engine',
+                  }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
