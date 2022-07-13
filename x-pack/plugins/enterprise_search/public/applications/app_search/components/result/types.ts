@@ -11,7 +11,9 @@ import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
 
 export type FieldType = InternalSchemaType | SchemaType;
 
-export type Raw = string | string[] | number | number[] | object;
+export type NestedFieldValue = { [fieldName: string]: ScalarFieldValue | NestedFieldValue } | NestedFieldValue[];
+export type ScalarFieldValue = string | string[] | number | number[];
+export type Raw = ScalarFieldValue | NestedFieldValue;
 export type Snippet = string;
 export interface FieldValue {
   raw?: Raw;
