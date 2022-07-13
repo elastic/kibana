@@ -16,7 +16,7 @@ describe('formatResult', () => {
       'multivalued_field': { raw: ['value_1', 'value_2'] },
       'simple_object.flattened': { raw: ['value_1', 'value_2'] },
       'raw': { raw: 'raw_value' },
-      'snippet': { snippet: 'snippet_value' },
+      'snippet': { snippet: 'snipet_value' },
     };
 
     expect(formatResult(data)).toEqual(data);
@@ -85,7 +85,7 @@ describe('formatResult', () => {
   it('does not consider _meta field as a nested field', () => {
     const data = {
       'id': { raw: 'doc-id' },
-      '_meta': { 'id': '1', 'score': 12 }
+      '_meta': { 'id': '1', '_score': 12, 'engine': 'foo-engine' }
     };
     expect(formatResult(data)).toEqual(data);
   });

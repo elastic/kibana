@@ -5,8 +5,21 @@
  * 2.0.
  */
 
-function isFieldValueWrapper(object: object): boolean {
-  return object && Object.entries(object).reduce((isValueWrapper: boolean, [k, v]) => {
+import { FieldValue, NestedFieldValue, ResultMeta, ScalarFieldValue, Snippet } from '../../components/result/types';
+
+interface SearchApiWrappedFieldValue {
+  raw?: ScalarFieldValue;
+  snippet?: Snippet;
+}
+type SearchApiNestedFieldValue = { [key: string]: SearchApiNestedFieldValue | SearchApiWrappedFieldValue } | SearchApiNestedFieldValue[];
+type SearchApiFieldValue = ResultMeta | SearchApiWrappedFieldValue | SearchApiNestedFieldValue;
+
+function isResultMeta(fieldName: string, _: SearchApiFieldValue): _ is ResultMeta {
+  return fieldName === '_meta';
+}
+
+function isFieldValueWrapper(fieldValue: SearchApiFieldValue): fieldValue is SearchApiWrappedFieldValue {
+  return fieldValue && Object.entries(fieldValue).reduce((isValueWrapper: boolean, [k, v]) => {
     if ((k !== 'raw' && k !== 'snippet')) {
       return false;
     }
@@ -15,55 +28,55 @@ function isFieldValueWrapper(object: object): boolean {
       return isValueWrapper;
     }
 
-    return (Array.isArray(v) ? v : []).reduce((isScalar, currentValue) => {
-      return isScalar && typeof currentValue !== 'object'
+    return (Array.isArray(v) ? v : [v]).reduce((isScalar, currentValue) => {
+      return isScalar && currentValue !== null && typeof currentValue !== 'object'
     }, isValueWrapper);
   }, true);
 }
 
-// Returns true for objects like this:
-// objectField: {
-//     objectSubField1: { raw: "one" },
-//     objectSubField2: { raw: "two" }
-// }
-// And false for objects like this:
-// objectField: { raw: "one" }
-function isNestedFieldValue(fiedlValue: object | object[]): boolean {
-  if (Array.isArray(fiedlValue)) {
-    return fiedlValue.reduce((acc: boolean, current) => acc || isNestedFieldValue(current), false);
+function isNestedFieldValue(fieldValue: SearchApiFieldValue): fieldValue is SearchApiNestedFieldValue {
+  if (Array.isArray(fieldValue)) {
+    return fieldValue.reduce((isNested: boolean, current) => isNested || isNestedFieldValue(current), false);
   }
 
-  return typeof fiedlValue === 'object' && !isFieldValueWrapper(fiedlValue);
+  return fieldValue != null && typeof fieldValue === 'object' && !isFieldValueWrapper(fieldValue);
 }
 
-// Takes any value and removes the wrapper around deepest values
-// (removes the wrapper Object with "raw" and/or "snippet" fields)
-// See tests for examples
-function cleanValueWrappers(value: object | object[]) : object {
-  if (Array.isArray(value)) {
-    return value.map(cleanValueWrappers);
+function formatNestedFieldValue(fieldValue: SearchApiNestedFieldValue | SearchApiWrappedFieldValue): NestedFieldValue {
+  if (Array.isArray(fieldValue)) {
+    return fieldValue.map(formatNestedFieldValue);
   }
 
-  if (typeof value === 'object' && isFieldValueWrapper(value)) {
-    return (value as { raw: object }).raw;
-  }
-
-  if (typeof value === 'object') {
-    return Object.entries(value).reduce((acc, [key, currentValue]) => {
-      return { ...acc, [key]: cleanValueWrappers(currentValue) };
+  if (fieldValue !== null && typeof fieldValue === 'object') {
+    return Object.entries(fieldValue).reduce((formattedFieldValue, [nestedFieldName, currentValue]) => {
+      return {
+        ...formattedFieldValue,
+        [nestedFieldName]: isFieldValueWrapper(currentValue) ? currentValue.raw : formatNestedFieldValue(currentValue),
+      };
     }, {});
   }
 
-  return value;
+  return fieldValue;
 }
 
-export function formatResult(result: object): object {
+export function formatResult(result: Record<string, SearchApiFieldValue>): Record<string, ResultMeta | FieldValue> {
   return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
-    if (fieldName !== '_meta' && isNestedFieldValue(fieldValue)) {
-      return {
-        ...acc,
-        [fieldName]: { raw: cleanValueWrappers(fieldValue) }
-      };
+    if (!isResultMeta(fieldName, fieldValue) && isNestedFieldValue(fieldValue)) {
+      return { ...acc, [fieldName]: { raw: formatNestedFieldValue(fieldValue) } };
+    }
+
+    return { ...acc, [fieldName]: fieldValue };
+  }, {});
+}
+
+export function formatResultWithoutMeta(result: Record<string, SearchApiFieldValue>): Record<string, FieldValue> {
+  return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
+    if (isResultMeta(fieldName, fieldValue)) {
+      return { ...acc }
+    }
+
+    if (isNestedFieldValue(fieldValue)) {
+      return { ...acc, [fieldName]: { raw: formatNestedFieldValue(fieldValue) } };
     }
 
     return { ...acc, [fieldName]: fieldValue };
