@@ -18,6 +18,3 @@ export type {
   InternalHttpServiceStartMock,
 } from './http_service.mock';
 export { createCoreContext, createHttpServer } from './test_utils';
-
-export { mockRouter } from '@kbn/core-http-router-server-mocks';
-export type { RouterMock } from '@kbn/core-http-router-server-mocks';
