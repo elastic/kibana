@@ -13,7 +13,6 @@ export const PROCESS_EVENTS_ROUTE = '/internal/kubernetes_security/process_event
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';
 export const COUNT_ROUTE = '/internal/kubernetes_security/count';
 export const AGGREGATE_PAGE_SIZE = 10;
-export const PROCESS_EVENTS_INDEX = '*:logs-endpoint.events.process*,logs-endpoint.events.process*'; // match on both cross cluster and local indices
 
 // so, bucket sort can only page through what we request at the top level agg, which means there is a ceiling to how many aggs we can page through.
 // we should also test this approach at scale.
