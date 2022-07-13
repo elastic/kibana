@@ -159,7 +159,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoadingPackagePolicies,
     ]);
 
-    const isReadonly = packagePolicy.is_externally_managed;
+    const isReadonly = packagePolicy.is_managed;
 
     return validationResults ? (
       <FormGroupResponsiveFields

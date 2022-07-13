@@ -37,7 +37,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
-  const isExternallyManaged = Boolean(packagePolicy.is_externally_managed);
+  const isExternallyManaged = Boolean(packagePolicy.is_managed);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
