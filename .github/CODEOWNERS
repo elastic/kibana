@@ -150,9 +150,6 @@
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
-/x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
-/x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
-/x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 ### END Observability Plugins
