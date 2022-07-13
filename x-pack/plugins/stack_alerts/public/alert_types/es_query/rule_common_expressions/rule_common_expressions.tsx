@@ -58,13 +58,13 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h5>
+        <h4>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.conditionsPrompt"
             defaultMessage="Set the threshold and time window"
           />{' '}
           <QueryThresholdHelpPopover />
-        </h5>
+        </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ThresholdExpression

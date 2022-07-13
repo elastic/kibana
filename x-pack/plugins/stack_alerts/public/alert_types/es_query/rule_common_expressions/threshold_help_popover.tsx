@@ -16,15 +16,23 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
+import { css } from '@emotion/react';
 interface State {
   isPopoverOpen: boolean;
 }
+
+const PopoverStyles = css`
+  max-width: 400px;
+`;
 
 export class QueryThresholdHelpPopover extends Component<{}, State> {
   state: State = {
     isPopoverOpen: false,
   };
+
+  PopoverStyles = css`
+    max-width: 400px;
+  `;
 
   _togglePopover = () => {
     this.setState((prevState) => ({
@@ -40,26 +48,24 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
 
   _renderContent() {
     return (
-      <div>
+      <div css={PopoverStyles}>
         <EuiText grow={false}>
-          <ol>
-            <li>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
-                defaultMessage="Specify a threshold value and a comparison operator. For example, is above 1000. Each time the rule runs, it checks whether the number of documents that match your query meets this threshold."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.thresholdHelp.timeWindow"
-                defaultMessage="Specify how far back in time to search. 
-                To avoid gaps in detection, generally this time window should be greater than or equal to the value you chose for the {checkField} field."
-                values={{
-                  checkField: <b>Check every</b>,
-                }}
-              />
-            </li>
-          </ol>
+          <p>
+            <FormattedMessage
+              id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
+              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold. For example, IS ABOVE 1000."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.stackAlerts.esQuery.ui.thresholdHelp.timeWindow"
+              defaultMessage="The time window indicates how far back in time to search. 
+              To avoid gaps in detection, generally this value should be greater than or equal to the value you chose for the {checkField} field."
+              values={{
+                checkField: <b>Check every</b>,
+              }}
+            />
+          </p>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiCallOut title="Multiple matches of the same document" iconType="pin">
