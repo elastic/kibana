@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { MonitorSummaryTabs } from './monitor_summary_tabs';
+import { MonitorDetailsTabs } from './monitor_detials_tabs';
 import { selectLatestPing } from '../../state/monitor_details';
 
-export const MonitorSummaryHeaderContent = () => {
+export const MonitorDetailsPageHeader = () => {
   const latestPing = useSelector(selectLatestPing);
 
   if (!latestPing) {
@@ -19,7 +19,7 @@ export const MonitorSummaryHeaderContent = () => {
 
   return (
     <>
-      <MonitorSummaryTabs />
+      <MonitorDetailsTabs />
     </>
   );
 };

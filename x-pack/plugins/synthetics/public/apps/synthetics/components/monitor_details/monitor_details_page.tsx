@@ -12,7 +12,7 @@ import { useSelectedLocation } from './hooks/use_selected_location';
 import { getMonitorAction, getMonitorRecentPingsAction } from '../../state/monitor_details';
 import { selectLatestPing } from '../../state/monitor_details';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
-export const MonitorSummaryPage = () => {
+export const MonitorDetailsPage = () => {
   const latestPing = useSelector(selectLatestPing);
 
   useMonitorListBreadcrumbs([{ text: latestPing?.monitor.name ?? '' }]);

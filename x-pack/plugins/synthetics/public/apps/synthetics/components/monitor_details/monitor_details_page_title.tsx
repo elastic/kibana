@@ -14,7 +14,7 @@ import { useSelectedLocation } from './hooks/use_selected_location';
 import { getMonitorRecentPingsAction, selectLatestPing } from '../../state';
 import { MonitorSummaryLastRunInfo } from './last_run_info';
 
-export const MonitorSummaryTitle = () => {
+export const MonitorDetailsPageTitle = () => {
   const dispatch = useDispatch();
 
   const latestPing = useSelector(selectLatestPing);

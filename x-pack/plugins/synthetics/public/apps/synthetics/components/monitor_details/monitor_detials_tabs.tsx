@@ -8,11 +8,11 @@
 import { EuiIcon, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ErrorsTabContent } from './tabs_content/errors_tab_content';
-import { HistoryTabContent } from './tabs_content/history_tab_content';
-import { SummaryTabContent } from './tabs_content/summary_tab_content';
+import { ErrorsTabContent } from './monitor_errors/monitor_errors';
+import { HistoryTabContent } from './monitor_history/monitor_history';
+import { MonitorSummary } from './monitor_summary/monitor_summary';
 
-export const MonitorSummaryTabs = () => {
+export const MonitorDetailsTabs = () => {
   const tabs = [
     {
       id: 'summary',
@@ -20,7 +20,7 @@ export const MonitorSummaryTabs = () => {
       content: (
         <>
           <EuiSpacer />
-          <SummaryTabContent />
+          <MonitorSummary />
         </>
       ),
     },
