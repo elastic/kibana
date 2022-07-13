@@ -106,6 +106,6 @@ describe('StatusPopoverButton', () => {
     expect(container.querySelector('.euiBadge__icon')).toBeNull();
 
     // popover should not open when hence checking that popover is not open
-    expect(queryByRole('dialog')).toBeNull();
+    expect(queryByRole('dialog')).not.toBeInTheDocument();
   });
 });
