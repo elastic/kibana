@@ -38,14 +38,14 @@ Array [
   >
     <div>
       <div
-        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning css-1mgmgmu-euiPanel-none-s-warning-euiCallOut"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
         <p
-          className="euiTitle euiCallOutHeader__title css-8qudto-euiTitle-xxs-euiCallOutHeader-warning"
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="css-15maws8-euiCallOut__icon"
+            className="emotion-euiCallOut__icon"
             color="inherit"
             data-euiicon-type="alert"
             size="m"
@@ -56,7 +56,7 @@ Array [
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
@@ -157,7 +157,7 @@ Array [
             disabled={false}
           >
             <legend
-              className="euiScreenReaderOnly"
+              className="emotion-euiScreenReaderOnly"
             >
               Boolean value
             </legend>
@@ -229,7 +229,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -331,14 +331,14 @@ Array [
   >
     <div>
       <div
-        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning css-1mgmgmu-euiPanel-none-s-warning-euiCallOut"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
         <p
-          className="euiTitle euiCallOutHeader__title css-8qudto-euiTitle-xxs-euiCallOutHeader-warning"
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="css-15maws8-euiCallOut__icon"
+            className="emotion-euiCallOut__icon"
             color="inherit"
             data-euiicon-type="alert"
             size="m"
@@ -349,7 +349,7 @@ Array [
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
@@ -463,7 +463,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -565,14 +565,14 @@ Array [
   >
     <div>
       <div
-        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning css-1mgmgmu-euiPanel-none-s-warning-euiCallOut"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
         <p
-          className="euiTitle euiCallOutHeader__title css-8qudto-euiTitle-xxs-euiCallOutHeader-warning"
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="css-15maws8-euiCallOut__icon"
+            className="emotion-euiCallOut__icon"
             color="inherit"
             data-euiicon-type="alert"
             size="m"
@@ -583,7 +583,7 @@ Array [
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
@@ -697,7 +697,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -908,7 +908,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"

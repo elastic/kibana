@@ -19,7 +19,7 @@ exports[`ML Integrations renders without errors 1`] = `
       >
         <span
           aria-label="Loading"
-          class="euiLoadingSpinner euiButtonContent__spinner css-155ohbx-euiLoadingSpinner-m"
+          class="euiLoadingSpinner euiButtonContent__spinner emotion-euiLoadingSpinner-m"
           role="progressbar"
         />
         <span

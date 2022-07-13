@@ -8,7 +8,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CasesUiStart, CasesPluginSetup, CasesPluginStart } from './types';
+import { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
@@ -24,6 +24,7 @@ import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 
 /**
  * @public
@@ -34,14 +35,17 @@ export class CasesUiPlugin
 {
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
+  private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: CasesPluginSetup) {
+  public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
+    const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -74,27 +78,58 @@ export class CasesUiPlugin
           pluginsStart,
           storage,
           kibanaVersion,
+          externalReferenceAttachmentTypeRegistry,
         });
       },
     });
 
-    // Return methods that should be available to other plugins
-    return {};
+    return {
+      attachmentFramework: {
+        registerExternalReference: (externalReferenceAttachmentType) => {
+          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
+        },
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
+
+    /**
+     * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
+     * we get the component on start and provide the same component to all consumers.
+     */
+    const getCasesContext = getCasesContextLazy({
+      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+    });
+
     return {
       api: createClientAPI({ http: core.http }),
       ui: {
-        getCases: getCasesLazy,
-        getCasesContext: getCasesContextLazy,
-        getRecentCases: getRecentCasesLazy,
+        getCases: (props) =>
+          getCasesLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
+        getCasesContext,
+        getRecentCases: (props) =>
+          getRecentCasesLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
         // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
-        getCreateCaseFlyout: getCreateCaseFlyoutLazy,
+        getCreateCaseFlyout: (props) =>
+          getCreateCaseFlyoutLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
         // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
-        getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
+        getAllCasesSelectorModal: (props) =>
+          getAllCasesSelectorModalLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
       },
       hooks: {
         getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,

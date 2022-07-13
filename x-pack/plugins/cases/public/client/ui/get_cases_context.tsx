@@ -9,29 +9,62 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, ReactNode, Suspense } from 'react';
 import { CasesContextProps } from '../../components/cases_context';
 
-export type GetCasesContextProps = CasesContextProps;
+export type GetCasesContextPropsInternal = CasesContextProps;
+export type GetCasesContextProps = Omit<
+  CasesContextProps,
+  'externalReferenceAttachmentTypeRegistry'
+>;
 
-const CasesProviderLazy: React.FC<{ value: GetCasesContextProps }> = lazy(
+const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = lazy(
   () => import('../../components/cases_context')
 );
 
 const CasesProviderLazyWrapper = ({
+  externalReferenceAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   children,
   releasePhase,
-}: GetCasesContextProps & { children: ReactNode }) => {
+}: GetCasesContextPropsInternal & { children: ReactNode }) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesProviderLazy value={{ owner, userCanCrud, features, releasePhase }}>
+      <CasesProviderLazy
+        value={{
+          externalReferenceAttachmentTypeRegistry,
+          owner,
+          permissions,
+          features,
+          releasePhase,
+        }}
+      >
         {children}
       </CasesProviderLazy>
     </Suspense>
   );
 };
+
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
-export const getCasesContextLazy = () => {
-  return CasesProviderLazyWrapper;
+export const getCasesContextLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+}: Pick<
+  GetCasesContextPropsInternal,
+  'externalReferenceAttachmentTypeRegistry'
+>): (() => React.FC<GetCasesContextProps>) => {
+  const CasesProviderLazyWrapperWithRegistry: React.FC<GetCasesContextProps> = ({
+    children,
+    ...props
+  }) => (
+    <CasesProviderLazyWrapper
+      {...props}
+      externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+    >
+      {children}
+    </CasesProviderLazyWrapper>
+  );
+
+  CasesProviderLazyWrapperWithRegistry.displayName = 'CasesProviderLazyWrapperWithRegistry';
+
+  return () => CasesProviderLazyWrapperWithRegistry;
 };

@@ -16,18 +16,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('General "click"', () => {
     beforeEach(async () => {
       await common.navigateToApp('home');
-      // Just click on the top div and expect it's still there... we're just testing the click event generation
-      await common.clickAndValidate('kibanaChrome', 'kibanaChrome');
+      // Just clicking the top-nav-button and expecting it's still there... we're just testing the click event generation
+      await common.clickAndValidate('toggleNavButton', 'toggleNavButton');
     });
 
     it('should emit a "click" event', async () => {
-      const [event] = await ebtUIHelper.getEvents(1, ['click']);
+      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['click'] });
       expect(event.event_type).to.eql('click');
       expect(event.properties.target).to.be.an('array');
       const targets = event.properties.target as string[];
       expect(targets.includes('DIV')).to.be(true);
       expect(targets.includes('id=kibana-body')).to.be(true);
       expect(targets.includes('data-test-subj=kibanaChrome')).to.be(true);
+      expect(targets.includes('BUTTON')).to.be(true);
+      expect(targets.includes('data-test-subj=toggleNavButton')).to.be(true);
     });
   });
 }

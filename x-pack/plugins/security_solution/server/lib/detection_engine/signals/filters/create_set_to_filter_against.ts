@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateSetToFilterAgainstOptions } from './types';
+import type { CreateSetToFilterAgainstOptions } from './types';
 
 /**
  * Creates a field set to filter against using the stringed version of the

@@ -15,6 +15,7 @@ import type {
   GetAgentStatusResponse,
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
+  PostBulkUpdateAgentTagsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -25,6 +26,7 @@ import type {
   GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
+  PostBulkUpdateAgentTagsRequestSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
@@ -110,6 +112,39 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const bulkUpdateAgentTagsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkUpdateAgentTagsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const agentOptions = Array.isArray(request.body.agents)
+    ? { agentIds: request.body.agents }
+    : { kuery: request.body.agents };
+
+  try {
+    const results = await AgentService.updateAgentTags(
+      esClient,
+      { ...agentOptions, batchSize: request.body.batchSize },
+      request.body.tagsToAdd ?? [],
+      request.body.tagsToRemove ?? []
+    );
+
+    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
+
+    return response.ok({ body });
+  } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
 };

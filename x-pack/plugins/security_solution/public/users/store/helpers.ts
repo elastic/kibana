@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UsersModel, UsersType, UsersTableType, UsersQueries } from './model';
+import type { UsersModel, UsersQueries } from './model';
+import { UsersType, UsersTableType } from './model';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
 export const setUsersPageQueriesActivePageToZero = (state: UsersModel): UsersQueries => ({

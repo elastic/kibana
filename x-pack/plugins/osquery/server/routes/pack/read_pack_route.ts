@@ -8,12 +8,12 @@
 import { filter, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { IRouter } from '@kbn/core/server';
-import { PackSavedObjectAttributes } from '../../common/types';
+import type { IRouter } from '@kbn/core/server';
+import type { PackSavedObjectAttributes } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

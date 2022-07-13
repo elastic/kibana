@@ -24,7 +24,6 @@ import { NodeAvailableWarning } from '../../../../components/node_available_warn
 import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
-import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
@@ -34,7 +33,6 @@ import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 
 let blockingJobsRefreshTimeout = null;
 
-// 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
   constructor(props) {
     super(props);
@@ -76,14 +74,7 @@ export class JobsListView extends Component {
   componentDidMount() {
     this._isMounted = true;
     this.refreshJobSummaryList(true);
-
-    if (this.props.isManagementTable !== true) {
-      // check to see if we need to open the start datafeed modal
-      // after the page has rendered. This will happen if the user
-      // has just created a job in the advanced wizard and selected to
-      // start the datafeed now.
-      this.openAutoStartDatafeedModal();
-    }
+    this.openAutoStartDatafeedModal();
   }
 
   componentDidUpdate(prevProps) {
@@ -94,9 +85,7 @@ export class JobsListView extends Component {
   }
 
   componentWillUnmount() {
-    if (this.props.isManagementTable === undefined) {
-      blockingJobsRefreshTimeout = null;
-    }
+    blockingJobsRefreshTimeout = null;
     this._isMounted = false;
   }
 
@@ -125,7 +114,6 @@ export class JobsListView extends Component {
             job={this.state.fullJobsList[jobId]}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
-            showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
             showClearButton={showClearButton}
           />
@@ -136,7 +124,6 @@ export class JobsListView extends Component {
             jobId={jobId}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
-            showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
             showClearButton={showClearButton}
           />
@@ -160,7 +147,6 @@ export class JobsListView extends Component {
                     job={job}
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
-                    showFullDetails={this.props.isManagementTable !== true}
                     refreshJobList={this.onRefreshClick}
                     showClearButton={showClearButton}
                   />
@@ -311,12 +297,6 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
-        let jobsSpaces = {};
-        if (this.props.spacesApi && this.props.isManagementTable) {
-          const allSpaces = await ml.savedObjects.jobsSpaces();
-          jobsSpaces = allSpaces['anomaly-detector'];
-        }
-
         let jobsAwaitingNodeCount = 0;
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
@@ -326,13 +306,6 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
-          job.spaceIds =
-            this.props.spacesApi &&
-            this.props.isManagementTable &&
-            jobsSpaces &&
-            jobsSpaces[job.id] !== undefined
-              ? jobsSpaces[job.id]
-              : [];
 
           if (job.awaitingNodeAssignment === true) {
             jobsAwaitingNodeCount++;
@@ -402,63 +375,6 @@ export class JobsListView extends Component {
         this.checkBlockingJobTasks();
       }, DELETING_JOBS_REFRESH_INTERVAL_MS);
     }
-  }
-
-  renderManagementJobsListComponents() {
-    const {
-      isRefreshing,
-      loading,
-      itemIdToExpandedRowMap,
-      jobsSummaryList,
-      filteredJobsSummaryList,
-      fullJobsList,
-      selectedJobs,
-    } = this.state;
-    return (
-      <div className="job-management" data-test-subj="ml-jobs-list">
-        <NodeAvailableWarning />
-        <UpgradeWarning />
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <JobStatsBar jobsSummaryList={jobsSummaryList} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <RefreshJobsListButton
-                  onRefreshClick={this.onRefreshClick}
-                  isRefreshing={isRefreshing}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <div className="managementJobsList">
-          <div>
-            <JobFilterBar
-              setFilters={this.setFilters}
-              queryText={this.props.jobsViewState.queryText}
-            />
-          </div>
-          <JobsList
-            jobsSummaryList={filteredJobsSummaryList}
-            fullJobsList={fullJobsList}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            toggleRow={this.toggleRow}
-            selectJobChange={this.selectJobChange}
-            selectedJobsCount={selectedJobs.length}
-            loading={loading}
-            isManagementTable={true}
-            isMlEnabledInSpace={this.props.isMlEnabledInSpace}
-            spacesApi={this.props.spacesApi}
-            jobsViewState={this.props.jobsViewState}
-            onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
-            refreshJobs={() => this.refreshJobSummaryList(true)}
-          />
-        </div>
-      </div>
-    );
   }
 
   renderJobsListComponents() {
@@ -582,14 +498,6 @@ export class JobsListView extends Component {
   }
 
   render() {
-    const { isManagementTable } = this.props;
-
-    return (
-      <div>
-        {!isManagementTable
-          ? this.renderJobsListComponents()
-          : this.renderManagementJobsListComponents()}
-      </div>
-    );
+    return <div>{this.renderJobsListComponents()}</div>;
   }
 }

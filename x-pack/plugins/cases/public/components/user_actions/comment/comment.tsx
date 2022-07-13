@@ -15,6 +15,7 @@ import * as i18n from '../translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
+import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 const getDeleteLabelTitle = () => `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
@@ -38,8 +39,9 @@ const getDeleteCommentUserAction = ({
 
 const getCreateCommentUserAction = ({
   userAction,
+  caseData,
+  externalReferenceAttachmentTypeRegistry,
   comment,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -59,13 +61,12 @@ const getCreateCommentUserAction = ({
   comment: Comment;
 } & Omit<
   UserActionBuilderArgs,
-  'caseData' | 'caseServices' | 'comments' | 'index' | 'handleOutlineComment'
+  'caseServices' | 'comments' | 'index' | 'handleOutlineComment'
 >): EuiCommentProps[] => {
   switch (comment.type) {
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
         comment,
-        userCanCrud,
         outlined: comment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(comment.id),
         commentRefs,
@@ -96,6 +97,14 @@ const getCreateCommentUserAction = ({
         actionsNavigation,
       });
       return actionBuilder.build();
+    case CommentType.externalReference:
+      const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
+        userAction,
+        comment,
+        externalReferenceAttachmentTypeRegistry,
+        caseData,
+      });
+      return externalReferenceBuilder.build();
     default:
       return [];
   }
@@ -103,8 +112,8 @@ const getCreateCommentUserAction = ({
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
+  externalReferenceAttachmentTypeRegistry,
   userAction,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -129,15 +138,17 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
     }
 
     const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
+
     if (comment == null) {
       return [];
     }
 
     if (commentUserAction.action === Actions.create) {
       const commentAction = getCreateCommentUserAction({
+        caseData,
         userAction: commentUserAction,
+        externalReferenceAttachmentTypeRegistry,
         comment,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

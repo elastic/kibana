@@ -61,7 +61,7 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
-    const { owner, userCanCrud } = useCasesContext();
+    const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners();
     const [refresh, setRefresh] = useState(0);
 
@@ -185,14 +185,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, setFilterOptions, refreshCases, setQueryParams]
     );
 
-    const showActions = userCanCrud && !isSelectorView;
+    const showActions = permissions.all && !isSelectorView;
 
     const columns = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       handleIsLoading,
       refreshCases,
       isSelectorView,
-      userCanCrud,
       connectors,
       onRowClick,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
@@ -271,7 +270,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           sorting={sorting}
           tableRef={tableRef}
           tableRowProps={tableRowProps}
-          userCanCrud={userCanCrud}
         />
       </>
     );

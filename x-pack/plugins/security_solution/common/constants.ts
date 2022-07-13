@@ -105,6 +105,7 @@ export enum SecurityPageName {
   networkTls = 'network-tls',
   overview = 'overview',
   policies = 'policy',
+  responseActions = 'response_actions',
   rules = 'rules',
   rulesCreate = 'rules-create',
   timelines = 'timelines',
@@ -122,6 +123,10 @@ export enum SecurityPageName {
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
   noPage = '',
+  cloudSecurityPosture = 'cloud_security_posture',
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -149,6 +154,11 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const CLOUD_SECURITY_POSTURE_PATH = '/cloud_security_posture' as const;
+export const CLOUD_SECURITY_POSTURE_DASHBOARD_PATH = '/cloud_security_posture/dashboard' as const;
+export const CLOUD_SECURITY_POSTURE_FINDINGS_PATH = '/cloud_security_posture/findings' as const;
+export const CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH = '/cloud_security_posture/benchmarks' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -174,6 +184,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -377,6 +388,11 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.FAILED,
   TRANSFORM_STATES.STOPPED,
   TRANSFORM_STATES.STOPPING,
+]);
+
+export const STARTED_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.INDEXING,
+  TRANSFORM_STATES.STARTED,
 ]);
 
 /**

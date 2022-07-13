@@ -19,7 +19,7 @@ export function PageLoadAndViews() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem style={{ flexBasis: 650 }}>
-        <EuiPanel hasBorder={true}>
+        <EuiPanel hasBorder={true} style={{ paddingBottom: 0 }}>
           <PageViewsTrend />
         </EuiPanel>
       </EuiFlexItem>

@@ -25,18 +25,6 @@ export interface ResultMeta {
   clicks?: number;
 }
 
-// A search result item
-export type Result = {
-  id: {
-    raw: string;
-  };
-  _meta: ResultMeta;
-} & {
-  // this should be a FieldType object, but there's no good way to do that in TS: https://github.com/microsoft/TypeScript/issues/17867
-  // You'll need to cast it to FieldValue whenever you use it.
-  [key: string]: object;
-};
-
 export interface ResultAction {
   onClick(): void;
   title: string;

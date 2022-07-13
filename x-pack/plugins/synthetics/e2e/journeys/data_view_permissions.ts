@@ -7,7 +7,7 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { callKibana } from '@kbn/apm-plugin/scripts/create_apm_users/helpers/call_kibana';
-import { byTestId, waitForLoadingToFinish } from './utils';
+import { byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 import { loginPageProvider } from '../page_objects/login';
 
 journey('DataViewPermissions', async ({ page, params }) => {

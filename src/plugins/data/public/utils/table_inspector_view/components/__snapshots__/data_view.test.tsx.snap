@@ -2,7 +2,7 @@
 
 exports[`Inspector Data View component should render empty state 1`] = `
 <div
-  class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-7iihzj-euiPanel-m-transparent"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
 >
   <div
     class="euiEmptyPrompt__main"
@@ -14,15 +14,15 @@ exports[`Inspector Data View component should render empty state 1`] = `
         class="euiEmptyPrompt__contentInner"
       >
         <h2
-          class="euiTitle css-1w464ad-euiTitle-m"
+          class="euiTitle emotion-euiTitle-m"
         >
           No data available
         </h2>
         <div
-          class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
-          class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
+          class="euiText emotion-euiText-m-euiTextColor-subdued"
         >
           <p>
             The element did not provide any data.
@@ -206,7 +206,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     class="euiBasicTable insDataTableFormat__table"
@@ -265,7 +265,7 @@ Array [
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -334,7 +334,7 @@ Array [
     </div>
     <div>
       <div
-        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
@@ -381,7 +381,7 @@ Array [
             <span
               aria-atomic="true"
               aria-relevant="additions text"
-              class="euiScreenReaderOnly"
+              class="emotion-euiScreenReaderOnly"
               role="status"
             >
               Page 1 of 1
@@ -459,7 +459,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText css-1utxlgq-euiText-xs"
+        class="euiText emotion-euiText-xs"
       >
         <p
           aria-atomic="true"
@@ -470,7 +470,7 @@ Array [
         </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+        class="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -551,7 +551,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     class="euiBasicTable insDataTableFormat__table"
@@ -610,7 +610,7 @@ Array [
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -680,7 +680,7 @@ Array [
     </div>
     <div>
       <div
-        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
@@ -727,7 +727,7 @@ Array [
             <span
               aria-atomic="true"
               aria-relevant="additions text"
-              class="euiScreenReaderOnly"
+              class="emotion-euiScreenReaderOnly"
               role="status"
             >
               Page 1 of 1

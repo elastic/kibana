@@ -45,7 +45,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
   <EuiSpacer
     size="s"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     aria-label="Toggle ValueAxis-1 options"
     buttonClassName="eui-textTruncate"
     buttonContent={
@@ -150,8 +150,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         }
       }
     />
-  </WithEuiTheme(EuiAccordionClass)>
-  <WithEuiTheme(EuiAccordionClass)
+  </EuiAccordionClass>
+  <EuiAccordionClass
     aria-label="Toggle ValueAxis-1 options"
     buttonClassName="eui-textTruncate"
     buttonContent={
@@ -256,6 +256,6 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         }
       }
     />
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
 </EuiPanel>
 `;

@@ -49,14 +49,73 @@ describe('parseExistingEnrichments', () => {
     const data = [
       {
         category: 'threat',
-        field: 'threat.enrichments',
+        field: 'threat.enrichments.indicator.first_seen',
         isObjectArray: true,
-        originalValue: [
-          `{"indicator":{"first_seen":"2021-03-21T19:40:19.000Z","provider":"provider","reference":"http://reference.url","ip":"192.168.1.19","type":"ip"},"matched":{"atomic":"192.168.1.19","field":"host.ip","id":"0SIZMnoB_Blp1Ib9ZYHU","index":"filebeat-8.0.0-2021.05.28-000001","type":"indicator_match_rule"}}`,
-        ],
-        values: [
-          `{"indicator":{"first_seen":"2021-03-21T19:40:19.000Z","provider":"provider","reference":"http://reference.url","ip":"192.168.1.19","type":"ip"},"matched":{"atomic":"192.168.1.19","field":"host.ip","id":"0SIZMnoB_Blp1Ib9ZYHU","index":"filebeat-8.0.0-2021.05.28-000001","type":"indicator_match_rule"}}`,
-        ],
+        originalValue: ['2021-03-21T19:40:19.000Z'],
+        values: ['2021-03-21T19:40:19.000Z'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.provider',
+        isObjectArray: true,
+        originalValue: ['provider'],
+        values: ['provider'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.reference',
+        isObjectArray: true,
+        originalValue: ['http://reference.url'],
+        values: ['http://reference.url'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.ip',
+        isObjectArray: true,
+        originalValue: ['192.168.1.19'],
+        values: ['192.168.1.19'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.type',
+        isObjectArray: true,
+        originalValue: ['ip'],
+        values: ['ip'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.atomic',
+        isObjectArray: true,
+        originalValue: ['192.168.1.19'],
+        values: ['192.168.1.19'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.field',
+        isObjectArray: true,
+        originalValue: ['host.ip'],
+        values: ['host.ip'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.id',
+        isObjectArray: true,
+        originalValue: ['0SIZMnoB_Blp1Ib9ZYHU'],
+        values: ['0SIZMnoB_Blp1Ib9ZYHU'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.index',
+        isObjectArray: true,
+        originalValue: ['filebeat-8.0.0-2021.05.28-000001'],
+        values: ['filebeat-8.0.0-2021.05.28-000001'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.type',
+        isObjectArray: true,
+        originalValue: ['indicator_match_rule'],
+        values: ['indicator_match_rule'],
       },
     ];
 
@@ -140,16 +199,73 @@ describe('parseExistingEnrichments', () => {
     const data = [
       {
         category: 'threat',
-        field: 'threat.enrichments',
+        field: 'threat.enrichments.indicator.first_seen',
         isObjectArray: true,
-        originalValue: [
-          `{"indicator":{"first_seen":"2021-03-21T19:40:19.000Z","provider":"provider","reference":"http://reference.url","ip":"192.168.1.19","type":"ip"},"matched":{"atomic":"192.168.1.19","field":"host.ip","id":"0SIZMnoB_Blp1Ib9ZYHU","index":"filebeat-8.0.0-2021.05.28-000001","type":"indicator_match_rule"}}`,
-          `{"indicator":{"first_seen":"2021-03-21T19:40:19.000Z","provider":"other","reference":"http://reference.url","ip":"192.168.1.19","type":"ip"},"matched":{"atomic":"192.168.1.19","field":"host.ip","id":"iiL9NHoB_Blp1Ib9yoJo","index":"filebeat-8.0.0-2021.05.28-000001","type":"indicator_match_rule"}}`,
-        ],
-        values: [
-          `{"indicator":{"first_seen":"2021-03-21T19:40:19.000Z","provider":"provider","reference":"http://reference.url","ip":"192.168.1.19","type":"ip"},"matched":{"atomic":"192.168.1.19","field":"host.ip","id":"0SIZMnoB_Blp1Ib9ZYHU","index":"filebeat-8.0.0-2021.05.28-000001","type":"indicator_match_rule"}}`,
-          `{"indicator":{"first_seen":"2021-03-21T19:40:19.000Z","provider":"other","reference":"http://reference.url","ip":"192.168.1.19","type":"ip"},"matched":{"atomic":"192.168.1.19","field":"host.ip","id":"iiL9NHoB_Blp1Ib9yoJo","index":"filebeat-8.0.0-2021.05.28-000001","type":"indicator_match_rule"}}`,
-        ],
+        originalValue: ['2021-03-21T19:40:19.000Z', '2021-03-21T19:40:19.000Z'],
+        values: ['2021-03-21T19:40:19.000Z', '2021-03-21T19:40:19.000Z'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.provider',
+        isObjectArray: true,
+        originalValue: ['provider', 'other'],
+        values: ['provider', 'other'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.reference',
+        isObjectArray: true,
+        originalValue: ['http://reference.url', 'http://reference.url'],
+        values: ['http://reference.url', 'http://reference.url'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.ip',
+        isObjectArray: true,
+        originalValue: ['192.168.1.19', '192.168.1.19'],
+        values: ['192.168.1.19', '192.168.1.19'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.indicator.type',
+        isObjectArray: true,
+        originalValue: ['ip', 'ip'],
+        values: ['ip', 'ip'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.atomic',
+        isObjectArray: true,
+        originalValue: ['192.168.1.19', '192.168.1.19'],
+        values: ['192.168.1.19', '192.168.1.19'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.field',
+        isObjectArray: true,
+        originalValue: ['host.ip', 'host.ip'],
+        values: ['host.ip', 'host.ip'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.id',
+        isObjectArray: true,
+        originalValue: ['0SIZMnoB_Blp1Ib9ZYHU', 'iiL9NHoB_Blp1Ib9yoJo'],
+        values: ['0SIZMnoB_Blp1Ib9ZYHU', 'iiL9NHoB_Blp1Ib9yoJo'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.index',
+        isObjectArray: true,
+        originalValue: ['filebeat-8.0.0-2021.05.28-000001', 'filebeat-8.0.0-2021.05.28-000001'],
+        values: ['filebeat-8.0.0-2021.05.28-000001', 'filebeat-8.0.0-2021.05.28-000001'],
+      },
+      {
+        category: 'threat',
+        field: 'threat.enrichments.matched.type',
+        isObjectArray: true,
+        originalValue: ['indicator_match_rule', 'indicator_match_rule'],
+        values: ['indicator_match_rule', 'indicator_match_rule'],
       },
     ];
 
