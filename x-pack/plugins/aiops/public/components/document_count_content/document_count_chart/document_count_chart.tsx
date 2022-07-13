@@ -83,7 +83,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     defaultMessage: 'document count',
   });
 
-  const viewMode = VIEW_MODE.BRUSH;
+  // TODO Let user choose between ZOOM and BRUSH mode.
+  const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
 
   const xDomain = {
     min: timeRangeEarliest,
