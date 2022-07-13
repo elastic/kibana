@@ -7,12 +7,15 @@
  */
 
 import Path from 'path';
+import Os from 'os';
 
+import Uuid from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
+import { REPO_ROOT } from '@kbn/utils';
 
-import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_SCRIPT_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';
-import { parseRawFlags } from './kibana_cli_args';
+import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
+import { parseRawFlags, getArgValue } from './kibana_cli_args';
 
 function extendNodeOptions(installDir?: string) {
   if (!installDir) {
@@ -44,13 +47,35 @@ export async function runKibanaServer({
 }) {
   const runOptions = config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
-  const extraArgs = options.extraKbnOpts ?? [];
+  const devMode = !installDir;
+  const useTaskRunner = config.get('kbnTestServer.useDedicatedTaskRunner');
+
+  const procRunnerOpts = {
+    cwd: installDir || REPO_ROOT,
+    cmd: installDir
+      ? process.platform.startsWith('win')
+        ? Path.resolve(installDir, 'bin/kibana.bat')
+        : Path.resolve(installDir, 'bin/kibana')
+      : process.execPath,
+    env: {
+      FORCE_COLOR: 1,
+      ...process.env,
+      ...config.get('kbnTestServer.env'),
+      ...extendNodeOptions(installDir),
+    },
+    wait: runOptions.wait,
+    onEarlyExit,
+  };
+
+  const prefixArgs = devMode
+    ? [Path.relative(process.cwd(), Path.resolve(REPO_ROOT, 'scripts/kibana'))]
+    : [];
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
 
-  const args = parseRawFlags([
+  const kbnFlags = parseRawFlags([
     // When installDir is passed, we run from a built version of Kibana which uses different command line
     // arguments. If installDir is not passed, we run from source code.
     ...(installDir
@@ -58,31 +83,51 @@ export async function runKibanaServer({
       : [...sourceArgs, ...serverArgs]),
 
     // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
-    ...extraArgs,
+    ...(options.extraKbnOpts ?? []),
   ]);
 
-  // main process
-  await procs.run('kibana', {
-    cmd: getKibanaCmd(installDir),
-    args: installDir ? args : [KIBANA_SCRIPT_PATH, ...args],
-    env: {
-      FORCE_COLOR: 1,
-      ...process.env,
-      ...config.get('kbnTestServer.env'),
-      ...extendNodeOptions(installDir),
-    },
-    cwd: installDir || KIBANA_ROOT,
-    wait: runOptions.wait,
-    onEarlyExit,
-  });
-}
+  const promises = [
+    // main process
+    procs.run(useTaskRunner ? 'kbn-ui' : 'kibana', {
+      ...procRunnerOpts,
+      args: [
+        ...prefixArgs,
+        ...parseRawFlags([
+          ...kbnFlags,
+          ...(!useTaskRunner
+            ? []
+            : [
+                '--node.roles=["ui"]',
+                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${Uuid.v4()}`)}`,
+              ]),
+        ]),
+      ],
+    }),
+  ];
 
-function getKibanaCmd(installDir?: string) {
-  if (installDir) {
-    return process.platform.startsWith('win')
-      ? Path.resolve(installDir, 'bin/kibana.bat')
-      : Path.resolve(installDir, 'bin/kibana');
+  if (useTaskRunner) {
+    const mainUuid = getArgValue(kbnFlags, 'server.uuid');
+
+    // dedicated task runner
+    promises.push(
+      procs.run('kbn-tasks', {
+        ...procRunnerOpts,
+        args: [
+          ...prefixArgs,
+          ...parseRawFlags([
+            ...kbnFlags,
+            `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
+            '--node.roles=["background_tasks"]',
+            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${Uuid.v4()}`)}`,
+            ...(typeof mainUuid === 'string' && mainUuid
+              ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
+              : []),
+            ...(devMode ? ['--no-optimizer'] : []),
+          ]),
+        ],
+      })
+    );
   }
 
-  return KIBANA_EXEC;
+  await Promise.all(promises);
 }
