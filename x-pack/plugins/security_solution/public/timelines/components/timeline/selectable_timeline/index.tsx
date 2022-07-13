@@ -214,7 +214,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       'data-test-subj': 'timeline-super-select-search-box',
       placeholder: placeholder ?? i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
       onSearch: onSearchTimeline,
-      incremental: true,
+      incremental: false,
       append: (
         <StyledEuiFilterButton
           data-test-subj="only-favorites-toggle"
