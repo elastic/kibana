@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a specified case.
+  summary: Retrieves information about a case.
   operationId: getCase
   description: >
     You must have `read` privileges for the **Cases** feature in the
@@ -24,8 +24,12 @@ get:
       content:
         application/json; charset=utf-8:
           schema:
-            type: string
-        examples: {}
+            type: object
+            properties:
+              $ref: '../components/schemas/case_response_properties.yaml'
+          examples:
+            getCaseResponse:
+              $ref: '../components/examples/get_case_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:
