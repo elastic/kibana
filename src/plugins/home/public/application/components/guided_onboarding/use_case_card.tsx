@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiAvatar,
-  EuiCard,
-  EuiText,
-  EuiTitle,
-  IconType,
-  useEuiTheme,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiCard, EuiText, EuiTitle, EuiImage } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -28,9 +20,8 @@ type UseCaseConstants = {
       title: string;
       description: string;
     };
-    icon: {
-      type: IconType;
-      name: string;
+    logo: {
+      altText: string;
     };
     navigateOptions: {
       appId: string;
@@ -49,10 +40,9 @@ const constants: UseCaseConstants = {
           'Create a finely-tuned search experience for your websites, applications, workplace content, and more.',
       }),
     },
-    icon: {
-      type: 'inspect',
-      name: i18n.translate('home.guidedOnboarding.gettingStarted.search.iconName', {
-        defaultMessage: 'Enterprise Search icon',
+    logo: {
+      altText: i18n.translate('home.guidedOnboarding.gettingStarted.search.iconName', {
+        defaultMessage: 'Enterprise Search logo',
       }),
     },
     navigateOptions: {
@@ -73,10 +63,9 @@ const constants: UseCaseConstants = {
         }
       ),
     },
-    icon: {
-      type: 'eye',
-      name: i18n.translate('home.guidedOnboarding.gettingStarted.observability.iconName', {
-        defaultMessage: 'Observability icon',
+    logo: {
+      altText: i18n.translate('home.guidedOnboarding.gettingStarted.observability.iconName', {
+        defaultMessage: 'Observability logo',
       }),
     },
     navigateOptions: {
@@ -94,10 +83,9 @@ const constants: UseCaseConstants = {
           'Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place.',
       }),
     },
-    icon: {
-      type: 'securitySignal',
-      name: i18n.translate('home.guidedOnboarding.gettingStarted.security.iconName', {
-        defaultMessage: 'Security icon',
+    logo: {
+      altText: i18n.translate('home.guidedOnboarding.gettingStarted.security.iconName', {
+        defaultMessage: 'Security logo',
       }),
     },
     navigateOptions: {
@@ -113,7 +101,17 @@ export interface UseCaseProps {
 }
 
 export const UseCaseCard = ({ useCase }: UseCaseProps) => {
-  const { application, trackUiMetric } = getServices();
+  const { application, trackUiMetric, uiSettings, http } = getServices();
+
+  const isDarkTheme = uiSettings.get('theme:darkMode');
+
+  const getImageUrl = (imageName: UseCase) => {
+    const imagePath = `/plugins/home/assets/solution_logos/${imageName}${
+      isDarkTheme ? '_dark' : ''
+    }.png`;
+
+    return http.basePath.prepend(imagePath);
+  };
 
   const onUseCaseSelection = () => {
     trackUiMetric(METRIC_TYPE.CLICK, `guided_onboarding__use_case__${useCase}`);
@@ -136,40 +134,11 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
       <p>{constants[useCase].i18nTexts.description}</p>
     </EuiText>
   );
-
-  const { euiTheme } = useEuiTheme();
-  const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const cardCss = useMemo(() => {
-    return {
-      backgroundColor:
-        useCase === 'search'
-          ? euiTheme.colors.warning
-          : useCase === 'security'
-          ? euiTheme.colors.accent
-          : euiTheme.colors.success,
-      // smaller screens: taller cards (250px)
-      // medium screens: lower cards (150px)
-      // larger screens: tall but not too tall cards (200px)
-      minHeight: isSmallerBreakpoint ? 250 : isMediumBreakpoint ? 150 : 200,
-    };
-  }, [euiTheme, isMediumBreakpoint, isSmallerBreakpoint, useCase]);
-
   return (
     <EuiCard
       display="subdued"
       textAlign="left"
-      icon={
-        <EuiAvatar
-          iconSize="xl"
-          iconType={constants[useCase].icon.type}
-          name={constants[useCase].icon.name}
-          color="plain"
-          size="xl"
-          // TODO add useEuiShadow('m') when EUI import is available (https://github.com/elastic/eui/pull/5970)
-        />
-      }
-      image={<div css={cardCss} />}
+      image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logo.altText} />}
       title={title}
       description={description}
       // Used for FS tracking
