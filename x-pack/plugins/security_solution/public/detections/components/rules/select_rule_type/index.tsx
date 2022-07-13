@@ -189,7 +189,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               title={i18n.NEW_TERMS_TYPE_TITLE}
               titleSize="xs"
               description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
-              icon={<EuiIcon size="l" type="alert" />}
+              icon={<EuiIcon size="l" type="magnifyWithPlus" />}
               selectable={newTermsSelectableConfig}
               layout="horizontal"
             />

@@ -560,7 +560,7 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNewTermsFieldHelpText',
       {
-        defaultMessage: 'Select fields check for new terms.',
+        defaultMessage: 'Select a field to check for new terms.',
       }
     ),
     validations: [
