@@ -6,9 +6,10 @@
  */
 
 // @ts-ignore
-import { setup } from '@kbn-core-test-helpers-browser';
+
 import fetchMock from 'fetch-mock/es5/client';
 
+import { setup } from '@kbn/core-test-helpers-browser';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 import { SessionExpired } from './session_expired';
