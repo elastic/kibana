@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-// export interface AggregateResult {
-//   key: string | number;
-//   key_as_string?: string;
-//   doc_count: number;
-//   count_by_aggs: {
-//     value: number;
-//   };
-// }
-
 interface Aggregate {
   key: string | number;
   doc_count: number;

@@ -6,8 +6,7 @@
  */
 
 import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react';
-import { EuiBasicTable, EuiTableSortingType, EuiProgress } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { EuiBasicTable, EuiTableSortingType, EuiProgress, EuiBasicTableColumn } from '@elastic/eui';
 import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';
@@ -131,7 +130,6 @@ export const ContainerNameWidget = ({
           })
           .flat() || [],
     };
-    // return true
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
 

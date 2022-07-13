@@ -11,8 +11,6 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
 import { ContainerNameWidget, LOADING_TEST_ID } from '.';
 import { useFetchContainerNameData } from './hooks';
-import { ContainerNameRow } from './container_name_row';
-import { fireEvent } from '@testing-library/react';
 
 const TABLE_ID = 'containerNameSessionTable';
 const TABLE_CONTAINER_NAME_ID = 'containerImageNameSessionNameColumn';
@@ -92,7 +90,7 @@ describe('ContainerNameWidget component', () => {
         }));
       });
 
-      it('should show title, table with correct columns', async () => {
+      it('should show the table, table title, table columns, sort button', async () => {
         render();
         expect(renderResult.queryByTestId(TABLE_ID)).toBeVisible();
         expect(renderResult.queryAllByTestId(TABLE_SORT_BUTTON_ID)).toHaveLength(1);
@@ -102,8 +100,6 @@ describe('ContainerNameWidget component', () => {
 
       it('should show data value names and value', async () => {
         render();
-        expect(renderResult.queryAllByTestId(TABLE_CONTAINER_NAME_ID)).toHaveLength(17);
-        expect(renderResult.queryAllByTestId(TABLE_CONTAINER_COUNT_ID)).toHaveLength(17);
         expect(renderResult.queryAllByTestId(TABLE_ROW_ELEMENT)).toHaveLength(17);
       });
     });
@@ -132,38 +128,5 @@ describe('ContainerNameWidget component', () => {
         expect(renderResult.getByTestId(LOADING_TEST_ID)).toBeVisible();
       });
     });
-  });
-});
-
-const TEST_NAME = 'TEST ROW';
-const TEST_BUTTON_FILTER = <div>Filter In</div>;
-const TEST_BUTTON_FILTER_OUT = <div>Filter Out</div>;
-
-describe('ContainerNameRow component with valid row', () => {
-  let renderResult: ReturnType<typeof render>;
-  const mockedContext = createAppRootMockRenderer();
-  const render: () => ReturnType<AppContextTestRender['render']> = () =>
-    (renderResult = mockedContext.render(
-      <ContainerNameRow
-        name={TEST_NAME}
-        index={1}
-        filterButtonIn={TEST_BUTTON_FILTER}
-        filterButtonOut={TEST_BUTTON_FILTER_OUT}
-      />
-    ));
-
-  it('should show the row element as well as the pop up filter button when mouse hovers above it', async () => {
-    render();
-    expect(renderResult.getByText(TEST_NAME)).toBeVisible();
-    fireEvent.mouseOver(renderResult.queryByText(TEST_NAME)!);
-    expect(renderResult.getByText('Filter In')).toBeVisible();
-    expect(renderResult.getByText('Filter Out')).toBeVisible();
-  });
-
-  it('should show the row element but not the pop up filter button outside mouse hover', async () => {
-    render();
-    expect(renderResult.getByText(TEST_NAME)).toBeVisible();
-    expect(renderResult.queryByText('Filter In')).toBeFalsy();
-    expect(renderResult.queryByText('Filter Out')).toBeFalsy();
   });
 });
