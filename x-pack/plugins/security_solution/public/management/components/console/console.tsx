@@ -44,7 +44,10 @@ const ConsoleWindow = styled.div`
     }
 
     &-header {
+      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
+      border-top-left-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+      border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
     }
 
     &-footer,
