@@ -208,7 +208,6 @@ export function getState({
       startSyncingStates();
     },
     stopSync: () => {
-      data.query.filterManager.setAppFilters([]);
       stopSyncingFilters();
       stopSyncingFilters = () => {};
       stopSyncingStates();
