@@ -14,11 +14,21 @@
 import _ from 'lodash';
 import { DataView } from './data_view';
 
-// Takes a hit, merges it with any stored/scripted fields, and with the metaFields
-// returns a flattened version
-
-function flattenHit(indexPattern: DataView, hit: Record<string, any>, deep: boolean) {
-  const flat = {} as Record<string, any>;
+/**
+ * Takes a hit, merges it with whatever stored/scripted fields, and with the metaFields
+ * returns a flattened version
+ *
+ * @param {DataView} indexPattern
+ * @param {Record<string, unknown>} hit - userland data
+ * @param {boolean} deep - whether to look into objects within arrays
+ * @returns {Record<string, unknown[]>}
+ */
+function flattenHit(
+  indexPattern: DataView,
+  hit: Record<string, unknown>,
+  deep: boolean
+): Record<string, unknown[]> {
+  const flat = {} as Record<string, unknown[]>;
 
   // recursively merge _source
   const fields = indexPattern.fields.getByName;
