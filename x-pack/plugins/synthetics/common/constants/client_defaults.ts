@@ -67,7 +67,7 @@ export const getLocationFilter = ({
     },
     {
       term: {
-        'observer.geo.name': `North America - ${locationName}`,
+        'observer.geo.name': locationName,
       },
     },
   ],
