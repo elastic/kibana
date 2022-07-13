@@ -9,5 +9,6 @@ export { buildSamplerAggregation } from './build_sampler_aggregation';
 export { fetchAggIntervals } from './fetch_agg_intervals';
 export { fetchHistogramsForFields } from './fetch_histograms_for_fields';
 export { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
+export type { AggCardinality } from './types';
 export type { NumberValidationResult } from './validate_number';
 export { numberValidator } from './validate_number';

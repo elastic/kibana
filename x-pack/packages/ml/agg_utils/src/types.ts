@@ -20,3 +20,16 @@ export type ElasticsearchClient = Omit<
   Client,
   'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
 >;
+
+interface FieldAggCardinality {
+  field: string;
+  percent?: any;
+}
+
+interface ScriptAggCardinality {
+  script: any;
+}
+
+export interface AggCardinality {
+  cardinality: FieldAggCardinality | ScriptAggCardinality;
+}

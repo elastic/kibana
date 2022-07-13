@@ -16,29 +16,13 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import type { ElasticsearchClient } from './types';
+import type { AggCardinality, ElasticsearchClient } from './types';
 
 const MAX_CHART_COLUMNS = 20;
 
 interface HistogramField {
   fieldName: string;
   type: string;
-}
-
-// imported from
-// import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
-
-interface FieldAggCardinality {
-  field: string;
-  percent?: any;
-}
-
-interface ScriptAggCardinality {
-  script: any;
-}
-
-interface AggCardinality {
-  cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
 
 interface AggHistogram {
