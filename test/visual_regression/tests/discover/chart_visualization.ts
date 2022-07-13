@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/visual_regression'
+        'test/functional/fixtures/kbn_archiver/discover/visual_regression'
       );
 
       // and load a set of makelogs data
