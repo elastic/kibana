@@ -74,9 +74,9 @@ export const fetchIndices = async (
     })
     .flatMap(({ name, aliases, ...engineData }) => {
       const indicesAndAliases = [];
-      indicesAndAliases.push({ name, ...engineData });
+      indicesAndAliases.push({ name, alias: false, ...engineData });
       aliases.forEach((alias) => {
-        indicesAndAliases.push({ name: alias, ...engineData });
+        indicesAndAliases.push({ name: alias, alias: true, ...engineData });
       });
       return indicesAndAliases;
     })

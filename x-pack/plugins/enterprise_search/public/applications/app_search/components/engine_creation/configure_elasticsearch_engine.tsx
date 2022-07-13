@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -38,7 +39,6 @@ import {
   ALLOWED_CHARS_NOTE,
   ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
   ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
-  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
   ENGINE_CREATION_FORM_TITLE,
   SANITIZED_NAME_NOTE,
 } from './constants';
@@ -51,6 +51,13 @@ export interface SearchIndexSelectableOption {
   label: string;
   health?: HealthStatus;
   status?: string;
+  alias: boolean;
+  badge: {
+    color: string;
+    icon: string;
+    label: string;
+  };
+  disabled: boolean;
   total: {
     docs: {
       count: number;
@@ -116,6 +123,11 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
             </b>
             &nbsp;{option.total?.store?.size_in_bytes ?? '-'}
           </span>
+          <span className="selectableSecondaryContentLabel" data-test-subj="optionStorage">
+            <EuiBadge color={option.badge.color} iconType={option.badge.icon}>
+              {option.badge.label}
+            </EuiBadge>
+          </span>
         </small>
       </EuiTextColor>
     </>
@@ -126,6 +138,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
   const {
     aliasName,
     indicesFormatted,
+    isAliasAllowed,
     isAliasRequired,
     isLoading,
     isLoadingIndices,
@@ -133,15 +146,27 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
     name,
     rawName,
   } = useValues(EngineCreationLogic);
-  const { loadIndices, setAliasName, setCreationStep, setRawName, setSelectedIndex } =
-    useActions(EngineCreationLogic);
+  const {
+    loadIndices,
+    setIsAliasAllowed,
+    setAliasName,
+    setCreationStep,
+    setRawName,
+    setSelectedIndex,
+  } = useActions(EngineCreationLogic);
 
   const onChange = (options: SearchIndexSelectableOption[]) => {
     const selected = options.find((option) => option.checked === 'on');
     setSelectedIndex(selected?.label ?? '');
+    if (selected?.alias ?? false) setAliasName('');
+    setIsAliasAllowed(!selected?.alias ?? true);
   };
 
-  const aliasOptionalOrRequired = isAliasRequired ? 'Required' : 'Optional';
+  const aliasOptionalOrRequired = !isAliasAllowed
+    ? 'Disabled'
+    : isAliasRequired
+    ? 'Required'
+    : 'Optional';
 
   useEffect(() => {
     loadIndices();
@@ -338,6 +363,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                   fullWidth
                   data-test-subj="AliasNameInput"
                   prepend={aliasOptionalOrRequired}
+                  disabled={!isAliasAllowed}
                 />
               </EuiFormRow>
             </EuiFlexItem>

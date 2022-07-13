@@ -37,6 +37,7 @@ interface EngineCreationActions {
   onLoadIndicesSuccess(indices: ElasticsearchIndex[]): { indices: ElasticsearchIndex[] };
   setSelectedIndex(selectedIndexName: string): { selectedIndexName: string };
   setEngineType(engineType: EngineType): { engineType: EngineType };
+  setIsAliasAllowed(isAliasAllowed: boolean): { isAliasAllowed: boolean };
 }
 
 interface EngineCreationValues {
@@ -54,6 +55,7 @@ interface EngineCreationValues {
   engineType: EngineType;
   isAliasRequired: boolean;
   isSubmitDisabled: boolean;
+  isAliasAllowed: boolean;
 }
 
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
@@ -71,6 +73,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setSelectedIndex: (selectedIndexName) => ({ selectedIndexName }),
     setEngineType: (engineType) => ({ engineType }),
     setCreationStep: (currentEngineCreationStep) => currentEngineCreationStep,
+    setIsAliasAllowed: (isAliasAllowed) => ({ isAliasAllowed }),
   },
   reducers: {
     ingestionMethod: [
@@ -107,6 +110,12 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
             ? ''
             : `search-${selectedIndexName}`;
         },
+      },
+    ],
+    isAliasAllowed: [
+      true,
+      {
+        setIsAliasAllowed: (_, { isAliasAllowed }) => isAliasAllowed,
       },
     ],
     isLoadingIndices: [

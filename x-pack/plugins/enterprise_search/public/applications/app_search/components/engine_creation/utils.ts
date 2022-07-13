@@ -35,11 +35,28 @@ export const formatIndicesToSelectable = (
   indices: ElasticsearchIndex[],
   selectedIndexName: string
 ): SearchIndexSelectableOption[] => {
-  return indices.map((index) => ({
-    ...(selectedIndexName === index.name ? { checked: 'on' } : {}),
-    label: index.name,
-    health: index.health,
-    status: index.status,
-    total: index.total,
-  }));
+  return indices.map((index) => {
+    let icon, color;
+    if (index.name.startsWith('search-')) {
+      color = 'success';
+    } else {
+      icon = index.alias ? 'alert' : 'iInCircle';
+      color = index.alias ? 'danger' : 'warning';
+    }
+
+    return {
+      ...(selectedIndexName === index.name ? { checked: 'on' } : {}),
+      alias: index.alias,
+      badge: {
+        color: color,
+        icon: icon,
+        label: index.alias ? 'Alias' : 'Index',
+      },
+      disabled: index.alias && !index.name.startsWith('search-'),
+      label: index.name,
+      health: index.health,
+      status: index.status,
+      total: index.total,
+    };
+  });
 };

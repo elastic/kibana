@@ -16,6 +16,7 @@ export interface ElasticsearchIndex {
   health?: HealthStatus;
   status?: IndicesStatsIndexMetadataState;
   name: IndexName;
+  alias: boolean;
   uuid?: Uuid;
   total: {
     docs: {
