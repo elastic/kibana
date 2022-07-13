@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DeprecationsService } from './deprecations_service';
-export type { DeprecationsServiceStart } from './deprecations_service';
-export type { ResolveDeprecationResponse } from './deprecations_client';
+export { deprecationsServiceMock } from './deprecations_service.mock';

@@ -18,6 +18,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import type { PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.
 import { ScopedHistory } from './application';
@@ -26,7 +27,6 @@ import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
@@ -43,7 +43,7 @@ export { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
-export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 
 function createCoreSetupMock({
   basePath = '',

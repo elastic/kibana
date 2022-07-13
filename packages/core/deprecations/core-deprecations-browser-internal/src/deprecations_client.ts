@@ -8,15 +8,16 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { DomainDeprecationDetails, DeprecationsGetResponse } from '../../server/types';
+import type {
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
+import type { ResolveDeprecationResponse } from '@kbn/core-deprecations-browser';
 
 /* @internal */
 export interface DeprecationsClientDeps {
   http: Pick<HttpStart, 'fetch'>;
 }
-
-/* @internal */
-export type ResolveDeprecationResponse = { status: 'ok' } | { status: 'fail'; reason: string };
 
 export class DeprecationsClient {
   private readonly http: Pick<HttpStart, 'fetch'>;
