@@ -199,8 +199,8 @@ export const FORM_CONFIG: FieldConfig = {
     step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.URLS}__single`],
-      FIELD[ConfigKey.TEXT_ASSERTION],
       FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.TEXT_ASSERTION],
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
