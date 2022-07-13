@@ -96,7 +96,7 @@ export const stateToDashboardContainerInput = ({
   dashboardState,
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
-  const { filterManager, timefilter: timefilterService } = queryService;
+  const { timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
   const {
@@ -109,12 +109,12 @@ export const stateToDashboardContainerInput = ({
     panels,
     query,
     title,
+    filters,
     timeRestore,
   } = dashboardState;
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
-    filters: filterManager.getFilters(),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     dashboardCapabilities,
@@ -126,6 +126,7 @@ export const stateToDashboardContainerInput = ({
     description,
     viewMode,
     panels,
+    filters,
     query,
     title,
     timeRange: {

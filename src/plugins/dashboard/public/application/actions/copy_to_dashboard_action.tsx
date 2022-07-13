@@ -41,8 +41,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
     private overlays: OverlayStart,
     private stateTransfer: EmbeddableStateTransfer,
     private capabilities: DashboardCopyToCapabilities,
-    private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider'],
-    private clearFilters: () => void
+    private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']
   ) {}
 
   public getDisplayName({ embeddable }: CopyToDashboardActionContext) {
@@ -82,7 +81,6 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
           capabilities={this.capabilities}
           dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
           embeddable={embeddable}
-          clearFilters={this.clearFilters}
         />,
         { theme$: this.theme.theme$ }
       ),

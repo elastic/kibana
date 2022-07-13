@@ -40,7 +40,6 @@ interface CopyToDashboardModalProps {
   embeddable: IEmbeddable;
   dashboardId?: string;
   closeModal: () => void;
-  clearFilters: () => void;
 }
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
@@ -49,7 +48,6 @@ export function CopyToDashboardModal({
   PresentationUtilContext,
   stateTransfer,
   capabilities,
-  clearFilters,
   dashboardId,
   embeddable,
   closeModal,
@@ -79,13 +77,12 @@ export function CopyToDashboardModal({
         : `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
-    clearFilters();
 
     stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
       state,
       path,
     });
-  }, [embeddable, dashboardOption, selectedDashboard, closeModal, clearFilters, stateTransfer]);
+  }, [embeddable, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';
