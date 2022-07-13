@@ -39,7 +39,10 @@ export interface IScopedSearchSessionsClient {
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => Promise<SavedObject<SearchSessionSavedObjectAttributes> | undefined>;
-  get: (sessionId: string, checkStatus?: boolean) => Promise<SavedObject<SearchSessionSavedObjectAttributes>>;
+  get: (
+    sessionId: string,
+    checkStatus?: boolean
+  ) => Promise<SavedObject<SearchSessionSavedObjectAttributes>>;
   find: (
     options: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>>;
