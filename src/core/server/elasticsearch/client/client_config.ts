@@ -10,7 +10,7 @@ import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ElasticsearchConfig } from '../elasticsearch_config';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_HEADERS } from '../default_headers';
 
 /**

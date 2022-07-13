@@ -18,7 +18,7 @@ import {
 } from './configure_client.test.mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ClusterConnectionPool } from '@elastic/elasticsearch';
-import type { ElasticsearchClientConfig } from './client_config';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 

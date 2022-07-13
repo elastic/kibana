@@ -7,7 +7,8 @@
  */
 
 import { duration } from 'moment';
-import { ElasticsearchClientConfig, parseClientOptions } from './client_config';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { parseClientOptions } from './client_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
 const createConfig = (

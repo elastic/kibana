@@ -20,8 +20,8 @@ import type {
   UnauthorizedErrorHandler,
   ICustomClusterClient,
 } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
-import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient } from './scoped_cluster_client';
 import { DEFAULT_HEADERS } from '../default_headers';
 import { createInternalErrorHandler, InternalUnauthorizedErrorHandler } from './retry_unauthorized';

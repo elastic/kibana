@@ -9,8 +9,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { PublicKeys } from '@kbn/utility-types';
-import { ElasticsearchClient } from './types';
-import { ICustomClusterClient } from './cluster_client';
+import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
 import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 
 const omittedProps = [

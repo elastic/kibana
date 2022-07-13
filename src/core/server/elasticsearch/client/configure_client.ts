@@ -8,7 +8,8 @@
 
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';
 

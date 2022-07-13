@@ -14,11 +14,11 @@
 import { timer, of, from, Observable } from 'rxjs';
 import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
-import type { ElasticsearchClient } from '../client';
 
 /** @public */
 export interface PollEsNodesVersionOptions {

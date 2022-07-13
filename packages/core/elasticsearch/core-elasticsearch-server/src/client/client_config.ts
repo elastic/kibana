@@ -36,10 +36,10 @@ export interface ElasticsearchClientConfig {
  * @public
  */
 export interface ElasticsearchClientSslConfig {
-  verificationMode: 'none' | 'certificate' | 'full';
+  verificationMode?: 'none' | 'certificate' | 'full';
   certificate?: string;
   certificateAuthorities?: string[];
   key?: string;
   keyPassphrase?: string;
-  alwaysPresentCertificate: boolean;
+  alwaysPresentCertificate?: boolean;
 }
