@@ -38,7 +38,10 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "@npm//react",
+  "@npm//rxjs",
+  "@npm//lodash",
+  "//packages/core/test-helpers/core-test-helpers-browser"
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -53,7 +56,12 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "@npm//rxjs",
+  "@npm//lodash",
+  "//packages/core/test-helpers/core-test-helpers-browser:npm_module_types",
+  "//packages/core/http/core-http-browser:npm_module_types",
+  "//packages/core/ui-settings/core-ui-settings-browser:npm_module_types"
 ]
 
 jsts_transpiler(
