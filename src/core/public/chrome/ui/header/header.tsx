@@ -21,23 +21,24 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
+
 import { LoadingIndicator } from '..';
-import {
+import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeNavControl,
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
 } from '../..';
-import { InternalApplicationStart } from '../../../application/types';
-import { HttpStart } from '../../../http';
-import {
+import type { InternalApplicationStart } from '../../../application/types';
+import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '../../types';
-import { OnIsLockedUpdate } from '.';
+import type { OnIsLockedUpdate } from '.';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';

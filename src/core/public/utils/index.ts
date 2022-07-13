@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { Sha256 } from './crypto';
 export { MountWrapper, mountReactNode } from './mount';
 export { KBN_LOAD_MARKS } from './consts';
