@@ -38,7 +38,7 @@ const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButt
 });
 
 const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
-  defaultMessage: 'Explore results',
+  defaultMessage: 'Use without saving',
 });
 
 export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc }: FooterProps) => {
@@ -73,8 +73,7 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc 
                   data-test-subj="exploreIndexPatternButton"
                   disabled={submitDisabled}
                   title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
-                    defaultMessage:
-                      'Explore creates a DataView without persisting it in a saved object',
+                    defaultMessage: 'Use this data view without creating a saved object',
                   })}
                 >
                   {exploreButtonLabel}

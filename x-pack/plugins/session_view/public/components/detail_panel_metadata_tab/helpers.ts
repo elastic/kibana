@@ -9,9 +9,15 @@ import {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common/types/process_tree';
 import { DASH } from '../../constants';
-import { DetailPanelHost, DetailPanelContainer, DetailPanelOrchestrator } from '../../types';
+import {
+  DetailPanelHost,
+  DetailPanelContainer,
+  DetailPanelOrchestrator,
+  DetailPanelCloud,
+} from '../../types';
 import { dataOrDash } from '../../utils/data_or_dash';
 
 export const getHostData = (host: ProcessEventHost | undefined): DetailPanelHost => {
@@ -112,4 +118,32 @@ export const getOrchestratorData = (
   detailPanelOrchestrator.parent.type = dataOrDash(orchestrator?.parent?.type).toString();
 
   return detailPanelOrchestrator;
+};
+
+export const getCloudData = (cloud: ProcessEventCloud | undefined): DetailPanelCloud => {
+  const detailPanelCloud: DetailPanelCloud = {
+    instance: {
+      name: DASH,
+    },
+    account: {
+      id: DASH,
+    },
+    project: {
+      id: DASH,
+    },
+    provider: DASH,
+    region: DASH,
+  };
+
+  if (!cloud) {
+    return detailPanelCloud;
+  }
+
+  detailPanelCloud.instance.name = dataOrDash(cloud?.instance?.name).toString();
+  detailPanelCloud.account.id = dataOrDash(cloud?.account?.id).toString();
+  detailPanelCloud.project.id = dataOrDash(cloud?.project?.id).toString();
+  detailPanelCloud.provider = dataOrDash(cloud?.provider).toString();
+  detailPanelCloud.region = dataOrDash(cloud?.region).toString();
+
+  return detailPanelCloud;
 };
