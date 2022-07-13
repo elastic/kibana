@@ -7,7 +7,7 @@
 
 import type { QueryObserverResult, UseQueryOptions } from 'react-query';
 import { useQuery } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { PendingActionsResponse } from '../../../../common/endpoint/types';
 import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint_pending_actions';
 
@@ -18,9 +18,9 @@ import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint_pendi
  */
 export const useGetEndpointPendingActionsSummary = (
   endpointAgentIds: string[],
-  options: UseQueryOptions<PendingActionsResponse, HttpFetchError> = {}
-): QueryObserverResult<PendingActionsResponse, HttpFetchError> => {
-  return useQuery<PendingActionsResponse, HttpFetchError>({
+  options: UseQueryOptions<PendingActionsResponse, IHttpFetchError> = {}
+): QueryObserverResult<PendingActionsResponse, IHttpFetchError> => {
+  return useQuery<PendingActionsResponse, IHttpFetchError>({
     queryKey: ['fetch-endpoint-pending-actions-summary', ...endpointAgentIds],
     ...options,
     queryFn: () => fetchPendingActionsByAgentId(endpointAgentIds),
