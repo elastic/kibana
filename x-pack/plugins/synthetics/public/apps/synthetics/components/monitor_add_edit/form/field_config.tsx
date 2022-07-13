@@ -241,7 +241,7 @@ export const MONITOR_TYPE_CONFIG = {
     id: 'syntheticsMonitorTypeICMP',
     'data-test-subj': 'syntheticsMonitorTypeICMP',
     label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.label', {
-      defaultMessage: 'TCP Ping',
+      defaultMessage: 'ICMP Ping',
     }),
     value: FormMonitorType.ICMP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.title', {
