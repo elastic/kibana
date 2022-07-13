@@ -135,6 +135,7 @@ export interface EndpointMetricsAggregation {
     endpoint_agents: {
       buckets: Array<{ key: string; doc_count: number; latest_metrics: EndpointMetricHits }>;
     };
+    endpoint_count: { value: number };
   };
 }
 

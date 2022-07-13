@@ -15,10 +15,10 @@ import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../ty
  */
 export const getThresholdBucketFilters = async ({
   signalHistory,
-  timestampOverride,
+  primaryTimestamp,
 }: {
   signalHistory: ThresholdSignalHistory;
-  timestampOverride: string | undefined;
+  primaryTimestamp: string;
 }): Promise<Filter[]> => {
   const filters = Object.values(signalHistory).reduce(
     (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
@@ -27,7 +27,7 @@ export const getThresholdBucketFilters = async ({
           filter: [
             {
               range: {
-                [timestampOverride ?? '@timestamp']: {
+                [primaryTimestamp]: {
                   // Timestamp of last event signaled on for this set of terms.
                   lte: new Date(bucket.lastSignalTimestamp).toISOString(),
                 },
