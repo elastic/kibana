@@ -772,12 +772,17 @@ export class DataViewsService {
    * @param skipFetchFields if true, will not fetch fields
    * @returns DataView
    */
-  async create({ id, ...restOfSpec }: DataViewSpec, skipFetchFields = false): Promise<DataView> {
+  async create(
+    { id, name, title, ...restOfSpec }: DataViewSpec,
+    skipFetchFields = false
+  ): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(META_FIELDS);
 
     const spec = {
       id: id ?? uuid.v4(),
+      title,
+      name: name || title,
       ...restOfSpec,
     };
 
@@ -827,7 +832,7 @@ export class DataViewsService {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.name}`);
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
 

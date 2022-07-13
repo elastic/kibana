@@ -249,13 +249,11 @@ export default function ({ getService }: FtrProviderContext) {
             const response1 = await supertest.post(config.path).send({
               [config.serviceKey]: {
                 title,
-                name: title,
               },
             });
             const response2 = await supertest.post(config.path).send({
               [config.serviceKey]: {
                 title,
-                name: title,
               },
             });
 
