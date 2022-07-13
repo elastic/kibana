@@ -16,19 +16,14 @@ import { SpanIcon } from './span_icon';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
-interface BackendLinkProps {
+interface Props {
   query: TypeOf<ApmRoutes, '/dependencies/overview'>['query'];
   subtype?: string;
   type?: string;
   onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
 }
 
-export function BackendLink({
-  query,
-  subtype,
-  type,
-  onClick,
-}: BackendLinkProps) {
+export function DependencyLink({ query, subtype, type, onClick }: Props) {
   const { link } = useApmRouter();
 
   return (

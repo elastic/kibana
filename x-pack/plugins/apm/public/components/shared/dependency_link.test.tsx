@@ -8,11 +8,11 @@
 import { composeStories } from '@storybook/testing-react';
 import { render } from '@testing-library/react';
 import React from 'react';
-import * as stories from './backend_link.stories';
+import * as stories from './dependency_link.stories';
 
 const { Example } = composeStories(stories);
 
-describe('BackendLink', () => {
+describe('DependencyLink', () => {
   it('renders', () => {
     expect(() => render(<Example />)).not.toThrowError();
   });

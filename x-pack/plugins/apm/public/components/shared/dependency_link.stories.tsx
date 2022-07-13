@@ -8,13 +8,13 @@
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
-import { BackendLink } from './backend_link';
+import { DependencyLink } from './dependency_link';
 
-type Args = ComponentProps<typeof BackendLink>;
+type Args = ComponentProps<typeof DependencyLink>;
 
 export default {
-  title: 'shared/BackendLink',
-  component: BackendLink,
+  title: 'shared/DependencyLink',
+  component: DependencyLink,
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
@@ -27,7 +27,7 @@ export default {
 };
 
 export const Example: Story<Args> = (args) => {
-  return <BackendLink {...args} />;
+  return <DependencyLink {...args} />;
 };
 Example.args = {
   query: {

@@ -16,7 +16,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { BackendLink } from '../../../shared/backend_link';
+import { DependencyLink } from '../../../shared/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
 
@@ -84,7 +84,7 @@ export function ServiceOverviewDependenciesTable({
       const name = getNodeName(location);
       const itemLink =
         location.type === NodeType.dependency ? (
-          <BackendLink
+          <DependencyLink
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
