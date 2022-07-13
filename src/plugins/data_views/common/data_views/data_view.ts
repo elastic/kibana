@@ -145,7 +145,7 @@ export class DataView implements DataViewBase {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     // set dependencies
-    this.fieldFormats = fieldFormats;
+    this.fieldFormats = { ...fieldFormats };
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
@@ -156,19 +156,19 @@ export class DataView implements DataViewBase {
 
     // set values
     this.id = spec.id;
-    this.fieldFormatMap = spec.fieldFormats || {};
+    this.fieldFormatMap = { ...spec.fieldFormats };
 
     this.version = spec.version;
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
-    this.sourceFilters = spec.sourceFilters;
+    this.sourceFilters = [...(spec.sourceFilters || [])];
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = spec.fieldAttrs || {};
+    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
     this.allowNoIndex = spec.allowNoIndex || false;
-    this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
   }

@@ -14,8 +14,9 @@ import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { Filter, TimeRange } from '@kbn/es-query';
 import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
+import { RefreshInterval, Query } from '../../services/data';
 import {
   ViewMode,
   Container,
@@ -30,7 +31,7 @@ import {
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
-import { DashboardPanelState } from './types';
+import { DashboardLoadedEvent, DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import {
   KibanaContextProvider,
@@ -62,6 +63,7 @@ export interface DashboardContainerServices {
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
   http: CoreStart['http'];
+  analytics?: CoreStart['analytics'];
 }
 
 interface IndexSignature {
@@ -151,6 +153,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       );
     }
+  }
+
+  private onDataLoaded(data: DashboardLoadedEvent) {
+    this.services.analytics?.reportEvent('dashboard-data-loaded', {
+      ...data,
+    });
   }
 
   protected createNewPanelState<
@@ -289,6 +297,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
                 controlsEnabled={controlsEnabled}
                 container={this}
                 controlGroup={this.controlGroup}
+                onDataLoaded={this.onDataLoaded.bind(this)}
               />
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>
