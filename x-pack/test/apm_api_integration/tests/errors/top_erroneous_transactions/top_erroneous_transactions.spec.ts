@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         path: {
           serviceName,
-          groupId: '',
+          groupId: 'test',
           ...overrides?.path,
         },
         query: {
