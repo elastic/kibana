@@ -128,7 +128,7 @@ export const useIndicators = (): UseIndicatorsValue => {
           },
         });
     },
-    [searchService]
+    [defaultThreatIndices, searchService]
   );
 
   const onChangeItemsPerPage = useCallback(

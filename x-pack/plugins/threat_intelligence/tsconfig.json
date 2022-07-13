@@ -2,17 +2,17 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./target/types",
-    "types": ["cypress"]
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
   },
   "include": [
-    "index.ts",
-    "common/**/*.ts",
-    "public/**/*.ts",
-    "public/**/*.tsx",
-    "server/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "scripts/**/*",
+    "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": [],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" }

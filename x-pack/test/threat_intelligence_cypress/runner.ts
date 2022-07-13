@@ -14,6 +14,7 @@ import Url from 'url';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import semver from 'semver';
+import { TransportResult } from '@elastic/elasticsearch';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { tiAbusechMalware } from './pipelines/ti_abusech_malware';
@@ -46,7 +47,7 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
   log.info('configure pipelines');
 
   for (const pipeline of pipelines) {
-    const { status } = await es.transport.request({
+    const res: TransportResult<unknown, any> = await es.transport.request({
       method: 'PUT',
       path: `_ingest/pipeline/${pipeline.name}`,
       body: {
@@ -55,7 +56,7 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
       },
     });
 
-    log.info(`PUT pipeline ${pipeline.name}: ${status}`);
+    log.info(`PUT pipeline ${pipeline.name}: ${res.statusCode}`);
   }
 
   await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence');
