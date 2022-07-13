@@ -164,10 +164,3 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
-
-export type CASES_CAPABILITIES =
-  | typeof CREATE_CASES_CAPABILITY
-  | typeof READ_CASES_CAPABILITY
-  | typeof UPDATE_CASES_CAPABILITY
-  | typeof DELETE_CASES_CAPABILITY
-  | typeof PUSH_CASES_CAPABILITY;

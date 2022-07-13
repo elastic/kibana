@@ -15,7 +15,7 @@ import {
 } from '../../../common/constants';
 
 export const getUICapabilities = (
-  featureCapabilities: Partial<Record<string, boolean | Record<string, boolean>>> | undefined
+  featureCapabilities?: Partial<Record<string, boolean | Record<string, boolean>>>
 ): CasesPermissions => {
   const create = !!featureCapabilities?.[CREATE_CASES_CAPABILITY];
   const read = !!featureCapabilities?.[READ_CASES_CAPABILITY];

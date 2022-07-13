@@ -21,6 +21,19 @@ describe('getUICapabilities', () => {
     `);
   });
 
+  it('returns false for all fields when the capabilities are not passed in', () => {
+    expect(getUICapabilities()).toMatchInlineSnapshot(`
+      Object {
+        "all": false,
+        "create": false,
+        "delete": false,
+        "push": false,
+        "read": false,
+        "update": false,
+      }
+    `);
+  });
+
   it('returns true for create when it is set to true in the ui capabilities', () => {
     expect(getUICapabilities({ create_cases: true })).toMatchInlineSnapshot(`
       Object {

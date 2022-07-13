@@ -34,7 +34,7 @@ export const useAddToCaseActions = ({
   timelineId,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
@@ -83,8 +83,8 @@ export const useAddToCaseActions = ({
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
       ].includes(timelineId as TimelineId) &&
-      casePermissions.create &&
-      casePermissions.read &&
+      userCasesPermissions.create &&
+      userCasesPermissions.read &&
       isAlert
     ) {
       return [
@@ -113,8 +113,8 @@ export const useAddToCaseActions = ({
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    casePermissions.create,
-    casePermissions.read,
+    userCasesPermissions.create,
+    userCasesPermissions.read,
     timelineId,
     isAlert,
   ]);

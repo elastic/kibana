@@ -19,7 +19,7 @@ export interface UseAddToCaseActions {
 export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActions = {}) => {
   const { cases: casesUi } = useKibana().services;
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose,
@@ -31,7 +31,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   });
 
   return useMemo(() => {
-    return casePermissions.create && casePermissions.read
+    return userCasesPermissions.create && userCasesPermissions.read
       ? [
           {
             label: ADD_TO_NEW_CASE,
@@ -60,8 +60,8 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   }, [
     casesUi.helpers,
     createCaseFlyout,
-    casePermissions.create,
-    casePermissions.read,
+    userCasesPermissions.create,
+    userCasesPermissions.read,
     selectCaseModal,
   ]);
 };

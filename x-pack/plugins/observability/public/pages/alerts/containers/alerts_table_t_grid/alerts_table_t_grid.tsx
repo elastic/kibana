@@ -168,7 +168,7 @@ function ObservabilityActions({
     setActionsPopover((current) => (current ? null : id));
   }, []);
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : null;
   const caseAttachments: CaseAttachments = useMemo(() => {
@@ -201,7 +201,7 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      ...(casePermissions.create && casePermissions.read
+      ...(userCasesPermissions.create && userCasesPermissions.read
         ? [
             <EuiContextMenuItem
               data-test-subj="add-to-existing-case-action"
@@ -246,8 +246,8 @@ function ObservabilityActions({
       ],
     ];
   }, [
-    casePermissions.create,
-    casePermissions.read,
+    userCasesPermissions.create,
+    userCasesPermissions.read,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     linkToRule,
@@ -333,7 +333,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     storage.get(stateStorageKey)
   );
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
     ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
@@ -416,7 +416,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     return {
       appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
-      casePermissions,
+      casePermissions: userCasesPermissions,
       type,
       columns: (tGridState?.columns ?? columns).map(addDisplayNames),
       deletedEventIds,
@@ -465,7 +465,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
     };
   }, [
-    casePermissions,
+    userCasesPermissions,
     tGridState?.columns,
     tGridState?.sort,
     deletedEventIds,

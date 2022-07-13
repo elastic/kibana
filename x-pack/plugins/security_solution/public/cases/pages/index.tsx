@@ -45,7 +45,7 @@ const TimelineDetailsPanel = () => {
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -147,7 +147,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
-          permissions: userPermissions,
+          permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

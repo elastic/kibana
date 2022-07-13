@@ -24,7 +24,7 @@ export const useAddToExistingCase = ({
   lensAttributes: LensAttributes | null;
   timeRange: { from: string; to: string } | null;
 }) => {
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
   const attachments = useMemo(() => {
     return [
@@ -56,7 +56,7 @@ export const useAddToExistingCase = ({
     disabled:
       lensAttributes == null ||
       timeRange == null ||
-      !userPermissions.create ||
-      !userPermissions.read,
+      !userCasesPermissions.create ||
+      !userCasesPermissions.read,
   };
 };

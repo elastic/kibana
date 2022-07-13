@@ -415,7 +415,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
@@ -448,7 +448,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
           <EuiFlexItem grow={false}>
             <AddToFavoritesButton timelineId={timelineId} />
           </EuiFlexItem>
-          {casePermissions.create && casePermissions.read && (
+          {userCasesPermissions.create && userCasesPermissions.read && (
             <EuiFlexItem grow={false}>
               <AddToCaseButton timelineId={timelineId} />
             </EuiFlexItem>
