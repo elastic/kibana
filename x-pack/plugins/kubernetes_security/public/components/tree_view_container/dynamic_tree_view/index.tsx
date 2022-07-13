@@ -293,7 +293,7 @@ const DynamicTreeViewItem = ({
         data-test-subj={expanded ? BUTTON_TEST_ID : ''}
         className="euiTreeView__nodeInner euiTreeView__nodeInner--withArrows"
         onClick={onButtonToggle}
-        onKeyDown={(event: React.KeyboardEvent) => onKeyDown(event)}
+        onKeyDown={onKeyDown}
         ref={(el) => (buttonRef.current[aggData.key] = el)}
       >
         {!isLastNode && (
