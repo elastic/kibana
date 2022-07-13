@@ -71,7 +71,6 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-
     const session = this.overlays.openModal(
       toMountPoint(
         <CopyToDashboardModal

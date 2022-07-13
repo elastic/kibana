@@ -77,12 +77,11 @@ export function CopyToDashboardModal({
         : `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
-
     stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
       state,
       path,
     });
-  }, [embeddable, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
+  }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';
