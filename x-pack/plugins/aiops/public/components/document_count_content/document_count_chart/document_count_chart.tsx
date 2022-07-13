@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
+
 import {
   Axis,
   BarSeries,
@@ -19,9 +20,14 @@ import {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import moment from 'moment';
+
+import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
+import { getWindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+
 import { useAiOpsKibana } from '../../../kibana_context';
 
 export interface DocumentCountChartPoint {
@@ -29,15 +35,21 @@ export interface DocumentCountChartPoint {
   value: number;
 }
 
-interface Props {
+interface DocumentCountChartProps {
+  brushSelectionUpdateHandler: (d: WindowParameters) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
-  interval?: number;
+  interval: number;
 }
 
 const SPEC_ID = 'document_count';
+
+enum VIEW_MODE {
+  ZOOM = 'zoom',
+  BRUSH = 'brush',
+}
 
 function getTimezone(uiSettings: IUiSettingsClient) {
   if (uiSettings.isDefault('dateFormat:tz')) {
@@ -49,7 +61,8 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   }
 }
 
-export const DocumentCountChart: FC<Props> = ({
+export const DocumentCountChart: FC<DocumentCountChartProps> = ({
+  brushSelectionUpdateHandler,
   width,
   chartPoints,
   timeRangeEarliest,
@@ -69,6 +82,8 @@ export const DocumentCountChart: FC<Props> = ({
   const seriesName = i18n.translate('xpack.aiops.dataGrid.field.documentCountChart.seriesLabel', {
     defaultMessage: 'document count',
   });
+
+  const viewMode = VIEW_MODE.BRUSH;
 
   const xDomain = {
     min: timeRangeEarliest,
@@ -117,46 +132,116 @@ export const DocumentCountChart: FC<Props> = ({
       from: startRange,
       to: startRange + interval,
     };
-    timefilterUpdateHandler(range);
+
+    if (viewMode === VIEW_MODE.ZOOM) {
+      timefilterUpdateHandler(range);
+    } else {
+      if (
+        typeof startRange === 'number' &&
+        originalWindowParameters === undefined &&
+        windowParameters === undefined &&
+        adjustedChartPoints !== undefined
+      ) {
+        const wp = getWindowParameters(startRange, xDomain.min, xDomain.max + interval);
+        setOriginalWindowParameters(wp);
+        setWindowParameters(wp);
+        brushSelectionUpdateHandler(wp);
+      }
+    }
   };
 
   const timeZone = getTimezone(uiSettings);
 
+  const [originalWindowParameters, setOriginalWindowParameters] = useState<
+    WindowParameters | undefined
+  >();
+  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+
+  function onWindowParametersChange(wp: WindowParameters) {
+    setWindowParameters(wp);
+    brushSelectionUpdateHandler(wp);
+  }
+
+  const [mlBrushWidth, setMlBrushWidth] = useState<number>();
+  const [mlBrushMarginLeft, setMlBrushMarginLeft] = useState<number>();
+
+  useEffect(() => {
+    if (viewMode !== VIEW_MODE.BRUSH) {
+      setOriginalWindowParameters(undefined);
+      setWindowParameters(undefined);
+    }
+  }, [viewMode]);
+
+  const isBrushVisible =
+    originalWindowParameters && mlBrushMarginLeft && mlBrushWidth && mlBrushWidth > 0;
+
   return (
-    <div style={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
-      <Chart
-        size={{
-          width: '100%',
-          height: 120,
-        }}
-      >
-        <Settings
-          xDomain={xDomain}
-          onBrushEnd={onBrushEnd as BrushEndListener}
-          onElementClick={onElementClick}
-          theme={chartTheme}
-          baseTheme={chartBaseTheme}
-        />
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          showOverlappingTicks={true}
-          tickFormat={(value) => xAxisFormatter.convert(value)}
-          timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-          style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
-        />
-        <Axis id="left" position={Position.Left} />
-        <BarSeries
-          id={SPEC_ID}
-          name={seriesName}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="time"
-          yAccessors={['value']}
-          data={adjustedChartPoints}
-          timeZone={timeZone}
-        />
-      </Chart>
-    </div>
+    <>
+      {isBrushVisible && (
+        <div className="aiopsHistogramBrushes">
+          <DualBrush
+            windowParameters={originalWindowParameters}
+            min={timeRangeEarliest}
+            max={timeRangeLatest + interval}
+            onChange={onWindowParametersChange}
+            marginLeft={mlBrushMarginLeft}
+            width={mlBrushWidth}
+          />
+        </div>
+      )}
+      <div style={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+        <Chart
+          size={{
+            width: '100%',
+            height: 120,
+          }}
+        >
+          <Settings
+            xDomain={xDomain}
+            onBrushEnd={viewMode !== VIEW_MODE.BRUSH ? (onBrushEnd as BrushEndListener) : undefined}
+            onElementClick={onElementClick}
+            onProjectionAreaChange={({ projection }) => {
+              setMlBrushMarginLeft(projection.left);
+              setMlBrushWidth(projection.width);
+            }}
+            theme={chartTheme}
+            baseTheme={chartBaseTheme}
+          />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            showOverlappingTicks={true}
+            tickFormat={(value) => xAxisFormatter.convert(value)}
+            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+          />
+          <Axis id="left" position={Position.Left} />
+          <BarSeries
+            id={SPEC_ID}
+            name={seriesName}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="time"
+            yAccessors={['value']}
+            data={adjustedChartPoints}
+            timeZone={timeZone}
+          />
+          {windowParameters && (
+            <>
+              <DualBrushAnnotation
+                id="baseline"
+                min={windowParameters.baselineMin}
+                max={windowParameters.baselineMax}
+              />
+              <DualBrushAnnotation
+                id="deviation"
+                min={windowParameters.deviationMin}
+                max={windowParameters.deviationMax}
+              />
+            </>
+          )}
+        </Chart>
+      </div>
+    </>
   );
 };

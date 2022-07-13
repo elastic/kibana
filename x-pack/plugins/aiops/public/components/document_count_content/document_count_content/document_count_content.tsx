@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import React, { useState, FC } from 'react';
+
+import { WindowParameters } from '@kbn/aiops-utils';
+
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 import { DocumentCountStats } from '../../../get_document_stats';
@@ -15,6 +18,8 @@ export interface Props {
 }
 
 export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount }) => {
+  const [spikeSelection, setSpikeSelection] = useState<WindowParameters | undefined>();
+
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
@@ -32,12 +37,15 @@ export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount
   return (
     <>
       <TotalCountHeader totalCount={totalCount} />
-      <DocumentCountChart
-        chartPoints={chartPoints}
-        timeRangeEarliest={timeRangeEarliest}
-        timeRangeLatest={timeRangeLatest}
-        interval={documentCountStats.interval}
-      />
+      {documentCountStats.interval !== undefined && (
+        <DocumentCountChart
+          brushSelectionUpdateHandler={setSpikeSelection}
+          chartPoints={chartPoints}
+          timeRangeEarliest={timeRangeEarliest}
+          timeRangeLatest={timeRangeLatest}
+          interval={documentCountStats.interval}
+        />
+      )}
     </>
   );
 };
