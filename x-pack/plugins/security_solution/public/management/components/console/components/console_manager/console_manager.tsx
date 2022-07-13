@@ -7,6 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback, useContext, useMemo, useRef, useState } from 'react';
+
 import type { ConsoleDataState } from '../console_state/types';
 import { ConsolePageOverlay } from './components/console_page_overlay';
 import type {
@@ -63,6 +64,8 @@ export type ConsoleManagerProps = PropsWithChildren<{
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
   const [consoleStateStorage] = useState(new Map<ManagedConsole['key'], ConsoleDataState>());
+
+  const [hasPendingActions, setHasPendingActions] = useState(false);
 
   // `consoleStorageRef` keeps a copy (reference) to the latest copy of the `consoleStorage` so that
   // some exposed methods (ex. `RegisteredConsoleClient`) are guaranteed to be immutable and function
@@ -241,6 +244,11 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 
         storeManagedConsoleState(key: ManagedConsole['key'], state: ConsoleDataState) {
           consoleStateStorage.set(key, state);
+          setHasPendingActions(
+            !!consoleStateStorage
+              .get(key)
+              ?.commandHistory.some((historyItem) => historyItem.state.status === 'pending')
+          );
         },
       },
     };
@@ -263,10 +271,12 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   return (
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
-
       {visibleConsole && (
         <ConsolePageOverlay
+          hasPendingActions={hasPendingActions}
           onHide={handleOnHide}
+          agentId={visibleConsole.client.id}
+          hostName={visibleConsole.client.meta.endpoint?.host.hostname}
           console={
             <Console
               {...visibleConsole.consoleProps}
