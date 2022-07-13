@@ -113,7 +113,7 @@ export const LOCATIONS_LABEL = i18n.translate(
 export const TECH_PREVIEW_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.techPreviewLabel',
   {
-    defaultMessage: 'Tech preview',
+    defaultMessage: 'Tech Preview',
   }
 );
 
