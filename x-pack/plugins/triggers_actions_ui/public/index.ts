@@ -15,7 +15,6 @@ export type {
   RuleAction,
   Rule,
   RuleType,
-  RuleTypeIndex,
   RuleTypeModel,
   RuleStatusFilterProps,
   RuleStatus,
@@ -30,7 +29,6 @@ export type {
   RuleFlyoutCloseReason,
   RuleTypeParams,
   AsApiContract,
-  RuleTableItem,
   AlertsTableProps,
   BulkActionsObjectProp,
   RuleSummary,
@@ -43,6 +41,7 @@ export type {
   FieldBrowserOptions,
   FieldBrowserProps,
   RuleDefinitionProps,
+  RulesListVisibleColumns,
 } from './types';
 
 export {

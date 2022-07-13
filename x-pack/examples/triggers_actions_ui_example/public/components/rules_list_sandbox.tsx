@@ -16,5 +16,5 @@ const style = {
 };
 
 export const RulesListSandbox = ({ triggersActionsUi }: SandboxProps) => {
-  return <div style={style}>{triggersActionsUi.getRulesList()}</div>;
+  return <div style={style}>{triggersActionsUi.getRulesList({})}</div>;
 };
