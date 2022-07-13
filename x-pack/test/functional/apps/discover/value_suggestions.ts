@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': false,
       });
+      await PageObjects.common.setTime({ from, to });
     });
 
     after(async () => {
@@ -53,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.setTime({ from, to });
         await PageObjects.common.navigateToApp('discover');
       });
 
