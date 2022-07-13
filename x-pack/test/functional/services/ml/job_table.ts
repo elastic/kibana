@@ -396,7 +396,7 @@ export function MachineLearningJobTableProvider(
       const isEnabled = await testSubjects.isEnabled('mlActionButtonViewDatafeedChart');
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected "view datafeeds count" action button for AD job '${jobId}' to be '${
+        `Expected "view datafeed counts" action button for AD job '${jobId}' to be '${
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
