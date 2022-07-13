@@ -44,6 +44,8 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       alertStatus: enrichedFieldInfo.values[0] as Status,
     });
 
+    const statusPopoverVisible = useMemo(() => actionItems.length > 0, [actionItems]);
+
     const button = useMemo(
       () => (
         <FormattedFieldValue
@@ -56,13 +58,17 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           fieldFormat={enrichedFieldInfo.data.format}
           isDraggable={false}
           truncate={false}
-          isButton={true}
-          onClick={togglePopover}
+          isButton={statusPopoverVisible}
+          onClick={statusPopoverVisible ? togglePopover : undefined}
           onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
       ),
-      [contextId, eventId, enrichedFieldInfo, togglePopover]
+      [contextId, eventId, enrichedFieldInfo, togglePopover, statusPopoverVisible]
     );
+
+    if (!statusPopoverVisible) {
+      return button;
+    }
 
     return (
       <EuiPopover
