@@ -42,7 +42,6 @@ export enum ConfigKey {
   REQUEST_METHOD_CHECK = 'check.request.method',
   REQUEST_SEND_CHECK = 'check.send',
   REVISION = 'revision',
-  RUN_ONCE = 'run_once',
   SCHEDULE = 'schedule',
   SCREENSHOTS = 'screenshots',
   SOURCE_PROJECT_CONTENT = 'source.project.content',
