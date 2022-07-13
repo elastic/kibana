@@ -62,6 +62,13 @@ export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError
     );
   }
 }
+export class PackagePolicyRestrictionRelatedError extends IngestManagerError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because the package policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
 export class FleetEncryptedSavedObjectEncryptionKeyRequired extends IngestManagerError {}
 export class FleetSetupError extends IngestManagerError {}
 export class GenerateServiceTokenError extends IngestManagerError {}

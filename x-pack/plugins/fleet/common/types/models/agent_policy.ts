@@ -39,6 +39,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_at: string;
   updated_by: string;
   revision: number;
+  agents?: number;
 }
 
 export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
