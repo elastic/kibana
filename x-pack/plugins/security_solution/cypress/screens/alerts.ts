@@ -33,6 +33,8 @@ export const ALERTS_COUNT =
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
+export const CHART_SELECT = '[data-test-subj="chartSelect"]';
+
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
@@ -44,6 +46,8 @@ export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$
 export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
+
+export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj="comboBoxInput"]';
 
 export const HOST_NAME = '[data-test-subj^=formatted-field][data-test-subj$=host\\.name]';
 
@@ -73,6 +77,8 @@ export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=ris
 export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule\\.name]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
+
+export const SELECT_TABLE = '[data-test-subj="table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 

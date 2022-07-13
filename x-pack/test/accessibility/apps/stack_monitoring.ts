@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaOverview = getService('monitoringKibanaOverview');
   const clusterOverview = getService('monitoringClusterOverview');
 
-  describe('Kibana Stack Monitoring a11y tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/136242
+  describe.skip('Kibana Stack Monitoring a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('monitoring');
       await a11y.testAppSnapshot();
@@ -48,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('alerts-modal-remind-later-button');
     });
 
-    it('a11y tests for Kibana Overview', async function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/135196
+    it.skip('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
       await kibanaOverview.isOnOverview();
       await a11y.testAppSnapshot();

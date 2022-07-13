@@ -11,6 +11,7 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
@@ -61,9 +62,18 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       termFilters,
     } = resources.params.body;
 
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+      start,
+      end,
+    });
+
     return getOverallLatencyDistribution({
       setup,
-      eventType: ProcessorEvent.transaction,
+      eventType: searchAggregatedTransactions
+        ? ProcessorEvent.metric
+        : ProcessorEvent.transaction,
       environment,
       kuery,
       start,

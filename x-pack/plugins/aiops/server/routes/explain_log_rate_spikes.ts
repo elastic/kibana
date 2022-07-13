@@ -16,6 +16,7 @@ import {
   addChangePointsAction,
   aiopsExplainLogRateSpikesSchema,
   errorAction,
+  resetAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -70,6 +71,7 @@ export const defineExplainLogRateSpikesRoute = (
 
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
+        push(resetAction());
         push(
           updateLoadingStateAction({
             ccsWarning: false,
