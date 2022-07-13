@@ -281,8 +281,8 @@ export interface SavedObjectsClientCommon {
   update: (
     type: string,
     id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: { version?: string }
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
@@ -292,8 +292,8 @@ export interface SavedObjectsClientCommon {
    */
   create: (
     type: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: { id?: string }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
