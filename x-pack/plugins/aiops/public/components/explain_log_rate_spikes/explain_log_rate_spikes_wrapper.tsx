@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
@@ -23,6 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { WindowParameters } from '@kbn/aiops-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import {
   Accessor,
   Dictionary,
@@ -39,14 +42,18 @@ import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 
-import { ExplainLogRateSpikes, ExplainLogRateSpikesProps } from './explain_log_rate_spikes';
+import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
 
-export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props) => {
-  const { dataView } = props;
+export interface ExplainLogRateSpikesWrapperProps {
+  /** The data view to analyze. */
+  dataView: DataView;
+}
 
+export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({ dataView }) => {
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const { docStats, timefilter } = useData(dataView, setGlobalState);
+  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
   const activeBounds = timefilter.getActiveBounds();
   let earliest: number | undefined;
@@ -177,17 +184,23 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props
             </EuiPageContentHeader>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
         <EuiHorizontalRule />
         <EuiPageContentBody>
           {docStats?.totalCount !== undefined && (
             <DocumentCountContent
+              brushSelectionUpdateHandler={setWindowParameters}
               documentCountStats={docStats.documentCountStats}
               totalCount={docStats.totalCount}
             />
           )}
-          {earliest !== undefined && latest !== undefined && (
-            <ExplainLogRateSpikes {...props} earliest={earliest} latest={latest} />
+          <EuiSpacer size="m" />
+          {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+            <ExplainLogRateSpikes
+              dataView={dataView}
+              earliest={earliest}
+              latest={latest}
+              windowParameters={windowParameters}
+            />
           )}
         </EuiPageContentBody>
       </EuiPageBody>

@@ -20,7 +20,7 @@ import { SpikeAnalysisTable } from '../spike_analysis_table';
 /**
  * ExplainLogRateSpikes props require a data view.
  */
-export interface ExplainLogRateSpikesProps {
+interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** Start timestamp filter */

@@ -142,7 +142,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         windowParameters === undefined &&
         adjustedChartPoints !== undefined
       ) {
-        const wp = getWindowParameters(startRange, xDomain.min, xDomain.max + interval);
+        const wp = getWindowParameters(
+          startRange + interval / 2,
+          xDomain.min,
+          xDomain.max + interval
+        );
         setOriginalWindowParameters(wp);
         setWindowParameters(wp);
         brushSelectionUpdateHandler(wp);
@@ -231,12 +235,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               <DualBrushAnnotation
                 id="baseline"
                 min={windowParameters.baselineMin}
-                max={windowParameters.baselineMax}
+                max={windowParameters.baselineMax - interval}
               />
               <DualBrushAnnotation
                 id="deviation"
                 min={windowParameters.deviationMin}
-                max={windowParameters.deviationMax}
+                max={windowParameters.deviationMax - interval}
               />
             </>
           )}
