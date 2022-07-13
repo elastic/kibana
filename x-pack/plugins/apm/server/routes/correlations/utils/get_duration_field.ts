@@ -13,11 +13,12 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 export function getDurationField(eventType: ProcessorEvent) {
-  if (eventType === ProcessorEvent.metric) {
-    return TRANSACTION_DURATION_HISTOGRAM;
+  switch (eventType) {
+    case ProcessorEvent.metric:
+      return TRANSACTION_DURATION_HISTOGRAM;
+    case ProcessorEvent.span:
+      return SPAN_DURATION;
+    default:
+      return TRANSACTION_DURATION;
   }
-  if (eventType === ProcessorEvent.span) {
-    return SPAN_DURATION;
-  }
-  return TRANSACTION_DURATION;
 }
