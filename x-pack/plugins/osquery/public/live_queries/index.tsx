@@ -74,7 +74,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
   const defaultValue = useMemo(() => {
     const initialValue = {
-      ...(agentSelection ? { agentSelection: initialAgentSelection } : {}),
+      ...(initialAgentSelection ? { agentSelection: initialAgentSelection } : {}),
       query,
       savedQueryId,
       ecs_mapping,
@@ -82,7 +82,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     };
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
-  }, [agentSelection, ecs_mapping, initialAgentSelection, packId, query, savedQueryId]);
+  }, [ecs_mapping, initialAgentSelection, packId, query, savedQueryId]);
 
   if (isLoading) {
     return <EuiLoadingContent lines={10} />;

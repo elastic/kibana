@@ -234,44 +234,46 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const submitButtonContent = useMemo(
     () => (
-      <EuiFlexGroup justifyContent="flexEnd">
-        {formType === 'steps' && queryType !== 'pack' && (
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd">
+          {formType === 'steps' && queryType !== 'pack' && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                disabled={
+                  !permissions.writeSavedQueries ||
+                  !agentSelected ||
+                  !queryValueProvided ||
+                  resultsStatus === 'disabled'
+                }
+                onClick={handleShowSaveQueryFlout}
+              >
+                <FormattedMessage
+                  id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
+                  defaultMessage="Save for later"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiButton
+              id="submit-button"
               disabled={
-                !permissions.writeSavedQueries ||
+                !enabled ||
                 !agentSelected ||
-                !queryValueProvided ||
-                resultsStatus === 'disabled'
+                (queryType === 'query' && !queryValueProvided) ||
+                (queryType === 'pack' && !packId) ||
+                isSubmitting
               }
-              onClick={handleShowSaveQueryFlout}
+              onClick={submit}
             >
               <FormattedMessage
-                id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
-                defaultMessage="Save for later"
+                id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
+                defaultMessage="Submit"
               />
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            id="submit-button"
-            disabled={
-              !enabled ||
-              !agentSelected ||
-              (queryType === 'query' && !queryValueProvided) ||
-              (queryType === 'pack' && !packId) ||
-              isSubmitting
-            }
-            onClick={submit}
-          >
-            <FormattedMessage
-              id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
-              defaultMessage="Submit"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     ),
     [
       agentSelected,
