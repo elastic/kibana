@@ -33,8 +33,8 @@ const CommandInputContainer = styled.div`
   }
 
   &.active {
-    border-bottom: solid ${({ theme: { eui } }) => eui.euiBorderWidthThin}
-      ${({ theme: { eui } }) => eui.euiColorPrimary};
+    border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
+    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
 
   .textEntered {
