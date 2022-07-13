@@ -48,13 +48,14 @@ export class NodeService {
   }
 
   public async preboot({ loggingSystem }: PrebootDeps): Promise<InternalNodeServicePreboot> {
-    const nodeRoles = await this.getNodeRoles();
-    loggingSystem.setGlobalContext('service.node.roles', nodeRoles);
-    this.log.info(`Kibana process configured with roles: [${nodeRoles.join(', ')}]`);
+    const roles = await this.getNodeRoles();
+    // @ts-expect-error Custom ECS field
+    loggingSystem.setGlobalContext({ service: { node: { roles } } });
+    this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
     return {
       roles: NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-        return { ...acc, [camelCase(curr)]: nodeRoles.includes(curr) };
+        return { ...acc, [camelCase(curr)]: roles.includes(curr) };
       }, {} as NodeRoles),
     };
   }

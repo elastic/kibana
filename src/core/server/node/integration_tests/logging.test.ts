@@ -30,7 +30,7 @@ function createRootWithRoles(roles: string[]) {
   });
 }
 
-describe('node service global LogMeta', () => {
+describe('node service global context', () => {
   const validRoles = [['ui', 'background_tasks'], ['ui'], ['background_tasks']];
 
   validRoles.forEach((roles) => {

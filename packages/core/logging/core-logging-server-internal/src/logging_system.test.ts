@@ -531,7 +531,8 @@ test('setGlobalContext() applies meta to new and existing loggers', async () => 
   );
 
   const existingLogger = system.get('some-existing-context');
-  system.setGlobalContext('a.b.c', true);
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: { b: { c: true } } });
   const newLogger = system.get('some-new-context');
 
   existingLogger.info('You know, just for your info.');
@@ -563,5 +564,38 @@ test('setGlobalContext() applies meta to new and existing loggers', async () => 
     message: 'You have been warned.',
     someMeta: 'goes here',
     a: { b: { c: true } },
+  });
+});
+
+test('new global context always overwrites existing context', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const logger = system.get('some-context');
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: { b: { c: true } }, d: false });
+  logger.info('You know, just for your info.');
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: false, d: true });
+  logger.info('You know, just for your info, again.');
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    log: { logger: 'some-context' },
+    message: 'You know, just for your info.',
+    a: { b: { c: true } },
+    d: false,
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchObject({
+    log: { logger: 'some-context' },
+    message: 'You know, just for your info, again.',
+    a: false,
+    d: true,
   });
 });

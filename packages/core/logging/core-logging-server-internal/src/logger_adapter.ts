@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { has } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
 import { LogRecord, Logger, LogMeta } from '@kbn/logging';
-
-/** @internal */
-export type GlobalMeta = Map<string, unknown>;
+import { GlobalContext, mergeGlobalContext } from './global_context';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
-  constructor(private logger: Logger, private globalMeta: GlobalMeta = new Map()) {}
+  constructor(private logger: Logger, private globalContext: GlobalContext = {}) {}
 
   /**
    * The current logger can be updated "on the fly", e.g. when the log config
@@ -30,61 +26,46 @@ export class LoggerAdapter implements Logger {
   }
 
   /**
-   * The current map of {@link GlobalMeta} that can be updated on the fly.
+   * The current record of {@link GlobalContext} that can be updated on the fly.
    * Any updates via this method will be applied to all subsequent log entries.
    *
    * This is not intended for external use, only internally in Kibana
    *
    * @internal
    */
-  public setGlobalMeta(meta: GlobalMeta) {
-    this.globalMeta = meta;
+  public updateGlobalContext(context: GlobalContext) {
+    this.globalContext = context;
   }
 
   public trace(message: string, meta?: LogMeta): void {
-    this.logger.trace(message, this.mergeGlobalMeta(meta));
+    this.logger.trace(message, mergeGlobalContext(this.globalContext, meta));
   }
 
   public debug(message: string, meta?: LogMeta): void {
-    this.logger.debug(message, this.mergeGlobalMeta(meta));
+    this.logger.debug(message, mergeGlobalContext(this.globalContext, meta));
   }
 
   public info(message: string, meta?: LogMeta): void {
-    this.logger.info(message, this.mergeGlobalMeta(meta));
+    this.logger.info(message, mergeGlobalContext(this.globalContext, meta));
   }
 
   public warn(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.warn(errorOrMessage, this.mergeGlobalMeta(meta));
+    this.logger.warn(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
   }
 
   public error(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.error(errorOrMessage, this.mergeGlobalMeta(meta));
+    this.logger.error(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
   }
 
   public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.fatal(errorOrMessage, this.mergeGlobalMeta(meta));
+    this.logger.fatal(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
   }
 
   public log(record: LogRecord) {
-    this.logger.log({ ...record, meta: this.mergeGlobalMeta(record.meta) });
+    this.logger.log({ ...record, meta: mergeGlobalContext(this.globalContext, record.meta) });
   }
 
   public get(...contextParts: string[]): Logger {
     return this.logger.get(...contextParts);
-  }
-
-  private mergeGlobalMeta(meta?: LogMeta) {
-    if (!meta && this.globalMeta.size === 0) {
-      return;
-    }
-
-    const mergedMeta = meta ?? {};
-    for (const [path, data] of this.globalMeta.entries()) {
-      if (!has(mergedMeta, path)) {
-        set(mergedMeta, path, data);
-      }
-    }
-
-    return mergedMeta;
   }
 }

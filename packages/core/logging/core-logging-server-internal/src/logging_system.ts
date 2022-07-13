@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import { getFlattenedObject, merge } from '@kbn/std';
+import { DisposableAppender, LogLevel, Logger, LoggerFactory, LogMeta } from '@kbn/logging';
 import type { LoggerConfigType, LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
-import { LoggerAdapter, GlobalMeta } from './logger_adapter';
+import { LoggerAdapter } from './logger_adapter';
 import {
   LoggingConfigType,
   LoggingConfig,
@@ -25,7 +26,7 @@ export interface ILoggingSystem extends LoggerFactory {
   asLoggerFactory(): LoggerFactory;
   upgrade(rawConfig?: LoggingConfigType): Promise<void>;
   setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput): Promise<void>;
-  setGlobalContext(path: string, meta: unknown): void;
+  setGlobalContext(meta: Partial<LogMeta>): void;
   stop(): Promise<void>;
 }
 
@@ -42,7 +43,7 @@ export class LoggingSystem implements ILoggingSystem {
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
-  private readonly globalMeta: GlobalMeta = new Map();
+  private globalContext: Partial<LogMeta> = {};
 
   constructor() {}
 
@@ -51,7 +52,7 @@ export class LoggingSystem implements ILoggingSystem {
     if (!this.loggers.has(context)) {
       this.loggers.set(
         context,
-        new LoggerAdapter(this.createLogger(context, this.computedConfig), this.globalMeta)
+        new LoggerAdapter(this.createLogger(context, this.computedConfig), this.globalContext)
       );
     }
     return this.loggers.get(context)!;
@@ -116,23 +117,19 @@ export class LoggingSystem implements ILoggingSystem {
   }
 
   /**
-   * A mechanism for specifying a set of "global" {@link LogMeta} that we want
+   * A mechanism for specifying some "global" {@link LogMeta} that we want
    * to inject into all log entries.
    *
-   * @example
-   * Global meta is provided with a lodash-style dot-separated path,
-   * and the value you wish to set:
-   * ```ts
-   * loggingSystem.setGlobalContext('service.node.roles', ['ui']);
-   * // adds { service: { node: { roles: ['ui'] } } } to every log entry
-   * ```
-   * @param path Lodash-style dot-separated path to update in the LogMeta.
-   * @param meta Global meta to set at the path.
+   * @remarks
+   * The provided context will be merged with the meta of each individual log
+   * entry. In the case of conflicting keys, the global context will always be
+   * overridden by the log entry.
    */
-  public setGlobalContext(path: string, meta: unknown) {
-    this.globalMeta.set(path, meta);
-    for (const [_, loggerAdapter] of this.loggers) {
-      loggerAdapter.setGlobalMeta(this.globalMeta);
+  public setGlobalContext(meta: Partial<LogMeta>) {
+    this.globalContext = merge(this.globalContext, meta);
+    const flattenedContext = getFlattenedObject(this.globalContext);
+    for (const loggerAdapter of this.loggers.values()) {
+      loggerAdapter.updateGlobalContext(flattenedContext);
     }
   }
 

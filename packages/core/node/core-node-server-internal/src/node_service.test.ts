@@ -104,7 +104,7 @@ describe('NodeService', () => {
       );
     });
 
-    it('sets the node roles in the global LogMeta', async () => {
+    it('sets the node roles in the global context', async () => {
       configService = getMockedConfigService({ roles: ['*'] });
       coreContext = mockCoreContext.create({ logger, configService });
 
@@ -112,10 +112,9 @@ describe('NodeService', () => {
       await service.preboot({ loggingSystem: logger });
 
       expect(logger.setGlobalContext).toHaveBeenCalledTimes(1);
-      expect(logger.setGlobalContext).toHaveBeenCalledWith('service.node.roles', [
-        'background_tasks',
-        'ui',
-      ]);
+      expect(logger.setGlobalContext).toHaveBeenCalledWith({
+        service: { node: { roles: ['background_tasks', 'ui'] } },
+      });
     });
   });
 });
