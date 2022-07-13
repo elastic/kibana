@@ -39,8 +39,8 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
     return 'crosshairs';
   },
   isCompatible: async ({ embeddable }: SynchronizeMovementActionContext) => {
-    const { synchronizeMovement } = await import('../embeddable/synchronize_movement');
-    if (!synchronizeMovement.hasMultipleMaps()) {
+    const { mapEmbeddablesSingleton } = await import('../embeddable/map_embeddables_singleton');
+    if (!mapEmbeddablesSingleton.hasMultipleMaps()) {
       return false;
     }
 
