@@ -64,6 +64,10 @@ descriptions.
 `default_action_group_id`::
 (string) The default ID for the rule type group.
 
+`does_set_recovery_context`::
+(boolean) 
+// TBD: What does this property mean?
+
 `enabled_in_license`::
 (boolean) Indicates whether the rule type is enabled or disabled based on the
 subscription.
@@ -105,66 +109,59 @@ GET api/alerting/rule_types
 --------------------------------------------------
 // KIBANA
 
-The API returns the following:
+For example, if you have `read` privileges for the {observability} {logs-app},
+the API returns the following:
 
 [source,sh]
 --------------------------------------------------
 [
    {
-      "id":".index-threshold",
-      "name":"Index threshold",
+      "id":"logs.alert.document.count",
+      "name":"Log threshold",
+      "producer":"logs",
+      "enabled_in_license":true,
+      "recovery_action_group":{
+         "id":"recovered",
+         "name":"Recovered"
+      },
       "action_groups":[
          {
-            "id":"threshold met",
-            "name":"Threshold met"
+            "id":"logs.threshold.fired",
+            "name":"Fired"
          },
          {
             "id":"recovered",
             "name":"Recovered"
          }
       ],
-      "recovery_action_group":{
-         "id":"recovered",
-         "name":"Recovered"
-      },
-      "default_action_group_id":"threshold met",
+      "default_action_group_id":"logs.threshold.fired",
+      "minimum_license_required":"basic",
+      "is_exportable":true,
+      "rule_task_timeout":"5m",
       "action_variables":{
          "context":[
             {
-               "name":"message",
-               "description":"A pre-constructed message for the alert."
+               "name":"timestamp",
+               "description":"UTC timestamp of when the alert was triggered"
             },
+            {
+               "name":"matchingDocuments",
+               "description":"The number of log entries that matched the conditions provided"
+            },
+            {
+               "name":"conditions",
+               "description":"The conditions that log entries needed to fulfill"
+            },
+            ...
          ],
          "state":[],
-         "params":[
-            {
-               "name":"threshold",
-               "description":"An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one."
-            },
-            {
-               "name":"index",
-               "description":"index"
-            },
-         ]
+         "params":[]
       },
-      "producer":"stackAlerts",
-      "minimum_license_required":"basic",
-      "is_exportable":true,
-      "enabled_in_license":true,
       "authorized_consumers":{
-         "alerts":{
-            "read":true,
-            "all":true
-         },
-         "stackAlerts":{
-            "read":true,
-            "all":true
-         },
-         "uptime":{
-            "read":true,
-            "all":true
-         }
-      }
+         "logs":{"read":true,"all":false},
+         "alerts":{"read":true,"all":false}
+      },
+      "does_set_recovery_context":true
    }
 ]
 --------------------------------------------------
