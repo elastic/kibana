@@ -78,7 +78,7 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     options: ROWS_PER_PAGE_OPTIONS,
     type: 'select',
     description: i18n.translate('discover.advancedSettings.sampleRowsPerPageText', {
-      defaultMessage: 'The number of rows per page to show in the table',
+      defaultMessage: 'The number of rows to display per page of the document table.',
     }),
     category: ['discover'],
     schema: schema.number(),
