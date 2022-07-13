@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { DeprecationsDetails } from '../../deprecations';
-import { IScopedClusterClient } from '../../elasticsearch';
 import { getAggregatedTypesDocuments } from '../migrations/actions/check_for_unknown_docs';
 import { addExcludedTypesToBoolQuery } from '../migrations/model/helpers';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';

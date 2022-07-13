@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { mergeConfig } from './merge_config';
-import type { ElasticsearchClientConfig } from './client';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 
 const partialToConfig = (parts: Partial<ElasticsearchClientConfig>): ElasticsearchClientConfig => {

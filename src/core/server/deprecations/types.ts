@@ -7,8 +7,8 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '../saved_objects/types';
-import type { IScopedClusterClient } from '../elasticsearch';
 
 /**
  * Base properties shared by all types of deprecations
