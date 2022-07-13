@@ -151,13 +151,11 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
       if (dataViewId != null && dataViewId !== '') {
         const dv = await data.dataViews.get(dataViewId);
         setIndexPattern(dv);
-      } else {
-        setIndexPattern(indexIndexPatterns);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, setIndexPattern, indexIndexPatterns]);
+  }, [data.dataViews, dataViewId, setIndexPattern]);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
