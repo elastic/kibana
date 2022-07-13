@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -159,7 +160,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoadingPackagePolicies,
     ]);
 
-    const isReadonly = packagePolicy.is_managed;
+    const isManaged = packagePolicy.is_managed;
 
     return validationResults ? (
       <FormGroupResponsiveFields
@@ -178,6 +179,17 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           />
         }
       >
+        {isManaged && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
+                defaultMessage="This is a managed package policy. You cannot change its name or description."
+              />
+            }
+            iconType="lensApp"
+          />
+        )}
         <EuiFlexGroup direction="column" gutterSize="m">
           {/* Name */}
           <EuiFlexItem>
@@ -192,7 +204,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               }
             >
               <EuiFieldText
-                readOnly={isReadonly}
+                readOnly={isManaged}
                 value={packagePolicy.name}
                 onChange={(e) =>
                   updatePackagePolicy({
@@ -225,7 +237,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               error={validationResults.description}
             >
               <EuiFieldText
-                readOnly={isReadonly}
+                readOnly={isManaged}
                 value={packagePolicy.description}
                 onChange={(e) =>
                   updatePackagePolicy({
@@ -267,7 +279,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           })}
 
           {/* Advanced options toggle */}
-          {!noAdvancedToggle && !isReadonly && (
+          {!noAdvancedToggle && !isManaged && (
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>

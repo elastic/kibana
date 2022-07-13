@@ -100,7 +100,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 
     const { http } = useKibana().services;
 
-    if (currentPolicy.is_externally_managed) {
+    if (currentPolicy.is_managed) {
       return (
         <EuiCallOut>
           <p>{EDIT_IN_UPTIME_DESC}</p>
