@@ -47,7 +47,12 @@ export const IncludeExcludeRow = ({
   exclude?: string[] | number[];
   tableRows?: DatatableRow[];
   columnId: string;
-  updateParams: (operation: 'include' | 'exclude', value: Array<string | number>) => void;
+  updateParams: (
+    operation: string,
+    operationValue: Array<string | number>,
+    regex: string,
+    regexValue: boolean
+  ) => void;
 }) => {
   const [includeExcludeSelectedOptions, setIncludeExcludeSelectedOptions] = useState(
     getTermsIncludeExcludeOptions(include, exclude)
@@ -82,6 +87,8 @@ export const IncludeExcludeRow = ({
       [operation]: false,
     };
     setIsPatternUsed(patternUsed);
+    const param = `${operation}IsRegex`;
+    // updateParams(param, false);
     const options = {
       ...includeExcludeSelectedOptions,
       [operation]: selectedOptions,
@@ -93,7 +100,8 @@ export const IncludeExcludeRow = ({
       }
       return option.label;
     });
-    updateParams(operation, terms);
+    // updateParams(operation, terms);
+    updateParams(operation, terms, param, false);
   };
 
   const onCreateOption = (
@@ -103,12 +111,16 @@ export const IncludeExcludeRow = ({
   ) => {
     // check if is regex
     const hasSpecialCharacters = isRegex(searchValue);
+    let regexValue = false;
     if (hasSpecialCharacters) {
       const patternUsed = {
         ...isPatternUsed,
         [operation]: true,
       };
       setIsPatternUsed(patternUsed);
+      regexValue = true;
+      // const param = `${operation}IsRegex`;
+      // updateParams(param, true);
     }
 
     const newOption = {
@@ -133,8 +145,9 @@ export const IncludeExcludeRow = ({
       }
       return option.label;
     });
-
-    updateParams(operation, terms);
+    const param = `${operation}IsRegex`;
+    updateParams(operation, terms, param, regexValue);
+    // updateParams(operation, terms);
   };
 
   return (

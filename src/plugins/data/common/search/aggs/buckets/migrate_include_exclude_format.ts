@@ -18,11 +18,6 @@ export const isType = (...types: string[]) => {
   };
 };
 
-const isRegex = (text: string) => {
-  const specialCharacters = /[`@#&*()+\=\[\]{}"\\|.<>\/?~]/;
-  return specialCharacters.test(text);
-};
-
 export const isNumberType = isType('number');
 export const isStringType = isType('string');
 export const isStringOrNumberType = isType('string', 'number');
@@ -49,7 +44,7 @@ export const migrateIncludeExcludeFormat = {
       // check if is regex
       const filtered = value.filter((val) => val !== '');
       if (filtered.length) {
-        const isRegularExpression = isRegex(filtered[0]);
+        const isRegularExpression = aggConfig.getParam(`${this.name}IsRegex`);
         output.params[this.name] = isRegularExpression ? filtered[0] : filtered;
       }
     } else if (isObject(value)) {

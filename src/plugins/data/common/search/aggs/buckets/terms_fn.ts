@@ -130,6 +130,18 @@ export const aggTerms = (): FunctionDefinition => ({
       }),
       multi: true,
     },
+    includeIsRegex: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.terms.includeIsRegex.help', {
+        defaultMessage: 'When set to true, the include property is handled as regex',
+      }),
+    },
+    excludeIsRegex: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.terms.excludeIsRegex.help', {
+        defaultMessage: 'When set to true, the exclude property is handled as regex',
+      }),
+    },
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.terms.json.help', {

@@ -320,6 +320,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       shardSize,
       ...(column.params.include?.length && { include: column.params.include }),
       ...(column.params.exclude?.length && { exclude: column.params.exclude }),
+      includeIsRegex: Boolean(column.params.includeIsRegex),
+      excludeIsRegex: Boolean(column.params.excludeIsRegex),
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -1008,15 +1010,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       exclude={currentColumn.params.exclude}
                       tableRows={activeData?.[rest.layerId]?.rows}
                       columnId={columnId}
-                      updateParams={(operation, value) =>
-                        paramEditorUpdater(
-                          updateColumnParam({
-                            layer,
-                            columnId,
-                            paramName: operation,
-                            value,
-                          })
-                        )
+                      updateParams={(operation, operationValue, regex, regexValue) =>
+                        paramEditorUpdater({
+                          ...layer,
+                          columns: {
+                            ...layer.columns,
+                            [columnId]: {
+                              ...currentColumn,
+                              params: {
+                                ...currentColumn.params,
+                                [operation]: operationValue,
+                                [regex]: regexValue,
+                              },
+                            },
+                          } as Record<string, TermsIndexPatternColumn>,
+                        })
                       }
                     />
                   </>

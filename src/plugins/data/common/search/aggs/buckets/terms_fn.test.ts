@@ -27,8 +27,10 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "customLabel": undefined,
               "exclude": undefined,
+              "excludeIsRegex": undefined,
               "field": "machine.os.keyword",
               "include": undefined,
+              "includeIsRegex": undefined,
               "json": undefined,
               "missingBucket": undefined,
               "missingBucketLabel": undefined,
@@ -74,10 +76,12 @@ describe('agg_expression_functions', () => {
             "exclude": Array [
               "ios",
             ],
+            "excludeIsRegex": undefined,
             "field": "machine.os.keyword",
             "include": Array [
               "win",
             ],
+            "includeIsRegex": undefined,
             "json": undefined,
             "missingBucket": true,
             "missingBucketLabel": "missing",
@@ -107,8 +111,10 @@ describe('agg_expression_functions', () => {
         Object {
           "customLabel": undefined,
           "exclude": undefined,
+          "excludeIsRegex": undefined,
           "field": "machine.os.keyword",
           "include": undefined,
+          "includeIsRegex": undefined,
           "json": undefined,
           "missingBucket": undefined,
           "missingBucketLabel": undefined,
@@ -119,8 +125,10 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "customLabel": undefined,
               "exclude": undefined,
+              "excludeIsRegex": undefined,
               "field": "name",
               "include": undefined,
+              "includeIsRegex": undefined,
               "json": undefined,
               "missingBucket": undefined,
               "missingBucketLabel": undefined,

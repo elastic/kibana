@@ -94,11 +94,17 @@ describe('Terms Agg', () => {
                 "enabled": Array [
                   true,
                 ],
+                "excludeIsRegex": Array [
+                  true,
+                ],
                 "field": Array [
                   "field",
                 ],
                 "id": Array [
                   "test",
+                ],
+                "includeIsRegex": Array [
+                  true,
                 ],
                 "missingBucket": Array [
                   false,
@@ -200,6 +206,8 @@ describe('Terms Agg', () => {
       const aggConfigs = getAggConfigs({
         include: ['include1', 'include2'],
         exclude: ['exclude1'],
+        includeIsRegex: false,
+        excludeIsRegex: false,
         field: {
           name: 'string_field',
           type: 'string',
@@ -220,6 +228,8 @@ describe('Terms Agg', () => {
       const aggConfigs = getAggConfigs({
         include: ['include.*'],
         exclude: ['exclude.*'],
+        includeIsRegex: true,
+        excludeIsRegex: true,
         field: {
           name: 'string_field',
           type: 'string',
@@ -236,7 +246,7 @@ describe('Terms Agg', () => {
       expect(params.exclude).toBe('exclude.*');
     });
 
-    test('accepts array of empty strings with regex and does not write a value', () => {
+    test('accepts array of empty strings and does not write a value', () => {
       const aggConfigs = getAggConfigs({
         include: [''],
         exclude: [''],

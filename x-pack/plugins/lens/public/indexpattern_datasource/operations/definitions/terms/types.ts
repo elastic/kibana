@@ -15,6 +15,8 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     accuracyMode?: boolean;
     include?: string[] | number[];
     exclude?: string[] | number[];
+    includeIsRegex?: boolean;
+    excludeIsRegex?: boolean;
     // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
     // another option or whether the user explicitly chose to make it alphabetical.
     orderBy:
