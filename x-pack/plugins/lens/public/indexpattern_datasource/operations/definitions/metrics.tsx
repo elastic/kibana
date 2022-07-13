@@ -325,6 +325,9 @@ Example: Get the standard deviation of price:
 
 Example: Get the variance of price for orders from the UK:
 \`square(standard_deviation(price, kql='location:UK'))\`
+
+Example: Get the sum of squares of price
+\`square(standard_deviation(price)) * count()\`
       `,
       }
     ),
