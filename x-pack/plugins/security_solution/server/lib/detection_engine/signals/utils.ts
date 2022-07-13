@@ -34,7 +34,7 @@ import type {
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 import type {
-  TimestampOverrideOrUndefined,
+  TimestampOverride,
   Privilege,
 } from '../../../../common/detection_engine/schemas/common';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
@@ -604,20 +604,20 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
  * is not correctly ISO8601 or epoch milliseconds formatted.
  * @param searchResult The result to try and parse out the timestamp.
- * @param timestampOverride The timestamp override to use its values if we have it.
+ * @param primaryTimestamp The primary timestamp to use.
  */
 export const lastValidDate = ({
   searchResult,
-  timestampOverride,
+  primaryTimestamp,
 }: {
   searchResult: SignalSearchResponse;
-  timestampOverride: TimestampOverrideOrUndefined;
+  primaryTimestamp: TimestampOverride;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
     return undefined;
   } else {
     const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    return getValidDateFromDoc({ doc: lastRecord, timestampOverride });
+    return getValidDateFromDoc({ doc: lastRecord, primaryTimestamp });
   }
 };
 
@@ -627,21 +627,20 @@ export const lastValidDate = ({
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
  * is not correctly ISO8601 or epoch milliseconds formatted.
  * @param searchResult The result to try and parse out the timestamp.
- * @param timestampOverride The timestamp override to use its values if we have it.
+ * @param primaryTimestamp The primary timestamp to use.
  */
 export const getValidDateFromDoc = ({
   doc,
-  timestampOverride,
+  primaryTimestamp,
 }: {
   doc: BaseSignalHit;
-  timestampOverride: TimestampOverrideOrUndefined;
+  primaryTimestamp: TimestampOverride;
 }): Date | undefined => {
-  const timestamp = timestampOverride ?? '@timestamp';
   const timestampValue =
-    doc.fields != null && doc.fields[timestamp] != null
-      ? doc.fields[timestamp][0]
+    doc.fields != null && doc.fields[primaryTimestamp] != null
+      ? doc.fields[primaryTimestamp][0]
       : doc._source != null
-      ? (doc._source as { [key: string]: unknown })[timestamp]
+      ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
       : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
@@ -668,10 +667,10 @@ export const getValidDateFromDoc = ({
 
 export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
-  timestampOverride,
+  primaryTimestamp,
 }: {
   searchResult: SignalSearchResponse;
-  timestampOverride: TimestampOverrideOrUndefined;
+  primaryTimestamp: TimestampOverride;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
     success:
@@ -682,11 +681,11 @@ export const createSearchAfterReturnTypeFromResponse = ({
             'No mapping found for [@timestamp] in order to sort on'
           ) ||
           failure.reason?.reason?.includes(
-            `No mapping found for [${timestampOverride}] in order to sort on`
+            `No mapping found for [${primaryTimestamp}] in order to sort on`
           )
         );
       }),
-    lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
+    lastLookBackDate: lastValidDate({ searchResult, primaryTimestamp }),
   });
 };
 
