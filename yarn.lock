@@ -3192,6 +3192,30 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-context-server-internal@link:bazel-bin/packages/core/http/core-http-context-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-context-server-mocks@link:bazel-bin/packages/core/http/core-http-context-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-router-server-mocks@link:bazel-bin/packages/core/http/core-http-router-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-server-internal@link:bazel-bin/packages/core/http/core-http-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-server-mocks@link:bazel-bin/packages/core/http/core-http-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
@@ -6771,10 +6795,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6788,6 +6808,34 @@
   uid ""
 
 "@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-context-server-internal@link:bazel-bin/packages/core/http/core-http-context-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-context-server-mocks@link:bazel-bin/packages/core/http/core-http-context-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-router-server-mocks@link:bazel-bin/packages/core/http/core-http-router-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server-internal@link:bazel-bin/packages/core/http/core-http-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server-mocks@link:bazel-bin/packages/core/http/core-http-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
   version "0.0.0"
   uid ""
 
