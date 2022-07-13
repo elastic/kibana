@@ -16,6 +16,9 @@ import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explai
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
+// TODO Consolidate with duplicate `fetchPValues` in
+// `x-pack/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
+
 const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
 
 const SUPPORTED_ES_FIELD_TYPES = [
