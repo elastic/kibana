@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 // import styled from 'styled-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { BulkActionsVerbs } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
@@ -57,9 +58,9 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActi
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
-      updateSelectedRows({ action: 'selectAll' });
+      updateSelectedRows({ action: BulkActionsVerbs.selectAll });
     } else {
-      updateSelectedRows({ action: 'clear' });
+      updateSelectedRows({ action: BulkActionsVerbs.clear });
     }
   }, [showClearSelection, updateSelectedRows]);
 
