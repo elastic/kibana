@@ -7,7 +7,6 @@
 
 import type { EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
-import { EuiFormLabel } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -44,16 +43,26 @@ const FORM_ID = 'liveQueryForm';
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
 
+  .euiTitle {
+    font-size: 1rem;
+  }
+
+  .euiText {
+    margin-top: 0;
+    color: ${(props) => props.theme.eui.euiTextSubduedColor};
+  }
+
   button[role='switch'] {
     left: auto;
     height: 100% !important;
     width: 80px;
     right: 0;
+    border-radius: 0 5px 5px 0;
 
     > span {
       svg {
-        width: 24px;
-        height: 24px;
+        width: 18px;
+        height: 18px;
       }
 
       // hide the label
@@ -440,6 +449,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     () => ({
       onClick: () => setQueryType('query'),
       isSelected: queryType === 'query',
+      iconType: 'check',
     }),
     [queryType]
   );
@@ -448,6 +458,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     () => ({
       onClick: () => setQueryType('pack'),
       isSelected: queryType === 'pack',
+      iconType: 'check',
     }),
     [queryType]
   );
