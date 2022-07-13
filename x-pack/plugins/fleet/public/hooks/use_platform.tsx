@@ -59,8 +59,8 @@ export const PLATFORM_OPTIONS: Array<{
   },
 ];
 
-export function usePlatform(id: PLATFORM_TYPE = 'linux') {
-  const [platform, setPlatform] = useState<PLATFORM_TYPE>(id);
+export function usePlatform() {
+  const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux');
 
   return {
     platform,

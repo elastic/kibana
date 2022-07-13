@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   EuiSpacer,
@@ -22,6 +22,7 @@ import type { PLATFORM_TYPE } from '../hooks';
 import { PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { DownloadInstructions } from './agent_enrollment_flyout/download_instructions';
+
 interface Props {
   linuxCommand: string;
   macCommand: string;
@@ -56,17 +57,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   fullCopyButton,
   onCopy,
 }) => {
-  const { platform, setPlatform } = usePlatform(isK8s ? 'kubernetes' : 'linux');
+  const { platform, setPlatform } = usePlatform();
+
+  useEffect(() => {
+    setPlatform(isK8s ? 'kubernetes' : 'linux');
+  }, [isK8s, isManaged, setPlatform]);
 
   // In case of fleet server installation remove Kubernetes as platform option
   const REDUCED_PLATFORM_OPTIONS = [...PLATFORM_OPTIONS];
   const indexOfK8s = REDUCED_PLATFORM_OPTIONS.findIndex((object) => {
     return object.id === 'kubernetes';
   });
-
-  if (isFleet && indexOfK8s !== -1) {
+  if (indexOfK8s !== -1) {
     REDUCED_PLATFORM_OPTIONS.splice(indexOfK8s, 1);
   }
+  const useReduce = isFleet || (!isManaged && !isK8s) ? true : false;
+  const options = useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -108,12 +114,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     setCopyButtonClicked(true);
     if (onCopy) onCopy();
   };
-
+  
   return (
     <>
       <>
         <EuiButtonGroup
-          options={isFleet ? REDUCED_PLATFORM_OPTIONS: PLATFORM_OPTIONS}
+          options={options}
           idSelected={platform}
           onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
           legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
