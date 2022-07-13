@@ -108,6 +108,8 @@ export const createNewTermsAlertType = (
           mergeStrategy,
           inputIndex,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         params,
@@ -186,7 +188,8 @@ export const createNewTermsAlertType = (
           filter,
           logger,
           pageSize: 0,
-          timestampOverride: params.timestampOverride,
+          primaryTimestamp,
+          secondaryTimestamp,
           buildRuleMessage,
           runtimeMappings,
         });
@@ -239,7 +242,8 @@ export const createNewTermsAlertType = (
           filter,
           logger,
           pageSize: 0,
-          timestampOverride: params.timestampOverride,
+          primaryTimestamp,
+          secondaryTimestamp,
           buildRuleMessage,
         });
         searchAfterResults.searchDurations.push(pageSearchDuration);
@@ -284,7 +288,8 @@ export const createNewTermsAlertType = (
             filter,
             logger,
             pageSize: 0,
-            timestampOverride: params.timestampOverride,
+            primaryTimestamp,
+            secondaryTimestamp,
             buildRuleMessage,
           });
           searchAfterResults.searchDurations.push(docFetchSearchDuration);
