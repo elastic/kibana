@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel, EuiLoadingChart } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
@@ -70,6 +71,13 @@ export const MetricItem = ({
                     value: averageDuration,
                     trendShape: MetricTrendShape.Area,
                     trend: data,
+                    extra: (
+                      <span>
+                        {i18n.translate('xpack.synthetics.overview.duration.label', {
+                          defaultMessage: 'Duration',
+                        })}
+                      </span>
+                    ),
                     valueFormatter: (d: number) => formatDuration(d),
                     color: getColor(theme, isMonitorEnabled, ping),
                   },
