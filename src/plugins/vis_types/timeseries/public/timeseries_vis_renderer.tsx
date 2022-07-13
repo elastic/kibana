@@ -60,7 +60,7 @@ export const getTimeseriesVisRenderer: (deps: {
 
       if (usageCollection) {
         const counterEvents = [
-          `render_${originatingApp}`,
+          `render_${originatingApp}_${model.type}`,
           model.use_kibana_indexes === false
             ? `render_${originatingApp}_index_pattern_string`
             : undefined,
