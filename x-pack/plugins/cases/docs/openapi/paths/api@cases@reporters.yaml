@@ -1,5 +1,6 @@
 get:
-  summary: Returns information about the users who opened cases. 
+  summary: Returns information about the users who opened cases in the default space. 
+  operationId: getCaseReportersDefaultCase
   description: >
     You must have read privileges for the **Cases** feature in the **Management**,
     **Observability**, or **Security** section of the Kibana feature privileges,

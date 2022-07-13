@@ -1,5 +1,6 @@
 post:
   summary: Creates a case.
+  operationId: createCase
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana 
@@ -75,6 +76,7 @@ post:
 
 delete:
   summary: Deletes one or more cases.
+  operationId: deleteCase
   description: >
     You must have `all` privileges for the **Cases** feature in the 
     **Management**, **Observability**, or **Security** section of the Kibana 
@@ -100,6 +102,7 @@ delete:
 
 patch:
   summary: Updates one or more cases.
+  operationId: updateCase
   description: >
     You must have `all` privileges for the **Cases** feature in the 
     **Management**, **Observability**, or **Security** section of the Kibana 
