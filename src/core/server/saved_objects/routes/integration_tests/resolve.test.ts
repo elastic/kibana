@@ -8,7 +8,7 @@
 
 import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import { registerResolveRoute } from '../resolve';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
