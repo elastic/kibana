@@ -8,8 +8,9 @@
 
 import type supertest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
+import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 import {
   createTestServers,
   TestElasticsearchUtils,
@@ -18,7 +19,6 @@ import {
   HttpMethod,
   getSupertest,
 } from '../../../../test_helpers/kbn_server';
-import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;
