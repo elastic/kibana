@@ -10,6 +10,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { SchemaType } from '../../../shared/schema/types';
+
 import { FieldType, Raw, SimpleFieldValue, Snippet } from './types';
 
 import './result_field_value.scss';
@@ -20,7 +21,7 @@ const isNotNumeric = (raw: string | number): boolean => {
 };
 
 const isScalarValue = (_: Raw, type?: FieldType): _ is SimpleFieldValue => {
-  return type !== SchemaType.Nested
+  return type !== SchemaType.Nested;
 };
 
 const getRawDisplay = (raw?: Raw, type?: FieldType): string | null => {
@@ -37,7 +38,7 @@ const getRawDisplay = (raw?: Raw, type?: FieldType): string | null => {
   }
 
   return raw.toString();
-}
+};
 
 const getRawArrayDisplay = (rawArray: string[] | number[]): string => {
   return `[${rawArray.map((raw) => (isNotNumeric(raw) ? `"${raw}"` : raw)).join(', ')}]`;

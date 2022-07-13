@@ -8,7 +8,7 @@
 import type { SearchResult } from '@elastic/search-ui';
 
 import { ResultMeta } from '../../../result/types';
-import { CurationResult  } from '../../types';
+import { CurationResult } from '../../types';
 
 /**
  * The `promoted` and `hidden` keys from the internal curations endpoints
@@ -30,18 +30,24 @@ const mergeMetas = (partialMeta: ResultMeta, secondPartialMeta: ResultMeta): Res
 
 const isNestedObject = (value: unknown): boolean => {
   if (Array.isArray(value)) {
-    return value.reduce((isNested: boolean, currentValue) => isNested || isNestedObject(currentValue), false)
+    return value.reduce(
+      (isNested: boolean, currentValue) => isNested || isNestedObject(currentValue),
+      false
+    );
   }
 
-  return value === null || typeof value == 'object';
-}
+  return value === null || typeof value === 'object';
+};
 
 export const convertToResultFormat = (document: CurationResult): SearchResult => {
   // Convert `key: 'value'` into `key: { raw: 'value' }`
   const result = Object.entries(document).reduce((acc, [key, value]) => {
     return {
       ...acc,
-      [key]: isNestedObject(value) || Object.prototype.hasOwnProperty.call(value, 'raw') ? value : { raw: value },
+      [key]:
+        isNestedObject(value) || Object.prototype.hasOwnProperty.call(value, 'raw')
+          ? value
+          : { raw: value },
     };
   }, {} as SearchResult);
 
