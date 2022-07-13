@@ -37,8 +37,17 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   latest,
   windowParameters,
 }) => {
-  const { services } = useAiOpsKibana();
-  const basePath = services.http?.basePath.get() ?? '';
+  // TODO: Need to pass in unified search service manually
+  const {
+    services: {
+      http,
+      unifiedSearch: {
+        // @ts-ignore
+        ui: { SearchBar },
+      },
+    },
+  } = useAiOpsKibana();
+  const basePath = http?.basePath.get() ?? '';
 
   const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,
