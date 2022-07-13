@@ -288,4 +288,11 @@ export interface CoreEditor {
    * Add folds at given ranges
    */
   addFoldsAtRanges(foldRanges: Range[]): void;
+
+  /** Entry point into the Ace functionality. See for more details https://ace.c9.io/#nav=api&api=editor */
+  editor: {
+    completer: {
+      detach(): void;
+    };
+  };
 }
