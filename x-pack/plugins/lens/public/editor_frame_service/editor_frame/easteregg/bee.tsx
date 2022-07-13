@@ -59,7 +59,7 @@ function Bee() {
       title="Bzzzzzzz"
       style={{
         position: 'absolute',
-        width: '360px',
+        width: '80px',
         height: 'auto',
         transform: position.vX > 0 ? 'scale(-1, 1)' : undefined,
         top: position.top,
