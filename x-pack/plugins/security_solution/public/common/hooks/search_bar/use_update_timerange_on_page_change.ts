@@ -19,6 +19,14 @@ import { useRouteSpy } from '../../utils/route/use_route_spy';
 const globalId: InputsModelId = 'global';
 const timelineId: InputsModelId = 'timeline';
 
+/**
+ * Update relative time ranges when navigating between pages.
+ *
+ * Ex: When 'toStr' is 'now' and we navigate to a new page, it updates `to` with the present date-time.
+ *
+ * * It does not update the time range on the landing page.
+ * * It only updates the time range when navigating to detection pages for performance reasons.
+ */
 export const useUpdateTimerangeOnPageChange = () => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
@@ -30,15 +38,7 @@ export const useUpdateTimerangeOnPageChange = () => {
   const { timerange: timelineTimerange } = inputState.timeline;
 
   useEffect(() => {
-    /**
-     * Update relative time ranges when navigating between pages.
-     *
-     * Ex: When 'toStr' is 'now' and we navigate to a new page, it updates `to` with the present date-time.
-     *
-     * * It does not update the time range on the landing page.
-     * * It only updates the time range when navigating to detection pages for performance reasons.
-     */
-    if (isDetectionsPages(pageName) && isNavigatingBetweenPages(pageName, previousPage)) {
+    if (isNavigatingToDetections(pageName, previousPage)) {
       if (timelineTimerange.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
@@ -69,7 +69,7 @@ export const useUpdateTimerangeOnPageChange = () => {
   }, [pageName, previousPage, dispatch, timelineTimerange, globalTimerange]);
 };
 
-const isNavigatingBetweenPages = (
+const isNavigatingToDetections = (
   pageName: SecurityPageName | undefined,
   previousPage: SecurityPageName | undefined
-) => pageName && previousPage && previousPage !== pageName;
+) => pageName && previousPage && previousPage !== pageName && isDetectionsPages(pageName);

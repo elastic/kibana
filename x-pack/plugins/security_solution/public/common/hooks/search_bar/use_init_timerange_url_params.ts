@@ -22,18 +22,22 @@ import { formatDate } from '../../components/super_date_picker';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { CONSTANTS } from '../../components/url_state/constants';
 
-export const useInitTimerangeUrlParams = () => {
+export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
 
   const onInitialize = useCallback(
-    (initialState: UrlInputsModel | null) => onInitializeTimerangeUrlParam(initialState, dispatch),
+    (initialState: UrlInputsModel | null) =>
+      initializeTimerangeFromUrlParam(initialState, dispatch),
     [dispatch]
   );
 
   useInitializeUrlParam(CONSTANTS.timerange, onInitialize);
 };
 
-const onInitializeTimerangeUrlParam = (initialState: UrlInputsModel | null, dispatch: Dispatch) => {
+const initializeTimerangeFromUrlParam = (
+  initialState: UrlInputsModel | null,
+  dispatch: Dispatch
+) => {
   if (initialState != null) {
     const globalId: InputsModelId = 'global';
     const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', initialState) };

@@ -25,8 +25,8 @@ import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
-import { useInitSearchBarUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
-import { useInitTimerangeUrlParams } from '../../common/hooks/search_bar/use_init_timerange_url_params';
+import { useInitSearchBarFromUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
+import { useInitTimerangeFromUrlParam } from '../../common/hooks/search_bar/use_init_timerange_url_params';
 import { useUpdateTimerangeOnPageChange } from '../../common/hooks/search_bar/use_update_timerange_on_page_change';
 
 interface HomePageProps {
@@ -35,17 +35,21 @@ interface HomePageProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
+const useUrlState = () => {
+  useSyncGlobalQueryString();
+  useInitSearchBarFromUrlParams();
+  useInitTimerangeFromUrlParam();
+  useUpdateTimerangeOnPageChange();
+};
+
 const HomePageComponent: React.FC<HomePageProps> = ({
   children,
   onAppLeave,
   setHeaderActionMenu,
 }) => {
   const { pathname } = useLocation();
-  useSyncGlobalQueryString();
   useInitSourcerer(getScopeFromPath(pathname));
-  useInitSearchBarUrlParams();
-  useInitTimerangeUrlParams();
-  useUpdateTimerangeOnPageChange();
+  useUrlState();
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
