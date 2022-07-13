@@ -11,6 +11,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MLHttpFetchError } from '../../../../../../common/util/errors';
 import { SupportedPytorchTasksType } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import { getInferenceInfoComponent } from './inference_info';
 
 export type InferenceType =
   | SupportedPytorchTasksType
@@ -37,12 +38,14 @@ export enum RUNNING_STATE {
 }
 
 export abstract class InferenceBase<TInferResponse> {
-  protected abstract inferenceType: InferenceType;
+  protected abstract readonly inferenceType: InferenceType;
+  protected abstract readonly inferenceTypeLabel: string;
   protected readonly inputField: string;
   public inputText$ = new BehaviorSubject<string>('');
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
   public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
+  protected readonly info: string[] = [];
 
   constructor(
     protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
@@ -67,6 +70,10 @@ export abstract class InferenceBase<TInferResponse> {
   public setFinishedWithErrors(error: MLHttpFetchError) {
     this.inferenceError$.next(error);
     this.runningState$.next(RUNNING_STATE.FINISHED_WITH_ERRORS);
+  }
+
+  public getInfoComponent(): JSX.Element {
+    return getInferenceInfoComponent(this.inferenceTypeLabel, this.info);
   }
 
   protected abstract getInputComponent(): JSX.Element;
