@@ -18,6 +18,7 @@ export type {
   RuleTypeModel,
   RuleStatusFilterProps,
   RuleStatus,
+  RuleTableItem,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
