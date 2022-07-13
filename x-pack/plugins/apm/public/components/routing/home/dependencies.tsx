@@ -18,7 +18,7 @@ import { DependencyDetailOperations } from '../../app/dependency_detail_operatio
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
 import { DependencyDetailView } from '../../app/dependency_detail_view';
 import { DependenciesInventory } from '../../app/dependencies_inventory';
-import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { DependencyOperationDetailView } from '../../app/dependency_operation_detail_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
 export const DependenciesInventoryTitle = i18n.translate(
@@ -80,7 +80,7 @@ export const dependencies = {
             }),
           ]),
         }),
-        element: <BackendOperationDetailView />,
+        element: <DependencyOperationDetailView />,
       },
       '/dependencies/overview': {
         element: <BackendDetailOverview />,

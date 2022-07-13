@@ -21,7 +21,7 @@ import { EmptyMessage } from '../../../shared/empty_message';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { DependencyOperationDetailLink } from '../../backend_operation_detail_view/dependency_operation_detail_link';
+import { DependencyOperationDetailLink } from '../../dependency_operation_detail_view/dependency_operation_detail_link';
 
 interface OperationStatisticsItem extends SpanMetricGroup {
   spanName: string;

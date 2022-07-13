@@ -16,7 +16,7 @@ import { DetailViewHeader } from '../../shared/detail_view_header';
 import { BackendOperationDistributionChart } from './backend_operation_distribution_chart';
 import { BackendOperationDetailTraceList } from './backend_operation_detail_trace_list';
 
-export function BackendOperationDetailView() {
+export function DependencyOperationDetailView() {
   const router = useApmRouter();
 
   const {
@@ -30,7 +30,7 @@ export function BackendOperationDetailView() {
       <EuiFlexItem>
         <DetailViewHeader
           backLabel={i18n.translate(
-            'xpack.apm.backendOperationDetailView.header.backLinkLabel',
+            'xpack.apm.dependecyOperationDetailView.header.backLinkLabel',
             { defaultMessage: 'All operations' }
           )}
           backHref={router.link('/dependencies/operations', { query })}
