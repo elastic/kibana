@@ -7,7 +7,6 @@
 
 import type { EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
-import { EuiFormLabel } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
