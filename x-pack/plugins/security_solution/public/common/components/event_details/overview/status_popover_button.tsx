@@ -44,6 +44,8 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       alertStatus: enrichedFieldInfo.values[0] as Status,
     });
 
+    // statusPopoverVisible includes the logic for the visibility of the popover in
+    // case actionItems is an empty array ( ex, when user has read access ).
     const statusPopoverVisible = useMemo(() => actionItems.length > 0, [actionItems]);
 
     const button = useMemo(
@@ -66,6 +68,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       [contextId, eventId, enrichedFieldInfo, togglePopover, statusPopoverVisible]
     );
 
+    // EuiPopover is not needed if statusPopoverVisible is false
     if (!statusPopoverVisible) {
       return button;
     }
