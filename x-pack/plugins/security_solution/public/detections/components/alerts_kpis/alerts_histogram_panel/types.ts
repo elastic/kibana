@@ -31,6 +31,7 @@ export interface AlertsGroupBucket {
   alerts: {
     buckets: AlertsBucket[];
   };
+  doc_count: number;
 }
 
 export interface AlertsTotal {
