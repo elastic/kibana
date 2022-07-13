@@ -135,7 +135,7 @@ class SpacesMenuUI extends Component<Props> {
         'aria-label': space.name,
         'aria-roledescription': 'space',
         label: space.name,
-        key: space.id,
+        key: space.id, // id is unique and we need it to form a path later
         prepend: (
           <Suspense fallback={<EuiLoadingSpinner size="m" />}>
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
@@ -155,9 +155,11 @@ class SpacesMenuUI extends Component<Props> {
     const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
 
     if (!!selectedSpaceItem) {
+      // ToDo: check if the selected space is already the active space, find a way to gracefully close the popover
+
       const urlToSelectedSpace = addSpaceIdToPath(
         this.props.serverBasePath,
-        selectedSpaceItem.key,
+        selectedSpaceItem.key, // the key is the unique space id
         ENTER_SPACE_PATH
       );
 
