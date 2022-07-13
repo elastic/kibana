@@ -1150,4 +1150,72 @@ export const tasks: TelemetryTask[] = [
       };
     },
   },
+  {
+    name: 'per_service',
+    executor: async ({ indices, search }) => {
+      const response = await search({
+        index: [indices.transaction],
+        body: {
+          size: 0,
+          timeout,
+          query: {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }],
+            },
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                size: 1000,
+              },
+              aggs: {
+                service_names: {
+                  terms: {
+                    field: SERVICE_NAME,
+                    size: 1000,
+                  },
+                  aggs: {
+                    cloud_region: {
+                      terms: {
+                        field: CLOUD_REGION,
+                        size: 5,
+                      },
+                    },
+                    cloud_provider: {
+                      terms: {
+                        field: CLOUD_PROVIDER,
+                        size: 3,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const data: Record<string, Record<string, Array<string | null>>> = {};
+      const envBuckets = response.aggregations?.environments.buckets ?? [];
+      envBuckets.forEach((bucket) => {
+        const env = bucket.key;
+        const serviceBuckets = bucket.service_names?.buckets ?? [];
+        serviceBuckets.forEach((bucket2) => {
+          const name = bucket.key;
+          const fullServiceName = env + '_' + name;
+          data[fullServiceName] = {};
+          data[fullServiceName].cloud_regions =
+            bucket2.cloud_region?.buckets.map((inner) => inner.key as string) ??
+            [];
+          data[fullServiceName].cloud_provider =
+            bucket2.cloud_provider?.buckets.map(
+              (inner) => inner.key as string
+            ) ?? [];
+        });
+      });
+      return {
+        per_service: data,
+      };
+    },
+  },
 ];

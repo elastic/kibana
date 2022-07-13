@@ -133,6 +133,7 @@ export interface APMUsage {
   service_groups: {
     kuery_fields: string[];
   };
+  per_service: Record<string, Record<string, Array<string | null>>>;
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
