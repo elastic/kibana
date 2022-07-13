@@ -16,7 +16,7 @@ export const generateOtelMetrics = (router: IRouter, metrics: Metrics) => {
       validate: {},
     },
     async function (_context, _req, res): Promise<IKibanaResponse<{}>> {
-      metrics.ruleExecutions.add(1);
+      metrics.requestCounter.add(1);
       return res.ok({});
     }
   );

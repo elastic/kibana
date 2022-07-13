@@ -9,10 +9,10 @@
 import { Counter, Meter } from '@opentelemetry/api-metrics';
 
 export class Metrics {
-  ruleExecutions: Counter;
+  requestCounter: Counter;
 
   constructor(meter: Meter) {
-    this.ruleExecutions = meter.createCounter('request_count', {
+    this.requestCounter = meter.createCounter('request_count', {
       description: 'Counts total number of requests',
     });
   }

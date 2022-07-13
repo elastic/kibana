@@ -42,7 +42,7 @@ describe('dynamic route', () => {
     const router = httpServiceMock.createRouter();
 
     const getMetric = async () => {
-      return Promise.resolve({ foo: 1 });
+      return { foo: 1 };
     };
     registerDynamicRoute({
       router,
@@ -81,7 +81,7 @@ describe('dynamic route', () => {
     const router = httpServiceMock.createRouter();
 
     const getMetric = async () => {
-      return Promise.resolve({});
+      return {};
     };
     registerDynamicRoute({ router, config: kibanaStatsConfig, getStatus, getMetric });
 
