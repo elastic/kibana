@@ -53,6 +53,7 @@ import {
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
+  PackagePolicyRestrictionRelatedError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -481,6 +482,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
+        }
+
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
