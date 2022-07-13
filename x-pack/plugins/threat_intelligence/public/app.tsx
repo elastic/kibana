@@ -7,18 +7,17 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import React, { VFC } from 'react';
+import { IndicatorsPage } from './modules/indicators/indicators_page';
 import { KibanaContextProvider } from './hooks/use_kibana';
 
 export interface AppProps {
   services: CoreStart;
 }
 
-export const TEST_ID = 'tiTestId';
-
 export const App: VFC<AppProps> = ({ services }) => {
   return (
     <KibanaContextProvider services={services}>
-      <p data-test-subj={TEST_ID}>Coming Soon!</p>
+      <IndicatorsPage />
     </KibanaContextProvider>
   );
 };

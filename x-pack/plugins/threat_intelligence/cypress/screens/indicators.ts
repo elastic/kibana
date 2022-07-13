@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const COMING_SOON_TEST_ID = `[data-test-subj="tiTestId"]`;
+import { TABLE_TEST_ID as INDICATORS_TABLE_TEST_ID } from '../../public/modules/indicators/components/indicators_table/indicators_table';
+import { TITLE_TEST_ID as LAYOUT_TITLE_TEST_ID } from '../../public/components/layout';
+
+export const DEFAULT_LAYOUT_TITLE = `[data-test-subj="${LAYOUT_TITLE_TEST_ID}"]`;
+
+export const INDICATORS_TABLE = `[data-test-subj="${INDICATORS_TABLE_TEST_ID}"]`;
