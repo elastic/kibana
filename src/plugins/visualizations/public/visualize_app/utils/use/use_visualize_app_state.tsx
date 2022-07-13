@@ -31,7 +31,8 @@ import { VisualizeConstants } from '../../../../common/constants';
 export const useVisualizeAppState = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
-  instance?: VisualizeEditorVisInstance
+  instance?: VisualizeEditorVisInstance,
+  preserveFilters?: boolean
 ) => {
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [appState, setAppState] = useState<VisualizeAppStateContainer | null>(null);
@@ -60,8 +61,10 @@ export const useVisualizeAppState = (
       eventEmitter.on('dirtyStateChange', onDirtyStateChange);
 
       // sync initial app state from state to managers
-      filterManager.setAppFilters(cloneDeep(currentAppState.filters));
-      queryString.setQuery(migrateLegacyQuery(currentAppState.query));
+      if (!preserveFilters) {
+        filterManager.setAppFilters(cloneDeep(currentAppState.filters));
+        queryString.setQuery(migrateLegacyQuery(currentAppState.query));
+      }
 
       // setup syncing of app filters between appState and query services
       const stopSyncingAppFilters = connectToQueryState(
@@ -150,7 +153,7 @@ export const useVisualizeAppState = (
         stopSyncingAppFilters();
       };
     }
-  }, [eventEmitter, instance, services]);
+  }, [eventEmitter, instance, preserveFilters, services]);
 
   return { appState, hasUnappliedChanges };
 };

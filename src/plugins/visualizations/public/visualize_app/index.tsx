@@ -16,8 +16,12 @@ import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
 
+interface VisualizeHistoryState {
+  preserveFilters: boolean;
+}
+
 export const renderApp = (
-  { element, onAppLeave }: AppMountParameters,
+  { element, onAppLeave, history }: AppMountParameters,
   services: VisualizeServices
 ) => {
   // add help link to visualize docs into app chrome menu
@@ -26,14 +30,17 @@ export const renderApp = (
   if (!services.visualizeCapabilities.save) {
     addBadgeToAppChrome(services.chrome);
   }
-
+  const state = history.location.state as VisualizeHistoryState | undefined;
   const app = (
     <KibanaThemeProvider theme$={services.theme.theme$}>
       <Router history={services.history}>
         <KibanaContextProvider services={services}>
           <services.presentationUtil.ContextProvider>
             <services.i18n.Context>
-              <VisualizeApp onAppLeave={onAppLeave} />
+              <VisualizeApp
+                onAppLeave={onAppLeave}
+                preserveFilters={Boolean(state?.preserveFilters)}
+              />
             </services.i18n.Context>
           </services.presentationUtil.ContextProvider>
         </KibanaContextProvider>

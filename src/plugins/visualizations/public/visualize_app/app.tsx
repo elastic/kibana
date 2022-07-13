@@ -30,6 +30,7 @@ import { VisualizeConstants } from '../../common/constants';
 
 export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
+  preserveFilters?: boolean;
 }
 
 interface NoDataComponentProps {
@@ -57,7 +58,7 @@ const NoDataComponent = ({
   );
 };
 
-export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
+export const VisualizeApp = ({ onAppLeave, preserveFilters }: VisualizeAppProps) => {
   const {
     services: {
       data: { query, dataViews },
@@ -134,7 +135,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
       <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
-        <VisualizeEditor onAppLeave={onAppLeave} />
+        <VisualizeEditor onAppLeave={onAppLeave} preserveFilters={preserveFilters} />
       </Route>
       <Route
         exact

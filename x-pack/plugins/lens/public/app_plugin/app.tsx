@@ -328,6 +328,7 @@ export function App({
         });
         application.navigateToApp('visualize', {
           path: initialContext.vizEditorOriginatingAppUrl,
+          state: { preserveFilters: true },
         });
       } else {
         setIsGoBackToVizEditorModalVisible(true);
