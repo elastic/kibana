@@ -32,7 +32,6 @@ import {
 } from '../../services/embeddable';
 import { createDashboardEditUrl, DashboardConstants, DashboardContainer } from '../..';
 import { DashboardPanelState } from '..';
-import { setFilters, useDashboardDispatch } from '../state';
 
 interface CopyToDashboardModalProps {
   capabilities: DashboardCopyToCapabilities;
@@ -41,6 +40,7 @@ interface CopyToDashboardModalProps {
   embeddable: IEmbeddable;
   dashboardId?: string;
   closeModal: () => void;
+  clearFilters: () => void;
 }
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
@@ -49,6 +49,7 @@ export function CopyToDashboardModal({
   PresentationUtilContext,
   stateTransfer,
   capabilities,
+  clearFilters,
   dashboardId,
   embeddable,
   closeModal,
@@ -57,7 +58,6 @@ export function CopyToDashboardModal({
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );
-  const dispatchDashboardStateChange = useDashboardDispatch();
 
   const onSubmit = useCallback(() => {
     const dashboard = embeddable.getRoot() as DashboardContainer;
@@ -65,8 +65,6 @@ export function CopyToDashboardModal({
     if (!panelToCopy) {
       throw new PanelNotFoundError();
     }
-
-    dispatchDashboardStateChange(setFilters([]));
 
     const state = {
       type: embeddable.type,
@@ -81,19 +79,13 @@ export function CopyToDashboardModal({
         : `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
+    clearFilters();
 
     stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
       state,
       path,
     });
-  }, [
-    embeddable,
-    dashboardOption,
-    selectedDashboard,
-    closeModal,
-    dispatchDashboardStateChange,
-    stateTransfer,
-  ]);
+  }, [embeddable, dashboardOption, selectedDashboard, closeModal, clearFilters, stateTransfer]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';

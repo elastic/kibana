@@ -420,7 +420,8 @@ export class DashboardPlugin
           canCreateNew: Boolean(dashboardCapabilities.createNew),
           canEditExisting: Boolean(dashboardCapabilities.showWriteControls),
         },
-        presentationUtil.ContextProvider
+        presentationUtil.ContextProvider,
+        () => data.query.filterManager.setFilters([])
       );
       uiActions.registerAction(copyToDashboardAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
