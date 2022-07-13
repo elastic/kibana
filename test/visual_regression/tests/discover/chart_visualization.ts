@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function unloadMakelogs() {
-      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
