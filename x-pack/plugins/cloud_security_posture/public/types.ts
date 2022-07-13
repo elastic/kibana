@@ -8,6 +8,7 @@
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspClientPluginSetup {}
@@ -26,5 +27,6 @@ export interface CspClientPluginStartDeps {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   charts: ChartsPluginStart;
+  discover: DiscoverStart;
   // optional
 }
