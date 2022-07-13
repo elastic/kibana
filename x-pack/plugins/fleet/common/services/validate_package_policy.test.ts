@@ -556,8 +556,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       });
     });
 
-    // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
-    it.skip('returns package policy validation error if input var does not exist', () => {
+    it('returns package policy validation error if input var does not exist', () => {
       expect(
         validatePackagePolicy(
           {
