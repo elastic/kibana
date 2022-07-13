@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMING_SOON_TEST_ID } from '../../screens/indicators';
+import { DEFAULT_LAYOUT_TITLE, INDICATORS_TABLE } from '../../screens/indicators';
 import { login } from '../../tasks/login';
 
 before(() => {
@@ -18,6 +18,8 @@ describe('Indicators page', () => {
   });
 
   it('should navigate to the indicators page, click on a flyout button and inspect flyout', () => {
-    cy.get(COMING_SOON_TEST_ID).should('exist').and('have.text', 'Coming Soon!');
+    cy.get(DEFAULT_LAYOUT_TITLE).should('have.text', 'Indicators');
+
+    cy.get(INDICATORS_TABLE).should('exist');
   });
 });
