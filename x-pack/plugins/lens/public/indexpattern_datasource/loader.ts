@@ -38,7 +38,7 @@ type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
 export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
-  const newFields = dataView.fields
+  const newFields: IndexPattern['fields'] = dataView.fields
     .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
     .map((field): IndexPatternField => {
       // Convert the getters on the index pattern service into plain JSON
@@ -82,20 +82,21 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
     });
   }
 
+  const newFieldFormatMap: IndexPattern['fieldFormatMap'] =
+    fieldFormatMap &&
+    Object.fromEntries(
+      Object.entries(fieldFormatMap).map(([id, format]) => [
+        id,
+        'toJSON' in format ? format.toJSON() : format,
+      ])
+    );
   return {
     id: dataView.id!, // id exists for sure because we got index patterns by id
     title,
     name: name ? name : title,
     timeFieldName,
-    fieldFormatMap:
-      fieldFormatMap &&
-      Object.fromEntries(
-        Object.entries(fieldFormatMap).map(([id, format]) => [
-          id,
-          'toJSON' in format ? format.toJSON() : format,
-        ])
-      ),
     fields: newFields,
+    fieldFormatMap: newFieldFormatMap,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
   };

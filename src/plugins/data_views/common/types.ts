@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  QueryDslQueryContainer,
-  QueryDslTypeQuery,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   SavedObject,
   SavedObjectsCreateOptions,
@@ -312,7 +309,7 @@ export interface SavedObjectsClientCommon {
 
 export interface GetFieldsOptions {
   pattern: string;
-  type?: QueryDslTypeQuery;
+  type?: string;
   lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;

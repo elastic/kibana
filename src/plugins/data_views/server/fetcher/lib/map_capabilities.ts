@@ -10,7 +10,7 @@ import { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api
 import { mergeJobConfigurations } from './jobs_compatibility';
 
 export interface RollupIndexCapability {
-  [key: string]: { aggs?: object; error?: string };
+  [key: string]: { aggs?: Record<string, {}>; error?: string };
 }
 
 /**

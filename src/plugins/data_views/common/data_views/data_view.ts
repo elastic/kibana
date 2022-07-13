@@ -15,7 +15,6 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
 import _, { cloneDeep, each, reject } from 'lodash';
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
@@ -24,6 +23,7 @@ import type {
   DataViewFieldMap,
   DataViewSpec,
   FieldConfiguration,
+  FieldFormatMap,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeType,
@@ -80,7 +80,7 @@ export class DataView implements DataViewBase {
   /**
    * Map of field formats by field name
    */
-  public fieldFormatMap: Record<string, SerializedFieldFormat<{}, SerializableRecord>>;
+  public fieldFormatMap: FieldFormatMap;
   /**
    * Only used by rollup indices, used by rollup specific endpoint to load field list.
    */
