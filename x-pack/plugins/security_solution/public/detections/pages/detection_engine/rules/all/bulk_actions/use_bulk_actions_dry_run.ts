@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryClient, UseMutateAsyncFunction } from 'react-query';
+import type { UseMutateAsyncFunction } from 'react-query';
 import { useMutation } from 'react-query';
 
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
@@ -19,9 +19,6 @@ import { performBulkAction } from '../../../../../containers/detection_engine/ru
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 
 const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
-
-export const getBulkActionsDryRunFromCache = (queryClient: QueryClient) =>
-  processDryRunResult(queryClient.getQueryData<BulkActionResponse>(BULK_ACTIONS_DRY_RUN_QUERY_KEY));
 
 export interface DryRunResult {
   /**
