@@ -11,6 +11,7 @@ import { EuiFlexItem, EuiFlexGrid, EuiSpacer, EuiTablePagination } from '@elasti
 import { selectOverviewState, setOverviewPerPageAction } from '../../../../state/overview';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
+import { MonitorDetailFlyout } from './monitor_detail_flyout';
 
 export const OverviewGrid = () => {
   const {
@@ -19,6 +20,9 @@ export const OverviewGrid = () => {
     pageState: { perPage },
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
+  const [flyoutConfig, setFlyoutConfig] = useState<{ id: string; location: string } | undefined>(
+    undefined
+  );
   const [page, setPage] = useState(0);
   const currentMonitors = pages[page] || [];
 
@@ -41,6 +45,7 @@ export const OverviewGrid = () => {
             data-test-subj="syntheticsOverviewGridItem"
           >
             <OverviewGridItem
+              onClick={(id: string, location: string) => setFlyoutConfig({ id, location })}
               monitorId={monitor.id}
               locationId={monitor.location?.id}
               monitorName={monitor.name}
@@ -60,6 +65,13 @@ export const OverviewGrid = () => {
         onChangeItemsPerPage={changeItemsPerPage}
         itemsPerPageOptions={[10, 20, 40]}
       />
+      {flyoutConfig?.id && flyoutConfig?.location && (
+        <MonitorDetailFlyout
+          id={flyoutConfig.id}
+          location={flyoutConfig.location}
+          onClose={() => setFlyoutConfig(undefined)}
+        />
+      )}
     </>
   ) : null;
 };

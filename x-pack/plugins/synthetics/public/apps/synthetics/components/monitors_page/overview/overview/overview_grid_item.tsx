@@ -13,11 +13,13 @@ export const OverviewGridItem = ({
   monitorName,
   locationId,
   isMonitorEnabled,
+  onClick,
 }: {
   monitorId: string;
   monitorName: string;
   locationId: string;
   isMonitorEnabled: boolean;
+  onClick: (id: string, location: string) => void;
 }) => {
   const { data, loading, averageDuration } = useLast50DurationChart({ locationId, monitorId });
   return (
@@ -29,6 +31,7 @@ export const OverviewGridItem = ({
       data={data}
       loaded={!loading}
       averageDuration={averageDuration}
+      onClick={onClick}
     />
   );
 };

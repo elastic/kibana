@@ -28,14 +28,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
-import { fetchPings, getMonitor } from '../../../state/api';
-import { ClientPluginsStart } from '../../../../plugin';
-import { useStatusByLocation } from '../../../../apps/synthetics/hooks/use_status_by_location';
+import { ClientPluginsStart } from '../../../../../../plugin';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants/ui';
+import { fetchSyntheticsMonitor } from '../../../../state/monitor_summary/api';
+import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 
 // TODO: remove any
 const FlyoutHeadingTable = styled<any>(EuiBasicTable)`
@@ -52,48 +52,49 @@ const BoldItem = styled(EuiFlexItem)`
   font-weight: bold;
 `;
 
-const STATUS_COLUMN_NAME = i18n.translate('xpack.synthetics.monitorList.statusColumnName', {
-  defaultMessage: 'Status',
-});
+const useMonitorDetail = (monitorId: string, location: string) => {
+  const { data, loading } = useEsSearch(
+    {
+      index: SYNTHETICS_INDEX_PATTERN,
+      body: {
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'monitor.id': monitorId,
+                },
+              },
+              {
+                term: {
+                  'observer.geo.name': location,
+                },
+              },
+              {
+                exists: {
+                  field: 'summary',
+                },
+              },
+            ],
+          },
+        },
+        sort: [{ '@timestamp': 'desc' }],
+      },
+    },
+    [monitorId],
+    {
+      name: 'getMonitorStatusByLocation',
+    }
+  );
 
-const LOCATION_COLUMN_NAME = i18n.translate('xpack.synthetics.monitorList.locationColumnName', {
-  defaultMessage: 'Location',
-});
+  if (!data || data.hits.hits.length !== 1) return { data: undefined, loading };
+  return {
+    data: data.hits.hits[0]._source,
+    loading,
+  };
+};
 
-const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
-  defaultMessage: 'Duration',
-});
-
-const MONITOR_DETAILS_HEADER_TEXT = i18n.translate(
-  'xpack.synthetics.monitorList.monitorDetailsHeaderText',
-  {
-    defaultMessage: 'Monitor Details',
-  }
-);
-
-const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
-  defaultMessage: 'Enabled',
-});
-
-const LOCATIONS_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.locationsItemText', {
-  defaultMessage: 'Locations',
-});
-
-const NAME_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.nameItemText', {
-  defaultMessage: 'Name',
-});
-
-const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
-  defaultMessage: 'Monitor ID',
-});
-
-const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
-  defaultMessage: 'Cancel',
-});
-
-const GO_TO_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.goToMonitorLinkText', {
-  defaultMessage: 'Go to monitor',
-});
 export function MonitorDetailFlyout(props: { id: string; location: string; onClose: () => void }) {
   const { id } = props;
   const theme = useEuiTheme();
@@ -104,34 +105,25 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
     data: monitorSavedObject,
     error,
     status,
-  } = useFetcher<Promise<DecryptedSyntheticsMonitorSavedObject | undefined>>(
-    () => getMonitor({ id }),
-    [id]
-  );
-  const { data: detailData, status: detailStatus } = useFetcher(() => {
-    return fetchPings({
-      dateRange: { from: 'now-12h', to: 'now' },
-      monitorId: id,
-      locations: `["${location}"]`,
-      size: 1,
-    });
-  }, [id, location]);
+  } = useFetcher(() => fetchSyntheticsMonitor(id), [id]);
+
+  const monitrDetail = useMonitorDetail(id, location);
   const locationStatuses = useStatusByLocation(id);
   return (
     <EuiFlyout onClose={props.onClose}>
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <EuiLoadingSpinner size="xl" />}
-      {status === FETCH_STATUS.SUCCESS && (
+      {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiTitle>
-                  <h2>{monitorSavedObject?.attributes.name}</h2>
+                  <h2>{monitorSavedObject?.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonIcon iconType="popout" href={detailData?.pings[0].url?.full} />
+                <EuiButtonIcon iconType="popout" href={(monitrDetail.data as any)?.url?.full} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
@@ -165,12 +157,12 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
                 },
                 {
                   name: 'Last run',
-                  field: 'timestamp',
+                  field: '@timestamp',
                   render: (item: string) => moment(item).fromNow(),
                 },
               ]}
-              items={detailData?.pings ?? []}
-              loading={detailStatus === FETCH_STATUS.LOADING}
+              items={monitrDetail.data ? [monitrDetail.data] : []}
+              loading={monitrDetail.loading}
               pagination={undefined}
             />
           </EuiFlyoutHeader>
@@ -226,7 +218,7 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
               <BoldItem>{ENABLED_ITEM_TEXT}</BoldItem>
               <EuiFlexItem>
                 <EuiSwitch
-                  checked={!!monitorSavedObject?.attributes.enabled}
+                  checked={!!monitorSavedObject?.enabled}
                   label=""
                   onChange={(e) => {
                     throw Error('Not implemented');
@@ -260,11 +252,11 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
             </EuiFlexGroup>
             <EuiFlexGroup>
               <BoldItem>{NAME_ITEM_TEXT}</BoldItem>
-              <EuiFlexItem>{monitorSavedObject?.attributes.name}</EuiFlexItem>
+              <EuiFlexItem>{monitorSavedObject?.name}</EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup>
               <BoldItem>{MONITOR_ID_ITEM_TEXT}</BoldItem>
-              <EuiFlexItem>{monitorSavedObject?.id}</EuiFlexItem>
+              <EuiFlexItem>{props.id}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
@@ -285,3 +277,46 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
     </EuiFlyout>
   );
 }
+
+const STATUS_COLUMN_NAME = i18n.translate('xpack.synthetics.monitorList.statusColumnName', {
+  defaultMessage: 'Status',
+});
+
+const LOCATION_COLUMN_NAME = i18n.translate('xpack.synthetics.monitorList.locationColumnName', {
+  defaultMessage: 'Location',
+});
+
+const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
+  defaultMessage: 'Duration',
+});
+
+const MONITOR_DETAILS_HEADER_TEXT = i18n.translate(
+  'xpack.synthetics.monitorList.monitorDetailsHeaderText',
+  {
+    defaultMessage: 'Monitor Details',
+  }
+);
+
+const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
+  defaultMessage: 'Enabled',
+});
+
+const LOCATIONS_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.locationsItemText', {
+  defaultMessage: 'Locations',
+});
+
+const NAME_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.nameItemText', {
+  defaultMessage: 'Name',
+});
+
+const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
+  defaultMessage: 'Monitor ID',
+});
+
+const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
+  defaultMessage: 'Cancel',
+});
+
+const GO_TO_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.goToMonitorLinkText', {
+  defaultMessage: 'Go to monitor',
+});

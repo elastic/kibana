@@ -31,6 +31,7 @@ export const MetricItem = ({
   averageDuration,
   data,
   loaded,
+  onClick,
 }: {
   monitorId: string;
   locationId: string;
@@ -39,6 +40,7 @@ export const MetricItem = ({
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
+  onClick: (id: string, location: string) => void;
 }) => {
   const locationName = useLocationName({ locationId });
   const { locations } = useStatusByLocation(monitorId);
@@ -47,9 +49,6 @@ export const MetricItem = ({
 
   return (
     <div
-      onClick={() => {
-        console.log('clicked on', monitorId);
-      }}
       style={{
         height: '160px',
       }}
@@ -62,6 +61,13 @@ export const MetricItem = ({
             overflow: 'hidden',
           }}
         >
+          {monitorId && locationName && (
+            <input
+              type="button"
+              onClick={() => onClick(monitorId, locationName ?? '')}
+              value="hello"
+            />
+          )}
           <Chart>
             <Settings baseTheme={DARK_THEME} />
             <Metric

@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { Ping } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
-  getTimeSpanFilter,
+  // getTimeSpanFilter,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
@@ -32,7 +32,8 @@ export function useStatusByLocation(monitorIdArg?: string) {
             filter: [
               SUMMARY_FILTER,
               EXCLUDE_RUN_ONCE_FILTER,
-              getTimeSpanFilter(),
+              // TODO: why is this filtering out all the monitors
+              // getTimeSpanFilter(),
               {
                 term: {
                   config_id: monitorIdArg ?? monitorId,
