@@ -542,6 +542,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         extendSession: this.extendSession.bind(this, deps),
         cancelSession: this.cancelSession.bind(this, deps),
         deleteSession: this.deleteSession.bind(this, deps),
+        getSessionStatus: searchSessionsClient.status,
       };
     };
   };

@@ -92,11 +92,11 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const resp = await supertest
-          .get(`/internal/session/${sessionId}`)
+          .get(`/internal/session/${sessionId}/status`)
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
-        const { status } = resp.body.attributes;
+        const { status } = resp.body;
         expect(status).to.equal(SearchSessionStatus.CANCELLED);
       });
 
@@ -309,11 +309,11 @@ export default function ({ getService }: FtrProviderContext) {
         'searches eventually complete and session gets into the complete state',
         async () => {
           const resp = await supertest
-            .get(`/internal/session/${sessionId}`)
+            .get(`/internal/session/${sessionId}/status`)
             .set('kbn-xsrf', 'foo')
             .expect(200);
 
-          const { status } = resp.body.attributes;
+          const { status } = resp.body;
 
           expect(status).to.be(SearchSessionStatus.COMPLETE);
 
@@ -570,11 +570,11 @@ export default function ({ getService }: FtrProviderContext) {
           'searches eventually complete and session gets into the complete state',
           async () => {
             const resp = await supertest
-              .get(`/s/${spaceId}/internal/session/${sessionId}`)
+              .get(`/s/${spaceId}/internal/session/${sessionId}/status`)
               .set('kbn-xsrf', 'foo')
               .expect(200);
 
-            const { status } = resp.body.attributes;
+            const { status } = resp.body;
 
             expect(status).to.be(SearchSessionStatus.COMPLETE);
             return true;

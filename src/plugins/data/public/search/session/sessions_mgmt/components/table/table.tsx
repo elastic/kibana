@@ -47,6 +47,7 @@ export function SearchSessionsMgmtTable({
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
   const showLatestResultsHandler = useRef<Function>();
+  const refreshTimeoutRef = useRef<number | null>(null);
   const refreshInterval = useMemo(
     () => moment.duration(config.management.refreshInterval).asMilliseconds(),
     [config.management.refreshInterval]
@@ -63,21 +64,33 @@ export function SearchSessionsMgmtTable({
 
   // refresh behavior
   const doRefresh = useCallback(async () => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
+    }
+
     setIsLoading(true);
     const renderResults = (results: UISession[]) => {
       setTableData(results);
     };
     showLatestResultsHandler.current = renderResults;
-    let results: UISession[] = [];
-    try {
-      results = await api.fetchTableData();
-    } catch (e) {} // eslint-disable-line no-empty
+
+    if (document.visibilityState !== 'hidden') {
+      let results: UISession[] = [];
+      try {
+        results = await api.fetchTableData();
+      } catch (e) {} // eslint-disable-line no-empty
+
+      if (showLatestResultsHandler.current === renderResults) {
+        renderResults(results);
+        setIsLoading(false);
+      }
+    }
 
     if (showLatestResultsHandler.current === renderResults) {
-      renderResults(results);
-      setIsLoading(false);
+      refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
-  }, [api]);
+  }, [api, refreshInterval]);
 
   // initial data load
   useEffect(() => {
