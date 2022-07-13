@@ -54,7 +54,6 @@ export const fetchDurationPercentiles = async ({
       },
     },
   };
-  console.log(JSON.stringify(params));
   const response = await setup.apmEventClient.search(
     'get_duration_percentiles',
     params
