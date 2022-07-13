@@ -128,12 +128,8 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     const otlpConfig = this.config.opentelemetry?.metrics.otlp;
     if (otlpConfig?.url) {
+      // Add OTLP exporter
       const url = otlpConfig.url;
-      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
-
-      const credentials = url.startsWith('https://')
-        ? grpc.credentials.createSsl()
-        : grpc.credentials.createInsecure();
 
       // Set Authorization headers
       const metadata = new grpc.Metadata();
@@ -143,10 +139,10 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
       }
 
-      // Add OTLP exporter
+      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
       meterProvider.addMetricReader(
         new PeriodicExportingMetricReader({
-          exporter: new OTLPMetricExporter({ url, credentials, metadata }),
+          exporter: new OTLPMetricExporter({ url, metadata }),
           exportIntervalMillis: otlpConfig.exportIntervalMillis,
         })
       );

@@ -24,7 +24,7 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
       prometheus.enabled: true
     ```
 
-### Enable OpenTelemetry Metrics API exported as OpenTelemetry Protocol
+### Enable OpenTelemetry Metrics API exported as OpenTelemetry Protocol over GRPC
 
 1. Start [local setup with fleet](../fleet/README.md#running-fleet-server-locally-in-a-container) or a cloud cluster
 2. Start Kibana
@@ -37,6 +37,26 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
     monitoring_collection.opentelemetry.metrics:
       otlp.url: "http://127.0.0.1:8200"
     ```
+
+You can also provide headers for OTLP endpoints that require authentication:
+
+```yml
+# Enable the OTLP exporter to an authenticated APM endpoint
+monitoring_collection.opentelemetry.metrics:
+  otlp:
+    url: "https://DEPLOYMENT.apm.REGION.PROVIDER.elastic-cloud.com"
+    headers:
+      Authorization: "Bearer SECRET_TOKEN"
+```
+
+For connection-level debug information you can set these variables:
+
+```bash
+export GRPC_NODE_TRACE="xds_client,xds_resolver,cds_balancer,eds_balancer,priority,weighted_target,round_robin,resolving_load_balancer,subchannel,keepalive,dns_resolver,fault_injection,http_filter,csds"
+export GRPC_NODE_VERBOSITY=DEBUG
+```
+
+See the [grpc-node docs](https://github.com/grpc/grpc-node/blob/master/doc/environment_variables.md) for details and other settings.
 
 ### Example of how to instrument the code
 
