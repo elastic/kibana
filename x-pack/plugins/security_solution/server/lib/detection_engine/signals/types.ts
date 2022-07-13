@@ -329,6 +329,8 @@ export interface SearchAfterAndBulkCreateParams {
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

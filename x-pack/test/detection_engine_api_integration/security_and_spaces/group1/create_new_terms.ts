@@ -404,7 +404,14 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatus.succeeded
       );
 
-      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule, maxSignals);
+      const signalsOpen = await getOpenSignals(
+        supertest,
+        log,
+        es,
+        createdRule,
+        RuleExecutionStatus.succeeded,
+        maxSignals
+      );
       expect(signalsOpen.hits.hits.length).eql(maxSignals);
       const processPids = signalsOpen.hits.hits
         .map((signal) => signal._source?.['kibana.alert.new_terms'])

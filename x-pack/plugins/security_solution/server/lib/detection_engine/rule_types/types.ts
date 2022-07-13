@@ -70,6 +70,8 @@ export interface RunOpts<TParams extends RuleParams> {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export type SecurityAlertType<

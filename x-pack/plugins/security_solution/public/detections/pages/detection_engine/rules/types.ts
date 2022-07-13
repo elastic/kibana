@@ -109,6 +109,7 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
+  timestampOverrideFallbackDisabled?: boolean;
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
@@ -217,6 +218,7 @@ export interface AboutStepRuleJson {
   threat: Threats;
   threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
+  timestamp_override_fallback_disabled?: boolean;
   note?: string;
 }
 

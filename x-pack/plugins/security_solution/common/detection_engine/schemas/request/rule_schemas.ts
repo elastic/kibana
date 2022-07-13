@@ -45,6 +45,7 @@ import {
   meta,
   rule_name_override,
   timestamp_override,
+  timestamp_override_fallback_disabled,
   author,
   description,
   false_positives,
@@ -165,6 +166,7 @@ const baseParams = {
     meta,
     rule_name_override,
     timestamp_override,
+    timestamp_override_fallback_disabled,
     namespace,
   },
   defaultable: {

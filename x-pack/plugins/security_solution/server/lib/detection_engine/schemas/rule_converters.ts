@@ -422,6 +422,9 @@ export const convertPatchAPIToInternalSchema = (
       severityMapping: params.severity_mapping ?? existingParams.severityMapping,
       threat: params.threat ?? existingParams.threat,
       timestampOverride: params.timestamp_override ?? existingParams.timestampOverride,
+      timestampOverrideFallbackDisabled:
+        params.timestamp_override_fallback_disabled ??
+        existingParams.timestampOverrideFallbackDisabled,
       to: params.to ?? existingParams.to,
       references: params.references ?? existingParams.references,
       namespace: params.namespace ?? existingParams.namespace,
@@ -481,6 +484,7 @@ export const convertCreateAPIToInternalSchema = (
       severityMapping: input.severity_mapping ?? [],
       threat: input.threat ?? [],
       timestampOverride: input.timestamp_override,
+      timestampOverrideFallbackDisabled: input.timestamp_override_fallback_disabled,
       to: input.to ?? 'now',
       references: input.references ?? [],
       namespace: input.namespace,
@@ -610,6 +614,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     meta: params.meta,
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
+    timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,
