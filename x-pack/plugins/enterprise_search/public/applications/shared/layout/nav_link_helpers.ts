@@ -19,10 +19,13 @@ interface Params {
   items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
 }
 
-type NavLinkProps = GeneratedReactRouterProps &
-  Pick<EuiSideNavItemType<unknown>, 'isSelected' | 'items'>;
+type NavLinkProps<T> = GeneratedReactRouterProps<T> &
+  Pick<EuiSideNavItemType<T>, 'isSelected' | 'items'>;
 
-export const generateNavLink = ({ items, ...rest }: Params & ReactRouterProps): NavLinkProps => {
+export const generateNavLink = ({
+  items,
+  ...rest
+}: Params & ReactRouterProps): NavLinkProps<unknown> => {
   const linkProps = {
     ...generateReactRouterProps({ ...rest }),
     isSelected: getNavLinkActive({ items, ...rest }),
@@ -37,8 +40,7 @@ export const getNavLinkActive = ({
   shouldNotCreateHref = false,
 }: Params & ReactRouterProps): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
-  // @ts-ignore TODO: Not sure where history.basePath is coming from. Is Kibana inserting it?
-  const basePath: string = KibanaLogic.values.history.basePath;
+  const basePath = KibanaLogic.values.history.basePath;
   const currentPath = stripTrailingSlash(pathname);
 
   // If shouldNotCreateHref is true then we expect `to` to already include the react router basePath

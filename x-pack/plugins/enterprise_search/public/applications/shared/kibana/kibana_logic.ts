@@ -24,7 +24,7 @@ type RequiredFieldsOnly<T> = {
 interface KibanaLogicProps {
   config: { host?: string };
   // Kibana core
-  history: History;
+  history: History & { basePath: string }; // TODO Where is basePath coming from? Kibana? React Router?
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;

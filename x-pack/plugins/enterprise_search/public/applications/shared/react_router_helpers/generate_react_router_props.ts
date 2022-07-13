@@ -31,15 +31,15 @@ export interface ReactRouterProps {
   shouldNotCreateHref?: boolean;
 }
 
-export type GeneratedReactRouterProps = Required<
-  Pick<EuiSideNavItemType<unknown>, 'href' | 'onClick'>
+export type GeneratedReactRouterProps<T> = Required<
+  Pick<EuiSideNavItemType<T>, 'href' | 'onClick'>
 >;
 
 export const generateReactRouterProps = ({
   to,
   onClick,
   shouldNotCreateHref,
-}: ReactRouterProps): GeneratedReactRouterProps => {
+}: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
 
