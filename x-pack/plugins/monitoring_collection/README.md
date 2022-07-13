@@ -12,17 +12,16 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
 2. Start Kibana
 3. Set up a new agent policy and enroll a new agent in your local machine
 4. Install the Prometheus Metrics package
-  a. Set **Hosts** with `localhost:5601`
-  b. Set **Metrics Path** with `/(BASEPATH)/api/monitoring_collection/v1/prometheus`
-  c. Remove the values from **Bearer Token File** and **SSL Certificate Authorities**
-  d. Set **Username** and **Password** with `elastic` and `changeme`
+   1. Set **Hosts** with `localhost:5601`
+   2. Set **Metrics Path** with `/(BASEPATH)/api/monitoring_collection/v1/prometheus`
+   3. Remove the values from **Bearer Token File** and **SSL Certificate Authorities**
+   4. Set **Username** and **Password** with `elastic` and `changeme`
 5. Add the following configuration to `kibana.dev.yml`
 
     ```yml
     # Enable the prometheus exporter
     monitoring_collection.opentelemetry.metrics:
       prometheus.enabled: true
-
     ```
 
 ### Enable OpenTelemetry Metrics API exported as OpenTelemetry Protocol
@@ -54,11 +53,12 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
         description: 'Counts total number of requests',
       });
     }
+  }
   ```
 
   In this example we're using a `Counter` metric, but [OpenTelemetry SDK](https://open-telemetry.github.io/opentelemetry-js/interfaces/_opentelemetry_api_metrics.Meter.html) provides there are other options to record metrics
 
-* Initialize meter in the plugin setup and pass it to the relevant components that will be instrumented. In this case, we want to intrument `FooApi` routes
+* Initialize meter in the plugin setup and pass it to the relevant components that will be instrumented. In this case, we want to instrument `FooApi` routes.
 
   ```ts
   import { IRouter } from '@kbn/core/server';
@@ -86,13 +86,13 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
   }
   ```
 
-    `monitoring_collection` plugins has to be initialized before the plugin that will be instrumented. If for some reason the instrumentation doesn't record any metrics, make sure `monitoring_collection` is included in the list of `requiredPlugins`. e.g:
+  `monitoring_collection` plugins has to be initialized before the plugin that will be instrumented. If for some reason the instrumentation doesn't record any metrics, make sure `monitoring_collection` is included in the list of `requiredPlugins`. e.g:
 
-    ```json
-    "requiredPlugins": [
-      "monitoringCollection"
-    ],
-    ```
+  ```json
+  "requiredPlugins": [
+    "monitoringCollection"
+  ],
+  ```
 
 * Lastly we can use the `metrics` object to instrument the code
 
@@ -109,4 +109,3 @@ This plugin allows for other plugins to add data to Kibana stack monitoring docu
       }
     );
   ```
-
