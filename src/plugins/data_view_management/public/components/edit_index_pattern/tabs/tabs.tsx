@@ -141,7 +141,6 @@ export function Tabs({
   saveIndexPattern,
   fields,
   history,
-  location,
   refreshFields,
   relationships,
   allowedTypes,
@@ -158,7 +157,10 @@ export function Tabs({
     savedObjectsManagement,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
-  const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
+  const [syncingStateFunc, setSyncingStateFunc] = useState<{
+    getCurrentTab: () => string;
+    setCurrentTab?: (newTab: string) => { tab: string };
+  }>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
@@ -260,7 +262,7 @@ export function Tabs({
   }, [closeFieldEditor]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(META_FIELDS)),
+    (filters: string[] | undefined) => fieldWildcardMatcher(filters, uiSettings.get(META_FIELDS)),
     [uiSettings]
   );
 
@@ -600,7 +602,7 @@ export function Tabs({
       selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
       onTabClick={(tab) => {
         setSelectedTabId(tab.id);
-        syncingStateFunc.setCurrentTab(tab.id);
+        syncingStateFunc.setCurrentTab?.(tab.id);
       }}
     />
   );

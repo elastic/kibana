@@ -23,7 +23,7 @@ export interface SourceFiltersTableProps {
 }
 
 export interface SourceFiltersTableState {
-  filterToDelete: any;
+  filterToDelete: SourceFiltersTableFilter | undefined;
   isDeleteConfirmationModalVisible: boolean;
   isSaving: boolean;
   filters: SourceFiltersTableFilter[];
@@ -56,7 +56,7 @@ export class SourceFiltersTable extends Component<
 
   updateFilters = () => {
     const sourceFilters = this.props.indexPattern.sourceFilters;
-    const filters = (sourceFilters || []).map((sourceFilter: any) => ({
+    const filters = (sourceFilters || []).map((sourceFilter) => ({
       ...sourceFilter,
       clientId: ++this.clientSideId,
     }));
@@ -66,7 +66,7 @@ export class SourceFiltersTable extends Component<
 
   getFilteredFilters = createSelector(
     (state: SourceFiltersTableState) => state.filters,
-    (state: SourceFiltersTableState, props: SourceFiltersTableProps) => props.filterFilter,
+    (_state: SourceFiltersTableState, props: SourceFiltersTableProps) => props.filterFilter,
     (filters, filterFilter) => {
       if (filterFilter) {
         const filterFilterToLowercase = filterFilter.toLowerCase();
@@ -98,7 +98,7 @@ export class SourceFiltersTable extends Component<
     const { filterToDelete, filters } = this.state;
 
     indexPattern.sourceFilters = filters.filter((filter) => {
-      return filter.clientId !== filterToDelete.clientId;
+      return filter.clientId !== filterToDelete?.clientId;
     });
 
     this.setState({ isSaving: true });

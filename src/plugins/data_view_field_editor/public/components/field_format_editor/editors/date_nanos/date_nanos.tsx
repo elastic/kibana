@@ -16,7 +16,7 @@ import { formatId } from './constants';
 
 import { FormatEditorSamples } from '../../samples';
 
-interface DateNanosFormatEditorFormatParams {
+export interface DateNanosFormatEditorFormatParams {
   pattern: string;
 }
 

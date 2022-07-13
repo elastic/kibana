@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import {
   IRouter,
-  StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
+  StartServicesAccessor,
 } from '@kbn/core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 import { IndexPatternsFetcher } from '../fetcher';
+import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];
@@ -28,7 +29,7 @@ const parseMetaFields = (metaFields: string | string[]) => {
 
 const path = '/api/index_patterns/_fields_for_wildcard';
 
-type IBody = { index_filter?: any } | undefined;
+type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
   meta_fields: string[];

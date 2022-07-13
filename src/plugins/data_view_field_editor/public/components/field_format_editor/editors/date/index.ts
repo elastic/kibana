@@ -8,8 +8,9 @@
 
 import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
+import { DateFormatEditorFormatParams } from './date';
 
 export type { DateFormatEditor } from './date';
-export const dateFormatEditorFactory: FieldFormatEditorFactory = () =>
+export const dateFormatEditorFactory: FieldFormatEditorFactory<DateFormatEditorFormatParams> = () =>
   import('./date').then((m) => m.DateFormatEditor);
 dateFormatEditorFactory.formatId = formatId;
