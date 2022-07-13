@@ -32,49 +32,55 @@ export const getAnomalies = async (
   params: AnomaliesSearchParams,
   mlAnomalySearch: MlAnomalySearch,
   listClient: ListClient
-): Promise<AnomalyResults> => {
+): Promise<{
+  anomalyResults: AnomalyResults;
+  unprocessedExceptions: ExceptionListItemSchema[];
+}> => {
   const boolCriteria = buildCriteria(params);
-  const { filter } = await buildExceptionFilter({
+  const { filter, unprocessedExceptions } = await buildExceptionFilter({
     lists: params.exceptionItems,
     excludeExceptions: true,
     chunkSize: 1024,
     alias: null,
     listClient,
   });
-  return mlAnomalySearch(
-    {
-      size: params.maxRecords || 100,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
-                  analyze_wildcard: false,
+  return {
+    anomalyResults: await mlAnomalySearch(
+      {
+        size: params.maxRecords || 100,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  query_string: {
+                    query: 'result_type:record',
+                    analyze_wildcard: false,
+                  },
                 },
-              },
-              { term: { is_interim: false } },
-              {
-                bool: {
-                  must: boolCriteria,
+                { term: { is_interim: false } },
+                {
+                  bool: {
+                    must: boolCriteria,
+                  },
                 },
-              },
-            ],
-            must_not: filter?.query,
+              ],
+              must_not: filter?.query,
+            },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+          ],
+          sort: [{ record_score: { order: 'desc' as const } }],
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-        ],
-        sort: [{ record_score: { order: 'desc' as const } }],
       },
-    },
-    params.jobIds
-  );
+      params.jobIds
+    ),
+    unprocessedExceptions,
+  };
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {

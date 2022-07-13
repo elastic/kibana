@@ -88,7 +88,7 @@ export const mlExecutor = async ({
       result.warning = true;
     }
 
-    const anomalyResults = await findMlSignals({
+    const { anomalyResults, unprocessedExceptions } = await findMlSignals({
       ml,
       // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
       // currently unused by the mlAnomalySearch function.
@@ -104,8 +104,8 @@ export const mlExecutor = async ({
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
+      exceptionsList: unprocessedExceptions,
       events: anomalyResults.hits.hits,
     });
 

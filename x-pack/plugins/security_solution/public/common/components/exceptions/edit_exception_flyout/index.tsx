@@ -39,12 +39,7 @@ import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
-import {
-  hasEqlSequenceQuery,
-  isEqlRule,
-  isNewTermsRule,
-  isThresholdRule,
-} from '../../../../../common/detection_engine/utils';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -386,10 +381,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 </>
               )}
               {getExceptionBuilderComponentLazy({
-                allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) &&
-                  !isThresholdRule(maybeRule?.type) &&
-                  !isNewTermsRule(maybeRule?.type),
+                allowLargeValueLists: true,
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: [exceptionItem],

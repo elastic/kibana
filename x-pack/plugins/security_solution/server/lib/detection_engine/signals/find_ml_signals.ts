@@ -34,7 +34,10 @@ export const findMlSignals = async ({
   to: string;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-}): Promise<AnomalyResults> => {
+}): Promise<{
+  anomalyResults: AnomalyResults;
+  unprocessedExceptions: ExceptionListItemSchema[];
+}> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
     jobIds,

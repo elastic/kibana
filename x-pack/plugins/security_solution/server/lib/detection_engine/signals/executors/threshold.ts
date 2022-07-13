@@ -104,7 +104,7 @@ export const thresholdExecutor = async ({
 
     if (hasLargeValueItem(exceptionItems)) {
       result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
+        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules' // TODO: change or get rid of this
       );
       result.warning = true;
     }

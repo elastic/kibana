@@ -72,7 +72,7 @@ export const eqlExecutor = async ({
     const result = createSearchAfterReturnType();
     if (hasLargeValueItem(exceptionItems)) {
       result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
+        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules' // TODO: change or get rid of this
       );
       result.warning = true;
     }
