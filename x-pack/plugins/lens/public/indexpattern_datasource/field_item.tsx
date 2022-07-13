@@ -432,7 +432,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
+    const formatId = indexPattern.fieldFormatMap[field.name].id as string;
+    const FormatType = fieldFormats.getType(formatId);
     if (FormatType) {
       formatter = new FormatType(
         indexPattern.fieldFormatMap[field.name].params,
