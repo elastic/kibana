@@ -8,7 +8,7 @@
 
 import type { Observable } from 'rxjs';
 import { defer, map, retry, shareReplay } from 'rxjs';
-import type { ElasticsearchClient } from './client';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 /** @private */
 export interface ClusterInfo {

@@ -122,15 +122,19 @@ export type {
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
+  ElasticsearchConfigPreboot,
+  PollEsNodesVersionOptions,
+  ElasticsearchRequestHandlerContext,
+} from './elasticsearch';
+export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchClientSslConfig,
   IScopedClusterClient,
-  ElasticsearchConfigPreboot,
-  PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
   UnauthorizedErrorHandlerRetryResult,
@@ -138,8 +142,7 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  ElasticsearchRequestHandlerContext,
-} from './elasticsearch';
+} from '@kbn/core-elasticsearch-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';

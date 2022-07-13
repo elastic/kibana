@@ -14,7 +14,7 @@ import {
   ClusterClientMock,
   CustomClusterClientMock,
 } from './client/mocks';
-import { ElasticsearchClientConfig } from './client';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import {

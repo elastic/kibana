@@ -18,9 +18,13 @@ import type {
 } from '@kbn/core-execution-context-server-internal';
 import type { IAuthHeadersStorage } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type {
+  UnauthorizedErrorHandler,
+  ElasticsearchClientConfig,
+} from '@kbn/core-elasticsearch-server';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import { ClusterClient, ElasticsearchClientConfig } from './client';
+import { ClusterClient } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import {
   InternalElasticsearchServicePreboot,
@@ -32,7 +36,6 @@ import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
-import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
 import { mergeConfig } from './merge_config';
 import { getClusterInfo$ } from './get_cluster_info';
 

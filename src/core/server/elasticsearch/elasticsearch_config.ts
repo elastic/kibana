@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import { ConfigDeprecationProvider } from '..';
+import type { ConfigDeprecationProvider } from '@kbn/config';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });

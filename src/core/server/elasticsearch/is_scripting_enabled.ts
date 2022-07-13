@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from './client';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 const scriptAllowedTypesKey = 'script.allowed_types';
 

@@ -7,7 +7,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IScopedClusterClient } from './client';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { InternalElasticsearchServiceStart } from './types';
 
 /**

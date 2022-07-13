@@ -21,25 +21,8 @@ export type {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-  FakeRequest,
-  ScopeableRequest,
   ElasticsearchConfigPreboot,
 } from './types';
-export type {
-  IClusterClient,
-  ICustomClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchClient,
-  IScopedClusterClient,
-  // unauthorized error handler
-  UnauthorizedErrorHandlerOptions,
-  UnauthorizedErrorHandlerResultRetryParams,
-  UnauthorizedErrorHandlerRetryResult,
-  UnauthorizedErrorHandlerNotHandledResult,
-  UnauthorizedErrorHandlerResult,
-  UnauthorizedErrorHandlerToolkit,
-  UnauthorizedErrorHandler,
-} from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
 export { pollEsNodesVersion } from './version_check/ensure_es_version';
 export {

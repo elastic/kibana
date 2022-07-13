@@ -7,12 +7,15 @@
  */
 
 import { Observable } from 'rxjs';
-import type { Headers, KibanaRequest } from '@kbn/core-http-server';
+import type {
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  UnauthorizedErrorHandler,
+} from '@kbn/core-elasticsearch-server';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
-import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
 import { ClusterInfo } from './get_cluster_info';
 
 /**
