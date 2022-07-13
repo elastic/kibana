@@ -25,6 +25,7 @@ import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 /**
  * @public
@@ -36,16 +37,19 @@ export class CasesUiPlugin
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+    this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
   public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
+    const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -79,6 +83,7 @@ export class CasesUiPlugin
           storage,
           kibanaVersion,
           externalReferenceAttachmentTypeRegistry,
+          persistableStateAttachmentTypeRegistry,
         });
       },
     });
@@ -87,6 +92,9 @@ export class CasesUiPlugin
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
           this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
+        },
+        registerPersistableState: (persistableStateAttachmentType) => {
+          this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
       },
     };
@@ -102,6 +110,7 @@ export class CasesUiPlugin
      */
     const getCasesContext = getCasesContextLazy({
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     });
 
     return {
@@ -111,24 +120,28 @@ export class CasesUiPlugin
           getCasesLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
         getCasesContext,
         getRecentCases: (props) =>
           getRecentCasesLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
         // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
           getCreateCaseFlyoutLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
         // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
           getAllCasesSelectorModalLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
       },
       hooks: {

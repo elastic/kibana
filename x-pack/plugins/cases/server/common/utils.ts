@@ -27,8 +27,6 @@ import {
   CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
-  CommentRequestExternalReferenceType,
-  CommentRequestPersistableStateType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
@@ -238,15 +236,6 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
- * A type narrowing function for external reference attachments.
- */
-export const isCommentRequestTypeExternalReference = (
-  context: CommentRequest
-): context is CommentRequestExternalReferenceType => {
-  return context.type === CommentType.externalReference;
-};
-
-/**
  * A type narrowing function for external reference so attachments.
  */
 export const isCommentRequestTypeExternalReferenceSO = (
@@ -256,15 +245,6 @@ export const isCommentRequestTypeExternalReferenceSO = (
     context.type === CommentType.externalReference &&
     context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
   );
-};
-
-/**
- * A type narrowing function for persistable state attachments.
- */
-export const isCommentRequestTypePersistableState = (
-  context: Partial<CommentRequest>
-): context is CommentRequestPersistableStateType => {
-  return context.type === CommentType.persistableState;
 };
 
 /**

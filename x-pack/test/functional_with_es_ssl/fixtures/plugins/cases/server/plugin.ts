@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import { PluginSetupContract as CasesSetup } from '@kbn/cases-plugin/server/types';
 import { Plugin, CoreSetup } from '@kbn/core/server';
+import { getPersistableStateAttachmentServer } from './attachments/persistable_state';
 
-export class CasesFixturePlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup) {}
+export interface CasesExamplePublicSetupDeps {
+  cases: CasesSetup;
+}
+
+export class CasesFixturePlugin implements Plugin<void, void, CasesExamplePublicSetupDeps> {
+  public setup(core: CoreSetup, { cases }: CasesExamplePublicSetupDeps) {
+    cases.attachmentFramework.registerPersistableState(getPersistableStateAttachmentServer());
+  }
+
   public start() {}
   public stop() {}
 }

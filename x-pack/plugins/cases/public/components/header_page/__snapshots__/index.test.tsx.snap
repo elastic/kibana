@@ -46,6 +46,10 @@ exports[`HeaderPage it renders 1`] = `
                 "all": true,
                 "read": true,
               },
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
+              },
             }
           }
         >
