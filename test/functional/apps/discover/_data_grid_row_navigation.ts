@@ -30,13 +30,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid row navigation', function () {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'simlilar-index', 'similar-index-two']);
+      await security.testUser.setRoles(['kibana_admin', 'similar_index', 'similar_index_two']);
       await PageObjects.common.navigateToApp('settings');
 
-      await createIndex('similar-index');
-      await createIndex('similar-index-two');
+      await createIndex('similar_index');
+      await createIndex('similar_index_two');
 
-      await PageObjects.settings.createIndexPattern('similar-index*', '@timestamp', true);
+      await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
