@@ -28,6 +28,7 @@ import {
   CasesMetricsResponse,
   CaseSeverity,
   CommentResponseExternalReferenceType,
+  CommentResponseTypePersistableState,
 } from '../api';
 import { PUSH_CASES_CAPABILITY } from '../constants';
 import { SnakeToCamelCase } from '../types';
@@ -74,6 +75,7 @@ export type CaseViewRefreshPropInterface = null | {
 export type Comment = SnakeToCamelCase<CommentResponse>;
 export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
+export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
