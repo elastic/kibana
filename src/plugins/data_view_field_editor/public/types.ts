@@ -58,7 +58,7 @@ export interface Field {
 
 export interface FieldFormatConfig {
   id: string;
-  params?: { [key: string]: any };
+  params?: { [key: string]: unknown };
 }
 
 export interface EsRuntimeField {

@@ -16,10 +16,10 @@ const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
 /**
  *  Determines if an error is an elasticsearch error that's
  *  describing a failure caused by missing index/indices
- *  @param  {Any}  err
+ *  @param  err
  *  @return {Boolean}
  */
-export function isEsIndexNotFoundError(err: any) {
+export function isEsIndexNotFoundError(err: unknown) {
   return get(err, ['body', 'error', 'type']) === ERR_ES_INDEX_NOT_FOUND;
 }
 
@@ -38,10 +38,10 @@ export function createNoMatchingIndicesError(pattern: string[] | string) {
 /**
  *  Determines if an error is produced by `createNoMatchingIndicesError()`
  *
- *  @param  {Any} err
+ *  @param  err
  *  @return {Boolean}
  */
-export function isNoMatchingIndicesError(err: any) {
+export function isNoMatchingIndicesError(err: unknown) {
   return get(err, ['output', 'payload', 'code']) === ERR_NO_MATCHING_INDICES;
 }
 

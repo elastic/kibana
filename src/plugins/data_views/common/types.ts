@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
+import type {
+  QueryDslQueryContainer,
+  QueryDslTypeQuery,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SavedObject,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+} from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public/notifications';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
-// eslint-disable-next-line
-import type { SavedObject } from 'src/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
+export type { SavedObject };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -282,7 +289,7 @@ export interface SavedObjectsClientCommon {
     type: string,
     id: string,
     attributes: DataViewAttributes,
-    options: { version?: string }
+    options: SavedObjectsUpdateOptions
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
@@ -293,7 +300,7 @@ export interface SavedObjectsClientCommon {
   create: (
     type: string,
     attributes: DataViewAttributes,
-    options: { id?: string }
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -305,7 +312,7 @@ export interface SavedObjectsClientCommon {
 
 export interface GetFieldsOptions {
   pattern: string;
-  type?: string;
+  type?: QueryDslTypeQuery;
   lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
@@ -317,8 +324,6 @@ export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   hasUserIndexPattern: () => Promise<boolean>;
 }
-
-export type { SavedObject };
 
 export type AggregationRestrictions = Record<
   string,

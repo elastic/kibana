@@ -30,11 +30,9 @@ const DOT_PREFIX_RE = /(.).+?\./g;
 /**
  * Convert a dot.notated.string into a short
  * version (d.n.string)
- *
- * @return {any}
  */
-export function shortenDottedString(input: any) {
-  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
+export function shortenDottedString(input: unknown): string {
+  return typeof input !== 'string' ? (input as string) : input.replace(DOT_PREFIX_RE, '$1.');
 }
 
 // Note - this code is duplicated from @kbn/es-query
