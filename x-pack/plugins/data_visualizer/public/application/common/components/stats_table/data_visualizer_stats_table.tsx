@@ -20,10 +20,12 @@ import {
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
+import { css } from '@emotion/react';
 import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import type { JobFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
@@ -70,6 +72,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   onChange,
   loading,
 }: DataVisualizerTableProps<T>) => {
+  const { euiTheme } = useEuiTheme();
+
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
 
@@ -361,6 +365,18 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}
+            css={css`
+              thead {
+                position: sticky;
+                inset-block-start: 0;
+                z-index: 1;
+                background-color: ${euiTheme.colors.emptyShade};
+                box-shadow: inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color};
+              }
+              .euiTableRow > .euiTableRowCel {
+                border-top: 0px;
+              }
+            `}
           />
         </div>
       )}
