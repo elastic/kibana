@@ -9,9 +9,9 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { DependenciesInventoryTitle } from '../../routing/home/dependencies';
-import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
+import { DependencyDetailTemplate } from '../../routing/templates/dependency_detail_template';
 
-export function BackendDetailView({
+export function DependencyDetailView({
   children,
 }: {
   children: React.ReactChild;
@@ -62,5 +62,5 @@ export function BackendDetailView({
       }),
     },
   ]);
-  return <BackendDetailTemplate>{children}</BackendDetailTemplate>;
+  return <DependencyDetailTemplate>{children}</DependencyDetailTemplate>;
 }

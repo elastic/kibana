@@ -26,7 +26,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function BackendDetailTemplate({ children }: Props) {
+export function DependencyDetailTemplate({ children }: Props) {
   const {
     query,
     query: { dependencyName, rangeFrom, rangeTo, environment },
@@ -46,7 +46,7 @@ export function BackendDetailTemplate({ children }: Props) {
     dependencyName,
   });
 
-  const backendMetadataFetch = useFetcher(
+  const dependencyMetadataFetch = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return;
@@ -65,7 +65,7 @@ export function BackendDetailTemplate({ children }: Props) {
     [dependencyName, start, end]
   );
 
-  const { data: { metadata } = {} } = backendMetadataFetch;
+  const { data: { metadata } = {} } = dependencyMetadataFetch;
 
   const tabs = isOperationsBreakdownFeatureEnabled
     ? [
@@ -74,7 +74,7 @@ export function BackendDetailTemplate({ children }: Props) {
           href: router.link('/dependencies/overview', {
             query,
           }),
-          label: i18n.translate('xpack.apm.backendDetailOverview.title', {
+          label: i18n.translate('xpack.apm.DependencyDetailOverview.title', {
             defaultMessage: 'Overview',
           }),
           isSelected: path === '/dependencies/overview',
@@ -84,7 +84,7 @@ export function BackendDetailTemplate({ children }: Props) {
           href: router.link('/dependencies/operations', {
             query,
           }),
-          label: i18n.translate('xpack.apm.backendDetailOperations.title', {
+          label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
             defaultMessage: 'Operations',
           }),
           isSelected:

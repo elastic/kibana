@@ -16,7 +16,7 @@ import { page } from '.';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { BackendDetailOperations } from '../../app/backend_detail_operations';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
-import { BackendDetailView } from '../../app/backend_detail_view';
+import { DependencyDetailView } from '../../app/dependency_detail_view';
 import { DependenciesInventory } from '../../app/dependencies_inventory';
 import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -48,9 +48,9 @@ export const dependencies = {
   }),
   '/dependencies': {
     element: (
-      <BackendDetailView>
+      <DependencyDetailView>
         <Outlet />
-      </BackendDetailView>
+      </DependencyDetailView>
     ),
     params: t.partial({
       query: t.intersection([
