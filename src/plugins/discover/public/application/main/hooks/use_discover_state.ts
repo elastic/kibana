@@ -8,7 +8,12 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  getIndexPatternFromSQLQuery,
+  AggregateQuery,
+  Query,
+} from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -74,6 +79,7 @@ export function useDiscoverState({
 
   const [state, setState] = useState(appStateContainer.getState());
   const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
+  const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
 
   /**
    * Search session logic
@@ -247,13 +253,13 @@ export function useDiscoverState({
     if (documentState.result?.length) {
       const firstRow = documentState.result[0];
       const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-      if (!isEqual(columns, documentStateCols)) {
-        return Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
+        return columns;
       }
       return [];
     }
     return [];
-  }, [documentState.result, documentStateCols]);
+  }, [documentState.result, documentStateCols, sqlQuery, state.query]);
 
   useEffect(() => {
     async function fetchDataview() {
