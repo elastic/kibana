@@ -63,6 +63,7 @@ import {
   GenericIndexPatternColumn,
   getErrorMessages,
   insertNewColumn,
+  operationDefinitionMap,
   TermsIndexPatternColumn,
 } from './operations';
 import { getReferenceRoot } from './operations/layer_helpers';
@@ -543,6 +544,16 @@ export function getIndexPatternDatasource({
             timeRange
           ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
+        getMaxPossibleNumValues: (columnId) => {
+          // TODO - is the isReferenced check necessary?
+          if (layer && layer.columns[columnId] && !isReferenced(layer, columnId)) {
+            const column = layer.columns[columnId];
+            return (
+              operationDefinitionMap[column.operationType].getMaxPossibleNumValues?.(column) ?? null
+            );
+          }
+          return null;
+        },
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers) {

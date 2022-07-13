@@ -215,11 +215,11 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
   }
 
   const pixelHeight = config.metric.maxTileHeight
-    ? metricConfigs.length * config.metric.maxTileHeight
+    ? grid.length * config.metric.maxTileHeight
     : undefined;
 
   const pixelWidth = config.metric.maxTileWidth
-    ? metricConfigs.length * config.metric.maxTileWidth
+    ? grid[0].length * config.metric.maxTileWidth
     : undefined;
 
   const chartTheme = getThemeService().useChartsTheme();

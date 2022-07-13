@@ -274,8 +274,6 @@ describe('MetricVisComponent', function () {
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
-      // overrides subtitle and extra text
-      expect(visConfig!.subtitle).toBe(table.columns[2].name);
       expect(visConfig!.extra).toEqual(<span>13.63</span>);
 
       expect(visConfig).toMatchInlineSnapshot(`
@@ -284,7 +282,7 @@ describe('MetricVisComponent', function () {
           "extra": <span>
             13.63
           </span>,
-          "subtitle": "Median products.min_price",
+          "subtitle": "subtitle",
           "title": "Median products.base_price",
           "value": 28.984375,
           "valueFormatter": [Function],
@@ -762,6 +760,7 @@ describe('MetricVisComponent', function () {
               },
               dimensions: {
                 metric: basePriceColumnId,
+                breakdownBy: dayOfWeekColumnId,
               },
             }}
           />
@@ -779,10 +778,10 @@ describe('MetricVisComponent', function () {
             "
     `);
 
-    expect(getContainerStyles(240, 1200)).toMatchInlineSnapshot(`
+    expect(getContainerStyles(40, 50)).toMatchInlineSnapshot(`
       "
-              height: 1200px;
-              width: 240px;
+              height: 100px;
+              width: 200px;
               max-height: 100%;
               max-width: 100%;
             "

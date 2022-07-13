@@ -36,7 +36,6 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
-  minTiles?: number; // TODO - may not be necessary on the state
 }
 
 // TODO - consider relaxing?
@@ -59,7 +58,7 @@ const toExpression = (
   datasourceLayers: DatasourceLayers,
   // attributes?:  Partial<{ title: string; description: string }>,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {},
-  constrainDimensions: boolean = true
+  isPreview: boolean = false
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
@@ -69,7 +68,14 @@ const toExpression = (
     return null;
   }
 
+  // we constrain the tile sizes in the lens editor for aesthetic reasons
   const sideLength = state.breakdownByAccessor ? 200 : 300;
+
+  const maxTilesPrediction = isPreview
+    ? null
+    : state.breakdownByAccessor
+    ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+    : null;
 
   return {
     type: 'expression',
@@ -96,9 +102,9 @@ const toExpression = (
               ]
             : [],
           maxCols: state.maxCols ? [state.maxCols] : [],
-          minTiles: state.minTiles ? [state.minTiles] : [],
-          maxTileWidth: constrainDimensions ? [sideLength] : [],
-          maxTileHeight: constrainDimensions ? [sideLength] : [],
+          minTiles: maxTilesPrediction ? [maxTilesPrediction] : [],
+          maxTileWidth: !isPreview ? [sideLength] : [],
+          maxTileHeight: !isPreview ? [sideLength] : [],
         },
       },
     ],

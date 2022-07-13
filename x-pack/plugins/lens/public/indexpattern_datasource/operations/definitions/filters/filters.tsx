@@ -169,6 +169,8 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       </EuiFormRow>
     );
   },
+
+  getMaxPossibleNumValues: (column) => column.params.filters.length,
 };
 
 export const FilterList = ({
