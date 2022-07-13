@@ -62,7 +62,7 @@ export class Optimizer {
       cache: options.cache,
       dist: options.dist,
       oss: options.oss,
-      examples: true,
+      examples: options.runExamples,
       pluginPaths: options.pluginPaths,
       pluginScanDirs: options.pluginScanDirs,
     });
