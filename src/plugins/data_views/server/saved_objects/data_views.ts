@@ -18,10 +18,10 @@ export const dataViewSavedObjectType: SavedObjectsType = {
   management: {
     displayName: 'data view',
     icon: 'indexPatternApp',
-    defaultSearchField: 'title',
+    defaultSearchField: 'name',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.title;
+      return obj.attributes.name || obj.attributes.title;
     },
     getEditUrl(obj) {
       return `/management/kibana/dataViews/dataView/${encodeURIComponent(obj.id)}`;
