@@ -948,4 +948,34 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
     license: 'platinum',
   },
+  {
+    key: 'linux.advanced.fanotify.ignore_unknown_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignore_unknown_filesystems',
+      {
+        defaultMessage: 'Ignore unknown filesystems.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.monitored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.monitored_filesystems',
+      {
+        defaultMessage: 'Monitored filesystems.  Default: Endpoint perogative.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.ignored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignored_filesystems',
+      {
+        defaultMessage: 'Unmonitored filesystems.  Default: Endpoint perogative.',
+      }
+    ),
+  },
 ];
