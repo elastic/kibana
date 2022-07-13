@@ -104,7 +104,6 @@ export const useBulkActions = ({
 
       const handleEnableAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
-        setIsRefreshOn(false);
         closePopover();
 
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
