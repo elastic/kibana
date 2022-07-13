@@ -223,8 +223,8 @@ export const RelevanceTuningLogic = kea<
   selectors: ({ selectors }) => ({
     schemaFields: [
       () => [selectors.schema],
-      (schema: AdvancedSchema) => Object.entries(schema).reduce((fields: string[], [fieldName, {capabilities: fieldCapabilies}]) => {
-        return (fieldCapabilies.fulltext || fieldCapabilies.boost) ? [ ...fields, fieldName ] : fields;
+      (schema: AdvancedSchema) => Object.entries(schema).reduce((fields: string[], [fieldName, {capabilities: fieldCapabilities}]) => {
+        return (fieldCapabilities.fulltext || fieldCapabilities.boost) ? [ ...fields, fieldName ] : fields;
       }, []),
     ],
     schemaFieldsWithConflicts: [
