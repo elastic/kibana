@@ -26,16 +26,18 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     this.http = http;
   }
 
-  private _request<T = unknown>(
-    url: string,
-    query?: {}
-  ): Promise<{ fields?: FieldSpec[]; result?: boolean }> {
-    return this.http.fetch<T>(url, { query }).catch((resp) => {
-      if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
-        throw new DataViewMissingIndices(resp.body.message);
-      }
-      throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
-    });
+  private _request<T = unknown>(url: string, query?: {}): Promise<T | undefined> {
+    return this.http
+      .fetch<T>(url, {
+        query,
+      })
+      .catch((resp) => {
+        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
+          throw new DataViewMissingIndices(resp.body.message);
+        }
+
+        throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+      });
   }
 
   private _getUrl(path: string[]) {
@@ -48,14 +50,14 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   getFieldsForWildcard(options: GetFieldsOptions) {
     const { pattern, metaFields, type, rollupIndex, allowNoIndex, filter } = options;
-    return this._request(this._getUrl(['_fields_for_wildcard']), {
+    return this._request<{ fields: FieldSpec[] }>(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       filter,
-    }).then((resp) => resp.fields || []);
+    }).then((resp) => resp?.fields || []);
   }
 
   /**
@@ -65,6 +67,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const response = await this._request<{ result: boolean }>(
       this._getUrl(['has_user_index_pattern'])
     );
-    return response.result ?? false;
+    return response?.result ?? false;
   }
 }

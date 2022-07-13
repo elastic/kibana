@@ -93,7 +93,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
       Object.fromEntries(
         Object.entries(fieldFormatMap).map(([id, format]) => [
           id,
-          'toJSON' in format ? (format as unknown as FieldFormat).toJSON() : format, // FIXME should this work with SerializedFieldFormat or FieldFormat?
+          'toJSON' in format ? (format as unknown as FieldFormat).toJSON() : format, // FIXME SerializedFieldFormat was inferred... was this intended to work with FieldFormat instead?
         ])
       ),
     fields: newFields,
