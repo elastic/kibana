@@ -20,6 +20,7 @@ import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
@@ -75,6 +76,7 @@ describe('threshold_executor', () => {
         ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
         runtimeMappings: {},
         inputIndex: ['auditbeat-*'],
+        primaryTimestamp: TIMESTAMP,
       });
       expect(response.warningMessages.length).toEqual(1);
     });

@@ -11,14 +11,14 @@ jest.mock('uuid', () => ({
 }));
 
 import { RouteOptions } from '@hapi/hapi';
+import { hapiMocks } from '@kbn/hapi-mocks';
 import { CoreKibanaRequest } from './request';
-import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
 
 describe('CoreKibanaRequest', () => {
   describe('id property', () => {
     it('uses the request.app.requestId property if present', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: { requestId: 'fakeId' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -27,7 +27,7 @@ describe('CoreKibanaRequest', () => {
 
     it('generates a new UUID if request.app property is not present', () => {
       // Undefined app property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: undefined,
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -36,7 +36,7 @@ describe('CoreKibanaRequest', () => {
 
     it('generates a new UUID if request.app.requestId property is not present', () => {
       // Undefined app.requestId property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: {},
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -46,7 +46,7 @@ describe('CoreKibanaRequest', () => {
 
   describe('uuid property', () => {
     it('uses the request.app.requestUuid property if present', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: { requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -55,7 +55,7 @@ describe('CoreKibanaRequest', () => {
 
     it('generates a new UUID if request.app property is not present', () => {
       // Undefined app property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: undefined,
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -64,7 +64,7 @@ describe('CoreKibanaRequest', () => {
 
     it('generates a new UUID if request.app.requestUuid property is not present', () => {
       // Undefined app.requestUuid property
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         app: {},
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -74,7 +74,7 @@ describe('CoreKibanaRequest', () => {
 
   describe('get all headers', () => {
     it('returns all headers', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -85,7 +85,7 @@ describe('CoreKibanaRequest', () => {
   describe('headers property', () => {
     it('provides a frozen copy of request headers', () => {
       const rawRequestHeaders = { custom: 'one' };
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: rawRequestHeaders,
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -96,7 +96,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it.skip("doesn't expose authorization header by default", () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -106,7 +106,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('exposes authorization header if secured = false', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
@@ -119,7 +119,7 @@ describe('CoreKibanaRequest', () => {
 
   describe('isSytemApi property', () => {
     it('is false when no kbn-system-request header is set', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -127,7 +127,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('is true when kbn-system-request header is set to true', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', 'kbn-system-request': 'true' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -135,7 +135,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('is false when kbn-system-request header is set to false', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         headers: { custom: 'one', 'kbn-system-request': 'false' },
       });
       const kibanaRequest = CoreKibanaRequest.from(request);
@@ -146,7 +146,7 @@ describe('CoreKibanaRequest', () => {
   describe('route.options.authRequired property', () => {
     it('handles required auth: undefined', () => {
       const auth: RouteOptions['auth'] = undefined;
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth,
@@ -159,7 +159,7 @@ describe('CoreKibanaRequest', () => {
     });
     it('handles required auth: false', () => {
       const auth: RouteOptions['auth'] = false;
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             // @ts-expect-error According to types/hapi__hapi, `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
@@ -172,7 +172,7 @@ describe('CoreKibanaRequest', () => {
       expect(kibanaRequest.route.options.authRequired).toBe(false);
     });
     it('handles required auth: { mode: "required" }', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: 'required' },
@@ -185,7 +185,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('handles required auth: { mode: "optional" }', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: 'optional' },
@@ -198,7 +198,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('handles required auth: { mode: "try" } as "optional"', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: 'try' },
@@ -211,7 +211,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('throws on auth: strategy name', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { strategies: ['session'] },
@@ -225,7 +225,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     it('throws on auth: { mode: unexpected mode }', () => {
-      const request = httpServerMock.createRawRequest({
+      const request = hapiMocks.createRequest({
         route: {
           settings: {
             auth: { mode: undefined },
@@ -243,7 +243,7 @@ describe('CoreKibanaRequest', () => {
     it('should work with config-schema', () => {
       const body = Buffer.from('body!');
       const request = {
-        ...httpServerMock.createRawRequest({
+        ...hapiMocks.createRequest({
           params: { id: 'params' },
           query: { search: 'query' },
         }),
@@ -265,7 +265,7 @@ describe('CoreKibanaRequest', () => {
     it('should work with ValidationFunction', () => {
       const body = Buffer.from('body!');
       const request = {
-        ...httpServerMock.createRawRequest({
+        ...hapiMocks.createRequest({
           params: { id: 'params' },
           query: { search: 'query' },
         }),

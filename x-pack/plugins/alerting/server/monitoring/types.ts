@@ -6,6 +6,16 @@
  */
 import { MetricResult } from '@kbn/monitoring-collection-plugin/server';
 
+export const EMPTY_CLUSTER_RULES_METRICS: ClusterRulesMetric = {
+  overdue: {
+    count: 0,
+    delay: {
+      p50: 0,
+      p99: 0,
+    },
+  },
+};
+
 export type ClusterRulesMetric = MetricResult<{
   overdue: {
     count: number;

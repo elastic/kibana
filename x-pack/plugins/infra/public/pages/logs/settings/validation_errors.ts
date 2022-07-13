@@ -22,6 +22,11 @@ export interface EmptyFieldValidationError {
   fieldName: string;
 }
 
+export interface IncludesSpacesValidationError {
+  type: 'includes_spaces';
+  fieldName: string;
+}
+
 export interface EmptyColumnListValidationError {
   type: 'empty_column_list';
 }
@@ -55,6 +60,7 @@ export type FormValidationError =
   | GenericValidationError
   | ChildFormValidationError
   | EmptyFieldValidationError
+  | IncludesSpacesValidationError
   | EmptyColumnListValidationError
   | MissingTimestampFieldValidationError
   | MissingMessageFieldValidationError
@@ -64,6 +70,9 @@ export type FormValidationError =
 
 export const validateStringNotEmpty = (fieldName: string, value: string): FormValidationError[] =>
   value === '' ? [{ type: 'empty_field', fieldName }] : [];
+
+export const validateStringNoSpaces = (fieldName: string, value: string): FormValidationError[] =>
+  value.includes(' ') ? [{ type: 'includes_spaces', fieldName }] : [];
 
 export const validateColumnListNotEmpty = (columns: unknown[]): FormValidationError[] =>
   columns.length <= 0 ? [{ type: 'empty_column_list' }] : [];

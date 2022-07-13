@@ -39,6 +39,7 @@ const EuiPanelStyled = styled(EuiPanel)`
 export type PageLayoutProps = PropsWithChildren<{
   pageTitle?: ReactNode;
   pageDescription?: ReactNode;
+  pageBody?: ReactNode;
   actions?: ReactNode | ReactNode[];
   headerHasBottomBorder?: boolean;
   restrictWidth?: boolean | number | string;
@@ -52,6 +53,7 @@ export const PageLayout = memo<PageLayoutProps>(
   ({
     pageTitle,
     pageDescription,
+    pageBody,
     actions,
     headerHasBottomBorder,
     restrictWidth,
@@ -75,7 +77,7 @@ export const PageLayout = memo<PageLayoutProps>(
       };
     }, []);
 
-    const bodyClassName = useMemo(() => {
+    const consoleBodyClassName = useMemo(() => {
       return classnames({
         'is-scrollable': scrollableBody,
         'is-not-scrollable': !scrollableBody,
@@ -132,7 +134,12 @@ export const PageLayout = memo<PageLayoutProps>(
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem grow className={bodyClassName} data-test-subj={getTestId('body')}>
+          <EuiFlexItem grow={false}>{pageBody}</EuiFlexItem>
+          <EuiFlexItem
+            grow
+            className={consoleBodyClassName}
+            data-test-subj={getTestId('consoleBody')}
+          >
             <div role="main" className="full-height">
               {children}
             </div>
