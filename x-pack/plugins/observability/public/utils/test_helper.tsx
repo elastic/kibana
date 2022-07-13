@@ -35,7 +35,6 @@ export const render = (component: React.ReactNode) => {
             appMountParameters,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
-            kibanaFeatures: [],
           }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>

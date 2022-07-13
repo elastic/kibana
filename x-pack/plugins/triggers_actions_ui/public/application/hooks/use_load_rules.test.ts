@@ -375,4 +375,106 @@ describe('useLoadRules', () => {
 
     expect(onError).toBeCalled();
   });
+
+  describe('No data', () => {
+    it('noData should be true, if there is no Filter and no rules', async () => {
+      loadRules.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
+      const params = {
+        page: {
+          index: 0,
+          size: 25,
+        },
+        searchText: '',
+        typesFilter: [],
+        actionTypesFilter: [],
+        ruleExecutionStatusesFilter: [],
+        ruleStatusesFilter: [],
+        tagsFilter: [],
+      };
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useLoadRules({
+          ...params,
+          onPage,
+          onError,
+        })
+      );
+
+      expect(result.current.noData).toBeTruthy();
+
+      await act(async () => {
+        result.current.loadRules();
+        await waitForNextUpdate();
+      });
+
+      expect(result.current.noData).toBeTruthy();
+    });
+
+    it('noData should be false, if there is rule types filter and no rules', async () => {
+      loadRules.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
+      const params = {
+        page: {
+          index: 0,
+          size: 25,
+        },
+        searchText: '',
+        typesFilter: ['some-kind-of-filter'],
+        actionTypesFilter: [],
+        ruleExecutionStatusesFilter: [],
+        ruleStatusesFilter: [],
+        tagsFilter: [],
+      };
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useLoadRules({
+          ...params,
+          onPage,
+          onError,
+        })
+      );
+
+      expect(result.current.noData).toBeTruthy();
+
+      await act(async () => {
+        result.current.loadRules();
+        await waitForNextUpdate();
+      });
+
+      expect(result.current.noData).toBeFalsy();
+    });
+
+    it('noData should be true, if there is rule types filter and no rules with hasDefaultRuleTypesFiltersOn = true', async () => {
+      loadRules.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
+      const params = {
+        page: {
+          index: 0,
+          size: 25,
+        },
+        searchText: '',
+        typesFilter: ['some-kind-of-filter'],
+        actionTypesFilter: [],
+        ruleExecutionStatusesFilter: [],
+        ruleStatusesFilter: [],
+        tagsFilter: [],
+        hasDefaultRuleTypesFiltersOn: true,
+      };
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useLoadRules({
+          ...params,
+          onPage,
+          onError,
+        })
+      );
+
+      expect(result.current.noData).toBeTruthy();
+
+      await act(async () => {
+        result.current.loadRules();
+        await waitForNextUpdate();
+      });
+
+      expect(result.current.noData).toBeTruthy();
+    });
+  });
 });

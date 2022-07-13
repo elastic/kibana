@@ -109,7 +109,10 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       return getRulesListNotifyBadgeLazy(props);
     },
     getRulesList: () => {
-      return getRulesListLazy({ connectorServices });
+      return getRulesListLazy({
+        connectorServices,
+        rulesListProps: {},
+      });
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
