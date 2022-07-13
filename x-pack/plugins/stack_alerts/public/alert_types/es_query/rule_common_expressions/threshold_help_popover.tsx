@@ -66,7 +66,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches"
-              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, it is considered in only the first threshold calculation. The rule uses the timestamp of the matches to avoid alerting on the same match multiple times."
+              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, it is used in only the first threshold calculation."
             />
           </p>
         </EuiCallOut>
