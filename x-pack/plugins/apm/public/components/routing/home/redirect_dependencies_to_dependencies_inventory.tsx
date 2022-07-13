@@ -9,7 +9,7 @@ import { useLocation, Redirect } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
 
-export function RedirectBackendsToBackendInventory({
+export function RedirectDependenciesToDependenciesInventory({
   children,
 }: {
   children: React.ReactElement;
