@@ -32,7 +32,7 @@ type DependencySpan = ValuesType<
   APIReturnType<'GET /internal/apm/dependencies/operations/spans'>['spans']
 >;
 
-export function BackendOperationDetailTraceList() {
+export function DependencyOperationDetailTraceList() {
   const router = useApmRouter();
 
   const theme = useTheme();
@@ -104,7 +104,7 @@ export function BackendOperationDetailTraceList() {
   const columns: Array<ITableColumn<DependencySpan>> = [
     {
       name: i18n.translate(
-        'xpack.apm.backendOperationDetailTraceListOutcomeColumn',
+        'xpack.apm.dependencyOperationDetailTraceListOutcomeColumn',
         { defaultMessage: 'Outcome' }
       ),
       field: 'outcome',
@@ -123,7 +123,7 @@ export function BackendOperationDetailTraceList() {
     },
     {
       name: i18n.translate(
-        'xpack.apm.backendOperationDetailTraceListTraceIdColumn',
+        'xpack.apm.dependencyOperationDetailTraceListTraceIdColumn',
         { defaultMessage: 'Trace' }
       ),
       field: 'traceId',
@@ -154,7 +154,7 @@ export function BackendOperationDetailTraceList() {
     },
     {
       name: i18n.translate(
-        'xpack.apm.backendOperationDetailTraceListServiceNameColumn',
+        'xpack.apm.dependencyOperationDetailTraceListServiceNameColumn',
         { defaultMessage: 'Originating service' }
       ),
       field: 'serviceName',
@@ -183,7 +183,7 @@ export function BackendOperationDetailTraceList() {
     },
     {
       name: i18n.translate(
-        'xpack.apm.backendOperationDetailTraceListTransactionNameColumn',
+        'xpack.apm.dependencyOperationDetailTraceListTransactionNameColumn',
         { defaultMessage: 'Transaction name' }
       ),
       field: 'transactionName',
@@ -211,7 +211,7 @@ export function BackendOperationDetailTraceList() {
     },
     {
       name: i18n.translate(
-        'xpack.apm.backendOperationDetailTraceListDurationColumn',
+        'xpack.apm.dependencyOperationDetailTraceListDurationColumn',
         { defaultMessage: 'Duration' }
       ),
       field: 'duration',
@@ -223,7 +223,7 @@ export function BackendOperationDetailTraceList() {
     },
     {
       name: i18n.translate(
-        'xpack.apm.backendOperationDetailTraceListTimestampColumn',
+        'xpack.apm.dependencyOperationDetailTraceListTimestampColumn',
         { defaultMessage: 'Timestamp' }
       ),
       field: '@timestamp',
@@ -269,7 +269,7 @@ export function BackendOperationDetailTraceList() {
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <EuiText>
-            {i18n.translate('xpack.apm.backendOperationDetailTraceList', {
+            {i18n.translate('xpack.apm.dependencyOperationDetailTraceList', {
               defaultMessage: 'Traces',
             })}
           </EuiText>

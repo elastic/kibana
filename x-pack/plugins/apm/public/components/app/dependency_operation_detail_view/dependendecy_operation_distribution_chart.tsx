@@ -16,11 +16,11 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { DurationDistributionChartData } from '../../shared/charts/duration_distribution_chart';
 import { DurationDistributionChartWithScrubber } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 
-export function BackendOperationDistributionChart() {
+export function DependencyOperationDistributionChart() {
   const { clearChartSelection, selectSampleFromChartSelection } =
     useSampleChartSelection();
 
-  // there is no "current" event in the backend operation detail view
+  // there is no "current" event in the dependency operation detail view
   const markerCurrentEvent = undefined;
 
   const euiTheme = useTheme();
@@ -73,20 +73,16 @@ export function BackendOperationDistributionChart() {
       areaSeriesColor: euiTheme.eui.euiColorVis1,
       histogram: data?.allSpansDistribution.overallHistogram ?? [],
       id: i18n.translate(
-        'xpack.apm.backendOperationDistributionChart.allSpansLegendLabel',
-        {
-          defaultMessage: 'All spans',
-        }
+        'xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel',
+        { defaultMessage: 'All spans' }
       ),
     },
     {
       areaSeriesColor: euiTheme.eui.euiColorVis7,
       histogram: data?.failedSpansDistribution?.overallHistogram ?? [],
       id: i18n.translate(
-        'xpack.apm.backendOperationDistributionChart.failedSpansLegendLabel',
-        {
-          defaultMessage: 'Failed spans',
-        }
+        'xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel',
+        { defaultMessage: 'Failed spans' }
       ),
     },
   ];

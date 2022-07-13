@@ -13,8 +13,8 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_dependency_detail_operations_breadcrumb';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { DetailViewHeader } from '../../shared/detail_view_header';
-import { BackendOperationDistributionChart } from './backend_operation_distribution_chart';
-import { BackendOperationDetailTraceList } from './backend_operation_detail_trace_list';
+import { DependencyOperationDistributionChart } from './dependendecy_operation_distribution_chart';
+import { DependencyOperationDetailTraceList } from './dependency_operation_detail_trace_list';
 
 export function DependencyOperationDetailView() {
   const router = useApmRouter();
@@ -45,12 +45,12 @@ export function DependencyOperationDetailView() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasBorder>
-          <BackendOperationDistributionChart />
+          <DependencyOperationDistributionChart />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasBorder>
-          <BackendOperationDetailTraceList />
+          <DependencyOperationDetailTraceList />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
