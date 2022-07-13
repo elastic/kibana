@@ -102,6 +102,16 @@ export const DynamicTreeView = ({
     fetchNextPage();
   };
 
+  const itemList = useMemo(() => {
+    return (
+      data?.pages
+        ?.map((aggsData) => {
+          return aggsData?.buckets;
+        })
+        .flat() || []
+    );
+  }, [data?.pages]);
+
   return (
     <EuiText
       size="s"
@@ -131,37 +141,35 @@ export const DynamicTreeView = ({
         aria-describedby={data?.pages?.length ? 'dynamicTreeViewInstructionId' : undefined}
         aria-label={ariaLabel}
       >
-        {data?.pages?.map((aggsData) => {
-          return aggsData?.buckets.map((aggData) => {
-            const queryFilter = {
-              ...query,
-              bool: {
-                ...query.bool,
-                filter: [...query.bool.filter, { term: { [tree[depth].key]: aggData.key } }],
-              },
-            };
+        {itemList.map((aggData) => {
+          const queryFilter = {
+            ...query,
+            bool: {
+              ...query.bool,
+              filter: [...query.bool.filter, { term: { [tree[depth].key]: aggData.key } }],
+            },
+          };
 
-            return (
-              <DynamicTreeViewExpander key={aggData.key}>
-                {({ isExpanded, onToggleExpand }) => (
-                  <DynamicTreeViewItem
-                    aggData={aggData}
-                    aria-label={ariaLabel}
-                    depth={depth}
-                    expanded={expanded}
-                    indexPattern={indexPattern}
-                    isExpanded={isExpanded}
-                    onSelect={onSelect}
-                    onToggleExpand={onToggleExpand}
-                    query={queryFilter}
-                    selected={selected}
-                    selectionDepth={selectionDepth}
-                    tree={tree}
-                  />
-                )}
-              </DynamicTreeViewExpander>
-            );
-          });
+          return (
+            <DynamicTreeViewExpander key={aggData.key}>
+              {({ isExpanded, onToggleExpand }) => (
+                <DynamicTreeViewItem
+                  aggData={aggData}
+                  aria-label={ariaLabel}
+                  depth={depth}
+                  expanded={expanded}
+                  indexPattern={indexPattern}
+                  isExpanded={isExpanded}
+                  onSelect={onSelect}
+                  onToggleExpand={onToggleExpand}
+                  query={queryFilter}
+                  selected={selected}
+                  selectionDepth={selectionDepth}
+                  tree={tree}
+                />
+              )}
+            </DynamicTreeViewExpander>
+          );
         })}
         {hasNextPage && (
           <li key="load_more" className="euiTreeView__node" css={styles.loadMoreButtonWrapper}>
