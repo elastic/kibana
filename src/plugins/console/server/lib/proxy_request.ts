@@ -113,7 +113,10 @@ export const proxyRequest = ({
 
   const timeoutPromise = new Promise<any>((timeoutResolve, timeoutReject) => {
     setTimeout(() => {
-      if (!req.aborted && !req.socket) req.abort();
+      // Destroy the stream on timeout and close the connection.
+      if (!req.destroyed) {
+        req.destroy();
+      }
       if (!resolved) {
         timeoutReject(Boom.gatewayTimeout('Client request timeout'));
       } else {

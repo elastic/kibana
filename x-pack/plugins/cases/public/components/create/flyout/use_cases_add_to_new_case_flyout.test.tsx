@@ -13,6 +13,7 @@ import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
+import { allCasesPermissions } from '../../../common/mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 
 jest.mock('../../../common/use_cases_toast');
@@ -30,7 +31,7 @@ describe('use cases add to new case flyout hook', () => {
           value={{
             externalReferenceAttachmentTypeRegistry,
             owner: ['test'],
-            userCanCrud: true,
+            permissions: allCasesPermissions(),
             appId: 'test',
             appTitle: 'jest',
             basePath: '/jest',

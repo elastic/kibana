@@ -22,14 +22,14 @@ export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
 export const getCreateCaseFlyoutLazy = ({
   externalReferenceAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   afterCaseCreated,
   onClose,
   onSuccess,
   attachments,
 }: GetCreateCaseFlyoutPropsInternal) => (
-  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud, features }}>
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, permissions, features }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyoutLazy
         afterCaseCreated={afterCaseCreated}

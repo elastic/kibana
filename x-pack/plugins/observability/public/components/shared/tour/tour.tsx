@@ -58,7 +58,7 @@ const tourStepsConfig: TourStep[] = [
         })}
       </EuiText>
     ),
-    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
+    anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'overviewStep',
     showOverlay: true,

@@ -14,7 +14,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
-    "**/*.story.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -90,6 +90,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

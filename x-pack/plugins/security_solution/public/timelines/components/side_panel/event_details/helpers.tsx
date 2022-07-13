@@ -7,7 +7,7 @@
 
 import { some } from 'lodash/fp';
 import { useMemo } from 'react';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 
 interface GetBasicDataFromDetailsData {

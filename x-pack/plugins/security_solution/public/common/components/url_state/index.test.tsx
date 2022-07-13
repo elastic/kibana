@@ -10,18 +10,17 @@ import React from 'react';
 
 import { HookWrapper } from '../../mock';
 import { SecurityPageName } from '../../../app/types';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../utils/route/types';
 import { CONSTANTS } from './constants';
 import {
   getMockPropsObj,
   mockHistory,
-  mockSetFilterQuery,
   mockSetAbsoluteRangeDatePicker,
   mockSetRelativeRangeDatePicker,
   testCases,
   getMockProps,
 } from './test_dependencies';
-import { UrlStateContainerPropTypes } from './types';
+import type { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
@@ -181,62 +180,6 @@ describe('UrlStateContainer', () => {
           }
         );
       });
-
-      describe('appQuery action is called with correct data on component mount', () => {
-        test.each(testCases.slice(0, 4))(
-          ' %o',
-          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
-            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
-              .relativeTimeSearch.undefinedQuery;
-
-            (useLocation as jest.Mock).mockReturnValue({
-              pathname: mockProps.pathName,
-              search: mockProps.search,
-            });
-
-            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
-
-            expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
-              id: 'global',
-              language: 'kuery',
-              query: 'host.name:"siem-es"',
-            });
-          }
-        );
-      });
-    });
-
-    describe('Redux updates URL state', () => {
-      describe('appQuery url state is set from redux data on component mount', () => {
-        test.each(testCases)(
-          '%o',
-          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
-            mockProps = getMockPropsObj({
-              page,
-              examplePath,
-              namespaceLower,
-              pageName,
-              detailName,
-            }).noSearch.definedQuery;
-
-            (useLocation as jest.Mock).mockReturnValue({
-              pathname: mockProps.pathName,
-              search: mockProps.search,
-            });
-
-            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
-
-            expect(
-              mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-            ).toEqual({
-              hash: '',
-              pathname: examplePath,
-              search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
-              state: '',
-            });
-          }
-        );
-      });
     });
 
     it("it doesn't update URL state when pathName and browserPAth are out of sync", () => {
@@ -296,32 +239,6 @@ describe('UrlStateContainer', () => {
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
       expect(mockHistory.replace.mock.calls[0][0].search).toBe('?');
-    });
-
-    it('it removes empty AppQuery state from URL', () => {
-      mockProps = {
-        ...getMockProps(
-          {
-            hash: '',
-            pathname: '/network',
-            search: "?query=(query:'')",
-            state: '',
-          },
-          CONSTANTS.networkPage,
-          null,
-          SecurityPageName.network,
-          undefined
-        ),
-      };
-
-      (useLocation as jest.Mock).mockReturnValue({
-        pathname: mockProps.pathName,
-        search: mockProps.search,
-      });
-
-      mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
-
-      expect(mockHistory.replace.mock.calls[0][0].search).not.toContain('query=');
     });
 
     it('it removes empty timeline state from URL', () => {

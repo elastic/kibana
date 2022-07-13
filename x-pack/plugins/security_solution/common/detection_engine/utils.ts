@@ -13,10 +13,10 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import { Threshold, ThresholdNormalized } from './schemas/common';
+import type { Threshold, ThresholdNormalized } from './schemas/common';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>

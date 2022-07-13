@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { EventFiltersFlyout, EventFiltersFlyoutProps } from './event_filters_flyout';
+import type { EventFiltersFlyoutProps } from './event_filters_flyout';
+import { EventFiltersFlyout } from './event_filters_flyout';
 import { act, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 
 import { getInitialExceptionFromEvent } from '../utils';
 import { useCreateArtifact } from '../../../../hooks/artifacts/use_create_artifact';
@@ -23,7 +22,7 @@ import { ecsEventMock, esResponseData } from '../../test_utils';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { of } from 'rxjs';
 import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 // mocked modules
 jest.mock('../../../../../common/lib/kibana');

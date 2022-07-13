@@ -7,23 +7,30 @@
 
 import React, { Suspense, useCallback, useState } from 'react';
 
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 import { useFetchAlertData } from './use_fetch_alert_data';
+import { UseGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { paths } from '../../config';
+import { ObservabilityAppServices } from '../../application/types';
 
 interface CasesProps {
-  userCanCrud: boolean;
+  permissions: UseGetUserCasesPermissions;
 }
-export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
+export const Cases = React.memo<CasesProps>(({ permissions }) => {
   const {
     cases,
-    application: { getUrlForApp, navigateToApp },
-  } = useKibana().services;
+    http: {
+      basePath: { prepend },
+    },
+    application: { navigateToUrl },
+  } = useKibana<ObservabilityAppServices>().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const [selectedAlertId, setSelectedAlertId] = useState<string>('');
+  const casesPermissions = { all: permissions.crud, read: permissions.read };
 
   const handleFlyoutClose = useCallback(() => {
     setSelectedAlertId('');
@@ -44,7 +51,7 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
       )}
       {cases.ui.getCases({
         basePath: CASES_PATH,
-        userCanCrud,
+        permissions: casesPermissions,
         owner: [CASES_OWNER],
         features: { alerts: { sync: false } },
         useFetchAlertData,
@@ -53,17 +60,16 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
         },
         ruleDetailsNavigation: {
           href: (ruleId) => {
-            return getUrlForApp('management', {
-              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-            });
+            return prepend(paths.observability.ruleDetails(ruleId));
           },
           onClick: async (ruleId, ev) => {
+            const ruleLink = prepend(paths.observability.ruleDetails(ruleId));
+
             if (ev != null) {
               ev.preventDefault();
             }
-            return navigateToApp('management', {
-              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-            });
+
+            return navigateToUrl(ruleLink);
           },
         },
       })}

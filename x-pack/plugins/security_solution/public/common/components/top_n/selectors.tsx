@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { State } from '../../store';
+import type { State } from '../../store';
 import { sourcererSelectors } from '../../store/selectors';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 
 export interface IndicesSelector {
   all: string[];

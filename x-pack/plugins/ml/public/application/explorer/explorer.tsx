@@ -569,21 +569,21 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
           <EuiSpacer size="m" />
 
-          <div className="euiText explorer-charts">
-            {showCharts ? (
-              <ExplorerChartsContainer
-                {...{
-                  ...chartsData,
-                  severity,
-                  timefilter,
-                  mlLocator,
-                  timeBuckets,
-                  onSelectEntity: applyFilter,
-                  chartsService,
-                }}
-              />
-            ) : null}
-          </div>
+          {showCharts ? (
+            <ExplorerChartsContainer
+              {...{
+                ...chartsData,
+                severity,
+                timefilter,
+                mlLocator,
+                timeBuckets,
+                onSelectEntity: applyFilter,
+                chartsService,
+              }}
+            />
+          ) : null}
+
+          <EuiSpacer size="m" />
 
           <AnomaliesTable bounds={bounds} tableData={tableData} influencerFilter={applyFilter} />
         </EuiPanel>

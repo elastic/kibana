@@ -30,6 +30,7 @@ import type { DataViewPickerProps } from '.';
 import { DataViewsList } from './dataview_list';
 import { changeDataViewStyles } from './change_dataview.styles';
 
+const hideAnnouncementsUISetting = 'hideAnnouncements';
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 
 const newMenuTourTitle = i18n.translate('unifiedSearch.query.dataViewMenu.newMenuTour.title', {
@@ -66,8 +67,9 @@ export function ChangeDataView({
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const kibana = useKibana<IDataPluginServices>();
-  const { application, data, storage } = kibana.services;
+  const { application, data, storage, uiSettings } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
+  const isHideAnnouncementSettingsOn = Boolean(uiSettings.get(hideAnnouncementsUISetting));
 
   const [isTourDismissed, setIsTourDismissed] = useState(() =>
     Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
@@ -75,10 +77,10 @@ export function ChangeDataView({
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
-    if (showNewMenuTour && !isTourDismissed) {
+    if (showNewMenuTour && !isTourDismissed && !isHideAnnouncementSettingsOn) {
       setIsTourOpen(true);
     }
-  }, [isTourDismissed, setIsTourOpen, showNewMenuTour]);
+  }, [isHideAnnouncementSettingsOn, isTourDismissed, setIsTourOpen, showNewMenuTour]);
 
   const onTourDismiss = () => {
     storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);

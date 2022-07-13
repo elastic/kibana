@@ -10,19 +10,20 @@ import React from 'react';
 
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { Columns, ItemsPerRow } from '../paginated_table';
+import type { Columns, ItemsPerRow } from '../paginated_table';
 import { getRowItemDraggables } from '../tables/helpers';
 
 import * as i18n from './translations';
 import { HostDetailsLink, NetworkDetailsLink, UserDetailsLink } from '../links';
-import { AuthenticationsEdges, MatrixHistogramType } from '../../../../common/search_strategy';
-import { AuthTableColumns } from './types';
-import {
+import type { AuthenticationsEdges } from '../../../../common/search_strategy';
+import { MatrixHistogramType } from '../../../../common/search_strategy';
+import type { AuthTableColumns } from './types';
+import type {
   MatrixHistogramConfigs,
   MatrixHistogramMappingTypes,
   MatrixHistogramOption,
 } from '../matrix_histogram/types';
-import { LensAttributes } from '../visualization_actions/types';
+import type { LensAttributes } from '../visualization_actions/types';
 import { authenticationLensAttributes } from '../visualization_actions/lens_attributes/common/authentication';
 
 export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as H from 'history';
+import type * as H from 'history';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 
-import { SpyRouteProps } from './types';
+import type { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
 import { SecurityPageName } from '../../../../common/constants';
 
