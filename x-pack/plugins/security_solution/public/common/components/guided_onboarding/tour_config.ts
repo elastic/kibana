@@ -12,7 +12,8 @@ import rulesGif from '../../images/onboarding_tour_step_rules.gif';
 import casesGif from '../../images/onboarding_tour_step_cases.gif';
 
 type TourConfig = Array<
-  Pick<EuiTourStepProps, 'step' | 'content' | 'anchor' | 'anchorPosition' | 'title'> & {
+  Pick<EuiTourStepProps, 'step' | 'content' | 'anchorPosition' | 'title' | 'data-test-subj'> & {
+    anchor: string;
     imageConfig?: {
       altText: string;
       src: string;
@@ -34,6 +35,7 @@ export const tourConfig: TourConfig = [
     ),
     anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
     anchorPosition: 'rightUp',
+    'data-test-subj': 'welcomeStep',
   },
   {
     step: 2,
@@ -55,6 +57,7 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
+    'data-test-subj': 'rulesStep',
   },
   {
     step: 3,
@@ -79,6 +82,7 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
+    'data-test-subj': 'alertsStep',
   },
   {
     step: 4,
@@ -100,6 +104,7 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
+    'data-test-subj': 'casesStep',
   },
   {
     step: 5,
@@ -111,5 +116,6 @@ export const tourConfig: TourConfig = [
     }),
     anchor: `[data-test-subj="add-data"]`,
     anchorPosition: 'rightUp',
+    'data-test-subj': 'dataStep',
   },
 ];

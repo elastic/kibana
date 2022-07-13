@@ -24,8 +24,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { tourConfig } from './tour_config';
 
-const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
-const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
+export const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
+export const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
 const getIsTourActiveFromLocalStorage = (): boolean => {
   return Boolean(JSON.parse(String(localStorage.getItem(SECURITY_TOUR_ACTIVE_KEY))));
 };
@@ -97,7 +97,6 @@ const getSteps = (tourControls: {
   return tourConfig.map((stepConfig) => {
     const { content, imageConfig, ...rest } = stepConfig;
     return (
-      // @ts-expect-error
       <EuiTourStep
         {...rest}
         minWidth={minWidth}
@@ -106,6 +105,7 @@ const getSteps = (tourControls: {
         repositionOnScroll={repositionOnScroll}
         stepsTotal={tourConfig.length}
         isStepOpen={stepConfig.step === activeStep}
+        onFinish={() => resetTour()}
         content={
           <>
             <EuiText size="xs">
