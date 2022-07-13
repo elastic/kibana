@@ -13,7 +13,7 @@ export const actionResponsesTransform: TransformPutTransformRequest = {
   transform_id: 'osquery_manager.action_responses-default-0.0.1',
   description: 'Latest osquery_manager action responses',
   source: {
-    index: [`${AGENT_ACTIONS_RESULTS_INDEX}`],
+    index: [`${AGENT_ACTIONS_RESULTS_INDEX}*`],
     query: {
       bool: {
         should: [
