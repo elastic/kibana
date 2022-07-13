@@ -30,3 +30,7 @@ export interface Connector {
   sync_now: boolean;
   sync_status: string | null;
 }
+
+export interface ConnectorWithId extends Connector {
+  id: string;
+}

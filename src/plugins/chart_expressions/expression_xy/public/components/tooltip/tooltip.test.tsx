@@ -18,22 +18,22 @@ const getSeriesIdentifier = ({
   layerId,
   xAccessor,
   yAccessor,
-  splitAccessor,
+  splitAccessors = [],
   splitRowAccessor,
   splitColumnAccessor,
-  splitAccessors,
+  seriesSplitAccessors,
 }: {
   layerId: string;
   xAccessor?: string;
   yAccessor?: string;
   splitRowAccessor?: string;
-  splitAccessor?: string;
+  splitAccessors?: string[];
   splitColumnAccessor?: string;
-  splitAccessors: Map<number | string, number | string>;
+  seriesSplitAccessors: Map<number | string, number | string>;
 }): XYChartSeriesIdentifier => ({
-  specId: generateSeriesId({ layerId, xAccessor, splitAccessor }, yAccessor),
+  specId: generateSeriesId({ layerId, xAccessor }, splitAccessors, yAccessor),
   yAccessor: yAccessor ?? 'a',
-  splitAccessors,
+  splitAccessors: seriesSplitAccessors,
   seriesKeys: [],
   key: '1',
   smVerticalAccessorValue: splitColumnAccessor,
@@ -42,9 +42,11 @@ const getSeriesIdentifier = ({
 
 describe('Tooltip', () => {
   const { data } = sampleArgs();
-  const { layerId, xAccessor, splitAccessor, accessors } = sampleLayer;
-  const splitAccessors = new Map();
-  splitAccessors.set(splitAccessor, '10');
+  const { layerId, xAccessor, splitAccessors = [], accessors } = sampleLayer;
+  const seriesSplitAccessors = new Map();
+  splitAccessors.forEach((splitAccessor) => {
+    seriesSplitAccessors.set(splitAccessor, '10');
+  });
 
   const accessor = accessors[0] as string;
   const splitRowAccessor = 'd';
@@ -54,8 +56,8 @@ describe('Tooltip', () => {
     layerId,
     yAccessor: accessor,
     xAccessor: xAccessor as string,
-    splitAccessor: splitAccessor as string,
-    splitAccessors,
+    splitAccessors: splitAccessors as string[],
+    seriesSplitAccessors,
     splitRowAccessor,
     splitColumnAccessor,
   });
@@ -74,7 +76,7 @@ describe('Tooltip', () => {
     [layerId]: {
       xTitles: { [xAccessor as string]: 'x-title' },
       yTitles: { [accessor]: 'y-title' },
-      splitSeriesTitles: { [splitAccessor as string]: 'split-series-title' },
+      splitSeriesTitles: { [splitAccessors[0] as string]: 'split-series-title' },
       splitRowTitles: { [splitRowAccessor]: 'split-row-title' },
       splitColumnTitles: { [splitColumnAccessor]: 'split-column-title' },
     },
@@ -84,7 +86,12 @@ describe('Tooltip', () => {
     [layerId]: {
       xAccessors: { [xAccessor as string]: { id: 'number' } },
       yAccessors: { [accessor]: { id: 'string' } },
-      splitSeriesAccessors: { [splitAccessor as string]: { id: 'date' } },
+      splitSeriesAccessors: {
+        [splitAccessors[0] as string]: {
+          format: { id: 'date' },
+          formatter: { convert: (value) => `formatted-date-${value}` } as FieldFormat,
+        },
+      },
       splitRowAccessors: { [splitRowAccessor]: { id: 'number' } },
       splitColumnAccessors: { [splitColumnAccessor]: { id: 'number' } },
     },
@@ -188,8 +195,8 @@ describe('Tooltip', () => {
     const seriesIdentifierWithoutX = getSeriesIdentifier({
       layerId,
       yAccessor: accessor,
-      splitAccessor: splitAccessor as string,
-      splitAccessors,
+      splitAccessors: splitAccessors as string[],
+      seriesSplitAccessors,
       splitRowAccessor,
       splitColumnAccessor,
     });
@@ -215,8 +222,8 @@ describe('Tooltip', () => {
     const seriesIdentifierWithoutY = getSeriesIdentifier({
       layerId,
       xAccessor: xAccessor as string,
-      splitAccessor: splitAccessor as string,
-      splitAccessors,
+      splitAccessors: splitAccessors as string[],
+      seriesSplitAccessors,
       splitRowAccessor,
       splitColumnAccessor,
     });
@@ -243,7 +250,8 @@ describe('Tooltip', () => {
       layerId,
       xAccessor: xAccessor as string,
       yAccessor: accessor,
-      splitAccessors: new Map(),
+      splitAccessors: splitAccessors as string[],
+      seriesSplitAccessors: new Map(),
       splitRowAccessor,
       splitColumnAccessor,
     });
@@ -270,8 +278,8 @@ describe('Tooltip', () => {
       layerId,
       xAccessor: xAccessor as string,
       yAccessor: accessor,
-      splitAccessor: splitAccessor as string,
-      splitAccessors,
+      splitAccessors: splitAccessors as string[],
+      seriesSplitAccessors,
       splitColumnAccessor,
     });
 
@@ -297,8 +305,8 @@ describe('Tooltip', () => {
       layerId,
       xAccessor: xAccessor as string,
       yAccessor: accessor,
-      splitAccessor: splitAccessor as string,
-      splitAccessors,
+      splitAccessors: splitAccessors as string[],
+      seriesSplitAccessors,
       splitRowAccessor,
     });
 

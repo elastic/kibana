@@ -47,4 +47,4 @@ export type {
   DeprecationsGetResponse,
 } from '@kbn/core-deprecations-common';
 export * from './ui_settings/types';
-export type { ExternalUrlConfig } from './http';
+export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';

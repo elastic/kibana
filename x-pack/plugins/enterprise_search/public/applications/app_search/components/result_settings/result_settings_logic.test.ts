@@ -680,10 +680,10 @@ describe('ResultSettingsLogic', () => {
         );
       });
 
-      it('should remove rawSize value when toggling off', () => {
+      it('should remove rawSize and snippetFallback value when toggling off', () => {
         mount({
           resultFields: {
-            bar: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
@@ -696,6 +696,7 @@ describe('ResultSettingsLogic', () => {
           {
             raw: false,
             snippet: false,
+            snippetFallback: false,
           }
         );
       });
