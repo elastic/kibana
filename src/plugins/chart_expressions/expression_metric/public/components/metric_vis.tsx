@@ -10,7 +10,14 @@ import React, { useCallback } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
+import {
+  Chart,
+  Metric,
+  MetricSpec,
+  MetricWProgress,
+  RenderChangeListener,
+  Settings,
+} from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
@@ -164,16 +171,13 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
     : undefined;
 
-  let getProgressBarConfig = (_row: DatatableRow) => ({});
+  let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
 
   if (config.dimensions.progressMax) {
     const maxColId = getColumnByAccessor(config.dimensions.progressMax, data.columns)?.id;
     if (maxColId) {
-      getProgressBarConfig = (_row: DatatableRow) => ({
-        domain: {
-          min: 0,
-          max: _row[maxColId],
-        },
+      getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
+        domainMax: _row[maxColId],
         progressBarDirection: config.metric.progressDirection,
       });
     }

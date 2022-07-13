@@ -312,24 +312,21 @@ describe('MetricVisComponent', function () {
           .find(Metric)
           .props().data![0][0]!;
 
-      expect(getConfig(undefined)).not.toHaveProperty('domain');
+      expect(getConfig(undefined)).not.toHaveProperty('domainMax');
       expect(getConfig(undefined)).not.toHaveProperty('progressBarDirection');
 
-      expect(getConfig('foobar')).not.toHaveProperty('domain');
+      expect(getConfig('foobar')).not.toHaveProperty('domainMax');
       expect(getConfig('foobar')).not.toHaveProperty('progressBarDirection');
 
       const configWithProgress = getConfig(basePriceColumnId) as MetricWProgress;
 
-      expect(configWithProgress.domain).toEqual({ min: 0, max: table.rows[0][basePriceColumnId] });
+      expect(configWithProgress.domainMax).toEqual(table.rows[0][basePriceColumnId]);
       expect(configWithProgress.progressBarDirection).toBe('vertical');
 
       expect(configWithProgress).toMatchInlineSnapshot(`
         Object {
           "color": "#343741",
-          "domain": Object {
-            "max": 28.984375,
-            "min": 0,
-          },
+          "domainMax": 28.984375,
           "extra": <span />,
           "progressBarDirection": "vertical",
           "subtitle": undefined,
@@ -660,10 +657,7 @@ describe('MetricVisComponent', function () {
           Array [
             Object {
               "color": "#343741",
-              "domain": Object {
-                "max": 28.984375,
-                "min": 0,
-              },
+              "domainMax": 28.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -673,10 +667,7 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#343741",
-              "domain": Object {
-                "max": 28.984375,
-                "min": 0,
-              },
+              "domainMax": 28.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -686,10 +677,7 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#343741",
-              "domain": Object {
-                "max": 25.984375,
-                "min": 0,
-              },
+              "domainMax": 25.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -699,10 +687,7 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#343741",
-              "domain": Object {
-                "max": 25.784375,
-                "min": 0,
-              },
+              "domainMax": 25.784375,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -712,10 +697,7 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#343741",
-              "domain": Object {
-                "max": 25.348011363636363,
-                "min": 0,
-              },
+              "domainMax": 25.348011363636363,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -727,10 +709,7 @@ describe('MetricVisComponent', function () {
           Array [
             Object {
               "color": "#343741",
-              "domain": Object {
-                "max": 24.984375,
-                "min": 0,
-              },
+              "domainMax": 24.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",

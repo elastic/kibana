@@ -10,7 +10,6 @@ import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -53,7 +52,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
         savedObjects: {
           client: {},
         },
-        timelines: { ...mockTimelines },
       },
     }),
     useToasts: jest.fn().mockReturnValue({

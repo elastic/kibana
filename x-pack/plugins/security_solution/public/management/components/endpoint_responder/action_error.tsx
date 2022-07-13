@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CommandExecutionResultComponent } from '../console/components/command_execution_result';
-import { ImmutableArray } from '../../../../common/endpoint/types';
+import type { CommandExecutionResultComponent } from '../console/components/command_execution_result';
+import type { ImmutableArray } from '../../../../common/endpoint/types';
 
 export const ActionError = memo<{
   title: string;

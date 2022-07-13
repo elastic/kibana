@@ -9,12 +9,12 @@ import React, { memo, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionDetails, ProcessesEntry } from '../../../../common/endpoint/types';
+import type { ActionDetails, ProcessesEntry } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
-import { EndpointCommandDefinitionMeta } from './types';
-import { CommandExecutionComponentProps } from '../console/types';
+import type { EndpointCommandDefinitionMeta } from './types';
+import type { CommandExecutionComponentProps } from '../console/types';
 import { useSendGetEndpointProcessesRequest } from '../../hooks/endpoint/use_send_get_endpoint_processes_request';
 import { ActionError } from './action_error';
 
@@ -47,7 +47,7 @@ export const GetProcessesActionResult = memo<
       actionId?: string;
       actionRequestSent?: boolean;
       completedActionDetails?: ActionDetails<ProcessesEntry>;
-      apiError?: HttpFetchError;
+      apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
   >

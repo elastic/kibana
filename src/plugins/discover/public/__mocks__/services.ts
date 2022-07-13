@@ -80,6 +80,11 @@ export const discoverServiceMock = {
   http: {
     basePath: '/',
   },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: () => true,
+    },
+  },
   dataViewFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {

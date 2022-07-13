@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-  ReactQueryHookRenderer,
-} from '../../../common/mock/endpoint';
+import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointDetails } from './use_get_endpoint_details';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';

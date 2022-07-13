@@ -9,7 +9,7 @@ import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
@@ -18,9 +18,10 @@ import {
 } from '../../../detections/components/alerts_table/translations';
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { getEnrichedFieldInfo, AlertSummaryRow } from './helpers';
-import { EventSummaryField, EnrichedFieldInfo } from './types';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { AlertSummaryRow } from './helpers';
+import { getEnrichedFieldInfo } from './helpers';
+import type { EventSummaryField, EnrichedFieldInfo } from './types';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { EventCode, EventCategory } from '../../../../common/ecs/event';

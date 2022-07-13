@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export const deleteItemIdx = (data: TimelineNonEcsData[], idx: number) => [
   ...data.slice(0, idx),

@@ -15,16 +15,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ConsoleCodeBlock } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
-import {
+import type {
   CommandHistoryItem,
   ConsoleDataAction,
   ConsoleDataState,
   ConsoleStoreReducer,
 } from '../types';
-import { parseCommandInput, ParsedCommandInterface } from '../../../service/parsed_command_input';
+import type { ParsedCommandInterface } from '../../../service/parsed_command_input';
+import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
-import { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
+import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
 

@@ -24,10 +24,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
 import { ConnectorConfiguration } from '../../../api/index/fetch_index_api_logic';
-
-import { isNotNullish } from '../../../utils/is_not_nullish';
 
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 

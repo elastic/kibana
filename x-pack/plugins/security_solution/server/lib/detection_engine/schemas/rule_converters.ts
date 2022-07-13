@@ -11,12 +11,12 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-import {
+import type {
   InternalRuleCreate,
   RuleParams,
   TypeSpecificRuleParams,
@@ -36,26 +36,33 @@ import {
   InternalRuleUpdate,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
+import type {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  RuleExecutionSummary,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
 import {
+  eqlPatchParams,
+  machineLearningPatchParams,
+  queryPatchParams,
+  savedQueryPatchParams,
+  threatMatchPatchParams,
+  thresholdPatchParams,
+} from '../../../../common/detection_engine/schemas/request';
+import type {
   CreateRulesSchema,
   CreateTypeSpecific,
-  eqlPatchParams,
   EqlPatchParams,
   FullResponseSchema,
-  machineLearningPatchParams,
   MachineLearningPatchParams,
-  queryPatchParams,
   QueryPatchParams,
   ResponseTypeSpecific,
-  savedQueryPatchParams,
   SavedQueryPatchParams,
-  threatMatchPatchParams,
   ThreatMatchPatchParams,
-  thresholdPatchParams,
   ThresholdPatchParams,
 } from '../../../../common/detection_engine/schemas/request';
-import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
@@ -69,12 +76,12 @@ import {
   transformActions,
 } from '../rules/utils';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import type { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { mergeRuleExecutionSummary } from '../rule_execution_log';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
-// required and defaultable fields. However, it is still possible to add an optional field to the API schema
+// required and default-able fields. However, it is still possible to add an optional field to the API schema
 // without causing a type-check error here.
 
 // Converts params from the snake case API format to the internal camel case format AND applies default values where needed.
@@ -340,7 +347,11 @@ const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
 
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  params: PatchRulesSchema,
+  params: PatchRulesSchema & {
+    related_integrations?: RelatedIntegrationArray;
+    required_fields?: RequiredFieldArray;
+    setup?: SetupGuide;
+  },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(params, existingRule.params);
@@ -362,16 +373,19 @@ export const convertPatchAPIToInternalSchema = (
       timelineTitle: params.timeline_title ?? existingParams.timelineTitle,
       meta: params.meta ?? existingParams.meta,
       maxSignals: params.max_signals ?? existingParams.maxSignals,
-      relatedIntegrations: existingParams.relatedIntegrations,
-      requiredFields: existingParams.requiredFields,
+      relatedIntegrations: params.related_integrations ?? existingParams.relatedIntegrations,
+      requiredFields: params.required_fields ?? existingParams.requiredFields,
       riskScore: params.risk_score ?? existingParams.riskScore,
       riskScoreMapping: params.risk_score_mapping ?? existingParams.riskScoreMapping,
       ruleNameOverride: params.rule_name_override ?? existingParams.ruleNameOverride,
-      setup: existingParams.setup,
+      setup: params.setup ?? existingParams.setup,
       severity: params.severity ?? existingParams.severity,
       severityMapping: params.severity_mapping ?? existingParams.severityMapping,
       threat: params.threat ?? existingParams.threat,
       timestampOverride: params.timestamp_override ?? existingParams.timestampOverride,
+      timestampOverrideFallbackDisabled:
+        params.timestamp_override_fallback_disabled ??
+        existingParams.timestampOverrideFallbackDisabled,
       to: params.to ?? existingParams.to,
       references: params.references ?? existingParams.references,
       namespace: params.namespace ?? existingParams.namespace,
@@ -395,7 +409,11 @@ export const convertPatchAPIToInternalSchema = (
 };
 
 export const convertCreateAPIToInternalSchema = (
-  input: CreateRulesSchema,
+  input: CreateRulesSchema & {
+    related_integrations?: RelatedIntegrationArray;
+    required_fields?: RequiredFieldArray;
+    setup?: SetupGuide;
+  },
   immutable = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
@@ -427,15 +445,16 @@ export const convertCreateAPIToInternalSchema = (
       severityMapping: input.severity_mapping ?? [],
       threat: input.threat ?? [],
       timestampOverride: input.timestamp_override,
+      timestampOverrideFallbackDisabled: input.timestamp_override_fallback_disabled,
       to: input.to ?? 'now',
       references: input.references ?? [],
       namespace: input.namespace,
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
-      relatedIntegrations: [],
-      requiredFields: [],
-      setup: '',
+      relatedIntegrations: input.related_integrations ?? [],
+      requiredFields: input.required_fields ?? [],
+      setup: input.setup ?? '',
       ...typeSpecificParams,
     },
     schedule: { interval: input.interval ?? '5m' },
@@ -544,6 +563,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     meta: params.meta,
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
+    timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,

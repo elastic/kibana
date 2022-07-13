@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 
 interface UseInspectModalProps {
   inputId?: InputsModelId;

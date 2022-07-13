@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkDnsStrategyResponse } from '../../../../common/search_strategy';
+import type { NetworkDnsStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockData: NetworkDnsStrategyResponse = {
   totalCount: 80,
