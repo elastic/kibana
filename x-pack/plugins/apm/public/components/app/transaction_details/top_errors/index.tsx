@@ -25,7 +25,7 @@ type ErrorGroupMainStatisticsByTransactionName =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name'>;
 
 type ErrorGroupDetailedStatisticsByTransactionName =
-  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics_by_transaction_name'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
   items: ErrorGroupMainStatisticsByTransactionName['errorGroups'];
@@ -113,7 +113,7 @@ export function TopErrors() {
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi(
-          'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics_by_transaction_name',
+          'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
               path: { serviceName },
@@ -123,8 +123,6 @@ export function TopErrors() {
                 start,
                 end,
                 numBuckets: 20,
-                transactionName,
-                transactionType,
                 offset:
                   comparisonEnabled && isTimeComparison(offset)
                     ? offset

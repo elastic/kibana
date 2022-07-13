@@ -37,10 +37,8 @@ type ErrorGroupMainStatistics = APIReturnType<
   | 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'
   | 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name'
 >;
-type ErrorGroupDetailedStatistics = APIReturnType<
-  | 'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'
-  | 'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics_by_transaction_name'
->;
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
