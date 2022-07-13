@@ -7,11 +7,11 @@
 
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import { getAlerts } from './get_alerts';
+import { processAlerts } from './process_alerts';
 import { Alert } from '../alert';
 import { DefaultActionGroupId } from '../types';
 
-describe('getAlerts', () => {
+describe('processAlerts', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeAll(() => {
@@ -45,7 +45,7 @@ describe('getAlerts', () => {
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
       // @ts-expect-error
-      const { newAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { newAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(newAlerts).toEqual({ '1': newAlert });
     });
@@ -76,7 +76,7 @@ describe('getAlerts', () => {
       expect(newAlert2.getState()).toStrictEqual({});
 
       // @ts-expect-error
-      const { newAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { newAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
 
@@ -121,7 +121,7 @@ describe('getAlerts', () => {
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
       // @ts-expect-error
-      const { activeAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -152,7 +152,7 @@ describe('getAlerts', () => {
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
       // @ts-expect-error
-      const { activeAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -199,7 +199,7 @@ describe('getAlerts', () => {
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
       // @ts-expect-error
-      const { activeAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -256,7 +256,7 @@ describe('getAlerts', () => {
       updatedAlerts['3'].scheduleActions('default', { foo: '2' });
 
       // @ts-expect-error
-      const { activeAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { activeAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(activeAlerts).toEqual({
         '1': updatedAlerts['1'],
@@ -305,7 +305,7 @@ describe('getAlerts', () => {
       updatedAlerts['2'].setContext({ foo: '2' });
 
       // @ts-expect-error
-      const { recoveredAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'] });
     });
@@ -326,7 +326,7 @@ describe('getAlerts', () => {
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
 
       // @ts-expect-error
-      const { recoveredAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(recoveredAlerts).toEqual({});
     });
@@ -349,7 +349,7 @@ describe('getAlerts', () => {
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
 
       // @ts-expect-error
-      const { recoveredAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
 
@@ -387,7 +387,7 @@ describe('getAlerts', () => {
       updatedAlerts['1'].scheduleActions('default', { foo: '1' });
 
       // @ts-expect-error
-      const { recoveredAlerts } = getAlerts(updatedAlerts, originalAlerts);
+      const { recoveredAlerts } = processAlerts(updatedAlerts, originalAlerts);
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
 

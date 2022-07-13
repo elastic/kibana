@@ -9,7 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
-import { getAlerts } from '../lib';
+import { processAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
   State extends AlertInstanceState,
@@ -58,7 +58,7 @@ export function createAlertFactory<
             return [];
           }
 
-          const { recoveredAlerts } = getAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
+          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
             alerts,
             originalAlerts
           );

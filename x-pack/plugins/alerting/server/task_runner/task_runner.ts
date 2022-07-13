@@ -22,7 +22,7 @@ import {
   executionStatusFromState,
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
-  getAlerts,
+  processAlerts,
 } from '../lib';
 import {
   Rule,
@@ -423,7 +423,7 @@ export class TaskRunner<
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
-    const { newAlerts, activeAlerts, recoveredAlerts } = getAlerts<
+    const { newAlerts, activeAlerts, recoveredAlerts } = processAlerts<
       State,
       Context,
       ActionGroupIds,

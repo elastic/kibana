@@ -9,7 +9,7 @@ import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
-interface GetAlertsResult<
+interface ProcessAlertsResult<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -20,7 +20,7 @@ interface GetAlertsResult<
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
 }
 
-export function getAlerts<
+export function processAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -28,7 +28,7 @@ export function getAlerts<
 >(
   alerts: Record<string, Alert<State, Context>>,
   originalAlerts: Record<string, Alert<State, Context>>
-): GetAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
+): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const originalAlertIds = new Set(Object.keys(originalAlerts));
 
   const currentTime = new Date().toISOString();
@@ -52,9 +52,7 @@ export function getAlerts<
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts
-          const state = originalAlertIds.has(id)
-            ? originalAlerts[id].getState()
-            : activeAlerts[id].getState();
+          const state = originalAlerts[id].getState();
           const durationInMs =
             new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
           const duration = state.start ? millisToNanos(durationInMs) : undefined;
@@ -64,21 +62,19 @@ export function getAlerts<
             ...(duration !== undefined ? { duration } : {}),
           });
         }
-      } else {
-        if (originalAlertIds.has(id)) {
-          recoveredAlerts[id] = alerts[id];
+      } else if (originalAlertIds.has(id)) {
+        recoveredAlerts[id] = alerts[id];
 
-          // Inject end time into alert state of recovered alerts
-          const state = recoveredAlerts[id].getState();
-          const durationInMs =
-            new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-          const duration = state.start ? millisToNanos(durationInMs) : undefined;
-          recoveredAlerts[id].replaceState({
-            ...state,
-            ...(duration ? { duration } : {}),
-            ...(state.start ? { end: currentTime } : {}),
-          });
-        }
+        // Inject end time into alert state of recovered alerts
+        const state = recoveredAlerts[id].getState();
+        const durationInMs =
+          new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
+        const duration = state.start ? millisToNanos(durationInMs) : undefined;
+        recoveredAlerts[id].replaceState({
+          ...state,
+          ...(duration ? { duration } : {}),
+          ...(state.start ? { end: currentTime } : {}),
+        });
       }
     }
   }
