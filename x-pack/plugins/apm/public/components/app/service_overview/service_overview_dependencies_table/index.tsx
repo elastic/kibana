@@ -100,7 +100,7 @@ export function ServiceOverviewDependenciesTable({
               trackEvent({
                 app: 'apm',
                 metricType: METRIC_TYPE.CLICK,
-                metric: 'service_dependencies_to_backend_detail',
+                metric: 'service_dependencies_to_dependency_detail',
               });
             }}
           />

@@ -123,7 +123,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
                 trackEvent({
                   app: 'apm',
                   metricType: METRIC_TYPE.CLICK,
-                  metric: 'span_flyout_to_backend_detail',
+                  metric: 'span_flyout_to_dependency_detail',
                 });
               }}
             />

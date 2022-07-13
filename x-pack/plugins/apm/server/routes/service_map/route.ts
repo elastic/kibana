@@ -206,8 +206,8 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
   },
 });
 
-const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/backend',
+const serviceMapDependencyNodeRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
     query: t.intersection([
       t.type({ dependencyName: t.string }),
@@ -256,5 +256,5 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
-  ...serviceMapBackendNodeRoute,
+  ...serviceMapDependencyNodeRoute,
 };

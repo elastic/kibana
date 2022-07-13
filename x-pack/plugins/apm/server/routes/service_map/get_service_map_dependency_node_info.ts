@@ -67,7 +67,7 @@ export function getServiceMapDependencyNodeInfo({
     };
 
     const response = await apmEventClient.search(
-      'get_service_map_backend_node_stats',
+      'get_service_map_dependency_node_stats',
       {
         apm: {
           events: [ProcessorEvent.metric],

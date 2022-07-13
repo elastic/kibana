@@ -188,7 +188,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_backend'
+                          'side_nav_dependency'
                         );
                       }
                     },

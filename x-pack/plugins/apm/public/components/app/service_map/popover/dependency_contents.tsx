@@ -21,14 +21,15 @@ import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-type BackendReturn = APIReturnType<'GET /internal/apm/service-map/backend'>;
+type DependencyReturn =
+  APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
-const INITIAL_STATE: Partial<BackendReturn> = {
+const INITIAL_STATE: Partial<DependencyReturn> = {
   currentPeriod: undefined,
   previousPeriod: undefined,
 };
 
-export function BackendContents({
+export function DependencyContents({
   elementData,
   environment,
   start,
@@ -50,7 +51,7 @@ export function BackendContents({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (dependencyName) {
-        return callApmApi('GET /internal/apm/service-map/backend', {
+        return callApmApi('GET /internal/apm/service-map/dependency', {
           params: {
             query: {
               dependencyName,
@@ -96,7 +97,7 @@ export function BackendContents({
             trackEvent({
               app: 'apm',
               metricType: METRIC_TYPE.CLICK,
-              metric: 'service_map_to_backend_detail',
+              metric: 'service_map_to_dependency_detail',
             });
           }}
         >

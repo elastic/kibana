@@ -43,10 +43,10 @@ type Destination = {
     }
 );
 
-// This operation tries to find a service for a backend, by:
+// This operation tries to find a service for a dependency, by:
 // - getting a span for each value of span.destination.service.resource (which indicates an outgoing call)
 // - for each span, find the transaction it creates
-// - if there is a transaction, match the backend name (span.destination.service.resource) to a service
+// - if there is a transaction, match the dependency name (span.destination.service.resource) to a service
 export const getDestinationMap = ({
   setup,
   start,
