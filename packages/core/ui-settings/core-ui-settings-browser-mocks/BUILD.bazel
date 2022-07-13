@@ -28,7 +28,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//react",
   "@npm//rxjs",
   "//packages/core/ui-settings/core-ui-settings-browser-internal"
 ]
@@ -36,7 +35,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react",
   "@npm//rxjs",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/core/ui-settings/core-ui-settings-browser-internal:npm_module_types",

@@ -28,14 +28,12 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//react",
   "@npm//rxjs",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react",
   "@npm//rxjs",
   "//packages/core/ui-settings/core-ui-settings-common:npm_module_types"
 ]

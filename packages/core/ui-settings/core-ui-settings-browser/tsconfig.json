@@ -10,7 +10,6 @@
     "types": [
       "jest",
       "node",
-      "react"
     ]
   },
   "include": [
