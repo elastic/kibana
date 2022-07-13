@@ -5,40 +5,30 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet, Route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
-import { BackendDetailOverview } from '../../app/backend_detail_overview';
-import { BackendInventory } from '../../app/backend_inventory';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
-import { TraceOverview } from '../../app/trace_overview';
-import { TraceExplorer } from '../../app/trace_explorer';
 import { TopTracesOverview } from '../../app/top_traces_overview';
+import { TraceExplorer } from '../../app/trace_explorer';
+import { TraceOverview } from '../../app/trace_overview';
+import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+import { RedirectTo } from '../redirect_to';
+import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
-import { ServiceGroupsRedirect } from '../service_groups_redirect';
-import { RedirectTo } from '../redirect_to';
-import { offsetRt } from '../../../../common/comparison_rt';
-import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
-import { BackendDetailOperations } from '../../app/backend_detail_operations';
-import { BackendDetailView } from '../../app/backend_detail_view';
-import { RedirectPathBackendDetailView } from './redirect_path_backend_detail_view';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { RedirectBackendsInventoryToDependencyInventory } from './redirect_backends_inventory_to_dependency_inventory';
-import { RedirectDependenciesToDependenciesOverview } from './redirect_dependencies_to_dependencies_overview';
-import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
-import { RedirectBackendsToDependencies } from './redirect_backends_to_dependencies';
-import { RedirectBackendsOperationsToDependenciesOperations } from './redirect_backends_operations_to_dependencies_operations';
-import { RedirectBackendsOperationToDependenciesOperation } from './redirect_backends_operation_to_dependencies_operation';
-import { RedirectBackendsOverviewToDependenciesOverview } from './redirect_backends_overview_to_dependencies_overview';
+import { dependencies } from './dependencies';
+import { legacyBackends } from './legacy_backends';
 
-function page<
+export function page<
   TPath extends string,
   TChildren extends Record<string, Route> | undefined = undefined,
   TParams extends t.Type<any> | undefined = undefined
@@ -141,13 +131,6 @@ export const ServiceMapTitle = i18n.translate(
   }
 );
 
-export const DependenciesInventoryTitle = i18n.translate(
-  'xpack.apm.views.dependenciesInventory.title',
-  {
-    defaultMessage: 'Dependencies',
-  }
-);
-
 export const DependenciesOperationsTitle = i18n.translate(
   'xpack.apm.views.dependenciesOperations.title',
   {
@@ -247,120 +230,8 @@ export const home = {
           },
         },
       }),
-      ...page({
-        path: '/dependencies/inventory',
-        title: DependenciesInventoryTitle,
-        element: <BackendInventory />,
-        params: t.partial({
-          query: t.intersection([
-            t.type({
-              comparisonEnabled: toBooleanRt,
-            }),
-            offsetRt,
-          ]),
-        }),
-      }),
-      '/dependencies': {
-        // All chidren routes are going to inherit the BackendDetailView
-        element: (
-          <BackendDetailView>
-            <Outlet />
-          </BackendDetailView>
-        ),
-        // All children routes must have these params
-        params: t.partial({
-          query: t.intersection([
-            t.type({
-              comparisonEnabled: toBooleanRt,
-              dependencyName: t.string,
-            }),
-            offsetRt,
-          ]),
-        }),
-        children: {
-          // Redirects to /dependencies/overview
-          '/dependencies': {
-            element: <RedirectDependenciesToDependenciesOverview />,
-          },
-          // dependencies operations overview (Tab operations)
-          '/dependencies/operations': {
-            element: <BackendDetailOperations />,
-          },
-          // dependencies operation details view
-          '/dependencies/operation': {
-            params: t.type({
-              query: t.intersection([
-                t.type({
-                  spanName: t.string,
-                }),
-                t.partial({
-                  sampleRangeFrom: toNumberRt,
-                  sampleRangeTo: toNumberRt,
-                }),
-              ]),
-            }),
-            element: <BackendOperationDetailView />,
-          },
-          // dependencies overview (Tab Overview)
-          '/dependencies/overview': {
-            element: <BackendDetailOverview />,
-          },
-        },
-      },
-      // Redirects this route to /dependencies/inventory
-      '/backends/inventory': {
-        element: <RedirectBackendsInventoryToDependencyInventory />,
-        params: t.partial({
-          query: t.intersection([
-            t.type({ comparisonEnabled: toBooleanRt }),
-            offsetRt,
-          ]),
-        }),
-      },
-      '/backends/{dependencyName}/overview': {
-        element: <RedirectPathBackendDetailView />,
-        params: t.type({ path: t.type({ dependencyName: t.string }) }),
-      },
-      '/backends': {
-        // All children routes must have these params
-        element: <Outlet />,
-        params: t.partial({
-          query: t.intersection([
-            t.type({
-              comparisonEnabled: toBooleanRt,
-              dependencyName: t.string,
-            }),
-            offsetRt,
-          ]),
-        }),
-        children: {
-          // Redirects to /dependencies
-          '/backends': {
-            element: <RedirectBackendsToDependencies />,
-          },
-          // Redirects to /dependencies/operations
-          '/backends/operations': {
-            element: <RedirectBackendsOperationsToDependenciesOperations />,
-          },
-          // Redirects to /dependencies/operation
-          '/backends/operation': {
-            params: t.type({
-              query: t.intersection([
-                t.type({ spanName: t.string }),
-                t.partial({
-                  sampleRangeFrom: toNumberRt,
-                  sampleRangeTo: toNumberRt,
-                }),
-              ]),
-            }),
-            element: <RedirectBackendsOperationToDependenciesOperation />,
-          },
-          // Redirects to /dependencies/overview
-          '/backends/overview': {
-            element: <RedirectBackendsOverviewToDependenciesOverview />,
-          },
-        },
-      },
+      ...dependencies,
+      ...legacyBackends,
       '/': {
         element: (
           <ServiceGroupsRedirect>

@@ -1,0 +1,90 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { Outlet } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+import qs from 'query-string';
+import { page } from '.';
+import { offsetRt } from '../../../../common/comparison_rt';
+import { BackendDetailOperations } from '../../app/backend_detail_operations';
+import { BackendDetailOverview } from '../../app/backend_detail_overview';
+import { BackendDetailView } from '../../app/backend_detail_view';
+import { BackendInventory } from '../../app/backend_inventory';
+import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { useApmParams } from '../../../hooks/use_apm_params';
+
+export const DependenciesInventoryTitle = i18n.translate(
+  'xpack.apm.views.dependenciesInventory.title',
+  { defaultMessage: 'Dependencies' }
+);
+
+function RedirectDependenciesToDependenciesOverview() {
+  const { query } = useApmParams('/dependencies');
+  const search = qs.stringify(query);
+  return <Redirect to={{ pathname: `/dependencies/overview`, search }} />;
+}
+
+export const dependencies = {
+  ...page({
+    path: '/dependencies/inventory',
+    title: DependenciesInventoryTitle,
+    element: <BackendInventory />,
+    params: t.partial({
+      query: t.intersection([
+        t.type({
+          comparisonEnabled: toBooleanRt,
+        }),
+        offsetRt,
+      ]),
+    }),
+  }),
+  '/dependencies': {
+    element: (
+      <BackendDetailView>
+        <Outlet />
+      </BackendDetailView>
+    ),
+    params: t.partial({
+      query: t.intersection([
+        t.type({
+          comparisonEnabled: toBooleanRt,
+          dependencyName: t.string,
+        }),
+        offsetRt,
+      ]),
+    }),
+    children: {
+      '/dependencies': {
+        element: <RedirectDependenciesToDependenciesOverview />,
+      },
+      '/dependencies/operations': {
+        element: <BackendDetailOperations />,
+      },
+      '/dependencies/operation': {
+        params: t.type({
+          query: t.intersection([
+            t.type({
+              spanName: t.string,
+            }),
+            t.partial({
+              sampleRangeFrom: toNumberRt,
+              sampleRangeTo: toNumberRt,
+            }),
+          ]),
+        }),
+        element: <BackendOperationDetailView />,
+      },
+      '/dependencies/overview': {
+        element: <BackendDetailOverview />,
+      },
+    },
+  },
+};
