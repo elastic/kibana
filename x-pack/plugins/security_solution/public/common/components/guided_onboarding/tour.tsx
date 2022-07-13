@@ -27,14 +27,14 @@ import { tourConfig } from './tour_config';
 export const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
 export const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
 const getIsTourActiveFromLocalStorage = (): boolean => {
-  return Boolean(JSON.parse(String(localStorage.getItem(SECURITY_TOUR_ACTIVE_KEY))));
+  return Boolean(localStorage.getItem(SECURITY_TOUR_ACTIVE_KEY));
 };
 const saveIsTourActiveToLocalStorage = (isTourActive: boolean): void => {
   localStorage.setItem(SECURITY_TOUR_ACTIVE_KEY, JSON.stringify(isTourActive));
 };
 
 const getTourStepFromLocalStorage = (): number => {
-  return Number(JSON.parse(String(localStorage.getItem(SECURITY_TOUR_STEP_KEY) ?? 1)));
+  return Number(localStorage.getItem(SECURITY_TOUR_STEP_KEY) ?? 1);
 };
 const saveTourStepToLocalStorage = (step: number): void => {
   localStorage.setItem(SECURITY_TOUR_STEP_KEY, JSON.stringify(step));
