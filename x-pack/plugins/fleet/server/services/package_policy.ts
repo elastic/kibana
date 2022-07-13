@@ -381,6 +381,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
+    if (packagePolicyUpdate.is_managed && !options?.force) {
+      throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
+    }
+
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
@@ -611,7 +615,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
@@ -626,6 +630,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           packagePolicy,
           pkgVersion
         ));
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+        }
 
         await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
       } catch (error) {
