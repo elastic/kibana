@@ -85,10 +85,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
   const newFieldFormatMap: IndexPattern['fieldFormatMap'] =
     fieldFormatMap &&
     Object.fromEntries(
-      Object.entries(fieldFormatMap).map(([id, format]) => [
-        id,
-        'toJSON' in format ? format.toJSON() : format,
-      ])
+      Object.entries(fieldFormatMap).map(([id, format]) => [id, 'toJSON' in format ? {} : format])
     );
   return {
     id: dataView.id!, // id exists for sure because we got index patterns by id

@@ -59,8 +59,8 @@ export interface IndexPattern {
   fieldFormatMap?: Record<
     string,
     {
-      id: string;
-      params: FieldFormatParams;
+      id?: string;
+      params?: FieldFormatParams;
     }
   >;
   hasRestrictions: boolean;
