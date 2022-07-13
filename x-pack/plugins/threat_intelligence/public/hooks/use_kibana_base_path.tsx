@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
+import { useKibana } from './use_kibana';
 
-export const EMPTY_VALUE = '-';
-
-export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
+export const useKibanaBasePath = (): string => useKibana().services.http.basePath.get();

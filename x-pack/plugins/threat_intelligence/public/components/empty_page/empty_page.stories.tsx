@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
+import React from 'react';
+import { EmptyPage } from '.';
 
-export const EMPTY_VALUE = '-';
+export default {
+  component: BasicEmptyPage,
+  title: 'EmptyPage',
+};
 
-export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
+export function BasicEmptyPage() {
+  return <EmptyPage integrationsPageLink="https://google.com" />;
+}
