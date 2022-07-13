@@ -49,7 +49,7 @@ export class NodeService {
 
   public async preboot({ loggingSystem }: PrebootDeps): Promise<InternalNodeServicePreboot> {
     const nodeRoles = await this.getNodeRoles();
-    loggingSystem.setGlobalMeta('service.node.roles', nodeRoles);
+    loggingSystem.setGlobalContext('service.node.roles', nodeRoles);
     this.log.info(`Kibana process configured with roles: [${nodeRoles.join(', ')}]`);
 
     return {

@@ -522,7 +522,7 @@ test('buffers log records for appenders created during config upgrade', async ()
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to a new context');
 });
 
-test('setGlobalMeta() applies meta to new and existing loggers', async () => {
+test('setGlobalContext() applies meta to new and existing loggers', async () => {
   await system.upgrade(
     config.schema.validate({
       appenders: { default: { type: 'console', layout: { type: 'json' } } },
@@ -531,7 +531,7 @@ test('setGlobalMeta() applies meta to new and existing loggers', async () => {
   );
 
   const existingLogger = system.get('some-existing-context');
-  system.setGlobalMeta('a.b.c', true);
+  system.setGlobalContext('a.b.c', true);
   const newLogger = system.get('some-new-context');
 
   existingLogger.info('You know, just for your info.');

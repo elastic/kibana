@@ -111,8 +111,8 @@ describe('NodeService', () => {
       service = new NodeService(coreContext);
       await service.preboot({ loggingSystem: logger });
 
-      expect(logger.setGlobalMeta).toHaveBeenCalledTimes(1);
-      expect(logger.setGlobalMeta).toHaveBeenCalledWith('service.node.roles', [
+      expect(logger.setGlobalContext).toHaveBeenCalledTimes(1);
+      expect(logger.setGlobalContext).toHaveBeenCalledWith('service.node.roles', [
         'background_tasks',
         'ui',
       ]);

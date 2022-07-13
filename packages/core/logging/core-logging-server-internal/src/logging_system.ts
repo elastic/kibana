@@ -25,7 +25,7 @@ export interface ILoggingSystem extends LoggerFactory {
   asLoggerFactory(): LoggerFactory;
   upgrade(rawConfig?: LoggingConfigType): Promise<void>;
   setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput): Promise<void>;
-  setGlobalMeta(path: string, meta: unknown): void;
+  setGlobalContext(path: string, meta: unknown): void;
   stop(): Promise<void>;
 }
 
@@ -123,13 +123,13 @@ export class LoggingSystem implements ILoggingSystem {
    * Global meta is provided with a lodash-style dot-separated path,
    * and the value you wish to set:
    * ```ts
-   * loggingSystem.setGlobalMeta('service.node.roles', ['ui']);
+   * loggingSystem.setGlobalContext('service.node.roles', ['ui']);
    * // adds { service: { node: { roles: ['ui'] } } } to every log entry
    * ```
    * @param path Lodash-style dot-separated path to update in the LogMeta.
    * @param meta Global meta to set at the path.
    */
-  public setGlobalMeta(path: string, meta: unknown) {
+  public setGlobalContext(path: string, meta: unknown) {
     this.globalMeta.set(path, meta);
     for (const [_, loggerAdapter] of this.loggers) {
       loggerAdapter.setGlobalMeta(this.globalMeta);
