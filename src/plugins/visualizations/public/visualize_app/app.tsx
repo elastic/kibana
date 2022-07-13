@@ -8,7 +8,7 @@
 
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
-import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -66,8 +66,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       dataViewEditor,
     },
   } = useKibana<VisualizeServices>();
-  const { pathname, state } = useLocation();
-  const history = useHistory();
+  const { pathname } = useLocation();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

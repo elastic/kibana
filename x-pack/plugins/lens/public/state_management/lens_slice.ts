@@ -56,11 +56,11 @@ export const getPreloadedState = ({
     };
   }
   let filters;
-  if (embeddableEditorIncomingState?.filters) {
+  if (initialContext && initialContext) {
+    filters = data.query.filterManager.getAppFilters();
+  } else if (embeddableEditorIncomingState?.filters) {
     filters = embeddableEditorIncomingState.filters;
     data.query.filterManager.setAppFilters(cloneDeep(filters));
-  } else if (initialContext) {
-    filters = data.query.filterManager.getAppFilters();
   }
 
   const state = {
