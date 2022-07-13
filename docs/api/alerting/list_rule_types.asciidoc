@@ -13,20 +13,27 @@ Retrieve a list of rule types that the user is authorized to access.
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rule_types`
 
-////
 === {api-prereq-title}
 
-////
+If you have `read` privileges for one or more {kib} features, the API response
+contains information about the appropriate rule types. For example, there are
+rule types associated with the *Management* > *Stack Rules* feature,
+*Analytics* > *Discover* and *{ml-app}* features, *{observability}*, and
+*Security* features. To get rule types associated with the
+*{stack-monitor-app}*, use the `monitoring_user` built-in role.
+
+For more details, refer to <<kibana-feature-privileges>>.
 
 === {api-description-title}
 
-Each rule type includes a list of consumer features. Within these features,
+Each rule type includes a list of authorized consumer features. For each feature,
 users are authorized to perform either `read` or `all` operations on rules of
-that type. This helps determine which rule types users can read, but not create
+that type. This enables you to determine which rule types you can read, create,
 or modify.
 
+// TBD: What is the purpose of this note? Since we're not creating/defining rules in this API, can it be removed?
 NOTE: Some rule types are limited to specific features, which might not be
-available when <<create-edit-rules,defining rules>> in *{stack-manage-app}*.
+available when <<create-edit-rules,defining rules>> in *{stack-manage-app}*. 
 
 [[list-rule-types-api-params]]
 === {api-path-parms-title}
