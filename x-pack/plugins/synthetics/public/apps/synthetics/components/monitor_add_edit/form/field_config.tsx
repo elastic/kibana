@@ -954,7 +954,7 @@ export const FIELD: Record<string, FieldMeta> = {
         {
           value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
           inputDisplay: (
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexGroup alignItems="baseline" gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiText>
                   {i18n.translate('xpack.synthetics.monitorConfig.throttling.options.default', {
