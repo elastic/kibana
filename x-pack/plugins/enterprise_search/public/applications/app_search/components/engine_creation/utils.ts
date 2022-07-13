@@ -36,12 +36,37 @@ export const formatIndicesToSelectable = (
   selectedIndexName: string
 ): SearchIndexSelectableOption[] => {
   return indices.map((index) => {
-    let icon, color;
+    let icon, color, toolTipTitle, toolTipContent;
     if (index.name.startsWith('search-')) {
       color = 'success';
+      if (index.alias) {
+        toolTipTitle = 'Alias name conforms to pattern';
+        toolTipContent = `
+          Aliases cannot be created for other aliases. Choosing this alias will
+          disable the Alias input below.
+        `;
+      } else {
+        toolTipTitle = 'Index name conforms to pattern';
+        toolTipContent = 'There is no need to specify an alias, but it is still allowed.';
+      }
     } else {
-      icon = index.alias ? 'alert' : 'iInCircle';
-      color = index.alias ? 'danger' : 'warning';
+      if (index.alias) {
+        icon = 'alert';
+        color = 'danger';
+        toolTipTitle = 'Alias name does not conform to pattern';
+        toolTipContent = `
+          This alias is incompatible with Enterprise Search. Please choose
+          another index or alias.
+        `;
+      } else {
+        icon = 'iInCircle';
+        color = 'warning';
+        toolTipTitle = 'Index name does not conform to pattern';
+        toolTipContent = `
+          Choosing this index will require specifying an alias prefixed with
+          'search-' in the Alias input below.
+        `;
+      }
     }
 
     return {
@@ -51,6 +76,8 @@ export const formatIndicesToSelectable = (
         color: color,
         icon: icon,
         label: index.alias ? 'Alias' : 'Index',
+        toolTipTitle: toolTipTitle,
+        toolTipContent: toolTipContent,
       },
       disabled: index.alias && !index.name.startsWith('search-'),
       label: index.name,

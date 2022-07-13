@@ -175,6 +175,8 @@ export const ReviewElasticsearchEngine: React.FC = () => {
               <p>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body',
+                  // FIXME: bold variables and pass them in as variables not in
+                  // the defaultMessage.
                   {
                     defaultMessage: `
                       The index you’ve selected has a name that does not match

@@ -31,6 +31,7 @@ import {
   EuiTextAlign,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -56,6 +57,8 @@ export interface SearchIndexSelectableOption {
     color: string;
     icon: string;
     label: string;
+    toolTipTitle: string;
+    toolTipContent: string;
   };
   disabled: boolean;
   total: {
@@ -125,7 +128,13 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
           </span>
           <span className="selectableSecondaryContentLabel" data-test-subj="optionStorage">
             <EuiBadge color={option.badge.color} iconType={option.badge.icon}>
-              {option.badge.label}
+              <EuiToolTip
+                position="left"
+                title={option.badge.toolTipTitle}
+                content={option.badge.toolTipContent}
+              >
+                <p>{option.badge.label}</p>
+              </EuiToolTip>
             </EuiBadge>
           </span>
         </small>
