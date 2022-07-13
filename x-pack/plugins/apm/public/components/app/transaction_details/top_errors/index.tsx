@@ -17,7 +17,6 @@ import uuid from 'uuid';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -166,30 +165,13 @@ export function TopErrors() {
       data-test-subj="topErrorsForTransactionTable"
     >
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.topErrors.title',
-                  {
-                    defaultMessage: 'Top 5 errors',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ErrorOverviewLink serviceName={serviceName} query={query}>
-              {i18n.translate(
-                'xpack.apm.transactionDetails.topErrors.errorsTableLinkText',
-                {
-                  defaultMessage: 'View all related errors',
-                }
-              )}
-            </ErrorOverviewLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="xs">
+          <h2>
+            {i18n.translate('xpack.apm.transactionDetails.topErrors.title', {
+              defaultMessage: 'Top 5 errors',
+            })}
+          </h2>
+        </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBasicTable
