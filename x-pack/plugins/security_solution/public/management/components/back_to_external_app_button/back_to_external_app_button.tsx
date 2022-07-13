@@ -19,8 +19,8 @@ const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
   .euiIcon {
-    width: ${({ theme }) => theme.eui.euiIconSizes.small};
-    height: ${({ theme }) => theme.eui.euiIconSizes.small};
+    width: ${({ theme }) => theme.eui.euiSizeM};
+    height: ${({ theme }) => theme.eui.euiSizeM};
   }
 
   .text {

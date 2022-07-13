@@ -8,8 +8,8 @@
 
 import { getUrlOrigin } from '@kbn/std';
 import { resolve } from 'url';
-import { IBasePath } from '../../http';
-import { App, ParsedAppUrl } from '../types';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { App, ParsedAppUrl } from '../types';
 
 /**
  * Parse given URL and return the associated app id and path if any app matches, or undefined if none do.

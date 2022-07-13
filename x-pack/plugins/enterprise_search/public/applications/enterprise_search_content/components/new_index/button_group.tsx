@@ -38,7 +38,7 @@ interface Props {
 
 export const ButtonGroup: React.FC<Props> = ({ onChange, options, selected }) => (
   <EuiFlexGroup className="buttonGroup" direction="column" gutterSize="m" role="radiogroup">
-    {options.map((option) => {
+    {options.map((option, index) => {
       const isSelected = option === selected;
       return (
         <EuiFlexItem
@@ -82,6 +82,7 @@ export const ButtonGroup: React.FC<Props> = ({ onChange, options, selected }) =>
                     aria-label={option.label}
                     aria-checked={isSelected}
                     role="radio"
+                    autoFocus={index === 0}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

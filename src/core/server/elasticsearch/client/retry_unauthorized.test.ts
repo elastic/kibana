@@ -7,8 +7,8 @@
  */
 
 import type { UnauthorizedError } from '@kbn/es-errors';
-import type { SetAuthHeaders } from '../../http';
-import { httpServerMock } from '../../http/http_server.mocks';
+import type { SetAuthHeaders } from '@kbn/core-http-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   createInternalErrorHandler,
   isRetryResult,
