@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uiSettingsServiceMock } from @kbn/core-ui-settings-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.mock';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';

@@ -76,7 +76,7 @@ export const MockUiSettingsService = uiSettingsServiceMock.create();
 export const UiSettingsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockUiSettingsService);
-jest.doMock('./ui_settings', () => ({
+jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
   UiSettingsService: UiSettingsServiceConstructor,
 }));
 
