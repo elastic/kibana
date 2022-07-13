@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { memo, FC, useMemo, useState, useCallback } from 'react';
 import {
   Chart,
@@ -566,6 +567,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           <Chart>
             <Settings
               onRenderChange={onRenderChange}
+              noResults={<EmptyPlaceholder icon={HeatmapIcon} renderComplete={onRenderChange} />}
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
