@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
+import { PluginStart } from '../types';
+import { initFieldStatsRoute } from './field_stats';
 
-export function defineRoutes(router: IRouter) {
+export function defineRoutes(setup: CoreSetup<PluginStart>) {
+  initFieldStatsRoute(setup);
+
+  // TODO: remove this temporary code
+  const router = setup.http.createRouter();
   router.get(
     {
       path: '/api/unified_field_list/example',

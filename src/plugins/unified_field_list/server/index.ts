@@ -16,4 +16,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new UnifiedFieldListPlugin(initializerContext);
 }
 
-export { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+export { UnifiedFieldListServerPluginSetup, UnifiedFieldListServerPluginStart } from './types';

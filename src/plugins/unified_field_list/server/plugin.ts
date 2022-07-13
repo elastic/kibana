@@ -7,12 +7,16 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-
-import { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+import {
+  UnifiedFieldListServerPluginSetup,
+  UnifiedFieldListServerPluginStart,
+  PluginStart,
+  PluginSetup,
+} from './types';
 import { defineRoutes } from './routes';
 
 export class UnifiedFieldListPlugin
-  implements Plugin<UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart>
+  implements Plugin<UnifiedFieldListServerPluginSetup, UnifiedFieldListServerPluginStart>
 {
   private readonly logger: Logger;
 
@@ -20,17 +24,15 @@ export class UnifiedFieldListPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     this.logger.debug('unifiedFieldList: Setup');
-    const router = core.http.createRouter();
 
-    // Register server side APIs
-    defineRoutes(router);
+    defineRoutes(core);
 
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: PluginStart) {
     this.logger.debug('unifiedFieldList: Started');
     return {};
   }

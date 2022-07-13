@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
@@ -12,25 +14,24 @@ import { CoreSetup } from '@kbn/core/server';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import { FieldStatsResponse, BASE_API_URL } from '../../common';
-import { PluginStartContract } from '../plugin';
+import { FIELD_STATS_API_PATH } from '../../common/constants';
+import type { FieldStatsResponse } from '../../common/types';
+import type { PluginStart } from '../types';
 
 const SHARD_SIZE = 5000;
 
-export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
+export async function initFieldStatsRoute(setup: CoreSetup<PluginStart>) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/index_stats/{indexPatternId}/field`,
+      path: FIELD_STATS_API_PATH,
       validate: {
-        params: schema.object({
-          indexPatternId: schema.string(),
-        }),
         body: schema.object(
           {
             dslQuery: schema.object({}, { unknowns: 'allow' }),
             fromDate: schema.string(),
             toDate: schema.string(),
+            dataViewId: schema.string(),
             fieldName: schema.string(),
             size: schema.maybe(schema.number()),
           },
@@ -40,7 +41,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery, size, dataViewId } = req.body;
 
       const [{ savedObjects, elasticsearch }, { dataViews }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -51,7 +52,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       );
 
       try {
-        const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
+        const indexPattern = await indexPatternsService.get(dataViewId);
 
         const timeFieldName = indexPattern.timeFieldName;
         const field = indexPattern.fields.find((f) => f.name === fieldName);

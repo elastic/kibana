@@ -25,7 +25,8 @@
     "expressionGauge",
     "expressionHeatmap",
     "eventAnnotation",
-    "unifiedSearch"
+    "unifiedSearch",
+    "unifiedFieldList"
   ],
   "optionalPlugins": [
     "expressionXY",

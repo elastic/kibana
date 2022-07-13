@@ -43,9 +43,14 @@ import { Filter, buildEsQuery, Query } from '@kbn/es-query';
 import { KBN_FIELD_TYPES, ES_FIELD_TYPES, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  BucketedAggregation,
+  FieldStatsResponse,
+  FIELD_STATS_API_PATH,
+} from '@kbn/unified-field-list-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import { BucketedAggregation, DOCUMENT_FIELD_NAME, FieldStatsResponse } from '../../common';
+import { DOCUMENT_FIELD_NAME } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -160,12 +165,13 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post<FieldStatsResponse<string | number>>(`/api/lens/index_stats/${indexPattern.id}/field`, {
+      .post<FieldStatsResponse<string | number>>(FIELD_STATS_API_PATH, {
         body: JSON.stringify({
           dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           fieldName: field.name,
+          dataViewId: indexPattern.id,
         }),
       })
       .then((results) => {

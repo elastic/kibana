@@ -18,6 +18,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from './document_field';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { FIELD_STATS_API_PATH } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
@@ -184,7 +185,7 @@ describe('IndexPattern Field Item', () => {
 
     clickField(wrapper, 'bytes');
 
-    expect(core.http.post).toHaveBeenCalledWith(`/api/lens/index_stats/1/field`, {
+    expect(core.http.post).toHaveBeenCalledWith(FIELD_STATS_API_PATH, {
       body: JSON.stringify({
         dslQuery: {
           bool: {
@@ -197,6 +198,7 @@ describe('IndexPattern Field Item', () => {
         fromDate: 'now-7d',
         toDate: 'now',
         fieldName: 'bytes',
+        dataViewId: '1',
       }),
     });
 
@@ -251,7 +253,7 @@ describe('IndexPattern Field Item', () => {
     clickField(wrapper, 'bytes');
 
     expect(core.http.post).toHaveBeenCalledTimes(2);
-    expect(core.http.post).toHaveBeenLastCalledWith(`/api/lens/index_stats/1/field`, {
+    expect(core.http.post).toHaveBeenLastCalledWith(FIELD_STATS_API_PATH, {
       body: JSON.stringify({
         dslQuery: {
           bool: {
@@ -274,6 +276,7 @@ describe('IndexPattern Field Item', () => {
         fromDate: 'now-14d',
         toDate: 'now-7d',
         fieldName: 'bytes',
+        dataViewId: '1',
       }),
     });
   });

@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UnifiedFieldListPluginSetup {}
+export interface UnifiedFieldListServerPluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UnifiedFieldListPluginStart {}
+export interface UnifiedFieldListServerPluginStart {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginSetup {}
+
+export interface PluginStart {
+  dataViews: DataViewsServerPluginStart;
+}
