@@ -40,5 +40,5 @@ export const dataViewSavedObjectType: SavedObjectsType = {
       type: { type: 'keyword' },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations as any,
+  migrations: indexPatternSavedObjectTypeMigrations,
 };

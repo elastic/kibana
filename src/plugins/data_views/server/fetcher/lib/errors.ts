@@ -31,7 +31,7 @@ export function isEsIndexNotFoundError(err: unknown) {
  */
 export function createNoMatchingIndicesError(pattern: string[] | string) {
   const err = Boom.notFound(`No indices match "${pattern}"`);
-  (err.output.payload as any).code = ERR_NO_MATCHING_INDICES;
+  (err as Boom.Boom).output.payload.code = ERR_NO_MATCHING_INDICES;
   return err;
 }
 

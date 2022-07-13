@@ -8,7 +8,7 @@
 
 import { debounce } from 'lodash';
 
-export const debounceByKey = <F extends (...args: any) => any>(
+export const debounceByKey = <T, F extends (...args: any[]) => T>(
   fn: F,
   waitInMs: number
 ): ((key: string) => F) => {
