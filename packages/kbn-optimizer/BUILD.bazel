@@ -59,7 +59,6 @@ RUNTIME_DEPS = [
   "@npm//webpack",
   "@npm//webpack-merge",
   "@npm//webpack-sources",
-  "@npm//zlib"
 ]
 
 TYPES_DEPS = [
@@ -81,7 +80,6 @@ TYPES_DEPS = [
   "@npm//lmdb-store",
   "@npm//pirates",
   "@npm//rxjs",
-  "@npm//zlib",
   "@npm//@types/babel__core",
   "@npm//@types/compression-webpack-plugin",
   "@npm//@types/dedent",

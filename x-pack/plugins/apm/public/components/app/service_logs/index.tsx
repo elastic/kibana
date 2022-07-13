@@ -36,7 +36,7 @@ export function ServiceLogs() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
+          'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
           {
             params: {
               path: { serviceName },
@@ -55,10 +55,7 @@ export function ServiceLogs() {
   );
 
   const noInfrastructureData = useMemo(() => {
-    return (
-      isEmpty(data?.serviceInfrastructure?.containerIds) &&
-      isEmpty(data?.serviceInfrastructure?.hostNames)
-    );
+    return isEmpty(data?.containerIds) && isEmpty(data?.hostNames);
   }, [data]);
 
   if (status === FETCH_STATUS.LOADING) {
@@ -98,12 +95,12 @@ export function ServiceLogs() {
 
 export const getInfrastructureKQLFilter = (
   data:
-    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs'>
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes'>
     | undefined,
   serviceName: string
 ) => {
-  const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
-  const hostNames = data?.serviceInfrastructure?.hostNames ?? [];
+  const containerIds = data?.containerIds ?? [];
+  const hostNames = data?.hostNames ?? [];
 
   const infraAttributes = containerIds.length
     ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)

@@ -11,7 +11,7 @@ import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
-import { UrlStateContainerPropTypes, LocationTypes } from './types';
+import type { UrlStateContainerPropTypes, LocationTypes } from './types';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
@@ -113,8 +113,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
-    [CONSTANTS.filters]: [],
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
@@ -137,7 +135,6 @@ export const getMockProps = (
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.appQuery]: kqlQueryValue || { query: '', language: 'kuery' },
   },
   history: {
     ...mockHistory,

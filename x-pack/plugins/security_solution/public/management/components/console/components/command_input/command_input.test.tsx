@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { ConsoleTestSetup, getConsoleTestSetup } from '../../mocks';
-import { ConsoleProps } from '../../types';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { ConsoleTestSetup } from '../../mocks';
+import { getConsoleTestSetup } from '../../mocks';
+import type { ConsoleProps } from '../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

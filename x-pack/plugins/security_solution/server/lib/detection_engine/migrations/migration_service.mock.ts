@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SignalsMigrationService } from './migration_service';
+import type { SignalsMigrationService } from './migration_service';
 
 const create = () =>
   ({

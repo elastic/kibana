@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '../http';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IScopedClusterClient } from './client';
 import type { InternalElasticsearchServiceStart } from './types';
 

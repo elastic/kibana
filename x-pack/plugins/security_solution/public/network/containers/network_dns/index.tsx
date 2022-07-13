@@ -11,25 +11,26 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel } from '../../../common/store';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { networkModel, networkSelectors } from '../../store';
-import {
+import type { networkModel } from '../../store';
+import { networkSelectors } from '../../store';
+import type {
   DocValueFields,
-  NetworkQueries,
   NetworkDnsRequestOptions,
   NetworkDnsStrategyResponse,
   MatrixOverOrdinalHistogramData,
   NetworkDnsEdges,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
+import { NetworkQueries } from '../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'networkDnsQuery';
