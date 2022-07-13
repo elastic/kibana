@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
@@ -40,6 +41,7 @@ import {
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
   getTimeFilter,
+  getUsageCollection,
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
@@ -50,7 +52,7 @@ import { createBasemapLayerDescriptor } from '../../../classes/layers/create_bas
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
-import { incrementLayerUsage } from '../../../reducers/map/layer_utils';
+import { LayerStatsCollector } from '../../../../common/telemetry';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -136,6 +138,8 @@ export class SavedMap {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
       }
     }
+
+    this._reportUsage();
 
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
@@ -224,7 +228,6 @@ export class SavedMap {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
-    incrementLayerUsage(this._initialLayerListConfig);
 
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
@@ -270,6 +273,34 @@ export class SavedMap {
           defaultMessage: 'Edit map',
         })
       : this._attributes!.title;
+  }
+
+  private _reportUsage(): void {
+    const usageCollector = getUsageCollection();
+    if (!usageCollector || !this._attributes) {
+      return;
+    }
+
+    const layerStatsCollector = new LayerStatsCollector(this._attributes);
+
+    const uiCounterEvents = {
+      layer: layerStatsCollector.getLayerCounts(),
+      scaling: layerStatsCollector.getScalingCounts(),
+      resolution: layerStatsCollector.getResolutionCounts(),
+      join: layerStatsCollector.getJoinCounts(),
+      ems_basemap: layerStatsCollector.getBasemapCounts(),
+    };
+
+    for (const [eventType, eventTypeMetrics] of Object.entries(uiCounterEvents)) {
+      for (const [eventName, count] of Object.entries(eventTypeMetrics)) {
+        usageCollector.reportUiCounter(
+          APP_ID,
+          METRIC_TYPE.LOADED,
+          `${eventType}_${eventName}`,
+          count
+        );
+      }
+    }
   }
 
   setBreadcrumbs() {
