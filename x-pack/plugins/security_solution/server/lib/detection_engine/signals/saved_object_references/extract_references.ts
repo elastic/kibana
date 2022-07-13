@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 import { isEqlParams, isQueryParams, isThresholdParams, isThreatParams } from '../utils';
 

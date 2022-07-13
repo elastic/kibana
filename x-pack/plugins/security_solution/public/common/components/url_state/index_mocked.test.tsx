@@ -13,7 +13,7 @@ import { SecurityPageName } from '../../../app/types';
 
 import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
-import { UrlStateContainerPropTypes } from './types';
+import type { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { useLocation } from 'react-router-dom';
 import { DASHBOARDS_PATH, MANAGEMENT_PATH } from '../../../../common/constants';
@@ -126,43 +126,9 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
-        search:
-          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-        state: '',
-      });
-    });
-
-    test('kql query redux state updates the url', () => {
-      mockProps = getMockPropsObj({
-        page: CONSTANTS.networkPage,
-        examplePath: '/network',
-        namespaceLower: 'network',
-        pageName: SecurityPageName.network,
-        detailName: undefined,
-      }).noSearch.undefinedQuery;
-
-      (useLocation as jest.Mock).mockReturnValue({
-        pathname: mockProps.pathName,
-        search: mockProps.search,
-      });
-
-      const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
-      );
-      const newUrlState = {
-        ...mockProps.urlState,
-        [CONSTANTS.appQuery]: getFilterQuery(),
-      };
-      wrapper.setProps({
-        hookProps: { ...mockProps, urlState: newUrlState, isInitializing: false },
-      });
-      wrapper.update();
-
-      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search:
-          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        search: expect.stringContaining(
+          "timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))"
+        ),
         state: '',
       });
     });
@@ -427,7 +393,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           wrapper.update();
 
           expect(mockHistory.replace.mock.calls[1][0].search).toEqual(
-            "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
+            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
         });
 

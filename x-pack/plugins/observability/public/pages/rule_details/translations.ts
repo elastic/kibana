@@ -12,12 +12,6 @@ export const RULE_LOAD_ERROR = (errorMessage: string) =>
     values: { message: errorMessage },
   });
 
-export const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
-  i18n.translate('xpack.observability.ruleDetails.connectorsLoadError', {
-    defaultMessage: 'Unable to load rule actions connectors. Reason: {message}',
-    values: { message: errorMessage },
-  });
-
 export const EXECUTION_LOG_ERROR = (errorMessage: string) =>
   i18n.translate('xpack.observability.ruleDetails.executionLogError', {
     defaultMessage: 'Unable to load rule execution log. Reason: {message}',
@@ -46,3 +40,58 @@ export const ON_WORD = i18n.translate('xpack.observability.ruleDetails.onWord', 
 export const CREATED_WORD = i18n.translate('xpack.observability.ruleDetails.createdWord', {
   defaultMessage: 'Created',
 });
+
+export const ALERT_STATUS_LICENSE_ERROR = i18n.translate(
+  'xpack.observability.ruleDetails.ruleStatusLicenseError',
+  {
+    defaultMessage: 'License Error',
+  }
+);
+
+export const ALERT_STATUS_OK = i18n.translate('xpack.observability.ruleDetails.ruleStatusOk', {
+  defaultMessage: 'Ok',
+});
+
+export const ALERT_STATUS_ACTIVE = i18n.translate(
+  'xpack.observability.ruleDetails.ruleStatusActive',
+  {
+    defaultMessage: 'Active',
+  }
+);
+
+export const ALERT_STATUS_ERROR = i18n.translate(
+  'xpack.observability.ruleDetails.ruleStatusError',
+  {
+    defaultMessage: 'Error',
+  }
+);
+
+export const ALERT_STATUS_PENDING = i18n.translate(
+  'xpack.observability.ruleDetails.ruleStatusPending',
+  {
+    defaultMessage: 'Pending',
+  }
+);
+
+export const ALERT_STATUS_UNKNOWN = i18n.translate(
+  'xpack.observability.ruleDetails.ruleStatusUnknown',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
+export const ALERT_STATUS_WARNING = i18n.translate(
+  'xpack.observability.ruleDetails.ruleStatusWarning',
+  {
+    defaultMessage: 'Warning',
+  }
+);
+
+export const rulesStatusesTranslationsMapping = {
+  ok: ALERT_STATUS_OK,
+  active: ALERT_STATUS_ACTIVE,
+  error: ALERT_STATUS_ERROR,
+  pending: ALERT_STATUS_PENDING,
+  unknown: ALERT_STATUS_UNKNOWN,
+  warning: ALERT_STATUS_WARNING,
+};

@@ -18,7 +18,7 @@ const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../component
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   basePath,
   onComponentInitialized,
   actionsNavigation,
@@ -34,7 +34,7 @@ export const getCasesLazy = ({
     value={{
       externalReferenceAttachmentTypeRegistry,
       owner,
-      userCanCrud,
+      permissions,
       basePath,
       features,
       releasePhase,

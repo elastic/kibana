@@ -22,10 +22,10 @@ const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
 export const getRecentCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   maxCasesToShow,
 }: GetRecentCasesPropsInternal) => (
-  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud }}>
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, permissions }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <RecentCasesLazy maxCasesToShow={maxCasesToShow} />
     </Suspense>

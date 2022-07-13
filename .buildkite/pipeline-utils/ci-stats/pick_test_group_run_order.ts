@@ -332,34 +332,36 @@ export async function pickTestGroupRunOrder() {
     { title: string; expectedDurationMin: number; names: string[] }
   > = {};
 
-  for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
-    for (const group of groups) {
-      if (!group.names.length) {
-        continue;
-      }
+  if (ftrConfigsByQueue.size) {
+    for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
+      for (const group of groups) {
+        if (!group.names.length) {
+          continue;
+        }
 
-      const key = `ftr_configs_${configCounter++}`;
-      let sortBy;
-      let title;
-      if (group.names.length === 1) {
-        title = group.names[0];
-        sortBy = title;
-      } else {
-        sortBy = ++groupCounter;
-        title = `FTR Configs #${sortBy}`;
-      }
+        const key = `ftr_configs_${configCounter++}`;
+        let sortBy;
+        let title;
+        if (group.names.length === 1) {
+          title = group.names[0];
+          sortBy = title;
+        } else {
+          sortBy = ++groupCounter;
+          title = `FTR Configs #${sortBy}`;
+        }
 
-      functionalGroups.push({
-        title,
-        key,
-        sortBy,
-        queue: queue ?? defaultQueue,
-      });
-      ftrRunOrder[key] = {
-        title,
-        expectedDurationMin: group.durationMin,
-        names: group.names,
-      };
+        functionalGroups.push({
+          title,
+          key,
+          sortBy,
+          queue: queue ?? defaultQueue,
+        });
+        ftrRunOrder[key] = {
+          title,
+          expectedDurationMin: group.durationMin,
+          names: group.names,
+        };
+      }
     }
   }
 

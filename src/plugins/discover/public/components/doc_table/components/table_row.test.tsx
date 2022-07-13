@@ -101,6 +101,21 @@ describe('Doc table row component', () => {
     expect(fields.length).toBe(3);
   });
 
+  it('should apply filter when pressed', () => {
+    const component = mountComponent({ ...defaultProps, columns: ['bytes'] });
+
+    const fields = findTestSubject(component, 'docTableField');
+    expect(fields.first().text()).toBe('20');
+
+    const filterInButton = findTestSubject(component, 'docTableCellFilter');
+    filterInButton.simulate('click');
+    expect(mockInlineFilter).toHaveBeenCalledWith(
+      indexPatternWithTimefieldMock.getFieldByName('bytes'),
+      20,
+      '+'
+    );
+  });
+
   describe('details row', () => {
     it('should be empty by default', () => {
       const component = mountComponent(defaultProps);

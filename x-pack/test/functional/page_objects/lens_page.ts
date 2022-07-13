@@ -1215,7 +1215,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer() {
-      await testSubjects.click('lnsLayerRemove');
+      await retry.try(async () => {
+        await testSubjects.click('lnsLayerRemove');
+        if (await testSubjects.exists('lnsLayerRemoveModal')) {
+          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+          await testSubjects.click('lnsLayerRemoveConfirmButton');
+        }
+      });
     },
 
     /**

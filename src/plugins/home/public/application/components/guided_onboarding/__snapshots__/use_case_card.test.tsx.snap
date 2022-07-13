@@ -9,7 +9,7 @@ exports[`use case card should render use case card component for observability 1
       size="xs"
     >
       <p>
-        Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability.
+        Get end-to-end observability into your environments by consolidating your logs, metrics, and traces.
       </p>
     </EuiText>
   }
@@ -41,7 +41,7 @@ exports[`use case card should render use case card component for observability 1
     >
       <h4>
         <strong>
-          Monitor my infrastructure
+          Monitor my environments
         </strong>
       </h4>
     </EuiTitle>
@@ -58,7 +58,7 @@ exports[`use case card should render use case card component for search 1`] = `
       size="xs"
     >
       <p>
-        Create a search experience for your websites, applications, workplace content, or anything in between.
+        Create a finely-tuned search experience for your websites, applications, workplace content, and more.
       </p>
     </EuiText>
   }
@@ -107,7 +107,7 @@ exports[`use case card should render use case card component for security 1`] = 
       size="xs"
     >
       <p>
-        Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats.
+        Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place.
       </p>
     </EuiText>
   }

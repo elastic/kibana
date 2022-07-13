@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DataProvider, IS_OPERATOR } from '../data_provider';
+import type { DataProvider } from '../data_provider';
+import { IS_OPERATOR } from '../data_provider';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;

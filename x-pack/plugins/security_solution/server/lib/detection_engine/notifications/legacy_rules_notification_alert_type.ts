@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
@@ -14,11 +14,10 @@ import {
 } from '../../../../common/constants';
 
 // eslint-disable-next-line no-restricted-imports
-import {
-  LegacyNotificationAlertTypeDefinition,
-  legacyRulesNotificationParams,
-} from './legacy_types';
-import { AlertAttributes } from '../signals/types';
+import type { LegacyNotificationAlertTypeDefinition } from './legacy_types';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRulesNotificationParams } from './legacy_types';
+import type { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';

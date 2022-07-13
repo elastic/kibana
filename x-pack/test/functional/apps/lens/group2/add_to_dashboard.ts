@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     await PageObjects.lens.switchToVisualization('lnsMetric');
 
-    await PageObjects.lens.waitForVisualization('mtrVis');
+    await PageObjects.lens.waitForVisualization('legacyMtrVis');
     await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
   };
 
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
     await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
     await PageObjects.lens.goToTimeRange();
-    await PageObjects.lens.waitForVisualization('mtrVis');
+    await PageObjects.lens.waitForVisualization('legacyMtrVis');
     await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
   };
 
@@ -303,10 +303,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.lens.waitForVisualization('mtrVis');
+          await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.lens.waitForVisualization('mtrVis');
+          await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');
@@ -349,10 +349,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.lens.waitForVisualization('mtrVis');
+          await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.lens.waitForVisualization('mtrVis');
+          await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');

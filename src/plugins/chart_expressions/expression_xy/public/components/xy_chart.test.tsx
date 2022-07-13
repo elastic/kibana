@@ -162,7 +162,7 @@ describe('XYChart component', () => {
       xAccessor: 'c',
       accessors: ['a', 'b'],
       showLines: true,
-      splitAccessor: 'd',
+      splitAccessors: ['d'],
       columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
       xScaleType: 'time',
       isHistogram: false,
@@ -264,7 +264,7 @@ describe('XYChart component', () => {
         isPercentage: false,
         xAccessor: 'c',
         accessors: ['a', 'b'],
-        splitAccessor: 'd',
+        splitAccessors: ['d'],
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
         xScaleType: 'time',
         isHistogram: true,
@@ -408,7 +408,7 @@ describe('XYChart component', () => {
             seriesType: 'line',
             xScaleType: 'time',
             isHistogram: true,
-            splitAccessor: undefined,
+            splitAccessors: undefined,
             table: newData,
           } as DataLayerConfig,
         ],
@@ -1108,7 +1108,7 @@ describe('XYChart component', () => {
       key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
       specId: 'd',
       yAccessor: 'd',
-      splitAccessors: {},
+      splitAccessors: new Map().set('b', 2),
       seriesKeys: [2, 'd'],
     };
 
@@ -1132,7 +1132,7 @@ describe('XYChart component', () => {
               showLines: true,
               xAccessor: 'b',
               xScaleType: 'time',
-              splitAccessor: 'b',
+              splitAccessors: ['b'],
               accessors: ['d'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               palette: mockPaletteOutput,
@@ -1540,7 +1540,7 @@ describe('XYChart component', () => {
             {
               ...(args.layers[0] as DataLayerConfig),
               xAccessor: undefined,
-              splitAccessor: 'e',
+              splitAccessors: ['e'],
               seriesType: 'bar',
               isStacked: true,
             },
@@ -1570,7 +1570,7 @@ describe('XYChart component', () => {
       seriesType: 'bar',
       isHistogram: true,
     } as DataLayerConfig;
-    delete firstLayer.splitAccessor;
+    delete firstLayer.splitAccessors;
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer] }} />
     );
@@ -1586,7 +1586,7 @@ describe('XYChart component', () => {
       seriesType: 'bar',
       isHistogram: true,
     } as DataLayerConfig;
-    delete firstLayer.splitAccessor;
+    delete firstLayer.splitAccessors;
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer] }} />
     );
@@ -1603,13 +1603,13 @@ describe('XYChart component', () => {
       seriesType: 'line',
       isHistogram: true,
     } as DataLayerConfig;
-    delete firstLayer.splitAccessor;
+    delete firstLayer.splitAccessors;
     const secondLayer: DataLayerConfig = {
       ...args.layers[0],
       seriesType: 'line',
       isHistogram: true,
     } as DataLayerConfig;
-    delete secondLayer.splitAccessor;
+    delete secondLayer.splitAccessors;
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer, secondLayer] }} />
     );
@@ -1794,7 +1794,7 @@ describe('XYChart component', () => {
             ...layer,
             type: 'extendedDataLayer',
             accessors: ['a', 'b'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
             decorations: [
               {
                 type: 'dataDecorationConfig',
@@ -1813,7 +1813,7 @@ describe('XYChart component', () => {
             ...layer,
             type: 'extendedDataLayer',
             accessors: ['c'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
             decorations: [
               {
                 type: 'dataDecorationConfig',
@@ -1878,12 +1878,14 @@ describe('XYChart component', () => {
         (lineSeries.at(0).prop('color') as Function)!({
           yAccessor: 'a',
           seriesKeys: ['a'],
+          splitAccessors: new Map(),
         })
       ).toEqual('blue');
       expect(
         (lineSeries.at(1).prop('color') as Function)!({
           yAccessor: 'c',
           seriesKeys: ['c'],
+          splitAccessors: new Map(),
         })
       ).toEqual('blue');
     });
@@ -2012,7 +2014,7 @@ describe('XYChart component', () => {
           {
             ...args.layers[0],
             accessors: ['a'],
-            splitAccessor: 'd',
+            splitAccessors: ['d'],
             columnToLabel: '{"a": "Label A"}',
             table: dataWithoutFormats,
           },
@@ -2026,7 +2028,16 @@ describe('XYChart component', () => {
         .find(LineSeries)
         .prop('name') as SeriesNameFn;
 
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('split1');
+      expect(
+        nameFn(
+          {
+            ...nameFnArgs,
+            seriesKeys: ['split1', 'a'],
+            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
+          },
+          false
+        )
+      ).toEqual('split1');
     });
 
     test('split series with formatting and single y accessor', () => {
@@ -2037,7 +2048,7 @@ describe('XYChart component', () => {
           {
             ...args.layers[0],
             accessors: ['a'],
-            splitAccessor: 'd',
+            splitAccessors: ['d'],
             columnToLabel: '{"a": "Label A"}',
             table: dataWithFormats,
           },
@@ -2052,7 +2063,16 @@ describe('XYChart component', () => {
         .prop('name') as SeriesNameFn;
 
       convertSpy.mockReturnValueOnce('formatted');
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('formatted');
+      expect(
+        nameFn(
+          {
+            ...nameFnArgs,
+            seriesKeys: ['split1', 'a'],
+            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
+          },
+          false
+        )
+      ).toEqual('formatted');
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'custom' });
     });
 
@@ -2064,7 +2084,7 @@ describe('XYChart component', () => {
           {
             ...args.layers[0],
             accessors: ['a', 'b'],
-            splitAccessor: 'd',
+            splitAccessors: ['d'],
             columnToLabel: '{"a": "Label A","b": "Label B"}',
             table: dataWithoutFormats,
           },
@@ -2077,12 +2097,26 @@ describe('XYChart component', () => {
       const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
       const nameFn2 = lineSeries.at(0).prop('name') as SeriesNameFn;
 
-      expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
-        'split1 - Label A'
-      );
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
-        'split1 - Label B'
-      );
+      expect(
+        nameFn1(
+          {
+            ...nameFnArgs,
+            seriesKeys: ['split1', 'a'],
+            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
+          },
+          false
+        )
+      ).toEqual('split1 - Label A');
+      expect(
+        nameFn2(
+          {
+            ...nameFnArgs,
+            seriesKeys: ['split1', 'b'],
+            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
+          },
+          false
+        )
+      ).toEqual('split1 - Label B');
     });
 
     test('split series with formatting with multiple y accessors', () => {
@@ -2093,7 +2127,7 @@ describe('XYChart component', () => {
           {
             ...args.layers[0],
             accessors: ['a', 'b'],
-            splitAccessor: 'd',
+            splitAccessors: ['d'],
             columnToLabel: '{"a": "Label A","b": "Label B"}',
             table: dataWithFormats,
           },
@@ -2107,12 +2141,26 @@ describe('XYChart component', () => {
       const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
 
       convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
-      expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
-        'formatted1 - Label A'
-      );
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
-        'formatted2 - Label B'
-      );
+      expect(
+        nameFn1(
+          {
+            ...nameFnArgs,
+            seriesKeys: ['split1', 'a'],
+            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
+          },
+          false
+        )
+      ).toEqual('formatted1 - Label A');
+      expect(
+        nameFn2(
+          {
+            ...nameFnArgs,
+            seriesKeys: ['split1', 'b'],
+            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
+          },
+          false
+        )
+      ).toEqual('formatted2 - Label B');
     });
   });
 
@@ -2475,7 +2523,7 @@ describe('XYChart component', () => {
           showLines: true,
           xAccessor: 'a',
           accessors: ['c'],
-          splitAccessor: 'b',
+          splitAccessors: ['b'],
           columnToLabel: '',
           xScaleType: 'ordinal',
           isHistogram: false,
@@ -2491,7 +2539,7 @@ describe('XYChart component', () => {
           showLines: true,
           xAccessor: 'a',
           accessors: ['c'],
-          splitAccessor: 'b',
+          splitAccessors: ['b'],
           columnToLabel: '',
           xScaleType: 'ordinal',
           isHistogram: false,
@@ -2582,7 +2630,7 @@ describe('XYChart component', () => {
           seriesType: 'line',
           xAccessor: 'a',
           accessors: ['c'],
-          splitAccessor: 'b',
+          splitAccessors: ['b'],
           columnToLabel: '',
           xScaleType: 'ordinal',
           isHistogram: false,
@@ -2671,7 +2719,7 @@ describe('XYChart component', () => {
           showLines: true,
           xAccessor: 'a',
           accessors: ['c'],
-          splitAccessor: 'b',
+          splitAccessors: ['b'],
           columnToLabel: '',
           xScaleType: 'ordinal',
           isHistogram: false,
@@ -2701,7 +2749,7 @@ describe('XYChart component', () => {
             {
               ...(args.layers[0] as DataLayerConfig),
               accessors: ['a'],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
             },
           ],
           legend: { ...args.legend, isVisible: true, showSingleSeries: true },
@@ -2724,7 +2772,7 @@ describe('XYChart component', () => {
             {
               ...(args.layers[0] as DataLayerConfig),
               accessors: ['a'],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
             },
           ],
           legend: { ...args.legend, isVisible: true, isInside: true },
