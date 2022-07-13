@@ -12195,7 +12195,7 @@
             "label": "developer",
             "description": [],
             "signature": [
-              "{ disableRegistryVersionCheck?: boolean | undefined; allowAgentUpgradeSourceUri?: boolean | undefined; bundledPackageLocation?: string | undefined; } | undefined"
+              "{ disableRegistryVersionCheck?: boolean | undefined; bundledPackageLocation?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/index.ts",
             "deprecated": false
@@ -13263,7 +13263,7 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; } | undefined"
+              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { source_uri: string; }; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false
@@ -16027,6 +16027,19 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentAction.source_uri",
+            "type": "string",
+            "tags": [],
+            "label": "source_uri",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false
@@ -20597,7 +20610,7 @@
         "label": "DEFAULT_DOWNLOAD_SOURCE",
         "description": [],
         "signature": [
-          "\"artifactory.elastic.co\""
+          "\"https://artifacts.elastic.co\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
         "deprecated": false,

@@ -225,8 +225,9 @@ export function XYChart({
     [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
+  const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
+
   if (dataLayers.length === 0) {
-    const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
     return (
       <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
     );
@@ -627,6 +628,13 @@ export function XYChart({
   return (
     <Chart ref={chartRef}>
       <Settings
+        noResults={
+          <EmptyPlaceholder
+            className="xyChart__empty"
+            icon={icon}
+            renderComplete={onRenderChange}
+          />
+        }
         onRenderChange={onRenderChange}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{

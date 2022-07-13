@@ -52,7 +52,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'fleet-default-download-source',
           name: 'default',
           is_default: true,
-          host: 'artifactory.elastic.co',
+          host: 'https://artifacts.elastic.co',
         });
       });
     });
@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'fleet-default-download-source',
             name: 'default',
             is_default: true,
-            host: 'artifactory.elastic.co',
+            host: 'https://artifacts.elastic.co',
           },
         });
       });
