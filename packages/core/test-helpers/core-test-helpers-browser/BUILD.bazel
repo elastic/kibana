@@ -28,7 +28,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//react",
   "//packages/core/execution-context/core-execution-context-browser-mocks",
   "//packages/core/fatal-errors/core-fatal-errors-browser-mocks",
   "//packages/core/injected-metadata/core-injected-metadata-browser-mocks",
