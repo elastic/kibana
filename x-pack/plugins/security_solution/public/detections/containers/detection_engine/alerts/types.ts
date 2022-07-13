@@ -33,6 +33,7 @@ export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
       value: number;
       relation: string;
     };
+    max_score?: number | null;
     hits: Hit[];
   };
 }

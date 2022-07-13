@@ -19,9 +19,10 @@ import {
 
 interface FooterProps {
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (isAdHoc?: boolean) => void;
   submitDisabled: boolean;
   isEdit: boolean;
+  allowAdHoc: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -29,14 +30,25 @@ const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseBu
 });
 
 const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
-  defaultMessage: 'Create data view',
+  defaultMessage: 'Save data view to Kibana',
 });
 
 const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButtonLabel', {
   defaultMessage: 'Save',
 });
 
-export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit }: FooterProps) => {
+const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
+  defaultMessage: 'Use without saving',
+});
+
+export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc }: FooterProps) => {
+  const submitPersisted = () => {
+    onSubmit(false);
+  };
+  const submitAdHoc = () => {
+    onSubmit(true);
+  };
+
   return (
     <EuiFlyoutFooter className="indexPatternEditor__footer">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -52,15 +64,35 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit }: FooterPro
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            onClick={onSubmit}
-            data-test-subj="saveIndexPatternButton"
-            fill
-            disabled={submitDisabled}
-          >
-            {isEdit ? editButtonLabel : saveButtonLabel}
-          </EuiButton>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            {allowAdHoc && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={submitAdHoc}
+                  data-test-subj="exploreIndexPatternButton"
+                  disabled={submitDisabled}
+                  title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
+                    defaultMessage: 'Use this data view without creating a saved object',
+                  })}
+                >
+                  {exploreButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={submitPersisted}
+                data-test-subj="saveIndexPatternButton"
+                fill
+                disabled={submitDisabled}
+              >
+                {isEdit ? editButtonLabel : saveButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

@@ -74,6 +74,8 @@ export const createIndicatorMatchAlertType = (
           searchAfterSize,
           tuple,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -95,6 +97,8 @@ export const createIndicatorMatchAlertType = (
         tuple,
         version,
         wrapHits,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },
