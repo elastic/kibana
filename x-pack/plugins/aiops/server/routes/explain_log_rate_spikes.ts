@@ -7,13 +7,17 @@
 
 import { chunk } from 'lodash';
 
+import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
+import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
   addChangePointsAction,
+  addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   errorAction,
   resetAction,
@@ -21,7 +25,6 @@ import {
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
-import type { ChangePoint } from '../../common/types';
 
 import type { AiopsLicense } from '../types';
 
@@ -30,7 +33,8 @@ import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
-const PROGRESS_STEP_P_VALUES = 0.8;
+const PROGRESS_STEP_P_VALUES = 0.6;
+const PROGRESS_STEP_HISTOGRAMS = 0.2;
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -149,6 +153,64 @@ export const defineExplainLogRateSpikesRoute = (
             end();
             return;
           }
+        }
+
+        // time series filtered by fields
+        if (changePoints) {
+          await asyncForEach(changePoints, async (cp, index) => {
+            if (changePoints) {
+              const histogramQuery = {
+                bool: {
+                  filter: [
+                    {
+                      term: { [cp.fieldName]: cp.fieldValue },
+                    },
+                  ],
+                },
+              };
+
+              const cpTimeSeries = await fetchHistogramsForFields(
+                client,
+                request.body.index,
+                histogramQuery,
+                // fields
+                [
+                  {
+                    fieldName: request.body.timeFieldName,
+                    type: 'date',
+                    // interval: overallTimeSeries[0].interval,
+                    // min: overallTimeSeries[0].stats[0],
+                    // max: overallTimeSeries[0].stats[1],
+                  },
+                ],
+                // samplerShardSize
+                -1,
+                undefined
+              );
+
+              const { fieldName, fieldValue } = cp;
+
+              loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
+              push(
+                updateLoadingStateAction({
+                  ccsWarning: false,
+                  loaded,
+                  loadingState: `Loading histogram data.`,
+                })
+              );
+              push(
+                addChangePointsHistogramAction([
+                  {
+                    fieldName,
+                    fieldValue,
+                    // TODO Fix types
+                    // @ts-ignore
+                    histogram: cpTimeSeries[0].data,
+                  },
+                ])
+              );
+            }
+          });
         }
 
         end();

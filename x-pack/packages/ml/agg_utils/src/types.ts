@@ -33,3 +33,28 @@ interface ScriptAggCardinality {
 export interface AggCardinality {
   cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
+
+export interface FieldValuePair {
+  fieldName: string;
+  // For dynamic fieldValues we only identify fields as `string`,
+  // but for example `http.response.status_code` which is part of
+  // of the list of predefined field candidates is of type long/number.
+  fieldValue: string | number;
+}
+
+export interface HistogramItem {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
+
+export interface ChangePoint extends FieldValuePair {
+  doc_count: number;
+  bg_count: number;
+  score: number;
+  pValue: number | null;
+  normalizedScore: number;
+}
+export interface ChangePointHistogram extends FieldValuePair {
+  histogram: HistogramItem[];
+}
