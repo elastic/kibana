@@ -26,7 +26,7 @@ export function BackendDetailOverview() {
       kuery,
       comparisonEnabled,
     },
-  } = useApmParams('/backends/overview');
+  } = useApmParams('/dependencies/overview');
 
   const apmRouter = useApmRouter();
 
@@ -35,7 +35,7 @@ export function BackendDetailOverview() {
       title: i18n.translate('xpack.apm.backendDetailOverview.breadcrumbTitle', {
         defaultMessage: 'Overview',
       }),
-      href: apmRouter.link('/backends/overview', {
+      href: apmRouter.link('/dependencies/overview', {
         query: {
           dependencyName,
           rangeFrom,

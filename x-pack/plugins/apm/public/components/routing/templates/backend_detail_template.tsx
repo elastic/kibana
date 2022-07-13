@@ -30,7 +30,7 @@ export function BackendDetailTemplate({ children }: Props) {
   const {
     query,
     query: { dependencyName, rangeFrom, rangeTo, environment },
-  } = useApmParams('/backends');
+  } = useApmParams('/dependencies');
 
   const router = useApmRouter();
 
@@ -71,24 +71,25 @@ export function BackendDetailTemplate({ children }: Props) {
     ? [
         {
           key: 'overview',
-          href: router.link('/backends/overview', {
+          href: router.link('/dependencies/overview', {
             query,
           }),
           label: i18n.translate('xpack.apm.backendDetailOverview.title', {
             defaultMessage: 'Overview',
           }),
-          isSelected: path === '/backends/overview',
+          isSelected: path === '/dependencies/overview',
         },
         {
           key: 'operations',
-          href: router.link('/backends/operations', {
+          href: router.link('/dependencies/operations', {
             query,
           }),
           label: i18n.translate('xpack.apm.backendDetailOperations.title', {
             defaultMessage: 'Operations',
           }),
           isSelected:
-            path === '/backends/operations' || path === '/backends/operation',
+            path === '/dependencies/operations' ||
+            path === '/dependencies/operation',
         },
       ]
     : [];

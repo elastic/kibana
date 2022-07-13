@@ -10,14 +10,14 @@ import { TypeOf } from '@kbn/typed-react-router-config';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { ApmRoutes } from '../../routing/apm_route_config';
 
-type Query = TypeOf<ApmRoutes, '/backends/operation'>['query'];
+type Query = TypeOf<ApmRoutes, '/dependencies/operation'>['query'];
 
 export function BackendOperationDetailLink(query: Query) {
   const router = useApmRouter();
 
   const { spanName } = query;
 
-  const link = router.link('/backends/operation', {
+  const link = router.link('/dependencies/operation', {
     query,
   });
 

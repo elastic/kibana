@@ -178,7 +178,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends/inventory',
+                    path: '/dependencies/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -301,7 +301,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         {
           id: 'dependencies',
           title: dependenciesTitle,
-          path: '/backends/inventory',
+          path: '/dependencies/inventory',
         },
       ],
 

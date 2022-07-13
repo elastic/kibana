@@ -27,14 +27,14 @@ export function BackendDetailView({
       kuery,
       comparisonEnabled,
     },
-  } = useApmParams('/backends');
+  } = useApmParams('/dependencies');
 
   const apmRouter = useApmRouter();
 
   useBreadcrumb([
     {
       title: DependenciesInventoryTitle,
-      href: apmRouter.link('/backends/inventory', {
+      href: apmRouter.link('/dependencies/inventory', {
         query: {
           rangeFrom,
           rangeTo,
@@ -48,7 +48,7 @@ export function BackendDetailView({
     },
     {
       title: dependencyName,
-      href: apmRouter.link('/backends', {
+      href: apmRouter.link('/dependencies', {
         query: {
           dependencyName,
           rangeFrom,
@@ -62,6 +62,5 @@ export function BackendDetailView({
       }),
     },
   ]);
-
   return <BackendDetailTemplate>{children}</BackendDetailTemplate>;
 }

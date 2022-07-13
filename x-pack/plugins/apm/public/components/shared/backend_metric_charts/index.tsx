@@ -29,7 +29,7 @@ export function BackendMetricCharts() {
       comparisonEnabled,
       offset,
     },
-  } = useAnyOfApmParams('/backends/overview', '/backends/operation');
+  } = useAnyOfApmParams('/dependencies/overview', '/dependencies/operation');
 
   const spanName = 'spanName' in query ? query.spanName : undefined;
 

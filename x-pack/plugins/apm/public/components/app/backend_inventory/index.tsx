@@ -18,7 +18,7 @@ import { BackendInventoryDependenciesTable } from './backend_inventory_dependenc
 export function BackendInventory() {
   const {
     query: { environment },
-  } = useApmParams('/backends/inventory');
+  } = useApmParams('/dependencies/inventory');
   const kueryBarBoolFilter = getKueryBarBoolFilter({
     environment,
   });

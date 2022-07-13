@@ -22,7 +22,7 @@ export function useBackendDetailOperationsBreadcrumb() {
       kuery,
       comparisonEnabled,
     },
-  } = useAnyOfApmParams('/backends/operations', '/backends/operation');
+  } = useAnyOfApmParams('/dependencies/operations', '/dependencies/operation');
 
   const apmRouter = useApmRouter();
 
@@ -32,7 +32,7 @@ export function useBackendDetailOperationsBreadcrumb() {
         'xpack.apm.backendDetailOperations.breadcrumbTitle',
         { defaultMessage: 'Operations' }
       ),
-      href: apmRouter.link('/backends/operations', {
+      href: apmRouter.link('/dependencies/operations', {
         query: {
           dependencyName,
           rangeFrom,

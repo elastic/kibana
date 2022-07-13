@@ -17,7 +17,7 @@ import { SpanIcon } from './span_icon';
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
-  query: TypeOf<ApmRoutes, '/backends/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/dependencies/overview'>['query'];
   subtype?: string;
   type?: string;
   onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
@@ -33,7 +33,7 @@ export function BackendLink({
 
   return (
     <StyledLink
-      href={link('/backends/overview', {
+      href={link('/dependencies/overview', {
         query,
       })}
       onClick={onClick}

@@ -36,7 +36,7 @@ export function BackendOperationDistributionChart() {
       sampleRangeFrom = 0,
       sampleRangeTo = 0,
     },
-  } = useApmParams('/backends/operation');
+  } = useApmParams('/dependencies/operation');
 
   const selection: [number, number] | undefined =
     sampleRangeFrom >= 0 && sampleRangeTo > 0

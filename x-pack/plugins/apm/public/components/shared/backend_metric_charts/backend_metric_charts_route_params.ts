@@ -10,7 +10,7 @@ import { ApmRoutes } from '../../routing/apm_route_config';
 export type BackendMetricChartsRouteParams = Pick<
   { spanName?: string } & TypeOf<
     ApmRoutes,
-    '/backends/operation' | '/backends/overview'
+    '/dependencies/operation' | '/dependencies/overview'
   >['query'],
   | 'dependencyName'
   | 'comparisonEnabled'

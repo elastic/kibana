@@ -52,7 +52,7 @@ export function BackendOperationDetailTraceList() {
       sampleRangeFrom,
       sampleRangeTo,
     },
-  } = useApmParams('/backends/operation');
+  } = useApmParams('/dependencies/operation');
 
   function getTraceLink({
     transactionName,

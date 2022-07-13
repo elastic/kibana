@@ -28,7 +28,7 @@ interface OperationStatisticsItem extends SpanMetricGroup {
 }
 
 function OperationLink({ spanName }: { spanName: string }) {
-  const { query } = useApmParams('/backends/operations');
+  const { query } = useApmParams('/dependencies/operations');
 
   return (
     <TruncateWithTooltip
@@ -50,7 +50,7 @@ export function BackendDetailOperationsList() {
       comparisonEnabled: urlComparisonEnabled,
       offset,
     },
-  } = useApmParams('/backends/operations');
+  } = useApmParams('/dependencies/operations');
 
   const { core } = useApmPluginContext();
 

@@ -28,7 +28,7 @@ export function BackendDetailDependenciesTable() {
       comparisonEnabled: urlComparisonEnabled,
       offset,
     },
-  } = useApmParams('/backends/overview');
+  } = useApmParams('/dependencies/overview');
 
   const { core } = useApmPluginContext();
 

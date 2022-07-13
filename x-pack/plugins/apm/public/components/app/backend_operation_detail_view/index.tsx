@@ -21,7 +21,7 @@ export function BackendOperationDetailView() {
 
   const {
     query: { spanName, ...query },
-  } = useApmParams('/backends/operation');
+  } = useApmParams('/dependencies/operation');
 
   useBackendDetailOperationsBreadcrumb();
 
@@ -33,7 +33,7 @@ export function BackendOperationDetailView() {
             'xpack.apm.backendOperationDetailView.header.backLinkLabel',
             { defaultMessage: 'All operations' }
           )}
-          backHref={router.link('/backends/operations', { query })}
+          backHref={router.link('/dependencies/operations', { query })}
           title={spanName}
         />
       </EuiFlexItem>

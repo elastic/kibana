@@ -10,14 +10,10 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
-export function RedirectBackendsToBackendDetailOverview() {
+export function RedirectBackendsToDependencies() {
   const { query } = useApmParams('/backends');
 
   const search = qs.stringify(query);
-  console.log(
-    '### caue ~ RedirectBackendsToBackendDetailOverview ~ search',
-    search
-  );
 
-  return <Redirect to={{ pathname: `/backends/overview`, search }} />;
+  return <Redirect to={{ pathname: `/dependencies`, search }} />;
 }

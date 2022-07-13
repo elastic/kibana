@@ -29,9 +29,14 @@ import { TransactionTab } from '../../app/transaction_details/waterfall_with_sum
 import { BackendDetailOperations } from '../../app/backend_detail_operations';
 import { BackendDetailView } from '../../app/backend_detail_view';
 import { RedirectPathBackendDetailView } from './redirect_path_backend_detail_view';
-import { RedirectBackendsToBackendDetailOverview } from './redirect_backends_to_backend_detail_view';
-import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { RedirectBackendsInventoryToDependencyInventory } from './redirect_backends_inventory_to_dependency_inventory';
+import { RedirectDependenciesToDependenciesOverview } from './redirect_dependencies_to_dependencies_overview';
+import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { RedirectBackendsToDependencies } from './redirect_backends_to_dependencies';
+import { RedirectBackendsOperationsToDependenciesOperations } from './redirect_backends_operations_to_dependencies_operations';
+import { RedirectBackendsOperationToDependenciesOperation } from './redirect_backends_operation_to_dependencies_operation';
+import { RedirectBackendsOverviewToDependenciesOverview } from './redirect_backends_overview_to_dependencies_overview';
 
 function page<
   TPath extends string,
@@ -243,7 +248,7 @@ export const home = {
         },
       }),
       ...page({
-        path: '/backends/inventory',
+        path: '/dependencies/inventory',
         title: DependenciesInventoryTitle,
         element: <BackendInventory />,
         params: t.partial({
@@ -255,15 +260,7 @@ export const home = {
           ]),
         }),
       }),
-      '/backends/{dependencyName}/overview': {
-        element: <RedirectPathBackendDetailView />,
-        params: t.type({
-          path: t.type({
-            dependencyName: t.string,
-          }),
-        }),
-      },
-      '/backends': {
+      '/dependencies': {
         // All chidren routes are going to inherit the BackendDetailView
         element: (
           <BackendDetailView>
@@ -281,16 +278,16 @@ export const home = {
           ]),
         }),
         children: {
-          // Redirects to /backends/overview
-          '/backends': {
-            element: <RedirectBackendsToBackendDetailOverview />,
+          // Redirects to /dependencies/overview
+          '/dependencies': {
+            element: <RedirectDependenciesToDependenciesOverview />,
           },
-          // Backends operations overview (Tab operations)
-          '/backends/operations': {
+          // dependencies operations overview (Tab operations)
+          '/dependencies/operations': {
             element: <BackendDetailOperations />,
           },
-          // Backends operation details view
-          '/backends/operation': {
+          // dependencies operation details view
+          '/dependencies/operation': {
             params: t.type({
               query: t.intersection([
                 t.type({
@@ -304,9 +301,63 @@ export const home = {
             }),
             element: <BackendOperationDetailView />,
           },
-          // Backends overview (Tab Overview)
-          '/backends/overview': {
+          // dependencies overview (Tab Overview)
+          '/dependencies/overview': {
             element: <BackendDetailOverview />,
+          },
+        },
+      },
+      // Redirects this route to /dependencies/inventory
+      '/backends/inventory': {
+        element: <RedirectBackendsInventoryToDependencyInventory />,
+        params: t.partial({
+          query: t.intersection([
+            t.type({ comparisonEnabled: toBooleanRt }),
+            offsetRt,
+          ]),
+        }),
+      },
+      '/backends/{dependencyName}/overview': {
+        element: <RedirectPathBackendDetailView />,
+        params: t.type({ path: t.type({ dependencyName: t.string }) }),
+      },
+      '/backends': {
+        // All children routes must have these params
+        element: <Outlet />,
+        params: t.partial({
+          query: t.intersection([
+            t.type({
+              comparisonEnabled: toBooleanRt,
+              dependencyName: t.string,
+            }),
+            offsetRt,
+          ]),
+        }),
+        children: {
+          // Redirects to /dependencies
+          '/backends': {
+            element: <RedirectBackendsToDependencies />,
+          },
+          // Redirects to /dependencies/operations
+          '/backends/operations': {
+            element: <RedirectBackendsOperationsToDependenciesOperations />,
+          },
+          // Redirects to /dependencies/operation
+          '/backends/operation': {
+            params: t.type({
+              query: t.intersection([
+                t.type({ spanName: t.string }),
+                t.partial({
+                  sampleRangeFrom: toNumberRt,
+                  sampleRangeTo: toNumberRt,
+                }),
+              ]),
+            }),
+            element: <RedirectBackendsOperationToDependenciesOperation />,
+          },
+          // Redirects to /dependencies/overview
+          '/backends/overview': {
+            element: <RedirectBackendsOverviewToDependenciesOverview />,
           },
         },
       },

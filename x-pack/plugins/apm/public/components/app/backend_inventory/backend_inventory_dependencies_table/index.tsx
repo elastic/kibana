@@ -27,7 +27,7 @@ export function BackendInventoryDependenciesTable() {
       comparisonEnabled,
       offset,
     },
-  } = useApmParams('/backends/inventory');
+  } = useApmParams('/dependencies/inventory');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

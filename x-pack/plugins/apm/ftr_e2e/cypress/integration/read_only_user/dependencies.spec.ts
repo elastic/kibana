@@ -60,7 +60,7 @@ describe('Dependencies', () => {
   describe.skip('dependency overview page', () => {
     it('shows dependency information and you can navigate to a page for an upstream service', () => {
       cy.visit(
-        `/app/apm/backends/overview?${new URLSearchParams({
+        `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
           dependencyName: 'postgresql',
         })}`
@@ -77,7 +77,7 @@ describe('Dependencies', () => {
 
     it('has no detectable a11y violations on load', () => {
       cy.visit(
-        `/app/apm/backends/overview?${new URLSearchParams({
+        `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
           dependencyName: 'postgresql',
         })}`

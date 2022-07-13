@@ -71,11 +71,11 @@ export function BackendContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const detailsUrl = dependencyName
-    ? apmRouter.link('/backends/overview', {
+    ? apmRouter.link('/dependencies/overview', {
         query: {
           ...query,
           dependencyName,
-        } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
+        } as TypeOf<ApmRoutes, '/dependencies/overview'>['query'],
       })
     : undefined;
 
