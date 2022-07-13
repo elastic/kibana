@@ -63,7 +63,6 @@ export function CopyToDashboardModal({
     if (!panelToCopy) {
       throw new PanelNotFoundError();
     }
-
     const state = {
       type: embeddable.type,
       input: {
