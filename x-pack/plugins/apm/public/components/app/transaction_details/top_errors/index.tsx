@@ -24,7 +24,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 type ErrorGroupMainStatisticsByTransactionName =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name'>;
 
-type ErrorGroupDetailedStatisticsByTransactionName =
+type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
@@ -35,11 +35,10 @@ const INITIAL_STATE_MAIN_STATISTICS: {
   requestId: undefined,
 };
 
-const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatisticsByTransactionName =
-  {
-    currentPeriod: {},
-    previousPeriod: {},
-  };
+const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
+  currentPeriod: {},
+  previousPeriod: {},
+};
 
 export function TopErrors() {
   const {
@@ -111,7 +110,7 @@ export function TopErrors() {
     status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (requestId && items.length && start && end && transactionType) {
+      if (requestId && items.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
