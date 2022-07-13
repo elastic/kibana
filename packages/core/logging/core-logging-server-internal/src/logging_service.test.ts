@@ -22,6 +22,7 @@ const createLoggingSystemMock = () => {
     get: jest.fn().mockImplementation(() => loggerMock.create()),
     asLoggerFactory: jest.fn().mockImplementation(() => loggerMock.create()),
     setContextConfig: jest.fn(),
+    setGlobalMeta: jest.fn(),
     upgrade: jest.fn(),
     stop: jest.fn(),
   };

@@ -47,7 +47,7 @@ describe('NodeService', () => {
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
-      const { roles } = await service.preboot();
+      const { roles } = await service.preboot({ loggingSystem: logger });
 
       expect(roles.backgroundTasks).toBe(true);
       expect(roles.ui).toBe(true);
@@ -58,7 +58,7 @@ describe('NodeService', () => {
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
-      const { roles } = await service.preboot();
+      const { roles } = await service.preboot({ loggingSystem: logger });
 
       expect(roles.backgroundTasks).toBe(true);
       expect(roles.ui).toBe(false);
@@ -69,7 +69,7 @@ describe('NodeService', () => {
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
-      const { roles } = await service.preboot();
+      const { roles } = await service.preboot({ loggingSystem: logger });
 
       expect(roles.backgroundTasks).toBe(false);
       expect(roles.ui).toBe(true);
@@ -80,7 +80,7 @@ describe('NodeService', () => {
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
-      const { roles } = await service.preboot();
+      const { roles } = await service.preboot({ loggingSystem: logger });
 
       expect(roles.backgroundTasks).toBe(true);
       expect(roles.ui).toBe(true);
@@ -94,7 +94,7 @@ describe('NodeService', () => {
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
-      await service.preboot();
+      await service.preboot({ loggingSystem: logger });
 
       expect(logger.get).toHaveBeenCalledTimes(1);
       expect(logger.get).toHaveBeenCalledWith('node');
@@ -102,6 +102,20 @@ describe('NodeService', () => {
       expect(mockLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
         `"Kibana process configured with roles: [background_tasks, ui]"`
       );
+    });
+
+    it('sets the node roles in the global LogMeta', async () => {
+      configService = getMockedConfigService({ roles: ['*'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      await service.preboot({ loggingSystem: logger });
+
+      expect(logger.setGlobalMeta).toHaveBeenCalledTimes(1);
+      expect(logger.setGlobalMeta).toHaveBeenCalledWith('service.node.roles', [
+        'background_tasks',
+        'ui',
+      ]);
     });
   });
 });
