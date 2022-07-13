@@ -39,7 +39,8 @@ export interface MetricVisualizationState {
   minTiles?: number; // TODO - may not be necessary on the state
 }
 
-export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+// TODO - consider relaxing?
+export const supportedTypes = new Set(['number']);
 
 // TODO - do we need this?
 function computePaletteParams(params: CustomPaletteParams) {
