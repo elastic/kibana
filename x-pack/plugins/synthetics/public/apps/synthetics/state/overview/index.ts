@@ -41,10 +41,11 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
       state.pageState = action.payload;
       state.loading = true;
+      state.loaded = false;
     })
     .addCase(fetchMonitorOverviewAction.success, (state, action) => {
-      state.loading = false;
       state.data = action.payload;
+      state.loading = false;
       state.loaded = true;
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {

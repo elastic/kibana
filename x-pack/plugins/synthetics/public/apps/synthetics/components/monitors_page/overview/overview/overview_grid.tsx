@@ -20,7 +20,7 @@ export const OverviewGrid = () => {
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
   const [page, setPage] = useState(0);
-  const currentMonitors = pages[page];
+  const currentMonitors = pages[page] || [];
 
   const goToPage = (pageNumber: number) => {
     setPage(pageNumber);
