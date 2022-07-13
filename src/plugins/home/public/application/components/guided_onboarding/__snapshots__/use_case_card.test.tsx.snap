@@ -15,7 +15,7 @@ exports[`use case card should render use case card component for observability 1
   }
   display="subdued"
   image={
-    <img
+    <EuiImage
       alt="Observability logo"
       src="/plugins/home/assets/solution_logos/observability.png"
     />
@@ -51,7 +51,7 @@ exports[`use case card should render use case card component for search 1`] = `
   }
   display="subdued"
   image={
-    <img
+    <EuiImage
       alt="Enterprise Search logo"
       src="/plugins/home/assets/solution_logos/search.png"
     />
@@ -87,7 +87,7 @@ exports[`use case card should render use case card component for security 1`] = 
   }
   display="subdued"
   image={
-    <img
+    <EuiImage
       alt="Security logo"
       src="/plugins/home/assets/solution_logos/security.png"
     />

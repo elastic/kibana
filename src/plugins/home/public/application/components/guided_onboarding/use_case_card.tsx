@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiText, EuiTitle, EuiImage } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -106,9 +106,9 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
   const isDarkTheme = uiSettings.get('theme:darkMode');
 
   const getImageUrl = (imageName: UseCase) => {
-    const imagePath = isDarkTheme
-      ? `/plugins/home/assets/solution_logos/${imageName}_dark.png`
-      : `/plugins/home/assets/solution_logos/${imageName}.png`;
+    const imagePath = `/plugins/home/assets/solution_logos/${imageName}${
+      isDarkTheme ? '_dark' : ''
+    }.png`;
 
     return http.basePath.prepend(imagePath);
   };
@@ -138,7 +138,7 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
     <EuiCard
       display="subdued"
       textAlign="left"
-      image={<img src={getImageUrl(useCase)} alt={constants[useCase].logo.altText} />}
+      image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logo.altText} />}
       title={title}
       description={description}
       // Used for FS tracking
