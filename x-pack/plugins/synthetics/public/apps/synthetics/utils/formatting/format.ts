@@ -32,16 +32,8 @@ export const formatDuration = (durationMicros: number) => {
   }
   const seconds = (durationMicros / ONE_SECOND_AS_MICROS).toFixed(0);
 
-  // we format seconds with correct pluralization here and not for `ms` because it is much more likely users
-  // will encounter times of exactly '1' second.
-  if (seconds === '1') {
-    return i18n.translate('xpack.synthetics.pingist.durationSecondsColumnFormatting.singular', {
-      values: { seconds },
-      defaultMessage: '{seconds} second',
-    });
-  }
   return i18n.translate('xpack.synthetics.pingist.durationSecondsColumnFormatting', {
     values: { seconds },
-    defaultMessage: '{seconds} seconds',
+    defaultMessage: '{seconds} s',
   });
 };

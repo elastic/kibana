@@ -15,11 +15,7 @@ describe('formatDuration', () => {
     expect(formatDuration(921_039)).toBe('921 ms');
   });
 
-  it('returns seconds string if > 1 second', () => {
-    expect(formatDuration(1_032_100)).toBe('1 second');
-  });
-
-  it('rounds to closest second', () => {
-    expect(formatDuration(1_832_100)).toBe('2 seconds');
+  it('returns s string for seconds', () => {
+    expect(formatDuration(1_032_100)).toBe('1 s');
   });
 });
