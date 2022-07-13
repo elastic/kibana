@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
 
 const INDEX_LINK_NAME = 'logs-cloud_security_posture.findings_latest-default';
 
-const getDetailsList = (data: CspFinding, navigateToIndex: any) => [
+const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
@@ -62,7 +62,11 @@ const getDetailsList = (data: CspFinding, navigateToIndex: any) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
       defaultMessage: 'Index',
     }),
-    description: <EuiLink onClick={navigateToIndex}>{INDEX_LINK_NAME}</EuiLink>,
+    description: discoverIndexLink ? (
+      <EuiLink href={discoverIndexLink}>{INDEX_LINK_NAME}</EuiLink>
+    ) : (
+      INDEX_LINK_NAME
+    ),
   },
 ];
 
@@ -118,32 +122,16 @@ const getEvidenceList = ({ result }: CspFinding) =>
 export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const {
     services: { discover },
-    notifications: { toasts },
   } = useKibana();
   const latestFindingsDataView = useLatestFindingsDataView();
 
-  const navigateToIndex = useCallback(async () => {
-    try {
-      // both cases should not happen, data view is loaded beforehand on findings page, this is mainly to discriminate and as a precaution
-      if (!discover.locator || !latestFindingsDataView.data) {
-        throw new Error();
-      }
-
-      await discover.locator.navigate({
-        indexPatternId: latestFindingsDataView.data.id,
-      });
-    } catch (err) {
-      toasts.danger({
-        title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorTitle', {
-          defaultMessage: 'Error',
-        }),
-        body: i18n.translate(
-          'xpack.csp.findings.findingsFlyout.overviewTab.indexLinkErrorMessage',
-          { defaultMessage: 'Index link not found' }
-        ),
-      });
-    }
-  }, [discover.locator, latestFindingsDataView.data, toasts]);
+  const discoverIndexLink = useMemo(
+    () =>
+      discover.locator?.getRedirectUrl({
+        indexPatternId: latestFindingsDataView.data?.id,
+      }),
+    [discover.locator, latestFindingsDataView.data?.id]
+  );
 
   const accordions: Accordion[] = useMemo(
     () => [
@@ -153,7 +141,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
           defaultMessage: 'Details',
         }),
         id: 'detailsAccordion',
-        listItems: getDetailsList(data, navigateToIndex),
+        listItems: getDetailsList(data, discoverIndexLink),
       },
       {
         initialIsOpen: true,
@@ -173,7 +161,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
         listItems: getEvidenceList(data),
       },
     ],
-    [data, navigateToIndex]
+    [data, discoverIndexLink]
   );
 
   return (
