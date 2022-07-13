@@ -6,13 +6,13 @@
  */
 
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
+import '../../__mocks__/react_router';
 
-jest.mock('../react_router_helpers', () => ({
-  generateReactRouterProps: ({ to }: { to: string }) => ({
-    href: `/app/enterprise_search${to}`,
-    onClick: () => mockKibanaValues.navigateToUrl(to),
-  }),
+jest.mock('../react_router_helpers/link_events', () => ({
+  letBrowserHandleEvent: jest.fn(),
 }));
+
+import { letBrowserHandleEvent } from '../react_router_helpers/link_events';
 
 import { generateNavLink, getNavLinkActive } from './nav_link_helpers';
 
@@ -23,6 +23,8 @@ describe('generateNavLink', () => {
   });
 
   it('generates React Router props for use within an EuiSideNavItem obj', () => {
+    (letBrowserHandleEvent as jest.Mock).mockReturnValueOnce(false);
+
     const navItem = generateNavLink({ to: '/test' });
 
     expect(navItem).toEqual({
@@ -31,8 +33,10 @@ describe('generateNavLink', () => {
       isSelected: false,
     });
 
-    navItem.onClick({} as any);
-    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test');
+    navItem.onClick({ preventDefault: jest.fn() } as any);
+    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test', {
+      shouldNotCreateHref: false,
+    });
   });
 
   describe('isSelected / getNavLinkActive', () => {

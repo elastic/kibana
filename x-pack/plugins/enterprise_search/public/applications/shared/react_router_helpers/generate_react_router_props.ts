@@ -38,7 +38,7 @@ export type GeneratedReactRouterProps<T> = Required<
 export const generateReactRouterProps = ({
   to,
   onClick,
-  shouldNotCreateHref,
+  shouldNotCreateHref = false,
 }: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
