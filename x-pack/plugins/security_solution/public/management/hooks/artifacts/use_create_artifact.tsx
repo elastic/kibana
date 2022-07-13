@@ -8,7 +8,7 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseMutationOptions, UseMutationResult } from 'react-query';
 import { useMutation } from 'react-query';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -19,19 +19,19 @@ export function useCreateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   customOptions: UseMutationOptions<
     ExceptionListItemSchema,
-    HttpFetchError,
+    IHttpFetchError,
     CreateExceptionListItemSchema,
     () => void
   > = DEFAULT_OPTIONS
 ): UseMutationResult<
   ExceptionListItemSchema,
-  HttpFetchError,
+  IHttpFetchError,
   CreateExceptionListItemSchema,
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema,
-    HttpFetchError,
+    IHttpFetchError,
     CreateExceptionListItemSchema,
     () => void
   >((exception: CreateExceptionListItemSchema) => {

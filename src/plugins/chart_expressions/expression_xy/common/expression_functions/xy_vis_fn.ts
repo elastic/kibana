@@ -73,7 +73,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     accessors,
     xAccessor,
     hide,
-    splitAccessor,
+    splitAccessors,
     columnToLabel,
     xScaleType,
     isHistogram,
@@ -96,7 +96,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const dataLayers: DataLayerConfigResult[] = [createDataLayer({ ...args, showLines }, data)];
 
   validateAccessor(dataLayers[0].xAccessor, data.columns);
-  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].splitAccessors?.forEach((accessor) => validateAccessor(accessor, data.columns));
   dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
 
   validateMarkSizeForChartType(dataLayers[0].markSizeAccessor, args.seriesType);
