@@ -35,9 +35,11 @@ export function makeDefaultServices(): DashboardAppServices {
     for (let i = 0; i < size; i++) {
       hits.push({
         id: `dashboard${i}`,
-        title: `dashboard${i} - ${search} - title`,
-        description: `dashboard${i} desc`,
-      });
+        attributes: {
+          title: `dashboard${i} - ${search} - title`,
+          description: `dashboard${i} desc`,
+        },
+      } as any);
     }
     return Promise.resolve({
       total: size,

@@ -42,6 +42,7 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
+import type { UserContentCommonSchema } from './services/kibana_react';
 
 export type { SavedDashboardPanel };
 
@@ -220,4 +221,15 @@ export interface DashboardAppServices {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
+}
+
+export interface DashboardAttributes {
+  title: string;
+  description: string;
+  error: unknown;
+  timeRestore: boolean;
+}
+
+export interface SimpleDashboardSavedObject extends UserContentCommonSchema {
+  attributes: DashboardAttributes;
 }

@@ -22,11 +22,17 @@ import {
   SearchFilterConfig,
   EuiLink,
 } from '@elastic/eui';
+import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ThemeServiceStart, ToastsStart, ApplicationStart } from '@kbn/core/public';
-import { keyBy, uniq, get } from 'lodash';
+import type {
+  ThemeServiceStart,
+  ToastsStart,
+  ApplicationStart,
+  SimpleSavedObject,
+} from '@kbn/core/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { KibanaPageTemplate } from '../../page_template';
 import { toMountPoint } from '../../util';
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
@@ -52,6 +58,7 @@ export interface Props<T> {
   customTableColumn?: EuiBasicTableColumn<T>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
+  savedObjectTagging?: SavedObjectsTaggingApi;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -89,12 +96,10 @@ export interface State<T extends UserContentCommonSchema> {
   };
 }
 
-export interface UserContentCommonSchema {
-  id?: string;
+export type UserContentCommonSchema = SimpleSavedObject<{
   title: string;
   description: string;
-  updatedAt?: string;
-}
+}>;
 
 function TableListView<T extends UserContentCommonSchema>({
   findItems,
@@ -116,6 +121,7 @@ function TableListView<T extends UserContentCommonSchema>({
   emptyPrompt,
   toastNotifications,
   application,
+  savedObjectTagging,
   theme,
   children,
 }: Props<T>) {
@@ -131,7 +137,6 @@ function TableListView<T extends UserContentCommonSchema>({
     showDeleteModal: false,
     selectedIds: [],
     tableColumns: [
-      // { id: string; title: string; timeRestore: boolean }
       {
         field: 'title',
         name: i18n.translate('kibana-react.tableListView.titleColumnName', {
@@ -141,9 +146,11 @@ function TableListView<T extends UserContentCommonSchema>({
         render: (field: keyof T, record: T) => (
           <EuiLink
             href={getDetailViewLink(record)}
-            data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
+            data-test-subj={`userContentListingTitleLink-${record.attributes.title
+              .split(' ')
+              .join('-')}`}
           >
-            {field}
+            {record.attributes.title}
           </EuiLink>
         ),
       },
@@ -152,7 +159,7 @@ function TableListView<T extends UserContentCommonSchema>({
         name: i18n.translate('kibana-react.tableListView.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
-        render: (field: keyof T, record: T) => <span>{record.description}</span>,
+        render: (field: keyof T, record: T) => <span>{record.attributes.description}</span>,
         sortable: true,
       },
     ],
@@ -191,6 +198,10 @@ function TableListView<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
+    if (savedObjectTagging) {
+      columns.push(savedObjectTagging.ui.getTableColumnDefinition());
+    }
+
     // Add "Actions" column
     if (editItem) {
       const actions: EuiTableActionsColumnType<T>['actions'] = [
@@ -225,7 +236,7 @@ function TableListView<T extends UserContentCommonSchema>({
     }
 
     return columns;
-  }, [customTableColumn, stateTableColumns, editItem, rowHeader]);
+  }, [customTableColumn, stateTableColumns, editItem, rowHeader, savedObjectTagging]);
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
   }, [items]);

@@ -10,6 +10,7 @@ export type {
   KibanaReactContext,
   KibanaReactContextValue,
   ExitFullScreenButtonProps,
+  UserContentCommonSchema,
 } from '@kbn/kibana-react-plugin/public';
 export {
   context,
@@ -17,6 +18,7 @@ export {
   withKibana,
   toMountPoint,
   TableListView,
+  TableListViewV2,
   reactToUiComponent,
   ExitFullScreenButton,
   KibanaContextProvider,
