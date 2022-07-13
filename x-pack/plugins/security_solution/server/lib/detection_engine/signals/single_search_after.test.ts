@@ -43,7 +43,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -62,7 +63,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -113,7 +115,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -137,7 +140,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -158,7 +162,8 @@ describe('singleSearchAfter', () => {
         logger: mockLogger,
         pageSize: 1,
         filter: {},
-        timestampOverride: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
         buildRuleMessage,
         runtimeMappings: undefined,
       })
