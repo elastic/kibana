@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseQueryResult, UseQueryOptions } from 'react-query';
 import { useQuery } from 'react-query';
 import { useHttp } from '../../../common/lib/kibana';
@@ -13,10 +13,10 @@ import type { GetHostPolicyResponse } from '../../../../common/endpoint/types';
 
 export function useGetEndpointPolicyResponse(
   selectedEndpoint: string,
-  customQueryOptions?: UseQueryOptions<GetHostPolicyResponse, HttpFetchError>
-): UseQueryResult<GetHostPolicyResponse, HttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetHostPolicyResponse, IHttpFetchError>
+): UseQueryResult<GetHostPolicyResponse, IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetHostPolicyResponse, HttpFetchError>(
+  return useQuery<GetHostPolicyResponse, IHttpFetchError>(
     ['getEndpointPolicyResponse', selectedEndpoint],
     () => {
       return http.get<GetHostPolicyResponse>(BASE_POLICY_RESPONSE_ROUTE, {

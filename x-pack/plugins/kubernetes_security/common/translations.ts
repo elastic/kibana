@@ -62,3 +62,32 @@ export const WIDGET_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.widge
 export const WIDGET_TOGGLE_HIDE = i18n.translate('xpack.kubernetesSecurity.widgetsToggle.hide', {
   defaultMessage: 'Hide widgets',
 });
+
+export const COUNT_WIDGET_CLUSTERS = i18n.translate(
+  'xpack.kubernetesSecurity.countWidget.clusters',
+  {
+    defaultMessage: 'Clusters',
+  }
+);
+
+export const COUNT_WIDGET_NAMESPACE = i18n.translate(
+  'xpack.kubernetesSecurity.countWidget.namespace',
+  {
+    defaultMessage: 'Namespace',
+  }
+);
+
+export const COUNT_WIDGET_NODES = i18n.translate('xpack.kubernetesSecurity.countWidget.nodes', {
+  defaultMessage: 'Nodes',
+});
+
+export const COUNT_WIDGET_PODS = i18n.translate('xpack.kubernetesSecurity.countWidget.pods', {
+  defaultMessage: 'Pods',
+});
+
+export const COUNT_WIDGET_CONTAINER_IMAGES = i18n.translate(
+  'xpack.kubernetesSecurity.countWidget.containerImages',
+  {
+    defaultMessage: 'Container Images',
+  }
+);
