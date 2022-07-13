@@ -103,9 +103,9 @@ export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
 ];
 
 /*
-  * !IMPORTANT! - Please only add to this list if it is an operator
-  * supported by the detection engine.
-*/
+ * !IMPORTANT! - Please only add to this list if it is an operator
+ * supported by the detection engine.
+ */
 export const EXCEPTION_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
