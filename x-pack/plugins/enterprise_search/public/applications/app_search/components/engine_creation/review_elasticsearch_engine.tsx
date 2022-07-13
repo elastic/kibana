@@ -216,6 +216,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                 type="submit"
                 data-test-subj="NewEngineSubmitButton"
                 iconType="arrowRight"
+                iconSide="right"
                 fill
               >
                 {i18n.translate(

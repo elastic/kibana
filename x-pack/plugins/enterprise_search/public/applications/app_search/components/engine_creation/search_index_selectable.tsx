@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EngineCreationLogic } from './engine_creation_logic';
 
-import './search_index_selectable.scss';
+import './engine_creation.scss';
 
 export interface SearchIndexSelectableOption {
   label: string;

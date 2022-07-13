@@ -39,7 +39,7 @@ export const SelectEngineType: React.FC = () => {
   const { setEngineType, setCreationStep } = useActions(EngineCreationLogic);
 
   return (
-    <div style={{ maxWidth: '60rem', margin: 'auto' }}>
+    <div className="entSearch__createEngineLayout">
       <EuiStepsHorizontal
         steps={[
           {

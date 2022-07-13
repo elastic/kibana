@@ -21,7 +21,9 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHealth,
   EuiHighlight,
+  EuiI18n,
   EuiIcon,
   EuiPanel,
   EuiSelectable,
@@ -46,7 +48,7 @@ import {
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
-import './search_index_selectable.scss';
+import './engine_creation.scss';
 
 export interface SearchIndexSelectableOption {
   label: string;
@@ -88,45 +90,43 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
       <EuiHighlight search={searchValue}>{option.label ?? ''}</EuiHighlight>
       <EuiSpacer size="xs" />
       <EuiTextColor color="subdued">
-        <small>
-          <span className="selectableSecondaryContentLabel">
-            <EuiIcon type="dot" color={option.health ? healthColorsMap[option.health] : ''} />
-            &nbsp;{option.health ?? '-'}
-          </span>
-          <span className="selectableSecondaryContentLabel" data-test-subj="optionStatus">
-            <b>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status',
-                {
-                  defaultMessage: 'Status:',
-                }
-              )}
-            </b>
-            &nbsp;{option.status ?? '-'}
-          </span>
-          <span className="selectableSecondaryContentLabel" data-test-subj="optionDocs">
-            <b>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount',
-                {
-                  defaultMessage: 'Docs count:',
-                }
-              )}
-            </b>
-            &nbsp;{option.total?.docs?.count ?? '-'}
-          </span>
-          <span className="selectableSecondaryContentLabel" data-test-subj="optionStorage">
-            <b>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage',
-                {
-                  defaultMessage: 'Storage size:',
-                }
-              )}
-            </b>
-            &nbsp;{option.total?.store?.size_in_bytes ?? '-'}
-          </span>
-          <span className="selectableSecondaryContentLabel" data-test-subj="optionStorage">
+        <EuiFlexGroup
+          className="entSearch__indexListItem"
+          alignItems="center"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiHealth color={option.health ? healthColorsMap[option.health] : ''}>
+              {option.health ?? '-'}
+            </EuiHealth>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj="optionStatus">
+            <EuiI18n
+              token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status"
+              default="{status}"
+              values={{
+                status: <span><b>Status</b>: {option.status ?? '-'}</span>,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj="optionDocs">
+            <EuiI18n
+              token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount"
+              default="{docsCount}"
+              values={{
+                docsCount: <span><b>Docs count</b>: {option.total?.docs?.count ?? '-'}</span>,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj="optionStorage">
+            <EuiI18n
+              token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage"
+              default="{storageSize}"
+              values={{
+                storageSize: <span><b>Storage size</b>: {option.total?.store?.size_in_bytes ?? '-'}</span>,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj="optionStorage">
             <EuiBadge color={option.badge.color} iconType={option.badge.icon}>
               <EuiToolTip
                 position="left"
@@ -136,8 +136,8 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
                 <p>{option.badge.label}</p>
               </EuiToolTip>
             </EuiBadge>
-          </span>
-        </small>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiTextColor>
     </>
   );
@@ -182,7 +182,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <div className="entSearch__createEngineLayout">
       <EuiStepsHorizontal
         steps={[
           {
@@ -227,7 +227,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
               {
                 defaultMessage:
-                  'Provide a unique name and an optional language analyzer for your App Search engine.',
+                  'Provide a unique name and select an index for your App Search engine.',
               }
             )}
           </EuiText>
@@ -333,6 +333,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               )}
               renderOption={renderIndexOption}
               data-test-subj="SearchIndexSelectable"
+              className="entSearch__indexSelectable"
             >
               {(list, search) => (
                 <>
@@ -417,6 +418,6 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
           </EuiFlexGroup>
         </EuiForm>
       </EuiPanel>
-    </>
+    </div>
   );
 };

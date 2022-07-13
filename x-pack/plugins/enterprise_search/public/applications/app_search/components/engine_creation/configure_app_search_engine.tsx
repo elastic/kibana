@@ -21,6 +21,8 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiStepsHorizontal,
+  EuiText,
+  EuiTextAlign,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -44,7 +46,7 @@ export const ConfigureAppSearchEngine: React.FC = () => {
     useActions(EngineCreationLogic);
 
   return (
-    <>
+    <div className="entSearch__createEngineLayout">
       <EuiStepsHorizontal
         steps={[
           {
@@ -66,7 +68,7 @@ export const ConfigureAppSearchEngine: React.FC = () => {
           },
         ]}
       />
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder paddingSize="l">
         <EuiForm
           component="form"
           data-test-subj="EngineCreationForm"
@@ -75,10 +77,26 @@ export const ConfigureAppSearchEngine: React.FC = () => {
             submitEngine();
           }}
         >
-          <EuiTitle>
-            <h2>{ENGINE_CREATION_FORM_TITLE}</h2>
-          </EuiTitle>
+          <EuiTextAlign textAlign="center">
+            <EuiTitle>
+              <h2>{ENGINE_CREATION_FORM_TITLE}</h2>
+            </EuiTitle>
+          </EuiTextAlign>
+
           <EuiSpacer />
+
+          <EuiText color="subdued" textAlign="center">
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+              {
+                defaultMessage:
+                  'Provide a unique name and an optional language analyzer for your App Search engine.',
+              }
+            )}
+          </EuiText>
+
+          <EuiSpacer />
+
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
@@ -146,6 +164,7 @@ export const ConfigureAppSearchEngine: React.FC = () => {
                 type="submit"
                 data-test-subj="NewEngineSubmitButton"
                 iconType="arrowRight"
+                iconSide="right"
                 fill
               >
                 {i18n.translate(
@@ -159,6 +178,6 @@ export const ConfigureAppSearchEngine: React.FC = () => {
           </EuiFlexGroup>
         </EuiForm>
       </EuiPanel>
-    </>
+    </div>
   );
 };
