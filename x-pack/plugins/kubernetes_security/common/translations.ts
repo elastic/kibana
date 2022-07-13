@@ -72,3 +72,10 @@ export const CONTAINER_NAME_SESSION_COUNT_COLUMN = i18n.translate(
     defaultMessage: 'Count',
   }
 );
+
+export const CONTAINER_NAME_SESSION_ARIA_LABEL = i18n.translate(
+  'xpack.kubernetesSecurity.containerNameWidget.containerImageAriaLabel',
+  {
+    defaultMessage: 'Container Name Session Widget',
+  }
+);

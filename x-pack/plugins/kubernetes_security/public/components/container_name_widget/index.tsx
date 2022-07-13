@@ -17,9 +17,13 @@ import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import {
   CONTAINER_NAME_SESSION,
   CONTAINER_NAME_SESSION_COUNT_COLUMN,
+  CONTAINER_NAME_SESSION_ARIA_LABEL,
 } from '../../../common/translations';
 
-export const LOADING_TEST_ID = 'kubernetesSecurity:container-name-widget-loading';
+export const LOADING_TEST_ID = 'kubernetesSecurity:containerNameWidgetLoading';
+export const NAME_COLUMN_TEST_ID = 'kubernetesSecurity:containerImageNameSessionNameColumn';
+export const COUNT_COLUMN_TEST_ID = 'kubernetesSecurity:containerImageNameSessionCountColumn';
+export const CONTAINER_NAME_TABLE_TEST_ID = 'kubernetesSecurity:containerNameSessionTable';
 
 export interface ContainerNameWidgetDataValueMap {
   key: string;
@@ -153,7 +157,7 @@ export const ContainerNameWidget = ({
       {
         field: 'name',
         name: CONTAINER_NAME_SESSION,
-        'data-test-subj': 'containerImageNameSessionNameColumn',
+        'data-test-subj': NAME_COLUMN_TEST_ID,
         render: (name: string) => {
           const indexHelper = containerNameArray.findIndex((obj) => {
             return obj.name === name;
@@ -176,7 +180,7 @@ export const ContainerNameWidget = ({
         field: 'count',
         name: CONTAINER_NAME_SESSION_COUNT_COLUMN,
         width: '76px',
-        'data-test-subj': 'containerImageNameSessionCountColumn',
+        'data-test-subj': COUNT_COLUMN_TEST_ID,
         render: (count: number) => {
           return <span css={styles.countValue}>{count}</span>;
         },
@@ -198,7 +202,7 @@ export const ContainerNameWidget = ({
 
   return (
     <div
-      data-test-subj="containerNameSessionTable"
+      data-test-subj={CONTAINER_NAME_TABLE_TEST_ID}
       className="eui-yScroll"
       css={styles.container}
       ref={scrollerRef}
@@ -212,7 +216,7 @@ export const ContainerNameWidget = ({
         />
       )}
       <EuiBasicTable
-        aria-label="Container Name Session Widget"
+        aria-label={CONTAINER_NAME_SESSION_ARIA_LABEL}
         items={containerNameArray}
         columns={columns}
         sorting={sorting}

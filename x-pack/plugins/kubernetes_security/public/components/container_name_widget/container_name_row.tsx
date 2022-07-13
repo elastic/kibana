@@ -16,6 +16,8 @@ export interface ContainerNameRowDeps {
   filterButtonOut?: ReactNode;
 }
 
+export const ROW_TEST_ID = 'kubernetesSecurity:containerNameSessionRow';
+
 export const ContainerNameRow = ({
   name,
   index,
@@ -30,7 +32,7 @@ export const ContainerNameRow = ({
     <EuiFlexItem
       onMouseEnter={() => setHoveredFilter(index!)}
       onMouseLeave={() => setHoveredFilter(null)}
-      data-test-subj={'containerNameSessionRow'}
+      data-test-subj={ROW_TEST_ID}
     >
       <EuiText size="xs" css={styles.dataInfo}>
         {name}

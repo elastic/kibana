@@ -9,12 +9,16 @@ import React from 'react';
 import { ENTRY_LEADER_ENTITY_ID, CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
-import { ContainerNameWidget, LOADING_TEST_ID } from '.';
+import {
+  ContainerNameWidget,
+  LOADING_TEST_ID,
+  NAME_COLUMN_TEST_ID,
+  COUNT_COLUMN_TEST_ID,
+  CONTAINER_NAME_TABLE_TEST_ID,
+} from '.';
 import { useFetchContainerNameData } from './hooks';
+import { ROW_TEST_ID } from './container_name_row';
 
-const TABLE_ID = 'containerNameSessionTable';
-const TABLE_CONTAINER_NAME_ID = 'containerImageNameSessionNameColumn';
-const TABLE_CONTAINER_COUNT_ID = 'containerImageNameSessionCountColumn';
 const TABLE_ROW_ELEMENT = 'containerNameSessionRow';
 const TABLE_SORT_BUTTON_ID = 'tableHeaderSortButton';
 
@@ -92,15 +96,15 @@ describe('ContainerNameWidget component', () => {
 
       it('should show the table, table title, table columns, sort button', async () => {
         render();
-        expect(renderResult.queryByTestId(TABLE_ID)).toBeVisible();
+        expect(renderResult.queryByTestId(CONTAINER_NAME_TABLE_TEST_ID)).toBeVisible();
         expect(renderResult.queryAllByTestId(TABLE_SORT_BUTTON_ID)).toHaveLength(1);
-        expect(renderResult.queryAllByTestId(TABLE_CONTAINER_NAME_ID)).toHaveLength(17);
-        expect(renderResult.queryAllByTestId(TABLE_CONTAINER_COUNT_ID)).toHaveLength(17);
+        expect(renderResult.queryAllByTestId(NAME_COLUMN_TEST_ID)).toHaveLength(17);
+        expect(renderResult.queryAllByTestId(COUNT_COLUMN_TEST_ID)).toHaveLength(17);
       });
 
       it('should show data value names and value', async () => {
         render();
-        expect(renderResult.queryAllByTestId(TABLE_ROW_ELEMENT)).toHaveLength(17);
+        expect(renderResult.queryAllByTestId(ROW_TEST_ID)).toHaveLength(17);
       });
     });
 
@@ -113,7 +117,7 @@ describe('ContainerNameWidget component', () => {
         render();
         expect(renderResult.getByText(TITLE)).toBeVisible();
         expect(renderResult.getByText('No items found')).toBeVisible();
-        expect(renderResult.getByTestId(TABLE_ID)).toBeVisible();
+        expect(renderResult.getByTestId(CONTAINER_NAME_TABLE_TEST_ID)).toBeVisible();
       });
     });
 

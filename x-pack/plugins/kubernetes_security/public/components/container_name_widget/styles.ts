@@ -14,7 +14,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font } = euiTheme;
+    const { size, font, colors } = euiTheme;
 
     const container: CSSObject = {
       padding: size.base,
@@ -38,7 +38,7 @@ export const useStyles = () => {
       marginLeft: size.s,
       position: 'absolute',
       left: '50%',
-      backgroundColor: 'white',
+      backgroundColor: colors.emptyShade,
       borderRadius: euiTheme.border.radius.small,
       border: euiTheme.border.thin,
       bottom: '-25px',
