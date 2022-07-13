@@ -56,6 +56,7 @@ describe('removeBoostStateProps', () => {
         },
       },
       precision: 10,
+      precision_enabled: true,
     };
     expect(removeBoostStateProps(searchSettings)).toEqual({
       ...searchSettings,

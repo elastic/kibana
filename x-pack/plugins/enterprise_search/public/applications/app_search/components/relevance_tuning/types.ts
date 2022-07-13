@@ -70,4 +70,5 @@ export interface SearchSettings {
   search_fields: Record<string, SearchField>;
   result_fields?: object;
   precision: number;
+  precision_enabled: boolean;
 }
