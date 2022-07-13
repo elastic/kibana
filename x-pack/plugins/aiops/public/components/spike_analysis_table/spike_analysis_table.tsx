@@ -117,6 +117,7 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
 
   return (
     <EuiBasicTable
+      compressed
       columns={columns}
       items={pageOfItems ?? []}
       noItemsMessage={noDataText}

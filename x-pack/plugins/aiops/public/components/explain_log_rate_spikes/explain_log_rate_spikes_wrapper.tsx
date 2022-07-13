@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+
+import type { WindowParameters } from '@kbn/aiops-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import {
   Accessor,
   Dictionary,
@@ -19,10 +35,51 @@ import {
   getNestedProperty,
   SetUrlState,
 } from '../../hooks/url_state';
+import { useData } from '../../hooks/use_data';
+import { useUrlState } from '../../hooks/url_state';
 
-import { ExplainLogRateSpikes, ExplainLogRateSpikesProps } from './explain_log_rate_spikes';
+import { FullTimeRangeSelector } from '../full_time_range_selector';
+import { DocumentCountContent } from '../document_count_content/document_count_content';
+import { DatePickerWrapper } from '../date_picker_wrapper';
 
-export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props) => {
+import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
+
+export interface ExplainLogRateSpikesWrapperProps {
+  /** The data view to analyze. */
+  dataView: DataView;
+}
+
+export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({ dataView }) => {
+  const [globalState, setGlobalState] = useUrlState('_g');
+
+  const { docStats, timefilter } = useData(dataView, setGlobalState);
+  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+
+  const activeBounds = timefilter.getActiveBounds();
+  let earliest: number | undefined;
+  let latest: number | undefined;
+  if (activeBounds !== undefined) {
+    earliest = activeBounds.min?.valueOf();
+    latest = activeBounds.max?.valueOf();
+  }
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
+
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
+
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
 
@@ -88,9 +145,65 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props
     [history, urlSearchString]
   );
 
+  if (!dataView || !timefilter) return null;
+
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <ExplainLogRateSpikes {...props} />{' '}
+      <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiPageContentHeader className="aiopsPageHeader">
+              <EuiPageContentHeaderSection>
+                <div className="aiopsTitleHeader">
+                  <EuiTitle size={'s'}>
+                    <h2>{dataView.title}</h2>
+                  </EuiTitle>
+                </div>
+              </EuiPageContentHeaderSection>
+
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="s"
+                data-test-subj="aiopsTimeRangeSelectorSection"
+              >
+                {dataView.timeFieldName !== undefined && (
+                  <EuiFlexItem grow={false}>
+                    <FullTimeRangeSelector
+                      dataView={dataView}
+                      query={undefined}
+                      disabled={false}
+                      timefilter={timefilter}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageContentHeader>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule />
+        <EuiPageContentBody>
+          {docStats?.totalCount !== undefined && (
+            <DocumentCountContent
+              brushSelectionUpdateHandler={setWindowParameters}
+              documentCountStats={docStats.documentCountStats}
+              totalCount={docStats.totalCount}
+            />
+          )}
+          <EuiSpacer size="m" />
+          {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+            <ExplainLogRateSpikes
+              dataView={dataView}
+              earliest={earliest}
+              latest={latest}
+              windowParameters={windowParameters}
+            />
+          )}
+        </EuiPageContentBody>
+      </EuiPageBody>
     </UrlStateContextProvider>
   );
 };

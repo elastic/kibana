@@ -5,16 +5,24 @@
  * 2.0.
  */
 import React, { FC } from 'react';
+
+import { WindowParameters } from '@kbn/aiops-utils';
+
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 import { DocumentCountStats } from '../../../get_document_stats';
 
-export interface Props {
+export interface DocumentCountContentProps {
+  brushSelectionUpdateHandler: (d: WindowParameters) => void;
   documentCountStats?: DocumentCountStats;
   totalCount: number;
 }
 
-export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount }) => {
+export const DocumentCountContent: FC<DocumentCountContentProps> = ({
+  brushSelectionUpdateHandler,
+  documentCountStats,
+  totalCount,
+}) => {
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
@@ -32,12 +40,15 @@ export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount
   return (
     <>
       <TotalCountHeader totalCount={totalCount} />
-      <DocumentCountChart
-        chartPoints={chartPoints}
-        timeRangeEarliest={timeRangeEarliest}
-        timeRangeLatest={timeRangeLatest}
-        interval={documentCountStats.interval}
-      />
+      {documentCountStats.interval !== undefined && (
+        <DocumentCountChart
+          brushSelectionUpdateHandler={brushSelectionUpdateHandler}
+          chartPoints={chartPoints}
+          timeRangeEarliest={timeRangeEarliest}
+          timeRangeLatest={timeRangeLatest}
+          interval={documentCountStats.interval}
+        />
+      )}
     </>
   );
 };

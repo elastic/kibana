@@ -80,15 +80,15 @@ export function parseUrlState(search: string): Dictionary<any> {
 // This uses a context to be able to maintain only one instance
 // of the url state. It gets passed down with `UrlStateProvider`
 // and can be used via `useUrlState`.
-export const aiOpsUrlStateStore = createContext<UrlState>({
+export const aiopsUrlStateStore = createContext<UrlState>({
   searchString: '',
   setUrlState: () => {},
 });
 
-export const { Provider } = aiOpsUrlStateStore;
+export const { Provider } = aiopsUrlStateStore;
 
 export const useUrlState = (accessor: Accessor) => {
-  const { searchString, setUrlState: setUrlStateContext } = useContext(aiOpsUrlStateStore);
+  const { searchString, setUrlState: setUrlStateContext } = useContext(aiopsUrlStateStore);
 
   const urlState = useMemo(() => {
     const fullUrlState = parseUrlState(searchString);
