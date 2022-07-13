@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
+// TODO Consolidate with duplicate component `CorrelationsProgressControls` in
+// `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
+
 interface ProgressControlProps {
   progress: number;
   progressMessage: string;
