@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { MapCenterAndZoom } from '../../common/descriptor_types';
 
 interface MapPanel {
@@ -12,6 +13,9 @@ interface MapPanel {
   onLocationChange(lat: number, lon: number, zoom: number): void;
   getIsMovementSynchronized(): boolean;
   setIsMovementSynchronized(IsMovementSynchronized: boolean): void;
+  getIsFilterByMapExtent(): boolean;
+  setIsFilterByMapExtent(isFilterByMapExtent: boolean): void;
+  getGeoFieldNames(): string[];
 }
 
 const registry: Record<string, MapPanel> = {};
@@ -19,7 +23,14 @@ let location: MapCenterAndZoom | undefined;
 let primaryPanelId: string | undefined;
 let primaryPanelTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
-export const synchronizeMovement = {
+export const mapEmbeddablesSingleton = {
+  getGeoFieldNames() {
+    const geoFieldNames: string[] = [];
+    Object.values(registry).forEach((mapPanel) => {
+      geoFieldNames.push(...mapPanel.getGeoFieldNames());
+    });
+    return _.uniq(geoFieldNames);
+  },
   getLocation() {
     return location;
   },
