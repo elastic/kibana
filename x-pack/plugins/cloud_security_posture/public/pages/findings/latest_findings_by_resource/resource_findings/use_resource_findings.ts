@@ -15,19 +15,21 @@ import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { CspFinding, FindingsBaseEsQuery } from '../../types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../../utils';
+import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
+import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../../utils';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
+  sort: Sort<CspFinding>;
   enabled: boolean;
 }
 
 export interface ResourceFindingsQuery {
   pageIndex: Pagination['pageIndex'];
   pageSize: Pagination['pageSize'];
+  sort: Sort<CspFinding>;
 }
 
 type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
@@ -43,6 +45,7 @@ const getResourceFindingsQuery = ({
   from,
   size,
   pitId,
+  sort,
 }: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   from,
   size,
@@ -54,6 +57,7 @@ const getResourceFindingsQuery = ({
         filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
+    sort: [{ [getSortKey(sort.field)]: sort.direction }],
     pit: { id: pitId },
     aggs: getFindingsCountAggQuery(),
   },

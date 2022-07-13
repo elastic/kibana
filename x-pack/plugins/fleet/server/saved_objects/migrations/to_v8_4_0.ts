@@ -10,6 +10,8 @@ import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { PackagePolicy } from '../../../common';
 import type { Installation } from '../../../common';
 
+import type { AgentPolicy } from '../../types';
+
 import { migratePackagePolicyToV840 as SecSolMigratePackagePolicyToV840 } from './security_solution';
 
 export const migrateInstallationToV840: SavedObjectMigrationFn<Installation, Installation> = (
@@ -20,7 +22,20 @@ export const migrateInstallationToV840: SavedObjectMigrationFn<Installation, Ins
   return installationDoc;
 };
 
-export const migratePackagePolicyToV830: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+export const migrateAgentPolicyToV840: SavedObjectMigrationFn<
+  Exclude<AgentPolicy, 'download_source_id'> & {
+    config_id: string;
+  },
+  AgentPolicy
+> = (agentPolicyDoc) => {
+  agentPolicyDoc.attributes.download_source_id = agentPolicyDoc.attributes.config_id;
+  // @ts-expect-error
+  delete agentPolicyDoc.attributes.config_id;
+
+  return agentPolicyDoc;
+};
+
+export const migratePackagePolicyToV840: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc,
   migrationContext
 ) => {

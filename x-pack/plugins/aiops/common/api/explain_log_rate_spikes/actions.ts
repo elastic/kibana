@@ -10,6 +10,7 @@ import type { ChangePoint } from '../../types';
 export const API_ACTION_NAME = {
   ADD_CHANGE_POINTS: 'add_change_points',
   ERROR: 'error',
+  RESET: 'reset',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
@@ -40,6 +41,14 @@ export function errorAction(payload: ApiActionError['payload']): ApiActionError 
   };
 }
 
+interface ApiActionReset {
+  type: typeof API_ACTION_NAME.RESET;
+}
+
+export function resetAction(): ApiActionReset {
+  return { type: API_ACTION_NAME.RESET };
+}
+
 interface ApiActionUpdateLoadingState {
   type: typeof API_ACTION_NAME.UPDATE_LOADING_STATE;
   payload: {
@@ -61,4 +70,5 @@ export function updateLoadingStateAction(
 export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionAddChangePoints
   | ApiActionError
+  | ApiActionReset
   | ApiActionUpdateLoadingState;
