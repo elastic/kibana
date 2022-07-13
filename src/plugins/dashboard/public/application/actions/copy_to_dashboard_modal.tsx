@@ -32,6 +32,7 @@ import {
 } from '../../services/embeddable';
 import { createDashboardEditUrl, DashboardConstants, DashboardContainer } from '../..';
 import { DashboardPanelState } from '..';
+import { setFilters, useDashboardDispatch } from '../state';
 
 interface CopyToDashboardModalProps {
   capabilities: DashboardCopyToCapabilities;
@@ -56,6 +57,7 @@ export function CopyToDashboardModal({
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );
+  const dispatchDashboardStateChange = useDashboardDispatch();
 
   const onSubmit = useCallback(() => {
     const dashboard = embeddable.getRoot() as DashboardContainer;
@@ -63,6 +65,9 @@ export function CopyToDashboardModal({
     if (!panelToCopy) {
       throw new PanelNotFoundError();
     }
+
+    dispatchDashboardStateChange(setFilters([]));
+
     const state = {
       type: embeddable.type,
       input: {
@@ -76,11 +81,19 @@ export function CopyToDashboardModal({
         : `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
+
     stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
       state,
       path,
     });
-  }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
+  }, [
+    embeddable,
+    dashboardOption,
+    selectedDashboard,
+    closeModal,
+    dispatchDashboardStateChange,
+    stateTransfer,
+  ]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';

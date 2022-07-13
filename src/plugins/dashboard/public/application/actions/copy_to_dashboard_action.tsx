@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { CoreStart, OverlayStart } from '@kbn/core/public';
+import { Provider } from 'react-redux';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
 import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
 import { toMountPoint } from '../../services/kibana_react';
@@ -15,6 +16,7 @@ import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
+import { dashboardStateStore } from '../state';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 
@@ -71,16 +73,19 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
+
     const session = this.overlays.openModal(
       toMountPoint(
-        <CopyToDashboardModal
-          PresentationUtilContext={this.PresentationUtilContext}
-          closeModal={() => session.close()}
-          stateTransfer={this.stateTransfer}
-          capabilities={this.capabilities}
-          dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
-          embeddable={embeddable}
-        />,
+        <Provider store={dashboardStateStore}>
+          <CopyToDashboardModal
+            PresentationUtilContext={this.PresentationUtilContext}
+            closeModal={() => session.close()}
+            stateTransfer={this.stateTransfer}
+            capabilities={this.capabilities}
+            dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
+            embeddable={embeddable}
+          />
+        </Provider>,
         { theme$: this.theme.theme$ }
       ),
       {
