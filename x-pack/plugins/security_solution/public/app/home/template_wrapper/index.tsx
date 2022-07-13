@@ -66,7 +66,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
     $addBottomPadding &&
     `
     @media (min-width: 768px) {
-      .kbnPageTemplateSolutionNav {
+      .kbnSolutionNav {
         padding-bottom: ${gutterTimeline};
       }
     }

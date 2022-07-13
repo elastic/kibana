@@ -218,7 +218,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
           disabled={false}
         >
           <legend
-            className="euiScreenReaderOnly"
+            className="emotion-euiScreenReaderOnly"
           >
             Style options
           </legend>
@@ -332,7 +332,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
           disabled={false}
         >
           <legend
-            className="euiScreenReaderOnly"
+            className="emotion-euiScreenReaderOnly"
           >
             Alignment options
           </legend>
@@ -679,7 +679,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
           disabled={false}
         >
           <legend
-            className="euiScreenReaderOnly"
+            className="emotion-euiScreenReaderOnly"
           >
             Style options
           </legend>
@@ -793,7 +793,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
           disabled={false}
         >
           <legend
-            className="euiScreenReaderOnly"
+            className="emotion-euiScreenReaderOnly"
           >
             Alignment options
           </legend>

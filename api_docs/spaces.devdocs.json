@@ -33,13 +33,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
@@ -3533,13 +3527,7 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3555,13 +3543,7 @@
                   "the request."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3665,13 +3647,7 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "spaces",
@@ -3694,13 +3670,7 @@
                   "the request."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3721,13 +3691,7 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3743,13 +3707,7 @@
                   "the request."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3770,13 +3728,7 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => boolean"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3792,13 +3744,7 @@
                   "the request."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3819,13 +3765,7 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "spaces",
@@ -3849,13 +3789,7 @@
                   "the request."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3968,13 +3902,7 @@
         ],
         "signature": [
           "(request: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>, savedObjectsStart: ",
           {
             "pluginId": "core",
@@ -4004,13 +3932,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
@@ -4051,13 +3973,7 @@
         ],
         "signature": [
           "(request: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>, baseClient: ",
           {
             "pluginId": "spaces",
@@ -4087,13 +4003,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",

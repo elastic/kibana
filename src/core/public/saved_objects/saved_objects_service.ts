@@ -7,8 +7,8 @@
  */
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
-import type { HttpStart } from '../http';
-import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { SavedObjectsClient, type SavedObjectsClientContract } from './saved_objects_client';
 
 /**
  * @public

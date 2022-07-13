@@ -265,7 +265,7 @@ Array [
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -381,7 +381,7 @@ Array [
             <span
               aria-atomic="true"
               aria-relevant="additions text"
-              class="euiScreenReaderOnly"
+              class="emotion-euiScreenReaderOnly"
               role="status"
             >
               Page 1 of 1
@@ -610,7 +610,7 @@ Array [
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -727,7 +727,7 @@ Array [
             <span
               aria-atomic="true"
               aria-relevant="additions text"
-              class="euiScreenReaderOnly"
+              class="emotion-euiScreenReaderOnly"
               role="status"
             >
               Page 1 of 1

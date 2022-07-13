@@ -67,7 +67,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             {editTooltip}
           </EuiButton>
         ),
-        defaultIndex !== indexPattern.id && setDefault && canSave && (
+        defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButton
             onClick={setDefault}
             iconType="starFilled"
@@ -77,7 +77,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             {setDefaultTooltip}
           </EuiButton>
         ),
-        canSave && (
+        canSave && indexPattern.isPersisted() && (
           <EuiButtonEmpty
             color="danger"
             onClick={deleteIndexPatternClick}

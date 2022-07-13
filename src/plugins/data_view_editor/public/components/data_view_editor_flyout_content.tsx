@@ -20,6 +20,7 @@ import {
   useFormData,
   useKibana,
   GetFieldsOptions,
+  UseField,
 } from '../shared_imports';
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
@@ -55,7 +56,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (dataViewSpec: DataViewSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec, persist: boolean) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -63,6 +64,7 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
+  allowAdHoc: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -79,6 +81,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
+  allowAdHoc,
 }: Props) => {
   const {
     services: { http, dataViews, uiSettings, overlays },
@@ -88,6 +91,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      isAdHoc: false,
       ...(editData
         ? {
             title: editData.title,
@@ -129,11 +133,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
-            await onSave(indexPatternStub);
+            await onSave(indexPatternStub, !formData.isAdHoc);
           },
         });
       } else {
-        await onSave(indexPatternStub);
+        await onSave(indexPatternStub, !formData.isAdHoc);
       }
     },
   });
@@ -371,6 +375,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
         <Form form={form} className="indexPatternEditor__form">
+          <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
           <EuiFlexGroup>
@@ -409,9 +414,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </Form>
         <Footer
           onCancel={onCancel}
-          onSubmit={() => form.submit()}
+          onSubmit={(adhoc?: boolean) => {
+            form.setFieldValue('isAdHoc', adhoc || false);
+            form.submit();
+          }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          allowAdHoc={allowAdHoc}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>

@@ -2071,6 +2071,20 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.legendPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legendPosition",
+            "description": [],
+            "signature": [
+              "Position",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ExploratoryEmbeddableProps.onBrushEnd",
             "type": "Function",
             "tags": [],
@@ -2201,6 +2215,19 @@
               "boolean | ",
               "ActionTypes",
               "[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.align",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "align",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false
@@ -6535,13 +6562,7 @@
             "text": "RequestStatus"
           },
           "; esResponse: any; kibanaRequest: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
           {
             "pluginId": "inspector",
@@ -6631,13 +6652,7 @@
                 "label": "kibanaRequest",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/observability/common/utils/get_inspect_response.ts",
@@ -6982,13 +6997,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7249,13 +7258,7 @@
           "text": "LicensingApiRequestHandlerContext"
         },
         ">; }, request: ",
-        {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCoreHttpPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
         "Annotation",
         "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
