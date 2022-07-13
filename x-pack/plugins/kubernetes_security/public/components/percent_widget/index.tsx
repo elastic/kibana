@@ -14,8 +14,8 @@ import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useFetchPercentWidgetData } from './hooks';
 
-export const LOADING_TEST_ID = 'kubernetesSecurity:percent-widget-loading';
-export const PERCENT_DATA_TEST_ID = 'kubernetesSecurity:percentage-widget-data';
+export const LOADING_TEST_ID = 'kubernetesSecurity:percentWidgetLoading';
+export const PERCENT_DATA_TEST_ID = 'kubernetesSecurity:percentWidgetData';
 
 export interface PercenWidgetDataValueMap {
   name: string;
