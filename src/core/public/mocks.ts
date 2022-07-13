@@ -17,6 +17,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.
 import { ScopedHistory } from './application';
@@ -24,7 +25,6 @@ import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
@@ -39,7 +39,7 @@ export { httpServiceMock } from '@kbn/core-http-browser-mocks';
 export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 export { notificationServiceMock } from './notifications/notifications_service.mock';
 export { overlayServiceMock } from './overlays/overlay_service.mock';
-export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
