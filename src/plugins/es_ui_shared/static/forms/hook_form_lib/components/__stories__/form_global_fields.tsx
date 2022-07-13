@@ -20,10 +20,16 @@ const globalFields = {
   fieldA: {
     path: 'fieldA',
     defaultValue: 'foo',
+    config: {
+      label: 'Field A',
+    },
   },
   fieldB: {
     path: 'fieldB',
     defaultValue: 123,
+    config: {
+      label: 'Field B',
+    },
   },
 };
 
@@ -136,10 +142,16 @@ const globalFields = {
   fieldA: {
     path: 'fieldA',
     defaultValue: 'foo',
+    config: {
+      label: 'Field A',
+    },
   },
   fieldB: {
     path: 'fieldB',
     defaultValue: 123,
+    config: {
+      label: 'Field B',
+    },
   },
 };
 
