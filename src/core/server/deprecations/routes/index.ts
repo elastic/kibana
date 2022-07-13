@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { InternalHttpServiceSetup } from '../../http';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalDeprecationRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 
