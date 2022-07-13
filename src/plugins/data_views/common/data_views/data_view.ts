@@ -156,7 +156,7 @@ export class DataView implements DataViewBase {
 
     // set values
     this.id = spec.id;
-    this.fieldFormatMap = spec.fieldFormats || {};
+    this.fieldFormatMap = { ...spec.fieldFormats };
 
     this.version = spec.version;
 
