@@ -50,9 +50,13 @@ const ConsoleWindow = styled.div`
       border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
     }
 
-    &-footer,
     &-commandInput {
       padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
+    }
+
+    &-footer {
+      padding-top: 0;
       padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
 
