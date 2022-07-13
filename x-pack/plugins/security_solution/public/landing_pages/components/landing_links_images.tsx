@@ -111,6 +111,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
               <EuiImage
                 data-test-subj="LandingImageCard-image"
                 role="presentation"
+                size={364}
                 alt={title}
                 src={image}
               />

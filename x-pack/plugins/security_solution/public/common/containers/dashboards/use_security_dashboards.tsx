@@ -8,10 +8,10 @@
 import type { MouseEventHandler } from 'react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
-import { useKibana } from '../../lib/kibana';
+import { LinkAnchor } from '../../components/links';
+import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
 
 export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
@@ -76,19 +76,16 @@ export const useSecurityDashboardsTableItems = () => {
 };
 
 export const useDashboardsTableColumns = (): Array<EuiBasicTableColumn<DashboardTableItem>> => {
-  const {
-    application: { navigateToUrl },
-    savedObjectsTagging,
-    dashboard: { locator } = {},
-  } = useKibana().services;
+  const { savedObjectsTagging, dashboard: { locator } = {} } = useKibana().services;
+  const { navigateTo } = useNavigateTo();
 
   const getNavigationHandler = useCallback(
     (href: string): MouseEventHandler =>
       (ev) => {
         ev.preventDefault();
-        navigateToUrl(href);
+        navigateTo({ url: href });
       },
-    [navigateToUrl]
+    [navigateTo]
   );
 
   const columns = useMemo(
@@ -100,10 +97,9 @@ export const useDashboardsTableColumns = (): Array<EuiBasicTableColumn<Dashboard
         render: (title: string, { id }) => {
           const href = locator?.getRedirectUrl({ dashboardId: id });
           return href ? (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink href={href} onClick={getNavigationHandler(href)}>
+            <LinkAnchor href={href} onClick={getNavigationHandler(href)}>
               {title}
-            </EuiLink>
+            </LinkAnchor>
           ) : (
             title
           );
