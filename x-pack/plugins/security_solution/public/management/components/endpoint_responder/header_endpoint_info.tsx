@@ -60,13 +60,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
               anchorClassName="eui-textTruncate"
             >
               <EuiText size="s" data-test-subj="responderHeaderEndpointName">
-                <h6 className="eui-textTruncate">
-                  <FormattedMessage
-                    id="xpack.securitySolution.responder.header.endpointName"
-                    defaultMessage="ENDPOINT {name}"
-                    values={{ name: endpointDetails.metadata.host.name }}
-                  />
-                </h6>
+                <h6 className="eui-textTruncate">{endpointDetails.metadata.host.name}</h6>
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
