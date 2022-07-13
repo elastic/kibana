@@ -595,13 +595,13 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.DataLayerArgs.splitAccessor",
-            "type": "CompoundType",
+            "id": "def-common.DataLayerArgs.splitAccessors",
+            "type": "Array",
             "tags": [],
-            "label": "splitAccessor",
+            "label": "splitAccessors",
             "description": [],
             "signature": [
-              "string | ",
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -609,7 +609,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              " | undefined"
+              ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
