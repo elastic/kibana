@@ -34,12 +34,14 @@ export const querySignalsRoute = (
     },
     async (context, request, response) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { query, aggs, _source, track_total_hits, size, runtime_mappings } = request.body;
+      const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings } =
+        request.body;
       const siemResponse = buildSiemResponse(response);
       if (
         query == null &&
         aggs == null &&
         _source == null &&
+        fields == null &&
         track_total_hits == null &&
         size == null
       ) {
@@ -57,6 +59,7 @@ export const querySignalsRoute = (
             // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
             aggs: { ...aggs },
             _source,
+            fields,
             track_total_hits,
             size,
             runtime_mappings: runtime_mappings as MappingRuntimeFields,
