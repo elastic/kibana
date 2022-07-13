@@ -8,7 +8,7 @@
 import type { SearchResult } from '@elastic/search-ui';
 
 import { Meta } from '../../../../../common/types';
-import { ResultMeta, ScalarFieldValue } from '../result/types';
+import { ResultMeta, SimpleFieldValue } from '../result/types';
 
 export interface CurationSuggestion {
   query: string;
@@ -47,7 +47,7 @@ export interface CurationResult {
   // TODO: Consider updating our internal API to return more standard Result data in the future
   id: string;
   _meta?: ResultMeta;
-  [key: string]: ScalarFieldValue | ResultMeta | CurationResultNestedFieldValue | undefined;
+  [key: string]: SimpleFieldValue | ResultMeta | CurationResultNestedFieldValue | undefined;
 }
 
-type CurationResultNestedFieldValue = { [key: string]: ScalarFieldValue | CurationResultNestedFieldValue } | CurationResultNestedFieldValue[];
+type CurationResultNestedFieldValue = { [key: string]: SimpleFieldValue | CurationResultNestedFieldValue } | CurationResultNestedFieldValue[];

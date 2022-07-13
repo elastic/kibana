@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FieldValue, NestedFieldValue, ResultMeta, ScalarFieldValue, Snippet } from '../../components/result/types';
+import { FieldValue, NestedFieldValue, ResultMeta, SimpleFieldValue, Snippet } from '../../components/result/types';
 
 interface SearchApiWrappedFieldValue {
-  raw?: ScalarFieldValue;
+  raw?: SimpleFieldValue;
   snippet?: Snippet;
 }
 type SearchApiNestedFieldValue = { [key: string]: SearchApiNestedFieldValue | SearchApiWrappedFieldValue } | SearchApiNestedFieldValue[];

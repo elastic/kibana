@@ -10,7 +10,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { SchemaType } from '../../../shared/schema/types';
-import { FieldType, Raw, ScalarFieldValue, Snippet } from './types';
+import { FieldType, Raw, SimpleFieldValue, Snippet } from './types';
 
 import './result_field_value.scss';
 
@@ -19,7 +19,7 @@ const isNotNumeric = (raw: string | number): boolean => {
   return isNaN(parseFloat(raw));
 };
 
-const isScalarValue = (_: Raw, type?: FieldType): _ is ScalarFieldValue => {
+const isScalarValue = (_: Raw, type?: FieldType): _ is SimpleFieldValue => {
   return type !== SchemaType.Nested
 };
 
