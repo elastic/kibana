@@ -79,7 +79,7 @@ describe('StatusPopoverButton', () => {
 
   test('it shows the correct options when clicked', async () => {
     (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
-    const { getByText } = render(
+    const { getByText, container } = render(
       <TestProviders>
         <StatusPopoverButton {...props} />
       </TestProviders>
@@ -87,6 +87,7 @@ describe('StatusPopoverButton', () => {
 
     getByText('open').click();
 
+    expect(container.querySelector('.euiBadge__icon')).not.toBeNull();
     getByText('Mark as acknowledged');
     getByText('Mark as closed');
   });
@@ -102,7 +103,7 @@ describe('StatusPopoverButton', () => {
     getByText('open').click();
 
     // Check the popover downward arrow should not be visible
-    expect(container.querySelector('euiBadge__icon')).toBeNull();
+    expect(container.querySelector('.euiBadge__icon')).toBeNull();
 
     // popover should not open when hence checking that popover is not open
     expect(queryByRole('dialog')).toBeNull();
