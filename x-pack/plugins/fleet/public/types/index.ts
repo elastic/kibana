@@ -23,6 +23,7 @@ export type {
   PackagePolicyConfigRecordEntry,
   PackagePolicyPackage,
   Output,
+  DownloadSource,
   DataStream,
   Settings,
   CurrentUpgrade,
@@ -121,6 +122,9 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  GetDownloadSourceResponse,
+  PostDownloadSourceRequest,
+  PutDownloadSourceRequest,
 } from '../../common';
 export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
 

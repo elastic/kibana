@@ -33,7 +33,12 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { policyHasFleetServer } from '../../../../services';
 
-import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
+import {
+  useOutputOptions,
+  useDownloadSourcesOptions,
+  DEFAULT_OUTPUT_VALUE,
+  DEFAULT_DOWNLOAD_SOURCE_VALUE,
+} from './hooks';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -57,6 +62,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
+  const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
+    useDownloadSourcesOptions(agentPolicy);
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
@@ -358,6 +365,44 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               });
             }}
             options={monitoringOutputOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
+              defaultMessage="Agent Binary Download"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
+            defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.download_source_id && validation.download_source_id
+              ? validation.download_source_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
+        >
+          <EuiSuperSelect
+            valueOfSelected={agentPolicy.download_source_id || DEFAULT_DOWNLOAD_SOURCE_VALUE}
+            fullWidth
+            isLoading={isLoadingDownloadSources}
+            onChange={(e) => {
+              updateAgentPolicy({
+                download_source_id: e !== DEFAULT_DOWNLOAD_SOURCE_VALUE ? e : null,
+              });
+            }}
+            options={dataDownloadSourceOptions}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
