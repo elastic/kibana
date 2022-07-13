@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
+import { RollupGetRollupIndexCapsRollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
+import { SerializableRecord } from '@kbn/utility-types';
+import { get, isEqual, set } from 'lodash';
 
 /**
  * Checks if given job configs are compatible by attempting to merge them
@@ -34,12 +36,12 @@ export function areJobsCompatible(jobs = []) {
  * @param jobs
  * @returns {{}}
  */
-export function mergeJobConfigurations(jobs = []) {
+export function mergeJobConfigurations(jobs: RollupGetRollupIndexCapsRollupJobSummary[] = []) {
   if (!jobs || !Array.isArray(jobs) || !jobs.length) {
     throw new Error('No capabilities available');
   }
 
-  const allAggs: { [key: string]: any } = {};
+  const allAggs: { [key: string]: SerializableRecord } = {};
 
   // For each job, look through all of its fields
   jobs.forEach((job: { fields: { [key: string]: any } }) => {
@@ -66,16 +68,17 @@ export function mergeJobConfigurations(jobs = []) {
         }
         // If aggregation already exists, attempt to merge it
         else {
-          const fieldAgg = allAggs[aggName][fieldName];
-
+          const fieldAgg = allAggs[aggName][fieldName] as object | null;
           switch (aggName) {
             // For histograms, calculate the least common multiple between the
             // new interval and existing interval
             case 'histogram':
-              // TODO: Fix this with LCD algorithm
-              const intervals = [fieldAgg.interval, agg.interval].sort((a, b) => a - b);
-              const isMultiple = intervals[1] % intervals[0] === 0;
-              fieldAgg.interval = isMultiple ? intervals[1] : intervals[0] * intervals[1];
+              if (fieldAgg) {
+                // TODO: Fix this with LCD algorithm
+                const intervals = [get(fieldAgg, 'interval'), agg.interval].sort((a, b) => a - b);
+                const isMultiple = intervals[1] % intervals[0] === 0;
+                set(fieldAgg, 'interval', isMultiple ? intervals[1] : intervals[0] * intervals[1]);
+              }
               break;
 
             // For date histograms, if it is on the same field, check that the configuration is identical,

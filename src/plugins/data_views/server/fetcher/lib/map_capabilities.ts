@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { mergeJobConfigurations } from './jobs_compatibility';
+
+export interface RollupIndexCapability {
+  [key: string]: { aggs?: object; error?: string };
+}
 
 /**
  * Get rollup job capabilities
@@ -14,9 +19,11 @@ import { mergeJobConfigurations } from './jobs_compatibility';
  * @param indices rollup job index capabilites
  */
 
-export function getCapabilitiesForRollupIndices(indices: Record<string, { rollup_jobs: any }>) {
+export function getCapabilitiesForRollupIndices(
+  indices: RollupGetRollupIndexCapsResponse
+): RollupIndexCapability {
   const indexNames = Object.keys(indices);
-  const capabilities = {} as { [key: string]: any };
+  const capabilities: RollupIndexCapability = {};
 
   indexNames.forEach((index) => {
     try {
