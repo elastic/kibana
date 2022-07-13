@@ -72,7 +72,6 @@ const getTestUtils = (
                 params: {},
                 created_by: 'elastic',
                 scheduled_task_id: response.body.scheduled_task_id,
-                snooze_schedule: response.body.snooze_schedule,
                 updated_at: response.body.updated_at,
                 created_at: response.body.created_at,
                 throttle: '1m',
@@ -85,6 +84,7 @@ const getTestUtils = (
                 ...(describeType === 'internal'
                   ? {
                       monitoring: response.body.monitoring,
+                      snooze_schedule: response.body.snooze_schedule,
                     }
                   : {}),
               });
