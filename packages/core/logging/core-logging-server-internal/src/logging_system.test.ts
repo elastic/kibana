@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-const mockStreamWrite = jest.fn();
-jest.mock('fs', () => ({
-  ...(jest.requireActual('fs') as any),
-  constants: {},
-  createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
-}));
+import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
 
 const dynamicProps = { process: { pid: expect.any(Number) } };
 
@@ -34,6 +29,7 @@ afterEach(() => {
   jest.restoreAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
+  mockGetFlattenedObject.mockClear();
 });
 
 test('uses default memory buffer logger until config is provided', () => {
@@ -597,5 +593,39 @@ test('new global context always overwrites existing context', async () => {
     message: 'You know, just for your info, again.',
     a: false,
     d: true,
+  });
+});
+
+test('flattens global context objects before passing to LoggerAdapter', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: { b: { c: true } }, d: false });
+
+  const logger = system.get('some-context');
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ d: true, e: false });
+
+  logger.info('You know, just for your info.');
+
+  expect(mockGetFlattenedObject).toHaveBeenCalledTimes(3);
+  expect(mockGetFlattenedObject.mock.calls[0][0]).toEqual({
+    a: { b: { c: true } },
+    d: false,
+  });
+  expect(mockGetFlattenedObject.mock.calls[1][0]).toEqual({
+    a: { b: { c: true } },
+    d: false,
+  });
+  expect(mockGetFlattenedObject.mock.calls[2][0]).toEqual({
+    a: { b: { c: true } },
+    d: true,
+    e: false,
   });
 });

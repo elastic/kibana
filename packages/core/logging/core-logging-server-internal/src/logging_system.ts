@@ -52,7 +52,10 @@ export class LoggingSystem implements ILoggingSystem {
     if (!this.loggers.has(context)) {
       this.loggers.set(
         context,
-        new LoggerAdapter(this.createLogger(context, this.computedConfig), this.globalContext)
+        new LoggerAdapter(
+          this.createLogger(context, this.computedConfig),
+          getFlattenedObject(this.globalContext)
+        )
       );
     }
     return this.loggers.get(context)!;

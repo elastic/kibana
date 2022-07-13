@@ -7,4 +7,4 @@
  */
 
 export { mergeGlobalContext } from './merge_global_context';
-export { GlobalContext } from './types';
+export type { GlobalContext } from './types';
