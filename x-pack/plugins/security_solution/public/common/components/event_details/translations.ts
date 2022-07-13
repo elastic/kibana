@@ -117,13 +117,6 @@ export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alert
   defaultMessage: 'Rule type',
 });
 
-export const SOURCE_EVENT_ID = i18n.translate(
-  'xpack.securitySolution.detections.alerts.sourceEventId',
-  {
-    defaultMessage: 'Source event id',
-  }
-);
-
 export const MULTI_FIELD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
   {
@@ -157,13 +150,6 @@ export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetai
   defaultMessage: 'View all fields in table',
 });
 
-export const SESSION_ID = i18n.translate('xpack.securitySolution.eventDetails.sessionId', {
-  defaultMessage: 'Session ID',
+export const INSIGHTS = i18n.translate('xpack.securitySolution.alertDetails.overview.insights', {
+  defaultMessage: 'Insights',
 });
-
-export const ALERTS_IN_PROCESS_TREE = i18n.translate(
-  'xpack.securitySolution.eventDetails.alertsInProcessTree',
-  {
-    defaultMessage: 'Related alerts',
-  }
-);

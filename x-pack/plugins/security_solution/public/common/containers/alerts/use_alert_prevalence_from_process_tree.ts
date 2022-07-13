@@ -28,6 +28,7 @@ interface UseAlertPrevalenceOptions {
 interface UserAlertPrevalenceFromProcessTreeResult {
   loading: boolean;
   alertIds: undefined | string[];
+  count?: number;
   error: boolean;
 }
 
@@ -100,6 +101,7 @@ export const useAlertPrevalenceFromProcessTree = ({
   return {
     loading,
     alertIds,
+    count: alertIds ? alertIds.length : undefined,
     error: false,
   };
 };
