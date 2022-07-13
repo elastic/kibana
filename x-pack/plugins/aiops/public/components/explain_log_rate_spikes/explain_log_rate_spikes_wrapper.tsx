@@ -149,12 +149,12 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
 
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <EuiPageBody data-test-subj="aiOpsIndexPage" paddingSize="none" panelled={false}>
+      <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <EuiPageContentHeader className="aiOpsPageHeader">
+            <EuiPageContentHeader className="aiopsPageHeader">
               <EuiPageContentHeaderSection>
-                <div className="aiOpsTitleHeader">
+                <div className="aiopsTitleHeader">
                   <EuiTitle size={'s'}>
                     <h2>{dataView.title}</h2>
                   </EuiTitle>
@@ -165,7 +165,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
                 alignItems="center"
                 justifyContent="flexEnd"
                 gutterSize="s"
-                data-test-subj="aiOpsTimeRangeSelectorSection"
+                data-test-subj="aiopsTimeRangeSelectorSection"
               >
                 {dataView.timeFieldName !== undefined && (
                   <EuiFlexItem grow={false}>
