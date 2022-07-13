@@ -25,7 +25,7 @@ type Props = {
     children: JSX.Element;
   };
   isOpen?: boolean;
-  isExternallyManaged?: boolean;
+  isManaged?: boolean;
   onChange?: (isOpen: boolean) => void;
 } & (
   | {
@@ -54,12 +54,12 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
   }, [isOpenState, onChange, isOpen]);
 
   const actionButton = button ? (
-    <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isExternallyManaged}>
+    <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isManaged}>
       {button.children}
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      isDisabled={props.isExternallyManaged}
+      isDisabled={props.isManaged}
       iconType="boxesHorizontal"
       onClick={handleToggleMenu}
       aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
@@ -74,7 +74,7 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
-        props.isExternallyManaged ? (
+        props.isManaged ? (
           <EuiToolTip
             title={i18n.translate('xpack.fleet.externallyManagedLabel', {
               defaultMessage: 'This is externally managed integration policy.',

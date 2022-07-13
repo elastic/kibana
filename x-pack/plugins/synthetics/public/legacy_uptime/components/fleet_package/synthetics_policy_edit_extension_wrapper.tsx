@@ -145,5 +145,5 @@ const EDIT_IN_UPTIME_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.
 });
 
 const EDIT_IN_UPTIME_DESC = i18n.translate('xpack.synthetics.editPackagePolicy.inUptimeDesc', {
-  defaultMessage: 'This is externally managed integration policy, and cannot be edited here.',
+  defaultMessage: 'This package policy is managed by uptime app.',
 });

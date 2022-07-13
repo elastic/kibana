@@ -37,7 +37,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
-  const isExternallyManaged = Boolean(packagePolicy.is_managed);
+  const isManaged = Boolean(packagePolicy.is_managed);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -150,7 +150,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         </EuiPortal>
       )}
       <ContextMenuActions
-        isExternallyManaged={isExternallyManaged}
+        isManaged={isManaged}
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}
