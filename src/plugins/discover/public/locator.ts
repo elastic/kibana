@@ -142,7 +142,6 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (interval) appState.interval = interval;
 
     if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;

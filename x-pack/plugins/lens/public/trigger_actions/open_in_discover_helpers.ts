@@ -6,7 +6,7 @@
  */
 
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { Filter, compareFilters } from '@kbn/es-query';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { Embeddable } from '../embeddable';
@@ -40,7 +40,6 @@ export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
 
 async function getDiscoverLocationParams({
   embeddable,
-  filters,
   dataViews,
   timeFieldName,
 }: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
@@ -54,12 +53,16 @@ async function getDiscoverLocationParams({
     throw new Error('Underlying data is not ready');
   }
   const dataView = await dataViews.get(args.indexPatternId);
-  let filtersToApply = [...(filters || []), ...args.filters];
+  const embeddableFilters = embeddable.getSavedVis()?.state.filters;
+  let filtersToApply = getFiltersToApply(
+    [...args.filters],
+    embeddableFilters ? [...embeddableFilters] : undefined
+  );
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters
   if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
     const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
+    const { restOfFilters, timeRange } = extractTimeRange(filtersToApply || [], timeFieldName);
     filtersToApply = restOfFilters;
     if (timeRange) {
       timeRangeToApply = timeRange;
@@ -74,16 +77,36 @@ async function getDiscoverLocationParams({
   };
 }
 
-export async function getHref({
-  embeddable,
-  discover,
-  filters,
-  dataViews,
-  timeFieldName,
-}: Context) {
+function getFiltersToApply(
+  argFilters: Filter[] | undefined,
+  embeddableFilters: Filter[] | undefined
+) {
+  if (!argFilters && !embeddableFilters) {
+    return [];
+  }
+  if (!argFilters) {
+    return embeddableFilters;
+  }
+  if (!embeddableFilters) {
+    return argFilters;
+  }
+  // argFilters will have the correct index
+  // we just need to return the subset of arg filters that are in embeddable filters
+  return argFilters.filter((argFilter) => {
+    return embeddableFilters.find((embeddableFilter) => {
+      return compareFilters(embeddableFilter, argFilter, {
+        state: true,
+        negate: true,
+        disabled: true,
+        alias: true,
+      });
+    });
+  });
+}
+
+export async function getHref({ embeddable, discover, dataViews, timeFieldName }: Context) {
   const params = await getDiscoverLocationParams({
     embeddable,
-    filters,
     dataViews,
     timeFieldName,
   });

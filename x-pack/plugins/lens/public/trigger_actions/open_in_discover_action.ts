@@ -37,7 +37,6 @@ export const createOpenInDiscoverAction = (
         discover,
         dataViews,
         hasDiscoverAccess,
-        filters: context.embeddable.getInput().filters || [],
         ...context,
       });
     },
