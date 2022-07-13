@@ -44,7 +44,7 @@ export const ControlledField = ({
   dependenciesValues,
   dependenciesFieldMeta,
 }: Props) => {
-  const { setValue, reset } = useFormContext();
+  const { setValue, reset, formState } = useFormContext();
   const noop = () => {};
   let hook: Function = noop;
   let hookProps;
@@ -67,6 +67,7 @@ export const ControlledField = ({
         dependenciesFieldMeta,
         space: space?.id,
         isEdit,
+        formState,
       })
     : {};
   const isInvalid = hookResult || Boolean(fieldState.error);

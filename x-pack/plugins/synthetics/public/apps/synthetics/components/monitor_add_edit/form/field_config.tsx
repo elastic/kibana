@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UseFormReturn, ControllerRenderProps } from 'react-hook-form';
+import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
   EuiButtonGroup,
   EuiCheckbox,
@@ -290,13 +290,17 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigURL',
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value, { shouldValidate: true });
+          setValue(ConfigKey.URLS, event.target.value, {
+            shouldValidate: Boolean(formState.submitCount > 0),
+          });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
+            setValue(ConfigKey.NAME, event.target.value, {
+              shouldValidate: Boolean(formState.submitCount > 0),
+            });
           }
         },
       };
@@ -314,12 +318,16 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value, { shouldValidate: true });
+          setValue(ConfigKey.URLS, event.target.value, {
+            shouldValidate: Boolean(formState.submitCount > 0),
+          });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
+            setValue(ConfigKey.NAME, event.target.value, {
+              shouldValidate: Boolean(formState.submitCount > 0),
+            });
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigURL',
@@ -335,12 +343,16 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value, { shouldValidate: true });
+          setValue(ConfigKey.HOSTS, event.target.value, {
+            shouldValidate: Boolean(formState.submitCount > 0),
+          });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
+            setValue(ConfigKey.NAME, event.target.value, {
+              shouldValidate: Boolean(formState.submitCount > 0),
+            });
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
@@ -356,12 +368,16 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value, { shouldValidate: true });
+          setValue(ConfigKey.HOSTS, event.target.value, {
+            shouldValidate: Boolean(formState.submitCount > 0),
+          });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value, { shouldValidate: true });
+            setValue(ConfigKey.NAME, event.target.value, {
+              shouldValidate: Boolean(formState.submitCount > 0),
+            });
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
@@ -436,10 +452,12 @@ export const FIELD: Record<string, FieldMeta> = {
       field,
       setValue,
       locations,
+      formState,
     }: {
       field?: ControllerRenderProps;
       setValue: UseFormReturn['setValue'];
       locations: ServiceLocations;
+      formState: FormState<unknown>;
     }) => {
       return {
         options: Object.values(locations).map((location) => ({
@@ -460,7 +478,7 @@ export const FIELD: Record<string, FieldMeta> = {
               id: location.id,
               isServiceManaged: location.isServiceManaged,
             })) as MonitorServiceLocations,
-            { shouldValidate: true }
+            { shouldValidate: Boolean(formState.submitCount > 0) }
           );
         },
       };

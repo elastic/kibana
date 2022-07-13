@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { UseFormReturn, ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
+import {
+  UseFormReturn,
+  ControllerRenderProps,
+  ControllerFieldState,
+  FormState,
+} from 'react-hook-form';
 import {
   ServiceLocations,
   FormMonitorType,
@@ -32,6 +37,7 @@ export interface FieldMeta {
   helpText?: string | React.ReactNode;
   props?: (params: {
     field?: ControllerRenderProps;
+    formState: FormState<unknown>;
     setValue: UseFormReturn['setValue'];
     reset: UseFormReturn['reset'];
     locations: ServiceLocations;

@@ -20,7 +20,7 @@ export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: 
   space,
 }) => {
   const methods = useFormWrapped({
-    mode: 'onTouched',
+    mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues:
       formatDefaultFormValues(defaultValues as SyntheticsMonitor) ||
