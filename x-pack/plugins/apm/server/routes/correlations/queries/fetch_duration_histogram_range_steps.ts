@@ -21,12 +21,12 @@ import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 // `import 'd3-scale'` to `require('d3-scale')`, we have to use
 // `await import('d3-scale')` instead. And since top-level await isn't
 // supported, we also need to lacy-load it.
-let scaleLog: typeof ScaleLog | undefined;
+let scaleLog: typeof ScaleLog;
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   // We round the final values because the ES range agg we use won't accept numbers with decimals for `transaction.duration.us`.
-  const logFn = scaleLog!().domain([min, max]).range([1, steps]);
+  const logFn = scaleLog().domain([min, max]).range([1, steps]);
   return [...Array(steps).keys()]
     .map(logFn.invert)
     .map((d) => (isNaN(d) ? 0 : Math.round(d)));

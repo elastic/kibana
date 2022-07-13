@@ -8,7 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import * as d3Brush from 'd3-brush';
-import * as d3Scale from 'd3-scale';
+import type { scaleLinear as ScaleLinear } from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
@@ -17,7 +17,6 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import './dual_brush.scss';
 
 const { brush, brushSelection, brushX } = d3Brush;
-const { scaleLinear } = d3Scale;
 const { select: d3Select } = d3Selection;
 // Import fix to apply correct types for the use of d3.select(this).transition()
 d3Select.prototype.transition = d3Transition.transition;
@@ -26,10 +25,14 @@ const d3 = {
   brush,
   brushSelection,
   brushX,
-  scaleLinear,
+  scaleLinear: undefined as typeof ScaleLinear | undefined,
   select: d3Select,
   transition: d3Transition,
 };
+
+(async () => {
+  d3.scaleLinear = (await import('d3-scale')).scaleLinear;
+})();
 
 const isBrushXSelection = (arg: unknown): arg is [number, number] => {
   return (
@@ -90,7 +93,7 @@ export function DualBrush({
         function brushend(this: d3Selection.BaseType) {
           const currentWidth = widthRef.current;
 
-          const x = d3.scaleLinear().domain([min, max]).rangeRound([0, currentWidth]);
+          const x = d3.scaleLinear!().domain([min, max]).rangeRound([0, currentWidth]);
 
           const px2ts = (px: number) => Math.round(x.invert(px));
           const xMin = x(min) ?? 0;
@@ -192,7 +195,7 @@ export function DualBrush({
             return 'brush-' + b.id;
           })
           .each((brushObject: DualBrush, i, n) => {
-            const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+            const x = d3.scaleLinear!().domain([min, max]).rangeRound([0, widthRef.current]);
             brushObject.brush(d3.select(n[i]));
             const xStart = x(brushObject.start) ?? 0;
             const xEnd = x(brushObject.end) ?? 0;
@@ -220,7 +223,7 @@ export function DualBrush({
           .data<DualBrush>(brushes.current, (d) => (d as DualBrush).id);
 
         mlBrushSelection.each(function (brushObject, i, n) {
-          const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+          const x = d3.scaleLinear!().domain([min, max]).rangeRound([0, widthRef.current]);
           brushObject.brush.extent([
             [0, BRUSH_MARGIN],
             [width, BRUSH_HEIGHT - BRUSH_MARGIN],

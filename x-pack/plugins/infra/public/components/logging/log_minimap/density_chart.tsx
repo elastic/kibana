@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { scaleLinear, scaleTime } from 'd3-scale';
+import type { scaleLinear as ScaleLinear, scaleTime as ScaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
-import { max } from 'lodash';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { max } from 'lodash';
 import { LogEntriesSummaryBucket } from '../../../../common/http_api';
+
+let scaleLinear: typeof ScaleLinear;
+let scaleTime: typeof ScaleTime;
+(async () => {
+  const d3Scale = await import('d3-scale');
+  scaleLinear = d3Scale.scaleLinear;
+  scaleTime = d3Scale.scaleTime;
+})();
 
 interface DensityChartProps {
   buckets: LogEntriesSummaryBucket[];

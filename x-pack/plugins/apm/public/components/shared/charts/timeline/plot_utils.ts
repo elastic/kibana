@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { scaleLinear } from 'd3-scale';
+import type { scaleLinear as ScaleLinear } from 'd3-scale';
 import { Margins } from '.';
+
+let scaleLinear: typeof ScaleLinear;
+(async () => {
+  scaleLinear = (await import('d3-scale')).scaleLinear;
+})();
 
 export type PlotValues = ReturnType<typeof getPlotValues>;
 

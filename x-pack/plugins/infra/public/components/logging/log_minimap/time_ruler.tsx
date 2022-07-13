@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { scaleTime } from 'd3-scale';
+import type { scaleTime as ScaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { getTimeLabelFormat } from './time_label_formatter';
+
+let scaleTime: typeof ScaleTime;
+(async () => {
+  scaleTime = (await import('d3-scale')).scaleTime;
+})();
 
 interface TimeRulerProps {
   end: number;

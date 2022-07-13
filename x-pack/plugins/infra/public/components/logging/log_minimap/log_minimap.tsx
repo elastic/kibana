@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { scaleLinear } from 'd3-scale';
+import type { scaleLinear as ScaleLinear } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -18,6 +18,11 @@ import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
 } from '../../../../common/http_api';
+
+let scaleLinear: typeof ScaleLinear;
+(async () => {
+  scaleLinear = (await import('d3-scale')).scaleLinear;
+})();
 
 interface Interval {
   end: number;
