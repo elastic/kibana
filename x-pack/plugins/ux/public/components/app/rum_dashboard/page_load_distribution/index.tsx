@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageLoadDistChart } from '../charts/page_load_dist_chart';
@@ -16,10 +15,6 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { PercentileRange } from './types';
 
 export function PageLoadDistribution() {
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
-
-  const { start, end } = urlParams;
-
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
