@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '@kbn/data-plugin/common';
-import { AgentsRequestOptions } from '../../../../../common/search_strategy';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { AgentsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildAgentsQuery = ({

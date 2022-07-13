@@ -37,7 +37,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   author,
   buildingBlockTypeOrUndefined,
@@ -78,6 +78,7 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  timestampOverrideFallbackDisabledOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
@@ -107,6 +108,7 @@ export const baseRuleParams = t.exact(
     severity,
     severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
+    timestampOverrideFallbackDisabled: timestampOverrideFallbackDisabledOrUndefined,
     threat: threats,
     to,
     references,

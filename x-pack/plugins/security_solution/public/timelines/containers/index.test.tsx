@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { initSortDefault, TimelineArgs, useTimelineEvents, UseTimelineEventsProps } from '.';
+import type { TimelineArgs, UseTimelineEventsProps } from '.';
+import { initSortDefault, useTimelineEvents } from '.';
 import { SecurityPageName } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -107,7 +108,6 @@ describe('useTimelineEvents', () => {
   const endDate: string = '3000-01-01T00:00:00.000Z';
   const props: UseTimelineEventsProps = {
     dataViewId: 'data-view-id',
-    docValueFields: [],
     endDate: '',
     id: TimelineId.active,
     indexNames: ['filebeat-*'],

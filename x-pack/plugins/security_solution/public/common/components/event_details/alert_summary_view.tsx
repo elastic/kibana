@@ -7,10 +7,10 @@
 
 import React, { useMemo } from 'react';
 
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { SummaryView } from './summary_view';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 import { getSummaryRows } from './get_alert_summary_rows';
 

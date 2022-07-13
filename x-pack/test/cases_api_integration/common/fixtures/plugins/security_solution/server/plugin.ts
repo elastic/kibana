@@ -10,9 +10,12 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginSetupContract as CasesPluginSetup } from '@kbn/cases-plugin/server';
+import { getPersistableAttachment } from '../attachments/persistable_state';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
+  cases: CasesPluginSetup;
 }
 
 export interface FixtureStartDeps {
@@ -22,7 +25,10 @@ export interface FixtureStartDeps {
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
-    const { features } = deps;
+    const { features, cases } = deps;
+
+    cases.attachmentFramework.registerPersistableState(getPersistableAttachment());
+
     features.registerKibanaFeature({
       id: 'securitySolutionFixture',
       name: 'SecuritySolutionFixture',

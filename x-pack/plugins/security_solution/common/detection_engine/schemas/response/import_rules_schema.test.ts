@@ -6,10 +6,12 @@
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { left, Either } from 'fp-ts/lib/Either';
-import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
-import { ErrorSchema } from './error_schema';
-import { Errors } from 'io-ts';
+import type { Either } from 'fp-ts/lib/Either';
+import { left } from 'fp-ts/lib/Either';
+import type { ImportRulesSchema } from './import_rules_schema';
+import { importRulesSchema } from './import_rules_schema';
+import type { ErrorSchema } from './error_schema';
+import type { Errors } from 'io-ts';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('import_rules_schema', () => {

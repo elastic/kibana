@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedEntry } from './types';
+import type { FormattedEntry } from './types';
 
 export const getFormattedEntryMock = (isNested = false): FormattedEntry => ({
   fieldName: 'host.name',

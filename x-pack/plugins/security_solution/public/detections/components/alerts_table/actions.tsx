@@ -13,7 +13,8 @@ import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -23,7 +24,7 @@ import {
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 
 import { lastValueFrom } from 'rxjs';
@@ -33,26 +34,22 @@ import {
   ALERT_RULE_TIMELINE_ID,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
-import {
-  TimelineId,
-  TimelineResult,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../common/types/timeline';
+import type { TimelineResult } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
-import {
+import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
   UpdateAlertStatusActionProps,
   CreateTimelineProps,
 } from './types';
-import { Ecs } from '../../../../common/ecs';
-import {
+import type { Ecs } from '../../../../common/ecs';
+import type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsQueries,
 } from '../../../../common/search_strategy/timeline';
+import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   omitTypenameInTimeline,
@@ -65,7 +62,7 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
-import {
+import type {
   DataProvider,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
@@ -545,7 +542,6 @@ export const sendAlertToTimelineAction = async ({
           >(
             {
               defaultIndex: [],
-              docValueFields: [],
               indexName: ecsData._index ?? '',
               eventId: ecsData._id,
               factoryQueryType: TimelineEventsQueries.details,

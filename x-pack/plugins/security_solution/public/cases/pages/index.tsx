@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
@@ -27,13 +27,10 @@ import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   return (
     <DetailsPanel
       browserFields={browserFields}
-      docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}
