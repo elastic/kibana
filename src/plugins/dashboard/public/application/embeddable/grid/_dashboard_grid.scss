@@ -42,16 +42,6 @@
  */
 
 /**
- * 1. Fixes fullscreen mode for saved searches. Otherwise, sibling grids can obscure the grid in fullscreen mode.
- * "euiDataGrid__restrictBody" is set to body element when a grid is in fullscreen
- * https://github.com/elastic/kibana/issues/134032#issuecomment-1178091867
- * It can be removed if we don't use inline styles (z-index, position) for Dashboard panels (react-grid-item)
- */
-.euiDataGrid__restrictBody .dshDashboardGrid__item {
-  position: static !important; /* 1 */
-}
-
-/**
  * When a single panel is expanded, all the other panels are hidden in the grid.
  */
 .dshDashboardGrid__item--hidden {
