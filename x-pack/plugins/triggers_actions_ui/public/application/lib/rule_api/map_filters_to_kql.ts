@@ -5,68 +5,85 @@
  * 2.0.
  */
 
+import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RuleStatus } from '../../../types';
 
-export const mapFiltersToKql = ({
+export const mapFilterToKueryNode = ({
   typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
+  searchText,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
-}): string[] => {
-  const filters = [];
+  searchText?: string;
+}): KueryNode | null => {
+  const filterKueryNode = [];
 
   if (typesFilter && typesFilter.length) {
-    filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
+    filterKueryNode.push(
+      nodeBuilder.or(typesFilter.map((tf) => nodeBuilder.is('alert.attributes.alertTypeId', tf)))
+    );
   }
   if (actionTypesFilter && actionTypesFilter.length) {
-    filters.push(
-      [
-        '(',
-        actionTypesFilter
-          .map((id) => `alert.attributes.actions:{ actionTypeId:${id} }`)
-          .join(' OR '),
-        ')',
-      ].join('')
+    filterKueryNode.push(
+      nodeBuilder.or(
+        actionTypesFilter.map((atf) => nodeBuilder.is('alert.attributes.actions.actionTypeId', atf))
+      )
     );
   }
   if (ruleExecutionStatusesFilter && ruleExecutionStatusesFilter.length) {
-    filters.push(
-      `alert.attributes.executionStatus.status:(${ruleExecutionStatusesFilter.join(' or ')})`
+    filterKueryNode.push(
+      nodeBuilder.or(
+        ruleExecutionStatusesFilter.map((resf) =>
+          nodeBuilder.is('alert.attributes.executionStatus.status', resf)
+        )
+      )
     );
   }
 
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
-    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)`;
-    const enabledFilter = `(alert.attributes.enabled: true AND NOT ${snoozedFilter})`;
-    const disabledFilter = `alert.attributes.enabled: false`;
+    const snoozedFilter = nodeBuilder.or([
+      nodeBuilder.is('alert.attributes.muteAll', 'true'),
+      nodeTypes.function.buildNode('range', 'alert.attributes.isSnoozedUntil', 'lt', 'now'),
+    ]);
+    const enabledFilter = nodeBuilder.and([
+      nodeBuilder.is('alert.attributes.enabled', 'true'),
+      nodeTypes.function.buildNode('not', snoozedFilter),
+    ]);
+    const disabledFilter = nodeBuilder.is('alert.attributes.enabled', 'false');
 
-    const result = [];
+    const ruleStatusesFilterKueryNode = [];
 
     if (ruleStatusesFilter.includes('enabled')) {
-      result.push(enabledFilter);
+      ruleStatusesFilterKueryNode.push(enabledFilter);
     }
 
     if (ruleStatusesFilter.includes('disabled')) {
-      result.push(disabledFilter);
+      ruleStatusesFilterKueryNode.push(disabledFilter);
     }
 
     if (ruleStatusesFilter.includes('snoozed')) {
-      result.push(`(${snoozedFilter} AND NOT ${disabledFilter})`);
+      ruleStatusesFilterKueryNode.push(
+        nodeBuilder.and([snoozedFilter, nodeTypes.function.buildNode('not', disabledFilter)])
+      );
     }
-
-    filters.push(result.join(' or '));
+    filterKueryNode.push(nodeBuilder.or(ruleStatusesFilterKueryNode));
   }
 
-  if (tagsFilter && tagsFilter.length) {
-    filters.push(`alert.attributes.tags:(${tagsFilter.join(' or ')})`);
+  if (searchText && searchText !== '') {
+    filterKueryNode.push(
+      nodeBuilder.or([
+        nodeBuilder.is('alert.attributes.name', nodeTypes.wildcard.buildNode(searchText)),
+        nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(searchText)),
+      ])
+    );
   }
 
-  return filters;
+  return filterKueryNode.length ? nodeBuilder.and(filterKueryNode) : null;
 };

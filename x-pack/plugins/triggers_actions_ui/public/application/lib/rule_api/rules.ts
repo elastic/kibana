@@ -8,7 +8,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
-import { mapFiltersToKql } from './map_filters_to_kql';
+import { mapFilterToKueryNode } from './map_filters_to_kql';
 import { transformRule } from './common_transformations';
 
 export interface LoadRulesProps {
@@ -43,13 +43,15 @@ export async function loadRules({
   total: number;
   data: Rule[];
 }> {
-  const filters = mapFiltersToKql({
+  const filtersKueryNode = mapFilterToKueryNode({
     typesFilter,
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
+    searchText,
   });
+
   const res = await http.get<
     AsApiContract<{
       page: number;
@@ -61,10 +63,7 @@ export async function loadRules({
     query: {
       page: page.index + 1,
       per_page: page.size,
-      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
-      search: searchText,
-      filter: filters.length ? filters.join(' and ') : undefined,
-      default_search_operator: 'AND',
+      ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
       sort_field: sort.field,
       sort_order: sort.direction,
     },

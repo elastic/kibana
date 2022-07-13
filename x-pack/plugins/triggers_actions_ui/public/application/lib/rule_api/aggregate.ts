@@ -8,7 +8,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { RuleAggregations, RuleStatus } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { mapFiltersToKql } from './map_filters_to_kql';
+import { mapFilterToKueryNode } from './map_filters_to_kql';
 
 export interface RuleTagsAggregations {
   ruleTags: string[];
@@ -63,20 +63,20 @@ export async function loadRuleAggregations({
   ruleStatusesFilter,
   tagsFilter,
 }: LoadRuleAggregationsProps): Promise<RuleAggregations> {
-  const filters = mapFiltersToKql({
+  const filtersKueryNode = mapFilterToKueryNode({
     typesFilter,
     actionTypesFilter,
+    tagsFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
-    tagsFilter,
+    searchText,
   });
+
   const res = await http.get<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       query: {
-        search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
-        search: searchText,
-        filter: filters.length ? filters.join(' and ') : undefined,
+        ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         default_search_operator: 'AND',
       },
     }

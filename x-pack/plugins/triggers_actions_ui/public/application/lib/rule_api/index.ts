@@ -6,7 +6,7 @@
  */
 
 export { alertingFrameworkHealth } from './health';
-export { mapFiltersToKql } from './map_filters_to_kql';
+export { mapFilterToKueryNode } from './map_filters_to_kql';
 export type { LoadRuleAggregationsProps } from './aggregate';
 export { loadRuleAggregations, loadRuleTags } from './aggregate';
 export { createRule } from './create';
