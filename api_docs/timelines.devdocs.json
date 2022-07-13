@@ -6968,9 +6968,7 @@
           },
           "; filterQuery: string | ",
           "ESQuery",
-          " | undefined; docValueFields?: ",
-          "QueryDslFieldAndFormat",
-          "[] | undefined; factoryQueryType?: ",
+          " | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",
           " | undefined; entityType?: ",
           {

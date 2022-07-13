@@ -20,12 +20,14 @@ import {
   waitForAlerts,
   markAcknowledgedFirstAlert,
   goToAcknowledgedAlerts,
+  clearGroupByTopInput,
   closeAlerts,
   closeFirstAlert,
   goToClosedAlerts,
   goToOpenedAlerts,
   openAlerts,
   openFirstAlert,
+  selectCountTable,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -53,6 +55,8 @@ describe('Changing alert status', () => {
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
+      selectCountTable();
+      clearGroupByTopInput();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -110,6 +114,8 @@ describe('Changing alert status', () => {
       createCustomRuleEnabled(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+      selectCountTable();
+      clearGroupByTopInput();
     });
     it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
@@ -148,6 +154,8 @@ describe('Changing alert status', () => {
       createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+      selectCountTable();
+      clearGroupByTopInput();
     });
     it('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
@@ -298,6 +306,8 @@ describe('Changing alert status', () => {
       createCustomRuleEnabled(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+      selectCountTable();
+      clearGroupByTopInput();
     });
     it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)

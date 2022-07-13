@@ -99,9 +99,9 @@ export const goToExceptionsTab = () => {
 };
 
 export const editException = () => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click({ force: true });
 
-  cy.get(EDIT_EXCEPTION_BTN).click();
+  cy.get(EDIT_EXCEPTION_BTN).click({ force: true });
 };
 
 export const removeException = () => {
