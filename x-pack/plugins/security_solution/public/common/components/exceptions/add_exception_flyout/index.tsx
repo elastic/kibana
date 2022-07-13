@@ -36,6 +36,7 @@ import type {
 import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
+import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -67,7 +68,6 @@ import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
-import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
@@ -159,16 +159,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
     useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
-
-  const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
-    } else {
-      return ruleIndices;
-    }
-  }, [jobs, ruleIndices]);
+  const { mlJobLoading, ruleIndices: memoRuleIndices } = useRuleIndices(
+    maybeRule?.machine_learning_job_id,
+    ruleIndices
+  );
 
   const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
     useFetchIndex(memoRuleIndices);
@@ -177,14 +171,18 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   useEffect(() => {
     const fetchSingleDataView = async () => {
-      if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
+      const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+      if (hasDataViewId) {
+        const dv = await data.dataViews.get(hasDataViewId);
         setIndexPattern(dv);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, setIndexPattern]);
+  }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern]);
+
+  const selectedIndexPattern =
+    dataViewId || maybeRule?.data_view_id ? indexPattern : indexIndexPatterns;
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -531,8 +529,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns:
-                  dataViewId != null && dataViewId !== '' ? indexPattern : indexIndexPatterns,
+                indexPatterns: selectedIndexPattern,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,
