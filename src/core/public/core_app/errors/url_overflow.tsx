@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IBasePath } from '@kbn/core-http-browser';
 
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { mountReactNode } from '../../utils';
 import { IToasts } from '../../notifications';
-import { IUiSettingsClient } from '../../ui_settings';
 
 const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 export const IS_IE = IE_REGEX.test(window.navigator.userAgent);
