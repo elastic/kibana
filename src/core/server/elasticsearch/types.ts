@@ -151,24 +151,6 @@ export interface ElasticsearchStatusMeta {
 }
 
 /**
- * Fake request object created manually by Kibana plugins.
- * @public
- */
-export interface FakeRequest {
-  /** Headers used for authentication against Elasticsearch */
-  headers: Headers;
-}
-
-/**
- A user credentials container.
- * It accommodates the necessary auth credentials to impersonate the current user.
- *
- * @public
- * See {@link KibanaRequest}.
- */
-export type ScopeableRequest = KibanaRequest | FakeRequest;
-
-/**
  * A limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.
  *
  * @public

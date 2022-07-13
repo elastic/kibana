@@ -8,71 +8,16 @@
 
 import { MaybePromise } from '@kbn/utility-types';
 import { UnauthorizedError } from '@kbn/es-errors';
-import type { AuthHeaders, KibanaRequest, SetAuthHeaders } from '@kbn/core-http-server';
+import type { SetAuthHeaders } from '@kbn/core-http-server';
 import { isRealRequest } from '@kbn/core-http-router-server-internal';
-import { ScopeableRequest } from '../types';
-
-/**
- * @public
- */
-export interface UnauthorizedErrorHandlerOptions {
-  error: UnauthorizedError;
-  request: KibanaRequest;
-}
-
-/**
- * @public
- */
-export interface UnauthorizedErrorHandlerResultRetryParams {
-  authHeaders: AuthHeaders;
-}
-
-/**
- * @public
- */
-export interface UnauthorizedErrorHandlerRetryResult
-  extends UnauthorizedErrorHandlerResultRetryParams {
-  type: 'retry';
-}
-
-/**
- * @public
- */
-export interface UnauthorizedErrorHandlerNotHandledResult {
-  type: 'notHandled';
-}
-
-/**
- * @public
- */
-export type UnauthorizedErrorHandlerResult =
-  | UnauthorizedErrorHandlerRetryResult
-  | UnauthorizedErrorHandlerNotHandledResult;
-
-/**
- * Toolkit passed to a {@link UnauthorizedErrorHandler} used to generate responses from the handler
- * @public
- */
-export interface UnauthorizedErrorHandlerToolkit {
-  /**
-   * The handler cannot handle the error, or was not able to authenticate.
-   */
-  notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
-  /**
-   * The handler was able to authenticate. Will retry the failed request with new auth headers
-   */
-  retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
-}
-
-/**
- * A handler used to handle unauthorized error returned by elasticsearch
- *
- * @public
- */
-export type UnauthorizedErrorHandler = (
-  options: UnauthorizedErrorHandlerOptions,
-  toolkit: UnauthorizedErrorHandlerToolkit
-) => MaybePromise<UnauthorizedErrorHandlerResult>;
+import type {
+  ScopeableRequest,
+  UnauthorizedErrorHandler,
+  UnauthorizedErrorHandlerResult,
+  UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
+} from '@kbn/core-elasticsearch-server';
 
 /** @internal */
 export type InternalUnauthorizedErrorHandler = (

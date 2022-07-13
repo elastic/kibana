@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
+export type { ElasticsearchClient } from './client';
+export type { IClusterClient, ICustomClusterClient } from './cluster_client';
+export type { ScopeableRequest, FakeRequest } from './scopeable_request';
+export type { IScopedClusterClient } from './scoped_cluster_client';
 export type {
-  ElasticsearchClient,
-  IScopedClusterClient,
-  IClusterClient,
-  ICustomClusterClient,
-  ScopeableRequest,
-  UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandler,
-  UnauthorizedErrorHandlerRetryResult,
-  UnauthorizedErrorHandlerToolkit,
-  UnauthorizedErrorHandlerResultRetryParams,
-  UnauthorizedErrorHandlerNotHandledResult,
   UnauthorizedErrorHandlerOptions,
-  FakeRequest,
-} from './client';
+  UnauthorizedErrorHandlerResult,
+  UnauthorizedErrorHandlerResultRetryParams,
+  UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
+} from './unauthorized_error_handler';

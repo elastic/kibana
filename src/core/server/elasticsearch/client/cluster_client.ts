@@ -15,51 +15,19 @@ import {
   isKibanaRequest,
   isRealRequest,
 } from '@kbn/core-http-router-server-internal';
-import { ScopeableRequest } from '../types';
-import { ElasticsearchClient } from './types';
+import type {
+  ScopeableRequest,
+  UnauthorizedErrorHandler,
+  ICustomClusterClient,
+} from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
-import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
+import { ScopedClusterClient } from './scoped_cluster_client';
 import { DEFAULT_HEADERS } from '../default_headers';
-import {
-  UnauthorizedErrorHandler,
-  createInternalErrorHandler,
-  InternalUnauthorizedErrorHandler,
-} from './retry_unauthorized';
+import { createInternalErrorHandler, InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { createTransport } from './create_transport';
 
 const noop = () => undefined;
-
-/**
- * Represents an Elasticsearch cluster API client created by the platform.
- * It allows to call API on behalf of the internal Kibana user and
- * the actual user that is derived from the request headers (via `asScoped(...)`).
- *
- * @public
- **/
-export interface IClusterClient {
-  /**
-   * A {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
-   */
-  readonly asInternalUser: ElasticsearchClient;
-  /**
-   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
-   */
-  asScoped: (request: ScopeableRequest) => IScopedClusterClient;
-}
-
-/**
- * See {@link IClusterClient}
- *
- * @public
- */
-export interface ICustomClusterClient extends IClusterClient {
-  /**
-   * Closes the cluster client. After that client cannot be used and one should
-   * create a new client instance to be able to interact with Elasticsearch API.
-   */
-  close: () => Promise<void>;
-}
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {

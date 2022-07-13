@@ -6,21 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { ElasticsearchClient } from './types';
 export { ScopedClusterClient } from './scoped_cluster_client';
-export type { IScopedClusterClient } from './scoped_cluster_client';
 export type { ElasticsearchClientConfig } from './client_config';
 export { ClusterClient } from './cluster_client';
-export type { IClusterClient, ICustomClusterClient } from './cluster_client';
 export { configureClient } from './configure_client';
 export { getRequestDebugMeta, getErrorMessage } from './log_query_and_deprecation';
 export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
-export type {
-  UnauthorizedErrorHandlerOptions,
-  UnauthorizedErrorHandlerResultRetryParams,
-  UnauthorizedErrorHandlerRetryResult,
-  UnauthorizedErrorHandlerNotHandledResult,
-  UnauthorizedErrorHandlerResult,
-  UnauthorizedErrorHandlerToolkit,
-  UnauthorizedErrorHandler,
-} from './retry_unauthorized';
