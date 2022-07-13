@@ -18,6 +18,7 @@ interface RuleState {
 }
 
 type UseLoadRulesProps = Omit<LoadRulesProps, 'http'> & {
+  hasDefaultRuleTypesFiltersOn?: boolean;
   onPage: (pagination: Pagination) => void;
   onError: (message: string) => void;
 };
@@ -92,6 +93,7 @@ export function useLoadRules({
   sort,
   onPage,
   onError,
+  hasDefaultRuleTypesFiltersOn = false,
 }: UseLoadRulesProps) {
   const { http } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -135,9 +137,10 @@ export function useLoadRules({
         onPage({ ...page, index: 0 });
       }
 
+      const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(typesFilter);
       const isFilterApplied = !(
         isEmpty(searchText) &&
-        isEmpty(typesFilter) &&
+        hasEmptyTypesFilter &&
         isEmpty(actionTypesFilter) &&
         isEmpty(ruleExecutionStatusesFilter) &&
         isEmpty(ruleStatusesFilter) &&
@@ -167,7 +170,7 @@ export function useLoadRules({
     ruleStatusesFilter,
     tagsFilter,
     sort,
-    dispatch,
+    hasDefaultRuleTypesFiltersOn,
     onPage,
     onError,
   ]);
