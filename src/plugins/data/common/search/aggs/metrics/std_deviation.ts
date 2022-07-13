@@ -18,6 +18,7 @@ import { BaseAggParams } from '../types';
 
 export interface AggParamsStdDeviation extends BaseAggParams {
   field: string;
+  showBounds?: boolean;
 }
 
 interface ValProp {
@@ -91,15 +92,29 @@ export const getStdDeviationMetricAgg = () => {
         type: 'field',
         filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
       },
+      {
+        name: 'showBounds',
+        type: 'boolean',
+        write: () => {},
+        shouldShow: () => false,
+      },
     ],
 
     getResponseAggs(agg) {
+      const showBounds = agg.getParam('showBounds');
+      if (showBounds === false) {
+        return [agg];
+      }
       const ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
 
       return [new ValueAggConfig('std_lower'), new ValueAggConfig('std_upper')];
     },
 
     getValue(agg, bucket) {
+      const showBounds = agg.getParam('showBounds');
+      if (showBounds === false) {
+        return bucket[agg.id].std_deviation;
+      }
       return get(bucket[agg.parentId], agg.valProp());
     },
   });
