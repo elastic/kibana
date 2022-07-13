@@ -1,40 +1,107 @@
 [[list-rule-types-api]]
-=== List rule types API
+== Get rule types API
 ++++
-<titleabbrev>List rule types</titleabbrev>
+<titleabbrev>Get rule types</titleabbrev>
 ++++
 
 Retrieve a list of rule types that the user is authorized to access.
 
-Each rule type includes a list of consumer features. Within these features, users are authorized to perform either `read` or `all` operations on rules of that type. This helps determine which rule types users can read, but not create or modify.
-
-NOTE: Some rule types are limited to specific features.  These rule types are not available when <<create-edit-rules, defining rules>> in <<management,Stack Management>>.
-
 [[list-rule-types-api-request]]
-==== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/alerting/rule_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rule_types`
 
+////
+=== {api-prereq-title}
+
+////
+
+=== {api-description-title}
+
+Each rule type includes a list of consumer features. Within these features,
+users are authorized to perform either `read` or `all` operations on rules of
+that type. This helps determine which rule types users can read, but not create
+or modify.
+
+NOTE: Some rule types are limited to specific features, which might not be
+available when <<create-edit-rules,defining rules>> in *{stack-manage-app}*.
+
 [[list-rule-types-api-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
+
+[[list-rule-types-response]]
+=== {api-response-body-title}
+
+Each rule type has the following properties in the API response:
+
+`action_groups`::
+(array of objects) An explicit list of groups for which the rule type can
+schedule actions, each with the action group's unique ID and human readable name.
+Rule `actions` validation uses this configuration to ensure that groups are
+valid. Use `kbn-i18n` to translate the names of the action group when
+registering the rule type.
+//TBD: The kbn-i18n phrase doesn't seem appropriate for this context. Can we remove it?
+
+`action_variables`::
+(object) An explicit list of action variables that the rule type makes available
+via context and state in action parameter templates, and a short human readable
+description. The Rule UI uses this information to prompt users for these
+variables in action parameter editors. Use `kbn-i18n` to translate the
+descriptions.
+//TBD: What is the intent of "explicit list"? Can we drop "explicit"?
+//TBD: Which "Rule UI" does this refer to? Is it only the "Rules and Connectors" UI in Stack Management? Or do all apps use this information?
+//TBD: The kbn-i18n sentence seems out of context here too. Can we remove it?
+
+`authorized_consumers`::
+(object) The list of the plugins IDs that have access to the rule type.
+
+`default_action_group_id`::
+(string) The default ID for the rule type group.
+
+`enabled_in_license`::
+(boolean) Indicates whether the rule type is enabled or disabled based on the
+subscription.
+
+`id`::
+(string) The unique identifier for the rule type.
+
+`is_exportable`
+(boolean) Indicates whether the rule type is exportable in *{stack-manage-app}*
+> *Saved Objects*.
+
+`minimum_license_required`::
+(string) The {subscriptions} required to use the rule type.
+
+`name`::
+(string) The descriptive name of the rule type.
+
+`producer`::
+(string) An identifier for the application that produces this rule type.
+
+`recovery_action_group`::
+(object) An action group to use when an alert goes from an active state to an
+inactive one. Do not specify this action group under the `action_groups`
+property. If `recovery_action_group` is not specified, the default `recovered` action group is used.
+//TBD: The "Do not use..." phrase doesn't seem appropriate here, since we're listing not setting these properties. Can we remove it?
 
 [[list-rule-types-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[list-rule-types-api-example]]
-==== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/alerting/rule_types
+GET api/alerting/rule_types
 --------------------------------------------------
 // KIBANA
 
@@ -101,43 +168,3 @@ The API returns the following:
    }
 ]
 --------------------------------------------------
-
-Each rule type contains the following properties:
-
-[cols="2*<"]
-|===
-
-| `name`
-| The descriptive name of the rule type.
-
-| `id`
-| The unique ID of the rule type.
-
-| `minimum_license_required`
-| The license required to use the rule type.
-
-| `is_exportable`
-| Whether the rule type is exportable through the Saved Objects Management UI.
-
-| `enabled_in_license`
-| Whether the rule type is enabled or disabled based on the license.
-
-| `action_groups`
-| An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule `actions` validation will use this configuration to ensure that groups are valid. Use `kbn-i18n` to translate the names of the action group when registering the rule type.
-
-| `recovery_action_group`
-| An action group to use when an alert goes from an active state, to an inactive one. Do not specify this action group under the `action_groups` property. If `recovery_action_group` is not specified, the default `recovered` action group is used.
-
-| `default_action_group_od`
-| The default ID for the rule type group.
-
-| `action_variables`
-| An explicit list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description. The Rule UI  will use this information to prompt users for these variables in action parameter editors. Use `kbn-i18n` to translate the descriptions.
-
-| `producer`
-| The ID of the application producing this rule type.
-
-| `authorized_consumers`
-| The list of the plugins IDs that have access to the rule type.
-
-|===
