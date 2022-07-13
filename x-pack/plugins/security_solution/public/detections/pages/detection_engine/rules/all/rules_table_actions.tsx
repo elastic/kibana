@@ -27,14 +27,23 @@ type NavigateToApp = (appId: string, options?: NavigateToAppOptions | undefined)
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
-export const getRulesTableActions = (
-  toasts: UseAppToasts,
-  navigateToApp: NavigateToApp,
-  invalidateRules: () => void,
-  actionsPrivileges: boolean,
-  setLoadingRules: RulesTableActions['setLoadingRules'],
-  startTransaction: ReturnType<typeof useStartTransaction>['startTransaction']
-): Array<DefaultItemAction<Rule>> => [
+export const getRulesTableActions = ({
+  toasts,
+  navigateToApp,
+  invalidateRules,
+  invalidatePrePackagedRulesStatus,
+  actionsPrivileges,
+  setLoadingRules,
+  startTransaction,
+}: {
+  toasts: UseAppToasts;
+  navigateToApp: NavigateToApp;
+  invalidateRules: () => void;
+  invalidatePrePackagedRulesStatus: () => void;
+  actionsPrivileges: boolean;
+  setLoadingRules: RulesTableActions['setLoadingRules'];
+  startTransaction: ReturnType<typeof useStartTransaction>['startTransaction'];
+}): Array<DefaultItemAction<Rule>> => [
   {
     type: 'icon',
     'data-test-subj': 'editRuleAction',
@@ -73,6 +82,7 @@ export const getRulesTableActions = (
         search: { ids: [rule.id] },
       });
       invalidateRules();
+      invalidatePrePackagedRulesStatus();
       const createdRules = result?.attributes.results.created;
       if (createdRules?.length) {
         goToRuleEditPage(createdRules[0].id, navigateToApp);
@@ -113,6 +123,7 @@ export const getRulesTableActions = (
         search: { ids: [rule.id] },
       });
       invalidateRules();
+      invalidatePrePackagedRulesStatus();
     },
   },
 ];

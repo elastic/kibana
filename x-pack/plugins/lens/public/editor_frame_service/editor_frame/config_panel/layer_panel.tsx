@@ -315,6 +315,7 @@ export function LayerPanel(
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
+                  layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
