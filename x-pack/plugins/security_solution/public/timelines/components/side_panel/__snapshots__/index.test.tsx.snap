@@ -3,7 +3,6 @@
 exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set: 
         <DetailsPanel
           browserFields={Object {}}
-          docValueFields={Array []}
           handleOnPanelClosed={[MockFunction]}
           isFlyoutView={false}
           runtimeMappings={Object {}}
@@ -13,7 +12,6 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
        1`] = `
 <DetailsPanel
   browserFields={Object {}}
-  docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
@@ -25,7 +23,6 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
 exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if no expanded detail has been set in the reducer 1`] = `
 <DetailsPanel
   browserFields={Object {}}
-  docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}

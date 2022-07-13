@@ -3,6 +3,9 @@
 exports[`Fleet preconfiguration reset Preconfigured cloud policy With a full preconfigured cloud policy Create correct .fleet-policies 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "source_uri": "https://artifacts.elastic.co",
+    },
     "monitoring": Object {
       "enabled": false,
       "logs": false,

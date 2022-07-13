@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsClientProvider } from './scoped_client_provider';
-import { httpServerMock } from '../../../http/http_server.mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
 test(`uses default client factory when one isn't set`, () => {

@@ -91,7 +91,6 @@ describe('Details Panel Component', () => {
 
   const mockProps = {
     browserFields: {},
-    docValueFields: [],
     handleOnPanelClosed: jest.fn(),
     isFlyoutView: false,
     runtimeMappings: {},
@@ -151,7 +150,6 @@ describe('Details Panel Component', () => {
       expect(wrapper.find('DetailsPanel')).toMatchSnapshot(`
         <DetailsPanel
           browserFields={Object {}}
-          docValueFields={Array []}
           handleOnPanelClosed={[MockFunction]}
           isFlyoutView={false}
           runtimeMappings={Object {}}
