@@ -51,6 +51,7 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
     id: connector.id,
     name: connector.name,
     minimumLicenseRequired: connector.minimumLicenseRequired,
+    allowedFeatureIds: connector.allowedFeatureIds,
     validate: validators,
     executor,
   });

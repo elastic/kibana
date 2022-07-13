@@ -14,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 beforeEach(() => jest.resetAllMocks());
 
 describe('loadActionTypes', () => {
-  test('should call get types API', async () => {
+  test('should call list types API', async () => {
     const apiResponseValue = [
       {
         id: 'test',
@@ -43,6 +43,44 @@ describe('loadActionTypes', () => {
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/actions/connector_types",
+      ]
+    `);
+  });
+
+  test('should call list types API with query parameter if specified', async () => {
+    const apiResponseValue = [
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        minimum_license_required: 'basic',
+      },
+    ];
+    http.get.mockResolvedValueOnce(apiResponseValue);
+
+    const resolvedValue: ActionType[] = [
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+      },
+    ];
+
+    const result = await loadActionTypes({ http, featureId: 'alerting' });
+    expect(result).toEqual(resolvedValue);
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/actions/connector_types",
+        Object {
+          "query": Object {
+            "feature_id": "alerting",
+          },
+        },
       ]
     `);
   });
