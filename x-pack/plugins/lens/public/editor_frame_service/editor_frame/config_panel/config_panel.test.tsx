@@ -156,6 +156,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -179,6 +183,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -200,6 +208,10 @@ describe('ConfigPanel', () => {
         .instance();
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+      });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);

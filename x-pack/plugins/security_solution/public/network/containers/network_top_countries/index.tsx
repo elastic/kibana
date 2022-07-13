@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { ESTermQuery } from '../../../../common/typed_json';
 import type { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import type { networkModel } from '../../store';
@@ -23,14 +19,12 @@ import type {
   FlowTargetSourceDest,
   NetworkTopCountriesEdges,
   NetworkTopCountriesRequestOptions,
-  NetworkTopCountriesStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../common/search_strategy';
-import { getInspectResponse } from '../../../helpers';
 import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export const ID = 'networkTopCountriesQuery';
 
@@ -72,18 +66,13 @@ export const useNetworkTopCountries = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopCountriesSelector(state, type, flowTarget)
   );
-  const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
 
-  const [networkTopCountriesRequest, setHostRequest] =
+  const [networkTopCountriesRequest, setNetworkTopCountriesRequest] =
     useState<NetworkTopCountriesRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
+      setNetworkTopCountriesRequest((prevRequest) => {
         if (!prevRequest) {
           return prevRequest;
         }
@@ -96,80 +85,56 @@ export const useNetworkTopCountries = ({
     },
     [limit]
   );
-  const { addError, addWarning } = useAppToasts();
 
-  const [networkTopCountriesResponse, setNetworkTopCountriesResponse] =
-    useState<NetworkTopCountriesArgs>({
-      networkTopCountries: [],
-      id,
-      inspect: {
-        dsl: [],
-        response: [],
-      },
-      isInspected: false,
-      loadPage: wrappedLoadMore,
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+  } = useSearchStrategy<NetworkQueries.topCountries>({
+    factoryQueryType: NetworkQueries.topCountries,
+    initialResult: {
+      edges: [],
+      totalCount: -1,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,
         showMorePagesIndicator: false,
       },
-      refetch: refetch.current,
-      totalCount: -1,
-    });
-
-  const networkTopCountriesSearch = useCallback(
-    (request: NetworkTopCountriesRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        searchSubscription$.current = data.search
-          .search<NetworkTopCountriesRequestOptions, NetworkTopCountriesStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                setLoading(false);
-                setNetworkTopCountriesResponse((prevResponse) => ({
-                  ...prevResponse,
-                  networkTopCountries: response.edges,
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  pageInfo: response.pageInfo,
-                  refetch: refetch.current,
-                  totalCount: response.totalCount,
-                }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_TOP_COUNTRIES);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_NETWORK_TOP_COUNTRIES,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-      refetch.current = asyncSearch;
     },
-    [data.search, addWarning, addError, skip]
+    errorMessage: i18n.FAIL_NETWORK_TOP_COUNTRIES,
+    abort: skip,
+  });
+
+  const networkTopCountriesResponse = useMemo(
+    () => ({
+      endDate,
+      networkTopCountries: response.edges,
+      id,
+      inspect,
+      isInspected: false,
+      loadPage: wrappedLoadMore,
+      pageInfo: response.pageInfo,
+      refetch,
+      startDate,
+      totalCount: response.totalCount,
+    }),
+    [
+      endDate,
+      id,
+      inspect,
+      refetch,
+      response.edges,
+      response.pageInfo,
+      response.totalCount,
+      startDate,
+      wrappedLoadMore,
+    ]
   );
 
   useEffect(() => {
-    setHostRequest((prevRequest) => {
+    setNetworkTopCountriesRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
@@ -193,20 +158,10 @@ export const useNetworkTopCountries = ({
   }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
-    networkTopCountriesSearch(networkTopCountriesRequest);
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [networkTopCountriesRequest, networkTopCountriesSearch]);
-
-  useEffect(() => {
-    if (skip) {
-      setLoading(false);
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+    if (!skip && networkTopCountriesRequest) {
+      search(networkTopCountriesRequest);
     }
-  }, [skip]);
+  }, [networkTopCountriesRequest, search, skip]);
 
   return [loading, networkTopCountriesResponse];
 };

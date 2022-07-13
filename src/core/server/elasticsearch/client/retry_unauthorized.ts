@@ -8,7 +8,8 @@
 
 import { MaybePromise } from '@kbn/utility-types';
 import { UnauthorizedError } from '@kbn/es-errors';
-import { AuthHeaders, KibanaRequest, SetAuthHeaders, isRealRequest } from '../../http';
+import type { AuthHeaders, KibanaRequest, SetAuthHeaders } from '@kbn/core-http-server';
+import { isRealRequest } from '@kbn/core-http-router-server-internal';
 import { ScopeableRequest } from '../types';
 
 /**
