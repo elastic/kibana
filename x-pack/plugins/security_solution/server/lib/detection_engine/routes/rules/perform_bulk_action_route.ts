@@ -392,9 +392,10 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                // during dry run only validation is getting performed and rule is not saved in ES
+                await validateBulkEnableRule({ mlAuthz, rule });
+
+                // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                 if (isDryRun) {
-                  validateBulkEnableRule({ mlAuthz, rule });
                   return rule;
                 }
 
@@ -405,7 +406,6 @@ export const performBulkActionRoute = (
                 });
 
                 if (!migratedRule.enabled) {
-                  validateBulkEnableRule({ mlAuthz, rule: migratedRule });
                   await rulesClient.enable({ id: migratedRule.id });
                 }
 
@@ -425,9 +425,10 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                // during dry run only validation is getting performed and rule is not saved in ES
+                await validateBulkDisableRule({ mlAuthz, rule });
+
+                // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                 if (isDryRun) {
-                  validateBulkDisableRule({ mlAuthz, rule });
                   return rule;
                 }
 
@@ -438,7 +439,6 @@ export const performBulkActionRoute = (
                 });
 
                 if (migratedRule.enabled) {
-                  validateBulkDisableRule({ mlAuthz, rule: migratedRule });
                   await rulesClient.disable({ id: migratedRule.id });
                 }
 
@@ -490,9 +490,10 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                // during dry run only validation is getting performed and rule is not saved in ES
+                await validateBulkDuplicateRule({ mlAuthz, rule });
+
+                // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                 if (isDryRun) {
-                  validateBulkDuplicateRule({ mlAuthz, rule });
                   return rule;
                 }
 
@@ -502,7 +503,6 @@ export const performBulkActionRoute = (
                   rule,
                 });
 
-                validateBulkDuplicateRule({ mlAuthz, rule: migratedRule });
                 const createdRule = await rulesClient.create({
                   data: duplicateRule(migratedRule),
                 });

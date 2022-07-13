@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  BulkActionsDryRunErrCode,
+} from '../../../../../common/constants';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
@@ -168,6 +171,46 @@ describe('perform_bulk_action', () => {
           errors: [
             {
               message: 'mocked validation message',
+              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          results: someBulkActionResults(),
+          summary: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns error if machine learning rule validation fails in dry run mode', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+      const response = await server.inject(
+        { ...getBulkActionRequest(), query: { dry_run: 'true' } },
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          errors: [
+            {
+              message: 'mocked validation message',
+              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {
