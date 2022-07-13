@@ -33,7 +33,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     downloadSource?.is_default
   );
 
-  const hostInput = useInput(downloadSource?.host, validateHost);
+  const hostInput = useInput(downloadSource?.host ?? '', validateHost);
 
   const inputs = {
     nameInput,
@@ -45,9 +45,10 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
+    const hostValid = hostInput.validate();
 
-    return nameInputValid;
-  }, [nameInput]);
+    return nameInputValid && hostValid;
+  }, [nameInput, hostInput]);
 
   const submit = useCallback(async () => {
     try {
@@ -120,40 +121,24 @@ function validateName(value: string) {
   }
 }
 
-function validateHost(value: string) {
-  const res = [];
+export function validateHost(value: string) {
   try {
-    if (value.match(/^http([s]){0,1}:\/\//)) {
-      res.push(
-        i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.hostProtocolError', {
-          defaultMessage: 'Host address must begin with a domain name or IP address',
-        })
-      );
-      return;
+    if (!value || value === '') {
+      return [
+        i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.HostIsRequiredErrorMessage', {
+          defaultMessage: 'Host is required',
+        }),
+      ];
     }
-
-    const url = new URL(`http://${value}`);
-
-    if (url.host !== value) {
-      throw new Error('Invalid host');
+    const urlParsed = new URL(value);
+    if (!['http:', 'https:'].includes(urlParsed.protocol)) {
+      throw new Error('Invalid protocol');
     }
   } catch (error) {
-    if (!value) {
-      res.push(
-        i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.hostRequiredError', {
-          defaultMessage: 'Host is required',
-        })
-      );
-    } else {
-      res.push(
-        i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.hostError', {
-          defaultMessage: 'Invalid Host',
-        })
-      );
-    }
-  }
-
-  if (res.length) {
-    return res;
+    return [
+      i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.hostError', {
+        defaultMessage: 'Invalid URL',
+      }),
+    ];
   }
 }

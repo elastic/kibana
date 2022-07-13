@@ -26,6 +26,7 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
 }) => (
   <FormattedMessage
     id="xpack.fleet.settings.updateDownloadSourceModal.confirmModalText"
+    data-test-subj="editDownloadSourcesConfirmModal.confirmModalText"
     defaultMessage="This action will update {downloadSourceName} agent binary source. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
     values={{
       downloadSourceName: <strong>{downloadSource.name}</strong>,

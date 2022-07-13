@@ -55,11 +55,13 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.createTitle"
                 defaultMessage="Add new agent download binary host"
+                data-test-subj="editDownloadSourcesFlyout.add.title"
               />
             ) : (
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.editTitle"
                 defaultMessage="Edit agent download binary host"
+                data-test-subj="editDownloadSourcesFlyout.edit.title"
               />
             )}
           </h2>
@@ -78,6 +80,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             {...inputs.nameInput.formRowProps}
           >
             <EuiFieldText
+              data-test-subj="editDownloadSourcesFlyout.nameInput"
               fullWidth
               {...inputs.nameInput.props}
               placeholder={i18n.translate(
@@ -92,8 +95,9 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             fullWidth
             helpText={
               <FormattedMessage
+                data-test-subj="editDownloadSourcesFlyout.hostHelpText"
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputDescription"
-                defaultMessage="Specify the addresses that your agents will use to download their binary from. {guideLink}."
+                defaultMessage="Address that your agents will use to download their binary from. Specify the path to the directory containing the binary. {guideLink}"
                 values={{
                   guideLink: (
                     <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
@@ -114,6 +118,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             }
           >
             <EuiFieldText
+              data-test-subj="editDownloadSourcesFlyout.hostInput"
               fullWidth
               {...inputs.hostInput.props}
               placeholder={i18n.translate(
@@ -127,6 +132,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
           <EuiSpacer size="m" />
           <EuiFormRow fullWidth {...inputs.defaultDownloadSourceInput.formRowProps}>
             <EuiSwitch
+              data-test-subj="editDownloadSourcesFlyout.isDefaultSwitch"
               {...inputs.defaultDownloadSourceInput.props}
               label={
                 <FormattedMessage
@@ -141,7 +147,11 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              onClick={onClose}
+              flush="left"
+              data-test-subj="editDownloadSourcesFlyout.cancelBtn"
+            >
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -154,7 +164,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               isLoading={form.isLoading}
               isDisabled={form.isDisabled}
               onClick={form.submit}
-              data-test-subj="saveApplySettingsDownloadSourcesBtn"
+              data-test-subj="editDownloadSourcesFlyout.submitBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.saveButton"

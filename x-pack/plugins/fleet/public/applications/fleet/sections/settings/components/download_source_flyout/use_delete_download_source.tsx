@@ -23,13 +23,13 @@ const ConfirmTitle = () => (
   />
 );
 
-interface ConfirmDescriptionProps {
+interface ConfirmDeleteDescriptionProps {
   downloadSource: DownloadSource;
   agentCount: number;
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
+const ConfirmDeleteDescription: React.FunctionComponent<ConfirmDeleteDescriptionProps> = ({
   downloadSource,
   agentCount,
   agentPolicyCount,
@@ -75,7 +75,8 @@ export function useDeleteDownloadSource(onSuccess: () => void) {
 
         const isConfirmed = await confirm(
           <ConfirmTitle />,
-          <ConfirmDescription
+          <ConfirmDeleteDescription
+            data-test-subj="editDownloadSourcesDeleteModal.confirmModalText"
             downloadSource={downloadSource}
             agentCount={agentCount}
             agentPolicyCount={agentPolicyCount}

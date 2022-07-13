@@ -40,7 +40,11 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
         render: (downloadSource: DownloadSource) => (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <NameFlexItemWithMaxWidth grow={false}>
-              <p title={downloadSource.name} className={`eui-textTruncate`}>
+              <p
+                title={downloadSource.name}
+                className={`eui-textTruncate`}
+                data-test-subj="editDownloadSourceTable.name"
+              >
                 {downloadSource.name}
               </p>
             </NameFlexItemWithMaxWidth>
@@ -56,7 +60,11 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
         render: (downloadSource: DownloadSource) => (
           <FlexGroupWithMinWidth direction="column" gutterSize="xs">
             <EuiFlexItem key={downloadSource.host}>
-              <p title={downloadSource.host} className={`eui-textTruncate`}>
+              <p
+                title={downloadSource.host}
+                className={`eui-textTruncate`}
+                data-test-subj="editDownloadSourceTable.host"
+              >
                 {downloadSource.host}
               </p>
             </EuiFlexItem>
@@ -85,6 +93,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
                         defaultMessage: 'Delete',
                       }
                     )}
+                    data-test-subj="editDownloadSourceTable.delete.btn"
                   />
                 )}
               </EuiFlexItem>
@@ -101,7 +110,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
                       defaultMessage: 'Edit',
                     }
                   )}
-                  data-test-subj="editDownloadSourceBtn"
+                  data-test-subj="editDownloadSourceTable.edit.btn"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

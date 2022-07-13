@@ -29,7 +29,7 @@ export async function getCountsForDownloadSource(downloadSource: DownloadSource)
   if (agentPolicyCount > 0) {
     const agents = await sendGetAgents({
       page: 1,
-      perPage: 0, // We only need the count here
+      perPage: 0,
       showInactive: false,
       kuery: agentPolicies.data?.items.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
     });
