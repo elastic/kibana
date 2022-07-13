@@ -36,7 +36,7 @@ export class SyntheticsPrivateLocation {
       throw new Error('Could not create new policy');
     }
 
-    newPolicy.is_externally_managed = true;
+    newPolicy.is_managed = true;
     newPolicy.policy_id = privateLocation.policyHostId;
     newPolicy.name = config.id + '-' + privateLocation.id;
     newPolicy.output_id = '';
@@ -157,7 +157,9 @@ export class SyntheticsPrivateLocation {
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient && policies.length > 0) {
       for (const policy of policies) {
-        await this.server.fleet.packagePolicyService.delete(soClient, esClient, [policy.id]);
+        await this.server.fleet.packagePolicyService.delete(soClient, esClient, [policy.id], {
+          force: true,
+        });
       }
     }
   }
