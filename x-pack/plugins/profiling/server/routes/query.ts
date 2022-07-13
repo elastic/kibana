@@ -5,35 +5,27 @@
  * 2.0.
  */
 
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsAggregationContainer,
+  QueryDslBoolQuery,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 
 export interface ProjectTimeQuery {
-  bool: {
-    filter: Array<
-      | {
-          term: {
-            ProjectID: string;
-          };
-        }
-      | {
-          range: {
-            '@timestamp': {
-              gte: string;
-              lt: string;
-              format: string;
-              boost: number;
-            };
-          };
-        }
-    >;
-  };
+  bool: QueryDslBoolQuery;
 }
 
-export function createProjectTimeQuery(
-  projectID: string,
-  timeFrom: string,
-  timeTo: string
-): ProjectTimeQuery {
+export function createCommonFilter({
+  projectID,
+  kuery,
+  timeFrom,
+  timeTo,
+}: {
+  projectID: string;
+  kuery: string;
+  timeFrom: string;
+  timeTo: string;
+}): ProjectTimeQuery {
   return {
     bool: {
       filter: [
@@ -42,6 +34,7 @@ export function createProjectTimeQuery(
             ProjectID: projectID,
           },
         },
+        ...kqlQuery(kuery),
         {
           range: {
             '@timestamp': {
@@ -54,7 +47,7 @@ export function createProjectTimeQuery(
         },
       ],
     },
-  } as ProjectTimeQuery;
+  };
 }
 
 export function autoHistogramSumCountOnGroupByField(

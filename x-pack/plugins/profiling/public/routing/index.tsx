@@ -163,6 +163,7 @@ const routes = {
             index: t.string,
             n: toNumberRt,
             projectID: toNumberRt,
+            kuery: t.string,
           }),
         }),
         defaults: {
@@ -170,6 +171,7 @@ const routes = {
             index: 'profiling-events-all',
             n: '100',
             projectID: '5',
+            kuery: '',
           },
         },
       },
