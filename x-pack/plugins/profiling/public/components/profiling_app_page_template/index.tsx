@@ -135,7 +135,6 @@ export function ProfilingAppPageTemplate({
               });
             }}
           />
-          ,
         </EuiFlexItem>
         <EuiFlexItem>{children}</EuiFlexItem>
       </EuiFlexGroup>
