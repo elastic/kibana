@@ -12,7 +12,6 @@ import {
   EuiSelect,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -72,8 +71,7 @@ export function TimeScaling({
   if (
     !selectedOperation.timeScalingMode ||
     selectedOperation.timeScalingMode === 'disabled' ||
-    !hasDateHistogram ||
-    !selectedColumn.timeScale
+    !hasDateHistogram
   ) {
     return null;
   }
@@ -103,18 +101,27 @@ export function TimeScaling({
           <EuiSelect
             fullWidth
             compressed
-            options={Object.entries(unitSuffixesLong).map(([unit, text]) => ({
-              value: unit,
-              text,
-            }))}
+            options={[
+              {
+                value: '',
+                text: i18n.translate('xpack.lens.timeScale.normalizeNone', {
+                  defaultMessage: 'None',
+                }),
+              },
+              ...Object.entries(unitSuffixesLong).map(([unit, text]) => ({
+                value: unit,
+                text,
+              })),
+            ]}
             data-test-subj="indexPattern-time-scaling-unit"
-            value={selectedColumn.timeScale}
+            value={selectedColumn.timeScale ?? ''}
             onChange={(e) => {
-              updateLayer(setTimeScaling(columnId, layer, e.target.value as TimeScaleUnit));
+              const value = e.target.value || undefined;
+              updateLayer(setTimeScaling(columnId, layer, value as TimeScaleUnit));
             }}
           />
         </EuiFlexItem>
-        {selectedOperation.timeScalingMode === 'optional' && (
+        {/* {selectedOperation.timeScalingMode === 'optional' && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               data-test-subj="indexPattern-time-scaling-remove"
@@ -128,7 +135,7 @@ export function TimeScaling({
               iconType="cross"
             />
           </EuiFlexItem>
-        )}
+        )} */}
       </EuiFlexGroup>
     </EuiFormRow>
   );
