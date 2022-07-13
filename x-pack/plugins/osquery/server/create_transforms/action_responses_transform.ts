@@ -6,14 +6,14 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { ACTION_RESPONSES_INDEX } from '../../common/constants';
 
 export const actionResponsesTransform: TransformPutTransformRequest = {
   transform_id: 'osquery_manager.action_responses-default-0.0.1',
   description: 'Latest osquery_manager action responses',
   source: {
-    index: [`${AGENT_ACTIONS_RESULTS_INDEX}*`],
+    index: [`${AGENT_ACTIONS_INDEX}*`],
     query: {
       bool: {
         should: [
