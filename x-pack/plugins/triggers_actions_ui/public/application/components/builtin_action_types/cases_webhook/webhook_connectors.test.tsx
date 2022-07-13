@@ -38,7 +38,7 @@ const config = {
   createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
   getIncidentResponseCreatedDateKey: 'fields.created',
   getIncidentResponseExternalTitleKey: 'key',
-  getIncidentResponseUpdatedDateKey: 'fields.udpated',
+  getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: [{ key: 'content-type', value: 'text' }],
   incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',

@@ -59,7 +59,13 @@ export const createExternalService = (
     updateIncidentUrl,
   } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (!getIncidentUrl || !password || !user) {
+  if (
+    !getIncidentUrl ||
+    !createIncidentUrlConfig ||
+    !incidentViewUrl ||
+    !updateIncidentUrl ||
+    (hasAuth && (!password || !user))
+  ) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
@@ -116,7 +122,6 @@ export const createExternalService = (
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     const { labels, summary, description } = incident;
-
     try {
       const res: AxiosResponse = await request({
         axios: axiosInstance,
@@ -211,7 +216,7 @@ export const createExternalService = (
         pushedDate: getPushedDate(updatedIncident.updated),
       };
     } catch (error) {
-      throw createServiceError(error, 'Unable to update incident');
+      throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
     }
   };
 
@@ -241,10 +246,9 @@ export const createExternalService = (
       throwIfResponseIsNotValidSpecial({
         res,
       });
-
-      return res;
+      return res.data;
     } catch (error) {
-      throw createServiceError(error, 'Unable to post comment');
+      throw createServiceError(error, `Unable to create comment at incident with id ${incidentId}`);
     }
   };
 

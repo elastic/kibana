@@ -14,7 +14,7 @@ export const createServiceError = (error: AxiosError, message: string) =>
   new Error(
     getErrorMessage(
       i18n.NAME,
-      `${message}. Error: ${error.message} ${
+      `${message}. Error: ${error.message}. ${
         error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
       }`
     )
@@ -91,20 +91,27 @@ export const throwIfResponseIsNotValidSpecial = ({
   }
 
   if (requiredAttributesToBeInTheResponse.length > 0) {
-    const requiredAttributesError = (attr: string) =>
-      new Error(`Response is missing at the expected field: ${attr}`);
+    const requiredAttributesError = (attrs: string[]) =>
+      new Error(
+        `Response is missing the expected ${attrs.length > 1 ? `fields` : `field`}: ${attrs.join(
+          ', '
+        )}`
+      );
 
+    const errorAttributes: string[] = [];
     /**
      * If the response is an array and requiredAttributesToBeInTheResponse
-     * are not empty then we thrown an error assuming that the consumer
-     * expects an object response and not an array.
+     * are not empty then we throw an error if we are missing data for the given attributes
      */
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
       if (getObjectValueByKey(data, attr) === undefined) {
-        throw requiredAttributesError(attr);
+        errorAttributes.push(attr);
       }
     });
+    if (errorAttributes.length) {
+      throw requiredAttributesError(errorAttributes);
+    }
   }
 };
 

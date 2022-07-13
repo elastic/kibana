@@ -1,0 +1,490 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import axios, { AxiosError, AxiosResponse } from 'axios';
+
+import { createExternalService } from './service';
+import { request, createAxiosResponse } from '../lib/axios_utils';
+import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalService } from './types';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+  };
+});
+
+axios.create = jest.fn(() => axios);
+const requestMock = request as jest.Mock;
+const configurationUtilities = actionsConfigMock.create();
+
+const config: CasesWebhookPublicConfigurationType = {
+  createCommentJson: '{"body":{{{case.comment}}}}',
+  createCommentMethod: CasesWebhookMethods.POST,
+  createCommentUrl:
+    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+  createIncidentJson:
+    '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+  createIncidentMethod: CasesWebhookMethods.POST,
+  createIncidentResponseKey: 'id',
+  createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+  getIncidentResponseCreatedDateKey: 'fields.created',
+  getIncidentResponseExternalTitleKey: 'key',
+  getIncidentResponseUpdatedDateKey: 'fields.updated',
+  hasAuth: true,
+  headers: { ['content-type']: 'application/json' },
+  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
+  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  updateIncidentJson:
+    '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+  updateIncidentMethod: CasesWebhookMethods.PUT,
+  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+};
+const secrets = {
+  user: 'user',
+  password: 'pass',
+};
+const actionId = '1234';
+describe('Cases webhook service', () => {
+  let service: ExternalService;
+
+  beforeAll(() => {
+    service = createExternalService(
+      actionId,
+      {
+        config,
+        secrets,
+      },
+      logger,
+      configurationUtilities
+    );
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('createExternalService', () => {
+    const requiredUrls = [
+      'createIncidentUrl',
+      'incidentViewUrl',
+      'getIncidentUrl',
+      'updateIncidentUrl',
+    ];
+    test.each(requiredUrls)('throws without url %p', (url) => {
+      expect(() =>
+        createExternalService(
+          actionId,
+          {
+            config: { ...config, [url]: '' },
+            secrets,
+          },
+          logger,
+          configurationUtilities
+        )
+      ).toThrow();
+    });
+
+    test('throws if hasAuth and no user/pass', () => {
+      expect(() =>
+        createExternalService(
+          actionId,
+          {
+            config,
+            secrets: { user: '', password: '' },
+          },
+          logger,
+          configurationUtilities
+        )
+      ).toThrow();
+    });
+
+    test('does not throw if hasAuth=false and no user/pass', () => {
+      expect(() =>
+        createExternalService(
+          actionId,
+          {
+            config: { ...config, hasAuth: false },
+            secrets: { user: '', password: '' },
+          },
+          logger,
+          configurationUtilities
+        )
+      ).not.toThrow();
+    });
+  });
+
+  describe('getIncident', () => {
+    const axiosRes = {
+      data: {
+        id: '1',
+        key: 'CK-1',
+        fields: {
+          summary: 'title',
+          description: 'description',
+          created: '2021-10-20T19:41:02.754+0300',
+          updated: '2021-10-20T19:41:02.754+0300',
+        },
+      },
+    };
+
+    test('it returns the incident correctly', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+      const res = await service.getIncident('1');
+      expect(res).toEqual({
+        id: '1',
+        title: 'CK-1',
+        created: '2021-10-20T19:41:02.754+0300',
+        updated: '2021-10-20T19:41:02.754+0300',
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+
+      await service.getIncident('1');
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        logger,
+        configurationUtilities,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: AxiosError = new Error('An error has occurred') as AxiosError;
+        error.response = { statusText: 'Required field' } as AxiosResponse;
+        throw error;
+      });
+      await expect(service.getIncident('1')).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to get incident. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ ...axiosRes, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getIncident('1')).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to get incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { fields: { notRequired: 'test' } } })
+      );
+
+      await expect(service.getIncident('1')).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to get incident. Error: Response is missing the expected fields: fields.created, key, fields.updated'
+      );
+    });
+  });
+
+  describe('createIncident', () => {
+    const incident = {
+      incident: {
+        summary: 'title',
+        description: 'desc',
+        labels: ['hello', 'world'],
+        issueType: '10006',
+        priority: 'High',
+        parent: 'RJ-107',
+      },
+    };
+
+    test('it creates the incident correctly', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
+        })
+      );
+
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
+
+      const res = await service.createIncident(incident);
+
+      expect(requestMock.mock.calls[0][0].data).toEqual(
+        `{"fields":{"summary":"title","description":"desc","labels":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`
+      );
+
+      expect(res).toEqual({
+        title: 'CK-1',
+        id: '1',
+        pushedDate: '2020-04-27T10:59:46.202Z',
+        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { created: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
+
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
+
+      await service.createIncident(incident);
+
+      expect(requestMock.mock.calls[0][0]).toEqual({
+        axios,
+        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        logger,
+        method: CasesWebhookMethods.POST,
+        configurationUtilities,
+        data: `{"fields":{"summary":"title","description":"desc","labels":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: AxiosError = new Error('An error has occurred') as AxiosError;
+        error.response = { statusText: 'Required field' } as AxiosResponse;
+        throw error;
+      });
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to create incident. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to create incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to create incident. Error: Response is missing the expected field: id.'
+      );
+    });
+  });
+
+  describe('updateIncident', () => {
+    const incident = {
+      incidentId: '1',
+      incident: {
+        summary: 'title',
+        description: 'desc',
+        labels: ['hello', 'world'],
+      },
+    };
+
+    test('it updates the incident correctly', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
+
+      const res = await service.updateIncident(incident);
+
+      expect(res).toEqual({
+        title: 'CK-1',
+        id: '1',
+        pushedDate: '2020-04-27T10:59:46.202Z',
+        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
+
+      await service.updateIncident(incident);
+
+      expect(requestMock.mock.calls[0][0]).toEqual({
+        axios,
+        logger,
+        method: CasesWebhookMethods.PUT,
+        configurationUtilities,
+        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        data: JSON.stringify({
+          fields: {
+            summary: 'title',
+            description: 'desc',
+            labels: ['hello', 'world'],
+            project: { key: 'ROC' },
+            issuetype: { id: '10024' },
+          },
+        }),
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: AxiosError = new Error('An error has occurred') as AxiosError;
+        error.response = { statusText: 'Required field' } as AxiosResponse;
+        throw error;
+      });
+
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+  });
+
+  describe('createComment', () => {
+    const commentReq = {
+      incidentId: '1',
+      comment: {
+        comment: 'comment',
+        commentId: 'comment-1',
+      },
+    };
+    test('it creates the comment correctly', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            created: '2020-04-27T10:59:46.202Z',
+          },
+        })
+      );
+
+      const res = await service.createComment(commentReq);
+
+      expect(res).toEqual({
+        id: '1',
+        key: 'CK-1',
+        created: '2020-04-27T10:59:46.202Z',
+      });
+    });
+
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            created: '2020-04-27T10:59:46.202Z',
+          },
+        })
+      );
+
+      await service.createComment(commentReq);
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        method: CasesWebhookMethods.POST,
+        configurationUtilities,
+        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
+        data: `{"body":"comment"}`,
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: AxiosError = new Error('An error has occurred') as AxiosError;
+        error.response = { statusText: 'Required field' } as AxiosResponse;
+        throw error;
+      });
+
+      await expect(service.createComment(commentReq)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to create comment at incident with id 1. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createComment(commentReq)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to create comment at incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+
+    test('it fails silently if createCommentUrl is missing', async () => {
+      service = createExternalService(
+        actionId,
+        {
+          config: { ...config, createCommentUrl: '' },
+          secrets,
+        },
+        logger,
+        configurationUtilities
+      );
+      const res = await service.createComment(commentReq);
+      expect(requestMock).not.toHaveBeenCalled();
+      expect(res).toEqual({});
+    });
+
+    test('it fails silently if createCommentJson is missing', async () => {
+      service = createExternalService(
+        actionId,
+        {
+          config: { ...config, createCommentJson: '' },
+          secrets,
+        },
+        logger,
+        configurationUtilities
+      );
+      const res = await service.createComment(commentReq);
+      expect(requestMock).not.toHaveBeenCalled();
+      expect(res).toEqual({});
+    });
+  });
+});
