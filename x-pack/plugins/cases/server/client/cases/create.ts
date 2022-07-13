@@ -12,6 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { performance } from 'perf_hooks';
 import {
   throwErrors,
   CaseResponseRt,
@@ -68,10 +69,12 @@ export const create = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
+    const beforeEnsureAuth = performance.now();
     await auth.ensureAuthorized({
       operation: Operations.createCase,
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
+    const afterEnsureAuth = performance.now();
 
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
@@ -80,6 +83,7 @@ export const create = async (
       }),
       id: savedObjectID,
     });
+    const afterPostNewCase = performance.now();
 
     await userActionService.createUserAction({
       type: ActionTypes.create_case,
@@ -88,6 +92,13 @@ export const create = async (
       user,
       payload: { ...query, severity: query.severity ?? CaseSeverity.LOW },
       owner: newCase.attributes.owner,
+    });
+    const afterCreateUserAction = performance.now();
+
+    console.log('create client', {
+      ensure: afterEnsureAuth - beforeEnsureAuth,
+      postNew: afterPostNewCase - afterEnsureAuth,
+      createUserAction: afterCreateUserAction - afterPostNewCase,
     });
 
     return CaseResponseRt.encode(

@@ -1,0 +1,12 @@
+{
+  "id": "v8Profiling",
+  "owner": {
+    "name": "Kibana Alerting",
+    "githubTeam": "kibana-alerting-services"
+  },
+  "version": "kibana",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [],
+  "server": true,
+  "ui": false
+}

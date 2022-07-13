@@ -571,7 +571,7 @@ export class CasesService {
       const createdCase = await this.unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
-        { id, references: transformedAttributes.referenceHandler.build() }
+        { id, references: transformedAttributes.referenceHandler.build(), refresh: false }
       );
       return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {

@@ -6,6 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
+import { performance } from 'perf_hooks';
 
 import {
   Logger,
@@ -331,7 +332,9 @@ export class CaseUserActionService {
   }: CreateUserActionClient<T>) {
     try {
       this.log.debug(`Attempting to create a user action of type: ${type}`);
+      const beforeGetBuilder = performance.now();
       const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+      const afterGetBuilder = performance.now();
 
       const userAction = userActionBuilder?.build({
         action,
@@ -343,10 +346,19 @@ export class CaseUserActionService {
         payload,
       });
 
+      const afterBuild = performance.now();
+
       if (userAction) {
         const { attributes, references } = userAction;
         await this.create({ unsecuredSavedObjectsClient, attributes, references });
       }
+      const afterCreate = performance.now();
+
+      console.log('useraction', {
+        beforeGetBuilder: afterGetBuilder - beforeGetBuilder,
+        build: afterBuild - afterGetBuilder,
+        create: afterCreate - afterBuild,
+      });
     } catch (error) {
       this.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
       throw error;
