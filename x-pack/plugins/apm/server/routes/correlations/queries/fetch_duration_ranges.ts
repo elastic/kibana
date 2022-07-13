@@ -6,14 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
+import { getDurationField } from '../utils';
 
 export const fetchDurationRanges = async ({
   rangeSteps,
@@ -64,10 +61,7 @@ export const fetchDurationRanges = async ({
       aggs: {
         logspace_ranges: {
           range: {
-            field:
-              eventType === ProcessorEvent.span
-                ? SPAN_DURATION
-                : TRANSACTION_DURATION,
+            field: getDurationField(eventType),
             ranges,
           },
         },

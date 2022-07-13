@@ -41,6 +41,34 @@
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.CONNECTORS_JOBS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTORS_JOBS_INDEX",
+        "description": [],
+        "signature": [
+          "\".elastic-connectors-sync-jobs\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.CONNECTORS_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTORS_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [

@@ -7,7 +7,6 @@
 import React, { memo, useEffect, useState, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart } from '@kbn/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import type { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
@@ -16,6 +15,7 @@ import { PolicyResponse } from './policy_response';
 import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 import { PolicyResponseActionFormatter } from './policy_response_friendly_names';
+import { useGetEndpointDetails } from '../../hooks';
 
 export interface PolicyResponseWrapperProps {
   endpointId: string;
@@ -26,6 +26,7 @@ export interface PolicyResponseWrapperProps {
 export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
   ({ endpointId, showRevisionMessage = true, onShowNeedsAttentionBadge }) => {
     const { data, isLoading, isFetching, isError } = useGetEndpointPolicyResponse(endpointId);
+    const { data: endpointDetails } = useGetEndpointDetails(endpointId);
 
     const { docLinks } = useKibana().services;
 
@@ -73,12 +74,11 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
         (acc, currentAction) => {
           const policyResponseActionFormatter = new PolicyResponseActionFormatter(
             currentAction,
-            docLinks.links.securitySolution.policyResponseTroubleshooting[
-              currentAction.name as keyof DocLinksStart['links']['securitySolution']['policyResponseTroubleshooting']
-            ]
+            docLinks.links.securitySolution.policyResponseTroubleshooting,
+            endpointDetails?.metadata.host.os.name.toLowerCase()
           );
 
-          if (policyResponseActionFormatter.isGeneric() && policyResponseActionFormatter.hasError) {
+          if (policyResponseActionFormatter.isGeneric && policyResponseActionFormatter.hasError) {
             acc.push(policyResponseActionFormatter);
           }
 
@@ -90,6 +90,7 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
       docLinks.links.securitySolution.policyResponseTroubleshooting,
       policyResponseActions,
       policyResponseConfig,
+      endpointDetails?.metadata.host.os.name,
     ]);
 
     return (
@@ -127,6 +128,7 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
         {policyResponseConfig !== undefined && policyResponseActions !== undefined && (
           <>
             <PolicyResponse
+              hostOs={endpointDetails?.metadata.host.os.name.toLowerCase() ?? ''}
               policyResponseConfig={policyResponseConfig}
               policyResponseActions={policyResponseActions}
               policyResponseAttentionCount={policyResponseAttentionCount}
