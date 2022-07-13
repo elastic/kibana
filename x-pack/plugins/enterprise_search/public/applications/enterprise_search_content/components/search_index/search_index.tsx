@@ -25,6 +25,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
+import { headerActions } from './components/header_actions/header_actions';
 import { IndexCreatedCallout } from './components/index_created_callout/callout';
 import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
@@ -136,7 +137,7 @@ export const SearchIndex: React.FC = () => {
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
       isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
-      pageHeader={{ pageTitle: indexName }}
+      pageHeader={{ pageTitle: indexName, rightSideItems: headerActions }}
     >
       <>
         {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
