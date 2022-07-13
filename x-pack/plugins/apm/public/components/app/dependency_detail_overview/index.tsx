@@ -11,10 +11,10 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
+import { DependenciesDetailTable } from './dependencies_detail_table';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 
-export function BackendDetailOverview() {
+export function DependencyDetailOverview() {
   const {
     query: {
       dependencyName,
@@ -32,9 +32,10 @@ export function BackendDetailOverview() {
 
   useBreadcrumb([
     {
-      title: i18n.translate('xpack.apm.backendDetailOverview.breadcrumbTitle', {
-        defaultMessage: 'Overview',
-      }),
+      title: i18n.translate(
+        'xpack.apm.dependencyDetailOverview.breadcrumbTitle',
+        { defaultMessage: 'Overview' }
+      ),
       href: apmRouter.link('/dependencies/overview', {
         query: {
           dependencyName,
@@ -56,7 +57,7 @@ export function BackendDetailOverview() {
         <DependencyMetricCharts />
       </ChartPointerEventContextProvider>
       <EuiSpacer size="l" />
-      <BackendDetailDependenciesTable />
+      <DependenciesDetailTable />
     </>
   );
 }

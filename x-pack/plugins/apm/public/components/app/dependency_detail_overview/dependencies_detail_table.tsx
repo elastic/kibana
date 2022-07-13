@@ -17,7 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export function BackendDetailDependenciesTable() {
+export function DependenciesDetailTable() {
   const {
     query: {
       dependencyName,
@@ -97,14 +97,13 @@ export function BackendDetailDependenciesTable() {
   return (
     <DependenciesTable
       dependencies={dependencies}
-      title={i18n.translate('xpack.apm.backendDetail.dependenciesTableTitle', {
-        defaultMessage: 'Upstream services',
-      })}
+      title={i18n.translate(
+        'xpack.apm.dependencyDetail.dependenciesTableTitle',
+        { defaultMessage: 'Upstream services' }
+      )}
       nameColumnTitle={i18n.translate(
-        'xpack.apm.backendDetail.dependenciesTableColumnBackend',
-        {
-          defaultMessage: 'Service',
-        }
+        'xpack.apm.dependencyDetail.dependenciesTableColumn',
+        { defaultMessage: 'Service' }
       )}
       status={status}
       compact={false}

@@ -15,7 +15,7 @@ import qs from 'query-string';
 import { page } from '.';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
-import { BackendDetailOverview } from '../../app/backend_detail_overview';
+import { DependencyDetailOverview } from '../../app/dependency_detail_overview';
 import { DependencyDetailView } from '../../app/dependency_detail_view';
 import { DependenciesInventory } from '../../app/dependencies_inventory';
 import { DependencyOperationDetailView } from '../../app/dependency_operation_detail_view';
@@ -83,7 +83,7 @@ export const dependencies = {
         element: <DependencyOperationDetailView />,
       },
       '/dependencies/overview': {
-        element: <BackendDetailOverview />,
+        element: <DependencyDetailOverview />,
       },
     },
   },
