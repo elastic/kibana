@@ -49,6 +49,15 @@ monitoring_collection.opentelemetry.metrics:
       Authorization: "Bearer SECRET_TOKEN"
 ```
 
+Alternatively, OTLP Exporter can be configured using environment variables `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT`, `OTEL_EXPORTER_OTLP_METRICS_HEADERS`. [See OTLP Exporter docs](https://opentelemetry.io/docs/reference/specification/protocol/exporter/) for details.
+
+It's possible to configure logging for the OTLP integration. If not informed, the default will be `info`
+
+```yml
+monitoring_collection.opentelemetry.metrics:
+  logLevel: warn | info | debug | warn | none | verbose | all
+```
+
 For connection-level debug information you can set these variables:
 
 ```bash

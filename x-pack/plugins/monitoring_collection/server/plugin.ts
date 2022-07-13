@@ -18,6 +18,7 @@ import { metrics } from '@opentelemetry/api-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
 import { Resource } from '@opentelemetry/resources';
+import { diag, DiagLogger, DiagLogLevel } from '@opentelemetry/api';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import * as grpc from '@grpc/grpc-js';
 import { PrometheusExporter } from './lib/prometheus_exporter';
@@ -41,6 +42,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private readonly initializerContext: PluginInitializerContext;
   private readonly logger: Logger;
   private readonly config: MonitoringCollectionConfig;
+  private readonly otlpLogger: DiagLogger;
 
   private metrics: Record<string, Metric<any>> = {};
 
@@ -50,6 +52,14 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
+
+    this.otlpLogger = {
+      debug: (message) => this.logger.debug(message),
+      error: (message) => this.logger.error(message),
+      info: (message) => this.logger.info(message),
+      warn: (message) => this.logger.warn(message),
+      verbose: (message) => this.logger.trace(message),
+    };
   }
 
   async getMetric(type: string) {
@@ -127,17 +137,21 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     metrics.setGlobalMeterProvider(meterProvider);
 
     const otlpConfig = this.config.opentelemetry?.metrics.otlp;
-    if (otlpConfig?.url) {
+    const url = otlpConfig?.url ?? process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT;
+    if (url) {
       // Add OTLP exporter
-      const url = otlpConfig.url;
-
       // Set Authorization headers
+      // OTLPMetricExporter internally will look at OTEL_EXPORTER_OTLP_METRICS_HEADERS env variable
+      // if `headers` are not present in the kibana config file
       const metadata = new grpc.Metadata();
       if (otlpConfig.headers) {
         for (const [key, value] of Object.entries(otlpConfig.headers)) {
           metadata.add(key, value);
         }
       }
+
+      const otlpLogLevel = otlpConfig.logLevel.toUpperCase() as keyof typeof DiagLogLevel;
+      diag.setLogger(this.otlpLogger, DiagLogLevel[otlpLogLevel]);
 
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
       meterProvider.addMetricReader(
