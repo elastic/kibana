@@ -6,11 +6,16 @@
  */
 
 import { createContext } from 'react';
-import { RowSelectionState, RowSelectionAction } from '../../../../types';
+import { BulkActionsReducerAction, BulkActionsState } from '../../../../types';
 
 export const BulkActionsContext = createContext<
-  [RowSelectionState, React.Dispatch<RowSelectionAction>]
+  [BulkActionsState, React.Dispatch<BulkActionsReducerAction>]
 >([
-  { rowSelection: new Set<number>(), isAllSelected: false, isPageSelected: false, pageSize: 0 },
+  {
+    rowSelection: new Set<number>(),
+    isAllSelected: false,
+    areAllVisibleRowsSelected: false,
+    rowCount: 0,
+  },
   () => {},
 ]);

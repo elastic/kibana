@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BulkActionsReducerAction, BulkActionsState } from '../../../../types';
+import { BulkActionsReducerAction, BulkActionsState, BulkActionsVerbs } from '../../../../types';
 
 const getAllRowsInPage = (rowCount: number) => new Set(Array.from(Array(rowCount).keys()));
 
@@ -16,27 +16,27 @@ export const bulkActionsReducer = (
   const { rowSelection, rowCount: currentRowCount } = currentState;
   const nextState = { ...currentState };
 
-  if (action === 'add' && rowIndex !== undefined) {
+  if (action === BulkActionsVerbs.add && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
     nextRowSelection.add(rowIndex);
     nextState.rowSelection = nextRowSelection;
-  } else if (action === 'delete' && rowIndex !== undefined) {
+  } else if (action === BulkActionsVerbs.delete && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
     nextRowSelection.delete(rowIndex);
     nextState.rowSelection = nextRowSelection;
-  } else if (action === 'selectCurrentPage') {
+  } else if (action === BulkActionsVerbs.selectCurrentPage) {
     nextState.rowSelection = getAllRowsInPage(currentRowCount);
-  } else if (action === 'selectAll') {
+  } else if (action === BulkActionsVerbs.selectAll) {
     nextState.rowSelection = getAllRowsInPage(currentRowCount);
     nextState.isAllSelected = true;
-  } else if (action === 'clear') {
+  } else if (action === BulkActionsVerbs.clear) {
     nextState.rowSelection = new Set();
     nextState.isAllSelected = false;
-  } else if (action === 'rowCountUpdate' && rowCount !== undefined) {
+  } else if (action === BulkActionsVerbs.rowCountUpdate && rowCount !== undefined) {
     nextState.rowCount = rowCount;
   }
 
-  nextState.areAllVisibleRowsSelected = nextState.rowSelection.size === currentRowCount;
+  nextState.areAllVisibleRowsSelected = nextState.rowSelection.size === nextState.rowCount;
 
   return nextState;
 };

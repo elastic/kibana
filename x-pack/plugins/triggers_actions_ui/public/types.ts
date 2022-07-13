@@ -432,6 +432,14 @@ export type AlertTableFlyoutComponent =
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
 
+export type RenderBulkActions =
+  | ((isAllSelected: boolean, selectedAlertIds: string[]) => JSX.Element[])
+  | undefined;
+
+export type UseBulkActionsRegistry = () => {
+  render: RenderBulkActions;
+};
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -446,18 +454,16 @@ export interface AlertsTableConfigurationRegistry {
     renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
     width?: number;
   };
-  useBulkActions?: () => {
-    render: (isAllSelected: boolean, selectedAlertIds: string[]) => JSX.Element[];
-  };
+  useBulkActions?: UseBulkActionsRegistry;
 }
 
-enum BulkActionsVerbs {
-  Add = 'add',
-  Delete = 'delete',
-  Clear = 'clear',
-  SelectCurrentPage = 'selectCurrentPage',
-  SelectAll = 'selectAll',
-  RowCountUpdate = 'rowCountUpdate',
+export enum BulkActionsVerbs {
+  add = 'add',
+  delete = 'delete',
+  clear = 'clear',
+  selectCurrentPage = 'selectCurrentPage',
+  selectAll = 'selectAll',
+  rowCountUpdate = 'rowCountUpdate',
 }
 
 export interface BulkActionsReducerAction {

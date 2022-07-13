@@ -8,6 +8,7 @@
 import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React from 'react';
+import { RenderBulkActions } from '../../../../types';
 import { BulkActions } from '../bulk_actions/components/toolbar';
 
 export const getToolbarVisibility = ({
@@ -17,7 +18,7 @@ export const getToolbarVisibility = ({
   rowSelection,
   alerts,
 }: {
-  renderBulkActions?: (isAllSelected: boolean, selectedAlertIds: string[]) => JSX.Element[];
+  renderBulkActions: RenderBulkActions;
   alertsCount: number;
   isAllSelected: boolean;
   rowSelection: Set<number>;

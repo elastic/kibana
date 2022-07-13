@@ -10,15 +10,13 @@ import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@ela
 
 import { BulkActionsHeader, BulkActionsRowCell } from './components';
 
-export const getLeadingControlColumn = ({
-  pageSize,
-}: {
-  pageSize: number;
-}): EuiDataGridControlColumn => ({
+export type GetLeadingControlColumn = () => EuiDataGridControlColumn;
+
+export const getLeadingControlColumn: GetLeadingControlColumn = (): EuiDataGridControlColumn => ({
   id: 'bulkActions',
   width: 30,
   headerCellRender: () => {
-    return <BulkActionsHeader pageSize={pageSize} />;
+    return <BulkActionsHeader />;
   },
   rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
     const { visibleRowIndex: rowIndex } = cveProps as EuiDataGridCellValueElementProps & {

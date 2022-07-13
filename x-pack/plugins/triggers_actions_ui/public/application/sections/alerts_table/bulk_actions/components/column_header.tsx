@@ -7,11 +7,10 @@
 
 import { EuiCheckbox } from '@elastic/eui';
 import React, { ChangeEvent, useContext } from 'react';
+import { BulkActionsVerbs } from '../../../../../types';
 import { BulkActionsContext } from '../context';
 
-const BulkActionsHeaderComponent: React.FunctionComponent<{ pageSize: number }> = ({
-  pageSize,
-}) => {
+const BulkActionsHeaderComponent: React.FunctionComponent = () => {
   const [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows] =
     useContext(BulkActionsContext);
 
@@ -22,9 +21,9 @@ const BulkActionsHeaderComponent: React.FunctionComponent<{ pageSize: number }> 
       checked={isAllSelected || areAllVisibleRowsSelected}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-          updateSelectedRows({ action: 'selectCurrentPage', pageSize });
+          updateSelectedRows({ action: BulkActionsVerbs.selectCurrentPage });
         } else {
-          updateSelectedRows({ action: 'clear' });
+          updateSelectedRows({ action: BulkActionsVerbs.clear });
         }
       }}
       data-test-subj="bulk-actions-header"

@@ -8,6 +8,7 @@
 import { EuiCheckbox } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { useContext } from 'react';
+import { BulkActionsVerbs } from '../../../../../types';
 import { BulkActionsContext } from '../context';
 
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
@@ -20,9 +21,9 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
       checked={isChecked}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-          updateSelectedRows({ action: 'add', rowIndex });
+          updateSelectedRows({ action: BulkActionsVerbs.add, rowIndex });
         } else {
-          updateSelectedRows({ action: 'delete', rowIndex });
+          updateSelectedRows({ action: BulkActionsVerbs.delete, rowIndex });
         }
       }}
       data-test-subj="bulk-actions-row-cell"

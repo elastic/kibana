@@ -6,15 +6,7 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, {
-  useState,
-  Suspense,
-  lazy,
-  useCallback,
-  useMemo,
-  useEffect,
-  useContext,
-} from 'react';
+import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -24,17 +16,15 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { useSorting, usePagination } from './hooks';
+import { useSorting, usePagination, useBulkActions } from './hooks';
 import { AlertsTableProps } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
-import { getLeadingControlColumn as getBulkActionsLeadingControlColumn } from './bulk_actions/leading_control_column';
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
-import { BulkActionsContext } from './bulk_actions/context';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
@@ -60,21 +50,31 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
-  const {
-    useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }),
-    useBulkActions = () => ({ render: undefined }),
-  } = props.alertsTableConfiguration;
+  const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
+    props.alertsTableConfiguration;
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
     useActionsColumn();
 
-  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const { render: renderBulkActions } = useBulkActions();
+  const {
+    isBulkActionsColumnActive,
+    getBulkActionsLeadingControlColumn,
+    bulkActionsState,
+    renderBulkActions,
+  } = useBulkActions({
+    alerts,
+    useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
+  });
 
-  const isBulkActionsColumnActive = Boolean(renderBulkActions);
-
-  useEffect(() => {
-    updateBulkActionsState({ action: 'rowCountUpdate', rowCount: alerts.length });
-  }, [alerts, updateBulkActionsState]);
+  const toolbarVisibility = useCallback(() => {
+    const { rowSelection, isAllSelected } = bulkActionsState;
+    return getToolbarVisibility({
+      renderBulkActions,
+      alertsCount,
+      rowSelection,
+      isAllSelected,
+      alerts: alertsData.alerts,
+    });
+  }, [alertsCount, alertsData.alerts, renderBulkActions, bulkActionsState])();
 
   const {
     pagination,
@@ -153,18 +153,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     }
 
     if (isBulkActionsColumnActive) {
-      controlColumns = [
-        getBulkActionsLeadingControlColumn({ pageSize: pagination.pageSize }),
-        ...controlColumns,
-      ];
+      controlColumns = [getBulkActionsLeadingControlColumn(), ...controlColumns];
     }
 
     return controlColumns;
   }, [
     actionsColumnWidth,
     alerts,
+    getBulkActionsLeadingControlColumn,
     isBulkActionsColumnActive,
-    pagination.pageSize,
     props.leadingControlColumns,
     props.showExpandToDetails,
     renderCustomActionsRow,
@@ -229,17 +226,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [alerts, pagination.pageIndex, pagination.pageSize, renderCellValue]
   );
-
-  const toolbarVisibility = useCallback(() => {
-    const { rowSelection, isAllSelected } = bulkActionsState;
-    return getToolbarVisibility({
-      renderBulkActions,
-      alertsCount,
-      rowSelection,
-      isAllSelected,
-      alerts: alertsData.alerts,
-    });
-  }, [alertsCount, alertsData.alerts, renderBulkActions, bulkActionsState])();
 
   return (
     <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
