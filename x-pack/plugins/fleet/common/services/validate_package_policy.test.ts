@@ -565,58 +565,6 @@ describe('Fleet - validatePackagePolicy()', () => {
       });
     });
 
-    it('returns no errors when required field is present but empty', () => {
-      expect(
-        validatePackagePolicy(
-          {
-            ...validPackagePolicy,
-            inputs: [
-              {
-                type: 'foo',
-                policy_template: 'pkgPolicy1',
-                enabled: true,
-                vars: {
-                  'foo-input-var-name': { value: '', type: 'text' },
-                  'foo-input2-var-name': { value: '', type: 'text' },
-                  'foo-input3-var-name': { value: ['test'], type: 'text' },
-                },
-                streams: [
-                  {
-                    data_stream: { dataset: 'foo', type: 'logs' },
-                    enabled: true,
-                    vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
-                  },
-                ],
-              },
-            ],
-          },
-          mockPackage,
-          safeLoad
-        )
-      ).toEqual({
-        name: null,
-        description: null,
-        namespace: null,
-        inputs: {
-          foo: {
-            streams: {
-              foo: {
-                vars: {
-                  'var-name': null,
-                },
-              },
-            },
-            vars: {
-              'foo-input-var-name': null,
-              'foo-input2-var-name': null,
-              'foo-input3-var-name': null,
-            },
-          },
-        },
-        vars: {},
-      });
-    });
-
     // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
     it.skip('returns package policy validation error if input var does not exist', () => {
       expect(
