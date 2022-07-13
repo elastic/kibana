@@ -12,7 +12,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
-import { BackendMetricCharts } from '../../shared/backend_metric_charts';
+import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 
 export function BackendDetailOverview() {
   const {
@@ -53,7 +53,7 @@ export function BackendDetailOverview() {
   return (
     <>
       <ChartPointerEventContextProvider>
-        <BackendMetricCharts />
+        <DependencyMetricCharts />
       </ChartPointerEventContextProvider>
       <EuiSpacer size="l" />
       <BackendDetailDependenciesTable />
