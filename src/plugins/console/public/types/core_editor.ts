@@ -289,10 +289,8 @@ export interface CoreEditor {
    */
   addFoldsAtRanges(foldRanges: Range[]): void;
 
-  /** Entry point into the Ace functionality. See for more details https://ace.c9.io/#nav=api&api=editor */
-  editor: {
-    completer: {
-      detach(): void;
-    };
-  };
+  /**
+   * Detach autocomplete
+   */
+  detachCompleter(): void;
 }
