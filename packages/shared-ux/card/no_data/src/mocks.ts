@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  getRedirectAppLinksMockServices,
-  getRedirectAppLinksStoryArgTypes,
-  getRedirectAppLinksStoryServices,
-} from '@kbn/shared-ux-link-redirect-app';
+import { RedirectAppLinksStorybookMocks } from '@kbn/shared-ux-link-redirect-app-storybook';
+import { getRedirectAppLinksMockServices } from '@kbn/shared-ux-link-redirect-app-jest';
 
 import { NoDataCardServices } from './services';
 
@@ -25,7 +22,7 @@ type ActionFn = (name: string) => any;
  */
 export const getStoryServices = (params: Params, action: ActionFn = () => {}) => {
   const services: NoDataCardServices = {
-    ...getRedirectAppLinksStoryServices(action),
+    ...RedirectAppLinksStorybookMocks.getServices(),
     ...params,
     addBasePath: (path) => {
       action('addBasePath')(path);
@@ -41,7 +38,6 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
  * consuming component stories.
  */
 export const getStoryArgTypes = () => ({
-  ...getRedirectAppLinksStoryArgTypes(),
   canAccessFleet: {
     control: 'boolean',
     defaultValue: true,
@@ -70,6 +66,7 @@ export const getStoryArgTypes = () => ({
     },
     defaultValue: '',
   },
+  ...RedirectAppLinksStorybookMocks.getServiceArgumentTypes(),
 });
 
 /**

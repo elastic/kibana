@@ -8,23 +8,20 @@
 
 import React, { FC, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
-import { NavigateToUrl } from './types';
+import {
+  RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
+} from '@kbn/shared-ux-link-redirect-app-types';
 
-/**
- * Contextual services for this component.
- */
-export interface Services {
-  navigateToUrl: NavigateToUrl;
-  currentAppId?: string;
-}
-
-const RedirectAppLinksContext = React.createContext<Services | null>(null);
+const RedirectAppLinksContext = React.createContext<RedirectAppLinksServices | null>(null);
 
 /**
  * Contextual services Provider.
  */
-export const RedirectAppLinksProvider: FC<Services> = ({ children, ...services }) => {
+export const RedirectAppLinksProvider: FC<RedirectAppLinksServices> = ({
+  children,
+  ...services
+}) => {
   const { navigateToUrl, currentAppId } = services;
   return (
     <RedirectAppLinksContext.Provider value={{ navigateToUrl, currentAppId }}>
@@ -34,21 +31,12 @@ export const RedirectAppLinksProvider: FC<Services> = ({ children, ...services }
 };
 
 /**
- * Kibana-specific contextual services to be adapted for this component.
- */
-export interface KibanaDependencies {
-  coreStart: {
-    application: {
-      currentAppId$: Observable<string | undefined>;
-      navigateToUrl: NavigateToUrl;
-    };
-  };
-}
-
-/**
  * Kibana-specific contextual services Provider.
  */
-export const RedirectAppLinksKibanaProvider: FC<KibanaDependencies> = ({ children, coreStart }) => {
+export const RedirectAppLinksKibanaProvider: FC<RedirectAppLinksKibanaDependencies> = ({
+  children,
+  coreStart,
+}) => {
   const { navigateToUrl, currentAppId$ } = coreStart.application;
   const currentAppId = useObservable(currentAppId$, undefined);
 
