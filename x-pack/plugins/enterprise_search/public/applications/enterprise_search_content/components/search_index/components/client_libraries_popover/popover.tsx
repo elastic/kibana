@@ -18,10 +18,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { OverviewLogic } from '../../overview.logic';
 
 const libraries = [
   {
+    href: docLinks.clientsJavaIntroduction,
     key: 'java',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.java',
@@ -29,6 +32,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsJsIntro,
     key: 'javascript',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.javascript',
@@ -36,6 +40,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsRubyOverview,
     key: 'ruby',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.ruby',
@@ -43,6 +48,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsGoIndex,
     key: 'go',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.go',
@@ -50,6 +56,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsNetIntroduction,
     key: 'dotnet',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.dotnet',
@@ -57,6 +64,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsPhpGuide,
     key: 'php',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.php',
@@ -64,6 +72,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsPerlGuide,
     key: 'perl',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.perl',
@@ -71,6 +80,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsPythonOverview,
     key: 'python',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.python',
@@ -78,6 +88,7 @@ const libraries = [
     ),
   },
   {
+    href: docLinks.clientsRustOverview,
     key: 'rust',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.rust',
@@ -107,7 +118,7 @@ export const ClientLibrariesPopover: React.FC = () => {
         size="s"
         items={libraries.map((item) => {
           return (
-            <EuiContextMenuItem key={item.key}>
+            <EuiContextMenuItem key={item.key} href={item.href} target="_blank">
               <EuiText>
                 <p>{item.text}</p>
               </EuiText>
