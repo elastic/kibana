@@ -20,7 +20,7 @@ import { Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
-import { formatResult } from '../../utils/results';
+import { formatResultWithoutMeta } from '../../utils/results';
 
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
@@ -57,7 +57,7 @@ export const Result: React.FC<Props> = ({
   const META = '_meta';
   const resultMeta = result[META];
   const resultFields = useMemo(
-    () => Object.entries(formatResult(result)).filter(([key]) => key !== META && key !== ID),
+    () => Object.entries(formatResultWithoutMeta(result)).filter(([key]) => key !== ID),
     [result]
   );
   const numResults = resultFields.length;
