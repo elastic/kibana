@@ -37,8 +37,16 @@ export interface TreeOptions {
   schema: ResolverSchema;
   nodes: NodeID[];
   indexPatterns: string[];
-  includeHits: boolean;
+  includeHits?: boolean;
 }
+
+type TreeResponse = Promise<
+  | ResolverNode[]
+  | {
+      alertIds: string[] | undefined;
+      statsNodes: ResolverNode[];
+    }
+>;
 
 /**
  * Handles retrieving nodes of a resolver tree.
@@ -54,10 +62,7 @@ export class Fetcher {
    *
    * @param options the options for retrieving the structure of the tree.
    */
-  public async tree(
-    options: TreeOptions,
-    isInternalRequest: boolean = false
-  ): Promise<ResolverNode[]> {
+  public async tree(options: TreeOptions, isInternalRequest: boolean = false): TreeResponse {
     const treeParts = await Promise.all([
       this.retrieveAncestors(options, isInternalRequest),
       this.retrieveDescendants(options, isInternalRequest),
@@ -75,7 +80,7 @@ export class Fetcher {
     treeNodes: FieldsObject[],
     options: TreeOptions,
     isInternalRequest: boolean
-  ): Promise<ResolverNode[]> {
+  ): TreeResponse {
     const statsIDs: NodeID[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
@@ -95,7 +100,7 @@ export class Fetcher {
       this.client,
       statsIDs,
       this.alertsClient,
-      options.includeHits
+      options.includeHits ?? false
     );
     const statsNodes: ResolverNode[] = [];
     for (const node of treeNodes) {

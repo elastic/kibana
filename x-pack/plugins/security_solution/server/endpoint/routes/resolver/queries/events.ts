@@ -63,7 +63,7 @@ export class EventsQuery {
     };
   }
 
-  private alertDetailQuery(id: JsonValue): { query: object; index: string } {
+  private alertDetailQuery(id?: JsonValue): { query: object; index: string } {
     return {
       query: {
         bool: {
@@ -89,7 +89,7 @@ export class EventsQuery {
     };
   }
 
-  private alertsForProcessQuery(id: JsonValue): { query: object; index: string } {
+  private alertsForProcessQuery(id?: JsonValue): { query: object; index: string } {
     return {
       query: {
         bool: {
@@ -138,7 +138,7 @@ export class EventsQuery {
    */
   async search(
     client: IScopedClusterClient,
-    body: { filter: string } | { eventID?: string; entityType: string },
+    body: { filter?: string; eventID?: string; entityType?: string },
     alertsClient: AlertsClient
   ): Promise<SafeResolverEvent[]> {
     if (body.filter) {

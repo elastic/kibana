@@ -207,26 +207,26 @@ export class StatsQuery {
       }),
       await alertsClient.find(this.alertStatsQuery(nodes, alertIndex, includeHits)),
     ]);
-    const eventAggs = body.aggregations?.ids?.buckets ?? [];
-    const alertAggs = alertsBody.aggregations?.ids?.buckets ?? [];
+    // @ts-expect-error declare aggegations type explicitly
+    const eventAggs: CategoriesAgg[] = body.aggregations?.ids?.buckets ?? [];
+    // @ts-expect-error declare aggegations type explicitly
+    const alertAggs: AggBucket[] = alertsBody.aggregations?.ids?.buckets ?? [];
     const eventsWithAggs = new Set([
       ...eventAggs.map((agg) => agg.key),
       ...alertAggs.map((agg) => agg.key),
     ]);
-    const alertsAggsMap = new Map(
-      alertsBody.aggregations?.ids.buckets.map(({ key, doc_count }) => [key, doc_count])
-    );
-    const eventAggsMap = new Map(
-      eventAggs.map(({ key, doc_count, categories }) => [
+    const alertsAggsMap = new Map(alertAggs.map(({ key, doc_count: docCount }) => [key, docCount]));
+    const eventAggsMap = new Map<string, EventStats>(
+      eventAggs.map(({ key, doc_count: docCount, categories }): [string, EventStats] => [
         key,
         {
-          ...StatsQuery.getEventStats({ key, doc_count, categories }),
+          ...StatsQuery.getEventStats({ key, doc_count: docCount, categories }),
         },
       ])
     );
     const alertIds = alertsBody.hits.hits
       .map((hit) => {
-        return hit._source['kibana.alert.uuid'];
+        return hit._source && hit._source['kibana.alert.uuid'];
       })
       .filter((hit) => hit !== undefined);
     const eventStats = [...eventsWithAggs.values()].reduce(
@@ -273,7 +273,7 @@ export class StatsQuery {
           }
         }
       },
-      includeHits ? { alertIds } : {}
+      {}
     );
     if (includeHits) {
       return { alertIds, eventStats };
