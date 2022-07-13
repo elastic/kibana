@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { EuiSpacer, EuiAccordion, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiAccordion
       id="advancedOptionsAccordion"
-      buttonContent={i18n.translate('xpack.lens.indexPattern.advancedSettings', {
-        defaultMessage: 'Advanced options',
-      })}
+      arrowProps={{ color: 'primary' }}
+      buttonContent={
+        <EuiText size="s" color={euiTheme.colors.primary}>
+          {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
+            defaultMessage: 'Advanced',
+          })}
+        </EuiText>
+      }
     >
       {props.options.map(({ dataTestSubj, inlineElement }) => (
         <React.Fragment key={dataTestSubj}>
