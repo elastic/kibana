@@ -140,6 +140,7 @@ export const replaceVariables = (
           if (variable) {
             const { value } = variable;
             if (
+              // Stringify if value is an object, array, number or boolean, this is necessary in order to send a successful request to es
               !(value.startsWith('{') && value.endsWith('}')) &&
               isNaN(parseFloat(value)) &&
               !(value.startsWith('[') && value.endsWith(']')) &&

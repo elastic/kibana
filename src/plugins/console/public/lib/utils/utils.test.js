@@ -199,8 +199,9 @@ describe('Utils class', () => {
       { name: 'v1', value: 'test' },
       { name: 'v2', value: 'true' },
       { name: 'v3', value: '{"f": "test"}' },
-      { name: 'v4', value: '[{"t": "test"}]' },
-      { name: 'v5', value: '1' },
+      { name: 'v4', value: '{"v1": "${v1}", "v6": "${v6}"}' },
+      { name: 'v5', value: '[{"t": "test"}]' },
+      { name: 'v6', value: '1' },
     ];
 
     function testVariables(data, variables, expected) {
@@ -233,14 +234,22 @@ describe('Utils class', () => {
     });
 
     describe('with arrays as field values', () => {
-      testVariables([{ url: 'test', data: ['{\n  "f": "${v4}"\n}'] }], variablesMock, [
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v5}"\n}'] }], variablesMock, [
         { url: 'test', data: ['{\n  "f": [{"t": "test"}]\n}'] },
       ]);
     });
 
     describe('with numbers as field values', () => {
-      testVariables([{ url: 'test', data: ['{\n  "f": "${v5}"\n}'] }], variablesMock, [
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v6}"\n}'] }], variablesMock, [
         { url: 'test', data: ['{\n  "f": 1\n}'] },
+      ]);
+    });
+
+    describe('with other variables as field values', () => {
+      // Currently, variables embedded in other variables' values aren't replaced.
+      // Once we build this feature, this test will fail and need to be updated.
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v4}"\n}'] }], variablesMock, [
+        { url: 'test', data: ['{\n  "f": {"v1": "${v1}", "v6": "${v6}"}\n}'] },
       ]);
     });
   });

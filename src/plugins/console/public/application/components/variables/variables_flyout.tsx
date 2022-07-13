@@ -82,11 +82,10 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
         defaultMessage: 'Variable',
       }),
       render: (name, { id }) => {
-        const isInvalid = !name.match(/^[-_a-zA-Z0-9:]+$/g);
+        const isInvalid = name && !name.match(/^[a-zA-Z0-9]+$/g);
         return (
           <EuiFieldText
             data-test-subj="variablesNameInput"
-            fullWidth
             name="name"
             value={name}
             onChange={(e) => onChange(e, id)}
@@ -103,7 +102,6 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       render: (value, { id }) => (
         <EuiFieldText
           data-test-subj="variablesValueInput"
-          fullWidth
           name="value"
           onChange={(e) => onChange(e, id)}
           value={value}
