@@ -27,7 +27,8 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
   const initialCurrentPage = totalPages > 0 ? Math.min(startPage, totalPages - 1) : 0;
   const [currentPage, setPage] = useState(initialCurrentPage);
   const hasRenderedRef = useRef<boolean>(false);
-  const maxPage = Math.min(totalPages - 1, 0);
+  const maxPage = Math.max(totalPages - 1, 0);
+
   const start = currentPage * perPage;
   const end = currentPage === 0 ? perPage : perPage * (currentPage + 1);
   const nextPageEnabled = currentPage < maxPage;
