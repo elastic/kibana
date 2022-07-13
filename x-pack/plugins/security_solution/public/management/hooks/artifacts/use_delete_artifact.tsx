@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseMutationOptions, UseMutationResult } from 'react-query';
 import { useMutation } from 'react-query';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -16,19 +16,19 @@ export function useDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   customOptions: UseMutationOptions<
     ExceptionListItemSchema,
-    HttpFetchError,
+    IHttpFetchError<Error>,
     { itemId?: string; id?: string },
     () => void
   > = DEFAULT_OPTIONS
 ): UseMutationResult<
   ExceptionListItemSchema,
-  HttpFetchError,
+  IHttpFetchError<Error>,
   { itemId?: string; id?: string },
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema,
-    HttpFetchError,
+    IHttpFetchError<Error>,
     { itemId?: string; id?: string },
     () => void
   >(({ itemId, id }) => {

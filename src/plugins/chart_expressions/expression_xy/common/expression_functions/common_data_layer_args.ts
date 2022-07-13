@@ -20,10 +20,10 @@ export const commonDataLayerArgs: Omit<
   CommonDataLayerFnArgs,
   'accessors' | 'xAccessor' | 'splitAccessor'
 > = {
-  hide: {
+  simpleView: {
     types: ['boolean'],
     default: false,
-    help: strings.getHideHelp(),
+    help: strings.getSimpleView(),
   },
   seriesType: {
     aliases: ['_'],
