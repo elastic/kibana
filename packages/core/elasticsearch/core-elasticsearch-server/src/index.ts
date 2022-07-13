@@ -20,4 +20,6 @@ export type {
   UnauthorizedErrorHandlerNotHandledResult,
   UnauthorizedErrorHandlerOptions,
   FakeRequest,
+  ElasticsearchClientSslConfig,
+  ElasticsearchClientConfig,
 } from './client';

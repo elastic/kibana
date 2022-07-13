@@ -7,7 +7,6 @@
  */
 
 export { ScopedClusterClient } from './scoped_cluster_client';
-export type { ElasticsearchClientConfig } from './client_config';
 export { ClusterClient } from './cluster_client';
 export { configureClient } from './configure_client';
 export { getRequestDebugMeta, getErrorMessage } from './log_query_and_deprecation';

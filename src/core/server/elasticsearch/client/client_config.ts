@@ -14,33 +14,6 @@ import { ElasticsearchConfig } from '../elasticsearch_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
- * Configuration options to be used to create a {@link IClusterClient | cluster client} using the
- * {@link ElasticsearchServiceStart.createClient | createClient API}
- *
- * @public
- */
-export type ElasticsearchClientConfig = Pick<
-  ElasticsearchConfig,
-  | 'customHeaders'
-  | 'maxSockets'
-  | 'compression'
-  | 'sniffOnStart'
-  | 'sniffOnConnectionFault'
-  | 'requestHeadersWhitelist'
-  | 'sniffInterval'
-  | 'hosts'
-  | 'username'
-  | 'password'
-  | 'serviceAccountToken'
-> & {
-  pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
-  requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
-  ssl?: Partial<ElasticsearchConfig['ssl']>;
-  keepAlive?: boolean;
-  caFingerprint?: ClientOptions['caFingerprint'];
-};
-
-/**
  * Parse the client options from given client config and `scoped` flag.
  *
  * @param config The config to generate the client options from.
