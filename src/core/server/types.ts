@@ -42,6 +42,9 @@ export type {
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects/service';
-export type { DomainDeprecationDetails, DeprecationsGetResponse } from './deprecations/types';
+export type {
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
 export * from './ui_settings/types';
 export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';

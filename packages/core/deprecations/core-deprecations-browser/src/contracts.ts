@@ -5,11 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { CoreService } from '@kbn/core-base-browser-internal';
-import type { HttpStart } from '@kbn/core-http-browser';
-import { DeprecationsClient, ResolveDeprecationResponse } from './deprecations_client';
-import type { DomainDeprecationDetails } from '../../server/types';
+import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+import type { ResolveDeprecationResponse } from './types';
 
 /**
  * DeprecationsService provides methods to fetch domain deprecation details from
@@ -40,21 +37,4 @@ export interface DeprecationsServiceStart {
    * @param {DomainDeprecationDetails} details
    */
   resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
-}
-
-export class DeprecationsService implements CoreService<void, DeprecationsServiceStart> {
-  public setup(): void {}
-
-  public start({ http }: { http: HttpStart }): DeprecationsServiceStart {
-    const deprecationsClient = new DeprecationsClient({ http });
-
-    return {
-      getAllDeprecations: deprecationsClient.getAllDeprecations,
-      getDeprecations: deprecationsClient.getDeprecations,
-      isDeprecationResolvable: deprecationsClient.isDeprecationResolvable,
-      resolveDeprecation: deprecationsClient.resolveDeprecation,
-    };
-  }
-
-  public stop(): void {}
 }

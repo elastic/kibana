@@ -23,6 +23,7 @@ import { ExecutionContextService } from '@kbn/core-execution-context-browser-int
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
+import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
@@ -33,7 +34,6 @@ import { ApplicationService } from './application';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
-import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
