@@ -51,11 +51,6 @@ const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfi
         ? `${dataLayer.isHorizontal ? 'horizontal_bar' : 'vertical_bar'}`
         : dataLayer.seriesType;
 
-    const isPercentageOrStacked = [
-      dataLayer.isPercentage ? 'percentage' : undefined,
-      dataLayer.isStacked ? 'stacked' : undefined,
-    ].filter(Boolean);
-
     const byTypes = layers.reduce(
       (acc, item) => {
         acc[item.layerType] += 1;
@@ -69,8 +64,13 @@ const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfi
     );
 
     return [
-      type,
-      isPercentageOrStacked.length ? `${type}_${isPercentageOrStacked.join('_')}` : undefined,
+      [
+        type,
+        dataLayer.isPercentage ? 'percentage' : undefined,
+        dataLayer.isStacked ? 'stacked' : undefined,
+      ]
+        .filter(Boolean)
+        .join('_'),
       byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
       byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
       byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
