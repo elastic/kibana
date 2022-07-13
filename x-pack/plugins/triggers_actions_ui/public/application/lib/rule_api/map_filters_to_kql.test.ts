@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { mapFilterToKueryNode } from './map_filters_to_kql';
-
 describe('mapFilterToKueryNode', () => {
   beforeEach(() => jest.resetAllMocks());
 
