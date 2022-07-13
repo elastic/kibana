@@ -130,7 +130,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
       name: i18n.translate(
         'xpack.apm.errorGroupTopTransactions.column.occurrences',
         {
-          defaultMessage: 'Number of transactions affected',
+          defaultMessage: 'Error occurrences',
         }
       ),
       align: RIGHT_ALIGNMENT,
@@ -190,7 +190,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
                 defaultMessage: 'Loading...',
               })
             : i18n.translate('xpack.apm.errorGroupTopTransactions.noResults', {
-                defaultMessage: 'No data found',
+                defaultMessage: 'No errors found associated with transactions',
               })
         }
       />
