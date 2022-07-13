@@ -20,7 +20,7 @@ contains information about the appropriate rule types. For example, there are
 rule types associated with the *Management* > *Stack Rules* feature,
 *Analytics* > *Discover* and *{ml-app}* features, *{observability}*, and
 *Security* features. To get rule types associated with the
-*{stack-monitor-app}*, use the `monitoring_user` built-in role.
+*{stack-monitor-app}* feature, use the `monitoring_user` built-in role.
 
 For more details, refer to <<kibana-feature-privileges>>.
 
@@ -82,12 +82,12 @@ subscription.
 `id`::
 (string) The unique identifier for the rule type.
 
-`is_exportable`
+`is_exportable`::
 (boolean) Indicates whether the rule type is exportable in *{stack-manage-app}*
 > *Saved Objects*.
 
 `minimum_license_required`::
-(string) The {subscriptions} required to use the rule type.
+(string) The {subscriptions}[subscriptions] required to use the rule type.
 
 `name`::
 (string) The descriptive name of the rule type.
