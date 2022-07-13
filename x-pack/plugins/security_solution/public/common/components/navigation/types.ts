@@ -8,14 +8,12 @@
 import type { IconType } from '@elastic/eui';
 import type { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
-import type { UrlState } from '../url_state/types';
 import type { SiemRouteType } from '../../utils/route/types';
 import type { LinkCategories } from '../../links';
 
 export interface TabNavigationComponentProps {
   pageName: string;
   tabName: SiemRouteType | undefined;
-  urlState: UrlState;
   pathName: string;
 }
 

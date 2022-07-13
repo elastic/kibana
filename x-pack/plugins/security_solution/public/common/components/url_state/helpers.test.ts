@@ -6,9 +6,7 @@
  */
 
 import { navTabs } from '../../../app/home/home_navigations';
-import { getTitle, isQueryStateEmpty } from './helpers';
-import { CONSTANTS } from './constants';
-import type { ValueUrlState } from './types';
+import { getTitle } from './helpers';
 
 describe('Helpers Url_State', () => {
   describe('getTitle', () => {
@@ -31,24 +29,6 @@ describe('Helpers Url_State', () => {
     test('Not existing', () => {
       const result = getTitle('IamHereButNotReally', navTabs);
       expect(result).toEqual('');
-    });
-  });
-
-  describe('isQueryStateEmpty', () => {
-    // TODO: Is this a bug, or intended?
-    test('returns false if url key is "timeline" and queryState is empty', () => {
-      const result = isQueryStateEmpty({} as ValueUrlState, CONSTANTS.timeline);
-      expect(result).toBeFalsy();
-    });
-
-    test('returns true if url key is "timeline" and queryState id is empty string', () => {
-      const result = isQueryStateEmpty({ id: '', isOpen: true }, CONSTANTS.timeline);
-      expect(result).toBeTruthy();
-    });
-
-    test('returns false if url key is "timeline" and queryState is not empty', () => {
-      const result = isQueryStateEmpty({ id: '123', isOpen: true }, CONSTANTS.timeline);
-      expect(result).toBeFalsy();
     });
   });
 });

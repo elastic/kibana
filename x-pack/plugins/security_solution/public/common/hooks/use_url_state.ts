@@ -9,10 +9,16 @@ import { useSyncGlobalQueryString } from '../utils/global_query_string';
 import { useInitSearchBarFromUrlParams } from './search_bar/use_init_search_bar_url_params';
 import { useInitTimerangeFromUrlParam } from './search_bar/use_init_timerange_url_params';
 import { useUpdateTimerangeOnPageChange } from './search_bar/use_update_timerange_on_page_change';
+import { useInitTimelineUrlParam } from './timeline/use_init_timeline_url_param';
+import { useSyncTimelineUrlParam } from './timeline/use_sync_timeline_url_param';
+import { useQueryTimelineByIdOnUrlChange } from './timeline/use_update_timeline_on_page_change';
 
 export const useUrlState = () => {
   useSyncGlobalQueryString();
   useInitSearchBarFromUrlParams();
   useInitTimerangeFromUrlParam();
   useUpdateTimerangeOnPageChange();
+  useInitTimelineUrlParam();
+  useSyncTimelineUrlParam();
+  useQueryTimelineByIdOnUrlChange();
 };
