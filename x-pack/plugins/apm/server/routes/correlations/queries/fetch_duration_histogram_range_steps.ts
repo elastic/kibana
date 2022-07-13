@@ -9,13 +9,10 @@ import { scaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { getDurationField } from '../utils';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
@@ -42,8 +39,7 @@ export const fetchDurationHistogramRangeSteps = async ({
 
   const steps = 100;
 
-  const durationField =
-    eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION;
+  const durationField = getDurationField(eventType);
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
