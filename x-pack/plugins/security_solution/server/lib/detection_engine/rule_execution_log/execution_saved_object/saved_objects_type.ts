@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import {
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import type {
   RuleExecutionMetrics,
   RuleExecutionStatus,
   RuleExecutionStatusOrder,

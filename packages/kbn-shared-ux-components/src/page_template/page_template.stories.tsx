@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { EuiButton, EuiText } from '@elastic/eui';
+import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+
 import { KibanaPageTemplate } from './page_template';
 import mdx from './page_template.mdx';
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 import { KibanaPageTemplateProps } from './types';
 
 export default {
@@ -36,7 +37,7 @@ const noDataConfig = {
   docsLink: 'http://wwww.docs.elastic.co',
 };
 
-const items: KibanaPageTemplateSolutionNavProps['items'] = [
+const items: SolutionNavProps['items'] = [
   {
     name: 'Ingest',
     id: '1',

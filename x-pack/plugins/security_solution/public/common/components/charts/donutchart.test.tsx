@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Partition, Settings } from '@elastic/charts';
 import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
-import { DonutChart, DonutChartProps } from './donutchart';
+import type { DonutChartProps } from './donutchart';
+import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';

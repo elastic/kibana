@@ -8,22 +8,17 @@
 
 import React, { useCallback } from 'react';
 import { useQueryClient } from 'react-query';
-import {
-  EuiTextColor,
-  EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { mountReactNode } from '@kbn/core/public/utils';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
@@ -44,6 +39,7 @@ import {
 } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -67,6 +63,7 @@ export const useBulkActions = ({
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
   const updateRulesCache = useUpdateRulesCache();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
@@ -159,6 +156,10 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
         clearRulesSelection();
       };
 
@@ -181,6 +182,10 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
       };
 
       const handleExportAction = async () => {
@@ -438,6 +443,7 @@ export const useBulkActions = ({
       toasts,
       filterQuery,
       invalidateRules,
+      invalidatePrePackagedRulesStatus,
       confirmDeletion,
       confirmBulkEdit,
       completeBulkEditForm,

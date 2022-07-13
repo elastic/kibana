@@ -6,11 +6,9 @@
  */
 
 import _ from 'lodash';
+import type { Event, Tree, TreeNode } from './generate_data';
 import {
   EndpointDocGenerator,
-  Event,
-  Tree,
-  TreeNode,
   RelatedEventCategory,
   ECSCategory,
   ANCESTRY_LIMIT,

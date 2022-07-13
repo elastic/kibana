@@ -25,9 +25,9 @@ import {
   alertsStackByOptions,
   histogramConfigs,
 } from '../../../common/components/alerts_viewer/histogram_configs';
-import { MatrixHistogramConfigs } from '../../../common/components/matrix_histogram/types';
+import type { MatrixHistogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';

@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { NavigateToAppOptions } from '@kbn/core/public';
 import {
   APP_UI_ID,
   CASES_FEATURE_ID,
@@ -21,7 +21,7 @@ import {
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);

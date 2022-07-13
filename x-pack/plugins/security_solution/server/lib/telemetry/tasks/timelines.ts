@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
-import { SafeEndpointEvent } from '../../../../common/endpoint/types';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
+import type { Logger } from '@kbn/core/server';
+import type { SafeEndpointEvent } from '../../../../common/endpoint/types';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type {
   ESClusterInfo,
