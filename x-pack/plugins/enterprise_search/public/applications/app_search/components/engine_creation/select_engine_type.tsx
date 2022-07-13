@@ -11,12 +11,18 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiPanel,
-  EuiStepsHorizontal,
-  EuiFlexGroup,
   EuiCard,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiStepsHorizontal,
+  EuiText,
+  EuiTextAlign,
+  EuiTitle,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import {
   ENGINE_CREATION_SELECT_APP_SEARCH_TITLE,
@@ -33,7 +39,7 @@ export const SelectEngineType: React.FC = () => {
   const { setEngineType, setCreationStep } = useActions(EngineCreationLogic);
 
   return (
-    <>
+    <div style={{ maxWidth: '60rem', margin: 'auto' }}>
       <EuiStepsHorizontal
         steps={[
           {
@@ -54,8 +60,53 @@ export const SelectEngineType: React.FC = () => {
           },
         ]}
       />
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder paddingSize="l">
+        <EuiTextAlign textAlign="center">
+          <EuiTitle>
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.SelectEngineTypeForm.title',
+                {
+                  defaultMessage: 'Select a search engine type',
+                }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiTextAlign>
+
+        <EuiSpacer />
+
+        <EuiText color="subdued" textAlign="center">
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engineCreation.SelectEngineTypeForm.description',
+            {
+              defaultMessage: `
+                You can now create search engines that are backed by an
+                Elasticsearch index. We need some good copy here explaining what
+                all the hubub about this new method is and a link to learn more
+                about it.
+              `,
+            }
+          )}
+        </EuiText>
+
+        <EuiSpacer />
+        <EuiSpacer />
+
         <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem>
+            <EuiCard
+              title={ENGINE_CREATION_SELECT_APP_SEARCH_TITLE}
+              description={ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION}
+              selectable={{
+                onClick: () => {
+                  setEngineType('appSearch');
+                },
+                isSelected: engineType === 'appSearch',
+              }}
+              hasBorder
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
               title={ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE}
@@ -70,23 +121,15 @@ export const SelectEngineType: React.FC = () => {
                 },
                 isSelected: engineType === 'elasticsearch',
               }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              title={ENGINE_CREATION_SELECT_APP_SEARCH_TITLE}
-              description={ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION}
-              selectable={{
-                onClick: () => {
-                  setEngineType('appSearch');
-                },
-                isSelected: engineType === 'appSearch',
-              }}
+              hasBorder
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem>
+
+        <EuiSpacer />
+
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               onClick={() => {
@@ -98,6 +141,6 @@ export const SelectEngineType: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </>
+    </div>
   );
 };
