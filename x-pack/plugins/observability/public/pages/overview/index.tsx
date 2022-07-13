@@ -50,6 +50,7 @@ import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
 import { ObservabilityStatus } from '../../components/app/observability_status';
 import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
+import { useObservabilityTourContext } from '../../components/shared/tour';
 
 export type BucketSize = ReturnType<typeof calculateBucketSize>;
 
@@ -287,6 +288,9 @@ function PageHeader({
   onTimeRangeRefresh,
 }: PageHeaderProps) {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
+  const { endTour: endObservabilityTour, isTourVisible: isObservabilityTourVisible } =
+    useObservabilityTourContext();
+
   const buttonRef = useRef();
 
   return (
@@ -312,7 +316,13 @@ function PageHeader({
           id="guidedSetupButton"
           color="text"
           iconType="wrench"
-          onClick={handleGuidedSetupClick}
+          onClick={() => {
+            // End the Observability tour if it's visible and the user clicks the guided setup button
+            if (isObservabilityTourVisible) {
+              endObservabilityTour();
+            }
+            handleGuidedSetupClick();
+          }}
         >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"
