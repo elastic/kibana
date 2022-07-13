@@ -110,7 +110,6 @@ const AlertsTableState = ({
         : columnsLocal.map((c) => c.id),
   });
 
-  const [showCheckboxes] = useState(false);
   const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
   const [pagination, setPagination] = useState({
     ...DefaultPagination,
@@ -212,7 +211,6 @@ const AlertsTableState = ({
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       leadingControlColumns: [],
-      showCheckboxes,
       showExpandToDetails,
       trailingControlColumns: [],
       useFetchAlertsData,
@@ -225,7 +223,6 @@ const AlertsTableState = ({
       columns,
       flyoutSize,
       pagination.pageSize,
-      showCheckboxes,
       showExpandToDetails,
       useFetchAlertsData,
       query,
