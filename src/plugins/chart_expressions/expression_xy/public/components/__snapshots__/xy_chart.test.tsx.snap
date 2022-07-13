@@ -208,7 +208,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
 />
 `;
 
-exports[`XYChart component annotations should render simplified annotations when hide is true 1`] = `
+exports[`XYChart component annotations should render simplified annotations when simpleView is true 1`] = `
 <LineAnnotation
   dataValues={
     Array [
@@ -236,7 +236,7 @@ exports[`XYChart component annotations should render simplified annotations when
 />
 `;
 
-exports[`XYChart component annotations should render simplified annotations when hide is true 2`] = `
+exports[`XYChart component annotations should render simplified annotations when simpleView is true 2`] = `
 Array [
   <RectAnnotation
     customTooltipDetails={[Function]}
