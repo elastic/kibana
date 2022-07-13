@@ -69,7 +69,7 @@ export function BreakdownChart({
   const history = useHistory();
   const chartTheme = useChartTheme();
   const { core } = useApmPluginContext();
-  const { chartRef, setPointerEvent } = useChartPointerEventContext();
+  const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
@@ -107,7 +107,7 @@ export function BreakdownChart({
           theme={chartTheme}
           xDomain={{ min, max }}
           flatLegend
-          onPointerUpdate={setPointerEvent}
+          onPointerUpdate={updatePointerEvent}
           externalPointerEvents={{
             tooltip: {
               visible: true,
