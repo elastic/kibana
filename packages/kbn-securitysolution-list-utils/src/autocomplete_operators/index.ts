@@ -102,6 +102,10 @@ export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
   matchesOperator,
 ];
 
+/*
+  * !IMPORTANT! - Please only add to this list if it is an operator
+  * supported by the detection engine.
+*/
 export const EXCEPTION_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
@@ -111,7 +115,6 @@ export const EXCEPTION_OPERATORS: OperatorOption[] = [
   doesNotExistOperator,
   isInListOperator,
   isNotInListOperator,
-  matchesOperator,
 ];
 
 export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
