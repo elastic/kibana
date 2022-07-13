@@ -17,7 +17,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 
-export function BackendInventoryDependenciesTable() {
+export function DependenciesInventoryTable() {
   const {
     query: {
       rangeFrom,
@@ -64,7 +64,7 @@ export function BackendInventoryDependenciesTable() {
       const name = getNodeName(location);
 
       if (location.type !== NodeType.backend) {
-        throw new Error('Expected a backend node');
+        throw new Error('Expected a dependency node');
       }
       const link = (
         <BackendLink
@@ -83,7 +83,7 @@ export function BackendInventoryDependenciesTable() {
             trackEvent({
               app: 'apm',
               metricType: METRIC_TYPE.CLICK,
-              metric: 'backend_inventory_to_backend_detail',
+              metric: 'dependencies_inventory_to_dependency_detail',
             });
           }}
         />
@@ -102,7 +102,7 @@ export function BackendInventoryDependenciesTable() {
       dependencies={dependencies}
       title={null}
       nameColumnTitle={i18n.translate(
-        'xpack.apm.backendInventory.dependencyTableColumn',
+        'xpack.apm.dependenciesInventory.dependencyTableColumn',
         {
           defaultMessage: 'Dependency',
         }

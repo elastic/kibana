@@ -13,9 +13,9 @@ import {
 } from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { SearchBar } from '../../shared/search_bar';
-import { BackendInventoryDependenciesTable } from './backend_inventory_dependencies_table';
+import { DependenciesInventoryTable } from './dependencies_inventory_table';
 
-export function BackendInventory() {
+export function DependenciesInventory() {
   const {
     query: { environment },
   } = useApmParams('/dependencies/inventory');
@@ -31,7 +31,7 @@ export function BackendInventory() {
         kueryBarBoolFilter={kueryBarBoolFilter}
       />
       <EuiSpacer size="s" />
-      <BackendInventoryDependenciesTable />
+      <DependenciesInventoryTable />
     </>
   );
 }
