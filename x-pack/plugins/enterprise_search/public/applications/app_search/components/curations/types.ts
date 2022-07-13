@@ -50,4 +50,6 @@ export interface CurationResult {
   [key: string]: SimpleFieldValue | ResultMeta | CurationResultNestedFieldValue | undefined;
 }
 
-type CurationResultNestedFieldValue = { [key: string]: SimpleFieldValue | CurationResultNestedFieldValue } | CurationResultNestedFieldValue[];
+type CurationResultNestedFieldValue =
+  | { [key: string]: SimpleFieldValue | CurationResultNestedFieldValue }
+  | CurationResultNestedFieldValue[];
