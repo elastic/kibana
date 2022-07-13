@@ -7,7 +7,7 @@
  */
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
-import type { HttpStart } from '../http';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { DeprecationsClient, ResolveDeprecationResponse } from './deprecations_client';
 import type { DomainDeprecationDetails } from '../../server/types';
 

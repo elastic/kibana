@@ -154,17 +154,13 @@ const RulesTableContext = createContext<RulesTableContextType | null>(null);
 
 interface RulesTableContextProviderProps {
   children: React.ReactNode;
-  refetchPrePackagedRulesStatus: () => Promise<void>;
 }
 
 const IN_MEMORY_STORAGE_KEY = 'detection-rules-table-in-memory';
 
 const DEFAULT_RULES_PER_PAGE = 20;
 
-export const RulesTableContextProvider = ({
-  children,
-  refetchPrePackagedRulesStatus,
-}: RulesTableContextProviderProps) => {
+export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
@@ -250,13 +246,6 @@ export const RulesTableContextProvider = ({
     pagination,
     refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
   });
-
-  useEffect(() => {
-    // Synchronize re-fetching of rules and pre-packaged rule statuses
-    if (isFetched && isRefetching) {
-      refetchPrePackagedRulesStatus();
-    }
-  }, [isFetched, isRefetching, refetchPrePackagedRulesStatus]);
 
   // Paginate and sort rules
   const rulesToDisplay = isInMemorySorting

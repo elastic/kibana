@@ -11,11 +11,11 @@ import { firstValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { DeprecationsFactory } from './deprecations_factory';
 import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
-import { InternalHttpServiceSetup } from '../http';
 import { IScopedClusterClient } from '../elasticsearch/client';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 
