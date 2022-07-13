@@ -159,7 +159,9 @@ export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
     id: 'syntheticsMonitorTypeMultistep',
     'data-test-subj': 'syntheticsMonitorTypeMultistep',
-    label: 'Multistep',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.label', {
+      defaultMessage: 'Multistep',
+    }),
     value: FormMonitorType.MULTISTEP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.title', {
       defaultMessage: 'Multistep Browser Journey',
@@ -178,7 +180,9 @@ export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.SINGLE]: {
     id: 'syntheticsMonitorTypeSingle',
     'data-test-subj': 'syntheticsMonitorTypeSingle',
-    label: 'Single Page',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.singlePage.label', {
+      defaultMessage: 'Single Page',
+    }),
     value: FormMonitorType.SINGLE,
     descriptionTitle: i18n.translate(
       'xpack.synthetics.monitorConfig.monitorType.singlePage.title',
@@ -200,7 +204,9 @@ export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
     'data-test-subj': 'syntheticsMonitorTypeHTTP',
-    label: 'HTTP Ping',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.label', {
+      defaultMessage: 'HTTP Ping',
+    }),
     value: FormMonitorType.HTTP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.title', {
       defaultMessage: 'HTTP Ping',
@@ -216,7 +222,9 @@ export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.TCP]: {
     id: 'syntheticsMonitorTypeTCP',
     'data-test-subj': 'syntheticsMonitorTypeTCP',
-    label: 'TCP Ping',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.label', {
+      defaultMessage: 'TCP Ping',
+    }),
     value: FormMonitorType.TCP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.title', {
       defaultMessage: 'TCP Ping',
@@ -232,7 +240,9 @@ export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.ICMP]: {
     id: 'syntheticsMonitorTypeICMP',
     'data-test-subj': 'syntheticsMonitorTypeICMP',
-    label: 'ICMP Ping',
+    label: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.label', {
+      defaultMessage: 'TCP Ping',
+    }),
     value: FormMonitorType.ICMP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.title', {
       defaultMessage: 'ICMP Ping',
@@ -615,8 +625,12 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.PROXY_URL]: {
     fieldKey: ConfigKey.PROXY_URL,
     component: EuiFieldText,
-    label: 'Proxy URL',
-    helpText: 'HTTP proxy URL.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.proxyUrl.label', {
+      defaultMessage: 'Proxy URL',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyUrl.helpText', {
+      defaultMessage: 'HTTP proxy URL',
+    }),
   },
   [ConfigKey.REQUEST_METHOD_CHECK]: {
     fieldKey: ConfigKey.REQUEST_METHOD_CHECK,
