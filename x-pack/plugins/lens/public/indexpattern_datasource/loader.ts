@@ -7,6 +7,7 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import { isNestedField } from '@kbn/data-views-plugin/common';
@@ -38,7 +39,7 @@ type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
 export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
-  const newFields: IndexPattern['fields'] = dataView.fields
+  const newFields = dataView.fields
     .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
     .map((field): IndexPatternField => {
       // Convert the getters on the index pattern service into plain JSON
@@ -82,18 +83,20 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
     });
   }
 
-  const newFieldFormatMap: IndexPattern['fieldFormatMap'] =
-    fieldFormatMap &&
-    Object.fromEntries(
-      Object.entries(fieldFormatMap).map(([id, format]) => [id, 'toJSON' in format ? {} : format])
-    );
   return {
     id: dataView.id!, // id exists for sure because we got index patterns by id
     title,
     name: name ? name : title,
     timeFieldName,
+    fieldFormatMap:
+      fieldFormatMap &&
+      Object.fromEntries(
+        Object.entries(fieldFormatMap).map(([id, format]) => [
+          id,
+          'toJSON' in format ? (format as unknown as FieldFormat).toJSON() : format, // FIXME should this work with SerializedFieldFormat or FieldFormat?
+        ])
+      ),
     fields: newFields,
-    fieldFormatMap: newFieldFormatMap,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
   };

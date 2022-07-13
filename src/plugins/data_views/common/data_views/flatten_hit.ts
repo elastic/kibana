@@ -121,7 +121,7 @@ function decorateFlattenedWrapper(
  *
  * @internal
  */
-export function flattenHitWrapper(dataView: DataView, metaFields = {}, cache = new WeakMap()) {
+export function flattenHitWrapper<T>(dataView: DataView, metaFields = {}, cache = new WeakMap()) {
   return function cachedFlatten(hit: Record<string, unknown[]>, deep = false) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);
