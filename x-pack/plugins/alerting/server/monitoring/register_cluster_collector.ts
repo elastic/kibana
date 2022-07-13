@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import stats from 'stats-lite';
+import type {
+  AggregationsKeyedPercentiles,
+  AggregationsPercentilesAggregateBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import {
-  IdleTaskWithExpiredRunAt,
-  RunningOrClaimingTaskWithExpiredRetryAt,
-} from '@kbn/task-manager-plugin/server';
+import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
 import { AlertingPluginsStart } from '../plugin';
-import { ClusterRulesMetric } from './types';
+import { ClusterRulesMetric, EMPTY_CLUSTER_RULES_METRICS } from './types';
 
 export function registerClusterCollector({
   monitoringCollection,
@@ -39,52 +39,56 @@ export function registerClusterCollector({
       },
     },
     fetch: async () => {
-      const [_, pluginStart] = await core.getStartServices();
-      const now = +new Date();
-      const { docs: overdueTasks } = await pluginStart.taskManager.fetch({
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  'task.scope': {
-                    value: 'alerting',
-                  },
-                },
-              },
-              {
-                bool: {
-                  should: [IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt],
-                },
-              },
-            ],
+      try {
+        const [_, pluginStart] = await core.getStartServices();
+        const results = await pluginStart.taskManager.aggregate(
+          aggregateTaskOverduePercentilesForType('alerting')
+        );
+
+        const totalOverdueTasks =
+          typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
+        const aggregations = results.aggregations as {
+          overdueByPercentiles: AggregationsPercentilesAggregateBase;
+        };
+        const overdueByValues: AggregationsKeyedPercentiles =
+          (aggregations?.overdueByPercentiles?.values as AggregationsKeyedPercentiles) ?? {};
+
+        /**
+         * Response format
+         * {
+         *   "aggregations": {
+         *     "overdueBy": {
+         *       "values": {
+         *         "50.0": 3027400
+         *         "99.0": 3035402
+         *       }
+         *     }
+         *   }
+         * }
+         */
+
+        const metrics: ClusterRulesMetric = {
+          overdue: {
+            count: totalOverdueTasks ?? 0,
+            delay: {
+              p50: (overdueByValues['50.0'] as number) ?? 0,
+              p99: (overdueByValues['99.0'] as number) ?? 0,
+            },
           },
-        },
-      });
+        };
 
-      const overdueTasksDelay = overdueTasks.map(
-        (overdueTask) => now - +new Date(overdueTask.runAt || overdueTask.retryAt)
-      );
+        if (isNaN(metrics.overdue.delay.p50)) {
+          metrics.overdue.delay.p50 = 0;
+        }
 
-      const metrics: ClusterRulesMetric = {
-        overdue: {
-          count: overdueTasks.length,
-          delay: {
-            p50: stats.percentile(overdueTasksDelay, 0.5),
-            p99: stats.percentile(overdueTasksDelay, 0.99),
-          },
-        },
-      };
+        if (isNaN(metrics.overdue.delay.p99)) {
+          metrics.overdue.delay.p99 = 0;
+        }
 
-      if (isNaN(metrics.overdue.delay.p50)) {
-        metrics.overdue.delay.p50 = 0;
+        return metrics;
+      } catch (err) {
+        return EMPTY_CLUSTER_RULES_METRICS;
       }
-
-      if (isNaN(metrics.overdue.delay.p99)) {
-        metrics.overdue.delay.p99 = 0;
-      }
-
-      return metrics;
     },
   });
 }
