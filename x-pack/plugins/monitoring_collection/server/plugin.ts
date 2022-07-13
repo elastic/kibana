@@ -19,7 +19,6 @@ import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import * as grpc from '@grpc/grpc-js';
 import { PrometheusExporter } from './lib/prometheus_exporter';
 import { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute, registerV1PrometheusRoute, PROMETHEUS_PATH } from './routes';
@@ -131,22 +130,10 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       const url = otlpConfig.url;
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
 
-      const credentials = url.startsWith('https://')
-        ? grpc.credentials.createSsl()
-        : grpc.credentials.createInsecure();
-
-      // Set Authorization headers
-      const metadata = new grpc.Metadata();
-      if (otlpConfig.headers) {
-        for (const [key, value] of Object.entries(otlpConfig.headers)) {
-          metadata.add(key, value);
-        }
-      }
-
       // Add OTLP exporter
       meterProvider.addMetricReader(
         new PeriodicExportingMetricReader({
-          exporter: new OTLPMetricExporter({ url, credentials, metadata }),
+          exporter: new OTLPMetricExporter({ url }),
           exportIntervalMillis: otlpConfig.exportIntervalMillis,
         })
       );
