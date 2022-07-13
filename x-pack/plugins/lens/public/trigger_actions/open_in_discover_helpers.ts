@@ -28,17 +28,22 @@ export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embedda
 
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
-  return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+  try {
+    return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+  } catch (e) {
+    // Fetching underlying data failed, log the error and behave as if the action is not compatible
+    // eslint-disable-next-line no-console
+    console.error(e);
+    return false;
+  }
 }
 
-export async function execute({
+async function getDiscoverLocationParams({
   embeddable,
-  discover,
   filters,
-  openInSameTab,
   dataViews,
   timeFieldName,
-}: Context) {
+}: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
   if (!isLensEmbeddable(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
@@ -60,10 +65,72 @@ export async function execute({
       timeRangeToApply = timeRange;
     }
   }
-  const discoverUrl = discover.locator?.getRedirectUrl({
+
+  return {
     ...args,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
+  };
+}
+
+export async function getHref({
+  embeddable,
+  discover,
+  filters,
+  dataViews,
+  timeFieldName,
+}: Context) {
+  const params = await getDiscoverLocationParams({
+    embeddable,
+    filters,
+    dataViews,
+    timeFieldName,
+  });
+
+  const discoverUrl = discover.locator?.getRedirectUrl(params);
+
+  return discoverUrl;
+}
+
+export async function getLocation({
+  embeddable,
+  discover,
+  filters,
+  dataViews,
+  timeFieldName,
+}: Context) {
+  const params = await getDiscoverLocationParams({
+    embeddable,
+    filters,
+    dataViews,
+    timeFieldName,
+  });
+
+  const discoverLocation = discover.locator?.getLocation(params);
+
+  if (!discoverLocation) {
+    throw new Error('Discover location not found');
+  }
+
+  return discoverLocation;
+}
+
+export async function execute({
+  embeddable,
+  discover,
+  filters,
+  openInSameTab,
+  dataViews,
+  timeFieldName,
+  hasDiscoverAccess,
+}: Context) {
+  const discoverUrl = await getHref({
+    embeddable,
+    discover,
+    filters,
+    dataViews,
+    timeFieldName,
+    hasDiscoverAccess,
   });
   window.open(discoverUrl, !openInSameTab ? '_blank' : '_self');
 }

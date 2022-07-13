@@ -220,6 +220,7 @@ function AlertsPage() {
 
   const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
 
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
@@ -265,7 +266,7 @@ function AlertsPage() {
         <EuiFlexItem>
           <CasesContext
             owner={[observabilityFeatureId]}
-            userCanCrud={userPermissions?.crud ?? false}
+            permissions={casesPermissions}
             features={{ alerts: { sync: false } }}
           >
             <AlertsTableTGrid

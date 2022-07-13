@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { DeprecationsClient } from './deprecations_client';
 import type { DomainDeprecationDetails } from '../../server/types';
 

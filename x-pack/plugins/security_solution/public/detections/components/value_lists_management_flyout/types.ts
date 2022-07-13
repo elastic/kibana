@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableProps } from '@elastic/eui';
+import type { EuiBasicTableProps } from '@elastic/eui';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 

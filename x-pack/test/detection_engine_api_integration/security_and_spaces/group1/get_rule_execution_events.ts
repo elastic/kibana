@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import dateMath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import moment from 'moment';
@@ -25,7 +26,11 @@ import {
   waitForEventLogExecuteComplete,
   waitForRuleSuccessOrStatus,
 } from '../../utils';
-import { failedGapExecution } from './template_data/execution_events';
+import {
+  failedGapExecution,
+  failedRanAfterDisabled,
+  successfulExecution,
+} from './template_data/execution_events';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -163,6 +168,71 @@ export default ({ getService }: FtrProviderContext) => {
           '4 minutes (244689ms) were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances.'
         )
       ).to.eql(true);
+    });
+
+    // For details, see: https://github.com/elastic/kibana/issues/131382
+    it('should return execution events ordered by @timestamp desc when a status filter is active and there are more than 1000 executions', async () => {
+      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid.v4(), false);
+      const { id } = await createRule(supertest, log, rule);
+
+      // Daterange for which we'll generate execution events between
+      const start = dateMath.parse('now')?.utc().toISOString();
+      const end = dateMath.parse('now+24d', { roundUp: true })?.utc().toISOString();
+
+      // 1002 total executions total, one minute apart
+      const dateTimes = [...Array(1002).keys()].map((i) =>
+        moment(start)
+          .add(i + 1, 'm')
+          .toDate()
+          .toISOString()
+      );
+
+      // Create 1000 successful executions
+      const events = dateTimes.slice(0, 1000).flatMap((dateTime) => {
+        const executionId = uuid.v4();
+        return cloneDeep(successfulExecution).map((e, i) => {
+          set(e, '@timestamp', dateTime);
+          set(e, 'event.start', dateTime);
+          set(e, 'event.end', dateTime);
+          set(e, 'rule.id', id);
+          set(e, 'kibana.saved_objects[0].id', id);
+          set(e, 'kibana.alert.rule.execution.uuid', executionId);
+          return e;
+        });
+      });
+
+      await indexEventLogExecutionEvents(es, log, events);
+
+      // Create 2 failed executions
+      const failedEvents = dateTimes.slice(1000).flatMap((dateTime) => {
+        const executionId = uuid.v4();
+        return cloneDeep(failedRanAfterDisabled).map((e, i) => {
+          set(e, '@timestamp', dateTime);
+          set(e, 'event.start', dateTime);
+          set(e, 'event.end', dateTime);
+          set(e, 'rule.id', id);
+          set(e, 'kibana.saved_objects[0].id', id);
+          set(e, 'kibana.alert.rule.execution.uuid', executionId);
+          return e;
+        });
+      });
+
+      await indexEventLogExecutionEvents(es, log, failedEvents);
+      await waitForEventLogExecuteComplete(es, log, id, 1002);
+
+      // Be sure to provide between 1-2 filters so that the server must prefetch events
+      const response = await supertest
+        .get(detectionEngineRuleExecutionEventsUrl(id))
+        .set('kbn-xsrf', 'true')
+        .query({ start, end, status_filters: 'failed,succeeded' });
+
+      // Verify the most recent execution was one of the failedRanAfterDisabled executions, which have a duration of 3ms and are made up of 2 docs per execution,
+      // and not one of the successfulExecution executions, which have a duration of 3183ms and are made up of 5 docs per execution
+      // The bug was because the prefetch of events was sorted by doc count by default, not `@timestamp`, which would result in the successful events pushing the 2 more recent
+      // failed events out of the 1000 query size of the prefetch query, which would result in only the successful executions being returned even though there were more recent
+      // failed executions
+      expect(response.body.total).to.eql(1002);
+      expect(response.body.events[0].duration_ms).to.eql(3);
     });
   });
 };

@@ -11,7 +11,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { MitreTacticsOptions, MitreTechniquesOptions, MitreSubtechniquesOptions } from './types';
+import type {
+  MitreTacticsOptions,
+  MitreTechniquesOptions,
+  MitreSubtechniquesOptions,
+} from './types';
 
 export const tactics = [
   {

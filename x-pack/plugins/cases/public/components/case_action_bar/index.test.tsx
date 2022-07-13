@@ -42,7 +42,6 @@ describe('CaseActionBar', () => {
     isLoading: false,
     onUpdateField,
     currentExternalIncident: null,
-    userCanCrud: true,
     metricsFeatures: [],
   };
 

@@ -11,22 +11,22 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   AuthenticationsEdges,
   AuthStackByField,
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
-  UsersQueries,
 } from '../../../../common/search_strategy/security_solution';
-import { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../common/typed_json';
+import { UsersQueries } from '../../../../common/search_strategy/security_solution';
+import type { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../common/typed_json';
 
-import { inputsModel } from '../../store';
+import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { useKibana } from '../../lib/kibana';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';

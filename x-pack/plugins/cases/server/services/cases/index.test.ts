@@ -42,6 +42,7 @@ import {
 } from '../test_utils';
 import { ESCaseAttributes } from './types';
 import { AttachmentService } from '../attachments';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 const createUpdateSOResponse = ({
   connector,
@@ -119,7 +120,11 @@ const createCasePatchParams = ({
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const attachmentService = new AttachmentService(mockLogger);
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+  const attachmentService = new AttachmentService(
+    mockLogger,
+    persistableStateAttachmentTypeRegistry
+  );
 
   let service: CasesService;
 

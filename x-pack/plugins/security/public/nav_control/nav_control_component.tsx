@@ -45,7 +45,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   userMenuLinks$,
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const userProfile = useUserProfile<{ avatar: UserAvatarData }>('avatar');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
@@ -55,12 +55,12 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const button = (
     <EuiHeaderSectionItemButton
       aria-controls="headerUserMenu"
-      aria-expanded={isOpen}
+      aria-expanded={isPopoverOpen}
       aria-haspopup="true"
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
         defaultMessage: 'Account menu',
       })}
-      onClick={() => setIsOpen((value) => (currentUser.value ? !value : false))}
+      onClick={() => setIsPopoverOpen((value) => (currentUser.value ? !value : false))}
       data-test-subj="userMenuButton"
       style={{ lineHeight: 'normal' }}
     >
@@ -105,6 +105,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       ),
       icon: <EuiIcon type={hasCustomProfileLinks ? 'controlsHorizontal' : 'user'} size="m" />,
       href: editProfileUrl,
+      onClick: () => {
+        setIsPopoverOpen(false);
+      },
       'data-test-subj': 'profileLink',
     };
 
@@ -138,10 +141,10 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       id="headerUserMenu"
       ownFocus
       button={button}
-      isOpen={isOpen}
+      isOpen={isPopoverOpen}
       anchorPosition="downRight"
       repositionOnScroll
-      closePopover={() => setIsOpen(false)}
+      closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       buffer={0}
     >

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
-import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useEffect, useMemo, useCallback } from 'react';
+import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { v4 as uuidV4 } from 'uuid';
 import type { HostInfo, PendingActionsResponse } from '../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from './types';
-import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import { EndpointAppliedPolicyStatus } from '../endpoint_applied_policy_status';
-import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
 import { useGetEndpointDetails } from '../../hooks';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { FormattedError } from '../formatted_error';
+import { ConsoleCodeBlock } from '../console/components/console_code_block';
+import { POLICY_STATUS_TO_TEXT } from '../../pages/endpoint_hosts/view/host_constants';
+import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<
@@ -28,26 +28,30 @@ export const EndpointStatusActionResult = memo<
     {
       apiCalled?: boolean;
       endpointDetails?: HostInfo;
-      detailsFetchError?: HttpFetchError;
+      detailsFetchError?: IHttpFetchError;
       endpointPendingActions?: PendingActionsResponse;
     },
     EndpointCommandDefinitionMeta
   >
->(({ command, status, setStatus, store, setStore }) => {
+>(({ command, status, setStatus, store, setStore, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId as string;
   const { endpointPendingActions, endpointDetails, detailsFetchError, apiCalled } = store;
   const isPending = status === 'pending';
+  const queryKey = useMemo(() => {
+    return uuidV4();
+  }, []);
 
   const {
+    data: fetchedEndpointDetails,
+    error: fetchedDetailsError,
     isFetching,
     isFetched,
-    refetch: fetchEndpointDetails,
-  } = useGetEndpointDetails(endpointId, { enabled: false });
+  } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey });
 
-  const { refetch: fetchEndpointPendingActionsSummary } = useGetEndpointPendingActionsSummary(
-    [endpointId],
-    { enabled: false }
-  );
+  const { data: fetchedPendingActionsSummary } = useGetEndpointPendingActionsSummary([endpointId], {
+    enabled: isPending,
+    queryKey: [queryKey, endpointId],
+  });
 
   const pendingIsolationActions = useMemo<
     Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
@@ -67,123 +71,170 @@ export const EndpointStatusActionResult = memo<
   }, [endpointPendingActions?.data]);
 
   useEffect(() => {
-    if (!apiCalled) {
+    if (!isPending) {
       setStore((prevState) => {
         return {
           ...prevState,
           apiCalled: true,
         };
       });
-
-      // Using a unique `queryKey` here and below so that data is NOT updated
-      // from cache when future requests for this endpoint ID is done again.
-      fetchEndpointDetails({ queryKey: uuidV4() })
-        .then(({ data }) => {
-          setStore((prevState) => {
-            return {
-              ...prevState,
-              endpointDetails: data,
-            };
-          });
-        })
-        .catch((err) => {
-          setStore((prevState) => {
-            return {
-              ...prevState,
-              detailsFetchError: err,
-            };
-          });
-        });
-
-      fetchEndpointPendingActionsSummary({ queryKey: uuidV4() }).then(({ data }) => {
-        setStore((prevState) => {
-          return {
-            ...prevState,
-            endpointPendingActions: data,
-          };
-        });
-      });
     }
-  }, [apiCalled, fetchEndpointDetails, fetchEndpointPendingActionsSummary, setStore]);
+  }, [apiCalled, isPending, setStore]);
 
+  // update command store if endpoint details fetch api call completed
   useEffect(() => {
     if (isFetched && isPending) {
       setStatus(detailsFetchError ? 'error' : 'success');
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          endpointDetails: fetchedEndpointDetails,
+          detailsFetchError: fetchedDetailsError ?? undefined,
+        };
+      });
     }
-  }, [detailsFetchError, isFetched, setStatus, isPending]);
+  }, [
+    detailsFetchError,
+    isFetched,
+    setStatus,
+    isPending,
+    setStore,
+    fetchedEndpointDetails,
+    fetchedDetailsError,
+  ]);
 
-  if (isFetching) {
-    return null;
-  }
+  // Update the store once we get back pending actions for this endpoint
+  useEffect(() => {
+    if (fetchedPendingActionsSummary) {
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          endpointPendingActions: fetchedPendingActionsSummary,
+        };
+      });
+    }
+  }, [fetchedPendingActionsSummary, setStore]);
+
+  const getStatusDescriptionList = useCallback(() => {
+    if (!endpointDetails) {
+      return undefined;
+    }
+
+    const agentStatus = () => {
+      let isolateStatus = '';
+
+      if (pendingIsolationActions.pendingIsolate > 0) {
+        isolateStatus = i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.status.isolating',
+          {
+            defaultMessage: 'Isolating',
+          }
+        );
+      } else if (pendingIsolationActions.pendingUnIsolate > 0) {
+        isolateStatus = i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.status.releasing',
+          {
+            defaultMessage: 'Releasing',
+          }
+        );
+      } else if (endpointDetails?.metadata.Endpoint.state?.isolation) {
+        isolateStatus = i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.status.isolated',
+          {
+            defaultMessage: 'Isolated',
+          }
+        );
+      }
+
+      return `${getAgentStatusText(endpointDetails.host_status)}${
+        isolateStatus.length > 0 ? ` - ${isolateStatus}` : ''
+      }`;
+    };
+
+    const statusData = [
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.agentStatus', {
+              defaultMessage: 'Agent status',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: <ConsoleCodeBlock>{agentStatus()}</ConsoleCodeBlock>,
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.version', {
+              defaultMessage: 'Version',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: endpointDetails.metadata.agent.version,
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.policyStatus', {
+              defaultMessage: 'Policy status',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {POLICY_STATUS_TO_TEXT[endpointDetails.metadata.Endpoint.policy.applied.status]}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.lastActive', {
+              defaultMessage: 'Last active',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            <FormattedDate
+              fieldName={i18n.translate(
+                'xpack.securitySolution.endpointResponseActions.status.lastActive',
+                { defaultMessage: 'Last active' }
+              )}
+              value={endpointDetails.metadata['@timestamp']}
+              className="eui-textTruncate"
+            />
+          </ConsoleCodeBlock>
+        ),
+      },
+    ];
+    return (
+      <EuiDescriptionList
+        compressed
+        type="column"
+        className="descriptionList-20_80"
+        listItems={statusData}
+        data-test-subj={'agent-status-console-output'}
+      />
+    );
+  }, [
+    pendingIsolationActions.pendingIsolate,
+    pendingIsolationActions.pendingUnIsolate,
+    endpointDetails,
+  ]);
 
   if (detailsFetchError) {
     return (
-      <EuiCallOut>
-        <EuiFieldText>
-          <FormattedError error={detailsFetchError} />
-        </EuiFieldText>
-      </EuiCallOut>
+      <ResultComponent showAs="failure">
+        <FormattedError error={detailsFetchError} />
+      </ResultComponent>
     );
   }
 
-  if (!endpointDetails) {
-    return null;
+  if (isFetching || !endpointDetails) {
+    return <ResultComponent showAs="pending" />;
   }
 
-  return (
-    <EuiFlexGroup wrap={false} responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.status.agentStatus"
-            defaultMessage="Agent status"
-          />
-        </EuiText>
-        <EndpointAgentAndIsolationStatus
-          status={endpointDetails.host_status}
-          isIsolated={Boolean(endpointDetails.metadata.Endpoint.state?.isolation)}
-          {...pendingIsolationActions}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.status.version"
-            defaultMessage="Version"
-          />
-        </EuiText>
-        <EuiText>{endpointDetails.metadata.agent.version}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.status.policyStatus"
-            defaultMessage="Policy status"
-          />
-        </EuiText>
-        <EndpointAppliedPolicyStatus
-          policyApplied={endpointDetails.metadata.Endpoint.policy.applied}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.status.lastActive"
-            defaultMessage="Last active"
-          />
-        </EuiText>
-        <EuiText>
-          <FormattedDate
-            fieldName={i18n.translate(
-              'xpack.securitySolution.endpointResponseActions.status.lastActive',
-              { defaultMessage: 'Last active' }
-            )}
-            value={endpointDetails.metadata['@timestamp']}
-            className="eui-textTruncate"
-          />
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return <ResultComponent showTitle={false}>{getStatusDescriptionList()}</ResultComponent>;
 });
 EndpointStatusActionResult.displayName = 'EndpointStatusActionResult';

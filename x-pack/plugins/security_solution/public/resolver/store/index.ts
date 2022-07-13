@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware, Store } from 'redux';
+import type { Store } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
-import { ResolverState, DataAccessLayer } from '../types';
+import type { ResolverState, DataAccessLayer } from '../types';
 import { resolverReducer } from './reducer';
 import { resolverMiddlewareFactory } from './middleware';
-import { ResolverAction } from './actions';
+import type { ResolverAction } from './actions';
 
 export const resolverStoreFactory = (
   dataAccessLayer: DataAccessLayer

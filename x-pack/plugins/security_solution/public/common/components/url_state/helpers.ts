@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
-import * as H from 'history';
-
-import type { Filter, Query } from '@kbn/es-query';
+import type * as H from 'history';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { inputsSelectors, State } from '../../store';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { State } from '../../store';
+import { inputsSelectors } from '../../store';
+import type { UrlInputsModel } from '../../store/inputs/model';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
-import { NavTab } from '../navigation/types';
-import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
+import type { NavTab } from '../navigation/types';
+import type { UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
+import type { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
@@ -125,9 +124,6 @@ export const getTitle = (pageName: string, navTabs: Record<string, NavTab>): str
 
 export const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
@@ -145,24 +141,8 @@ export const makeMapStateToProps = () => {
           }
         : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
-    let searchAttr: {
-      [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
-      [CONSTANTS.savedQuery]?: string;
-    } = {
-      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
-      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
-    };
-    const savedQuery = getGlobalSavedQuerySelector(state);
-    if (savedQuery != null && savedQuery.id !== '') {
-      searchAttr = {
-        [CONSTANTS.savedQuery]: savedQuery.id,
-      };
-    }
-
     return {
       urlState: {
-        ...searchAttr,
         [CONSTANTS.timerange]: {
           global: {
             [CONSTANTS.timerange]: globalTimerange,
@@ -202,10 +182,7 @@ export const isQueryStateEmpty = (
   queryState: ValueUrlState | undefined | null,
   urlKey: KeyUrlState
 ): boolean =>
-  queryState == null ||
-  (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
-  (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
-  (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
+  queryState == null || (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
 
 export const replaceStatesInLocation = (
   states: ReplaceStateInLocation[],

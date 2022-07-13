@@ -41,6 +41,9 @@ import { CoreStart } from '@kbn/core/public';
 
 jest.mock('.');
 jest.mock('../../id_generator');
+jest.mock('../dimension_panel/reference_editor', () => ({
+  ReferenceEditor: () => null,
+}));
 
 const indexPatternFields = [
   {

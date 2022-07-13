@@ -67,7 +67,8 @@ export interface MetricOption {
   timeScale?: string;
   showPercentileAnnotations?: boolean;
   formula?: string;
-  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette'>;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  palette?: PaletteOutput;
 }
 
 export interface SeriesConfig {
@@ -160,3 +161,5 @@ export interface BuilderItem {
   series: SeriesUrl;
   seriesConfig?: SeriesConfig;
 }
+
+export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';

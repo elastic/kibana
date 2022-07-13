@@ -7,44 +7,47 @@
 
 import React, { useEffect, FC } from 'react';
 
-import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useFetchStream, ProgressControls } from '@kbn/aiops-utils';
+import { ProgressControls } from '@kbn/aiops-components';
+import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
+import { SpikeAnalysisTable } from '../spike_analysis_table';
 
 /**
  * ExplainLogRateSpikes props require a data view.
  */
-export interface ExplainLogRateSpikesProps {
+interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** Start timestamp filter */
+  earliest: number;
+  /** End timestamp filter */
+  latest: number;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
 }
 
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   dataView,
+  earliest,
+  latest,
   windowParameters,
 }) => {
-  const kibana = useKibana();
-  const basePath = kibana.services.http?.basePath.get() ?? '';
+  const { services } = useAiOpsKibana();
+  const basePath = services.http?.basePath.get() ?? '';
 
-  const { cancel, start, data, isRunning } = useFetchStream<
+  const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,
     typeof basePath
   >(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
-      // TODO Consider actual user selected time ranges.
-      // Since we already receive window parameters here,
-      // we just set a maximum time range of 1970-2038 here.
-      start: 0,
-      end: 2147483647000,
+      start: earliest,
+      end: latest,
       // TODO Consider an optional Kuery.
       kuery: '',
       // TODO Handle data view without time fields.
@@ -61,8 +64,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   }, []);
 
   return (
-    <EuiText>
-      <h2>{dataView.title}</h2>
+    <>
       <ProgressControls
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
@@ -70,10 +72,9 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
         onRefresh={start}
         onCancel={cancel}
       />
-      <EuiSpacer size="xs" />
-      <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-        {JSON.stringify(data, null, 2)}
-      </EuiCodeBlock>
-    </EuiText>
+      {data?.changePoints ? (
+        <SpikeAnalysisTable changePointData={data.changePoints} loading={isRunning} error={error} />
+      ) : null}
+    </>
   );
 };
