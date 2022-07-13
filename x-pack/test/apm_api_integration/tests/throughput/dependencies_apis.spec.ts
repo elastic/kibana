@@ -7,7 +7,7 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { BackendNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
+import { DependencyNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     return {
       topDependencies: topDependenciesAPIResponse.body.dependencies.map((item) => [
-        (item.location as BackendNode).backendName,
+        (item.location as DependencyNode).dependencyName,
         roundNumber(item.currentStats.throughput.value),
       ]),
       dependencyThroughputChartMean,

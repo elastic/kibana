@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { NodeType, BackendNode } from '@kbn/apm-plugin/common/connections';
+import { NodeType, DependencyNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../../utils';
@@ -70,11 +70,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct dependency information', () => {
-          const location = topDependencies.dependencies[0].location as BackendNode;
+          const location = topDependencies.dependencies[0].location as DependencyNode;
           const { span } = dataConfig;
 
-          expect(location.type).to.be(NodeType.backend);
-          expect(location.backendName).to.be(span.destination);
+          expect(location.type).to.be(NodeType.dependency);
+          expect(location.dependencyName).to.be(span.destination);
           expect(location.spanType).to.be(span.type);
           expect(location.spanSubtype).to.be(span.subType);
           expect(location).to.have.property('id');
