@@ -487,6 +487,9 @@
             },
             {
               "id": "kibDevDocsOpsEslintPluginImports"
+            },
+            {
+              "id": "kibDevDocsOpsEslintPluginPackages"
             }
           ]
         },
