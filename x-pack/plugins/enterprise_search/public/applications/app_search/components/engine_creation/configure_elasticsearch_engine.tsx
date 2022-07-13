@@ -24,7 +24,6 @@ import {
   EuiHealth,
   EuiHighlight,
   EuiI18n,
-  EuiIcon,
   EuiPanel,
   EuiSelectable,
   EuiSpacer,

@@ -184,7 +184,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                 values={{
                   status: (
                     <p>
-                      The index you've selected has a name that does not match the Enterprise Search
+                      The index you&#39;ve selected has a name that does not match the Enterprise Search
                       naming pattern of "search-." We will automatically create an alias for you
                       named <b>{aliasName}</b> and assign it to the engine, <b>{name}</b>.
                     </p>
