@@ -30,19 +30,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid row navigation', function () {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'similar_index']);
-      await security.testUser.setRoles(['kibana_admin', 'similar_index_two']);
+      await security.testUser.setRoles(['kibana_admin', 'simlilar-index', 'similar-index-two']);
       await PageObjects.common.navigateToApp('settings');
 
-      await createIndex('similar_index');
-      await createIndex('similar_index_two');
+      await createIndex('similar-index');
+      await createIndex('similar-index-two');
 
-      await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await PageObjects.settings.createIndexPattern('similar-index*', '@timestamp', true);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('should navigate through rows with the same id but different indices correctly', async () => {
