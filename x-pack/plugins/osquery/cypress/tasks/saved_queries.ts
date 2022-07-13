@@ -83,7 +83,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       cy.react('PlayButtonComponent', {
         props: { savedQuery: { attributes: { id: savedQueryId } } },
       }).click();
-      selectAllAgents();
+      // selectAllAgents();
       submitQuery();
 
       // edit saved query

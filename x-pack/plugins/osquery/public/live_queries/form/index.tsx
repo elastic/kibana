@@ -6,6 +6,8 @@
  */
 
 import type { EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiFormLabel } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -38,6 +40,29 @@ import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 
 const FORM_ID = 'liveQueryForm';
+
+const StyledEuiCard = styled(EuiCard)`
+  padding: 16px 92px 16px 16px !important;
+
+  button[role='switch'] {
+    left: auto;
+    height: 100% !important;
+    width: 80px;
+    right: 0;
+
+    > span {
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      // hide the label
+      > :not(svg) {
+        display: none;
+      }
+    }
+  }
+`;
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
@@ -448,29 +473,38 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <Form form={form}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
-                <EuiCard
-                  title="Single query"
-                  description="Run a saved query or start from scratch."
-                  selectable={queryCardSelectable}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCard
-                  title="Pack"
-                  description="Run a set of queries in a pack."
-                  selectable={packCardSelectable}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFormRow label="Query type" fullWidth>
+              <EuiFlexGroup gutterSize="m">
+                <EuiFlexItem>
+                  <StyledEuiCard
+                    layout="horizontal"
+                    title="Single query"
+                    titleSize="xs"
+                    hasBorder
+                    description="Run a saved query or new one."
+                    selectable={queryCardSelectable}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <StyledEuiCard
+                    layout="horizontal"
+                    title="Pack"
+                    titleSize="xs"
+                    hasBorder
+                    description="Run a set of queries in a pack."
+                    selectable={packCardSelectable}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField
-              path="agentSelection"
-              component={!hideAgentsField ? AgentsTableField : GhostFormField}
-            />
-          </EuiFlexItem>
+          {!hideAgentsField ? (
+            <EuiFlexItem>
+              <UseField path="agentSelection" component={AgentsTableField} />
+            </EuiFlexItem>
+          ) : (
+            <UseField path="agentSelection" component={GhostFormField} />
+          )}
           {queryType === 'pack' ? (
             <>
               <EuiFlexItem>
