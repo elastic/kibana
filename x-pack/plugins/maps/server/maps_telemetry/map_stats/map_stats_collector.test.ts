@@ -6,7 +6,7 @@
  */
 
 // @ts-ignore
-import mapSavedObjects from '../test_resources/sample_map_saved_objects.json';
+import mapSavedObjects from '../../../common/telemetry/test_resources/sample_map_saved_objects.json';
 import { MapStatsCollector } from './map_stats_collector';
 
 test('returns zeroed telemetry data when there are no saved objects', () => {
