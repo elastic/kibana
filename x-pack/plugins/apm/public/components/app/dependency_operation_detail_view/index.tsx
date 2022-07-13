@@ -11,7 +11,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_dependency_detail_operations_breadcrumb';
-import { BackendMetricCharts } from '../../shared/backend_metric_charts';
+import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { DetailViewHeader } from '../../shared/detail_view_header';
 import { BackendOperationDistributionChart } from './backend_operation_distribution_chart';
 import { BackendOperationDetailTraceList } from './backend_operation_detail_trace_list';
@@ -40,7 +40,7 @@ export function DependencyOperationDetailView() {
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <ChartPointerEventContextProvider>
-          <BackendMetricCharts />
+          <DependencyMetricCharts />
         </ChartPointerEventContextProvider>
       </EuiFlexItem>
       <EuiFlexItem>

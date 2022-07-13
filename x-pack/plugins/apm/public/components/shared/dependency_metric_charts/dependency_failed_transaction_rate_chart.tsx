@@ -18,14 +18,14 @@ import {
   getTimeSeriesColor,
 } from '../charts/helper/get_timeseries_color';
 import { getComparisonChartTheme } from '../time_comparison/get_comparison_chart_theme';
-import { BackendMetricChartsRouteParams } from './backend_metric_charts_route_params';
+import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
 import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function BackendFailedTransactionRateChart({
+export function DependencyFailedTransactionRateChart({
   height,
   dependencyName,
   kuery,
@@ -37,7 +37,7 @@ export function BackendFailedTransactionRateChart({
   spanName,
 }: {
   height: number;
-} & BackendMetricChartsRouteParams) {
+} & DependencyMetricChartsRouteParams) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const comparisonChartTheme = getComparisonChartTheme();
@@ -96,7 +96,7 @@ export function BackendFailedTransactionRateChart({
         data: data.currentTimeseries,
         type: 'linemark',
         color: currentPeriodColor,
-        title: i18n.translate('xpack.apm.backendErrorRateChart.chartTitle', {
+        title: i18n.translate('xpack.apm.dependencyErrorRateChart.chartTitle', {
           defaultMessage: 'Failed transaction rate',
         }),
       });

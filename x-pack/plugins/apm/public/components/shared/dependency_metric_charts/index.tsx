@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
-import { BackendLatencyChart } from './backend_latency_chart';
-import { BackendMetricChartsRouteParams } from './backend_metric_charts_route_params';
-import { BackendThroughputChart } from './backend_throughput_chart';
+import { DependencyFailedTransactionRateChart } from './dependency_failed_transaction_rate_chart';
+import { DependencyLatencyChart } from './dependency_latency_chart';
+import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
+import { DependencyThroughputChart } from './dependency_throughput_chart';
 
-export function BackendMetricCharts() {
+export function DependencyMetricCharts() {
   const largeScreenOrSmaller = useBreakpoints().isLarge;
 
   const {
@@ -33,7 +33,7 @@ export function BackendMetricCharts() {
 
   const spanName = 'spanName' in query ? query.spanName : undefined;
 
-  const props: BackendMetricChartsRouteParams = {
+  const props: DependencyMetricChartsRouteParams = {
     dependencyName,
     rangeFrom,
     rangeTo,
@@ -53,24 +53,12 @@ export function BackendMetricCharts() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate('xpack.apm.backendDetailLatencyChartTitle', {
+              {i18n.translate('xpack.apm.dependencyDetailLatencyChartTitle', {
                 defaultMessage: 'Latency',
               })}
             </h2>
           </EuiTitle>
-          <BackendLatencyChart height={200} {...props} />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.apm.backendDetailThroughputChartTitle', {
-                defaultMessage: 'Throughput',
-              })}
-            </h2>
-          </EuiTitle>
-          <BackendThroughputChart height={200} {...props} />
+          <DependencyLatencyChart height={200} {...props} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -78,12 +66,25 @@ export function BackendMetricCharts() {
           <EuiTitle size="xs">
             <h2>
               {i18n.translate(
-                'xpack.apm.backendDetailFailedTransactionRateChartTitle',
+                'xpack.apm.dependencyDetailThroughputChartTitle',
+                { defaultMessage: 'Throughput' }
+              )}
+            </h2>
+          </EuiTitle>
+          <DependencyThroughputChart height={200} {...props} />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.dependencyDetailFailedTransactionRateChartTitle',
                 { defaultMessage: 'Failed transaction rate' }
               )}
             </h2>
           </EuiTitle>
-          <BackendFailedTransactionRateChart height={200} {...props} />
+          <DependencyFailedTransactionRateChart height={200} {...props} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

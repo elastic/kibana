@@ -7,7 +7,7 @@
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { ApmRoutes } from '../../routing/apm_route_config';
 
-export type BackendMetricChartsRouteParams = Pick<
+export type DependencyMetricChartsRouteParams = Pick<
   { spanName?: string } & TypeOf<
     ApmRoutes,
     '/dependencies/operation' | '/dependencies/overview'

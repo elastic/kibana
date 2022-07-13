@@ -18,10 +18,10 @@ import {
   getTimeSeriesColor,
 } from '../charts/helper/get_timeseries_color';
 import { getComparisonChartTheme } from '../time_comparison/get_comparison_chart_theme';
-import { BackendMetricChartsRouteParams } from './backend_metric_charts_route_params';
+import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
 import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
 
-export function BackendThroughputChart({
+export function DependencyThroughputChart({
   height,
   dependencyName,
   rangeFrom,
@@ -31,7 +31,7 @@ export function BackendThroughputChart({
   offset,
   comparisonEnabled,
   spanName,
-}: { height: number } & BackendMetricChartsRouteParams) {
+}: { height: number } & DependencyMetricChartsRouteParams) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const comparisonChartTheme = getComparisonChartTheme();
@@ -91,9 +91,10 @@ export function BackendThroughputChart({
         data: data.currentTimeseries,
         type: 'linemark',
         color: currentPeriodColor,
-        title: i18n.translate('xpack.apm.backendThroughputChart.chartTitle', {
-          defaultMessage: 'Throughput',
-        }),
+        title: i18n.translate(
+          'xpack.apm.dependencyThroughputChart.chartTitle',
+          { defaultMessage: 'Throughput' }
+        ),
       });
     }
 
