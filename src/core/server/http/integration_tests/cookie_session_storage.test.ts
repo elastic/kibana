@@ -16,15 +16,11 @@ import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { HttpService } from '../http_service';
-
-import { contextServiceMock } from '../../context/context_service.mock';
-import { httpServerMock } from '../http_server.mocks';
-
-import { createCookieSessionStorageFactory } from '../cookie_session_storage';
-import { ensureRawRequest } from '../router';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
 

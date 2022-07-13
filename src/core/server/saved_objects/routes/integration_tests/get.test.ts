@@ -8,14 +8,14 @@
 
 import supertest from 'supertest';
 import { registerGetRoute } from '../get';
-import { ContextService } from '../../../context';
+import { ContextService } from '@kbn/core-http-context-server-internal';
+import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
+import type { CoreUsageStatsClient } from '../../../core_usage_data';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { HttpService, InternalHttpServiceSetup } from '../../../http';
-import { createHttpServer, createCoreContext } from '../../../http/test_utils';
 import { contextServiceMock, coreMock } from '../../../mocks';
 import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
 

@@ -9,8 +9,11 @@
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
-import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';

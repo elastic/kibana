@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { httpServerMock } from '../http/http_server.mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { HttpResources, HttpResourcesServiceToolkit } from './types';
 
 const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({

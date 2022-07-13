@@ -16,8 +16,7 @@ import {
 import { PackageInfo } from '@kbn/config';
 import { AuthStatus } from '@kbn/core-http-server';
 import { UiPlugins } from '../../plugins';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { httpServerMock } from '../../http/http_server.mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 

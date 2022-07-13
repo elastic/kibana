@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { createHttpServer } from './http/test_utils';
+export { createHttpServer } from '@kbn/core-http-server-mocks';
 export { ServiceStatusLevelSnapshotSerializer } from './status/test_utils';
 export { setupServer } from './saved_objects/routes/test_utils';
 export {

@@ -44,4 +44,4 @@ export type {
 } from './saved_objects/service';
 export type { DomainDeprecationDetails, DeprecationsGetResponse } from './deprecations/types';
 export * from './ui_settings/types';
-export type { ExternalUrlConfig } from './http';
+export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObject } from '../../../types';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { httpServerMock } from '../../http/http_server.mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
