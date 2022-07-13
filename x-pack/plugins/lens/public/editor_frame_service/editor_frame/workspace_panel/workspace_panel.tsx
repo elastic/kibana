@@ -76,6 +76,8 @@ import {
   selectDatasourceLayers,
   applyChanges,
   selectChangesApplied,
+  VisualizationState,
+  DatasourceStates,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
@@ -161,6 +163,43 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   // const expressionToRender = useRef<null | undefined | string>();
   const initialRenderComplete = useRef<boolean>();
+
+  const renderDeps = useRef<{
+    datasourceMap: DatasourceMap;
+    datasourceStates: DatasourceStates;
+    visualization: VisualizationState;
+    visualizationMap: VisualizationMap;
+  }>();
+
+  renderDeps.current = {
+    datasourceMap,
+    datasourceStates,
+    visualization,
+    visualizationMap,
+  };
+
+  const onRender$ = useCallback(() => {
+    if (renderDeps.current) {
+      const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
+        (acc, datasource) => [
+          ...acc,
+          ...(datasource.getRenderEventCounters?.(
+            renderDeps.current!.datasourceStates[datasource.id].state
+          ) ?? []),
+        ],
+        []
+      );
+      let visualizationEvents: string[] = [];
+      if (renderDeps.current.visualization.activeId) {
+        visualizationEvents =
+          renderDeps.current.visualizationMap[
+            renderDeps.current.visualization.activeId
+          ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
+      }
+
+      trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
+    }
+  }, []);
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
 
@@ -477,7 +516,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         application={core.application}
         datasourceMap={datasourceMap}
         activeDatasourceId={activeDatasourceId}
-        visualizationMap={visualizationMap}
+        onRender$={onRender$}
       />
     );
   };
@@ -552,7 +591,7 @@ export const VisualizationWrapper = ({
   application,
   activeDatasourceId,
   datasourceMap,
-  visualizationMap,
+  onRender$,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -573,7 +612,7 @@ export const VisualizationWrapper = ({
   application: ApplicationStart;
   activeDatasourceId: string | null;
   datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
+  onRender$: () => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -589,8 +628,6 @@ export const VisualizationWrapper = ({
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
-  const datasourceStates = useLensSelector(selectDatasourceStates);
-  const visualization = useLensSelector(selectVisualization);
   const dispatchLens = useLensDispatch();
   const [defaultLayerId] = Object.keys(datasourceLayers);
 
@@ -612,30 +649,6 @@ export const VisualizationWrapper = ({
     },
     [defaultLayerId, dispatchLens]
   );
-
-  const onRender$ = useCallback(() => {
-    const datasourceEvents = Object.values(datasourceMap).reduce<string[]>(
-      (acc, datasource) => [
-        ...acc,
-        ...(datasource.getRenderEventCounters?.(datasourceStates[datasource.id].state) ?? []),
-      ],
-      []
-    );
-    let visualizationEvents: string[] = [];
-    if (visualization.activeId) {
-      visualizationEvents =
-        visualizationMap[visualization.activeId].getRenderEventCounters?.(visualization.state) ??
-        [];
-    }
-
-    trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
-  }, [
-    datasourceMap,
-    datasourceStates,
-    visualization.activeId,
-    visualization.state,
-    visualizationMap,
-  ]);
 
   function renderFixAction(
     validationError:
