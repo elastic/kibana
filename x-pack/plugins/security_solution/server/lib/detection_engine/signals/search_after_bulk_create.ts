@@ -42,9 +42,10 @@ export const searchAfterAndBulkCreate = async ({
   tuple,
   wrapHits,
   runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
-    const ruleParams = completeRule.ruleParams;
     let toReturn = createSearchAfterReturnType();
 
     // sortId tells us where to start our next consecutive search_after query
@@ -80,7 +81,8 @@ export const searchAfterAndBulkCreate = async ({
             logger,
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
-            timestampOverride: ruleParams.timestampOverride,
+            primaryTimestamp,
+            secondaryTimestamp,
             trackTotalHits,
             sortOrder,
           });
@@ -89,7 +91,7 @@ export const searchAfterAndBulkCreate = async ({
             toReturn,
             createSearchAfterReturnTypeFromResponse({
               searchResult: mergedSearchResults,
-              timestampOverride: ruleParams.timestampOverride,
+              primaryTimestamp,
             }),
             createSearchAfterReturnType({
               searchAfterTimes: [searchDuration],

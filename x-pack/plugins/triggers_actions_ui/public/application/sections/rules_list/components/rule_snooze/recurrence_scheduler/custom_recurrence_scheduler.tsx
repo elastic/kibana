@@ -39,16 +39,22 @@ interface CustomRecurrenceSchedulerProps {
   startDate: Moment | null;
   onChange: (state: CustomFrequencyState) => void;
   initialState: CustomFrequencyState;
+  minimumRecurrenceDays: number;
 }
 
 export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
   startDate,
   onChange,
   initialState,
+  minimumRecurrenceDays,
 }) => {
   const [initialStartDate] = useState(startDate);
   const [frequency, setFrequency] = useState(initialState.freq);
-  const [interval, setInterval] = useState(initialState.interval);
+  const [interval, setInterval] = useState(
+    initialState.freq === RRuleFrequency.DAILY
+      ? Math.max(minimumRecurrenceDays, initialState.interval)
+      : initialState.interval
+  );
   const [byweekday, setByweekday] = useState(
     getInitialByweekday(initialState.byweekday, startDate)
   );
@@ -78,6 +84,12 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
       },
     ];
   }, [startDate]);
+
+  useEffect(() => {
+    if (frequency === RRuleFrequency.DAILY && interval < minimumRecurrenceDays) {
+      setInterval(minimumRecurrenceDays);
+    }
+  }, [minimumRecurrenceDays, frequency, interval, setInterval]);
 
   useEffect(() => {
     if (initialStartDate !== startDate) setByweekday(getInitialByweekday([], startDate));
@@ -110,6 +122,10 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
   );
 
   const endControlOptions = useMemo(() => i18nEndControlOptions(interval), [interval]);
+  const intervalMin = useMemo(() => {
+    if (frequency !== RRuleFrequency.DAILY) return 1;
+    return Math.max(minimumRecurrenceDays, 1);
+  }, [frequency, minimumRecurrenceDays]);
 
   return (
     <>
@@ -131,7 +147,8 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
           )}
           startControl={
             <EuiFieldNumber
-              min={1}
+              data-test-subj="customRecurrenceSchedulerInterval"
+              min={intervalMin}
               value={interval}
               onChange={(e) => setInterval(Number(e.target.value))}
             />

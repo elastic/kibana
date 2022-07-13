@@ -33,6 +33,7 @@ import {
   getSeriesProps,
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
+  LayersFieldFormats,
 } from '../helpers';
 
 interface Props {
@@ -53,6 +54,7 @@ interface Props {
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
+  fieldFormats: LayersFieldFormats;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -73,8 +75,9 @@ export const DataLayers: FC<Props> = ({
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
   defaultXScaleType,
+  fieldFormats,
 }) => {
-  const colorAssignments = getColorAssignments(layers, formatFactory);
+  const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
   return (
     <>
       {layers.flatMap((layer) =>
@@ -114,6 +117,7 @@ export const DataLayers: FC<Props> = ({
             emphasizeFitting,
             fillOpacity,
             defaultXScaleType,
+            fieldFormats,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
