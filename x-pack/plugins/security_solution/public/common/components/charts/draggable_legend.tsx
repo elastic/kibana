@@ -14,8 +14,9 @@ import type { LegendItem } from './draggable_legend_item';
 import { DraggableLegendItem } from './draggable_legend_item';
 
 export const MIN_LEGEND_HEIGHT = 175;
+export const DEFAULT_WIDTH = 165; // px
 
-const DraggableLegendContainer = styled.div<{ height: number }>`
+const DraggableLegendContainer = styled.div<{ height: number; $minWidth: number }>`
   height: ${({ height }) => `${height}px`};
   overflow: auto;
   scrollbar-width: thin;
@@ -23,6 +24,7 @@ const DraggableLegendContainer = styled.div<{ height: number }>`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
     width: 165px;
   }
+  min-width: ${({ $minWidth }) => `${$minWidth}px`};
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -44,7 +46,8 @@ const DraggableLegendContainer = styled.div<{ height: number }>`
 const DraggableLegendComponent: React.FC<{
   height: number;
   legendItems: LegendItem[];
-}> = ({ height, legendItems }) => {
+  minWidth?: number;
+}> = ({ height, legendItems, minWidth = DEFAULT_WIDTH }) => {
   if (legendItems.length === 0) {
     return null;
   }
@@ -53,6 +56,7 @@ const DraggableLegendComponent: React.FC<{
     <DraggableLegendContainer
       data-test-subj="draggable-legend"
       height={height === 0 ? MIN_LEGEND_HEIGHT : height}
+      $minWidth={minWidth}
     >
       <EuiText size="xs">
         <EuiFlexGroup direction="column" gutterSize="none">

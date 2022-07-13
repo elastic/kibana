@@ -75,10 +75,3 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-
-  - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
-    label: 'Build Webpack Bundle Analyzer reports'
-    agents:
-      queue: c2-16
-    key: webpack_bundle_analyzer
-    timeout_in_minutes: 60

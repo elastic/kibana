@@ -12,8 +12,7 @@ import {
   createInternalErrorHandlerMock,
 } from './cluster_client.test.mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { httpServerMock } from '../../http/http_server.mocks';
-import { httpServiceMock } from '../../http/http_service.mock';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from './mocks';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './client_config';

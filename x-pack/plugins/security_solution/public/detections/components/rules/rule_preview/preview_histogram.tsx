@@ -109,7 +109,6 @@ export const PreviewHistogram = ({
 
   const {
     browserFields,
-    docValueFields,
     indexPattern,
     runtimeMappings,
     dataViewId: selectedDataViewId,
@@ -205,7 +204,6 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
             end: endDate,
             entityType: 'events',
             filters: [],
@@ -235,7 +233,6 @@ export const PreviewHistogram = ({
       <DetailsPanel
         browserFields={browserFields}
         entityType={'events'}
-        docValueFields={docValueFields}
         isFlyoutView
         runtimeMappings={runtimeMappings}
         timelineId={TimelineId.rulePreview}

@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -30,7 +31,6 @@ import {
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import { InternalHttpServiceSetup } from '../http';
 import {
   SavedObjectsClientContract,
   SavedObjectsType,

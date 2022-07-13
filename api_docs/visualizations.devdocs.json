@@ -5163,7 +5163,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; getInspectorAdapters: () => ",
+          ">) => void; reportsEmbeddableLoad: () => boolean; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -5179,7 +5179,7 @@
             "section": "def-public.OverlayRef",
             "text": "OverlayRef"
           },
-          " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerRender: () => void; onContainerError: (error: ",
+          " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerData: () => void; onContainerRender: () => void; onContainerError: (error: ",
           {
             "pluginId": "expressions",
             "scope": "public",
