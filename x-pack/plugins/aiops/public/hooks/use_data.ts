@@ -11,7 +11,7 @@ import { merge } from 'rxjs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useAiOpsKibana } from '../kibana_context';
 import { useTimefilter } from './use_time_filter';
-import { aiOpsRefresh$ } from '../application/services/timefilter_refresh_service';
+import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import { TimeBuckets } from '../../common/time_buckets';
 import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
@@ -80,7 +80,7 @@ export const useData = (
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      aiOpsRefresh$
+      aiopsRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({
