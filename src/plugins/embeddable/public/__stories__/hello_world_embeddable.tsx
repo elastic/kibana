@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { render } from 'react-dom';
+import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Embeddable, IEmbeddable } from '..';
+import { Embeddable, EmbeddableInput, IEmbeddable } from '..';
 
 export class HelloWorldEmbeddable extends Embeddable {
   readonly type = 'hello-world';
@@ -19,9 +20,14 @@ export class HelloWorldEmbeddable extends Embeddable {
   reload() {}
 
   render(node: HTMLElement) {
-    render(<EuiEmptyPrompt body={this.getTitle()} />, node);
+    const App = connect((state: EmbeddableInput) => ({ body: state.title }))(EuiEmptyPrompt);
 
-    this.reload = this.render.bind(this, node);
+    render(
+      <Provider store={this.getStore()}>
+        <App />
+      </Provider>,
+      node
+    );
   }
 
   setErrorRenderer(renderer: IEmbeddable['renderError']) {

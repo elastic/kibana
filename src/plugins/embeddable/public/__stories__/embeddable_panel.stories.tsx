@@ -24,7 +24,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-import { CONTEXT_MENU_TRIGGER, EmbeddablePanel, PANEL_BADGE_TRIGGER, ViewMode } from '..';
+import { actions, CONTEXT_MENU_TRIGGER, EmbeddablePanel, PANEL_BADGE_TRIGGER, ViewMode } from '..';
 import { HelloWorldEmbeddable } from './hello_world_embeddable';
 
 const layout: DecoratorFn = (story) => {
@@ -91,17 +91,13 @@ const HelloWorldEmbeddablePanel = forwardRef<
     const embeddable = useMemo(() => new HelloWorldEmbeddable({ id: `${Math.random()}` }, {}), []);
     const theme$ = useMemo(() => new ReplaySubject<CoreTheme>(1), []);
     const theme = useContext(ThemeContext) as CoreTheme;
+    const store = useMemo(() => embeddable.getStore(), [embeddable]);
 
     useEffect(() => theme$.next(theme), [theme$, theme]);
-    useEffect(
-      () =>
-        embeddable.updateInput({
-          title,
-          viewMode: viewMode ? ViewMode.VIEW : ViewMode.EDIT,
-          lastReloadRequestTime: new Date().getMilliseconds(),
-        }),
-      [embeddable, title, viewMode]
-    );
+    useEffect(() => {
+      store.dispatch(actions.setTitle(title));
+      store.dispatch(actions.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT));
+    }, [store, title, viewMode]);
     useEffect(
       () =>
         embeddable.updateOutput({
@@ -162,7 +158,9 @@ export function DefaultWithBadges({ badges, ...props }: DefaultWithBadgesProps) 
 
   useEffect(
     () =>
-      ref.current?.embeddable.updateInput({ lastReloadRequestTime: new Date().getMilliseconds() }),
+      void ref.current?.embeddable
+        .getStore()
+        .dispatch(actions.setLastReloadRequestTime(new Date().getMilliseconds())),
     [getActions]
   );
 
@@ -207,7 +205,9 @@ export function DefaultWithContextMenu({ items, ...props }: DefaultWithContextMe
 
   useEffect(
     () =>
-      ref.current?.embeddable.updateInput({ lastReloadRequestTime: new Date().getMilliseconds() }),
+      void ref.current?.embeddable
+        .getStore()
+        .dispatch(actions.setLastReloadRequestTime(new Date().getMilliseconds())),
     [getActions]
   );
 
