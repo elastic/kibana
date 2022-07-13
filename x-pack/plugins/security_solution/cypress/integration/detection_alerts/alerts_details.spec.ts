@@ -50,7 +50,7 @@ describe('Alert details with unmapped fields', () => {
 
     cy.get(JSON_TEXT).then((x) => {
       const parsed = JSON.parse(x.text());
-      expect(parsed._source.unmapped).to.equal(expectedUnmappedValue);
+      expect(parsed.fields.unmapped[0]).to.equal(expectedUnmappedValue);
     });
   });
 
@@ -61,7 +61,7 @@ describe('Alert details with unmapped fields', () => {
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(pageSelector(5)).click({ force: true });
+    cy.get(ALERT_FLYOUT).find(pageSelector(4)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
       .within(() => {
