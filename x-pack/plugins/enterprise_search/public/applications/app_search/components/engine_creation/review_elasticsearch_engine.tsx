@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiI18n,
   EuiPanel,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -30,8 +31,7 @@ import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logi
 import { IndexStatusDetails } from './configure_elasticsearch_engine';
 
 export const ReviewElasticsearchEngine: React.FC = () => {
-  const { aliasName, engineType, name, selectedIndex, selectedIndexFormatted } =
-    useValues(EngineCreationLogic);
+  const { aliasName, name, selectedIndex, selectedIndexFormatted } = useValues(EngineCreationLogic);
   const { setCreationStep, submitEngine } = useActions(EngineCreationLogic);
 
   return (
@@ -108,7 +108,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                     )}
                   </h4>
                 </EuiText>
-                <EuiText>{engineType}</EuiText>
+                <EuiText>Elasticsearch-managed index</EuiText>
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -178,21 +178,19 @@ export const ReviewElasticsearchEngine: React.FC = () => {
               )}
               iconType="iInCircle"
             >
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body',
-                  // FIXME: bold variables and pass them in as variables not in
-                  // the defaultMessage.
-                  {
-                    defaultMessage: `
-                      The index you’ve selected has a name that does not match
-                      the Enterprise Search naming pattern of "search-." We will
-                      automatically create an alias for you named ${aliasName}
-                      and assign it to the engine, ${name}.
-                    `,
-                  }
-                )}
-              </p>
+              <EuiI18n
+                token="xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body"
+                default="{status}"
+                values={{
+                  status: (
+                    <p>
+                      The index you've selected has a name that does not match the Enterprise Search
+                      naming pattern of "search-." We will automatically create an alias for you
+                      named <b>{aliasName}</b> and assign it to the engine, <b>{name}</b>.
+                    </p>
+                  ),
+                }}
+              />
             </EuiCallOut>
           )}
 
