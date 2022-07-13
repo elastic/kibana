@@ -184,9 +184,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
   ).map((row) => {
     const value = row[primaryMetricColumn.id];
     const title = breakdownByColumn ? row[breakdownByColumn.id] : primaryMetricColumn.name;
-    const subtitle = breakdownByColumn
-      ? primaryMetricColumn.name
-      : secondaryMetricColumn?.name ?? config.metric.subtitle;
+    const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
     return {
       value,
       valueFormatter: formatPrimaryMetric,

@@ -22,6 +22,7 @@ import { Visualization, OperationMetadata, DatasourceLayers } from '../../types'
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { MetricDimensionEditor } from './dimension_editor';
+import { MetricToolbar } from './toolbar';
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -318,7 +319,7 @@ export const getMetricVisualization = ({
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
-          <div>Im a toolbar!</div>
+          <MetricToolbar {...props} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
