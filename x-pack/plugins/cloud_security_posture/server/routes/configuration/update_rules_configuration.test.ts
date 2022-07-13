@@ -140,6 +140,7 @@ describe('Update rules configuration API', () => {
             enabled: true,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -149,6 +150,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -158,6 +160,7 @@ describe('Update rules configuration API', () => {
             enabled: true,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -181,6 +184,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -190,6 +194,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -199,6 +204,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -253,6 +259,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -262,6 +269,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -271,6 +279,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -315,6 +324,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -324,6 +334,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -333,6 +344,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -389,6 +401,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
