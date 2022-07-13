@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { HttpFetchError } from '@kbn/core/public';
+
 import { useQuery } from 'react-query';
 import { useHttp } from '../../lib/kibana';
 
@@ -39,7 +39,7 @@ export function useAlertPrevalenceFromProcessTreeActual(
   processEntityId: string
 ): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
-  const query = useQuery<ProcessTreeAlertPrevalenceResponse, HttpFetchError>(
+  const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
     ['getAlertPrevalenceFromProcessTree', processEntityId],
     () => {
       return http.get<ProcessTreeAlertPrevalenceResponse>('/TBD', {
