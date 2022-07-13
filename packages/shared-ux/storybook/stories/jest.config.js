@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Services } from './services';
-
-/**
- * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
- */
-export const getMockServices = () => {
-  const services: Services = {
-    navigateToUrl: jest.fn(),
-    currentAppId: 'currentAppId',
-  };
-
-  return services;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/storybook/stories'],
 };

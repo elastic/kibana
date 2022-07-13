@@ -3572,6 +3572,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-stories@link:bazel-bin/packages/shared-ux/storybook/stories":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
@@ -6771,10 +6779,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6788,6 +6792,10 @@
   uid ""
 
 "@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7152,6 +7160,14 @@
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook-stories@link:bazel-bin/packages/shared-ux/storybook/stories/npm_module_types":
   version "0.0.0"
   uid ""
 

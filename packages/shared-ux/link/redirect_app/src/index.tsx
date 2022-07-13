@@ -15,12 +15,7 @@ export type {
   KibanaDependencies as RedirectAppLinksKibanaDependencies,
 } from './services';
 
-export {
-  getMockServices as getRedirectAppLinksMockServices,
-  getStoryArgTypes as getRedirectAppLinksStoryArgTypes,
-  getStoryServices as getRedirectAppLinksStoryServices,
-} from './mocks';
-
+export { getMockServices as getRedirectAppLinksMockServices } from './mocks';
 import React, { FC } from 'react';
 import { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links';
 import {
