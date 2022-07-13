@@ -6,9 +6,14 @@
  */
 
 import { NewPackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { SyntheticsConfig } from '../formatters/format_configs';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
-import { PrivateLocation, SyntheticsMonitorWithId } from '../../../common/runtime_types';
+import {
+  MonitorFields,
+  PrivateLocation,
+  SyntheticsMonitorWithId,
+} from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
 export class SyntheticsPrivateLocation {
@@ -38,7 +43,7 @@ export class SyntheticsPrivateLocation {
     newPolicy.namespace = 'default';
 
     const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
-      ...config,
+      ...(config as Partial<MonitorFields>),
       config_id: config.id,
       location_name: privateLocation.name,
     });
@@ -63,7 +68,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async editMonitor(config: SyntheticsMonitorWithId) {
+  async editMonitor(config: SyntheticsConfig) {
     const { locations } = config;
 
     const allPrivateLocations = await getSyntheticsPrivateLocations(

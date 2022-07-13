@@ -230,7 +230,7 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.PARAMS]: t.string,
-    [ConfigKey.URLS]: t.union([t.string, t.undefined]),
+    [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   ZipUrlTLSFieldsCodec,
