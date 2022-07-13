@@ -10,7 +10,6 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +24,9 @@ import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
+import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
 import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
+import { ManageKeysPopover } from './components/manage_api_keys_popover/popover';
 import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
@@ -40,7 +41,7 @@ const getDeploymentUrls = (cloudId: string) => {
 export const SearchIndexOverview: React.FC = () => {
   const cloudContext = useCloudDetails();
   const { apiKey, isGenerateModalOpen, indexData, isSuccess } = useValues(OverviewLogic);
-  const { openGenerateModal, closeGenerateModal } = useActions(OverviewLogic);
+  const { closeGenerateModal } = useActions(OverviewLogic);
 
   const searchIndexApiUrl = cloudContext.cloudId
     ? getDeploymentUrls(cloudContext.cloudId).elasticUrl
@@ -84,20 +85,10 @@ export const SearchIndexOverview: React.FC = () => {
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                           <EuiFlexItem>
-                            <EuiButton iconType="arrowDown" iconSide="right">
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.content,overview.documentExample.clientLibraries.label',
-                                { defaultMessage: 'Client Libraries' }
-                              )}
-                            </EuiButton>
+                            <ClientLibrariesPopover />
                           </EuiFlexItem>
                           <EuiFlexItem>
-                            <EuiButton fill onClick={openGenerateModal}>
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.content.overview.documentExample.generateApiKeyButton.label',
-                                { defaultMessage: 'Generate an API key' }
-                              )}
-                            </EuiButton>
+                            <ManageKeysPopover />
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>

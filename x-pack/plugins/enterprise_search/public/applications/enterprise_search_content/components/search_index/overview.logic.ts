@@ -16,6 +16,8 @@ interface OverviewLogicActions {
   apiReset: typeof GenerateApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
   openGenerateModal: void;
+  toggleClientsPopover: void;
+  toggleManageApiKeyPopover: void;
 }
 
 interface OverviewLogicValues {
@@ -24,8 +26,10 @@ interface OverviewLogicValues {
   apiKeyStatus: typeof GenerateApiKeyLogic.values.status;
   data: typeof FetchIndexApiLogic.values.data;
   indexData: IndexData;
+  isClientsPopoverOpen: boolean;
   isGenerateModalOpen: boolean;
   isLoading: boolean;
+  isManageKeysPopoverOpen: boolean;
   isSuccess: boolean;
   status: typeof FetchIndexApiLogic.values.status;
 }
@@ -34,6 +38,8 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
   actions: {
     closeGenerateModal: true,
     openGenerateModal: true,
+    toggleClientsPopover: true,
+    toggleManageApiKeyPopover: true,
   },
   connect: {
     actions: [GenerateApiKeyLogic, ['apiReset']],
@@ -51,11 +57,24 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
   }),
   path: ['enterprise_search', 'search_index', 'overview'],
   reducers: () => ({
+    isClientsPopoverOpen: [
+      false,
+      {
+        toggleClientsPopover: (state) => !state,
+      },
+    ],
     isGenerateModalOpen: [
       false,
       {
         closeGenerateModal: () => false,
         openGenerateModal: () => true,
+      },
+    ],
+    isManageKeysPopoverOpen: [
+      false,
+      {
+        openGenerateModal: () => false,
+        toggleManageApiKeyPopover: (state) => !state,
       },
     ],
   }),
