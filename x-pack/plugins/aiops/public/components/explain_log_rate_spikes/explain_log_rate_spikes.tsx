@@ -39,9 +39,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
 }) => {
   // TODO: Need to pass in unified search service manually
   const {
-    services: {
-      http,
-    },
+    services: { http },
   } = useAiOpsKibana();
   const basePath = http?.basePath.get() ?? '';
 
