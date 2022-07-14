@@ -3,7 +3,7 @@ id: kibDevDocsOpsKbnPm
 slug: /kibana-dev-docs/ops/kbn-pm
 title: "@kbn/pm"
 description: 'The tool which bootstraps the repo and helps work with packages'
-date: 2022-05-16
+date: 2022-07-14
 tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts']
 ---
 
@@ -28,3 +28,17 @@ There are several commands supported by `@kbn/pm`, but rather than documenting t
 Since this tool is required for bootstrapping the repository it needs to work without any dependencies installed and without a build toolchain. We accomplish this by writing the tool in vanilla JS (shocker!) and using TypeScript to validate the code which is typed via heavy use of JSDoc comments.
 
 In order to use import/export syntax and enhance the developer experience a little we use the `.mjs` file extension.
+
+In some cases we actually do use TypeScript files, just for defining complicated types. These files are then imported only in special TS-compatible JSDoc comments, so Node.js will never try to import them but they can be used to define types which are too complicated to define inline or in a JSDoc comment.
+
+There are cases where `@kbn/pm` relies on code from packages, mostly to prevent reimplementing common functionality. This can only be done in one of two ways:
+
+ 1. With a dynamic `await import(...)` statement that is always run after boostrap is complete, or is wrapped in a try/catch in case bootstrap didn't complete successfully.
+ 2. By pulling in the source code of the un-built package.
+
+Option 1 is used in several places, with contingencies in place in case bootstrap failed. Option 2 is used for two pieces of code which are needed in order to run bootstrap:
+
+ 1. `@kbn/plugin-discovery` as we need to populate the `@kbn/synthetic-package-map` to run Bazel
+ 2. `@kbn/bazel-runner` as we want to have the logic for running bazel in a single location
+
+Because we load these two packages from source, without being built, before bootstrap is ever run, they can not depend on other packages and must be written in Vanilla JS as well.
