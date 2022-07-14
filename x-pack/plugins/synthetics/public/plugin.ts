@@ -41,6 +41,7 @@ import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
+import { MONITORS_ROUTE } from '../common/constants/ui';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -158,16 +159,18 @@ export class UptimePlugin
 
     const appKeywords = [
       'Synthetics',
-      'pings',
-      'checks',
       'availability',
-      'response duration',
-      'response time',
-      'outside in',
+      'browser',
+      'checks',
+      'digital',
       'reachability',
       'reachable',
-      'digital',
+      'response duration',
+      'response time',
+      'monitors',
+      'outside in',
       'performance',
+      'pings',
       'web performance',
       'web perf',
     ];
@@ -262,8 +265,8 @@ function registerSyntheticsRoutesWithNavigation(
                     defaultMessage: 'Monitors',
                   }),
                   app: 'synthetics',
-                  path: '/manage-monitors',
-                  matchFullPath: false,
+                  path: MONITORS_ROUTE,
+                  matchFullPath: true,
                   ignoreTrailingSlash: true,
                 },
               ],

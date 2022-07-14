@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('createDataViewButtonFlyout');
+      const button = await testSubjects.find('createDataViewButton');
       button.click();
       await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();

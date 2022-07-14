@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
@@ -148,6 +149,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
           }
         }}
         isLoading={isLoading}
+        yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
         noDataWarning={
           <EuiEmptyPrompt
             titleSize="xxs"

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+require('../../../../src/setup_node_env');
+
 const path = require('path');
 const webpack = require('webpack');
 const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
 
+const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {
   KIBANA_ROOT,
   SHAREABLE_RUNTIME_OUTPUT,
@@ -32,7 +35,6 @@ module.exports = {
     [SHAREABLE_RUNTIME_NAME]: require.resolve('./index.ts'),
   },
   mode: isProd ? 'production' : 'development',
-  plugins: isProd ? [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })] : [],
   output: {
     path: SHAREABLE_RUNTIME_OUTPUT,
     filename: '[name].js',
@@ -191,4 +193,10 @@ module.exports = {
     fs: 'empty',
     child_process: 'empty',
   },
+  plugins: [
+    isProd ? new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }) : [],
+    new CiStatsPlugin({
+      entryName: SHAREABLE_RUNTIME_NAME,
+    }),
+  ].flat(),
 };

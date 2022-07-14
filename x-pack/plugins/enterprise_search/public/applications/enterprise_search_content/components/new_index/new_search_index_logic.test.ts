@@ -11,12 +11,9 @@ import { DEFAULT_LANGUAGE } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
 
 const DEFAULT_VALUES = {
-  searchEngines: [],
-  searchEngineSelectOptions: [],
   rawName: '',
   name: '',
   language: DEFAULT_LANGUAGE,
-  selectedSearchEngines: [],
 };
 
 describe('NewSearchIndexLogic', () => {

@@ -23,7 +23,7 @@ import {
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes } from './utils';
+import { createIncident, getCommentContextFromAttributes, getDurationInSeconds } from './utils';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
@@ -225,6 +225,12 @@ export const push = async (
                 closed_at: pushedDate,
                 closed_by: { email, full_name, username },
               }
+            : {}),
+          ...(shouldMarkAsClosed
+            ? getDurationInSeconds({
+                closedAt: pushedDate,
+                createdAt: theCase.created_at,
+              })
             : {}),
           external_service: externalService,
           updated_at: pushedDate,

@@ -41,6 +41,7 @@ describe('Custom Query Alerts', () => {
     ruleDataClient,
     eventLogService,
     ruleExecutionLoggerFactory: () => ruleExecutionLogMock.forExecutors.create(),
+    version: '8.3',
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -88,7 +89,7 @@ describe('Custom Query Alerts', () => {
       params,
     });
 
-    expect(ruleDataClient.getWriter().bulk).not.toHaveBeenCalled();
+    expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
     expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
   });
 
@@ -130,7 +131,7 @@ describe('Custom Query Alerts', () => {
 
     await executor({ params });
 
-    expect(ruleDataClient.getWriter().bulk).toHaveBeenCalled();
+    expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
     expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
   });
 });

@@ -831,6 +831,37 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.isRuleSnoozed",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuleSnoozed",
+        "description": [],
+        "signature": [
+          "(rule: RuleSnoozeProps) => boolean"
+        ],
+        "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.isRuleSnoozed.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "RuleSnoozeProps"
+            ],
+            "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.parseDuration",
         "type": "Function",
         "tags": [],
@@ -1479,24 +1510,9 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
-              "PublicMethodsOf",
-              "<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.RulesClient",
-                "text": "RulesClient"
-              },
-              ">"
+              "RulesClientApi"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
@@ -1509,13 +1525,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -1534,13 +1544,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "PublicMethodsOf",
               "<",
@@ -1564,13 +1568,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -2770,7 +2768,15 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "{ operation: \"delete\" | \"set\" | \"add\"; field: \"tags\"; value: string[]; } | { operation: \"set\" | \"add\"; field: \"actions\"; value: NormalizedAlertAction[]; }"
+          "{ operation: \"delete\" | \"set\" | \"add\"; field: \"tags\"; value: string[]; } | { operation: \"set\" | \"add\"; field: \"actions\"; value: NormalizedAlertAction[]; } | { operation: \"set\"; field: \"schedule\"; value: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; }"
         ],
         "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
         "deprecated": false,
@@ -3037,7 +3043,15 @@
             "section": "def-server.BulkEditError",
             "text": "BulkEditError"
           },
-          "[]; total: number; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeEndTime, }: { id: string; snoozeEndTime: string | -1; }) => Promise<void>; unsnooze: ({ id }: { id: string; }) => Promise<void>; updateSnoozedUntilTime: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
+          "[]; total: number; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnoozeSchedule",
+            "text": "RuleSnoozeSchedule"
+          },
+          "; }) => Promise<void>; unsnooze: ({ id, scheduleIds, }: { id: string; scheduleIds?: string[] | undefined; }) => Promise<void>; updateSnoozedUntilTime: ({ id }: { id: string; }) => Promise<void>; clearExpiredSnoozes: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
@@ -4467,10 +4481,13 @@
           {
             "parentPluginId": "alerting",
             "id": "def-common.RRuleRecord.bymonthday",
-            "type": "number",
+            "type": "Array",
             "tags": [],
             "label": "bymonthday",
             "description": [],
+            "signature": [
+              "number[]"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false
           },
@@ -5244,6 +5261,71 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.RuleSnoozeSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleSnoozeSchedule",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.rRule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rRule",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RRuleRecord",
+                "text": "RRuleRecord"
+              },
+              "> & Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RRuleRecord",
+                "text": "RRuleRecord"
+              },
+              ", \"dtstart\" | \"tzid\">"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleStateNavigation",
         "type": "Interface",
         "tags": [],
@@ -5943,23 +6025,7 @@
         "label": "RuleSnooze",
         "description": [],
         "signature": [
-          "{ duration: number; rRule: Partial<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RRuleRecord",
-            "text": "RRuleRecord"
-          },
-          "> & Pick<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RRuleRecord",
-            "text": "RRuleRecord"
-          },
-          ", \"dtstart\" | \"tzid\">; id?: string | undefined; }[]"
+          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; }[]"
         ],
         "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
         "deprecated": false,

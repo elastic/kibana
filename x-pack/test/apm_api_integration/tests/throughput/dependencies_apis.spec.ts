@@ -43,6 +43,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               ...commonQuery,
               backendName: overrides?.backendName || 'elasticsearch',
+              spanName: '',
+              searchServiceDestinationMetrics: false,
               kuery: '',
             },
           },

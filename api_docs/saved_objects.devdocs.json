@@ -1129,121 +1129,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "{ create: <T = unknown>(type: string, attributes: T, options?: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsCreateOptions",
-                    "text": "SavedObjectsCreateOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; bulkCreate: (objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBulkCreateObject",
-                    "text": "SavedObjectsBulkCreateObject"
-                  },
-                  "<unknown>[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBulkCreateOptions",
-                    "text": "SavedObjectsBulkCreateOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBatchResponse",
-                    "text": "SavedObjectsBatchResponse"
-                  },
-                  "<unknown>>; delete: (type: string, id: string, options?: ",
-                  "SavedObjectsDeleteOptions",
-                  " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsFindResponsePublic",
-                    "text": "SavedObjectsFindResponsePublic"
-                  },
-                  "<T, unknown>>; bulkGet: (objects?: { id: string; type: string; }[]) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBatchResponse",
-                    "text": "SavedObjectsBatchResponse"
-                  },
-                  "<unknown>>; bulkResolve: <T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.ResolvedSimpleSavedObject",
-                    "text": "ResolvedSimpleSavedObject"
-                  },
-                  "<T>[]; }>; get: <T = unknown>(type: string, id: string) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.ResolvedSimpleSavedObject",
-                    "text": "ResolvedSimpleSavedObject"
-                  },
-                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsUpdateOptions",
-                    "text": "SavedObjectsUpdateOptions"
-                  },
-                  "<unknown>) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; bulkUpdate: <T = unknown>(objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBulkUpdateObject",
-                    "text": "SavedObjectsBulkUpdateObject"
-                  },
-                  "<unknown>[]) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBatchResponse",
-                    "text": "SavedObjectsBatchResponse"
-                  },
-                  "<T>>; }"
+                    "section": "def-public.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
@@ -1916,8 +1808,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | null>) | undefined"
             ],
@@ -2350,8 +2242,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | undefined"
             ],

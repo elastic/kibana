@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useState, useCallback } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import {
   EuiFilterButton,
@@ -14,9 +15,9 @@ import {
   EuiFlexItem,
   EuiSearchBar,
 } from '@elastic/eui';
-import { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';
+import type { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';
 import * as i18n from './translations';
-import { JobsFilters, SecurityJob } from '../../types';
+import type { JobsFilters, SecurityJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';
 
 interface JobsTableFiltersProps {

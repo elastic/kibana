@@ -178,7 +178,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends',
+                    path: '/backends/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -298,7 +298,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        {
+          id: 'backends',
+          title: dependenciesTitle,
+          path: '/backends/inventory',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {

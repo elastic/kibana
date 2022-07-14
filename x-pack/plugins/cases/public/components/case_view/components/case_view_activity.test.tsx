@@ -19,9 +19,8 @@ import { ConnectorTypes } from '../../../../common/api/connectors';
 import { Case } from '../../../../common';
 import { CaseViewProps } from '../types';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
-import { useConnectors } from '../../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
-import { useGetActionLicense } from '../../../containers/use_get_action_license';
+import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
 
 jest.mock('../../../containers/use_get_case_user_actions');
@@ -32,11 +31,7 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 
-(useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
-(useGetActionLicense as jest.Mock).mockReturnValue({
-  actionLicense: null,
-  isLoading: false,
-});
+(useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
 const caseData: Case = {
   ...basicCase,
@@ -90,13 +85,13 @@ export const caseProps = {
 };
 
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   beforeAll(() => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
-    useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
+    useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
   });
   let appMockRender: AppMockRenderer;

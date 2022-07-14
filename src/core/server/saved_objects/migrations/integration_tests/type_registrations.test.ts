@@ -38,6 +38,8 @@ const previouslyRegisteredTypes = [
   'config',
   'connector_token',
   'core-usage-stats',
+  'csp-rule-template',
+  'csp_rule',
   'dashboard',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
@@ -59,6 +61,7 @@ const previouslyRegisteredTypes = [
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'ingest-agent-policies',
+  'ingest-download-sources',
   'ingest-outputs',
   'ingest-package-policies',
   'ingest_manager_settings',
@@ -114,7 +117,7 @@ const previouslyRegisteredTypes = [
 ].sort();
 
 describe('SO type registrations', () => {
-  it('does not remove types from registrations without updating unusedTypesQuery', async () => {
+  it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
     const root = kbnTestServer.createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();

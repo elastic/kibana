@@ -8,14 +8,19 @@
 
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
+  const config = getService('config');
 
   describe('console app', function () {
     before(async function () {
       await browser.setWindowSize(1300, 1100);
     });
-
-    loadTestFile(require.resolve('./_console'));
-    loadTestFile(require.resolve('./_autocomplete'));
-    loadTestFile(require.resolve('./_vector_tile'));
+    if (config.get('esTestCluster.ccs')) {
+      loadTestFile(require.resolve('./_console_ccs'));
+    } else {
+      loadTestFile(require.resolve('./_console'));
+      loadTestFile(require.resolve('./_autocomplete'));
+      loadTestFile(require.resolve('./_vector_tile'));
+      loadTestFile(require.resolve('./_comments'));
+    }
   });
 }

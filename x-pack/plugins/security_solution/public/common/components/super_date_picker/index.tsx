@@ -6,25 +6,26 @@
  */
 
 import dateMath from '@kbn/datemath';
-import {
-  EuiSuperDatePicker,
+import type {
   OnRefreshChangeProps,
   EuiSuperDatePickerRecentRange,
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
+import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useUiSetting$ } from '../../lib/kibana';
-import { inputsModel, State } from '../../store';
+import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 import {
   policySelector,
   durationSelector,
@@ -37,7 +38,7 @@ import {
   queriesSelector,
   kqlQuerySelector,
 } from './selectors';
-import { InputsRange } from '../../store/inputs/model';
+import type { InputsRange } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 

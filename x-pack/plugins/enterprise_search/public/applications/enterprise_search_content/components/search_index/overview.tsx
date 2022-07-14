@@ -7,16 +7,44 @@
 
 import React from 'react';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { useValues } from 'kea';
+
+import { EuiSpacer } from '@elastic/eui';
+
+import { Status } from '../../../../../common/types/api';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+
+import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
+import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
+import { GenerateApiKeyPanel } from './generate_api_key_panel';
+import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
+  const { data, status } = useValues(FetchIndexApiLogic);
+
+  const isCrawler = typeof data?.crawler !== 'undefined';
+  const isConnector = typeof data?.connector !== 'undefined';
+  const isApi = !(isCrawler || isConnector);
+
   return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[]}
-      pageViewTelemetry="Overview"
-      isLoading={false}
-    >
-      <>Overview</>
-    </EnterpriseSearchContentPageTemplate>
+    <>
+      <EuiSpacer />
+      {status === Status.SUCCESS && data && (
+        <TotalStats
+          lastUpdated={'TODO'}
+          documentCount={data.index.total.docs.count ?? 0}
+          indexHealth={data.index.health ?? ''}
+          ingestionType={data.connector ? 'Connector' : data.crawler ? 'Crawler' : 'API'}
+        />
+      )}
+      <EuiSpacer />
+      {isApi && <GenerateApiKeyPanel />}
+      {isCrawler && (
+        <>
+          <CrawlRequestsPanel />
+          <CrawlDetailsFlyout />
+        </>
+      )}
+    </>
   );
 };

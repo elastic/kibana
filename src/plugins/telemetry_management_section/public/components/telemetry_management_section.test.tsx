@@ -26,7 +26,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         sendUsageTo: 'staging',
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: true,
@@ -57,7 +56,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -109,7 +107,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -155,7 +152,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
@@ -192,7 +188,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -217,7 +212,10 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(0);
+      const toggleExampleComponent = component
+        .find('FormattedMessage > EuiLink')
+        .find('button')
+        .at(0);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInExampleFlyout');
       updatedView.simulate('close');
@@ -230,7 +228,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -278,7 +275,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,

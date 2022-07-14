@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
-import {
+import type {
   Threats,
   Type,
   SeverityMapping,
@@ -20,13 +20,13 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
-import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { Rule } from '../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../containers/detection_engine/rules';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
@@ -83,6 +83,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? [],
   index: rule.index ?? [],
+  dataViewId: rule.data_view_id,
   threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
     query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
@@ -163,6 +164,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     rule_name_override: ruleNameOverride,
     severity_mapping: severityMapping,
     timestamp_override: timestampOverride,
+    timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     references,
     severity,
     false_positives: falsePositives,
@@ -179,6 +181,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
     timestampOverride: timestampOverride ?? '',
+    timestampOverrideFallbackDisabled,
     name,
     description,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -254,9 +257,9 @@ export type PrePackagedTimelineStatus =
   | 'unknown';
 
 export const getPrePackagedRuleStatus = (
-  rulesInstalled: number | null,
-  rulesNotInstalled: number | null,
-  rulesNotUpdated: number | null
+  rulesInstalled?: number,
+  rulesNotInstalled?: number,
+  rulesNotUpdated?: number
 ): PrePackagedRuleStatus => {
   if (
     rulesNotInstalled != null &&
@@ -293,9 +296,9 @@ export const getPrePackagedRuleStatus = (
   return 'unknown';
 };
 export const getPrePackagedTimelineStatus = (
-  timelinesInstalled: number | null,
-  timelinesNotInstalled: number | null,
-  timelinesNotUpdated: number | null
+  timelinesInstalled?: number,
+  timelinesNotInstalled?: number,
+  timelinesNotUpdated?: number
 ): PrePackagedTimelineStatus => {
   if (
     timelinesNotInstalled != null &&

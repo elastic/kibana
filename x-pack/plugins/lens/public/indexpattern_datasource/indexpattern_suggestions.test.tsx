@@ -1638,6 +1638,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id3: expect.objectContaining({
                     operationType: 'terms',
                     sourceField: 'source',
+                    label: 'Top 10 values of source',
                     params: expect.objectContaining({
                       size: 10,
                       otherBucket: false,

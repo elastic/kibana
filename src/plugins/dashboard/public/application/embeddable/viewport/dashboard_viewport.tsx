@@ -19,11 +19,13 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
+import { DashboardLoadedEvent } from '../types';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
   controlsEnabled?: boolean;
+  onDataLoaded?: (data: DashboardLoadedEvent) => void;
 }
 
 interface State {
@@ -118,14 +120,16 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             ) : null}
 
-            <div
-              className={
-                controlGroup && controlGroup.getPanelCount() > 0
-                  ? 'dshDashboardViewport-controls'
-                  : ''
-              }
-              ref={this.controlsRoot}
-            />
+            {container.getInput().viewMode !== ViewMode.PRINT && (
+              <div
+                className={
+                  controlGroup && controlGroup.getPanelCount() > 0
+                    ? 'dshDashboardViewport-controls'
+                    : ''
+                }
+                ref={this.controlsRoot}
+              />
+            )}
           </>
         ) : null}
         <div
@@ -153,7 +157,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             </div>
           )}
-          {this.state.controlGroupReady && <DashboardGrid container={container} />}
+          {this.state.controlGroupReady && (
+            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
+          )}
         </div>
       </>
     );

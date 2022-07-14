@@ -43,7 +43,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
+import type { BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
   getValidDateFromDoc,
@@ -51,7 +51,7 @@ import {
   isWrappedSignalHit,
 } from '../../../signals/utils';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
-import { SearchTypes } from '../../../../telemetry/types';
+import type { SearchTypes } from '../../../../telemetry/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -60,6 +60,7 @@ import {
   ALERT_ORIGINAL_EVENT,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_RULE_ACTIONS,
+  ALERT_RULE_INDICES,
   ALERT_RULE_THROTTLE,
   ALERT_RULE_TIMELINE_ID,
   ALERT_RULE_TIMELINE_TITLE,
@@ -73,13 +74,13 @@ import {
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
 } from '../../../../../../common/field_maps/field_names';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   commonParamsCamelToSnake,
   typeSpecificCamelToSnake,
 } from '../../../schemas/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import {
+import type {
   AncestorLatest,
   BaseFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
@@ -130,12 +131,14 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
  * @param rule The rule that is generating the new alert.
  * @param spaceId The space ID in which the rule was executed.
  * @param reason Human readable string summarizing alert.
+ * @param indicesToQuery Array of index patterns searched by the rule.
  */
 export const buildAlert = (
   docs: SimpleHit[],
   completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   reason: string,
+  indicesToQuery: string[],
   overrides?: {
     nameOverride: string;
     severityOverride: string;
@@ -175,7 +178,7 @@ export const buildAlert = (
 
   const originalTime = getValidDateFromDoc({
     doc: docs[0],
-    timestampOverride: undefined,
+    primaryTimestamp: TIMESTAMP,
   });
 
   return {
@@ -204,6 +207,7 @@ export const buildAlert = (
     [ALERT_RULE_FROM]: params.from,
     [ALERT_RULE_IMMUTABLE]: params.immutable,
     [ALERT_RULE_INTERVAL]: schedule.interval,
+    [ALERT_RULE_INDICES]: indicesToQuery,
     [ALERT_RULE_LICENSE]: params.license,
     [ALERT_RULE_MAX_SIGNALS]: params.maxSignals,
     [ALERT_RULE_NAME]: overrides?.nameOverride ?? name,

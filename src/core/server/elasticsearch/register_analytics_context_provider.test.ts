@@ -7,8 +7,8 @@
  */
 
 import { firstValueFrom, of } from 'rxjs';
-import type { AnalyticsServiceSetup } from '../analytics';
-import { analyticsServiceMock } from '../analytics/analytics_service.mock';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 describe('registerAnalyticsContextProvider', () => {

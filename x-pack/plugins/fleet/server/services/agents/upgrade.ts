@@ -10,7 +10,6 @@ import moment from 'moment';
 import pMap from 'p-map';
 
 import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
-import { agentPolicyService } from '..';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -22,14 +21,10 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import {
-  getAgentDocuments,
-  getAgents,
-  updateAgent,
-  bulkUpdateAgents,
-  getAgentPolicyForAgent,
-} from './crud';
+import { errorsToResults, processAgentsInBatches } from './crud';
+import { getAgentDocuments, updateAgent, bulkUpdateAgents, getAgentPolicyForAgent } from './crud';
 import { searchHitToAgent } from './helpers';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
 
@@ -85,6 +80,7 @@ export async function sendUpgradeAgentsActions(
     force?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
+    batchSize?: number;
   }
 ) {
   // Full set of agents
@@ -104,29 +100,44 @@ export async function sendUpgradeAgentsActions(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    return await processAgentsInBatches(
+      esClient,
+      {
+        kuery: options.kuery,
+        showInactive: options.showInactive ?? false,
+        batchSize: options.batchSize,
+      },
+      async (agents: Agent[], skipSuccess: boolean) =>
+        await upgradeBatch(soClient, esClient, agents, outgoingErrors, options, skipSuccess)
+    );
   }
 
-  // get any policy ids from upgradable agents
-  const policyIdsToGet = new Set(
-    givenAgents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
-  );
+  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, options);
+}
 
-  // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
-    fields: ['is_managed'],
-  });
-  const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
-    acc[policy.id] = policy.is_managed;
-    return acc;
-  }, {});
-  const isHostedAgent = (agent: Agent) => agent.policy_id && hostedPolicies[agent.policy_id];
+async function upgradeBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  givenAgents: Agent[],
+  outgoingErrors: Record<Agent['id'], Error>,
+  options: ({ agents: Agent[] } | GetAgentsOptions) & {
+    version: string;
+    sourceUri?: string | undefined;
+    force?: boolean;
+    upgradeDurationSeconds?: number;
+    startTime?: string;
+  },
+  skipSuccess?: boolean
+): Promise<{ items: BulkActionResult[] }> {
+  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
+
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
   // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =
     'kuery' in options && !options.force
-      ? givenAgents.filter((agent: Agent) => !isHostedAgent(agent))
+      ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -139,7 +150,7 @@ export async function sendUpgradeAgentsActions(
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
-      if (!options.force && isHostedAgent(agent)) {
+      if (!options.force && isHostedAgent(hostedPolicies, agent)) {
         throw new HostedAgentPolicyRestrictionRelatedError(
           `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
         );
@@ -154,7 +165,7 @@ export async function sendUpgradeAgentsActions(
       agents.push(result.value);
     } else {
       const id = givenAgents[index].id;
-      outgoingErrors[id] = result.reason;
+      errors[id] = result.reason;
     }
     return agents;
   }, []);
@@ -196,22 +207,14 @@ export async function sendUpgradeAgentsActions(
     }))
   );
 
-  const givenOrder =
-    'agentIds' in options ? options.agentIds : agentsToCheckUpgradeable.map((agent) => agent.id);
-
-  const orderedOut = givenOrder.map((agentId) => {
-    const hasError = agentId in outgoingErrors;
-    const result: BulkActionResult = {
-      id: agentId,
-      success: !hasError,
-    };
-    if (hasError) {
-      result.error = outgoingErrors[agentId];
-    }
-    return result;
-  });
-
-  return { items: orderedOut };
+  return {
+    items: errorsToResults(
+      givenAgents,
+      errors,
+      'agentIds' in options ? options.agentIds : undefined,
+      skipSuccess
+    ),
+  };
 }
 
 /**
@@ -316,11 +319,6 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
             },
           },
           {
-            exists: {
-              field: 'start_time',
-            },
-          },
-          {
             range: {
               expiration: { gte: now },
             },
@@ -343,7 +341,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime: hit._source.start_time as string,
+          startTime: hit._source?.start_time,
         };
       }
 

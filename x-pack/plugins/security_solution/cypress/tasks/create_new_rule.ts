@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { getEmailConnector, EmailConnector } from '../objects/connector';
-import {
+import type { EmailConnector } from '../objects/connector';
+import { getEmailConnector } from '../objects/connector';
+import type {
   CustomRule,
   MachineLearningRule,
-  getMachineLearningRule,
   OverrideRule,
   ThreatIndicatorRule,
   ThresholdRule,
 } from '../objects/rule';
+import { getMachineLearningRule } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -255,6 +256,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
@@ -316,6 +318,7 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   if (rule.customQuery == null) {
     throw new TypeError('The rule custom query should never be undefined or null ');
   }
+
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
@@ -394,6 +397,7 @@ export const fillIndexAndIndicatorIndexPattern = (
   indicatorIndex?: string[]
 ) => {
   getIndexPatternClearButton().click();
+
   getIndicatorIndex().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
@@ -442,7 +446,9 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
-export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+export const getIndicatorIndex = () => {
+  return cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+};
 
 /** Returns the indicator's indicator index */
 export const getIndicatorIndicatorIndex = () =>

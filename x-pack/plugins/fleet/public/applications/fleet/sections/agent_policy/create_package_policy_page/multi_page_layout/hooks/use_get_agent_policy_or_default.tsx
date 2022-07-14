@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   sendCreateAgentPolicy,
@@ -25,8 +26,11 @@ interface UseGetAgentPolicyOrDefaultResponse {
 export const DEFAULT_AGENT_POLICY_ID: string = 'fleet-first-agent-policy';
 export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze({
   id: DEFAULT_AGENT_POLICY_ID,
-  name: 'My first agent policy',
+  name: i18n.translate('xpack.fleet.createPackagePolicy.firstAgentPolicyNameText', {
+    defaultMessage: 'My first agent policy',
+  }),
   namespace: 'default',
+  monitoring_enabled: ['logs', 'metrics'],
 });
 
 const sendGetAgentPolicy = async (agentPolicyId: string) => {

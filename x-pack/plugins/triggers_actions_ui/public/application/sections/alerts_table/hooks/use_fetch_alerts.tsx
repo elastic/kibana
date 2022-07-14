@@ -200,8 +200,13 @@ const useFetchAlerts = ({
                     type: 'response',
                     alerts: rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
                       if (hit.fields) {
-                        acc.push(hit.fields as EcsFieldsResponse);
+                        acc.push({
+                          ...hit.fields,
+                          _id: hit._id,
+                          _index: hit._index,
+                        } as EcsFieldsResponse);
                       }
+
                       return acc;
                     }, []),
                     totalAlerts,

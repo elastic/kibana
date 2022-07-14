@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 const MOCK_INDEX = 'kubernetes-test-index';
 const ORCHESTRATOR_NAMESPACE_PROPERTY = 'orchestrator.namespace';
 const CONTAINER_IMAGE_NAME_PROPERTY = 'container.image.name';
+const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
 const TIMESTAMP_PROPERTY = '@timestamp';
 
 // eslint-disable-next-line import/no-default-export
@@ -63,6 +64,44 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.length).to.be(1);
       expect(response.body[0].key).to.be('namespace11');
+    });
+
+    it(`${AGGREGATE_ROUTE} return countBy value for each aggregation`, async () => {
+      const response = await supertest
+        .get(AGGREGATE_ROUTE)
+        .set('kbn-xsrf', 'foo')
+        .query({
+          query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME_PROPERTY]: 'debian11' } }),
+          groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+          countBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+          page: 0,
+          index: MOCK_INDEX,
+        });
+      expect(response.status).to.be(200);
+      expect(response.body.length).to.be(10);
+
+      // when groupBy and countBy use the same field, count_by_aggs.value will always be 1
+      response.body.forEach((agg: any) => {
+        expect(agg.count_by_aggs.value).to.be(1);
+      });
+    });
+
+    it(`${AGGREGATE_ROUTE} return sorted aggregation by countBy field if sortByCount is true`, async () => {
+      const response = await supertest
+        .get(AGGREGATE_ROUTE)
+        .set('kbn-xsrf', 'foo')
+        .query({
+          query: JSON.stringify({ match: { [CONTAINER_IMAGE_NAME_PROPERTY]: 'debian11' } }),
+          groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
+          countBy: ENTRY_LEADER_ENTITY_ID,
+          page: 0,
+          index: MOCK_INDEX,
+          sortByCount: 'desc',
+        });
+      expect(response.status).to.be(200);
+      expect(response.body.length).to.be(10);
+      expect(response.body[0].count_by_aggs.value).to.be(2);
+      expect(response.body[1].count_by_aggs.value).to.be(1);
     });
 
     it(`${AGGREGATE_ROUTE} allows a range query`, async () => {

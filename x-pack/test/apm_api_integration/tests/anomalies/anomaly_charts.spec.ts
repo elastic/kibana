@@ -11,6 +11,7 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';
+import { last } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
@@ -202,6 +203,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let latencySeries: ServiceAnomalyTimeseries | undefined;
           let throughputSeries: ServiceAnomalyTimeseries | undefined;
           let failureRateSeries: ServiceAnomalyTimeseries | undefined;
+          const endTimeMs = new Date(end).getTime();
 
           before(async () => {
             allAnomalyTimeseries = (
@@ -231,6 +233,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               allAnomalyTimeseries.every((spec) => spec.bounds.some((bound) => bound.y0 ?? 0 > 0))
             );
+          });
+
+          it('returns model plots with bounds for x range within start and end', () => {
+            expect(allAnomalyTimeseries.length).to.eql(3);
+
+            expect(
+              allAnomalyTimeseries.every((spec) =>
+                spec.bounds.every(
+                  (bound) => bound.x >= new Date(start).getTime() && bound.x <= endTimeMs
+                )
+              )
+            );
+          });
+          it('returns model plots with latest bucket matching the end time', () => {
+            expect(allAnomalyTimeseries.every((spec) => last(spec.bounds)?.x === endTimeMs));
           });
 
           it('returns the correct metadata', () => {

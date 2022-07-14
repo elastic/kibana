@@ -25,17 +25,29 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
-import { StatefulBody, Props } from '.';
-import { Sort } from './sort';
+import type { Props } from '.';
+import { StatefulBody } from '.';
+import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
-import { createStore, State } from '../../../../common/store';
+import type { State } from '../../../../common/store';
+import { createStore } from '../../../../common/store';
 
-jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/user_privileges', () => {
+  return {
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
@@ -73,7 +85,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
       },
     }),
-    useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
 
@@ -208,43 +219,7 @@ describe('Body', () => {
         });
       });
     }, 20000);
-
-    test('it dispatches the `REMOVE_COLUMN` action when there is a field removed from the custom fields', async () => {
-      const customFieldId = 'my.custom.runtimeField';
-      const { storage } = createSecuritySolutionStorageMock();
-      const state: State = {
-        ...mockGlobalState,
-        timeline: {
-          ...mockGlobalState.timeline,
-          timelineById: {
-            ...mockGlobalState.timeline.timelineById,
-            'timeline-test': {
-              ...mockGlobalState.timeline.timelineById.test,
-              id: 'timeline-test',
-              columns: [
-                ...defaultHeaders,
-                { id: customFieldId, category: 'my', columnHeaderType: 'not-filtered' },
-              ],
-            },
-          },
-        },
-      };
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-      mount(
-        <TestProviders store={store}>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch).toBeCalledWith({
-        payload: { columnId: customFieldId, id: 'timeline-test' },
-        type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
-      });
-    });
   });
-
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
@@ -261,7 +236,7 @@ describe('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('Add a Note to an event', () => {
+    test('Add a note to an event', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulBody {...props} />
@@ -293,7 +268,7 @@ describe('Body', () => {
       );
     });
 
-    test('Add two Note to an event', () => {
+    test('Add two notes to an event', () => {
       const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,

@@ -7,7 +7,7 @@
 
 import { EndpointDocGenerator } from '../generate_data';
 import { isProcessRunning } from './event';
-import { SafeResolverEvent } from '../types';
+import type { SafeResolverEvent } from '../types';
 
 describe('Generated documents', () => {
   let generator: EndpointDocGenerator;

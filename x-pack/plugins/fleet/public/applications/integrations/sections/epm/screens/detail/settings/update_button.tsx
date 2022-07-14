@@ -144,6 +144,16 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, []);
 
   const navigateToNewSettingsPage = useCallback(() => {
+    // only navigate if still on old settings page (user has not navigated away)
+    if (
+      !history.location.pathname.match(
+        getPath('integration_details_settings', {
+          pkgkey: `${name}-.*`,
+        })
+      )
+    ) {
+      return;
+    }
     const settingsPath = getPath('integration_details_settings', {
       pkgkey: `${name}-${version}`,
     });

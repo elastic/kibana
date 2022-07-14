@@ -33,7 +33,6 @@ export function mockTelemetryService({
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
-    enabled: true,
     sendUsageTo: 'staging' as const,
     sendUsageFrom: 'browser' as const,
     optIn: true,

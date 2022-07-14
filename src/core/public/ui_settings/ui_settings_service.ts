@@ -8,16 +8,16 @@
 
 import { Subject } from 'rxjs';
 
-import { HttpSetup } from '../http';
-import { InjectedMetadataSetup } from '../injected_metadata';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
-import { IUiSettingsClient } from './types';
+import type { IUiSettingsClient } from './types';
 
 export interface UiSettingsServiceDeps {
   http: HttpSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /** @internal */

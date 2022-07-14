@@ -123,6 +123,12 @@ export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 export const index = t.array(t.string);
 export type Index = t.TypeOf<typeof index>;
 
+export const data_view_id = t.string;
+export type DataViewId = t.TypeOf<typeof data_view_id>;
+
+export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
+export type DataViewIdOrUndefined = t.TypeOf<typeof dataViewIdOrUndefined>;
+
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 
@@ -181,6 +187,19 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
+
+export const timestamp_override_fallback_disabled = t.boolean;
+export type TimestampOverrideFallbackDisabled = t.TypeOf<
+  typeof timestamp_override_fallback_disabled
+>;
+
+export const timestampOverrideFallbackDisabledOrUndefined = t.union([
+  timestamp_override_fallback_disabled,
+  t.undefined,
+]);
+export type TimestampOverrideFallbackDisabledOrUndefined = t.TypeOf<
+  typeof timestampOverrideFallbackDisabledOrUndefined
+>;
 
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
@@ -462,14 +481,17 @@ const bulkActionEditPayloadTags = t.type({
 
 export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
 
-const bulkActionEditPayloadIndexPatterns = t.type({
-  type: t.union([
-    t.literal(BulkActionEditType.add_index_patterns),
-    t.literal(BulkActionEditType.delete_index_patterns),
-    t.literal(BulkActionEditType.set_index_patterns),
-  ]),
-  value: index,
-});
+const bulkActionEditPayloadIndexPatterns = t.intersection([
+  t.type({
+    type: t.union([
+      t.literal(BulkActionEditType.add_index_patterns),
+      t.literal(BulkActionEditType.delete_index_patterns),
+      t.literal(BulkActionEditType.set_index_patterns),
+    ]),
+    value: index,
+  }),
+  t.exact(t.partial({ overwriteDataViews: t.boolean })),
+]);
 
 export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
   typeof bulkActionEditPayloadIndexPatterns

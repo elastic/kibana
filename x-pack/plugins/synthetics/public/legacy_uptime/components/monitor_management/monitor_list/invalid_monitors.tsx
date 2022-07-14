@@ -49,6 +49,7 @@ export const InvalidMonitors = ({
           perPage: pageState.pageSize,
           total: invalidTotal ?? 0,
           syncErrors: null,
+          absoluteTotal: 0,
         },
         enablement: null,
         error: { monitorList: null, serviceLocations: null, enablement: null },

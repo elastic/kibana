@@ -9,10 +9,11 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { thresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
-import { ThresholdAlertState } from '../../signals/types';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { ThresholdAlertState } from '../../signals/types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
@@ -71,6 +72,10 @@ export const createThresholdAlertType = (
           tuple,
           wrapHits,
           ruleDataReader,
+          inputIndex,
+          runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         startedAt,
@@ -91,6 +96,10 @@ export const createThresholdAlertType = (
         version,
         wrapHits,
         ruleDataReader,
+        inputIndex,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
 
       return result;

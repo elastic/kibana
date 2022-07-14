@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { Observable } from 'rxjs';
+import { type Either, isLeft, left, right } from 'fp-ts/lib/Either';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { INDEX_PREFIX } from '../config';
-import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
+import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
-import { Dataset, IndexOptions } from './index_options';
-import { IResourceInstaller, ResourceInstaller } from './resource_installer';
+import type { Dataset, IndexOptions } from './index_options';
+import { type IResourceInstaller, ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
 /**
@@ -90,6 +91,7 @@ interface ConstructorOptions {
   isWriteEnabled: boolean;
   isWriterCacheEnabled: boolean;
   disabledRegistrationContexts: string[];
+  pluginStop$: Observable<void>;
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -110,6 +112,7 @@ export class RuleDataService implements IRuleDataService {
       logger: options.logger,
       disabledRegistrationContexts: options.disabledRegistrationContexts,
       isWriteEnabled: options.isWriteEnabled,
+      pluginStop$: options.pluginStop$,
     });
 
     this.installCommonResources = Promise.resolve(right('ok'));

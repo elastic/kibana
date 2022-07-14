@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
-import { UrlStateType } from '../url_state/constants';
+import type { IconType } from '@elastic/eui';
+import type { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
-import { UrlState } from '../url_state/types';
-import { SiemRouteType } from '../../utils/route/types';
-import { LinkCategories } from '../../links';
+import type { UrlState } from '../url_state/types';
+import type { SiemRouteType } from '../../utils/route/types';
+import type { LinkCategories } from '../../links';
 
 export interface TabNavigationComponentProps {
   pageName: string;
@@ -26,6 +26,7 @@ export interface NavGroupTab {
   name: string;
 }
 export enum SecurityNavGroupKey {
+  dashboards = 'dashboards',
   detect = 'detect',
   explore = 'explore',
   investigate = 'investigate',
@@ -57,6 +58,7 @@ export const securityNavKeys = [
   SecurityPageName.hosts,
   SecurityPageName.network,
   SecurityPageName.overview,
+  SecurityPageName.responseActions,
   SecurityPageName.rules,
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,

@@ -5,20 +5,30 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+  SPAN_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import {
+  getDocCountFieldForServiceDestinationStatistics,
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getLatencyFieldForServiceDestinationStatistics,
+  getProcessorEventForServiceDestinationStatistics,
+} from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 export async function getLatencyChartsForBackend({
   backendName,
+  spanName,
+  searchServiceDestinationMetrics,
   setup,
   start,
   end,
@@ -27,6 +37,8 @@ export async function getLatencyChartsForBackend({
   offset,
 }: {
   backendName: string;
+  spanName: string;
+  searchServiceDestinationMetrics: boolean;
   setup: Setup;
   start: number;
   end: number;
@@ -44,7 +56,11 @@ export async function getLatencyChartsForBackend({
 
   const response = await apmEventClient.search('get_latency_for_backend', {
     apm: {
-      events: [ProcessorEvent.metric],
+      events: [
+        getProcessorEventForServiceDestinationStatistics(
+          searchServiceDestinationMetrics
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -54,6 +70,10 @@ export async function getLatencyChartsForBackend({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
+            ...termQuery(SPAN_NAME, spanName || null),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(
+              searchServiceDestinationMetrics
+            ),
             { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
           ],
         },
@@ -68,14 +88,22 @@ export async function getLatencyChartsForBackend({
           aggs: {
             latency_sum: {
               sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                field: getLatencyFieldForServiceDestinationStatistics(
+                  searchServiceDestinationMetrics
+                ),
               },
             },
-            latency_count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
+            ...(searchServiceDestinationMetrics
+              ? {
+                  latency_count: {
+                    sum: {
+                      field: getDocCountFieldForServiceDestinationStatistics(
+                        searchServiceDestinationMetrics
+                      ),
+                    },
+                  },
+                }
+              : {}),
           },
         },
       },
@@ -86,7 +114,9 @@ export async function getLatencyChartsForBackend({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y: (bucket.latency_sum.value ?? 0) / (bucket.latency_count.value ?? 0),
+        y:
+          (bucket.latency_sum.value ?? 0) /
+          (bucket.latency_count?.value ?? bucket.doc_count),
       };
     }) ?? []
   );

@@ -9,26 +9,24 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { act } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
-import { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getCommandListMock } from '../../mocks';
 import { useConsoleManager } from './console_manager';
-import { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
+import type { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
 
 export const getNewConsoleRegistrationMock = (
   overrides: Partial<ConsoleRegistrationInterface> = {}
 ): ConsoleRegistrationInterface => {
   return {
     id: Math.random().toString(36),
-    title: 'Test console',
+    PageTitleComponent: () => <>{'Test console'}</>,
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
       commands: getCommandListMock(),
     },
-    onBeforeTerminate: jest.fn(),
     ...overrides,
   };
 };
@@ -48,9 +46,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     clickOnRegisterNewConsole: async () => {
       const currentRunningCount = renderResult.queryAllByTestId('showRunningConsole').length;
 
-      act(() => {
-        userEvent.click(renderResult.getByTestId('registerNewConsole'));
-      });
+      userEvent.click(renderResult.getByTestId('registerNewConsole'));
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('showRunningConsole')).toHaveLength(
@@ -64,29 +60,24 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
      * @param atIndex
      */
     openRunningConsole: async (atIndex: number = 0) => {
-      act(() => {
-        userEvent.click(renderResult.queryAllByTestId('showRunningConsole')[atIndex]);
-      });
+      const runningConsoleShowButton = renderResult.queryAllByTestId('showRunningConsole')[atIndex];
+
+      if (!runningConsoleShowButton) {
+        throw new Error(`No registered console found at index [${atIndex}]`);
+      }
+
+      userEvent.click(runningConsoleShowButton);
 
       await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(false);
+        expect(renderResult.getByTestId('consolePageOverlay'));
       });
     },
 
     hideOpenedConsole: async () => {
-      const hideConsoleButton = renderResult.queryByTestId('consolePopupHideButton');
+      userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
 
-      if (!hideConsoleButton) {
-        return;
-      }
-
-      userEvent.click(hideConsoleButton);
       await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(true);
+        expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
       });
     },
   };
@@ -102,7 +93,7 @@ const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
       <div data-test-subj="runningConsole">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow data-test-subj="runningConsoleTitle">
-            {registeredConsole.title}
+            {registeredConsole.id}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

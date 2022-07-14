@@ -8,9 +8,10 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
+
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
@@ -23,6 +24,7 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
+import { useUrlState } from '../../common/hooks/use_url_state';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -36,8 +38,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   setHeaderActionMenu,
 }) => {
   const { pathname } = useLocation();
-
   useInitSourcerer(getScopeFromPath(pathname));
+  useUrlState();
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date

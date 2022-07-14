@@ -8,6 +8,7 @@
 
 import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
+import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
@@ -15,7 +16,6 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
-import { InjectedPluginMetadata } from '../injected_metadata';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -26,6 +26,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 export interface PluginsServiceSetup {
   contracts: ReadonlyMap<string, unknown>;
 }
+
 /** @internal */
 export interface PluginsServiceStart {
   contracts: ReadonlyMap<string, unknown>;
@@ -44,7 +45,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
+  constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 

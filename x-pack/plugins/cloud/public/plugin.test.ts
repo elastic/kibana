@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/crypto-browser';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { CloudPlugin, CloudConfigType } from './plugin';
-import { firstValueFrom } from 'rxjs';
-import { Sha256 } from '@kbn/core/public/utils';
+import { CloudPlugin, type CloudConfigType } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -170,13 +170,10 @@ describe('Cloud Plugin', () => {
         expect(hashId1).not.toEqual(hashId2);
       });
 
-      test('user hash does not include cloudId when authenticated via Cloud SAML', async () => {
+      test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
         const { coreSetup } = await setupPlugin({
           config: { id: 'cloudDeploymentId' },
-          currentUserProps: {
-            username,
-            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
-          },
+          currentUserProps: { username, elastic_cloud_user: true },
         });
 
         expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();

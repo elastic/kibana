@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 
@@ -28,21 +28,21 @@ import {
   filterIndexPatterns,
   getCodeSignatureValue,
 } from './helpers';
-import { AlertData, Flattened } from './types';
-import {
-  ListOperatorTypeEnum as OperatorTypeEnum,
+import type { AlertData, Flattened } from './types';
+import type {
   EntriesArray,
   OsTypeArray,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { DataViewBase } from '@kbn/es-query';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { DataViewBase } from '@kbn/es-query';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '@kbn/lists-plugin/common/schemas/types/entry_match.mock';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '@kbn/lists-plugin/common/constants.mock';
-import { CodeSignature } from '../../../../common/ecs/file';
+import type { CodeSignature } from '../../../../common/ecs/file';
 import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,

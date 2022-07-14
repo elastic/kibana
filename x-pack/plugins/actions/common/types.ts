@@ -50,6 +50,10 @@ export interface ActionTypeExecutorResult<Data> {
   retry?: null | boolean | Date;
 }
 
+export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
+  error?: Error;
+};
+
 export function isActionTypeExecutorResult(
   result: unknown
 ): result is ActionTypeExecutorResult<unknown> {

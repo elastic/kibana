@@ -7,7 +7,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
@@ -50,7 +50,6 @@ import {
   syncDataForLayerId,
   updateStyleMeta,
 } from './data_request_actions';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -241,10 +240,6 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     // If the layer visibility is already what we want it to be, do nothing
     if (!layer || layer.isVisible() === makeVisible) {
       return;
-    }
-
-    if (!makeVisible) {
-      dispatch(updateTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -597,7 +592,6 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
     clearInspectorAdapters(layerGettingRemoved, getInspectorAdapters(getState()));
     dispatch({
       type: REMOVE_LAYER,

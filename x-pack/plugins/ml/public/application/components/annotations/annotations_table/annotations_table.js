@@ -709,7 +709,7 @@ class AnnotationsTableUI extends Component {
         <EuiInMemoryTable
           data-test-subj={'mlAnnotationsTable'}
           error={searchError}
-          className="eui-textOverflowWrap"
+          className="eui-textBreakWord"
           compressed={true}
           items={items}
           columns={columns}

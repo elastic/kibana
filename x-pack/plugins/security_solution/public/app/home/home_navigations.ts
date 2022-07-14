@@ -6,11 +6,8 @@
  */
 
 import * as i18n from '../translations';
-import {
-  SecurityNav,
-  SecurityNavGroup,
-  SecurityNavGroupKey,
-} from '../../common/components/navigation/types';
+import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
+import { SecurityNavGroupKey } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
   APP_DETECTION_RESPONSE_PATH,
@@ -32,6 +29,7 @@ import {
   APP_USERS_PATH,
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
+  APP_RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -168,9 +166,20 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
+  [SecurityPageName.responseActions]: {
+    id: SecurityPageName.responseActions,
+    name: i18n.RESPONSE_ACTIONS,
+    href: APP_RESPONSE_ACTIONS_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
 };
 
 export const securityNavGroup: SecurityNavGroup = {
+  [SecurityNavGroupKey.dashboards]: {
+    id: SecurityNavGroupKey.dashboards,
+    name: i18n.DASHBOARDS,
+  },
   [SecurityNavGroupKey.detect]: {
     id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,

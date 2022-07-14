@@ -5,32 +5,44 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import {
+  getDocCountFieldForServiceDestinationStatistics,
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getProcessorEventForServiceDestinationStatistics,
+} from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 export async function getThroughputChartsForBackend({
   backendName,
+  spanName,
   setup,
   start,
   end,
   environment,
   kuery,
+  searchServiceDestinationMetrics,
   offset,
 }: {
   backendName: string;
+  spanName: string;
   setup: Setup;
   start: number;
   end: number;
   environment: string;
   kuery: string;
+  searchServiceDestinationMetrics: boolean;
   offset?: string;
 }) {
   const { apmEventClient } = setup;
@@ -49,7 +61,11 @@ export async function getThroughputChartsForBackend({
 
   const response = await apmEventClient.search('get_throughput_for_backend', {
     apm: {
-      events: [ProcessorEvent.metric],
+      events: [
+        getProcessorEventForServiceDestinationStatistics(
+          searchServiceDestinationMetrics
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -59,6 +75,10 @@ export async function getThroughputChartsForBackend({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
+            ...termQuery(SPAN_NAME, spanName || null),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(
+              searchServiceDestinationMetrics
+            ),
             { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
           ],
         },
@@ -74,7 +94,13 @@ export async function getThroughputChartsForBackend({
           aggs: {
             throughput: {
               rate: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                ...(searchServiceDestinationMetrics
+                  ? {
+                      field: getDocCountFieldForServiceDestinationStatistics(
+                        searchServiceDestinationMetrics
+                      ),
+                    }
+                  : {}),
                 unit: 'minute',
               },
             },

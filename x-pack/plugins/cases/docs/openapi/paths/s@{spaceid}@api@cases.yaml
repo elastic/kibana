@@ -1,7 +1,10 @@
 post:
+  summary: Creates a case.
+  operationId: createCase
   description: >
-    Creates a case.
-    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana 
+    feature privileges, depending on the owner of the case you're creating.
   tags:
     - cases
     - kibana
@@ -19,6 +22,11 @@ post:
               type: object
               properties:
                 $ref: '../components/schemas/connector_properties.yaml'
+              required:
+                - fields
+                - id
+                - name
+                - type
             description:
               description: The description for the case.
               type: string
@@ -67,9 +75,12 @@ post:
      - url: https://localhost:5601
 
 delete:
+  summary: Deletes one or more cases.
+  operationId: deleteCase
   description: >
-    Deletes one or more cases.
-    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
+    You must have `all` privileges for the **Cases** feature in the 
+    **Management**, **Observability**, or **Security** section of the Kibana 
+    feature privileges, depending on the owner of the cases you're deleting.
   tags:
     - cases
     - kibana
@@ -82,7 +93,7 @@ delete:
       required: true
       schema:
         type: string
-      example: 'd4e7abb0-b462-11ec-9a8d-698504725a43'
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
   responses:
     '204':
       description: Indicates a successful call.
@@ -90,9 +101,12 @@ delete:
     - url: https://localhost:5601
 
 patch:
+  summary: Updates one or more cases.
+  operationId: updateCase
   description: >
-    Updates one or more cases.
-    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
+    You must have `all` privileges for the **Cases** feature in the 
+    **Management**, **Observability**, or **Security** section of the Kibana 
+    feature privileges, depending on the owner of the case you're updating.
   tags:
     - cases
     - kibana
@@ -115,6 +129,11 @@ patch:
                     type: object
                     properties:
                       $ref: '../components/schemas/connector_properties.yaml'
+                    required:
+                      - fields
+                      - id
+                      - name
+                      - type
                   description:
                     description: The description for the case.
                     type: string

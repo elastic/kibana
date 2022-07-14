@@ -6,10 +6,10 @@
  */
 
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
-import { Capabilities } from '@kbn/core/types';
+import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { AppLinkItems } from './types';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { AppLinkItems } from './types';
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
   useAppLinks,
@@ -27,9 +27,9 @@ const defaultAppLinks: AppLinkItems = [
     path: '/hosts',
     links: [
       {
-        id: SecurityPageName.hostsAuthentications,
-        title: 'Authentications',
-        path: `/hosts/authentications`,
+        id: SecurityPageName.hostsAnomalies,
+        title: 'Anomalies',
+        path: `/hosts/anomalies`,
       },
       {
         id: SecurityPageName.hostsEvents,
@@ -47,6 +47,25 @@ const mockCapabilities = {
   [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
   [SERVER_APP_ID]: { show: true },
 } as unknown as Capabilities;
+
+const fakePageId = 'fakePage';
+const testFeatureflag = 'detectionResponseEnabled';
+
+jest.mock('./app_links', () => {
+  const actual = jest.requireActual('./app_links');
+  const fakeLink = {
+    id: fakePageId,
+    title: 'test fake menu item',
+    path: 'test fake path',
+    hideWhenExperimentalKey: testFeatureflag,
+  };
+
+  return {
+    ...actual,
+    getAppLinks: () => [...actual.appLinks, fakeLink],
+    appLinks: [...actual.appLinks, fakeLink],
+  };
+});
 
 const licenseBasicMock = jest.fn().mockImplementation((arg: LicenseType) => arg === 'basic');
 const licensePremiumMock = jest.fn().mockReturnValue(true);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OsqueryTelemetryTaskConfig } from '../task';
+import type { OsqueryTelemetryTaskConfig } from '../task';
 import { createTelemetryPacksTaskConfig } from './packs';
 import { createTelemetrySavedQueriesTaskConfig } from './saved_queries';
 

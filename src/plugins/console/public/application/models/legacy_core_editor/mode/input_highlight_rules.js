@@ -39,7 +39,7 @@ export function InputHighlightRules() {
     start: mergeTokens(
       [
         { token: 'warning', regex: '#!.*$' },
-        { token: 'comment', regex: /^#.*$/ },
+        { include: 'comments' },
         { token: 'paren.lparen', regex: '{', next: 'json', push: true },
       ],
       addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),
@@ -88,9 +88,46 @@ export function InputHighlightRules() {
       addEOL(['url.param'], /([^&=]+)/, 'start-sql'),
       addEOL(['url.amp'], /(&)/, 'start-sql')
     ),
+    /**
+     * Each key in this.$rules considered to be a state in state machine. Regular expressions define the tokens for the current state, as well as the transitions into another state.
+     * See for more details https://cloud9-sdk.readme.io/docs/highlighting-rules#section-defining-states
+     * *
+     * Define a state for comments, these comment rules then can be included in other states. E.g. in 'start' and 'json' states by including { include: 'comments' }
+     * This will avoid duplicating the same rules in other states
+     */
+    comments: [
+      {
+        // Capture a line comment, indicated by #
+        token: ['comment.punctuation', 'comment.line'],
+        regex: /(#)(.*$)/,
+      },
+      {
+        // Begin capturing a block comment, indicated by /*
+        token: 'comment.punctuation',
+        regex: /\/\*/,
+        push: [
+          {
+            // Finish capturing a block comment, indicated by */
+            token: 'comment.punctuation',
+            regex: /\*\//,
+            next: 'pop',
+          },
+          {
+            defaultToken: 'comment.block',
+          },
+        ],
+      },
+      {
+        // Capture a line comment, indicated by //
+        token: ['comment.punctuation', 'comment.line'],
+        regex: /(\/\/)(.*$)/,
+      },
+    ],
   };
 
   addXJsonToRules(this);
+  // Add comment rules to json rule set
+  this.$rules.json.unshift({ include: 'comments' });
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();

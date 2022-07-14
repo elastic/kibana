@@ -2887,13 +2887,7 @@
           "text": "SavedObjectsClientContract"
         },
         ", request: ",
-        {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCoreHttpPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",
         "AnomalyDetectionAlertContext",
         "; name: string; isHealthy: boolean; } | undefined>; }; }"
@@ -3075,51 +3069,6 @@
               "number"
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
-        "id": "def-common.isPopulatedObject",
-        "type": "Function",
-        "tags": [],
-        "label": "isPopulatedObject",
-        "description": [],
-        "signature": [
-          "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
-        ],
-        "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.isPopulatedObject.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "arg",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.isPopulatedObject.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "requiredAttributes",
-            "description": [],
-            "signature": [
-              "U[]"
-            ],
-            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
             "deprecated": false,
             "isRequired": true
           }

@@ -10,12 +10,16 @@ import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { HttpService, InternalHttpServicePreboot, InternalHttpServiceSetup } from '../../http';
-import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import {
+  HttpService,
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { CapabilitiesService, CapabilitiesSetup } from '..';
-import { createHttpServer } from '../../http/test_utils';
 
 const coreId = Symbol('core');
 

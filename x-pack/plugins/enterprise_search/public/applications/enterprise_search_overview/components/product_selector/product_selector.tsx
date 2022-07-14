@@ -24,7 +24,6 @@ import { Chat } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
-  KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
   NO_DATA_PAGE_TEMPLATE_PROPS,
 } from '@kbn/kibana-react-plugin/public';
@@ -38,6 +37,7 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
 import { ElasticsearchCard } from '../elasticsearch_card';
+import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -152,37 +152,40 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     />
   );
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
+    <EnterpriseSearchOverviewPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
-      <EuiText textAlign="center">
-        <KibanaPageTemplateSolutionNavAvatar
-          name="Enterprise Search"
-          iconType="logoEnterpriseSearch"
-          size="xxl"
-        />
-
-        <EuiSpacer />
-
-        <h1>
-          {i18n.translate('xpack.enterpriseSearch.overview.heading', {
-            defaultMessage: 'Welcome to Elastic Enterprise Search',
-          })}
-        </h1>
-        <p>
-          {config.host
-            ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                defaultMessage: 'Add search to your app or organization.',
-              })
-            : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
-                defaultMessage: 'Choose a product to set up and get started.',
+      <EuiFlexGroup responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <KibanaPageTemplateSolutionNavAvatar
+            name="Enterprise Search"
+            iconType="logoEnterpriseSearch"
+            size="xxl"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              {i18n.translate('xpack.enterpriseSearch.overview.heading', {
+                defaultMessage: 'Welcome to Elastic Enterprise Search',
               })}
-        </p>
-      </EuiText>
+            </h1>
+            <p>
+              {config.host
+                ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
+                    defaultMessage: 'Add search to your app or organization.',
+                  })
+                : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
+                    defaultMessage: 'Choose a product to set up and get started.',
+                  })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="xxl" />
       {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
       <Chat />
-    </KibanaPageTemplate>
+    </EnterpriseSearchOverviewPageTemplate>
   );
 };

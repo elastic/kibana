@@ -12,6 +12,8 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import { EuiToolTip } from '@elastic/eui';
 
+import './_annotation.scss';
+
 export class Annotation extends Component {
   constructor(props) {
     super(props);

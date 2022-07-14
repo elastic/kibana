@@ -9,3 +9,5 @@ export * from './use_url_params';
 export * from './use_breadcrumbs';
 export * from '../../../hooks/use_breakpoints';
 export * from './use_service_allowed';
+export * from './use_enablement';
+export * from './use_locations';

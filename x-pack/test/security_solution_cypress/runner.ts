@@ -57,6 +57,15 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   });
 }
 
+/**
+ * Takes total CI jobs number(totalCiJobs) between which tests will be split and sequential number of the job(ciJobNumber).
+ * This helper will split file list cypress integrations into chunks, and run integrations in chunk which match ciJobNumber
+ * If both totalCiJobs === 1 && ciJobNumber === 1, this function will run all existing tests, without splitting them
+ * @param context FtrProviderContext
+ * @param {number} totalCiJobs - total number of jobs between which tests will be split
+ * @param {number} ciJobNumber - number of job
+ * @returns
+ */
 export async function SecuritySolutionCypressCliTestRunnerCI(
   context: FtrProviderContext,
   totalCiJobs: number,

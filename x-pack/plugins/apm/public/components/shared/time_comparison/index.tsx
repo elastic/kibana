@@ -8,9 +8,10 @@
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -29,7 +30,7 @@ const PrependContainer = euiStyled.div`
   align-items: center;
   background-color: ${({ theme }) =>
     theme.eui.euiFormInputGroupLabelBackground};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export function TimeComparison() {
@@ -40,6 +41,9 @@ export function TimeComparison() {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
+  const location = useLocation();
+  const apmRouter = useApmRouter();
+
   const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
     useAnomalyDetectionJobsContext();
   const { core } = useApmPluginContext();
@@ -48,11 +52,20 @@ export function TimeComparison() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
+
   const comparisonOptions = useMemo(() => {
+    const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
+    // Only show the "Expected bounds" option in Overview and Transactions tabs
+    const showExpectedBoundsForThisTab = matchingRoutes.some(
+      (d) =>
+        d.path === '/services/{serviceName}/overview' ||
+        d.path === '/services/{serviceName}/transactions'
+    );
+
     const timeComparisonOptions = getComparisonOptions({
       start,
       end,
-      canGetJobs,
+      showSelectedBoundsOption: showExpectedBoundsForThisTab && canGetJobs,
       anomalyDetectionJobsStatus,
       anomalyDetectionJobsData,
       preferredEnvironment,
@@ -66,6 +79,8 @@ export function TimeComparison() {
     start,
     end,
     preferredEnvironment,
+    apmRouter,
+    location.pathname,
   ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(

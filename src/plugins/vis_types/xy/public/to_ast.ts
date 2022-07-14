@@ -7,12 +7,13 @@
  */
 
 import moment from 'moment';
-
+import { Position } from '@elastic/charts';
 import {
   VisToExpressionAst,
   getVisSchemas,
   DateHistogramParams,
   HistogramParams,
+  LegendSize,
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
@@ -32,7 +33,6 @@ import {
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
-import { getEsaggsFn } from './to_ast_esaggs';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
 
@@ -203,6 +203,11 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       }
     }
   });
+  let legendSize = vis.params.legendSize;
+
+  if (vis.params.legendPosition === Position.Top || vis.params.legendPosition === Position.Bottom) {
+    legendSize = LegendSize.AUTO;
+  }
 
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
     type: vis.type.name as XyVisType,
@@ -210,7 +215,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     addTimeMarker: vis.params.addTimeMarker,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    legendSize: vis.params.legendSize,
+    legendSize,
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,
@@ -238,7 +243,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
   });
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+  const ast = buildExpression([visTypeXy]);
 
   return ast.toAst();
 };

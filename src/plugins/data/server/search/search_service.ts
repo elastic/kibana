@@ -30,6 +30,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -41,7 +42,6 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { IndexPatternsServiceStart } from '../data_views';
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
@@ -116,7 +116,7 @@ export interface SearchServiceSetupDependencies {
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
   taskManager?: TaskManagerStartContract;
 }
 
@@ -248,7 +248,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerType(esRawResponse);
     expressions.registerType(eqlRawResponse);
 
-    const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+    });
 
     firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
@@ -275,13 +277,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.sessionService.start(core, { taskManager });
     }
 
+    const aggs = this.aggsService.start({
+      fieldFormats,
+      uiSettings,
+      indexPatterns,
+    });
+
     this.asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({
-        fieldFormats,
-        uiSettings,
-        indexPatterns,
-      }),
+      aggs,
       searchAsInternalUser: this.searchAsInternalUser,
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
@@ -289,11 +293,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
-          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
+          const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
             savedObjectsClient,
             esClient.asCurrentUser
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+          const aggsStart = await aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser);
 
           // cache ui settings, only including items which are explicitly needed by SearchSource
           const uiSettingsCache = pick(
@@ -302,6 +307,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           );
 
           const searchSourceDependencies: SearchSourceDependencies = {
+            aggs: aggsStart,
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,

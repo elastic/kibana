@@ -18,7 +18,9 @@ export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;
   getConfig: <T = any>(key: string) => T;
   getFieldFormatsStart: () => Pick<FieldFormatsStartCommon, 'deserialize' | 'getDefaultInstance'>;
-  isDefaultTimezone: () => boolean;
+  aggExecutionContext?: {
+    shouldDetectTimeZone?: boolean;
+  };
 }
 
 /** @internal */

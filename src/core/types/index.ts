@@ -14,4 +14,4 @@ export * from './capabilities';
 export * from './app_category';
 export * from './ui_settings';
 export * from './saved_objects';
-export type { KibanaExecutionContext } from './execution_context';
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';

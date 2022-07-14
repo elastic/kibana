@@ -90,6 +90,9 @@ export default async function ({ readConfigFile }) {
       integrations: {
         pathname: '/app/integrations',
       },
+      kibana_overview: {
+        pathname: '/app/kibana_overview',
+      },
     },
     junit: {
       reportName: 'Chrome UI Functional Tests',
@@ -207,6 +210,36 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['context-encoded-param'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        similar_index: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['similar-index'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        similar_index_two: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['similar-index-two'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },

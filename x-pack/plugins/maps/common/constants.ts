@@ -195,6 +195,7 @@ export enum LAYER_STYLE_TYPE {
   VECTOR = 'VECTOR',
   HEATMAP = 'HEATMAP',
   TILE = 'TILE',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
 }
 
 export enum COLOR_MAP_TYPE {
@@ -288,6 +289,7 @@ export enum DATA_MAPPING_FUNCTION {
   INTERPOLATE = 'INTERPOLATE',
   PERCENTILES = 'PERCENTILES',
 }
+
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | string[] | number | boolean | undefined | null;

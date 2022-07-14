@@ -14,17 +14,19 @@ high-level visibility into how a service is performing across your infrastructur
 
 [discrete]
 [[service-time-comparison]]
-=== Time series comparison
+=== Time series and expected bounds comparison
 
-Comparing how a service performs relative to a previous time frame can offer additional insight into
-the health of your services. For example, has latency been slowly increasing over time, or did the service
-experience a sudden spike--enabling a time series comparison can provide the answer.
+For insight into the health of your services, you can compare how a service 
+performs relative to a previous time frame or to the expected bounds from the 
+corresponding {anomaly-job}. For example, has latency been slowly increasing 
+over time, did the service experience a sudden spike, is the throughput similar 
+to what the {ml} job expects – enabling a comparison can provide the answer.
 
 [role="screenshot"]
-image::apm/images/time-series-comparison.png[Time series comparison]
+image::apm/images/time-series-expected-bounds-comparison.png[Time series and expected bounds comparison]
 
-Select the *Comparison* box to enable or disable time series comparison.
-The time comparison options are based on the selected time filter range:
+Select the *Comparison* box to apply a time-based or expected bounds comparison.
+The time-based comparison options are based on the selected time filter range:
 
 [options="header"]
 |====
@@ -39,6 +41,10 @@ The time comparison options are based on the selected time filter range:
 |> 7 days
 |An identical amount of time immediately before the selected time range
 |====
+
+You can use the expected bounds comparison if {ml-jobs} exist in your selected 
+environment and you have 
+{ml-docs}/setup.html#kib-visibility-spaces[access to the {ml-features}].
 
 [discrete]
 [[service-latency]]

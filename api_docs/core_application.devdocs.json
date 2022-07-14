@@ -1596,13 +1596,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/core/public/application/types.ts",
@@ -1829,6 +1823,21 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToUrlOptions.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false

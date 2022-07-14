@@ -7,6 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 interface ClientOptions {
   node: string;
@@ -33,6 +34,7 @@ interface Transaction {
   id: string;
   name: string;
   type: string;
+  duration: { us: number };
 }
 
 export interface Document {
@@ -52,6 +54,33 @@ export interface Document {
   transaction: Transaction;
 }
 
+const addBooleanFilter = (filter: { field: string; value: string }): QueryDslQueryContainer => {
+  return {
+    bool: {
+      should: [
+        {
+          match_phrase: {
+            [filter.field]: filter.value,
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};
+
+const addRangeFilter = (range: { startTime: string; endTime: string }): QueryDslQueryContainer => {
+  return {
+    range: {
+      '@timestamp': {
+        format: 'strict_date_optional_time',
+        gte: range.startTime,
+        lte: range.endTime,
+      },
+    },
+  };
+};
+
 export function initClient(options: ClientOptions) {
   const client = new Client({
     node: options.node,
@@ -62,14 +91,42 @@ export function initClient(options: ClientOptions) {
   });
 
   return {
-    async getTransactions(buildId: string, journeyName: string) {
+    async getKibanaServerTransactions(
+      buildId: string,
+      journeyName: string,
+      range?: { startTime: string; endTime: string }
+    ) {
+      const filters = [
+        { field: 'transaction.type', value: 'request' },
+        { field: 'processor.event', value: 'transaction' },
+        { field: 'labels.testBuildId', value: buildId },
+        { field: 'labels.journeyName', value: journeyName },
+      ];
+      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+      if (range) {
+        queryFilters.push(addRangeFilter(range));
+      }
+      return await this.getTransactions(queryFilters);
+    },
+    async getFtrTransactions(buildId: string, journeyName: string) {
+      const filters = [
+        { field: 'service.name', value: 'functional test runner' },
+        { field: 'processor.event', value: 'transaction' },
+        { field: 'labels.testBuildId', value: buildId },
+        { field: 'labels.journeyName', value: journeyName },
+        { field: 'labels.performancePhase', value: 'TEST' },
+      ];
+      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+      return await this.getTransactions(queryFilters);
+    },
+    async getTransactions(queryFilters: QueryDslQueryContainer[]) {
       const result = await client.search<Document>({
         body: {
           track_total_hits: true,
           sort: [
             {
               '@timestamp': {
-                order: 'desc',
+                order: 'asc',
                 unmapped_type: 'boolean',
               },
             },
@@ -83,56 +140,7 @@ export function initClient(options: ClientOptions) {
               filter: [
                 {
                   bool: {
-                    filter: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'transaction.type': 'request',
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'processor.event': 'transaction',
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'labels.testBuildId': buildId,
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'labels.journeyName': journeyName,
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                    ],
+                    filter: queryFilters,
                   },
                 },
               ],

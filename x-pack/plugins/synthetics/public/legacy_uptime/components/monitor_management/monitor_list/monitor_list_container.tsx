@@ -39,8 +39,8 @@ export const MonitorListContainer = ({
     dispatchPageAction({ type: 'refresh' });
   }, [dispatchPageAction]);
 
-  useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
-  useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'monitors' });
+  useTrackPageview({ app: 'uptime', path: 'monitors', delay: 15000 });
 
   const monitorList = useSelector(monitorManagementListSelector);
 

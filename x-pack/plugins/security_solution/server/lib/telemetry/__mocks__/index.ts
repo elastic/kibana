@@ -6,25 +6,30 @@
  */
 
 import moment from 'moment';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
-import { SecurityTelemetryTaskConfig } from '../task';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
+import type { SecurityTelemetryTaskConfig } from '../task';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
+import { stubEndpointMetricsResponse } from './metrics';
 
 export const createMockTelemetryEventsSender = (
-  enableTelemetry?: boolean
+  enableTelemetry?: boolean,
+  canConnect?: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
   return {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
     getClusterID: jest.fn(),
+    getTelemetryUsageCluster: jest.fn(),
     fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
+    isTelemetryServicesReachable: jest.fn().mockReturnValue(canConnect ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
     sendOnDemand: jest.fn(),
@@ -64,8 +69,13 @@ const stubLicenseInfo = {
 };
 
 export const createMockTelemetryReceiver = (
-  diagnosticsAlert?: unknown
+  diagnosticsAlert?: unknown,
+  emptyTimelineTree?: boolean
 ): jest.Mocked<TelemetryReceiver> => {
+  const processTreeResponse = emptyTimelineTree
+    ? Promise.resolve([])
+    : Promise.resolve(Promise.resolve(stubProcessTree()));
+
   return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
@@ -73,7 +83,7 @@ export const createMockTelemetryReceiver = (
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
     fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
-    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
@@ -82,7 +92,7 @@ export const createMockTelemetryReceiver = (
     fetchTimelineEndpointAlerts: jest
       .fn()
       .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
-    buildProcessTree: jest.fn().mockReturnValue(Promise.resolve(stubProcessTree())),
+    buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };

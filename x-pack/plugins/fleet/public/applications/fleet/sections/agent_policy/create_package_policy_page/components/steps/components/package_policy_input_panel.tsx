@@ -20,7 +20,9 @@ import {
 } from '@elastic/eui';
 
 import type {
+  NewPackagePolicy,
   NewPackagePolicyInput,
+  PackageInfo,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
@@ -30,6 +32,7 @@ import { hasInvalidButRequiredVar, countValidationErrors } from '../../../servic
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
+import { useDataStreamId } from './hooks';
 
 const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
   &&& {
@@ -38,32 +41,39 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
   }
 `;
 
-const shouldShowStreamsByDefault = (
+export const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
-  packagePolicyInput: NewPackagePolicyInput
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
+  packagePolicyInput: NewPackagePolicyInput,
+  defaultDataStreamId?: string
 ): boolean => {
+  if (!packagePolicyInput.enabled) {
+    return false;
+  }
+
   return (
-    packagePolicyInput.enabled &&
-    (hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
-      Boolean(
-        packageInputStreams.find(
-          (stream) =>
-            stream.enabled &&
-            hasInvalidButRequiredVar(
-              stream.vars,
-              packagePolicyInput.streams.find(
-                (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
-              )?.vars
-            )
+    hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
+    packageInputStreams.some(
+      (stream) =>
+        stream.enabled &&
+        hasInvalidButRequiredVar(
+          stream.vars,
+          packagePolicyInput.streams.find(
+            (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
+          )?.vars
         )
-      ))
+    ) ||
+    packagePolicyInput.streams.some((stream) => {
+      return defaultDataStreamId && stream.id && stream.id === defaultDataStreamId;
+    })
   );
 };
 
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
+  packageInfo: PackageInfo;
+  packagePolicy: NewPackagePolicy;
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>;
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
@@ -71,15 +81,23 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 }> = memo(
   ({
     packageInput,
+    packageInfo,
     packageInputStreams,
     packagePolicyInput,
+    packagePolicy,
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
   }) => {
+    const defaultDataStreamId = useDataStreamId();
     // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
-      shouldShowStreamsByDefault(packageInput, packageInputStreams, packagePolicyInput)
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
+      shouldShowStreamsByDefault(
+        packageInput,
+        packageInputStreams,
+        packagePolicyInput,
+        defaultDataStreamId
+      )
     );
 
     // Errors state
@@ -214,6 +232,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
+                  packageInfo={packageInfo}
+                  packagePolicy={packagePolicy}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicyInputStream={(

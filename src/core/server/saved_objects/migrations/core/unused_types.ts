@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Types that are no longer registered and need to be removed
@@ -35,13 +35,15 @@ export const REMOVED_TYPES: string[] = [
   'timelion-sheet',
   // Removed in 8.3 https://github.com/elastic/kibana/issues/127745
   'ui-counter',
+  // Deprecated, no longer used since 7.13 https://github.com/elastic/kibana/pull/94923/files
+  'application_usage_transactional',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
 // the upgraded index.
-export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
+export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
     must_not: [
       ...REMOVED_TYPES.map((typeName) => ({

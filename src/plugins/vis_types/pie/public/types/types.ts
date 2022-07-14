@@ -14,7 +14,7 @@ export interface Dimension {
   accessor: number;
   format: {
     id?: string;
-    params?: SerializedFieldFormat<object>;
+    params?: SerializedFieldFormat;
   };
 }
 

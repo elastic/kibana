@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { TagList, TagListProps } from '.';
 import { getFormMock } from '../__mock__/form';
-import { TestProviders } from '../../common/mock';
+import { readCasesPermissions, TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -33,7 +33,6 @@ jest.mock('@elastic/eui', () => {
 });
 const onSubmit = jest.fn();
 const defaultProps: TagListProps = {
-  userCanCrud: true,
   isLoading: false,
   onSubmit,
   tags: [],
@@ -48,8 +47,8 @@ describe('TagList ', () => {
     (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
-      tags: sampleTags,
-      fetchTags,
+      data: sampleTags,
+      refetch: fetchTags,
     }));
   });
 
@@ -109,10 +108,9 @@ describe('TagList ', () => {
   });
 
   it('does not render when the user does not have write permissions', () => {
-    const props = { ...defaultProps, userCanCrud: false };
     const wrapper = mount(
-      <TestProviders>
-        <TagList {...props} />
+      <TestProviders permissions={readCasesPermissions()}>
+        <TagList {...defaultProps} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="tag-list-edit"]`).exists()).toBeFalsy();

@@ -1846,6 +1846,26 @@
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.onEditorDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditorDidMount",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.OnExpressionInputEditorDidMount",
+                "text": "OnExpressionInputEditorDidMount"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2609,6 +2629,39 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.OnExpressionInputEditorDidMount",
+        "type": "Type",
+        "tags": [],
+        "label": "OnExpressionInputEditorDidMount",
+        "description": [],
+        "signature": [
+          "(editor: ",
+          "editor",
+          ".IStandaloneCodeEditor | null) => void"
+        ],
+        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OnExpressionInputEditorDidMount.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "editor",
+            "description": [],
+            "signature": [
+              "editor",
+              ".IStandaloneCodeEditor | null"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.PluginServiceFactory",
         "type": "Type",
         "tags": [],
@@ -2785,13 +2838,7 @@
         "signature": [
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">"
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/default_theme.ts",

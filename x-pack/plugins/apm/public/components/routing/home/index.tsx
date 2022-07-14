@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet, Route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
@@ -21,33 +21,42 @@ import { TraceOverview } from '../../app/trace_overview';
 import { TraceExplorer } from '../../app/trace_explorer';
 import { TopTracesOverview } from '../../app/top_traces_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
-import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { RedirectTo } from '../redirect_to';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+import { BackendDetailOperations } from '../../app/backend_detail_operations';
+import { BackendDetailView } from '../../app/backend_detail_view';
+import { RedirectPathBackendDetailView } from './redirect_path_backend_detail_view';
+import { RedirectBackendsToBackendDetailOverview } from './redirect_backends_to_backend_detail_view';
+import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function page<
   TPath extends string,
-  TChildren extends Record<string, Route> | undefined = undefined
+  TChildren extends Record<string, Route> | undefined = undefined,
+  TParams extends t.Type<any> | undefined = undefined
 >({
   path,
   element,
   children,
   title,
   showServiceGroupSaveButton = false,
+  params,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   children?: TChildren;
   title: string;
   showServiceGroupSaveButton?: boolean;
+  params?: TParams;
 }): Record<
   TPath,
   {
     element: React.ReactElement<any, any>;
-  } & (TChildren extends Record<string, Route> ? { children: TChildren } : {})
+  } & (TChildren extends Record<string, Route> ? { children: TChildren } : {}) &
+    (TParams extends t.Type<any> ? { params: TParams } : {})
 > {
   return {
     [path]: {
@@ -62,6 +71,7 @@ function page<
         </Breadcrumb>
       ),
       children,
+      params,
     },
   } as any;
 }
@@ -133,9 +143,20 @@ export const DependenciesInventoryTitle = i18n.translate(
   }
 );
 
+export const DependenciesOperationsTitle = i18n.translate(
+  'xpack.apm.views.dependenciesOperations.title',
+  {
+    defaultMessage: 'Operations',
+  }
+);
+
 export const home = {
   '/': {
-    element: <Outlet />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <Outlet />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.type({
       query: t.intersection([
         environmentRt,
@@ -148,6 +169,10 @@ export const home = {
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
+          page: toNumberRt,
+          pageSize: toNumberRt,
+          sortField: t.string,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
         offsetRt,
       ]),
@@ -217,8 +242,10 @@ export const home = {
           },
         },
       }),
-      '/backends': {
-        element: <Outlet />,
+      ...page({
+        path: '/backends/inventory',
+        title: DependenciesInventoryTitle,
+        element: <BackendInventory />,
         params: t.partial({
           query: t.intersection([
             t.type({
@@ -227,28 +254,60 @@ export const home = {
             offsetRt,
           ]),
         }),
-        children: {
-          '/backends/{backendName}/overview': {
-            element: <RedirectToBackendOverviewRouteView />,
-            params: t.type({
-              path: t.type({
-                backendName: t.string,
-              }),
-            }),
-          },
-          '/backends/overview': {
-            element: <BackendDetailOverview />,
-            params: t.type({
-              query: t.type({
-                backendName: t.string,
-              }),
-            }),
-          },
-          ...page({
-            path: '/backends',
-            title: DependenciesInventoryTitle,
-            element: <BackendInventory />,
+      }),
+      '/backends/{backendName}/overview': {
+        element: <RedirectPathBackendDetailView />,
+        params: t.type({
+          path: t.type({
+            backendName: t.string,
           }),
+        }),
+      },
+      '/backends': {
+        element: <Outlet />,
+        params: t.partial({
+          query: t.intersection([
+            t.type({
+              comparisonEnabled: toBooleanRt,
+              backendName: t.string,
+            }),
+            offsetRt,
+          ]),
+        }),
+        children: {
+          '/backends': {
+            element: (
+              <BackendDetailView>
+                <Outlet />
+              </BackendDetailView>
+            ),
+            children: {
+              '/backends/operations': {
+                element: <BackendDetailOperations />,
+              },
+
+              '/backends/operation': {
+                params: t.type({
+                  query: t.intersection([
+                    t.type({
+                      spanName: t.string,
+                    }),
+                    t.partial({
+                      sampleRangeFrom: toNumberRt,
+                      sampleRangeTo: toNumberRt,
+                    }),
+                  ]),
+                }),
+                element: <BackendOperationDetailView />,
+              },
+              '/backends/overview': {
+                element: <BackendDetailOverview />,
+              },
+              '/backends': {
+                element: <RedirectBackendsToBackendDetailOverview />,
+              },
+            },
+          },
         },
       },
       '/': {

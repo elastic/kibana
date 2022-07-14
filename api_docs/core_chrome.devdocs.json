@@ -171,7 +171,15 @@
               "\nCustom content to occur below the list of links"
             ],
             "signature": [
-              "((element: HTMLDivElement) => () => void) | undefined"
+              "((element: HTMLDivElement, menuActions: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreChromePluginApi",
+                "section": "def-public.ChromeHelpMenuActions",
+                "text": "ChromeHelpMenuActions"
+              },
+              ") => () => void) | undefined"
             ],
             "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
@@ -185,6 +193,26 @@
                 "description": [],
                 "signature": [
                   "HTMLDivElement"
+                ],
+                "path": "src/core/public/chrome/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ChromeHelpExtension.content.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "menuActions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreChromePluginApi",
+                    "section": "def-public.ChromeHelpMenuActions",
+                    "text": "ChromeHelpMenuActions"
+                  }
                 ],
                 "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
@@ -453,6 +481,34 @@
             ],
             "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ChromeHelpMenuActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeHelpMenuActions",
+        "description": [],
+        "path": "src/core/public/chrome/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeHelpMenuActions.hideHelpMenu",
+            "type": "Function",
+            "tags": [],
+            "label": "hideHelpMenu",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/public/chrome/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1868,9 +1924,7 @@
         "signature": [
           "React.HTMLAttributes<HTMLElement> & ",
           "CommonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: ",
-          "EuiLinkColor",
-          " | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"subdued\" | \"primary\" | \"accent\" | \"success\" | \"warning\" | \"danger\" | \"text\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,

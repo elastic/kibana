@@ -19,7 +19,6 @@ import { hostDetailsPagePath } from './types';
 const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.hosts}|` +
-  `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +

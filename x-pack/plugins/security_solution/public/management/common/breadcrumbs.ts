@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, EVENT_FILTERS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from './translations';
-import { AdministrationRouteSpyState } from '../../common/utils/route/types';
-import { HOST_ISOLATION_EXCEPTIONS, BLOCKLIST } from '../../app/translations';
+import type { AdministrationRouteSpyState } from '../../common/utils/route/types';
+import { HOST_ISOLATION_EXCEPTIONS, BLOCKLIST, RESPONSE_ACTIONS } from '../../app/translations';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
@@ -18,6 +18,7 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.eventFilters]: EVENT_FILTERS_TAB,
   [AdministrationSubTab.hostIsolationExceptions]: HOST_ISOLATION_EXCEPTIONS,
   [AdministrationSubTab.blocklist]: BLOCKLIST,
+  [AdministrationSubTab.responseActions]: RESPONSE_ACTIONS,
 };
 
 export function getTrailingBreadcrumbs(params: AdministrationRouteSpyState): ChromeBreadcrumb[] {

@@ -31,14 +31,6 @@ export type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
   IScopedClusterClient,
-  // responses
-  SearchResponse,
-  CountResponse,
-  ShardsInfo,
-  ShardsResponse,
-  GetResponse,
-  DeleteDocumentResponse,
-  ElasticsearchErrorDetails,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
@@ -47,7 +39,6 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  UnauthorizedError,
 } from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
 export { pollEsNodesVersion } from './version_check/ensure_es_version';
@@ -56,3 +47,5 @@ export {
   isNotFoundFromUnsupportedServer,
   PRODUCT_RESPONSE_HEADER,
 } from './supported_server_response_check';
+export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
+export type { ElasticsearchRequestHandlerContext } from './elasticsearch_route_handler_context';

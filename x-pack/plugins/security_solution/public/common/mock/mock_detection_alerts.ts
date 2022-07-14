@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
-import { TimelineNonEcsData } from '../../../common/search_strategy';
+import type { Ecs } from '../../../common/ecs';
+import type { TimelineNonEcsData } from '../../../common/search_strategy';
 
 export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
   ...{
@@ -22,6 +22,7 @@ export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
       category: ['Access'],
       module: ['nginx'],
       severity: [3],
+      kind: ['signal'],
     },
     source: {
       ip: ['192.168.0.1'],

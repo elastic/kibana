@@ -26,6 +26,7 @@ export const MethodEs: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
+      title="Elasticsearch"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodElasticsearch.description',
         {
@@ -36,6 +37,7 @@ export const MethodEs: React.FC = () => {
       docsUrl="#"
       type="elasticsearch"
       onNameChange={(value: string) => onNameChange(value)}
+      onSubmit={() => null}
     >
       <EuiPanel
         color="subdued"

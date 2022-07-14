@@ -8,6 +8,7 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
@@ -16,9 +17,11 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
+    datatableUtilities: createDatatableUtilitiesMock(),
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
@@ -71,7 +74,7 @@ describe('#toExpression', () => {
     expect(
       xyVisualization.toExpression(
         {
-          legend: { position: Position.Bottom, isVisible: true },
+          legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
@@ -156,13 +159,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(
-      (expression.chain[0].arguments.axisTitlesVisibilitySettings[0] as Ast).chain[0].arguments
-    ).toEqual({
-      x: [true],
-      yLeft: [true],
-      yRight: [true],
-    });
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showTitle: [true],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showTitle: [true],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showTitle: [true],
+      })
+    );
   });
 
   it('should generate an expression without x accessor', () => {
@@ -241,9 +254,6 @@ describe('#toExpression', () => {
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
-    expect(expression.chain[0].arguments.xTitle).toEqual(['']);
-    expect(expression.chain[0].arguments.yTitle).toEqual(['']);
-    expect(expression.chain[0].arguments.yRightTitle).toEqual(['']);
     expect(
       (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
     ).toEqual([
@@ -276,13 +286,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(
-      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
-    ).toEqual({
-      x: [true],
-      yLeft: [true],
-      yRight: [true],
-    });
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showLabels: [true],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showLabels: [true],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showLabels: [true],
+      })
+    );
   });
 
   it('should default the tick labels orientation settings to 0', () => {
@@ -306,11 +326,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.labelsOrientation[0] as Ast).chain[0].arguments).toEqual({
-      x: [0],
-      yLeft: [0],
-      yRight: [0],
-    });
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        labelsOrientation: [0],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        labelsOrientation: [0],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        labelsOrientation: [0],
+      })
+    );
   });
 
   it('should default the gridlines visibility settings to true', () => {
@@ -334,13 +366,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(
-      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
-    ).toEqual({
-      x: [true],
-      yLeft: [true],
-      yRight: [true],
-    });
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showGridLines: [true],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showGridLines: [true],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showGridLines: [true],
+      })
+    );
   });
 
   it('should correctly report the valueLabels visibility settings', () => {
@@ -365,6 +407,94 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
     expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('show');
+  });
+
+  it('should set legend size for outside legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Left, isVisible: true, legendSize: LegendSize.SMALL },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
+    ).toEqual('small');
+  });
+
+  it('should use auto legend size for bottom/top legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Bottom,
+          isVisible: true,
+          isInside: false,
+          legendSize: LegendSize.SMALL,
+        },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]).toBe(
+      LegendSize.AUTO
+    );
+  });
+
+  it('should ignore legend size for inside legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Left,
+          isVisible: true,
+          isInside: true,
+          legendSize: LegendSize.SMALL,
+        },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
+    ).toBeUndefined();
   });
 
   it('should compute the correct series color fallback based on the layer type', () => {
@@ -397,8 +527,9 @@ describe('#toExpression', () => {
     ) as Ast;
 
     function getYConfigColorForLayer(ast: Ast, index: number) {
-      return ((ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.yConfig[0] as Ast)
-        .chain[0].arguments.color;
+      return (
+        (ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.decorations[0] as Ast
+      ).chain[0].arguments.color;
     }
     expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
     expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);

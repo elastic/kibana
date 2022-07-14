@@ -10,12 +10,12 @@ exports[`FeatureProperties should render 1`] = `
       key="prop1"
     >
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
       >
         prop1
       </td>
       <td
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
       >
         foobar1
       </td>
@@ -26,12 +26,12 @@ exports[`FeatureProperties should render 1`] = `
       key="prop2"
     >
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
       >
         prop2
       </td>
       <td
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
       >
         foobar2
       </td>
@@ -64,12 +64,12 @@ exports[`FeatureProperties should show filter button for filterable properties 1
       key="prop1"
     >
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
       >
         prop1
       </td>
       <td
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
       >
         foobar1
       </td>
@@ -92,12 +92,12 @@ exports[`FeatureProperties should show filter button for filterable properties 1
       key="prop2"
     >
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
       >
         prop2
       </td>
       <td
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
       >
         foobar2
       </td>
@@ -117,12 +117,12 @@ exports[`FeatureProperties should show view actions button when there are availa
       key="prop1"
     >
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
       >
         prop1
       </td>
       <td
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
       >
         foobar1
       </td>
@@ -160,12 +160,12 @@ exports[`FeatureProperties should show view actions button when there are availa
       key="prop2"
     >
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
       >
         prop2
       </td>
       <td
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
       >
         foobar2
       </td>

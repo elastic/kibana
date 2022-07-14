@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
-import { UsersKpiProps } from './types';
+import type { UsersKpiProps } from './types';
 
-import { HostsKpiAuthentications } from '../../../hosts/components/kpi_hosts/authentications';
+import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { CallOutSwitcher } from '../../../common/components/callouts';
@@ -61,7 +61,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
-            <HostsKpiAuthentications
+            <UsersKpiAuthentications
               filterQuery={filterQuery}
               from={from}
               indexNames={indexNames}

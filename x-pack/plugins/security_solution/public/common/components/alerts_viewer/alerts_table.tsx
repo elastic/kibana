@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
