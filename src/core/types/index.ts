@@ -14,3 +14,10 @@ export * from './capabilities';
 export * from './app_category';
 export * from './saved_objects';
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+export type {
+  UiSettingsType,
+  DeprecationSettings,
+  UiSettingsParams,
+  PublicUiSettingsParams,
+  UserProvidedValues,
+} from '@kbn/core-ui-settings-common';

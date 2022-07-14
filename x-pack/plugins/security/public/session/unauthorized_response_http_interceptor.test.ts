@@ -6,7 +6,6 @@
  */
 
 // @ts-ignore
-
 import fetchMock from 'fetch-mock/es5/client';
 
 import { setup } from '@kbn/core-test-helpers-browser';
