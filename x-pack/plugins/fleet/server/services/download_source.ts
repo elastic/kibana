@@ -8,7 +8,7 @@ import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 
 import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-  DEFAULT_DOWNLOAD_SOURCE,
+  DEFAULT_DOWNLOAD_SOURCE_URI,
   DEFAULT_DOWNLOAD_SOURCE_ID,
 } from '../constants';
 
@@ -151,9 +151,9 @@ class DownloadSourceService {
 
     if (!defaultDS) {
       const newDefaultDS: DownloadSourceBase = {
-        name: 'default',
+        name: 'Elastic Artifacts',
         is_default: true,
-        host: DEFAULT_DOWNLOAD_SOURCE,
+        host: DEFAULT_DOWNLOAD_SOURCE_URI,
       };
 
       return await this.create(soClient, newDefaultDS, {

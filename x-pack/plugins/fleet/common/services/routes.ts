@@ -20,6 +20,7 @@ import {
   APP_API_ROUTES,
   K8S_API_ROUTES,
   PRECONFIGURATION_API_ROUTES,
+  DOWNLOAD_SOURCE_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -230,4 +231,15 @@ export const enrollmentAPIKeyRouteService = {
 
 export const setupRouteService = {
   getSetupPath: () => SETUP_API_ROUTE,
+};
+
+export const downloadSourceRoutesService = {
+  getInfoPath: (downloadSourceId: string) =>
+    DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN.replace('{sourceId}', downloadSourceId),
+  getUpdatePath: (downloadSourceId: string) =>
+    DOWNLOAD_SOURCE_API_ROUTES.UPDATE_PATTERN.replace('{sourceId}', downloadSourceId),
+  getListPath: () => DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN,
+  getDeletePath: (downloadSourceId: string) =>
+    DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN.replace('{sourceId}', downloadSourceId),
+  getCreatePath: () => DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
 };
