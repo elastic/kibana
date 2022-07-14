@@ -18,23 +18,28 @@ export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
     const privateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
     const agentPolicies = await server.syntheticsService.privateLocationAPI.getAgentPolicies();
 
+    const privateLocs =
+      privateLocations?.map((loc) => ({
+        label: loc.name,
+        isServiceManaged: false,
+        isInvalid: agentPolicies.find((policy) => policy.id === loc.policyHostId) === undefined,
+        ...loc,
+      })) ?? [];
+
     if (server.syntheticsService.locations.length > 0) {
       const { throttling, locations } = server.syntheticsService;
 
       return {
         throttling,
-        locations: [
-          ...locations,
-          ...(privateLocations?.map((loc) => ({
-            label: loc.name,
-            isServiceManaged: false,
-            isInvalid: agentPolicies.find((policy) => policy.id === loc.policyHostId) === undefined,
-            ...loc,
-          })) ?? []),
-        ],
+        locations: [...locations, ...privateLocs],
       };
     }
 
-    return getServiceLocations(server);
+    const { locations, throttling } = await getServiceLocations(server);
+
+    return {
+      locations: [...locations, ...privateLocs],
+      throttling,
+    };
   },
 });
