@@ -13,7 +13,6 @@ import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -31,11 +30,13 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
+  dataFetchingHook,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  dataFetchingHook: () => any; // TODO: types
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -89,7 +90,7 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
+  const dataFetchingOptions = {
     initialFetchStatus,
     searchSessionManager,
     savedSearch,
@@ -97,7 +98,8 @@ export function useDiscoverState({
     services,
     stateContainer,
     useNewFieldsApi,
-  });
+  };
+  const { data$, refetch$, reset, inspectorAdapters } = dataFetchingHook(dataFetchingOptions);
 
   /**
    * Reset to display loading spinner when savedSearch is changing
