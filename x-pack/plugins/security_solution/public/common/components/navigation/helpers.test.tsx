@@ -10,16 +10,16 @@ import { getSearch } from './helpers';
 
 describe('helpers', () => {
   it('returns the search string', () => {
-    const serachNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
+    const searchNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
     const globalQueryString = 'test=123';
 
-    expect(getSearch(serachNavTab, globalQueryString)).toEqual('?&test=123');
+    expect(getSearch(searchNavTab, globalQueryString)).toEqual('?test=123');
   });
 
   it('returns an empty string when globalQueryString is empty', () => {
-    const serachNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
+    const searchNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
     const globalQueryString = '';
 
-    expect(getSearch(serachNavTab, globalQueryString)).toEqual('');
+    expect(getSearch(searchNavTab, globalQueryString)).toEqual('');
   });
 });

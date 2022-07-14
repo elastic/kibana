@@ -8,7 +8,8 @@
 import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
 import { parse } from 'query-string';
-import { decodeRisonUrlState } from '../../../url_state/helpers';
+import { decodeRisonUrlState } from '../../../../utils/global_query_string/helpers';
+
 import { ID, PREFIX } from './constants';
 import * as i18n from './translations';
 

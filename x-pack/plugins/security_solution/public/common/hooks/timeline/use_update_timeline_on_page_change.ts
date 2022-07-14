@@ -10,7 +10,6 @@ import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useDispatch } from 'react-redux';
-import { CONSTANTS } from '../../components/url_state/constants';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
@@ -24,7 +23,8 @@ import {
   decodeRisonUrlState,
   getParamFromQueryString,
   getQueryStringFromLocation,
-} from '../../components/url_state/helpers';
+} from '../../utils/global_query_string/helpers';
+import { URL_PARAM_KEY } from '../use_url_state';
 
 /**
  * After the initial load of the security solution, timeline is not updated when the timeline url search value is changed
@@ -35,21 +35,22 @@ import {
  */
 
 // TODO change the name. OnUrlChange
+// TODO TEST THIS SCENARIO https://github.com/elastic/kibana/pull/107099#issuecomment-891147792
 export const useQueryTimelineByIdOnUrlChange = () => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const flyoutTimeline = useShallowEqualSelector((state) => getTimeline(state, TimelineId.active));
   const { search } = useLocation();
   const oldSearch = usePrevious(search);
-  const timelineIdFromReduxStore = flyoutTimeline.savedObjectId ?? '';
+  const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
   const dispatch = useDispatch();
 
   useEffect(() => {
     const oldUrlStateString = getQueryStringKeyValue({
-      urlKey: CONSTANTS.timeline,
+      urlKey: URL_PARAM_KEY.timeline,
       search: oldSearch ?? '',
     });
 
-    const newUrlStateString = getQueryStringKeyValue({ urlKey: CONSTANTS.timeline, search });
+    const newUrlStateString = getQueryStringKeyValue({ urlKey: URL_PARAM_KEY.timeline, search });
 
     if (oldUrlStateString != null && newUrlStateString != null) {
       let newTimeline = null;

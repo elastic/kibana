@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { navTabs } from '../../../app/home/home_navigations';
-import { getTitle } from './helpers';
+import { navTabs } from '../../app/home/home_navigations';
+import { getTitle } from './use_update_browser_title';
 
 describe('Helpers Url_State', () => {
   describe('getTitle', () => {

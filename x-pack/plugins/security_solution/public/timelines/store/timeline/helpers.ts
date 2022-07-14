@@ -31,8 +31,7 @@ import type {
   TimelinePersistInput,
 } from '../../../../common/types/timeline';
 import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
-import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
-
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
 import type { TimelineById } from './types';

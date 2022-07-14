@@ -6,7 +6,6 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
 import type { SiemRouteType } from '../../utils/route/types';
 import type { LinkCategories } from '../../links';
@@ -30,6 +29,24 @@ export enum SecurityNavGroupKey {
   investigate = 'investigate',
   manage = 'manage',
 }
+
+export type UrlStateType =
+  | 'administration'
+  | 'alerts'
+  | 'cases'
+  | 'detection_response'
+  | 'exceptions'
+  | 'get_started'
+  | 'host'
+  | 'users'
+  | 'network'
+  | 'kubernetes'
+  | 'overview'
+  | 'rules'
+  | 'timeline'
+  | 'explore'
+  | 'dashboards'
+  | 'threat_intelligence';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {

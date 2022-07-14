@@ -10,15 +10,15 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useInitializeUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../../components/url_state/constants';
 import {
   dispatchUpdateTimeline,
   queryTimelineById,
 } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
+import { URL_PARAM_KEY } from '../use_url_state';
 
-export const useInitTimelineUrlParam = () => {
+export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
 
   const onInitialize = useCallback(
@@ -39,5 +39,5 @@ export const useInitTimelineUrlParam = () => {
     [dispatch]
   );
 
-  useInitializeUrlParam(CONSTANTS.timeline, onInitialize);
+  useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);
 };
