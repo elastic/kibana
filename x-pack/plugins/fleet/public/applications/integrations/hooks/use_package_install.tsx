@@ -18,10 +18,12 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { FleetErrorResponse } from '../../../../common';
 
 import type { PackageInfo } from '../../../types';
-import { sendInstallPackage, sendRemovePackage, useLink, useStartServices } from '../../../hooks';
+import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
+
 import { InstallStatus } from '../../../types';
 import { isVerificationError } from '../services';
-import { UnverifiedPackageModal } from '../components';
+
+import { useConfirmForceInstall } from '.';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -50,8 +52,7 @@ function usePackageInstall({
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { overlays } = useStartServices();
-
+  const confirmForceInstall = useConfirmForceInstall();
   const setPackageInstallStatus = useCallback(
     ({ name, status, version }: SetPackageInstallStatusProps) => {
       const packageProps: PackageInstallItem = {
@@ -84,25 +85,6 @@ function usePackageInstall({
       setPackageInstallStatus({ ...prevStatus, name: installProps.name });
     }
   };
-
-  const confirmForceInstall = (pkg: { name: string; version: string }): Promise<boolean> =>
-    new Promise((resolve) => {
-      const session = overlays.openModal(
-        toMountPoint(
-          <UnverifiedPackageModal
-            pkg={pkg}
-            onConfirm={() => {
-              session.close();
-              resolve(true);
-            }}
-            onCancel={() => {
-              session.close();
-              resolve(false);
-            }}
-          />
-        )
-      );
-    });
 
   const installPackage = useCallback(
     async (props: InstallPackageProps) => {
