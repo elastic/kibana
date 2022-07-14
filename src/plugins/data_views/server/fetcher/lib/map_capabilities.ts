@@ -7,15 +7,15 @@
  */
 
 import { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SerializableRecord } from '@kbn/utility-types';
 import { Dictionary } from 'lodash';
+import { AggregationRestrictions } from '../../../common';
 import { mergeJobConfigurations } from './jobs_compatibility';
 
 /**
  * A record of capabilities (aggregations) for an index rollup job
  */
 export interface RollupIndexCapability {
-  [index: string]: { aggs?: Dictionary<Record<string, SerializableRecord>>; error?: string };
+  [index: string]: { aggs?: Dictionary<AggregationRestrictions>; error?: string };
 }
 
 /**

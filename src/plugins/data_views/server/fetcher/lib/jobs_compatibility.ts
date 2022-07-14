@@ -8,7 +8,6 @@
 
 import { RollupGetRollupIndexCapsRollupJobSummary as RollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
-import { FieldDescriptor } from '../index_patterns_fetcher';
 import { RollupIndexCapability } from './map_capabilities';
 
 /**
@@ -58,35 +57,28 @@ export function mergeJobConfigurations(
       // Look through each field's capabilities (aggregations)
       fieldAggs.forEach((agg) => {
         const aggName = agg.agg;
-        const fieldDescriptor = allAggs[aggName];
-        const aggDoesntExist = !fieldDescriptor;
-        const fieldDoesntExist =
-          fieldDescriptor && !fieldDescriptor[fieldName as keyof FieldDescriptor];
+        const aggDoesntExist = !allAggs[aggName];
+        const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
         const isDateHistogramAgg = aggName === 'date_histogram';
 
         // If we currently don't have this aggregation, add it.
         // Special case for date histogram, since there can only be one
         // date histogram field.
         if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
-          allAggs[aggName] = fieldDescriptor || {};
+          allAggs[aggName] = allAggs[aggName] || {};
           allAggs[aggName][fieldName] = { ...agg };
         }
         // If aggregation already exists, attempt to merge it
         else {
-          const fieldAgg = fieldDescriptor[fieldName as keyof FieldDescriptor];
+          const fieldAgg = allAggs[aggName][fieldName];
 
           switch (aggName) {
             // For histograms, calculate the least common multiple between the
             // new interval and existing interval
             case 'histogram':
-              // FIXME the interface infers `calendar_interval` is valid, not `interval`
-              // @ts-expect-error
-              const aggInterval: number = agg.interval ?? agg.calendar_interval;
-              // @ts-expect-error
-              const fieldAggInterval: number = fieldAgg.interval ?? fieldAgg.calendar_interval;
-
               // TODO: Fix this with LCD algorithm
-              const intervals = [fieldAggInterval, aggInterval].sort((a, b) => a - b);
+              // @ts-expect-error - Property 'interval' does not exist on type 'RollupGetRollupIndexCapsRollupJobSummaryField'
+              const intervals = [fieldAgg.interval, agg.interval].sort((a, b) => a - b);
               const isMultiple = intervals[1] % intervals[0] === 0;
               fieldAgg.interval = isMultiple ? intervals[1] : intervals[0] * intervals[1];
               break;
