@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import { getRowsPerPageOptions } from '../../../../utils/get_rows_per_page_options';
+import { getRowsPerPageOptions } from '../../../../utils/rows_per_page';
 
 interface ToolBarPaginationProps {
   pageSize: number;
