@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SomeDevLog } from '@kbn/some-dev-log';
-
 /**
  * Options that can be used to customize how Bazel is run
  */
 export interface BazelRunOptions {
-  /**
-   * Logger to write messages to
-   */
-  log: SomeDevLog;
   /**
    * Cli args to pass to bazel
    */

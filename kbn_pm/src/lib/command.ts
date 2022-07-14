@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Log } from './log.mjs';
 import type { Args } from './args.mjs';
 
 /**
@@ -20,7 +20,7 @@ export type SubCommandTimeFn = <T>(id: string, block: () => Promise<T>) => Promi
  */
 export interface CommandRunContext {
   args: Args;
-  log: SomeDevLog;
+  log: Log;
   time: SubCommandTimeFn;
 }
 

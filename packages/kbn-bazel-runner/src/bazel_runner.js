@@ -57,7 +57,6 @@ function once(emitter, event) {
  * @param {import('./types').BazelRunOptions} options
  */
 async function runBazelRunner(runner, options) {
-  options.log.debug('running', runner, options.args);
   const proc = ChildProcess.spawn(runner, options.args, {
     env: {
       ...process.env,
@@ -84,10 +83,6 @@ async function runBazelRunner(runner, options) {
         if (typeof code !== 'number' || code === 0) {
           return;
         }
-
-        options.log.error(
-          'HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`'
-        );
 
         if (options.onErrorExit) {
           options.onErrorExit(code, buffer.join('\n'));

@@ -52,13 +52,13 @@ export function setupRemoteCache(log) {
     return;
   }
 
-  log.debug(`[bazel_tools] setting up remote cache settings if necessary`);
+  log.debug(`setting up remote cache settings if necessary`);
 
   const settingsPath = Path.resolve(REPO_ROOT, '.bazelrc.cache');
 
   // Checks if we should upgrade or install the config file
   if (upToDate(settingsPath)) {
-    log.debug(`[bazel_tools] remote cache config already exists and is up-to-date, skipping`);
+    log.debug(`remote cache config already exists and is up-to-date, skipping`);
     return;
   }
 
@@ -71,5 +71,5 @@ export function setupRemoteCache(log) {
   `;
 
   Fs.writeFileSync(settingsPath, contents);
-  log.info(`[bazel_tools] remote cache settings written to ${settingsPath}`);
+  log.info(`remote cache settings written to ${settingsPath}`);
 }

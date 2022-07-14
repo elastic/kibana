@@ -27,67 +27,80 @@ async function getBazelRunner() {
 }
 
 /**
+ * @param {import('./log.mjs').Log} log
  * @param {string} name
  * @param {number} code
  * @param {string} output
  */
-function throwBazelError(name, code, output) {
+function throwBazelError(log, name, code, output) {
+  const tag = Color.title('HINT');
+  log._write(
+    [
+      tag,
+      tag +
+        'If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`',
+      tag,
+    ].join('\n')
+  );
+
   throw createCliError(
     `[${name}] exited with code [${code}]${output ? `\n  output:\n${indent(4, output)}}` : ''}`
   );
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
- * @param {string[]} args
+ * @param {import('./log.mjs').Log} log
+ * @param {string[]} inputArgs
  * @param {{ quiet?: boolean; offline?: boolean, env?: Record<string, string> } | undefined} opts
  */
-async function runBazel(log, args, opts = undefined) {
+async function runBazel(log, inputArgs, opts = undefined) {
   const bazel = (await getBazelRunner()).runBazel;
 
+  const args = [...(opts?.offline ? ['--config=offline'] : []), ...inputArgs];
+  log.debug(`> bazel ${args.join(' ')}`);
   await bazel({
-    log,
-    args: [...(opts?.offline ? ['--config=offline'] : []), ...args],
+    args,
     env: opts?.env,
     cwd: REPO_ROOT,
     quiet: opts?.quiet,
     logPrefix: Color.info('[bazel]'),
     onErrorExit(code, output) {
-      throwBazelError('bazel', code, output);
+      throwBazelError(log, 'bazel', code, output);
     },
   });
 }
 
 /**
  *
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  * @param {{ offline: boolean } | undefined} opts
  */
 export async function watch(log, opts = undefined) {
   const ibazel = (await getBazelRunner()).runIBazel;
 
+  const args = [
+    // --run_output=false arg will disable the iBazel notifications about gazelle
+    // and buildozer when running it. Could also be solved by adding a root
+    // `.bazel_fix_commands.json` but its not needed at the moment
+    '--run_output=false',
+    'build',
+    '//packages:build',
+    '--show_result=1',
+    ...(opts?.offline ? ['--config=offline'] : []),
+  ];
+  log.debug(`> ibazel ${args.join(' ')}`);
   await ibazel({
-    log,
-    args: [
-      // --run_output=false arg will disable the iBazel notifications about gazelle
-      // and buildozer when running it. Could also be solved by adding a root
-      // `.bazel_fix_commands.json` but its not needed at the moment
-      '--run_output=false',
-      'build',
-      '//packages:build',
-      '--show_result=1',
-      ...(opts?.offline ? ['--config=offline'] : []),
-    ],
+    args,
     cwd: REPO_ROOT,
     logPrefix: Color.info('[ibazel]'),
     onErrorExit(code, output) {
-      throwBazelError('ibazel', code, output);
+      throwBazelError(log, 'ibazel', code, output);
     },
   });
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  * @param {{ quiet?: boolean } | undefined} opts
  */
 export async function clean(log, opts = undefined) {
@@ -98,7 +111,7 @@ export async function clean(log, opts = undefined) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  * @param {{ quiet?: boolean } | undefined} opts
  */
 export async function expungeCache(log, opts = undefined) {
@@ -109,10 +122,12 @@ export async function expungeCache(log, opts = undefined) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  */
 export async function cleanDiskCache(log) {
-  const repositoryCachePath = spawnSync('bazel', ['info', 'repository_cache']);
+  const args = ['info', 'repository_cache'];
+  log.debug(`> bazel ${args.join(' ')}`);
+  const repositoryCachePath = spawnSync('bazel', args);
 
   await cleanPaths(log, [
     Path.resolve(Path.dirname(repositoryCachePath), 'disk-cache'),
@@ -123,7 +138,7 @@ export async function cleanDiskCache(log) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
 export async function installYarnDeps(log, opts = undefined) {
@@ -142,7 +157,7 @@ export async function installYarnDeps(log, opts = undefined) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
 export async function buildPackages(log, opts = undefined) {
@@ -163,7 +178,7 @@ function readBazelToolsVersionFile(versionFilename) {
 
   if (!version) {
     throw new Error(
-      `[bazel_tools] Failed on reading bazel tools versions\n ${versionFilename} file do not contain any version set`
+      `Failed on reading bazel tools versions\n ${versionFilename} file do not contain any version set`
     );
   }
 
@@ -171,18 +186,18 @@ function readBazelToolsVersionFile(versionFilename) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  */
 export function tryRemovingBazeliskFromYarnGlobal(log) {
   try {
-    // Check if Bazelisk is installed on the yarn global scope
+    log.debug('Checking if Bazelisk is installed on the yarn global scope');
     const stdout = spawnSync('yarn', ['global', 'list']);
 
-    // Bazelisk was found on yarn global scope so lets remove it
     if (stdout.includes(`@bazel/bazelisk@`)) {
+      log.debug('Bazelisk was found on yarn global scope, removing it');
       spawnSync('yarn', ['global', 'remove', `@bazel/bazelisk`]);
 
-      log.info(`[bazel_tools] bazelisk was installed on Yarn global packages and is now removed`);
+      log.info(`bazelisk was installed on Yarn global packages and is now removed`);
       return true;
     }
 
@@ -193,17 +208,18 @@ export function tryRemovingBazeliskFromYarnGlobal(log) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  */
 export function isInstalled(log) {
   try {
+    log.debug('getting bazel version');
     const stdout = spawnSync('bazel', ['--version']).trim();
     const bazelVersion = readBazelToolsVersionFile('.bazelversion');
 
     if (stdout === `bazel ${bazelVersion}`) {
       return true;
     } else {
-      log.info(`[bazel_tools] Bazel is installed (${stdout}), but was expecting ${bazelVersion}`);
+      log.info(`Bazel is installed (${stdout}), but was expecting ${bazelVersion}`);
       return false;
     }
   } catch {
@@ -212,7 +228,7 @@ export function isInstalled(log) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('./log.mjs').Log} log
  */
 export function ensureInstalled(log) {
   if (isInstalled(log)) {
@@ -220,14 +236,14 @@ export function ensureInstalled(log) {
   }
 
   // Install bazelisk if not installed
-  log.debug(`[bazel_tools] reading bazel tools versions from version files`);
+  log.debug(`reading bazel tools versions from version files`);
   const bazeliskVersion = readBazelToolsVersionFile('.bazeliskversion');
   const bazelVersion = readBazelToolsVersionFile('.bazelversion');
 
-  log.info(`[bazel_tools] installing Bazel tools`);
+  log.info(`installing Bazel tools`);
 
   log.debug(
-    `[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`
+    `bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`
   );
   spawnSync('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
     env: {
@@ -238,9 +254,9 @@ export function ensureInstalled(log) {
   const isBazelBinAvailableAfterInstall = isInstalled(log);
   if (!isBazelBinAvailableAfterInstall) {
     throw new Error(
-      `[bazel_tools] an error occurred when installing the Bazel tools. Please make sure you have access to npm globally installed modules on your $PATH`
+      `an error occurred when installing the Bazel tools. Please make sure you have access to npm globally installed modules on your $PATH`
     );
   }
 
-  log.success(`[bazel_tools] bazel tools installed`);
+  log.success(`bazel tools installed`);
 }
