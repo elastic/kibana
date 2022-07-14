@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ConnectorScheduling } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
-import { ConnectorScheduling } from '../index/fetch_index_api_logic';
 
 export interface UpdateConnectorSchedulingArgs {
   connectorId: string;
