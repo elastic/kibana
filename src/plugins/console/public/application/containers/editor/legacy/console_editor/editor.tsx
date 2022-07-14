@@ -233,6 +233,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
+        // Close autocomplete popup on unmount
+        editorInstanceRef.current?.getCoreEditor().detachCompleter();
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
