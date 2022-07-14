@@ -29,7 +29,7 @@ const getMockSearchSessionsConfig = ({
     defaultExpiration,
   } as SearchSessionsConfigSchema);
 
-describe.skip('request utils', () => {
+describe('request utils', () => {
   describe('getIgnoreThrottled', () => {
     test('does not return `ignore_throttled` when `includeFrozen` is `false`', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({
@@ -60,7 +60,7 @@ describe.skip('request utils', () => {
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
-    test('Uses `keep_alive` from config if enabled', async () => {
+    test('Uses `keep_alive` from config if enabled and session is stored', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
       });
@@ -69,6 +69,7 @@ describe.skip('request utils', () => {
       });
       const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
         sessionId: 'foo',
+        isStored: true,
       });
       expect(params).toHaveProperty('keep_alive', '259200000ms');
     });
@@ -132,12 +133,16 @@ describe.skip('request utils', () => {
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
-    test('Has no `keep_alive` if `sessionId` is provided', async () => {
+    test('Has no `keep_alive` if `sessionId` is provided and search already stored', async () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
         enabled: true,
       });
-      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      const params = getDefaultAsyncGetParams(mockConfig, {
+        sessionId: 'foo',
+        isStored: true,
+        isSearchStored: true,
+      });
       expect(params).not.toHaveProperty('keep_alive');
     });
 
