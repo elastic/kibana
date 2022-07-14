@@ -9,7 +9,7 @@
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
 import * as Bazel from '../lib/bazel.mjs';
-import { findPluginCleanPaths } from '../lib/find_plugin_clean_paths.mjs';
+import { findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {

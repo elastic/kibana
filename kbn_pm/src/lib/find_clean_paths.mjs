@@ -33,7 +33,7 @@ async function tryToGetSyntheticPackageMap(log) {
  * @param {*} packageDir
  * @returns {string[]}
  */
-function readCleanPatterns(packageDir) {
+export function readCleanPatterns(packageDir) {
   let json;
   try {
     const path = Path.resolve(packageDir, 'package.json');
@@ -51,7 +51,10 @@ function readCleanPatterns(packageDir) {
   return patterns.flatMap((pattern) => {
     const absolute = Path.resolve(packageDir, pattern);
 
-    if (!absolute.startsWith(packageDir)) {
+    // sanity check to make sure that resolved patterns are "relative" to
+    // the package dir, if they start with a . then they traverse out of
+    // the package dir so we drop them
+    if (Path.relative(packageDir, absolute).startsWith('.')) {
       return [];
     }
 
