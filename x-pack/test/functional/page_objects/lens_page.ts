@@ -521,6 +521,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async enableFilter() {
       await testSubjects.click('indexPattern-advanced-accordion');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
+      });
     },
 
     async setFilterBy(queryString: string) {
