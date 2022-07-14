@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { DataViewBase } from '@kbn/es-query';
+import type { Optional } from '@kbn/utility-types';
+
+import type { NavTab } from '../../../common/components/navigation/types';
 import type { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -21,3 +25,28 @@ export interface OwnProps {
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
 }
+
+export type NetworkComponentsQueryProps = OwnProps & {
+  flowTarget: FlowTarget;
+};
+
+export type TlsQueryTableComponentProps = OwnProps & {
+  flowTarget: FlowTargetSourceDest;
+};
+
+export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
+  flowTarget: FlowTargetSourceDest;
+  indexPattern: DataViewBase;
+};
+
+export enum NetworkDetailsRouteType {
+  anomalies = 'anomalies',
+  flows = 'flows',
+  tls = 'tls',
+  http = 'http',
+  alerts = 'external-alerts',
+  users = 'users',
+}
+
+type KeyNetworkNavTabs = `${NetworkDetailsRouteType}`;
+export type NetworkDetailsNavTabs = Optional<Record<KeyNetworkNavTabs, NavTab>, 'anomalies'>;
