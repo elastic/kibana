@@ -24,7 +24,7 @@ const meta: Eslint.Rule.RuleMetaData = {
   messages,
 };
 
-const nakedEslintDisableRegex =
+const ESLINT_DISABLE_RE =
   /^eslint-disable(?:-next-line|-line)?(?<ruleName>$|(?:\s+(?:@(?:[\w-]+\/){1,2})?[\w-]+)?)/;
 
 const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
@@ -34,7 +34,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
 
       nodeComments.forEach((comment) => {
         const commentVal = comment.value.trim();
-        const nakedESLintRegexResult = commentVal.match(nakedEslintDisableRegex);
+        const nakedESLintRegexResult = commentVal.match(ESLINT_DISABLE_RE);
         const ruleName = nakedESLintRegexResult?.groups?.ruleName;
         const cStart = comment?.loc?.start;
         const cEnd = comment?.loc?.end;
