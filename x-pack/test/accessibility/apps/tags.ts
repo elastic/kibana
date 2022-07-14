@@ -15,9 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Kibana Tags Page Accessibility', () => {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -33,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('tags main page meets a11y validations', async () => {
@@ -71,8 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // https://github.com/elastic/kibana/issues/135985 inconsistent test failure
-    it.skip('tag assignment panel meets a11y requirements', async () => {
+    it('tag assignment panel meets a11y requirements', async () => {
       await testSubjects.click('euiCollapsedItemActionsButton');
       const actionOnTag = 'assign';
       await PageObjects.tagManagement.clickActionItem(actionOnTag);
@@ -80,14 +82,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('tag management page with connections column populated meets a11y requirements', async () => {
-      await testSubjects.click('euiCollapsedItemActionsButton');
-      const actionOnTag = 'assign';
-      await PageObjects.tagManagement.clickActionItem(actionOnTag);
       await testSubjects.click('assignFlyout-selectAllButton');
-
       await testSubjects.click('assignFlyoutConfirmButton');
       await toasts.dismissAllToasts();
-
       await retry.try(async () => {
         await a11y.testAppSnapshot();
       });
