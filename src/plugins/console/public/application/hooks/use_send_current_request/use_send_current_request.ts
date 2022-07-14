@@ -31,6 +31,7 @@ export const useSendCurrentRequest = () => {
   return useCallback(async () => {
     try {
       const editor = registry.getInputEditor();
+      // Default variables will be used in the default request to demonstrate variables in action
       const variables = [...DEFAULT_VARIABLES, ...storage.get(StorageKeys.VARIABLES, [])];
       let requests = await editor.getRequestsInRange();
       requests = replaceVariables(requests, variables);
