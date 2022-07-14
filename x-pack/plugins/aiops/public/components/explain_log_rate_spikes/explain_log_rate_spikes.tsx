@@ -41,10 +41,6 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   const {
     services: {
       http,
-      unifiedSearch: {
-        // @ts-ignore
-        ui: { SearchBar },
-      },
     },
   } = useAiOpsKibana();
   const basePath = http?.basePath.get() ?? '';

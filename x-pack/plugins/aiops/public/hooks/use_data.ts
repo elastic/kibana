@@ -16,14 +16,59 @@ import { TimeBuckets } from '../../common/time_buckets';
 import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
 import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+// import { SEARCH_QUERY_LANGUAGE } from '../../common/types'
+import { getEsQueryFromSavedSearch } from '../../common/search_utils';
 
 export const useData = (
   currentDataView: DataView,
+  aiopsListState: any, // TODO: update
   onUpdate: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useAiOpsKibana();
   const { uiSettings } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
+
+  /** Prepare required params to pass to search strategy **/
+  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const searchData = getEsQueryFromSavedSearch({
+      dataView: currentDataView,
+      uiSettings,
+      savedSearch: undefined, // currentSavedSearch,
+      // query: currentQuery,
+      // filters: currentFilters,
+      // filterManager: data.query.filterManager,
+    });
+
+    if (searchData === undefined || aiopsListState.searchString !== '') {
+      if (aiopsListState.filters) {
+        services.data.query.filterManager.setFilters(aiopsListState.filters);
+      }
+      return {
+        searchQuery: aiopsListState.searchQuery,
+        searchString: aiopsListState.searchString,
+        searchQueryLanguage: aiopsListState.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    // currentSavedSearch?.id,
+    currentDataView.id,
+    aiopsListState.searchString,
+    aiopsListState.searchQueryLanguage,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify({
+      searchQuery: aiopsListState.searchQuery,
+      // currentQuery,
+      // currentFilters,
+    }),
+    lastRefresh,
+  ]);
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -44,11 +89,15 @@ export const useData = (
       // Obtain the interval to use for date histogram aggregations
       // (such as the document count chart). Aim for 75 bars.
       const buckets = _timeBuckets;
+
       const tf = timefilter;
+
       if (!buckets || !tf || !currentDataView) return;
+
       const activeBounds = tf.getActiveBounds();
       let earliest: number | undefined;
       let latest: number | undefined;
+
       if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
         earliest = activeBounds.min?.valueOf();
         latest = activeBounds.max?.valueOf();
@@ -56,6 +105,7 @@ export const useData = (
       const bounds = tf.getActiveBounds();
       const BAR_TARGET = 75;
       buckets.setInterval('auto');
+
       if (bounds) {
         buckets.setBounds(bounds);
         buckets.setBarTarget(BAR_TARGET);
@@ -67,12 +117,20 @@ export const useData = (
         latest,
         intervalMs: aggInterval?.asMilliseconds(),
         index: currentDataView.title,
+        searchQuery,
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_timeBuckets, timefilter, currentDataView.id, lastRefresh]
+    [
+      _timeBuckets,
+      timefilter,
+      currentDataView.id,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(searchQuery),
+      lastRefresh,
+    ]
   );
   const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
 
@@ -98,5 +156,8 @@ export const useData = (
   return {
     docStats,
     timefilter,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
   };
 };

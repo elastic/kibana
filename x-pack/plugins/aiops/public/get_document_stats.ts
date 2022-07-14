@@ -23,6 +23,7 @@ export interface DocumentStatsSearchStrategyParams {
   latest?: number;
   intervalMs?: number;
   index: string;
+  searchQuery: any; // TODO: update type
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
@@ -35,15 +36,13 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     earliest: earliestMs,
     latest: latestMs,
     runtimeFieldMap,
-    // searchQuery,
+    searchQuery,
     intervalMs,
     fieldsToFetch,
   } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, {
-    match_all: {},
-  });
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   // Don't use the sampler aggregation as this can lead to some potentially
   // confusing date histogram results depending on the date range of data amongst shards.

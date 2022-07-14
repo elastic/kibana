@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { Query } from '@kbn/es-query';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+export type SavedSearchSavedObject = SimpleSavedObject<any>;
+
+export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
+  return isPopulatedObject(arg, ['id', 'type', 'attributes']);
+}
+
 export interface FieldValuePair {
   fieldName: string;
   fieldValue: string;
@@ -16,4 +26,21 @@ export interface ChangePoint extends FieldValuePair {
   bg_count: number;
   score: number;
   pValue: number | null;
+}
+
+export const SEARCH_QUERY_LANGUAGE = {
+  KUERY: 'kuery',
+  LUCENE: 'lucene',
+} as const;
+
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
+
+export interface CombinedQuery {
+  searchString: Query['query'];
+  searchQueryLanguage: string;
+}
+
+export interface ErrorMessage {
+  query: string;
+  message: string;
 }
