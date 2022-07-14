@@ -26,6 +26,18 @@ const args = new Args(process.argv.slice(2), process.env.CI ? ['--quiet'] : []);
 const log = new Log(args.getLoggingLevel());
 const cmdName = args.getCommandName();
 
+/**
+ * @param {import('./lib/log.mjs').Log} log
+ */
+async function tryToGetCiStatsReporter(log) {
+  try {
+    const { CiStatsReporter } = await import('@kbn/ci-stats-reporter');
+    return CiStatsReporter.fromEnv(log);
+  } catch {
+    return;
+  }
+}
+
 try {
   const cmd = cmdName ? COMMANDS.find((c) => c.name === cmdName) : undefined;
 
@@ -93,9 +105,10 @@ try {
   }
 
   if (timings.length) {
-    const { CiStatsReporter } = await import('@kbn/ci-stats-reporter');
-    const reporter = CiStatsReporter.fromEnv(log);
-    await reporter.timings({ timings });
+    const reporter = await tryToGetCiStatsReporter(log);
+    if (reporter) {
+      await reporter.timings({ timings });
+    }
   }
 
   if (result.status === 'rejected') {
