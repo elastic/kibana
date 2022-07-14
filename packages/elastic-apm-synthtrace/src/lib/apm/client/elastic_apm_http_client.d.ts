@@ -35,6 +35,8 @@ declare module 'elastic-apm-http-client' {
     apiKey?: string;
     /** The APM Server URL (default: http://localhost:8200) */
     serverUrl: string;
+    maxQueueSize?: number;
+    bufferWindowSize?: number;
 
     /** (required) The APM agent name */
     agentName: string;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Client from 'elastic-apm-http-client';
+import Client, { FlushOptions } from 'elastic-apm-http-client';
 import Util from 'util';
 import { Logger } from '../../utils/create_logger';
 import { ApmFields } from '../apm_fields';
@@ -34,8 +34,15 @@ export interface ApmSynthtraceApmClientOptions {
   // defaults to true if unspecified
   refreshAfterIndex?: boolean;
 }
+interface ClientState {
+  client: Client;
+  enqueued: number;
+  sendSpan: (s: Span) => Promise<void>;
+  sendTransaction: (s: Transaction) => Promise<void>;
+  flush: (o: FlushOptions) => Promise<void>;
+}
 export class ApmSynthtraceApmClient {
-  private readonly _serviceClients: Map<string, Client> = new Map<string, Client>();
+  private readonly _serviceClients: Map<string, ClientState> = new Map<string, ClientState>();
   constructor(
     private readonly apmTarget: string,
     private readonly logger: Logger,
@@ -201,6 +208,7 @@ export class ApmSynthtraceApmClient {
       });
       return;
     }
+    const queueSize = 10000;
     for await (const item of sideEffectYield()) {
       if (item == null) continue;
 
@@ -211,6 +219,8 @@ export class ApmSynthtraceApmClient {
         const client = new Client({
           userAgent: 'x',
           serverUrl: this.apmTarget,
+          maxQueueSize: queueSize,
+          bufferWindowSize: queueSize / 2,
 
           serviceName: service,
           serviceNodeName: service,
@@ -221,30 +231,38 @@ export class ApmSynthtraceApmClient {
           frameworkVersion: item.context?.service?.framework?.version ?? undefined,
           hostname: hostName,
         });
-        this.logger.info(`Created a new client for: ${lookup}`);
-        this._serviceClients.set(lookup, client);
+        this._serviceClients.set(lookup, {
+          client,
+          enqueued: 0,
+          sendSpan: Util.promisify(client.sendSpan).bind(client),
+          sendTransaction: Util.promisify(client.sendTransaction).bind(client),
+          flush: Util.promisify(client.flush).bind(client),
+        });
       }
-      const client = this._serviceClients.get(lookup)!;
-      const sendSpan = Util.promisify(client.sendSpan).bind(client);
-      const sendTransaction = Util.promisify(client.sendTransaction).bind(client);
+      const clientState = this._serviceClients.get(lookup)!;
 
       if (yielded === 0) {
         options?.itemStartStopCallback?.apply(this, [fields, false]);
-        yielded++;
       }
       if (item.kind === 'span') {
-        await sendSpan(item);
+        clientState.sendSpan(item);
       } else if (item.kind === 'transaction') {
-        await sendTransaction(item);
+        clientState.sendTransaction(item);
+      }
+      yielded++;
+      clientState.enqueued++;
+      if (clientState.enqueued % queueSize === 0) {
+        this.logger.debug(
+          ` -- Flushing client: ${lookup} after enqueueing ${clientState.enqueued}`
+        );
+        await clientState.flush({});
       }
     }
-    for (const [clientName, client] of this._serviceClients) {
-      const flush = Util.promisify(client.flush).bind(client);
-      this.logger.info(`Flushing client: ${clientName}`);
-      await flush({});
-    }
-    for (const [clientName, client] of this._serviceClients) {
-      this.logger.info(`Events sent by client: ${clientName}, ${client.sent}`);
+    for (const [clientName, state] of this._serviceClients) {
+      await state.flush({});
+      this.logger.info(
+        ` -- sent: ${clientName}: ${state.client.sent}, enqueued: ${state.enqueued}`
+      );
     }
     options?.itemStartStopCallback?.apply(this, [fields, true]);
   }

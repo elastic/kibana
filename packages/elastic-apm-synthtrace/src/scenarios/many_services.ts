@@ -34,7 +34,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             'production',
             languages[index % languages.length]
           )
-          .instance('instance')
+          .instance(`instance-${index}`)
       );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];

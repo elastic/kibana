@@ -222,7 +222,11 @@ export function runSynthtrace() {
           }
         }
         if (argv.clean) {
-          await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
+          if (argv.apm) {
+            await apmEsClient.clean(['metrics-apm.service-*']);
+          } else {
+            await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
+          }
         }
         if (runOptions.gcpRepository) {
           await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
