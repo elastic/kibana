@@ -898,7 +898,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined) => ",
           {
@@ -928,7 +928,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined"
             ],
