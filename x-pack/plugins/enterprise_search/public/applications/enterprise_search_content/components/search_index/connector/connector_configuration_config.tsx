@@ -12,32 +12,38 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
-import { ConnectorConfiguration } from '../../../api/index/fetch_index_api_logic';
 
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 interface ConnectorConfigurationConfigArgs {
+  apiKey: string | undefined;
   configuration: ConnectorConfiguration;
+  connectorId: string;
   indexId: string;
   indexName: string;
 }
 
 export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfigArgs> = ({
+  apiKey,
   configuration,
+  connectorId,
   indexId,
   indexName,
 }) => {
@@ -53,6 +59,19 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
       setEditingConfigState(configState);
     }
   }, [isEditing]);
+
+  const ymlBlock = (
+    <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
+      {`${
+        apiKey
+          ? `elasticsearch:
+  api_key: "${apiKey}"
+`
+          : ''
+      }connector_package_id: "${connectorId}"
+`}
+    </EuiCodeBlock>
+  );
 
   const form = (
     <EuiForm
@@ -122,6 +141,7 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
   const displayList = Object.values(configState)
     .filter(isNotNullish)
     .map(({ label, value }) => ({ description: value ?? '--', title: label }));
+
   const display = (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -157,6 +177,19 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
             }
           )}
         </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.yml.description',
+            {
+              defaultMessage:
+                'Use this YAML sample with your Elastic API key and Connector id to get going faster',
+            }
+          )}
+        </EuiText>
+        <EuiSpacer />
+        {ymlBlock}
       </EuiFlexItem>
       <EuiFlexItem>{displayList.length > 0 && fields}</EuiFlexItem>
     </EuiFlexGroup>

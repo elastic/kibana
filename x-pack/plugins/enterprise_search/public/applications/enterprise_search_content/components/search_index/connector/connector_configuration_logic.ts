@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   clearFlashMessages,
@@ -21,7 +22,6 @@ import {
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
 } from '../../../api/connector_package/update_connector_configuration_api_logic';
-import { ConnectorConfiguration } from '../../../api/index/fetch_index_api_logic';
 
 type ConnectorConfigurationActions = Pick<
   Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,

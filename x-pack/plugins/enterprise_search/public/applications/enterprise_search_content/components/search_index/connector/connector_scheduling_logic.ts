@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorScheduling } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   clearFlashMessages,
@@ -20,7 +21,6 @@ import {
   UpdateConnectorSchedulingApiLogic,
   UpdateConnectorSchedulingArgs,
 } from '../../../api/connector_package/update_connector_scheduling_api_logic';
-import { ConnectorScheduling } from '../../../api/index/fetch_index_api_logic';
 
 type ConnectorSchedulingActions = Pick<
   Actions<UpdateConnectorSchedulingArgs, ConnectorScheduling>,

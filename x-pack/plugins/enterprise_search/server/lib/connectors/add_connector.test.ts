@@ -8,6 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
+import { ConnectorStatus } from '../../../common/types/connectors';
 
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
@@ -42,13 +43,12 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
-        created_at: null,
         index_name: 'index_name',
         last_seen: null,
         last_synced: null,
         scheduling: { enabled: false, interval: '* * * * *' },
         service_type: null,
-        status: 'not connected',
+        status: ConnectorStatus.CREATED,
         sync_error: null,
         sync_now: false,
         sync_status: null,
@@ -73,13 +73,12 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
-        created_at: null,
         index_name: 'index_name',
         last_seen: null,
         last_synced: null,
         scheduling: { enabled: false, interval: '* * * * *' },
         service_type: null,
-        status: 'not connected',
+        status: ConnectorStatus.CREATED,
         sync_error: null,
         sync_now: false,
         sync_status: null,
