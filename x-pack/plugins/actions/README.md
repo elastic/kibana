@@ -99,7 +99,7 @@ Built-In-Actions are configured using the _xpack.actions_ namespace under _kiban
 
 #### **allowedHosts** configuration
 
-- You can use the string "*" in the **allowedHosts** configuration in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential to use such a feature to create [SSRF](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery) attacks from your server.
+- You can use the string "*" in the **allowedHosts** configuration in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential to use such a feature to launch [SSRF](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery) attacks from your server.
 
 
 - The **allowedHosts** configuration applies to built-in action types (such as Slack and PagerDuty). While the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about in [Pagerduty's documentation](https://v2.developer.pagerduty.com/docs/events-api-v2)), the PagerDuty domain must still be included in the allowedHosts configuration before the action can be used.
