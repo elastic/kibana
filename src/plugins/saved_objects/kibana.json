@@ -8,8 +8,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "dataViews"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "savedObjectsManagement"]
 }

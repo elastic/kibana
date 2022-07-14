@@ -12,12 +12,18 @@ import './index.scss';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
+  getAllowedTypes,
+  getSavedObjectLabel,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
+import {
   createSavedObjectClass,
   SavedObjectDecoratorRegistry,
   SavedObjectDecoratorConfig,
 } from './saved_object';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
+import { setSavedObjects } from './services';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
@@ -45,6 +51,8 @@ export interface SavedObjectsStart {
      */
     getListingLimit: () => number;
   };
+  getSavedObjectLabel: typeof getSavedObjectLabel;
+  getAllowedTypes: () => Promise<SavedObjectManagementTypeInfo[]>;
 }
 
 export interface SavedObjectsStartDeps {
@@ -63,7 +71,7 @@ export class SavedObjectsPublicPlugin
     };
   }
   public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
-    return {
+    const start = {
       SavedObjectClass: createSavedObjectClass(
         {
           dataViews,
@@ -78,6 +86,12 @@ export class SavedObjectsPublicPlugin
         getPerPage: () => core.uiSettings.get(PER_PAGE_SETTING),
         getListingLimit: () => core.uiSettings.get(LISTING_LIMIT_SETTING),
       },
+      getSavedObjectLabel,
+      getAllowedTypes: getAllowedTypes.bind(undefined, core.http),
     };
+
+    setSavedObjects(start);
+
+    return start;
   }
 }
