@@ -94,18 +94,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6);
-      await testSubjects.existOrFail('pagination-button-1');
-      await testSubjects.missingOrFail('pagination-button-2');
+      await dataGrid.checkCurrentRowsPerPageToBe(6);
 
-      // now we change to 10 via popover
-      await testSubjects.click('tablePaginationPopoverButton');
-      await retry.try(async function () {
-        return testSubjects.exists('tablePagination-10-rows');
-      });
-      await testSubjects.click('tablePagination-10-rows');
-      await retry.try(async function () {
-        return (await dataGrid.getDocTableRows()).length === 10;
-      });
+      // now we change it via popover
+      await dataGrid.changeRowsPerPageTo(10);
 
       // save as a new search
       const savedSearchTitle = 'search with saved rowsPerPage';
@@ -115,11 +107,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('discoverNewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
+      await dataGrid.checkCurrentRowsPerPageToBe(6);
 
       // open the saved search
       await PageObjects.discover.loadSavedSearch(savedSearchTitle);
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
+      await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
   });
 }
