@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiLink,
   EuiSpacer,
-  EuiCallOut,
   EuiConfirmModal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -72,7 +71,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
       confirmButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
         {
-          defaultMessage: 'Generate an Elasticsearch API key',
+          defaultMessage: 'Generate API key',
         }
       )}
       defaultFocusedButton="confirm"
@@ -81,7 +80,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
         'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
         {
           defaultMessage:
-            'Generating a new Elasticsearch API key will invalidate the previous key. Are you sure you want to generate a new Elasticsearch API key? This can not be undone.',
+            'Generating a new API key will invalidate the previous key. Are you sure you want to generate a new API key? This can not be undone.',
         }
       )}
     </EuiConfirmModal>
@@ -96,7 +95,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
             'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
             {
               defaultMessage:
-                'Keep your Elasticsearch API key somewhere safe while you configure your connector. Generating a new Elasticsearch API key will invalidate the previous key.',
+                'Keep your Elasticsearch API key somewhere safe while you configure your connector.',
             }
           )}
         </EuiText>
@@ -133,25 +132,6 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
             <ApiKey apiKey={data?.encoded} label="API Key" />
           </EuiFlexItem>
         </>
-      )}
-      {hasApiKey && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.warning.title',
-              { defaultMessage: 'An Elasticsearch API key is already in use' }
-            )}
-            color="warning"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.warning.description',
-              {
-                defaultMessage:
-                  'Generating a new Elasticsearch API key will invalidate the previous key.',
-              }
-            )}
-          </EuiCallOut>
-        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
