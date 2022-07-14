@@ -9,6 +9,7 @@ import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } 
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -30,7 +31,7 @@ import type {
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -44,6 +45,7 @@ import {
   DatasourceMap,
   DatasourceFixAction,
   Suggestion,
+  DatasourceLayers,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -117,6 +119,10 @@ const dropProps = {
   order: [1, 0, 0, 0],
 };
 
+const executingContext: KibanaExecutionContext = {
+  type: 'lens',
+};
+
 // Exported for testing purposes only.
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
@@ -154,6 +160,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
   const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
+  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -169,6 +176,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceStates: DatasourceStates;
     visualization: VisualizationState;
     visualizationMap: VisualizationMap;
+    datasourceLayers: DatasourceLayers;
   }>();
 
   renderDeps.current = {
@@ -176,6 +184,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceStates,
     visualization,
     visualizationMap,
+    datasourceLayers,
   };
 
   const onRender$ = useCallback(() => {
@@ -201,10 +210,30 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, []);
 
+  const onData$ = useCallback(
+    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (renderDeps.current) {
+        const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
+
+        if (adapters && adapters.tables) {
+          dispatchLens(
+            onActiveDataChange(
+              Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                (acc, [key, value], index, tables) => ({
+                  ...acc,
+                  [tables.length === 1 ? defaultLayerId : key]: value,
+                }),
+                {}
+              )
+            )
+          );
+        }
+      }
+    },
+    [dispatchLens]
+  );
+
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
-
-  const { datasourceLayers } = framePublicAPI;
-
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
@@ -514,9 +543,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         application={core.application}
-        datasourceMap={datasourceMap}
         activeDatasourceId={activeDatasourceId}
         onRender$={onRender$}
+        onData$={onData$}
       />
     );
   };
@@ -590,8 +619,8 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent,
   application,
   activeDatasourceId,
-  datasourceMap,
   onRender$,
+  onData$,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -611,8 +640,8 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
   activeDatasourceId: string | null;
-  datasourceMap: DatasourceMap;
   onRender$: () => void;
+  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -627,28 +656,8 @@ export const VisualizationWrapper = ({
     [context]
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
-  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
-  const dispatchLens = useLensDispatch();
-  const [defaultLayerId] = Object.keys(datasourceLayers);
 
-  const onData$ = useCallback(
-    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
-      if (adapters && adapters.tables) {
-        dispatchLens(
-          onActiveDataChange(
-            Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-              (acc, [key, value], index, tables) => ({
-                ...acc,
-                [tables.length === 1 ? defaultLayerId : key]: value,
-              }),
-              {}
-            )
-          )
-        );
-      }
-    },
-    [defaultLayerId, dispatchLens]
-  );
+  const dispatchLens = useLensDispatch();
 
   function renderFixAction(
     validationError:
@@ -836,9 +845,7 @@ export const VisualizationWrapper = ({
         onData$={onData$}
         onRender$={onRender$}
         inspectorAdapters={lensInspector.adapters}
-        executionContext={{
-          type: 'lens',
-        }}
+        executionContext={executingContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);

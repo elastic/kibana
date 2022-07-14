@@ -40,6 +40,8 @@ export const getDatatableRenderer = (dependencies: {
     config: DatatableProps,
     handlers: ILensInterpreterRenderHandlers
   ) => {
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+
     const resolvedGetType = await dependencies.getType;
     const { hasCompatibleActions, isInteractive } = handlers;
 
@@ -93,6 +95,5 @@ export const getDatatableRenderer = (dependencies: {
       </KibanaThemeProvider>,
       domNode
     );
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
