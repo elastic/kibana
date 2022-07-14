@@ -72,7 +72,7 @@ function createMockEventLoopDelaysMonitor() {
   return new MockEventLoopDelaysMonitor();
 }
 
-export const mocked = {
+export const eventLoopDelaysMonitorMock = {
   createHistogram: createMockRawNsDataHistogram, // raw data as received from Node.js perf_hooks.monitorEventLoopDelay([options])
   createEventLoopDelaysMonitor: createMockEventLoopDelaysMonitor,
 };

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import { OpsProcessMetrics } from '@kbn/core-metrics-server';
-import { mocked } from '../event_loop_delays/event_loop_delays_monitor.mocks';
+import { eventLoopDelaysMonitorMock } from '../event_loop_delays/event_loop_delays_monitor.mocks';
 
 export function createMockOpsProcessMetrics(): OpsProcessMetrics {
-  const histogram = mocked.createHistogram();
+  const histogram = eventLoopDelaysMonitorMock.createHistogram();
 
   return {
     memory: {

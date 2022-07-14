@@ -10,3 +10,4 @@ export { OsMetricsCollector } from './os';
 export type { OpsMetricsCollectorOptions } from './os';
 export { ProcessMetricsCollector } from './process';
 export { ServerMetricsCollector } from './server';
+export { collectorMock } from './mocks';

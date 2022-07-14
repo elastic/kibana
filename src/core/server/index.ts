@@ -401,7 +401,7 @@ export type {
   MetricsServiceStart,
   IntervalHistogram,
 } from '@kbn/core-metrics-server';
-export { EventLoopDelaysMonitor } from './metrics';
+export { EventLoopDelaysMonitor } from '@kbn/core-metrics-server-internal';
 
 export type { I18nServiceSetup } from './i18n';
 export type {

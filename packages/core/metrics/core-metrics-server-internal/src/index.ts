@@ -10,4 +10,6 @@ export type { InternalMetricsServiceStart, InternalMetricsServiceSetup } from '.
 export { MetricsService } from './metrics_service';
 export { opsConfig } from './ops_config';
 export type { OpsConfigType } from './ops_config';
-export { EventLoopDelaysMonitor } from './event_loop_delays';
+export { EventLoopDelaysMonitor, eventLoopDelaysMonitorMock } from './event_loop_delays';
+export { ServerMetricsCollector } from './collectors/server';
+export { collectorMock } from './collectors';
