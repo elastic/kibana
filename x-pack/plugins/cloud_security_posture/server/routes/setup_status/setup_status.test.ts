@@ -9,8 +9,7 @@ import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
 import { defineGetCspSetupStatusRoute } from './setup_status';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
