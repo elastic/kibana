@@ -7,8 +7,9 @@
 import { JsonObject } from '@kbn/utility-types';
 import { schema } from '@kbn/config-schema';
 import { IRouter, ServiceStatus } from '@kbn/core/server';
-import { getESClusterUuid, getKibanaStats } from '../lib';
-import { MetricResult } from '../plugin';
+import { getESClusterUuid, getKibanaStats } from '../../../../lib';
+import { MetricResult } from '../../../../plugin';
+import { MONITORING_COLLECTION_BASE_PATH } from '../../../../constants';
 
 export function registerDynamicRoute({
   router,
@@ -34,7 +35,7 @@ export function registerDynamicRoute({
 }) {
   router.get(
     {
-      path: `/api/monitoring_collection/{type}`,
+      path: `${MONITORING_COLLECTION_BASE_PATH}/{type}`,
       options: {
         authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
