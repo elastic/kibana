@@ -9,7 +9,18 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiLink,
+  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiAccordion,
+  EuiImage,
+  EuiButton,
+} from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { SampleDataCards } from '@kbn/home-sample-data-cards';
 
@@ -38,7 +49,42 @@ class TutorialDirectoryUi extends React.Component {
           id: 'home.tutorial.tabs.sampleDataTitle',
           defaultMessage: 'Sample data',
         }),
-        content: <SampleDataCards />,
+        content: (
+          <>
+            <EuiPanel hasBorder paddingSize="xl">
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem>
+                  <EuiText size="s" grow={false}>
+                    <h2>Explore our live demo&nbsp;environment</h2>
+                    <p>
+                      Browse our demo environment and explore the many ways you can gain insights
+                      into your own data using Elastic. With its real-world data for search,
+                      observability, and security, it&apos;s just a few clicks before you find
+                      something that you can leverage for your own use cases.
+                    </p>
+                    <EuiButton fill iconSide="right" iconType="popout">
+                      Start exploring
+                    </EuiButton>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiImage
+                    alt="Illustration of Elastic data integrations"
+                    size="l"
+                    src={this.props.addBasePath(
+                      '/plugins/kibanaReact/assets/illustration_welcome_lightmode.svg'
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer />
+            <EuiAccordion buttonContent="Other sample data sets">
+              <EuiSpacer />
+              <SampleDataCards />
+            </EuiAccordion>
+          </>
+        ),
       },
       ...extraTabs.map(({ id, name, component: Component }) => ({
         id,
