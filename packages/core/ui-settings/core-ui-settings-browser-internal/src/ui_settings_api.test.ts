@@ -11,7 +11,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
-import { setup as httpSetup } from '../../test_helpers/http_test_setup';
+import { setup as httpSetup } from '@kbn/core-test-helpers-http-setup-browser';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {

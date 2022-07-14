@@ -7,7 +7,7 @@
  */
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
-import { IUiSettingsClient } from '../ui_settings';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 import { MomentService } from './moment';
 import { StylesService } from './styles';

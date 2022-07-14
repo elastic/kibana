@@ -8,7 +8,7 @@
 
 import { momentMock } from './moment_service.test.mocks';
 import { MomentService } from './moment_service';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { BehaviorSubject } from 'rxjs';
 
 describe('MomentService', () => {
