@@ -77,12 +77,11 @@ function once(emitter, event) {
 
 /**
  * Run a child process and print the output to the log
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
  * @param {string} cmd
  * @param {string[]} args
  * @param {undefined | (SpawnOpts & { logPrefix?: string })} options
  */
-export async function spawnStreaming(log, cmd, args, options = undefined) {
+export async function spawnStreaming(cmd, args, options = undefined) {
   const proc = ChildProcess.spawn(cmd, args, {
     env: {
       ...process.env,
@@ -102,10 +101,6 @@ export async function spawnStreaming(log, cmd, args, options = undefined) {
         if (typeof code !== 'number' || code === 0) {
           return;
         }
-
-        log.error(
-          'HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`'
-        );
 
         throw new Error(`[${cmd}] exitted with code [${code}]`);
       }),

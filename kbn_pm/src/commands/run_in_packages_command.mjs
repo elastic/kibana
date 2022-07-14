@@ -23,6 +23,7 @@ export const command = {
     --filter             package name to be filter packages by, can be specified multiple times
                           and only packages matching this filter will be matched
     --exclude            package name to be excluded, can be specified multiple times
+    --quiet              only log the output of commands if they fail
   `,
   reportTimings: {
     group: 'scripts/kbn run',
@@ -50,24 +51,26 @@ export const command = {
         continue;
       }
 
-      log.info(
-        `[${pkg.name}] running "${scriptName}" script`,
+      log.debug(
+        `running [${scriptName}] script in [${pkg.name}]`,
         scriptArgs.length ? `with args [${scriptArgs.join(' ')}]` : ''
       );
 
       const cwd = Path.resolve(REPO_ROOT, normalizedRepoRelativeDir);
 
-      if (process.env.CI) {
+      if (args.getBooleanValue('quiet')) {
         spawnSync('yarn', ['run', scriptName, ...scriptArgs], {
           cwd,
           description: `${scriptName} in ${pkg.name}`,
         });
       } else {
-        await spawnStreaming(log, 'yarn', ['run', scriptName, ...scriptArgs], {
+        await spawnStreaming('yarn', ['run', scriptName, ...scriptArgs], {
           cwd: cwd,
           logPrefix: '    ',
         });
       }
+
+      log.success(`Ran [${scriptName}] in [${pkg.name}]`);
     }
   },
 };
