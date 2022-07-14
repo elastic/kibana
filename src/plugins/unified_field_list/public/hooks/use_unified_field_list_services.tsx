@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { FieldStatsProps } from './field_stats';
-export { FieldStats } from './field_stats';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { UnifiedFieldListServices } from '../types';
 
-export type { FieldStatsFromSampleProps } from './field_stats_from_sample';
-export { FieldStatsFromSample } from './field_stats_from_sample';
+export const useUnifiedFieldListServices = (): UnifiedFieldListServices => {
+  return useKibana<UnifiedFieldListServices>().services;
+};

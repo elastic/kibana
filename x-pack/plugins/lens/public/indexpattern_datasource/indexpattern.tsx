@@ -267,17 +267,27 @@ export function getIndexPatternDatasource({
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
-            <IndexPatternDataPanel
-              changeIndexPattern={handleChangeIndexPattern}
-              data={data}
-              dataViews={dataViews}
-              fieldFormats={fieldFormats}
-              charts={charts}
-              indexPatternFieldEditor={dataViewFieldEditor}
-              {...props}
-              core={core}
-              uiActions={uiActions}
-            />
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+              }}
+            >
+              <IndexPatternDataPanel
+                changeIndexPattern={handleChangeIndexPattern}
+                data={data}
+                dataViews={dataViews}
+                fieldFormats={fieldFormats}
+                charts={charts}
+                indexPatternFieldEditor={dataViewFieldEditor}
+                {...props}
+                core={core}
+                uiActions={uiActions}
+              />
+            </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
         domElement

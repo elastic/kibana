@@ -9,7 +9,7 @@
   "description": "Contains functionality for the field list which can be integrated into apps sidebar",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["dataViews"],
+  "requiredPlugins": ["dataViews", "data", "fieldFormats", "charts"],
   "optionalPlugins": [],
   "requiredBundles": ["kibanaReact"]
 }

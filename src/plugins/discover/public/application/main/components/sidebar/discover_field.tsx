@@ -26,7 +26,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { FieldStats } from '@kbn/unified-field-list-plugin/public';
+import { FieldStatsFromSample } from '@kbn/unified-field-list-plugin/public';
 import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
@@ -376,7 +376,7 @@ function DiscoverFieldComponent({
       <>
         {showFieldStats && (
           <>
-            <FieldStats />
+            <FieldStatsFromSample />
             <EuiTitle size="xxxs">
               <h5>
                 {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
