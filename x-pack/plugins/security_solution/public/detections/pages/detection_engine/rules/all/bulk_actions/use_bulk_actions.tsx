@@ -20,14 +20,17 @@ import {
   BulkActionEditType,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
+import { downloadBlob } from '../../../../../../common/utils/download_blob';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
 import { executeRulesBulkAction } from '../actions';
+import { getExportedRulesCounts } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
+import { transformExportDataToDryRunResult } from './use_bulk_actions_dry_run';
+import type { ExecuteBulkActionsDryRun, DryRunResult } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 import { prepareSearchParams } from './utils/prepare_search_params';
@@ -43,7 +46,10 @@ import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/d
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
   confirmDeletion: () => Promise<boolean>;
-  confirmBulkEdit: () => Promise<boolean>;
+  showBulkActionConfirmation: (
+    result: DryRunResult | undefined,
+    action: BulkAction
+  ) => Promise<boolean>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -54,7 +60,7 @@ interface UseBulkActionsArgs {
 export const useBulkActions = ({
   filterOptions,
   confirmDeletion,
-  confirmBulkEdit,
+  showBulkActionConfirmation,
   completeBulkEditForm,
   reFetchTags,
   executeBulkActionsDryRun,
@@ -193,12 +199,32 @@ export const useBulkActions = ({
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
-        await executeRulesBulkAction({
+        const response = await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.export,
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
+        });
+
+        const summary = await getExportedRulesCounts(response);
+
+        // if there are failed exported rules notify users.
+        // they can either cancel action or proceed with export of succeeded rules
+        if (
+          (await showBulkActionConfirmation(
+            transformExportDataToDryRunResult(summary),
+            BulkAction.export
+          )) === false
+        ) {
+          return;
+        }
+
+        downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);
+
+        toasts.addSuccess({
+          title: i18n.RULES_BULK_EXPORT_SUCCESS,
+          text: i18n.RULES_BULK_EXPORT_SUCCESS_DESCRIPTION(summary.succeeded, summary.total),
         });
       };
 
@@ -217,11 +243,8 @@ export const useBulkActions = ({
             : { ids: selectedRuleIds },
         });
 
-        // show bulk edit confirmation window only if there is at least one failed rule
-        const hasFailedRules = (dryRunResult?.failedRulesCount ?? 0) > 0;
-
-        if (hasFailedRules && (await confirmBulkEdit()) === false) {
-          // User has cancelled edit action or there are no custom rules to proceed
+        // User has cancelled edit action or there are no custom rules to proceed
+        if ((await showBulkActionConfirmation(dryRunResult, BulkAction.edit)) === false) {
           return;
         }
 
@@ -347,10 +370,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_EXPORT,
               name: i18n.BULK_ACTION_EXPORT,
               'data-test-subj': 'exportRuleBulk',
-              disabled:
-                (containsImmutable && !isAllSelected) ||
-                containsLoading ||
-                selectedRuleIds.length === 0,
+              disabled: containsLoading || selectedRuleIds.length === 0,
               onClick: handleExportAction,
               icon: undefined,
             },
@@ -446,17 +466,17 @@ export const useBulkActions = ({
       setLoadingRules,
       toasts,
       filterQuery,
+      updateRulesCache,
       invalidateRules,
       invalidatePrePackagedRulesStatus,
+      clearRulesSelection,
       confirmDeletion,
-      confirmBulkEdit,
-      completeBulkEditForm,
+      showBulkActionConfirmation,
+      executeBulkActionsDryRun,
       filterOptions,
+      completeBulkEditForm,
       getIsMounted,
       resolveTagsRefetch,
-      updateRulesCache,
-      clearRulesSelection,
-      executeBulkActionsDryRun,
     ]
   );
 

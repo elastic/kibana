@@ -8,13 +8,16 @@
 import type { UseMutateAsyncFunction } from 'react-query';
 import { useMutation } from 'react-query';
 
-import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 import type {
   BulkAction,
   BulkActionEditType,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
-import type { BulkActionResponse } from '../../../../../containers/detection_engine/rules';
+import type {
+  BulkActionResponse,
+  BulkActionSummary,
+} from '../../../../../containers/detection_engine/rules';
 import { performBulkAction } from '../../../../../containers/detection_engine/rules';
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 
@@ -39,6 +42,22 @@ export interface DryRunResult {
   }>;
 }
 
+export const transformExportDataToDryRunResult = (summary: BulkActionSummary) => {
+  return {
+    succeededRulesCount: summary.succeeded,
+    failedRulesCount: summary.failed,
+    // if there are rules that can't be exported, it means they are immutable. So we can safely put error code as immutable
+    ruleErrors: summary.failed
+      ? [
+          {
+            errorCode: BulkActionsDryRunErrCode.IMMUTABLE,
+            message: BulkActionsDryRunErrCode.IMMUTABLE,
+            ruleIds: Array(summary.failed),
+          },
+        ]
+      : [],
+  };
+};
 /**
  * helper utility that transforms raw BulkActionResponse response to DryRunResult format
  * @param response - raw bulk_actions API response ({@link BulkActionResponse})

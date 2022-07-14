@@ -230,7 +230,16 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_DENIED_TITLE = (rulesCount: number) =>
+export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be exported',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
     {
@@ -239,9 +248,9 @@ export const BULK_EDIT_CONFIRMATION_DENIED_TITLE = (rulesCount: number) =>
     }
   );
 
-export const BULK_EDIT_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationPartlyTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionConfirmationPartlyTitle',
     {
       values: { customRulesCount },
       defaultMessage:
@@ -256,8 +265,8 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCloseButtonLabel',
+export const BULK_ACTION_CONFIRMATION_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkActionConfirmationCloseButtonLabel',
   {
     defaultMessage: 'Close',
   }
@@ -269,6 +278,16 @@ export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
     {
       values: { customRulesCount },
       defaultMessage: 'Edit {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+    }
+  );
+
+export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkExportConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage:
+        'Export {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
     }
   );
 

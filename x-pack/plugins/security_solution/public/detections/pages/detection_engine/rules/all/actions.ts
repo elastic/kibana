@@ -14,14 +14,12 @@ import { SecurityPageName } from '../../../../../app/types';
 import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../common/lib/telemetry';
-import { downloadBlob } from '../../../../../common/utils/download_blob';
 import type {
   BulkActionResponse,
   BulkActionSummary,
 } from '../../../../containers/detection_engine/rules';
 import { performBulkAction } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
-import { getExportedRulesCounts } from './helpers';
 import type { RulesTableActions } from './rules_table/rules_table_context';
 
 export const goToRuleEditPage = (
@@ -34,19 +32,31 @@ export const goToRuleEditPage = (
   });
 };
 
-interface ExecuteRulesBulkActionArgs {
+interface BaseRulesBulkActionArgs {
   visibleRuleIds?: string[];
-  action: BulkAction;
   toasts: UseAppToasts;
   search: { query: string } | { ids: string[] };
   payload?: { edit?: BulkActionEditPayload[] };
-  onSuccess?: (toasts: UseAppToasts, action: BulkAction, summary: BulkActionSummary) => void;
   onError?: (toasts: UseAppToasts, action: BulkAction, error: HTTPError) => void;
   onFinish?: () => void;
+  onSuccess?: (toasts: UseAppToasts, action: BulkAction, summary: BulkActionSummary) => void;
   setLoadingRules?: RulesTableActions['setLoadingRules'];
 }
 
-export const executeRulesBulkAction = async ({
+interface RulesBulkActionArgs extends BaseRulesBulkActionArgs {
+  action: Exclude<BulkAction, BulkAction.export>;
+}
+interface ExportRulesBulkActionArgs extends BaseRulesBulkActionArgs {
+  action: BulkAction.export;
+}
+
+// export bulk actions APi returns blob, the rest of actions returns BulkActionResponse JSON
+// hence method overloading to make type safe calls
+export async function executeRulesBulkAction(args: ExportRulesBulkActionArgs): Promise<Blob>;
+export async function executeRulesBulkAction(
+  args: RulesBulkActionArgs
+): Promise<BulkActionResponse>;
+export async function executeRulesBulkAction({
   visibleRuleIds = [],
   action,
   setLoadingRules,
@@ -56,14 +66,13 @@ export const executeRulesBulkAction = async ({
   onSuccess = defaultSuccessHandler,
   onError = defaultErrorHandler,
   onFinish,
-}: ExecuteRulesBulkActionArgs) => {
+}: RulesBulkActionArgs | ExportRulesBulkActionArgs) {
   try {
     setLoadingRules?.({ ids: visibleRuleIds, action });
 
     if (action === BulkAction.export) {
-      const response = await performBulkAction({ ...search, action });
-      downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);
-      onSuccess(toasts, action, await getExportedRulesCounts(response));
+      // on successToast for export handles separately outside of action execution method
+      return performBulkAction({ ...search, action });
     } else {
       const response = await performBulkAction({ ...search, action, edit: payload?.edit });
       sendTelemetry(action, response);
@@ -77,7 +86,7 @@ export const executeRulesBulkAction = async ({
     setLoadingRules?.({ ids: [], action: null });
     onFinish?.();
   }
-};
+}
 
 function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HTTPError) {
   // if response doesn't have number of failed rules, it means the whole bulk action failed
