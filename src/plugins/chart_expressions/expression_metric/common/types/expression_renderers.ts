@@ -15,8 +15,8 @@ export const visType = 'metric';
 export interface DimensionsVisParam {
   metric: ExpressionValueVisDimension | string;
   secondaryMetric?: ExpressionValueVisDimension | string;
+  max?: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
-  progressMax?: ExpressionValueVisDimension | string;
 }
 
 export interface MetricVisParam {

@@ -39,6 +39,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The secondary metric (shown above the primary).',
       }),
     },
+    max: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionMetricVis.function.max.help.', {
+        defaultMessage: 'The dimension containing the maximum value.',
+      }),
+    },
     breakdownBy: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.breakdownBy.help', {
@@ -55,12 +61,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.extra.help', {
         defaultMessage: 'Text to be shown above metric value. Overridden by secondaryMetric.',
-      }),
-    },
-    progressMax: {
-      types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionMetricVis.function.progressMax.help.', {
-        defaultMessage: 'The dimension containing the maximum value.',
       }),
     },
     progressDirection: {
@@ -141,9 +141,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         ]);
       }
 
-      if (args.progressMax) {
+      if (args.max) {
         argsTable.push([
-          [args.progressMax],
+          [args.max],
           i18n.translate('expressionMetricVis.function.dimension.maximum', {
             defaultMessage: 'Maximum',
           }),
@@ -174,8 +174,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           dimensions: {
             metric: args.metric,
             secondaryMetric: args.secondaryMetric,
+            max: args.max,
             breakdownBy: args.breakdownBy,
-            progressMax: args.progressMax,
           },
         },
       },

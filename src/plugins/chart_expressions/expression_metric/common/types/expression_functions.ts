@@ -21,10 +21,10 @@ import { EXPRESSION_METRIC_NAME } from '../constants';
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
   secondaryMetric?: ExpressionValueVisDimension | string;
+  max?: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
   subtitle?: string;
   extraText?: string;
-  progressMax?: ExpressionValueVisDimension | string;
   progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;

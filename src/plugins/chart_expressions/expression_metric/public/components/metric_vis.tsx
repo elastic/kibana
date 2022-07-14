@@ -81,7 +81,7 @@ const getFormatter = (
   if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
     throw new Error(
       i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
-        defaultMessage: 'Metric Visualization - Unsupported column format: "{id}"',
+        defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
         values: {
           id: formatId,
         },
@@ -142,13 +142,49 @@ const getFormatter = (
     : new Intl.NumberFormat(locale, intlOptions).format;
 };
 
-const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
-  paletteParams
-    ? getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-        min: paletteParams.rangeMin,
-        max: paletteParams.rangeMax,
-      }) || defaultColor
-    : defaultColor;
+const getColor = (
+  value: number,
+  paletteParams: CustomPaletteState | undefined,
+  accessors: { metric: string; max?: string; breakdownBy?: string },
+  data: Datatable,
+  rowNumber: number
+) => {
+  if (!paletteParams) {
+    return defaultColor;
+  }
+
+  let rangeMax = paletteParams.rangeMax;
+
+  if (paletteParams.range === 'percent') {
+    if (!accessors.breakdownBy && !accessors.max) {
+      throw new Error(
+        i18n.translate('expressionMetricVis.errors.percentBasedPaletteInvalid', {
+          defaultMessage:
+            'Metric visualization expression - percent-based palette used with no maximum or breakdown-by dimension',
+        })
+      );
+    }
+
+    rangeMax = accessors.breakdownBy
+      ? accessors.max
+        ? data.rows[rowNumber][accessors.max]
+        : Math.max(...data.rows.map((row) => row[accessors.metric]))
+      : Math.max(...data.rows.map((row) => row[accessors.max!]));
+  }
+
+  return (
+    getPaletteService()
+      .get(CUSTOM_PALETTE)
+      ?.getColorForValue?.(
+        value,
+        { ...paletteParams, rangeMax },
+        {
+          min: paletteParams.rangeMin,
+          max: rangeMax,
+        }
+      ) || defaultColor
+  );
+};
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -173,19 +209,19 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
 
   let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
 
-  if (config.dimensions.progressMax) {
-    const maxColId = getColumnByAccessor(config.dimensions.progressMax, data.columns)?.id;
-    if (maxColId) {
-      getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
-        domainMax: _row[maxColId],
-        progressBarDirection: config.metric.progressDirection,
-      });
-    }
+  const maxColId = config.dimensions.max
+    ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
+    : undefined;
+  if (maxColId) {
+    getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
+      domainMax: _row[maxColId],
+      progressBarDirection: config.metric.progressDirection,
+    });
   }
 
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
-  ).map((row) => {
+  ).map((row, rowIdx) => {
     const value = row[primaryMetricColumn.id];
     const title = breakdownByColumn ? row[breakdownByColumn.id] : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
@@ -201,7 +237,17 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
             : config.metric.extraText}
         </span>
       ),
-      color: getColor(value, config.metric.palette),
+      color: getColor(
+        value,
+        config.metric.palette,
+        {
+          metric: primaryMetricColumn.id,
+          max: maxColId,
+          breakdownBy: breakdownByColumn?.id,
+        },
+        data,
+        rowIdx
+      ),
       ...getProgressBarConfig(row),
     };
   });

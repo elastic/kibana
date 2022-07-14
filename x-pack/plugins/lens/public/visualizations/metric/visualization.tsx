@@ -87,10 +87,10 @@ const toExpression = (
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
+          max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy: state.breakdownByAccessor ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           extraText: state.extraText ? [state.extraText] : [],
-          progressMax: state.maxAccessor ? [state.maxAccessor] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
           palette: state.palette?.params
             ? [
@@ -317,6 +317,10 @@ export const getMetricVisualization = ({
     }
     if (prevState.breakdownByAccessor === columnId) {
       delete updated.breakdownByAccessor;
+    }
+
+    if (updated.palette && !updated.maxAccessor && !updated.breakdownByAccessor) {
+      updated.palette.params = { ...updated.palette.params, rangeType: 'number' };
     }
 
     return updated;

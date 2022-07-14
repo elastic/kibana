@@ -26,7 +26,7 @@ import { css } from '@emotion/react';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { defaultPaletteParams } from './palette_config';
+import { defaultPaletteParams, RANGE_MIN } from './palette_config';
 import { MetricVisualizationState } from './visualization';
 
 export function MetricDimensionEditor(
@@ -47,10 +47,9 @@ export function MetricDimensionEditor(
 
   const hasDynamicColoring = Boolean(state?.palette);
 
-  const currentMinMax = {
-    min: 0,
-    max: 1000, // TODO base off max dimension?
-  };
+  const canHavePercentPalette = Boolean(state.maxAccessor || state.breakdownByAccessor);
+
+  const currentMax = 100;
 
   const activePalette = state?.palette || {
     type: 'palette',
@@ -60,12 +59,14 @@ export function MetricDimensionEditor(
       continuity: 'all',
       colorStops: undefined,
       stops: undefined,
-      rangeMin: currentMinMax.min,
-      rangeMax: currentMinMax.max,
+      rangeType: canHavePercentPalette ? 'percent' : 'number',
     },
   };
 
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  const displayStops = applyPaletteParams(props.paletteService, activePalette, {
+    min: activePalette.params?.rangeMin || RANGE_MIN,
+    max: currentMax,
+  });
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
   return (
@@ -151,15 +152,14 @@ export function MetricDimensionEditor(
                   <CustomizablePalette
                     palettes={props.paletteService}
                     activePalette={activePalette}
-                    dataBounds={currentMinMax}
+                    dataBounds={{ min: RANGE_MIN, max: currentMax }}
                     setPalette={(newPalette) => {
-                      // TODO - should this hold? if the new palette is not custom, replace the rangeMin with the artificial one
                       if (
                         newPalette.name !== CUSTOM_PALETTE &&
                         newPalette.params &&
-                        newPalette.params.rangeMin !== currentMinMax.min
+                        newPalette.params.rangeMin !== RANGE_MIN
                       ) {
-                        newPalette.params.rangeMin = currentMinMax.min;
+                        newPalette.params.rangeMin = RANGE_MIN;
                       }
                       setState({
                         ...state,
