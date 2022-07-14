@@ -102,10 +102,13 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string) => {
+export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
   return sendRequest<InstallPackageResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
+    body: {
+      force,
+    },
   });
 };
 

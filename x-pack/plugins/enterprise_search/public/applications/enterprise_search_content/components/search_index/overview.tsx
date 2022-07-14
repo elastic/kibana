@@ -27,6 +27,10 @@ import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
 import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
 import { ManageKeysPopover } from './components/manage_api_keys_popover/popover';
+
+import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
+import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
+import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
@@ -43,6 +47,10 @@ export const SearchIndexOverview: React.FC = () => {
   const { apiKey, isGenerateModalOpen, indexData, isSuccess } = useValues(OverviewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
 
+  const isCrawler = typeof indexData?.crawler !== 'undefined';
+  const isConnector = typeof indexData?.connector !== 'undefined';
+  const isApi = !(isCrawler || isConnector);
+
   const searchIndexApiUrl = cloudContext.cloudId
     ? getDeploymentUrls(cloudContext.cloudId).elasticUrl
     : `http://${window.location.hostname}:9200/`; // TODO change
@@ -51,8 +59,17 @@ export const SearchIndexOverview: React.FC = () => {
 
   return (
     <>
-      {isGenerateModalOpen && isSuccess && (
+      <EuiSpacer />
+      {isApi && <GenerateApiKeyPanel />}
+
+      {isApi && isGenerateModalOpen && (
         <GenerateApiKeyModal indexName={indexData.index.name} onClose={closeGenerateModal} />
+      )}
+      {isCrawler && (
+        <>
+          <CrawlRequestsPanel />
+          <CrawlDetailsFlyout />
+        </>
       )}
       {isSuccess && (
         <>
