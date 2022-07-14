@@ -95,7 +95,9 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
           <UserCommandInput input={command.input} />
         </div>
         <div>
-          <EuiSpacer size="m" />
+          {/* UX desire for 12px (current theme): achived with EuiSpace sizes - s (8px) + xs (4px) */}
+          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
 
           <RenderComponent
             command={command}
