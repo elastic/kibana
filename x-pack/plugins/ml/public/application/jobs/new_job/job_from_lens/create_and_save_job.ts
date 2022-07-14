@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -13,13 +12,13 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { getJobsItemsFromEmbeddable } from './utils';
 import { createJob } from './create_job';
 import { MlApiServices } from '../../../services/ml_api_service';
-// import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export async function createAndSaveJob(
   jobId: string,
+  bucketSpan: string,
   embeddable: Embeddable,
   startJob: boolean,
-  share: SharePluginStart,
+  runInRealTime: boolean,
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient,
   timeFilter: TimefilterContract,
@@ -31,12 +30,13 @@ export async function createAndSaveJob(
     return;
   }
 
-  const { jobConfig, datafeedConfig, start } = await createJob(
+  const { jobConfig, datafeedConfig, start, end } = await createJob(
     vis,
     from,
     to,
     query,
     filters,
+    bucketSpan,
     dataViewClient,
     kibanaConfig,
     timeFilter,
@@ -51,25 +51,8 @@ export async function createAndSaveJob(
 
   await ml.addJob({ jobId: job.job_id, job });
   await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
-  await ml.openJob({ jobId });
-
-  await ml.startDatafeed({ datafeedId, start });
-  // console.log(startResp);
-
-  // const locator = share.url.locators.get(ML_APP_LOCATOR);
-
-  // const url = await locator?.getUrl({
-  //   page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS,
-  //   pageState: {
-  //     vis: vis as any,
-  //     from,
-  //     to,
-  //     query,
-  //     filters,
-  //     filters,
-  //     layerIndex,
-  //   },
-  // });
-
-  // window.open(url, '_blank');
+  if (startJob) {
+    await ml.openJob({ jobId });
+    await ml.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
+  }
 }

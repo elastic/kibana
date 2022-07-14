@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useDebounce from 'react-use/lib/useDebounce';
 
 import './style.scss';
 import {
@@ -30,6 +30,8 @@ import {
   EuiFormRow,
   EuiLoadingSpinner,
   EuiButtonEmpty,
+  EuiCheckbox,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import {
@@ -37,11 +39,13 @@ import {
   createAndSaveJob,
 } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
-import { CREATED_BY_LABEL } from '../../../../common/constants/new_job';
+import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
 import { extractErrorMessage } from '../../../../common/util/errors';
 import { MlApiServices } from '../../../application/services/ml_api_service';
 import { basicJobValidation } from '../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
+import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
+
 // import { getMessages } from '../../../../common/constants/messages';
 // import {} from '../../../application/jobs/new_job/common/job_validator/util'
 // populateValidationMessages
@@ -74,7 +78,12 @@ export const FlyoutBody: FC<Props> = ({
   kibanaConfig,
 }) => {
   const [jobId, setJobId] = useState('');
+  const [startJob, setStartJob] = useState(true);
+  const [runInRealTime, setRunInRealTime] = useState(true);
+  const [bucketSpan, setBucketSpan] = useState(DEFAULT_BUCKET_SPAN);
+
   const [jobIdValid, setJobIdValid] = useState<string>('');
+  const [bucketSpanValid, setBucketSpanValid] = useState<string>('');
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
 
   function createADJobInWizard(layerIndex: number) {
@@ -86,9 +95,10 @@ export const FlyoutBody: FC<Props> = ({
     try {
       await createAndSaveJob(
         jobId,
+        bucketSpan,
         embeddable,
-        true,
-        share,
+        startJob,
+        runInRealTime,
         data.dataViews,
         kibanaConfig,
         data.query.timefilter.timefilter,
@@ -102,11 +112,20 @@ export const FlyoutBody: FC<Props> = ({
     }
   }
 
+  function setStartJobWrapper(start: boolean) {
+    setStartJob(start);
+    setRunInRealTime(start && runInRealTime);
+  }
+
   useDebounce(
     async function validateJobId() {
       setJobIdValid('');
+      setBucketSpanValid('');
       const validationResults = basicJobValidation(
-        { job_id: jobId, analysis_config: { detectors: [] } } as unknown as estypes.MlJob,
+        {
+          job_id: jobId,
+          analysis_config: { detectors: [], bucket_span: bucketSpan },
+        } as unknown as estypes.MlJob,
         undefined,
         { max_model_memory_limit: '', effective_max_model_memory_limit: '' },
         true
@@ -141,10 +160,14 @@ export const FlyoutBody: FC<Props> = ({
           );
         }
       }
+
+      if (validationResults.contains('bucket_span_invalid')) {
+        setBucketSpanValid(invalidTimeIntervalMessage(bucketSpan));
+      }
       setState(STATE.DEFAULT);
     },
     500,
-    [jobId]
+    [jobId, bucketSpan]
   );
 
   //   <EuiFormRow label={title} error={validation.message} isInvalid={validation.valid === false}>
@@ -209,6 +232,65 @@ export const FlyoutBody: FC<Props> = ({
                             }}
                           />
                         </EuiFormRow>
+
+                        <EuiSpacer size="s" />
+                        <EuiAccordion
+                          id="additional-section"
+                          buttonContent={i18n.translate(
+                            'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+                            {
+                              defaultMessage: 'Additional settings',
+                            }
+                          )}
+                        >
+                          <EuiSpacer size="s" />
+                          <EuiFormRow
+                            label="Bucket span"
+                            error={bucketSpanValid}
+                            isInvalid={bucketSpanValid !== ''}
+                          >
+                            <EuiFieldText
+                              disabled={state === STATE.SAVING}
+                              value={bucketSpan}
+                              onChange={(e) => {
+                                setBucketSpan(e.target.value);
+                                setState(STATE.VALIDATING);
+                              }}
+                            />
+                          </EuiFormRow>
+                          <EuiSpacer size="l" />
+                          <EuiFormRow>
+                            <EuiCheckbox
+                              disabled={state === STATE.SAVING}
+                              id="startJob"
+                              checked={startJob}
+                              onChange={(e) => setStartJobWrapper(e.target.checked)}
+                              label={i18n.translate(
+                                'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+                                {
+                                  defaultMessage: 'Start the job after saving',
+                                }
+                              )}
+                            />
+                          </EuiFormRow>
+
+                          <EuiSpacer size="s" />
+                          <EuiFormRow>
+                            <EuiCheckbox
+                              disabled={startJob === false || state === STATE.SAVING}
+                              id="startJob"
+                              checked={runInRealTime}
+                              onChange={(e) => setRunInRealTime(e.target.checked)}
+                              label={i18n.translate(
+                                'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+                                {
+                                  defaultMessage: 'Leave the job running for new data',
+                                }
+                              )}
+                            />
+                          </EuiFormRow>
+                          <EuiSpacer size="m" />
+                        </EuiAccordion>
                       </EuiForm>
                       <EuiSpacer size="m" />
                       <EuiFlexGroup>
@@ -218,7 +300,8 @@ export const FlyoutBody: FC<Props> = ({
                               state === STATE.SAVING ||
                               state === STATE.VALIDATING ||
                               jobId === '' ||
-                              jobIdValid !== ''
+                              jobIdValid !== '' ||
+                              bucketSpanValid !== ''
                             }
                             onClick={createADJob.bind(null, i)}
                             size="s"

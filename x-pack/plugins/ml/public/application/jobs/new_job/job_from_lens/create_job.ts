@@ -74,6 +74,7 @@ export async function createAndStashADJob(
       endString,
       query,
       filters,
+      DEFAULT_BUCKET_SPAN,
       dataViewClient,
       kibanaConfig,
       timeFilter,
@@ -107,6 +108,7 @@ export async function createJob(
   endString: string,
   query: Query,
   filters: Filter[],
+  bucketSpan: string,
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient,
   timeFilter: TimefilterContract,
@@ -116,6 +118,7 @@ export async function createJob(
     vis,
     query,
     filters,
+    bucketSpan,
     dataViewClient,
     kibanaConfig,
     layerIndex
@@ -218,6 +221,7 @@ async function createADJobFromLensSavedObject(
   vis: LensSavedObjectAttributes,
   query: Query,
   filters: Filter[],
+  bucketSpan: string,
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient,
   layerIndex?: number
@@ -250,7 +254,7 @@ async function createADJobFromLensSavedObject(
   jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
 
   jobConfig.data_description.time_field = timeField.sourceField;
-  jobConfig.analysis_config.bucket_span = DEFAULT_BUCKET_SPAN;
+  jobConfig.analysis_config.bucket_span = bucketSpan;
   if (splitField) {
     jobConfig.analysis_config.influencers = [splitField.sourceField];
   }
