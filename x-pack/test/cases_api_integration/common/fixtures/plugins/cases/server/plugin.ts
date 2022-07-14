@@ -15,6 +15,7 @@ import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/serve
 import { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 import { PluginSetupContract as CasesSetup } from '@kbn/cases-plugin/server/types';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
+import { getExternalReferenceAttachment } from './attachments/external_reference';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -35,6 +36,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   }
 
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
+    deps.cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
     deps.cases.attachmentFramework.registerPersistableState(getPersistableStateAttachment());
 
     const router = core.http.createRouter();

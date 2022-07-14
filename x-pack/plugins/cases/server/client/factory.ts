@@ -30,6 +30,7 @@ import {
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup?: SecurityPluginSetup;
@@ -39,6 +40,7 @@ interface CasesClientFactoryArgs {
   actionsPluginStart: ActionsPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }
 
 /**
@@ -131,6 +133,7 @@ export class CasesClientFactory {
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
     });
   }
 }

@@ -39,6 +39,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
+  /**
+   * Attachment types are being registered in
+   * x-pack/test/cases_api_integration/common/fixtures/plugins/cases/server/plugin.ts
+   */
   describe('Persistable state attachments', () => {
     describe('references', () => {
       afterEach(async () => {

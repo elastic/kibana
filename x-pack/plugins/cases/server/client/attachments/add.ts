@@ -12,7 +12,10 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../../common/utils/attachments';
 import { CaseResponse, CommentRequest, CommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
@@ -51,7 +54,12 @@ export const addComment = async (
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  const { logger, authorization, persistableStateAttachmentTypeRegistry } = clientArgs;
+  const {
+    logger,
+    authorization,
+    persistableStateAttachmentTypeRegistry,
+    externalReferenceAttachmentTypeRegistry,
+  } = clientArgs;
 
   decodeCommentRequest(comment);
   try {
@@ -61,6 +69,15 @@ export const addComment = async (
       operation: Operations.createComment,
       entities: [{ owner: comment.owner, id: savedObjectID }],
     });
+
+    if (
+      isCommentRequestTypeExternalReference(query) &&
+      !externalReferenceAttachmentTypeRegistry.has(query.externalReferenceAttachmentTypeId)
+    ) {
+      throw Boom.badRequest(
+        `Attachment type ${query.externalReferenceAttachmentTypeId} is not registered.`
+      );
+    }
 
     if (
       isCommentRequestTypePersistableState(query) &&
