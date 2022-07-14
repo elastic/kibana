@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { ScopedClusterClient } from './scoped_cluster_client';
-export { ClusterClient } from './cluster_client';
-export { configureClient } from './configure_client';
-export { getRequestDebugMeta, getErrorMessage } from './log_query_and_deprecation';
+export { elasticsearchClientMock } from './mocks';
+export type {
+  ClientApiMockInstance,
+  ClusterClientMock,
+  ScopedClusterClientMock,
+  CustomClusterClientMock,
+  DeeplyMockedApi,
+  ElasticsearchClientMock,
+} from './mocks';

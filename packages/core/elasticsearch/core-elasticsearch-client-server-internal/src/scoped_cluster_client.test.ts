@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchClientMock } from './mocks';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ScopedClusterClient } from './scoped_cluster_client';
+
+const createEsClient = () => ({} as unknown as ElasticsearchClient);
 
 describe('ScopedClusterClient', () => {
   it('uses the internal client passed in the constructor', () => {
-    const internalClient = elasticsearchClientMock.createElasticsearchClient();
-    const scopedClient = elasticsearchClientMock.createElasticsearchClient();
+    const internalClient = createEsClient();
+    const scopedClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 
@@ -20,8 +22,8 @@ describe('ScopedClusterClient', () => {
   });
 
   it('uses the scoped client passed in the constructor', () => {
-    const internalClient = elasticsearchClientMock.createElasticsearchClient();
-    const scopedClient = elasticsearchClientMock.createElasticsearchClient();
+    const internalClient = createEsClient();
+    const scopedClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 

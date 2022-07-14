@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { type IncomingHttpHeaders } from 'http';
 import { type DiagnosticResult } from '@elastic/elasticsearch';
 import { type LogMeta } from '@kbn/logging';

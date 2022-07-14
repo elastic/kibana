@@ -7,13 +7,13 @@
  */
 
 import type { IncomingHttpHeaders } from 'http';
-import type {
-  TransportRequestParams,
-  TransportRequestOptions,
-  TransportResult,
-} from '@elastic/transport';
-import type { TransportOptions } from '@elastic/transport/lib/Transport';
-import { Transport } from '@elastic/elasticsearch';
+import {
+  Transport,
+  type TransportOptions,
+  type TransportRequestParams,
+  type TransportRequestOptions,
+  type TransportResult,
+} from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
 import { InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unauthorized';
 

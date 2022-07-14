@@ -11,7 +11,7 @@ import { URL } from 'url';
 import { Duration } from 'moment';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { DEFAULT_HEADERS } from './headers';
 
 /**
  * Parse the client options from given client config and `scoped` flag.

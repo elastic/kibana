@@ -6,17 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { deepFreeze } from '@kbn/std';
-
-export const PRODUCT_ORIGIN_HEADER = 'x-elastic-product-origin';
-
-export const RESERVED_HEADERS = deepFreeze([PRODUCT_ORIGIN_HEADER]);
-
-export const DEFAULT_HEADERS = deepFreeze({
-  // Elasticsearch uses this to identify when a request is coming from Kibana, to allow Kibana to
-  // access system indices using the standard ES APIs.
-  [PRODUCT_ORIGIN_HEADER]: 'kibana',
-});
+import { RESERVED_HEADERS } from '@kbn/core-elasticsearch-client-server';
 
 export const getReservedHeaders = (headerNames: string[]): string[] => {
   const reservedHeaders = [];

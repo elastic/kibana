@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export const PRODUCT_RESPONSE_HEADER = 'x-elastic-product';
+
 /**
  * Response headers check to determine if the response is from Elasticsearch
  * @param headers Response headers

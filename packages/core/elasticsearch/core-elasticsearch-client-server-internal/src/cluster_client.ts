@@ -23,7 +23,7 @@ import type {
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { DEFAULT_HEADERS } from './headers';
 import { createInternalErrorHandler, InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { createTransport } from './create_transport';
 

@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
+import type { Client, TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { PublicKeys } from '@kbn/utility-types';
 import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
-import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
+import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 
 const omittedProps = [
   'diagnostic',

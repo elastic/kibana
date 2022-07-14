@@ -9,7 +9,7 @@
 import { duration } from 'moment';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { DEFAULT_HEADERS } from './headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
