@@ -22,14 +22,14 @@ export const ContainerNameRow = ({
   filterButtonIn,
   filterButtonOut,
 }: ContainerNameRowDeps) => {
-  const [isHover, seIsHover] = useState<boolean | null>(false);
+  const [isHover, setIsHover] = useState<boolean>(false);
 
   const styles = useStyles();
 
   return (
     <EuiFlexItem
-      onMouseEnter={() => seIsHover(true)}
-      onMouseLeave={() => seIsHover(false)}
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
       data-test-subj={ROW_TEST_ID}
     >
       <EuiText size="xs" css={styles.dataInfo}>
