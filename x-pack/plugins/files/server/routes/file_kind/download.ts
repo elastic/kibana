@@ -29,7 +29,7 @@ type Response = Readable;
 function getDownloadedFileName(file: File): string {
   // When creating a file we also calculate the extension so the `file.extension`
   // check is not really necessary except for type checking.
-  if (file.mime && file.extension) {
+  if (file.mimeType && file.extension) {
     return `${file.name}.${file.extension}`;
   }
   return file.name;
@@ -50,7 +50,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   return res.ok({
     body,
     headers: {
-      'content-type': file.mime ?? 'application/octet-stream',
+      'content-type': file.mimeType ?? 'application/octet-stream',
       // note, this name can be overridden by the client if set via a "download" attribute.
       'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
     },
