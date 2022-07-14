@@ -67,7 +67,6 @@ const IS_BUCKETED = false;
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field', {}, true> = {
   type: 'count',
-  priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
