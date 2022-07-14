@@ -14,8 +14,7 @@ import {
   ElasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server/elasticsearch/client/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '@kbn/core/server/http/router/request';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
@@ -357,7 +356,6 @@ describe('benchmarks API', () => {
       it('should build benchmark entry agent policy and package policy', async () => {
         const packagePolicy = createPackagePolicyMock();
         const agentPolicy = createMockAgentPolicy();
-        // @ts-expect-error
         agentPolicy.agents = 3;
 
         const cspRulesStatus = {

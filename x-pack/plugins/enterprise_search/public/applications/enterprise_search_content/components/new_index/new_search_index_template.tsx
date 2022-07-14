@@ -131,6 +131,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     isInvalid={false}
                     value={rawName}
                     onChange={handleNameChange}
+                    autoFocus
                   />
                 </EuiFormRow>
               </EuiFlexItem>

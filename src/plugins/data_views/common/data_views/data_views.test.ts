@@ -142,6 +142,14 @@ describe('IndexPatterns', () => {
     SOClientGetDelay = 0;
   });
 
+  test('does cache ad-hoc data views', async () => {
+    const id = '1';
+    const dataView = await indexPatterns.create({ id });
+    const gettedDataView = await indexPatterns.get(id);
+
+    expect(dataView).toBe(gettedDataView);
+  });
+
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
     const id = '2';
     setDocsourcePayload(id, {
