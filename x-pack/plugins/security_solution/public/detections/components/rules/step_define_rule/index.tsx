@@ -243,36 +243,37 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
     defaultValues?.eqlOptions || {}
   );
-  const [initIsIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
-    useFetchIndex(index, false);
+  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
+    index,
+    false
+  );
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
-  console.error('ANYTHING IN INDEX PATTERN?', indexPattern);
-  console.error('ANYTHING IN initIndexPattern PATTERN?', initIndexPattern);
 
-  const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
   const [dataSourceRadioIdSelected, setDataSourceRadioIdSelected] = useState(
     dataView == null || dataView === '' ? INDEX_PATTERN_SELECT_ID : DATA_VIEW_SELECT_ID
   );
   const [tempDataViewId, setTempDataViewId] = useState(dataView);
   const [tempIndexPattern, setTempIndexPattern] = useState(index);
 
+  // setting the values in the form so that a user can switch between
+  // index and data view and not lose what was selected
   useEffect(() => {
     if (dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
       if (tempIndexPattern != null) {
         form.setFieldValue('index', tempIndexPattern);
-      } else {
-        // form.setFieldValue('index', []);
       }
     } else {
       form.setFieldValue('dataViewId', tempDataViewId);
     }
   }, [form, tempIndexPattern, dataSourceRadioIdSelected, tempDataViewId]);
 
+  // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
+  // when the index pattern changes.
   useEffect(() => {
-    if (dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
+    if (!isIndexPatternLoading && dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
       setIndexPattern(initIndexPattern);
     }
-  }, [initIndexPattern, dataSourceRadioIdSelected]);
+  }, [initIndexPattern, dataSourceRadioIdSelected, isIndexPatternLoading]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = (optionId: string) => {
@@ -488,7 +489,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         componentProps={{
           kibanaDataViews,
           onChangeSelectedDataSource,
-          setIsIndexPatternLoading,
         }}
       />
     );
@@ -535,30 +535,31 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            {dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? (
-              DataViewSelectorMemo
-            ) : (
-              <CommonUseField
-                path="index"
-                onChange={(val) => setTempIndexPattern(val)}
-                config={{
-                  ...schema.index,
-                  labelAppend: indexModified ? (
-                    <MyLabelButton onClick={handleResetIndices} iconType="refresh">
-                      {i18n.RESET_DEFAULT_INDEX}
-                    </MyLabelButton>
-                  ) : null,
-                }}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleIndices',
-                  'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-                  euiFieldProps: {
-                    fullWidth: true,
-                    placeholder: '',
-                  },
-                }}
-              />
-            )}
+            {!isIndexPatternLoading &&
+              (dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? (
+                DataViewSelectorMemo
+              ) : (
+                <CommonUseField
+                  path="index"
+                  onChange={(val) => setTempIndexPattern(val)}
+                  config={{
+                    ...schema.index,
+                    labelAppend: indexModified ? (
+                      <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                        {i18n.RESET_DEFAULT_INDEX}
+                      </MyLabelButton>
+                    ) : null,
+                  }}
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleIndices',
+                    'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      placeholder: '',
+                    },
+                  }}
+                />
+              ))}
           </EuiFlexItem>
         </EuiFlexGroup>
       </RuleTypeEuiFormRow>
@@ -569,6 +570,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
+    isIndexPatternLoading,
   ]);
 
   const QueryBarMemo = useMemo(
@@ -642,8 +644,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           },
     [indexPattern]
   );
-
-  console.error('DID INDEX CHANGE', index);
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
