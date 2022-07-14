@@ -76,6 +76,5 @@ export const useSecuritySolutionNavigation = () => {
     pageName,
     tabName,
     timeline: urlState.timeline,
-    timerange: urlState.timerange,
   });
 };

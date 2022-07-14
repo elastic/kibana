@@ -25,7 +25,6 @@ import {
   isDetectionsPages,
   encodeRisonUrlState,
   isQueryStateEmpty,
-  updateTimerangeUrl,
 } from './helpers';
 import type {
   UrlStateContainerPropTypes,
@@ -38,7 +37,6 @@ import type {
 } from './types';
 import { ALL_URL_STATE_KEYS, isAdministration } from './types';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
-import type { UrlInputsModel } from '../../store/inputs/model';
 import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
 import { getLinkInfo } from '../../links';
 import { useIsGroupedNavigationEnabled } from '../navigation/helpers';
@@ -97,7 +95,6 @@ export const useUrlStateHooks = ({
             const stateToUpdate = getUpdateToFormatUrlStateString({
               isFirstPageLoad,
               newUrlStateString,
-              updateTimerange: isDetectionsPages(pageName) || isFirstPageLoad,
               urlKey,
             });
 
@@ -227,12 +224,10 @@ const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: st
 export const getUpdateToFormatUrlStateString = ({
   isFirstPageLoad,
   newUrlStateString,
-  updateTimerange,
   urlKey,
 }: {
   isFirstPageLoad: boolean;
   newUrlStateString: string;
-  updateTimerange: boolean;
   urlKey: KeyUrlState;
 }): ReplaceStateInLocation | undefined => {
   if (isQueryStateEmpty(decodeRisonUrlState<ValueUrlState>(newUrlStateString), urlKey)) {
@@ -240,16 +235,7 @@ export const getUpdateToFormatUrlStateString = ({
       urlStateToReplace: '',
       urlStateKey: urlKey,
     };
-  } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
-    const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
-    if (queryState != null && queryState.global != null) {
-      return {
-        urlStateToReplace: updateTimerangeUrl(queryState, isFirstPageLoad),
-        urlStateKey: urlKey,
-      };
-    }
   }
-  return undefined;
 };
 
 const isTimelinePresentInUrlStateString = (urlStateString: string, timeline: TimelineUrl) => {

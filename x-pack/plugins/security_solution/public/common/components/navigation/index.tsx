@@ -84,7 +84,6 @@ export const TabNavigationComponent: React.FC<
         pathName={pathName}
         tabName={tabName}
         timeline={urlState.timeline}
-        timerange={urlState.timerange}
       />
     );
   }
