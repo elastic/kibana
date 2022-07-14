@@ -24,7 +24,6 @@ import { schema } from '../form_schema';
 interface Props {
   options: TimestampOption[];
   isLoadingOptions: boolean;
-  isExistingIndexPattern: boolean;
   isLoadingMatchedIndices: boolean;
   hasMatchedIndices: boolean;
 }
@@ -73,7 +72,6 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
 export const TimestampField = ({
   options = [],
   isLoadingOptions = false,
-  isExistingIndexPattern,
   isLoadingMatchedIndices,
   hasMatchedIndices,
 }: Props) => {
@@ -85,11 +83,7 @@ export const TimestampField = ({
   const selectTimestampHelp = options.length ? timestampFieldHelp : '';
 
   const timestampNoFieldsHelp =
-    options.length === 0 &&
-    !isExistingIndexPattern &&
-    !isLoadingMatchedIndices &&
-    !isLoadingOptions &&
-    hasMatchedIndices
+    options.length === 0 && !isLoadingMatchedIndices && !isLoadingOptions && hasMatchedIndices
       ? noTimestampOptionText
       : '';
 

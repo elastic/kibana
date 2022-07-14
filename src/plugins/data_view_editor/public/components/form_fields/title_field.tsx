@@ -30,7 +30,6 @@ interface RefreshMatchedIndicesResult {
 }
 
 interface TitleFieldProps {
-  existingIndexPatterns: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
@@ -54,20 +53,6 @@ const mustMatchError = {
     defaultMessage: 'Name must match one or more data streams, indices, or index aliases.',
   }),
 };
-
-const createTitlesNoDupesValidator = (
-  namesNotAllowed: string[]
-): ValidationConfig<{}, string, string> => ({
-  validator: ({ value }) => {
-    if (namesNotAllowed.includes(value)) {
-      return {
-        message: i18n.translate('indexPatternEditor.dataViewExists.ValidationErrorMessage', {
-          defaultMessage: 'An index pattern with this name already exists.',
-        }),
-      };
-    }
-  },
-});
 
 interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
@@ -122,7 +107,6 @@ const createMatchesIndicesValidator = ({
 });
 
 interface GetTitleConfigArgs {
-  namesNotAllowed: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
@@ -130,7 +114,6 @@ interface GetTitleConfigArgs {
 }
 
 const getTitleConfig = ({
-  namesNotAllowed,
   isRollup,
   rollupIndicesCapabilities,
   refreshMatchedIndices,
@@ -145,7 +128,6 @@ const getTitleConfig = ({
       refreshMatchedIndices,
       isRollup,
     }),
-    createTitlesNoDupesValidator(namesNotAllowed),
   ];
 
   return {
@@ -155,7 +137,6 @@ const getTitleConfig = ({
 };
 
 export const TitleField = ({
-  existingIndexPatterns,
   isRollup,
   matchedIndices,
   rollupIndicesCapabilities,
@@ -166,19 +147,12 @@ export const TitleField = ({
   const fieldConfig = useMemo(
     () =>
       getTitleConfig({
-        namesNotAllowed: existingIndexPatterns,
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
         refreshMatchedIndices,
       }),
-    [
-      existingIndexPatterns,
-      isRollup,
-      matchedIndices,
-      rollupIndicesCapabilities,
-      refreshMatchedIndices,
-    ]
+    [isRollup, matchedIndices, rollupIndicesCapabilities, refreshMatchedIndices]
   );
 
   return (
