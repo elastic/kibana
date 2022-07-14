@@ -29,18 +29,18 @@ export const FILE_FORMATS = {
   // XML: 'xml',
 };
 
-export const JOB_FIELD_TYPES = {
+export const SUPPORTED_FIELD_TYPES = {
   BOOLEAN: 'boolean',
   DATE: 'date',
   GEO_POINT: 'geo_point',
   GEO_SHAPE: 'geo_shape',
+  HISTOGRAM: 'histogram',
   IP: 'ip',
   KEYWORD: 'keyword',
   NUMBER: 'number',
   TEXT: 'text',
-  HISTOGRAM: 'histogram',
-  UNKNOWN: 'unknown',
   VERSION: 'version',
+  UNKNOWN: 'unknown',
 } as const;
 
 export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];

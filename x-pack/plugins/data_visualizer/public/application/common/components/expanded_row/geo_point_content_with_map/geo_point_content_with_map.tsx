@@ -13,7 +13,7 @@ import { DocumentStatsTable } from '../../stats_table/components/field_data_expa
 import { ExamplesList } from '../../examples_list';
 import { FieldVisConfig } from '../../stats_table/types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
@@ -35,7 +35,8 @@ export const GeoPointContentWithMap: FC<{
         dataView?.id !== undefined &&
         config !== undefined &&
         config.fieldName !== undefined &&
-        (config.type === JOB_FIELD_TYPES.GEO_POINT || config.type === JOB_FIELD_TYPES.GEO_SHAPE)
+        (config.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
+          config.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE)
       ) {
         const params = {
           indexPatternId: dataView.id,

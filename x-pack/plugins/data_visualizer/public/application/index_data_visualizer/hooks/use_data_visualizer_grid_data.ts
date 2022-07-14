@@ -20,7 +20,7 @@ import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
 import { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
-  JOB_FIELD_TYPES,
+  SUPPORTED_FIELD_TYPES,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
 } from '../../../../common/constants';
@@ -319,7 +319,7 @@ export const useDataVisualizerGridData = (
       const metricConfig: FieldVisConfig = {
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
-        type: JOB_FIELD_TYPES.NUMBER,
+        type: SUPPORTED_FIELD_TYPES.NUMBER,
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
