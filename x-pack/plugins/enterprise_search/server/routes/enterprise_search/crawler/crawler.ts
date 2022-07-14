@@ -42,7 +42,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/ent/v1/internal/crawler/validate_url',
+      path: '/api/ent/v1/internal/crawler2/validate_url',
     })
   );
 
