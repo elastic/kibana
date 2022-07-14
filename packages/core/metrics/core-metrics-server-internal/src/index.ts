@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { collectorMock } from './collectors/mocks';
-
-export const mockOpsCollector = collectorMock.create();
-
-jest.doMock('./ops_metrics_collector', () => ({
-  OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
-}));
+export type { InternalMetricsServiceStart, InternalMetricsServiceSetup } from './metrics_service';
+export { MetricsService } from './metrics_service';
+export { opsConfig } from './ops_config';
+export type { OpsConfigType } from './ops_config';
+export { EventLoopDelaysMonitor } from './event_loop_delays';
