@@ -25,14 +25,14 @@ export const microsToMillis = (microseconds: number | null): number | null => {
 
 export const formatDuration = (durationMicros: number) => {
   if (durationMicros < MILLIS_LIMIT) {
-    return i18n.translate('xpack.synthetics.pingList.durationMsColumnFormatting', {
+    return i18n.translate('xpack.synthetics.overview.durationMsFormatting', {
       values: { millis: microsToMillis(durationMicros) },
       defaultMessage: '{millis} ms',
     });
   }
   const seconds = (durationMicros / ONE_SECOND_AS_MICROS).toFixed(0);
 
-  return i18n.translate('xpack.synthetics.pingist.durationSecondsColumnFormatting', {
+  return i18n.translate('xpack.synthetics.overview.durationSecondsFormatting', {
     values: { seconds },
     defaultMessage: '{seconds} s',
   });
