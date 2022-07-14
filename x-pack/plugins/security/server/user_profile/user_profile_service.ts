@@ -310,7 +310,7 @@ export class UserProfileService {
 
       return (
         body.profiles
-          // "uuids" is just a hint that allows to put user profiles with the requested uids on the top of the
+          // "uids" is just a hint that allows to put user profiles with the requested uids on the top of the
           // returned list, but if Elasticsearch cannot find user profiles for all requested uids it might include
           // other "matched" user profiles as well.
           .filter((rawProfile) => uids.has(rawProfile.uid))

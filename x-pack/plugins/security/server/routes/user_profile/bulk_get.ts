@@ -27,9 +27,9 @@ export function defineBulkGetUserProfilesRoute({
       options: { tags: ['access:bulkGetUserProfiles'] },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const userProfileService = getUserProfileService();
+      const userProfileServiceInternal = getUserProfileService();
       try {
-        const profiles = await userProfileService.bulkGet({
+        const profiles = await userProfileServiceInternal.bulkGet({
           uids: new Set(request.body.uids),
           dataPath: request.body.dataPath,
         });
