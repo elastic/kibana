@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { UiSettingsParams } from '../../../types';
 import { getDateFormatSettings } from './date_formats';
 
 describe('accessibility settings', () => {

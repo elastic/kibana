@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { UiSettingsParams } from '../../../types';
 
 function parseThemeTags() {
   if (!process.env.KBN_OPTIMIZER_THEMES || process.env.KBN_OPTIMIZER_THEMES === '*') {

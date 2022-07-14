@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { UiSettingsParams } from '../../../types';
 
 export const getNotificationsSettings = (): Record<string, UiSettingsParams> => {
   return {
