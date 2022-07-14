@@ -484,6 +484,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return this._source.getLicensedFeatures();
   }
 
+  getLayerTypeIconName() {
+    return 'grid';
+  }
+
   getLayerIcon(): LayerIcon {
     return {
       icon: <EuiIcon size="m" type="grid" />,
