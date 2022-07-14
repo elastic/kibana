@@ -261,39 +261,13 @@ export class SearchSource {
       filters = this.getFilters(originalFilters);
     }
 
-    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/gi;
     const queryString = Array.isArray(query) ? query.map((q) => q.query) : query?.query;
 
-    type ParseActiveIndexPatternFromString = (
-      str: string,
-      indexPatternSet?: Set<string>
-    ) => string[];
-    const parseActiveIndexPatternFromQueryString: ParseActiveIndexPatternFromString = (
-      str,
-      indexPatternSet = new Set()
-    ) => {
-      let m;
-      while ((m = regex.exec(str)) !== null) {
-        // This is necessary to avoid infinite loops with zero-width matches
-        if (m.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
-
-        m.forEach((match, groupIndex) => {
-          if (groupIndex === 2) {
-            indexPatternSet.add(match);
-          }
-        });
-      }
-
-      return [...indexPatternSet];
-    };
-
-    const matchedIndexPatternFromQuery =
+    const indexPatternFromQuery =
       typeof queryString === 'string'
-        ? parseActiveIndexPatternFromQueryString(queryString)
+        ? this.parseActiveIndexPatternFromQueryString(queryString)
         : queryString?.reduce((acc: string[], currStr: string) => {
-            return acc.concat(parseActiveIndexPatternFromQueryString(currStr));
+            return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
           }, []) ?? [];
 
     const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
@@ -310,7 +284,7 @@ export class SearchSource {
       } else {
         return acc;
       }
-    }, matchedIndexPatternFromQuery);
+    }, indexPatternFromQuery);
 
     const dedupActiveIndexPattern = new Set([...activeIndexPattern]);
 
@@ -1058,5 +1032,26 @@ export class SearchSource {
     }
 
     return ast;
+  }
+
+  parseActiveIndexPatternFromQueryString(queryString: string): string[] {
+    let m;
+    const indexPatternSet: Set<string> = new Set();
+    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/g;
+
+    while ((m = regex.exec(queryString)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      m.forEach((match, groupIndex) => {
+        if (groupIndex === 2) {
+          indexPatternSet.add(match);
+        }
+      });
+    }
+
+    return [...indexPatternSet];
   }
 }
