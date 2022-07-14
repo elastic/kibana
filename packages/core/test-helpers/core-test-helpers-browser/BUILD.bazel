@@ -37,7 +37,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react",
   "//packages/core/execution-context/core-execution-context-browser-mocks:npm_module_types",
   "//packages/core/fatal-errors/core-fatal-errors-browser-mocks:npm_module_types",
   "//packages/core/injected-metadata/core-injected-metadata-browser-mocks:npm_module_types",
