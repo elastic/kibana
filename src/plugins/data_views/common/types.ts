@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { QueryDslQueryContainer, Time } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   SavedObject,
   SavedObjectsCreateOptions,
@@ -326,9 +326,9 @@ export type AggregationRestrictions = Record<
   string,
   {
     agg?: string;
+    interval?: number;
     fixed_interval?: string;
-    interval?: Time;
-    calendar_interval?: Time;
+    calendar_interval?: string;
     delay?: string;
     time_zone?: string;
   }

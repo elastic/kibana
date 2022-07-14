@@ -8,6 +8,7 @@
 
 import { RollupGetRollupIndexCapsRollupJobSummary as RollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
+import { AggregationRestrictions } from '../../../common';
 import { RollupIndexCapability } from './map_capabilities';
 
 /**
@@ -66,7 +67,7 @@ export function mergeJobConfigurations(
         // date histogram field.
         if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
           allAggs[aggName] = allAggs[aggName] || {};
-          allAggs[aggName][fieldName] = { ...agg };
+          allAggs[aggName][fieldName] = { ...agg } as AggregationRestrictions[string];
         }
         // If aggregation already exists, attempt to merge it
         else {
