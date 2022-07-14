@@ -64,7 +64,7 @@ export const UnverifiedPackageModal: React.FC<{
         children={
           <FormattedMessage
             id="xpack.fleet.unverifiedPackageModal.calloutBody"
-            defaultMessage="This integration contains an unisgned package with unknown authenticity and could contain malicious files. "
+            defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. "
           />
         }
       />
