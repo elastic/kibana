@@ -18,9 +18,10 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { FleetErrorResponse } from '../../../../common';
 
 import type { PackageInfo } from '../../../types';
-import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
+import { sendInstallPackage, sendRemovePackage, useLink, useStartServices } from '../../../hooks';
 import { InstallStatus } from '../../../types';
 import { isVerificationError } from '../services';
+import { UnverifiedPackageModal } from '../components';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -29,7 +30,6 @@ interface PackagesInstall {
 interface PackageInstallItem {
   status: InstallStatus;
   version: string | null;
-  error?: FleetErrorResponse;
 }
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
@@ -50,13 +50,13 @@ function usePackageInstall({
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
+  const { overlays } = useStartServices();
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status, version, error }: SetPackageInstallStatusProps) => {
+    ({ name, status, version }: SetPackageInstallStatusProps) => {
       const packageProps: PackageInstallItem = {
         status,
         version,
-        error,
       };
       setPackage((prev: PackagesInstall) => ({
         ...prev,
@@ -73,18 +73,50 @@ function usePackageInstall({
     [packages]
   );
 
+  const optionallyForceInstall = async (
+    installProps: InstallPackageProps,
+    prevStatus: PackageInstallItem
+  ) => {
+    const forceInstall = await confirmForceInstall(installProps);
+    if (forceInstall) {
+      installPackage({ ...installProps, force: true });
+    } else {
+      setPackageInstallStatus({ ...prevStatus, name: installProps.name });
+    }
+  };
+
+  const confirmForceInstall = (pkg: { name: string; version: string }): Promise<boolean> =>
+    new Promise((resolve) => {
+      const session = overlays.openModal(
+        toMountPoint(
+          <UnverifiedPackageModal
+            pkg={pkg}
+            onConfirm={() => {
+              session.close();
+              resolve(true);
+            }}
+            onCancel={() => {
+              session.close();
+              resolve(false);
+            }}
+          />
+        )
+      );
+    });
+
   const installPackage = useCallback(
-    async ({
-      name,
-      version,
-      title,
-      fromUpdate = false,
-      isReinstall = false,
-      force = false,
-    }: InstallPackageProps) => {
-      const currStatus = getPackageInstallStatus(name);
+    async (props: InstallPackageProps) => {
+      const {
+        name,
+        version,
+        title,
+        fromUpdate = false,
+        isReinstall = false,
+        force = false,
+      } = props;
+      const prevStatus = getPackageInstallStatus(name);
       const newStatus = {
-        ...currStatus,
+        ...prevStatus,
         name,
         status: isReinstall ? InstallStatus.reinstalling : InstallStatus.installing,
       };
@@ -92,21 +124,17 @@ function usePackageInstall({
 
       const res = await sendInstallPackage(name, version, isReinstall || force);
       if (res.error) {
+        if (isVerificationError(res.error)) {
+          optionallyForceInstall(props, prevStatus);
+          return;
+        }
         if (fromUpdate) {
           // if there is an error during update, set it back to the previous version
           // as handling of bad update is not implemented yet
-          setPackageInstallStatus({ ...currStatus, name });
+          setPackageInstallStatus({ ...prevStatus, name });
         } else {
-          setPackageInstallStatus({
-            name,
-            status: InstallStatus.notInstalled,
-            version,
-            error: res.error,
-          });
+          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
         }
-
-        // no toast for verification errors as we give the user the option to proceed
-        if (isVerificationError(res.error)) return;
 
         notifications.toasts.addWarning({
           title: toMountPoint(
@@ -176,13 +204,14 @@ function usePackageInstall({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       getPackageInstallStatus,
-      notifications.toasts,
       setPackageInstallStatus,
+      notifications.toasts,
+      theme$,
       getPath,
       history,
-      theme$,
     ]
   );
 
