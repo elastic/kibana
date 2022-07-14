@@ -37,8 +37,8 @@ export interface PerformanceMetricEvent {
 
 export const PERFORMANCE_METRIC_EVENT_SCHEMA: Record<keyof PerformanceMetricEvent, any> = {
   duration: {
-    type: 'long',
-    _meta: { description: 'The main event duration', optional: true },
+    type: 'integer',
+    _meta: { description: 'The main event duration in ms', optional: true },
   },
   jsHeapSizeLimit: {
     type: 'long',

@@ -170,7 +170,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       key1: 'time-to-data',
       value1: data.timeToData,
       key2: 'num-of-panels',
-      value2: data.timeToData,
+      value2: data.numOfPanels,
     });
   }
 

@@ -148,7 +148,7 @@ export class DashboardPlugin
         ...PERFORMANCE_METRIC_EVENT_SCHEMA,
         status: {
           type: 'keyword',
-          _meta: { description: 'Dashborad load status' },
+          _meta: { description: 'Dashboard load status' },
         },
       },
     });
