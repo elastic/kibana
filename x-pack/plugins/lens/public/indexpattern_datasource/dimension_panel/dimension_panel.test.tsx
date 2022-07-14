@@ -14,7 +14,6 @@ import {
   EuiListGroup,
   EuiRange,
   EuiSelect,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
