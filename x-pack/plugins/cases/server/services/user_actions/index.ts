@@ -18,6 +18,7 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KueryNode } from '@kbn/es-query';
+import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
   isPushedUserAction,
@@ -54,11 +55,7 @@ import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client/utils';
 import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
-import {
-  defaultSortField,
-  isCommentRequestTypeExternalReferenceSO,
-  isCommentRequestTypePersistableState,
-} from '../../common/utils';
+import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 
