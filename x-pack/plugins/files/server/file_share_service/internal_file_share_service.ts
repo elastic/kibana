@@ -11,7 +11,6 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import type {
-  FileSavedObjectAttributes,
   FileShareJSON,
   FileShareSavedObjectAttributes,
   UpdatableFileShareAttributes,
@@ -116,13 +115,13 @@ export class InternalFileShareService implements FileShareServiceStart {
   public async update({
     id,
     attributes,
-  }: UpdateArgs): Promise<FileSavedObjectAttributes & { id: string }> {
+  }: UpdateArgs): Promise<FileShareSavedObjectAttributes & { id: string }> {
     const result = await this.savedObjects.update<FileShareSavedObjectAttributes>(
       this.savedObjectsType,
       id,
       attributes
     );
-    return { id, ...(result.attributes as FileSavedObjectAttributes) };
+    return { id, ...(result.attributes as FileShareSavedObjectAttributes) };
   }
 
   public async list({ file, page, perPage }: ListArgs): Promise<FileShareJSON[]> {

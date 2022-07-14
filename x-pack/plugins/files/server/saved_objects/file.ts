@@ -12,38 +12,44 @@ import type { FileSavedObjectAttributes } from '../../common';
 type Properties = Record<keyof FileSavedObjectAttributes, SavedObjectsFieldMapping>;
 
 const properties: Properties = {
-  created_at: {
+  created: {
     type: 'date',
   },
-  updated_at: {
+  Updated: {
     type: 'date',
   },
   name: {
     type: 'text',
   },
-  alt: {
+  Alt: {
     type: 'text',
   },
-  status: {
+  Status: {
     type: 'keyword',
   },
-  content_ref: {
+  mime_type: {
     type: 'keyword',
   },
-  mime: {
-    type: 'keyword',
-  },
-  extension: {
+  Extension: {
     type: 'keyword',
   },
   size: {
     type: 'long',
   },
-  meta: {
+  Meta: {
     type: 'object',
   },
-  file_kind: {
+  FileKind: {
     type: 'keyword',
+  },
+  ChunkSize: {
+    type: 'long',
+  },
+  Compression: {
+    type: 'keyword',
+  },
+  hash: {
+    type: 'object',
   },
 };
 
