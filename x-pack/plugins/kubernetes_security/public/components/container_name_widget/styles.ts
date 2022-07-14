@@ -7,57 +7,54 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font, border } = euiTheme;
+    const { size, font, colors } = euiTheme;
 
     const container: CSSObject = {
       padding: size.base,
-      border: border.thin,
-      borderRadius: border.radius.medium,
+      border: euiTheme.border.thin,
+      borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
-      position: 'relative',
       height: '100%',
-    };
-
-    const title: CSSObject = {
-      marginBottom: size.m,
-      fontSize: size.m,
-      fontWeight: font.weight.bold,
+      minHeight: '250px',
+      position: 'relative',
+      marginBottom: size.l,
     };
 
     const dataInfo: CSSObject = {
       marginBottom: size.xs,
-      height: '18px',
-      fontSize: size.l,
-      fontWeight: font.weight.bold,
-    };
-
-    const dataValue: CSSObject = {
-      fontWeight: font.weight.semiBold,
-      marginLeft: 'auto',
+      display: 'flex',
+      alignItems: 'center',
+      height: size.l,
+      position: 'relative',
     };
 
     const filters: CSSObject = {
       marginLeft: size.s,
+      position: 'absolute',
+      left: '50%',
+      backgroundColor: colors.emptyShade,
+      borderRadius: euiTheme.border.radius.small,
+      border: euiTheme.border.thin,
+      bottom: '-25px',
+      boxShadow: `0 ${size.xs} ${size.xs} ${transparentize(euiTheme.colors.shadow, 0.04)}`,
     };
 
-    const loadingSpinner: CSSObject = {
-      alignItems: 'center',
-      margin: `${size.xs} auto ${size.xl} auto`,
+    const countValue: CSSObject = {
+      fontWeight: font.weight.semiBold,
     };
 
     return {
       container,
-      title,
       dataInfo,
-      dataValue,
       filters,
-      loadingSpinner,
+      countValue,
     };
   }, [euiTheme]);
 

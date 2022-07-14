@@ -58,3 +58,24 @@ export const COUNT_WIDGET_CONTAINER_IMAGES = i18n.translate(
     defaultMessage: 'Container Images',
   }
 );
+
+export const CONTAINER_NAME_SESSION = i18n.translate(
+  'xpack.kubernetesSecurity.containerNameWidget.containerImage',
+  {
+    defaultMessage: 'Container Images Session',
+  }
+);
+
+export const CONTAINER_NAME_SESSION_COUNT_COLUMN = i18n.translate(
+  'xpack.kubernetesSecurity.containerNameWidget.containerImageCountColumn',
+  {
+    defaultMessage: 'Count',
+  }
+);
+
+export const CONTAINER_NAME_SESSION_ARIA_LABEL = i18n.translate(
+  'xpack.kubernetesSecurity.containerNameWidget.containerImageAriaLabel',
+  {
+    defaultMessage: 'Container Name Session Widget',
+  }
+);
