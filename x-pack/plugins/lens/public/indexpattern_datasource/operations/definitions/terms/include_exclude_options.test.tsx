@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiSwitchEvent, EuiSwitch, EuiFieldText } from '@elastic/eui';
 import { IncludeExcludeRow } from './include_exclude_options';
 
 const tableRows = [
@@ -25,7 +25,15 @@ const tableRows = [
 describe('IncludeExcludeComponent', () => {
   it('should render 2 EuiComboBox component correctly', () => {
     const instance = shallow(
-      <IncludeExcludeRow include={[]} exclude={[]} updateParams={jest.fn()} columnId="1" />
+      <IncludeExcludeRow
+        include={[]}
+        exclude={[]}
+        updateParams={jest.fn()}
+        columnId="1"
+        isNumberField={false}
+        includeIsRegex={false}
+        excludeIsRegex={false}
+      />
     );
 
     expect(instance.find(EuiComboBox).length).toEqual(2);
@@ -38,8 +46,11 @@ describe('IncludeExcludeComponent', () => {
         include={undefined}
         exclude={undefined}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={false}
+        excludeIsRegex={false}
       />
     );
     act(() => {
@@ -58,8 +69,11 @@ describe('IncludeExcludeComponent', () => {
         include={undefined}
         exclude={undefined}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={false}
+        excludeIsRegex={false}
       />
     );
     act(() => {
@@ -78,8 +92,11 @@ describe('IncludeExcludeComponent', () => {
         include={['FEF']}
         exclude={undefined}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={false}
+        excludeIsRegex={false}
       />
     );
     expect(
@@ -94,8 +111,11 @@ describe('IncludeExcludeComponent', () => {
         include={['FEF']}
         exclude={['ABC']}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={false}
+        excludeIsRegex={false}
       />
     );
     expect(
@@ -110,8 +130,11 @@ describe('IncludeExcludeComponent', () => {
         include={undefined}
         exclude={undefined}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={false}
+        excludeIsRegex={false}
       />
     );
     expect(
@@ -119,23 +142,51 @@ describe('IncludeExcludeComponent', () => {
     ).toEqual([{ label: 'ABC' }, { label: 'FEF' }]);
   });
 
-  it('should run as single selection if pattern is given', () => {
+  it('should display an input text if pattern is selected', () => {
     const onUpdateSpy = jest.fn();
-    const instance = shallow(
+    const instance = mount(
       <IncludeExcludeRow
-        include={undefined}
+        include={['test.*']}
         exclude={undefined}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={true}
+        excludeIsRegex={false}
       />
     );
     act(() => {
-      instance.find(EuiComboBox).first().prop('onCreateOption')!('test.*', [{ label: 'ABC' }]);
+      instance.find(EuiSwitch).first().prop('onChange')({
+        target: { checked: true },
+      } as EuiSwitchEvent);
+    });
+    expect(instance.find(EuiFieldText).length).toBe(1);
+  });
+
+  it('should run updateParams on the input text if pattern is selected', () => {
+    const onUpdateSpy = jest.fn();
+    const instance = mount(
+      <IncludeExcludeRow
+        include={['test.*']}
+        exclude={undefined}
+        updateParams={onUpdateSpy}
+        isNumberField={false}
+        columnId="1"
+        tableRows={tableRows}
+        includeIsRegex={true}
+        excludeIsRegex={false}
+      />
+    );
+    act(() => {
+      instance.find(EuiSwitch).first().prop('onChange')({
+        target: { checked: true },
+      } as EuiSwitchEvent);
     });
     expect(
-      instance.find('[data-test-subj="lens-include-terms-combobox"]').prop('singleSelection')
-    ).toBe(true);
+      instance.find('[data-test-subj="lens-include-terms-regex-input"]').first().prop('value')
+    ).toEqual('test.*');
+    expect(onUpdateSpy.mock.calls.length).toBe(1);
   });
 
   it('should run as multi selection if normal string is given', () => {
@@ -145,8 +196,11 @@ describe('IncludeExcludeComponent', () => {
         include={undefined}
         exclude={undefined}
         updateParams={onUpdateSpy}
+        isNumberField={false}
         columnId="1"
         tableRows={tableRows}
+        includeIsRegex={false}
+        excludeIsRegex={false}
       />
     );
     act(() => {

@@ -8,17 +8,12 @@
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSpacer, EuiSwitch, EuiFieldText, EuiText } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin';
 
 export interface IncludeExcludeOptions {
   label: string;
 }
-
-const isRegex = (text: string) => {
-  const specialCharacters = /[`@#&*()+\=\[\]{}"\\|.<>\/?~]/;
-  return specialCharacters.test(text);
-};
 
 const getTermsIncludeExcludeOptions = (
   include?: string[] | number[],
@@ -41,16 +36,22 @@ export const IncludeExcludeRow = ({
   exclude,
   tableRows,
   columnId,
+  isNumberField,
+  includeIsRegex,
+  excludeIsRegex,
   updateParams,
 }: {
   include?: string[] | number[];
   exclude?: string[] | number[];
   tableRows?: DatatableRow[];
   columnId: string;
+  isNumberField: boolean;
+  includeIsRegex: boolean;
+  excludeIsRegex: boolean;
   updateParams: (
     operation: string,
     operationValue: Array<string | number>,
-    regex: string,
+    regexParam: string,
     regexValue: boolean
   ) => void;
 }) => {
@@ -58,10 +59,23 @@ export const IncludeExcludeRow = ({
     getTermsIncludeExcludeOptions(include, exclude)
   );
   const [termsOptions, setTermsOptions] = useState<IncludeExcludeOptions[] | undefined>(undefined);
-  const [isPatternUsed, setIsPatternUsed] = useState({
-    include: false,
-    exclude: false,
+  const [isRegexUsed, setIsRegexUsed] = useState({
+    include: includeIsRegex,
+    exclude: excludeIsRegex,
   });
+  const [regex, setRegex] = useState({
+    include: includeIsRegex ? include?.[0] : '',
+    exclude: excludeIsRegex ? exclude?.[0] : '',
+  });
+
+  useEffect(() => {
+    if (isNumberField) {
+      setIsRegexUsed({
+        include: false,
+        exclude: false,
+      });
+    }
+  }, [isNumberField]);
 
   useEffect(() => {
     if (includeExcludeSelectedOptions?.include?.length) return;
@@ -82,13 +96,6 @@ export const IncludeExcludeRow = ({
     selectedOptions: IncludeExcludeOptions[],
     operation: 'include' | 'exclude'
   ) => {
-    const patternUsed = {
-      ...isPatternUsed,
-      [operation]: false,
-    };
-    setIsPatternUsed(patternUsed);
-    const param = `${operation}IsRegex`;
-    // updateParams(param, false);
     const options = {
       ...includeExcludeSelectedOptions,
       [operation]: selectedOptions,
@@ -100,7 +107,7 @@ export const IncludeExcludeRow = ({
       }
       return option.label;
     });
-    // updateParams(operation, terms);
+    const param = `${operation}IsRegex`;
     updateParams(operation, terms, param, false);
   };
 
@@ -109,29 +116,13 @@ export const IncludeExcludeRow = ({
     flattenedOptions: IncludeExcludeOptions[] = [],
     operation: 'include' | 'exclude'
   ) => {
-    // check if is regex
-    const hasSpecialCharacters = isRegex(searchValue);
-    let regexValue = false;
-    if (hasSpecialCharacters) {
-      const patternUsed = {
-        ...isPatternUsed,
-        [operation]: true,
-      };
-      setIsPatternUsed(patternUsed);
-      regexValue = true;
-      // const param = `${operation}IsRegex`;
-      // updateParams(param, true);
-    }
-
     const newOption = {
       label: searchValue,
     };
 
     let includeExcludeOptions = [];
 
-    const includeORExcludeSelectedOptions = hasSpecialCharacters
-      ? []
-      : includeExcludeSelectedOptions[operation] ?? [];
+    const includeORExcludeSelectedOptions = includeExcludeSelectedOptions[operation] ?? [];
     includeExcludeOptions = [...includeORExcludeSelectedOptions, newOption];
     const options = {
       ...includeExcludeSelectedOptions,
@@ -146,8 +137,7 @@ export const IncludeExcludeRow = ({
       return option.label;
     });
     const param = `${operation}IsRegex`;
-    updateParams(operation, terms, param, regexValue);
-    // updateParams(operation, terms);
+    updateParams(operation, terms, param, false);
   };
 
   return (
@@ -159,23 +149,80 @@ export const IncludeExcludeRow = ({
         })}
         display="rowCompressed"
         fullWidth
+        labelAppend={
+          !isNumberField ? (
+            <EuiSwitch
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.lens.indexPattern.terms.addRegex', {
+                    defaultMessage: 'Use a regex instead',
+                  })}
+                </EuiText>
+              }
+              data-test-subj="lens-include-terms-regex-switch"
+              compressed
+              checked={isRegexUsed.include}
+              onChange={(e) => {
+                const value = e.target.checked;
+                setIsRegexUsed({
+                  ...isRegexUsed,
+                  include: value,
+                });
+                setRegex({
+                  ...regex,
+                  include: '',
+                });
+                setIncludeExcludeSelectedOptions(getTermsIncludeExcludeOptions([], exclude));
+                updateParams('include', [], 'includeIsRegex', value);
+              }}
+            />
+          ) : null
+        }
       >
-        <EuiComboBox
-          aria-label={i18n.translate('xpack.lens.indexPattern.terms.include', {
-            defaultMessage: 'Include terms',
-          })}
-          placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
-            defaultMessage: 'Select existing terms or create a new one',
-          })}
-          options={termsOptions}
-          selectedOptions={includeExcludeSelectedOptions.include}
-          onChange={(options) => onChangeIncludeExcludeOptions(options, 'include')}
-          onCreateOption={(searchValue, options) => onCreateOption(searchValue, options, 'include')}
-          isClearable={true}
-          data-test-subj="lens-include-terms-combobox"
-          autoFocus
-          singleSelection={isPatternUsed.include}
-        />
+        {isRegexUsed.include ? (
+          <EuiFieldText
+            placeholder={i18n.translate(
+              'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
+              {
+                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+              }
+            )}
+            data-test-subj="lens-include-terms-regex-input"
+            value={regex.include}
+            onChange={(e) => {
+              const value = e.target.value;
+              setRegex({
+                ...regex,
+                include: value,
+              });
+              updateParams('include', [value], 'includeIsRegex', true);
+            }}
+            aria-label={i18n.translate(
+              'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
+              {
+                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+              }
+            )}
+          />
+        ) : (
+          <EuiComboBox
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.include', {
+              defaultMessage: 'Include terms',
+            })}
+            placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
+              defaultMessage: 'Select existing terms or add a new one',
+            })}
+            options={termsOptions}
+            selectedOptions={includeExcludeSelectedOptions.include}
+            onChange={(options) => onChangeIncludeExcludeOptions(options, 'include')}
+            onCreateOption={(searchValue, options) =>
+              onCreateOption(searchValue, options, 'include')
+            }
+            isClearable={true}
+            data-test-subj="lens-include-terms-combobox"
+            autoFocus
+          />
+        )}
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -184,23 +231,78 @@ export const IncludeExcludeRow = ({
         })}
         display="rowCompressed"
         fullWidth
+        labelAppend={
+          !isNumberField ? (
+            <EuiSwitch
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.lens.indexPattern.terms.addRegex', {
+                    defaultMessage: 'Use a regex instead',
+                  })}
+                </EuiText>
+              }
+              compressed
+              checked={isRegexUsed.exclude}
+              onChange={(e) => {
+                const value = e.target.checked;
+                setIsRegexUsed({
+                  ...isRegexUsed,
+                  exclude: value,
+                });
+                setRegex({
+                  ...regex,
+                  exclude: '',
+                });
+                setIncludeExcludeSelectedOptions(getTermsIncludeExcludeOptions(include, []));
+                updateParams('exclude', [], 'excludeIsRegex', value);
+              }}
+            />
+          ) : null
+        }
       >
-        <EuiComboBox
-          aria-label={i18n.translate('xpack.lens.indexPattern.terms.exclude', {
-            defaultMessage: 'Exclude terms',
-          })}
-          placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
-            defaultMessage: 'Select existing terms or create a new one',
-          })}
-          options={termsOptions}
-          selectedOptions={includeExcludeSelectedOptions.exclude}
-          onChange={(options) => onChangeIncludeExcludeOptions(options, 'exclude')}
-          onCreateOption={(searchValue, options) => onCreateOption(searchValue, options, 'exclude')}
-          isClearable={true}
-          data-test-subj="lens-exclude-terms-combobox"
-          autoFocus
-          singleSelection={isPatternUsed.exclude}
-        />
+        {isRegexUsed.exclude ? (
+          <EuiFieldText
+            placeholder={i18n.translate(
+              'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
+              {
+                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+              }
+            )}
+            value={regex.exclude}
+            onChange={(e) => {
+              const value = e.target.value;
+              setRegex({
+                ...regex,
+                exclude: value,
+              });
+              updateParams('exclude', [value], 'excludeIsRegex', true);
+            }}
+            aria-label={i18n.translate(
+              'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
+              {
+                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+              }
+            )}
+          />
+        ) : (
+          <EuiComboBox
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.exclude', {
+              defaultMessage: 'Exclude terms',
+            })}
+            placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
+              defaultMessage: 'Select existing terms or add a new one',
+            })}
+            options={termsOptions}
+            selectedOptions={includeExcludeSelectedOptions.exclude}
+            onChange={(options) => onChangeIncludeExcludeOptions(options, 'exclude')}
+            onCreateOption={(searchValue, options) =>
+              onCreateOption(searchValue, options, 'exclude')
+            }
+            isClearable={true}
+            data-test-subj="lens-exclude-terms-combobox"
+            autoFocus
+          />
+        )}
       </EuiFormRow>
     </>
   );

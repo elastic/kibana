@@ -1008,8 +1008,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                     <IncludeExcludeRow
                       include={currentColumn.params.include}
                       exclude={currentColumn.params.exclude}
+                      includeIsRegex={Boolean(currentColumn.params.includeIsRegex)}
+                      excludeIsRegex={Boolean(currentColumn.params.excludeIsRegex)}
                       tableRows={activeData?.[rest.layerId]?.rows}
                       columnId={columnId}
+                      isNumberField={Boolean(currentColumn.dataType === 'number')}
                       updateParams={(operation, operationValue, regex, regexValue) =>
                         paramEditorUpdater({
                           ...layer,
