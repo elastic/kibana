@@ -19,9 +19,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpaces(getService);
     });
 
-    // loadTestFile(require.resolve('../common'));
-    //
-    // loadTestFile(require.resolve('./cases/push_case'));
+    loadTestFile(require.resolve('../common'));
+
+    loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./configure'));
   });
 };

@@ -10,9 +10,9 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('configuration tests', function () {
-    // loadTestFile(require.resolve('./get_configure'));
+    loadTestFile(require.resolve('./get_configure'));
     loadTestFile(require.resolve('./get_connectors'));
-    // loadTestFile(require.resolve('./patch_configure'));
-    // loadTestFile(require.resolve('./post_configure'));
+    loadTestFile(require.resolve('./patch_configure'));
+    loadTestFile(require.resolve('./post_configure'));
   });
 };
