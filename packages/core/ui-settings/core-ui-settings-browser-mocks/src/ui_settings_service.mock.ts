@@ -8,8 +8,8 @@
 
 import * as Rx from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UiSettingsService } from '.';
-import { IUiSettingsClient } from './types';
+import type { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<IUiSettingsClient> = {

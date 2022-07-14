@@ -24,9 +24,22 @@ export async function getDataStreamsQueryMetadata({
     esClient.search({
       size: 1,
       index: dataStreamName,
-      sort: 'event.ingested:desc',
       _source: false,
       fields: ['event.ingested'],
+      // We need to use `body` to control the `sort` value here, because otherwise
+      // it's just appended as a query string to the search operation and we can't
+      // set `unmapped_type` for cases where `event.ingested` is not defiend, e.g.
+      // in custom logs or custom HTTPJSON integrations
+      body: {
+        sort: {
+          'event.ingested': {
+            order: 'desc',
+            // Necessary because of https://github.com/elastic/elasticsearch/issues/81960
+            missing: 0,
+            unmapped_type: 'long',
+          },
+        },
+      },
     }),
     esClient.termsEnum({
       index: dataStreamName,
