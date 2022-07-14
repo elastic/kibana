@@ -9,7 +9,6 @@ import moment from 'moment';
 import React from 'react';
 import {
   AllSeries,
-  ALL_VALUES_SELECTED,
   fromQuery,
   RECORDS_FIELD,
   toQuery,
@@ -17,50 +16,32 @@ import {
 } from '@kbn/observability-plugin/public';
 import { useHistory } from 'react-router-dom';
 
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { useDataView } from '../local_uifilters/use_data_view';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { useExpViewAttributes } from './use_exp_view_attrs';
 
 interface Props {
   breakdown: BreakdownItem | null;
-  uiFilters: UxUIFilters;
 }
 
-export function PageViewsChart({ breakdown, uiFilters }: Props) {
+export function PageViewsChart({ breakdown }: Props) {
   const { dataViewTitle } = useDataView();
   const history = useHistory();
-  const { urlParams } = useLegacyUrlParams();
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability;
-  const { start, end } = urlParams;
 
   const theme = useTheme();
 
+  const { reportDefinitions, time } = useExpViewAttributes();
+
   const allSeries: AllSeries = [
     {
+      time,
+      reportDefinitions,
       dataType: 'ux',
-      time: {
-        from: start ?? '',
-        to: end ?? '',
-      },
       name: 'ux-series-1',
       selectedMetricField: RECORDS_FIELD,
-      reportDefinitions: {
-        [SERVICE_ENVIRONMENT]:
-          !uiFilters?.environment ||
-          uiFilters.environment === ENVIRONMENT_ALL.value
-            ? [ALL_VALUES_SELECTED]
-            : [uiFilters.environment],
-        [SERVICE_NAME]: urlParams.serviceName
-          ? [urlParams.serviceName]
-          : [ALL_VALUES_SELECTED],
-      },
       breakdown: breakdown?.fieldName,
       color: theme.eui.euiColorVis1,
     },
@@ -93,6 +74,7 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
       dataTypesIndexPatterns={{ ux: dataViewTitle }}
       isSingleMetric={true}
       axisTitlesVisibility={{ x: false, yRight: true, yLeft: true }}
+      legendIsVisible={Boolean(breakdown)}
     />
   );
 }

@@ -33,7 +33,9 @@ const IndexPatternFlyoutContentContainer = ({
         editData.title = title;
         editData.name = name;
         editData.timeFieldName = timeFieldName;
-        saveResponse = await dataViews.updateSavedObject(editData);
+        saveResponse = editData.isPersisted()
+          ? await dataViews.updateSavedObject(editData)
+          : editData;
       } else {
         saveResponse = persist
           ? await dataViews.createAndSave(dataViewSpec)
