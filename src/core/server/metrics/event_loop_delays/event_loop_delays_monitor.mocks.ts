@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
+import type { IntervalHistogram } from '@kbn/core-metrics-server';
 import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
-import type { IntervalHistogram } from '../types';
 
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}

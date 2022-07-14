@@ -7,7 +7,7 @@
  */
 
 import { ResponseObject, Server as HapiServer } from '@hapi/hapi';
-import { OpsServerMetrics, MetricsCollector } from './types';
+import type { MetricsCollector, OpsServerMetrics } from '@kbn/core-metrics-server';
 
 interface ServerResponseTime {
   count: number;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MetricsCollector } from './types';
+import type { MetricsCollector } from '@kbn/core-metrics-server';
 
 const createCollector = <T = any>(
   collectReturnValue: any = {}

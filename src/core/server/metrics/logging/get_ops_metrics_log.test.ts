@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OpsMetrics } from '..';
+import type { OpsMetrics } from '@kbn/core-metrics-server';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
 import { collectorMock } from '../collectors/mocks';
 

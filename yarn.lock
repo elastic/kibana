@@ -3295,6 +3295,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-metrics-server@link:bazel-bin/packages/core/metrics/core-metrics-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
   version "0.0.0"
   uid ""
@@ -6851,6 +6855,10 @@
   uid ""
 
 "@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-metrics-server@link:bazel-bin/packages/core/metrics/core-metrics-server/npm_module_types":
   version "0.0.0"
   uid ""
 

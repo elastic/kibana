@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { InternalMetricsServiceStart, InternalMetricsServiceSetup } from './types';
-export { MetricsService } from './metrics_service';
-export { opsConfig } from './ops_config';
-export type { OpsConfigType } from './ops_config';
-export { EventLoopDelaysMonitor } from './event_loop_delays';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/metrics/core-metrics-server'],
+};

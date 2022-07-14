@@ -10,11 +10,13 @@ import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } from './types';
+import type { OpsMetrics } from '@kbn/core-metrics-server';
+import type { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './types';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 
+/** @internal */
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
 }
