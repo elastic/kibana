@@ -66,7 +66,7 @@ class SpacesMenuUI extends Component<Props> {
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
         <FormattedMessage
-          id="xpack.spaces.navControl.spacesMenu.noSpacesFound"
+          id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
           defaultMessage=" no spaces found "
         />
       </EuiText>
@@ -103,7 +103,6 @@ class SpacesMenuUI extends Component<Props> {
               : undefined
           }
           noMatchesMessage={noSpacesMessage}
-          emptyMessage={noSpacesMessage}
           options={spaceMenuOptions}
           singleSelection={'always'}
           style={{ width: 300 }}

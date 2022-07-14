@@ -102,7 +102,6 @@ export class SpacesPopoverList extends Component<Props, State> {
             : undefined
         }
         noMatchesMessage={noSpacesMessage}
-        emptyMessage={noSpacesMessage}
         options={options}
         singleSelection={true}
         style={{ width: 300 }}
