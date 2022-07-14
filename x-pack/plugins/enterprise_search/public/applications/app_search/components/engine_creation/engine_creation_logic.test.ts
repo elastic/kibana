@@ -20,7 +20,7 @@ import {
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { EngineCreationLogic } from './engine_creation_logic';
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
 describe('EngineCreationLogic', () => {
   const { mount } = new LogicMounter(EngineCreationLogic);
@@ -134,6 +134,19 @@ describe('EngineCreationLogic', () => {
         expect(EngineCreationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           selectedIndex: 'search-test-index',
+          aliasName: '',
+          isAliasRequired: false,
+        });
+      });
+
+      it('sets aliasName and isAliasRequired if it does not start with "search-"', () => {
+        mount();
+        EngineCreationLogic.actions.setSelectedIndex('test-index');
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedIndex: 'test-index',
+          aliasName: 'search-test-index',
+          isAliasRequired: true,
         });
       });
     });
@@ -145,6 +158,39 @@ describe('EngineCreationLogic', () => {
         expect(EngineCreationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           engineType: 'elasticsearch',
+        });
+      });
+    });
+
+    describe('setAliasName', () => {
+      it('sets aliasName', () => {
+        mount();
+        EngineCreationLogic.actions.setAliasName('search-index-name');
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          aliasName: 'search-index-name',
+        });
+      });
+    });
+
+    describe('setCreationStep', () => {
+      it('sets currentEngineCreationStep', () => {
+        mount();
+        EngineCreationLogic.actions.setCreationStep(EngineCreationSteps.ConfigureStep);
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          currentEngineCreationStep: EngineCreationSteps.ConfigureStep,
+        });
+      });
+    });
+
+    describe('setIsAliasAllowed', () => {
+      it('sets isAliasAllowed', () => {
+        mount();
+        EngineCreationLogic.actions.setIsAliasAllowed(false);
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isAliasAllowed: false,
         });
       });
     });
@@ -204,6 +250,7 @@ describe('EngineCreationLogic', () => {
           expect(EngineCreationLogic.values.isSubmitDisabled).toBe(false);
         });
       });
+
       describe('Elasticsearch Index based engine', () => {
         it('should disable button if engine name is empty', () => {
           mount({
@@ -225,7 +272,40 @@ describe('EngineCreationLogic', () => {
           expect(EngineCreationLogic.values.isSubmitDisabled).toBe(true);
         });
 
-        it('should enable button if all selected', () => {
+        it('should disable button if non "search-" index selected without alias', () => {
+          mount({
+            rawName: 'my-engine-name',
+            selectedIndex: 'my-index',
+            aliasName: '',
+            engineType: 'elasticsearch',
+          });
+
+          expect(EngineCreationLogic.values.isSubmitDisabled).toBe(true);
+        });
+
+        it('should disable button if non "search-" index selected and non "search-" alias', () => {
+          mount({
+            rawName: 'my-engine-name',
+            selectedIndex: 'my-index',
+            aliasName: 'an-alias',
+            engineType: 'elasticsearch',
+          });
+
+          expect(EngineCreationLogic.values.isSubmitDisabled).toBe(true);
+        });
+
+        it('should disable button if "search-" index selected and non "search-" alias', () => {
+          mount({
+            rawName: 'my-engine-name',
+            selectedIndex: 'search-my-index',
+            aliasName: 'an-alias',
+            engineType: 'elasticsearch',
+          });
+
+          expect(EngineCreationLogic.values.isSubmitDisabled).toBe(true);
+        });
+
+        it('should enable button if all selected and "search-" index', () => {
           mount({
             rawName: 'my-engine-name',
             selectedIndex: 'search-my-index-1',
@@ -234,6 +314,86 @@ describe('EngineCreationLogic', () => {
 
           expect(EngineCreationLogic.values.isSubmitDisabled).toBe(false);
         });
+
+        it('should enable button if all selected and "search-" alias', () => {
+          mount({
+            rawName: 'my-engine-name',
+            selectedIndex: 'my-index-1',
+            aliasName: 'search-my-index-1',
+            engineType: 'elasticsearch',
+          });
+
+          expect(EngineCreationLogic.values.isSubmitDisabled).toBe(false);
+        });
+
+        it('should enable button if all selected and "search-" index and alias', () => {
+          mount({
+            rawName: 'my-engine-name',
+            selectedIndex: 'my-index-1',
+            aliasName: 'search-my-index-1',
+            engineType: 'elasticsearch',
+          });
+
+          expect(EngineCreationLogic.values.isSubmitDisabled).toBe(false);
+        });
+      });
+    });
+
+    describe('isAliasRequired', () => {
+      it('should return false when index is prefixed with "search-"', () => {
+        mount({
+          selectedIndex: 'search-my-index',
+        });
+
+        expect(EngineCreationLogic.values.isAliasRequired).toEqual(false);
+      });
+
+      it('should return false when index is not selected', () => {
+        mount({
+          selectedIndex: '',
+        });
+
+        expect(EngineCreationLogic.values.isAliasRequired).toEqual(false);
+      });
+
+      it('should return true when index is not prefixed with "search-"', () => {
+        mount({
+          selectedIndex: 'my-index',
+        });
+
+        expect(EngineCreationLogic.values.isAliasRequired).toEqual(true);
+      });
+    });
+
+    describe('selectedIndexFormatted', () => {
+      it('should be null if indices is empty', () => {
+        mount({
+          indices: [],
+        });
+
+        expect(EngineCreationLogic.values.selectedIndexFormatted).toBeUndefined();
+      });
+
+      it('should be null if there is no selectedIndex', () => {
+        mount({
+          indices: mockElasticsearchIndices,
+          selectedIndex: '',
+        });
+
+        expect(EngineCreationLogic.values.selectedIndexFormatted).toBeUndefined();
+      });
+
+      it('should select the correctly formatted search index', () => {
+        mount({
+          indices: mockElasticsearchIndices,
+          selectedIndex: 'search-my-index-2',
+        });
+        const mockCheckedSearchIndexOptions = [...mockSearchIndexOptions];
+        mockCheckedSearchIndexOptions[1].checked = 'on';
+
+        expect(EngineCreationLogic.values.selectedIndexFormatted).toEqual(
+          mockCheckedSearchIndexOptions[1]
+        );
       });
     });
   });
@@ -334,6 +494,29 @@ describe('EngineCreationLogic', () => {
           EngineCreationLogic.actions.submitEngine();
           await nextTick();
           expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        });
+
+        it('adds alias_name to the payload if aliasName is present', () => {
+          mount({
+            engineType: 'elasticsearch',
+            name: 'engine-name',
+            selectedIndex: 'selected-index',
+            aliasName: 'search-selected-index',
+          });
+
+          const body = JSON.stringify({
+            name: EngineCreationLogic.values.name,
+            search_index: {
+              type: 'elasticsearch',
+              index_name: EngineCreationLogic.values.selectedIndex,
+              alias_name: EngineCreationLogic.values.aliasName,
+            },
+          });
+          EngineCreationLogic.actions.submitEngine();
+
+          expect(http.post).toHaveBeenCalledWith('/internal/app_search/elasticsearch/engines', {
+            body,
+          });
         });
       });
     });

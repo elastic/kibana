@@ -29,7 +29,7 @@ export interface SearchIndexSelectableOption {
   alias: boolean;
   badge: {
     color: string;
-    icon: string;
+    icon?: string;
     label: string;
     toolTipTitle: string;
     toolTipContent: string;

@@ -47,16 +47,16 @@ interface EngineCreationValues {
   language: string;
   name: string;
   rawName: string;
-  aliasName: string;
   isLoadingIndices: boolean;
   indices: ElasticsearchIndex[];
   indicesFormatted: SearchIndexSelectableOption[];
   selectedIndex: string;
-  selectedIndexFormatted: SearchIndexSelectableOption;
+  selectedIndexFormatted?: SearchIndexSelectableOption;
   engineType: EngineType;
+  aliasName: string;
+  isAliasAllowed: boolean;
   isAliasRequired: boolean;
   isSubmitDisabled: boolean;
-  isAliasAllowed: boolean;
 }
 
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
@@ -184,7 +184,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     ],
     isAliasRequired: [
       () => [selectors.selectedIndex],
-      (selectedIndex: string) => !selectedIndex.startsWith('search-'),
+      (selectedIndex: string) => selectedIndex.length > 0 && !selectedIndex?.startsWith('search-'),
     ],
     selectedIndexFormatted: [
       () => [selectors.selectedIndex, selectors.indicesFormatted],

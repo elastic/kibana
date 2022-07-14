@@ -37,8 +37,10 @@ export const formatIndicesToSelectable = (
 ): SearchIndexSelectableOption[] => {
   return indices.map((index) => {
     let icon, color, toolTipTitle, toolTipContent;
+
     if (index.name.startsWith('search-')) {
       color = 'success';
+
       if (index.alias) {
         toolTipTitle = 'Alias name conforms to pattern';
         toolTipContent = `
@@ -73,11 +75,11 @@ export const formatIndicesToSelectable = (
       ...(selectedIndexName === index.name ? { checked: 'on' } : {}),
       alias: index.alias,
       badge: {
-        color: color,
-        icon: icon,
+        color,
+        toolTipTitle,
+        toolTipContent,
         label: index.alias ? 'Alias' : 'Index',
-        toolTipTitle: toolTipTitle,
-        toolTipContent: toolTipContent,
+        ...(icon ? { icon } : {}),
       },
       disabled: index.alias && !index.name.startsWith('search-'),
       label: index.name,
