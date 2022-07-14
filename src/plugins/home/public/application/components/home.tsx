@@ -46,10 +46,13 @@ export class Home extends Component<HomeProps, State> {
   constructor(props: HomeProps) {
     super(props);
 
+    const { homeConfig, application, environmentService } = getServices();
+
     const isWelcomeEnabled =
-      !getServices().homeConfig.disableWelcomeScreen &&
-      getServices().application.capabilities.navLinks.integrations &&
-      props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
+      !homeConfig.disableWelcomeScreen &&
+      application.capabilities.navLinks.integrations &&
+      props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false' &&
+      environmentService.getEnvironment().cloud === false;
 
     const body = document.querySelector('body')!;
     body.classList.add('isHomPage');
