@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiLink } from '@elastic/eui';
-import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
-import { getEndpointDetailsPath } from '../../../../../common/routing';
-import { useEndpointSelector } from '../../../../../pages/endpoint_hosts/view/hooks';
+import { EuiText } from '@elastic/eui';
+
 import { CONSOLE_EXIT_MODAL_INFO } from '../translations';
-import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { uiQueryParams } from '../../../../../pages/endpoint_hosts/store/selectors';
 
 export const HostNameText = ({ hostName }: { hostName: string }) => (
-  <EuiText size="s" style={{ maxWidth: 120, display: 'inline-flex' }}>
+  <EuiText size="s" style={{ maxWidth: 100, display: 'inline-flex' }}>
     <span className="eui-textTruncate">
       <strong>{hostName}</strong>
     </span>
@@ -35,45 +31,14 @@ export const ConsoleExitModalActionLogLink = memo(
     hostName: string;
     onClose: () => void;
   }) => {
-    const { getAppUrl } = useAppUrl();
-    const { show: _, ...currentUrlQueryParams } = useEndpointSelector(uiQueryParams);
-
-    const detailsRoutePath = useMemo(
-      () =>
-        getEndpointDetailsPath({
-          name: 'endpointActivityLog',
-          ...currentUrlQueryParams,
-          selected_endpoint: agentId,
-        }),
-      [agentId, currentUrlQueryParams]
-    );
-    const getActivityLogRoute = useNavigateByRouterEventHandler(detailsRoutePath);
-
-    const onClickActionLogLink = useCallback(
-      (e) => {
-        onClose();
-        getActivityLogRoute(e);
-      },
-      [getActivityLogRoute, onClose]
-    );
-
     return (
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.consolePageOverlay.exitModal.actionLogLink"
-          defaultMessage="Pending response actions will resume. You may track the actions progress on {hostName}'s {link}."
+          defaultMessage="Pending response actions will resume. You may track progress of the action on {hostName}'s {link}."
           values={{
             hostName: <HostNameText hostName={hostName} />,
-            link: (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
-              <EuiLink
-                data-test-subj={`${dataTestSubj}-link`}
-                onClick={onClickActionLogLink}
-                href={getAppUrl({ path: detailsRoutePath })}
-              >
-                {CONSOLE_EXIT_MODAL_INFO.actionLogLink}
-              </EuiLink>
-            ),
+            link: <strong>{CONSOLE_EXIT_MODAL_INFO.actionLogLink}</strong>,
           }}
         />
       </EuiText>

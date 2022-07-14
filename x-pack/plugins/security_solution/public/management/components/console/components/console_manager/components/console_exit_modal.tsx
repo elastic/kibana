@@ -17,19 +17,20 @@ export const ConsoleExitModal = memo(
     'data-test-subj': dataTestSubj,
     hostName,
     onClose,
+    onCancel,
   }: {
     agentId: string;
     'data-test-subj'?: string;
     hostName: string;
     onClose: () => void;
+    onCancel: () => void;
   }) => {
     return (
       <EuiConfirmModal
         confirmButtonText={CONSOLE_EXIT_MODAL_INFO.confirmButtonText}
         cancelButtonText={CONSOLE_EXIT_MODAL_INFO.cancelButtonText}
         data-test-subj={dataTestSubj}
-        defaultFocusedButton="confirm"
-        onCancel={onClose}
+        onCancel={onCancel}
         onConfirm={onClose}
         title={CONSOLE_EXIT_MODAL_INFO.title}
         maxWidth={500}
@@ -50,7 +51,7 @@ export const ConsoleExitModal = memo(
                 <strong>
                   <FormattedMessage
                     id="xpack.securitySolution.consolePageOverlay.exitModal.linkText"
-                    defaultMessage="Manage> Endpoints> {hostName}> Action log"
+                    defaultMessage="Manage> Endpoints> {hostName}> Action log."
                     values={{
                       hostName: <HostNameText hostName={hostName} />,
                     }}

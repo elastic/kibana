@@ -58,6 +58,8 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
       [onHide, hasPendingActions]
     );
 
+    const onCancelModal = useCallback(() => setShowExitModal(false), [setShowExitModal]);
+
     const layoutProps = useMemo<PageLayoutProps>(() => {
       // If in `hidden` mode, then we don't render the html for the layout header section
       // of the layout
@@ -108,6 +110,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
           {showExitModal && (
             <ConsoleExitModal
               onClose={onHide}
+              onCancel={onCancelModal}
               agentId={agentId}
               hostName={hostName}
               data-test-subj={getTestId('console-exit-modal')}

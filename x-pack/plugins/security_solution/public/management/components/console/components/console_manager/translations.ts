@@ -10,13 +10,13 @@ export const CONSOLE_EXIT_MODAL_INFO = Object.freeze({
   cancelButtonText: i18n.translate(
     'xpack.securitySolution.consolePageOverlay.exitModal.cancelButtonText',
     {
-      defaultMessage: 'Close',
+      defaultMessage: 'Cancel',
     }
   ),
   confirmButtonText: i18n.translate(
     'xpack.securitySolution.consolePageOverlay.exitModal.confirmButtonText',
     {
-      defaultMessage: 'Okay',
+      defaultMessage: 'Okay, exit responder',
     }
   ),
   title: i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.title', {
