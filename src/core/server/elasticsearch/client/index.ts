@@ -10,4 +10,3 @@ export { ScopedClusterClient } from './scoped_cluster_client';
 export { ClusterClient } from './cluster_client';
 export { configureClient } from './configure_client';
 export { getRequestDebugMeta, getErrorMessage } from './log_query_and_deprecation';
-export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
