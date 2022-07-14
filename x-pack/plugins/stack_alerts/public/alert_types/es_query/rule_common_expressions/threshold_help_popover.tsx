@@ -60,7 +60,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.timeWindow"
               defaultMessage="The time window indicates how far back in time to search. 
-              To avoid gaps in detection, generally this value should be greater than or equal to the value you chose for the {checkField} field."
+              To avoid gaps in detection, set this value greater than or equal to the value you chose for the {checkField} field."
               values={{
                 checkField: <b>Check every</b>,
               }}
