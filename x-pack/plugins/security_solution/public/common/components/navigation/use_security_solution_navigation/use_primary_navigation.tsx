@@ -24,7 +24,6 @@ export const usePrimaryNavigation = ({
   pageName,
   tabName,
   timeline,
-  timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
@@ -50,7 +49,6 @@ export const usePrimaryNavigation = ({
     navTabs,
     selectedTabId,
     timeline,
-    timerange,
   });
 
   return {

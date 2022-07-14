@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useMemo } from 'react';
 
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useGlobalQueryString } from '../../utils/global_query_string';
-import { makeMapStateToProps } from '../url_state/helpers';
+import { getQueryStringFromLocation, makeMapStateToProps } from '../url_state/helpers';
 import { getSearch, getUrlStateSearch } from './helpers';
 import type { SearchNavTab } from './types';
 
@@ -31,11 +32,11 @@ export const useGetUrlStateQueryString = () => {
   const globalQueryString = useGlobalQueryString();
   const getUrlStateQueryString = useCallback(() => {
     // TODO: Temporary code while we are migrating all query strings to global_query_string_manager
-    if (globalQueryString.length > 0) {
-      return `${getUrlStateSearch(urlState)}&${globalQueryString}`;
-    }
+    const urlStateSearch = getQueryStringFromLocation(getUrlStateSearch(urlState));
+    const isNotEmpty = (e: string) => !isEmpty(e);
+    const search = [urlStateSearch, globalQueryString].filter(isNotEmpty).join('&');
 
-    return getUrlStateSearch(urlState);
+    return search.length > 0 ? `?${search}` : '';
   }, [urlState, globalQueryString]);
 
   return getUrlStateQueryString;
