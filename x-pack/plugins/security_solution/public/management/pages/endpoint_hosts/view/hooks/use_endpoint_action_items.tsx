@@ -252,5 +252,6 @@ export const useEndpointActionItems = (
     isPlatinumPlus,
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
+    isEndpointList,
   ]);
 };
