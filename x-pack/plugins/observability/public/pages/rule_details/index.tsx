@@ -238,7 +238,13 @@ export function RuleDetailsPage() {
                     isOpen={isRuleEditPopoverOpen}
                     closePopover={handleClosePopover}
                     button={
-                      <EuiButton fill iconSide="right" onClick={togglePopover} iconType="arrowDown">
+                      <EuiButton
+                        fill
+                        iconSide="right"
+                        onClick={togglePopover}
+                        iconType="arrowDown"
+                        data-test-subj="actions"
+                      >
                         {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {
                           defaultMessage: 'Actions',
                         })}
