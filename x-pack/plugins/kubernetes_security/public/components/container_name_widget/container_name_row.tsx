@@ -11,7 +11,6 @@ import { useStyles } from './styles';
 
 export interface ContainerNameRowDeps {
   name: string;
-  index?: number;
   filterButtonIn?: ReactNode;
   filterButtonOut?: ReactNode;
 }
@@ -20,23 +19,22 @@ export const ROW_TEST_ID = 'kubernetesSecurity:containerNameSessionRow';
 
 export const ContainerNameRow = ({
   name,
-  index,
   filterButtonIn,
   filterButtonOut,
 }: ContainerNameRowDeps) => {
-  const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
+  const [isHoveredFilter, setHoveredFilter] = useState<boolean | null>(false);
 
   const styles = useStyles();
 
   return (
     <EuiFlexItem
-      onMouseEnter={() => setHoveredFilter(index!)}
-      onMouseLeave={() => setHoveredFilter(null)}
+      onMouseEnter={() => setHoveredFilter(!isHoveredFilter!)}
+      onMouseLeave={() => setHoveredFilter(false)}
       data-test-subj={ROW_TEST_ID}
     >
       <EuiText size="xs" css={styles.dataInfo}>
         {name}
-        {hoveredFilter === index && (
+        {isHoveredFilter && (
           <div css={styles.filters}>
             {filterButtonIn}
             {filterButtonOut}

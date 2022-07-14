@@ -21,7 +21,6 @@ describe('ContainerNameRow component with valid row', () => {
     (renderResult = mockedContext.render(
       <ContainerNameRow
         name={TEST_NAME}
-        index={1}
         filterButtonIn={TEST_BUTTON_FILTER}
         filterButtonOut={TEST_BUTTON_FILTER_OUT}
       />

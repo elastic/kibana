@@ -166,20 +166,19 @@ export const ContainerNameWidget = ({
           return (
             <ContainerNameRow
               name={name}
-              index={indexHelper}
               filterButtonIn={filterButtons.filterForButtons[indexHelper]}
               filterButtonOut={filterButtons.filterOutButtons[indexHelper]}
             />
           );
         },
         align: 'left',
-        width: '216px',
+        width: '74%',
         sortable: false,
       },
       {
         field: 'count',
         name: CONTAINER_NAME_SESSION_COUNT_COLUMN,
-        width: '76px',
+        width: '26%',
         'data-test-subj': COUNT_COLUMN_TEST_ID,
         render: (count: number) => {
           return <span css={styles.countValue}>{count}</span>;

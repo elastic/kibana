@@ -21,7 +21,8 @@ export const useStyles = () => {
       border: euiTheme.border.thin,
       borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
-      height: '250px',
+      minHeight: '250px',
+      height: '100%',
       minWidth: '332px',
       position: 'relative',
     };
