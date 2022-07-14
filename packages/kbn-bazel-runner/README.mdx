@@ -11,11 +11,11 @@ This is a package with helpers for invoking bazel and iBazel commands, used ever
 
 ## API
 
-### async runBazel(options: BazelRunOptions)
+### async runBazel(args: string[], options: BazelRunOptions)
 
 It runs bazel on the background with the given options
 
-### async runIBazel(options: BazelRunOptions)
+### async runIBazel(args: string[], options: BazelRunOptions)
 
 It runs a IBazel on the background with the given options
 
@@ -25,8 +25,6 @@ It runs a IBazel on the background with the given options
 {
   // a logger to print the command output
   log: SomeDevLog;
-  // the arguments to run the bazel or ibazel with
-  args: string[];
   // run bazel with the no connection compatible config or not
   offline?: boolean;
   // environment variables to set in process running Bazel

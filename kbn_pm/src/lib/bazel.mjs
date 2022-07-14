@@ -58,8 +58,7 @@ async function runBazel(log, inputArgs, opts = undefined) {
 
   const args = [...(opts?.offline ? ['--config=offline'] : []), ...inputArgs];
   log.debug(`> bazel ${args.join(' ')}`);
-  await bazel({
-    args,
+  await bazel(args, {
     env: opts?.env,
     cwd: REPO_ROOT,
     quiet: opts?.quiet,
@@ -89,8 +88,7 @@ export async function watch(log, opts = undefined) {
     ...(opts?.offline ? ['--config=offline'] : []),
   ];
   log.debug(`> ibazel ${args.join(' ')}`);
-  await ibazel({
-    args,
+  await ibazel(args, {
     cwd: REPO_ROOT,
     logPrefix: Color.info('[ibazel]'),
     onErrorExit(code, output) {

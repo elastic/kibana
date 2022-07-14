@@ -54,15 +54,16 @@ function once(emitter, event) {
 
 /**
  * @param {'bazel' | 'ibazel'} runner
- * @param {import('./types').BazelRunOptions} options
+ * @param {string[]} args
+ * @param {import('./types').BazelRunOptions | undefined} options
  */
-async function runBazelRunner(runner, options) {
-  const proc = ChildProcess.spawn(runner, options.args, {
+async function runBazelRunner(runner, args, options = undefined) {
+  const proc = ChildProcess.spawn(runner, args, {
     env: {
       ...process.env,
-      ...options.env,
+      ...options?.env,
     },
-    cwd: options.cwd,
+    cwd: options?.cwd,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
@@ -70,11 +71,11 @@ async function runBazelRunner(runner, options) {
   const buffer = [];
 
   await Promise.all([
-    options.quiet
+    options?.quiet
       ? Promise.all([bufferLines(proc.stdout, buffer), bufferLines(proc.stderr, buffer)])
       : Promise.all([
-          printLines(proc.stdout, options.logPrefix),
-          printLines(proc.stderr, options.logPrefix),
+          printLines(proc.stdout, options?.logPrefix),
+          printLines(proc.stderr, options?.logPrefix),
         ]),
 
     // Wait for process to exit, or error
@@ -84,7 +85,7 @@ async function runBazelRunner(runner, options) {
           return;
         }
 
-        if (options.onErrorExit) {
+        if (options?.onErrorExit) {
           options.onErrorExit(code, buffer.join('\n'));
         } else {
           throw new Error(
@@ -103,21 +104,23 @@ async function runBazelRunner(runner, options) {
 }
 
 /**
- * @param {import('./types').BazelRunOptions} options
+ * @param {string[]} args
+ * @param {import('./types').BazelRunOptions | undefined} options
  */
-async function runBazel(options) {
-  return await runBazelRunner('bazel', options);
+async function runBazel(args, options = undefined) {
+  return await runBazelRunner('bazel', args, options);
 }
 
 /**
- * @param {import('./types').BazelRunOptions} options
+ * @param {string[]} args
+ * @param {import('./types').BazelRunOptions | undefined} options
  */
-async function runIBazel(options) {
-  return await runBazelRunner('ibazel', {
+async function runIBazel(args, options = undefined) {
+  return await runBazelRunner('ibazel', args, {
     ...options,
     env: {
       IBAZEL_USE_LEGACY_WATCHER: '0',
-      ...options.env,
+      ...options?.env,
     },
   });
 }

@@ -11,10 +11,6 @@
  */
 export interface BazelRunOptions {
   /**
-   * Cli args to pass to bazel
-   */
-  args: string[];
-  /**
    * Current working directory to run bazel in
    */
   cwd?: string;
