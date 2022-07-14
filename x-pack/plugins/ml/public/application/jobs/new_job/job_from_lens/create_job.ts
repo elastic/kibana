@@ -9,6 +9,7 @@ import { mergeWith } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import { Filter, Query, DataViewBase } from '@kbn/es-query';
 
@@ -23,7 +24,6 @@ import type {
   XYLayerConfig,
 } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 
@@ -56,7 +56,7 @@ export interface LayerResult {
   error?: ErrorType;
 }
 
-export async function canCreateAndStashADJob(
+export async function createAndStashADJob(
   vis: LensSavedObjectAttributes,
   startString: string,
   endString: string,
@@ -68,42 +68,17 @@ export async function canCreateAndStashADJob(
   layerIndex: number | undefined
 ) {
   try {
-    const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
+    const { jobConfig, datafeedConfig, createdBy, start, end, includeTimeRange } = await createJob(
       vis,
+      startString,
+      endString,
       query,
       filters,
       dataViewClient,
       kibanaConfig,
+      timeFilter,
       layerIndex
     );
-
-    let start: number | undefined;
-    let end: number | undefined;
-    let includeTimeRange = true;
-
-    try {
-      // attempt to parse the start and end dates.
-      // if start and end values cannot be determined
-      // instruct the job cloning code to auto-select the
-      // full time range for the index.
-      const { min, max } = timeFilter.calculateBounds({ to: endString, from: startString });
-      start = min?.valueOf();
-      end = max?.valueOf();
-
-      if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
-        throw Error(
-          i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeRange', {
-            defaultMessage: 'Incompatible time range',
-          })
-        );
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-      includeTimeRange = false;
-      start = undefined;
-      end = undefined;
-    }
 
     // add job config and start and end dates to the
     // job cloning stash, so they can be used
@@ -124,6 +99,64 @@ export async function canCreateAndStashADJob(
     // eslint-disable-next-line no-console
     console.error(error);
   }
+}
+
+export async function createJob(
+  vis: LensSavedObjectAttributes,
+  startString: string,
+  endString: string,
+  query: Query,
+  filters: Filter[],
+  dataViewClient: DataViewsContract,
+  kibanaConfig: IUiSettingsClient,
+  timeFilter: TimefilterContract,
+  layerIndex: number | undefined
+) {
+  const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
+    vis,
+    query,
+    filters,
+    dataViewClient,
+    kibanaConfig,
+    layerIndex
+  );
+
+  let start: number | undefined;
+  let end: number | undefined;
+  let includeTimeRange = true;
+
+  try {
+    // attempt to parse the start and end dates.
+    // if start and end values cannot be determined
+    // instruct the job cloning code to auto-select the
+    // full time range for the index.
+    const { min, max } = timeFilter.calculateBounds({ to: endString, from: startString });
+    start = min?.valueOf();
+    end = max?.valueOf();
+
+    if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
+      throw Error(
+        i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeRange', {
+          defaultMessage: 'Incompatible time range',
+        })
+      );
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    includeTimeRange = false;
+    start = undefined;
+    end = undefined;
+  }
+
+  return {
+    jobConfig,
+    datafeedConfig,
+    createdBy,
+    start,
+    end,
+    includeTimeRange,
+  };
 }
 
 export async function getResultLayersFromEmbeddable(

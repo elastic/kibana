@@ -9,7 +9,7 @@ import rison from 'rison-node';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { canCreateAndStashADJob } from './create_job';
+import { createAndStashADJob } from './create_job';
 import {
   getUiSettings,
   getDataViews,
@@ -72,7 +72,7 @@ export async function resolver(
   const kibanaConfig = getUiSettings();
   const timeFilter = getTimefilter();
 
-  await canCreateAndStashADJob(
+  await createAndStashADJob(
     vis,
     from,
     to,

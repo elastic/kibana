@@ -283,7 +283,15 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    startDatafeed({ datafeedId, start, end }: { datafeedId: string; start: number; end: number }) {
+    startDatafeed({
+      datafeedId,
+      start,
+      end,
+    }: {
+      datafeedId: string;
+      start?: number;
+      end?: number;
+    }) {
       const body = JSON.stringify({
         ...(start !== undefined ? { start } : {}),
         ...(end !== undefined ? { end } : {}),

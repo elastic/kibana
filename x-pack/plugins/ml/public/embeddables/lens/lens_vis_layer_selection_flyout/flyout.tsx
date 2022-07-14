@@ -9,6 +9,8 @@ import React, { FC } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import {
   EuiFlyoutFooter,
@@ -21,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { MlApiServices } from '../../../application/services/ml_api_service';
 
 import { FlyoutBody } from './flyout_body';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
@@ -29,6 +32,9 @@ interface Props {
   layerResults: LayerResult[];
   embeddable: Embeddable;
   share: SharePluginStart;
+  data: DataPublicPluginStart;
+  kibanaConfig: IUiSettingsClient;
+  ml: MlApiServices;
   onClose: () => void;
 }
 
@@ -37,6 +43,9 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
   layerResults,
   embeddable,
   share,
+  data,
+  ml,
+  kibanaConfig,
 }) => {
   return (
     <>
@@ -63,6 +72,9 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
           layerResults={layerResults}
           embeddable={embeddable}
           share={share}
+          data={data}
+          kibanaConfig={kibanaConfig}
+          ml={ml}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
