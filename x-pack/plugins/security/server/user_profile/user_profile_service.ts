@@ -26,6 +26,9 @@ const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
 
+/**
+ * A set of methods to work with Kibana user profiles.
+ */
 export interface UserProfileServiceStart {
   /**
    * Retrieves multiple user profiles by their identifiers.

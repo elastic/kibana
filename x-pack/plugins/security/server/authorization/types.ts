@@ -87,10 +87,25 @@ export interface CheckPrivileges {
   ): Promise<CheckPrivilegesResponse>;
 }
 
+/**
+ * Privileges that can be checked for the Kibana users.
+ */
 export interface CheckPrivilegesPayload {
+  /**
+   * A list of the Kibana specific privileges (usually generated with `security.authz.actions.*.get(...)`).
+   */
   kibana?: string | string[];
+  /**
+   * A set of the Elasticsearch cluster and index privileges.
+   */
   elasticsearch?: {
+    /**
+     * A list of Elasticsearch cluster privileges (`manage_security`, `create_snapshot` etc.).
+     */
     cluster: string[];
+    /**
+     * A map (index name <-> list of privileges) of Elasticsearch index privileges (`view_index_metadata`, `read` etc.).
+     */
     index: Record<string, string[]>;
   };
 }
@@ -110,6 +125,9 @@ export interface CheckUserProfilesPrivileges {
  * Privileges that can be checked for the users profiles (only Kibana specific privileges are supported at the moment).
  */
 export interface CheckUserProfilesPrivilegesPayload {
+  /**
+   * A list of the Kibana specific privileges (usually generated with `security.authz.actions.*.get(...)`).
+   */
   kibana: string[];
 }
 

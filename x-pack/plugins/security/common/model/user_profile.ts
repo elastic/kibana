@@ -39,9 +39,21 @@ export interface UserProfile<D extends UserProfileData = UserProfileData> {
  * Basic user information returned in user profile.
  */
 export interface UserProfileUserInfo {
+  /**
+   * Username of the user.
+   */
   username: string;
+  /**
+   * Optional email of the user.
+   */
   email?: string;
+  /**
+   * Optional full name of the user.
+   */
   full_name?: string;
+  /**
+   * Optional display name of the user.
+   */
   display_name?: string;
 }
 
@@ -59,8 +71,17 @@ export type UserProfileLabels = Record<string, string>;
  * Avatar stored in user profile.
  */
 export interface UserProfileAvatarData {
+  /**
+   * Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified.
+   */
   initials?: string;
+  /**
+   * Background color of the avatar when initials are used.
+   */
   color?: string;
+  /**
+   * Base64 data URL for the user avatar image.
+   */
   imageUrl?: string;
 }
 
@@ -68,8 +89,18 @@ export interface UserProfileAvatarData {
  * Extended user information returned in user profile (both basic and security related properties).
  */
 export interface UserProfileUserInfoWithSecurity extends UserProfileUserInfo {
+  /**
+   * List of the user roles.
+   */
   roles: readonly string[];
+  /**
+   * Name of the Elasticsearch security realm that was used to authenticate user.
+   */
   realm_name: string;
+  /**
+   * Optional name of the security domain that Elasticsearch security realm that was
+   * used to authenticate user resides in (if any).
+   */
   realm_domain?: string;
 }
 
