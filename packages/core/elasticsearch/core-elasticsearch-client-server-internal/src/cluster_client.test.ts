@@ -11,12 +11,12 @@ import {
   createTransportMock,
   createInternalErrorHandlerMock,
 } from './cluster_client.test.mocks';
+import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { elasticsearchClientMock } from './mocks';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { DEFAULT_HEADERS } from './headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -34,18 +34,21 @@ const createConfig = (
   };
 };
 
+const createClient = () =>
+  ({ close: jest.fn(), child: jest.fn() } as unknown as jest.Mocked<Client>);
+
 describe('ClusterClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let authHeaders: ReturnType<typeof httpServiceMock.createAuthHeaderStorage>;
-  let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
-  let scopedClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  let internalClient: jest.Mocked<Client>;
+  let scopedClient: jest.Mocked<Client>;
 
   const mockTransport = { mockTransport: true };
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    internalClient = elasticsearchClientMock.createInternalClient();
-    scopedClient = elasticsearchClientMock.createInternalClient();
+    internalClient = createClient();
+    scopedClient = createClient();
 
     authHeaders = httpServiceMock.createAuthHeaderStorage();
     authHeaders.get.mockImplementation(() => ({
