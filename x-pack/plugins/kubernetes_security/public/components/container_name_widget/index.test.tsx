@@ -19,7 +19,6 @@ import {
 import { useFetchContainerNameData } from './hooks';
 import { ROW_TEST_ID } from './container_name_row';
 
-const TABLE_ROW_ELEMENT = 'containerNameSessionRow';
 const TABLE_SORT_BUTTON_ID = 'tableHeaderSortButton';
 
 const TITLE = 'Container Images Session';
