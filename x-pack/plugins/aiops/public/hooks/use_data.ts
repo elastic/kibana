@@ -16,12 +16,12 @@ import { TimeBuckets } from '../../common/time_buckets';
 import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
 import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-// import { SEARCH_QUERY_LANGUAGE } from '../../common/types'
 import { getEsQueryFromSavedSearch } from '../../common/search_utils';
+import { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_wrapper';
 
 export const useData = (
   currentDataView: DataView,
-  aiopsListState: any, // TODO: update
+  aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useAiOpsKibana();
@@ -33,10 +33,7 @@ export const useData = (
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
-      savedSearch: undefined, // currentSavedSearch,
-      // query: currentQuery,
-      // filters: currentFilters,
-      // filterManager: data.query.filterManager,
+      savedSearch: undefined,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
@@ -57,15 +54,12 @@ export const useData = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    // currentSavedSearch?.id,
     currentDataView.id,
     aiopsListState.searchString,
     aiopsListState.searchQueryLanguage,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify({
       searchQuery: aiopsListState.searchQuery,
-      // currentQuery,
-      // currentFilters,
     }),
     lastRefresh,
   ]);

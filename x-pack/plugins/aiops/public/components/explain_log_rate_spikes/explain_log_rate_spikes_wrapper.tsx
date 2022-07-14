@@ -6,10 +6,6 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
-// import { parse, stringify } from 'query-string';
-// import { isEqual } from 'lodash';
-// import { encode } from 'rison-node';
-// import { useHistory, useLocation } from 'react-router-dom';
 import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
@@ -28,15 +24,6 @@ import {
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-// import {
-//   Accessor,
-//   Dictionary,
-//   parseUrlState,
-//   Provider as UrlStateContextProvider,
-//   isRisonSerializationRequired,
-//   getNestedProperty,
-//   SetUrlState,
-// } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 
@@ -61,7 +48,7 @@ const defaultSearchQuery = {
 export interface AiOpsIndexBasedAppState {
   searchString?: Query['query'];
   searchQuery?: Query['query'];
-  searchQueryLanguage?: SearchQueryLanguage;
+  searchQueryLanguage: SearchQueryLanguage;
   filters?: Filter[];
 }
 
@@ -85,16 +72,6 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
 
   const [globalState, setGlobalState] = useUrlState('_g');
-
-  //  const [currentSavedSearch, setCurrentSavedSearch] = useState(
-  //   dataVisualizerProps.currentSavedSearch
-  // );
-
-  //  useEffect(() => {
-  //   if (dataVisualizerProps?.currentSavedSearch !== undefined) {
-  //     setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
-  //   }
-  // }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
     if (!dataView.isTimeBased()) {
@@ -120,12 +97,6 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads saved search and then clear or modify the query
-      // we should remove the saved search and replace it with the index pattern id
-      // if (currentSavedSearch !== null) {
-      //   setCurrentSavedSearch(null);
-      // }
-
       setAiopsListState({
         ...aiopsListState,
         searchQuery: searchParams.searchQuery,
@@ -134,7 +105,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
         filters: searchParams.filters,
       });
     },
-    [aiopsListState, setAiopsListState] // currentSavedSearch
+    [aiopsListState, setAiopsListState]
   );
 
   const { docStats, timefilter, searchQueryLanguage, searchString, searchQuery } = useData(
@@ -179,71 +150,6 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
-  // const history = useHistory();
-  // const { search: urlSearchString } = useLocation();
-
-  // const setUrlState: SetUrlState = useCallback(
-  //   (
-  //     accessor: Accessor,
-  //     attribute: string | Dictionary<any>,
-  //     value?: any,
-  //     replaceState?: boolean
-  //   ) => {
-  //     const prevSearchString = urlSearchString;
-  //     const urlState = parseUrlState(prevSearchString);
-  //     const parsedQueryString = parse(prevSearchString, { sort: false });
-
-  //     if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-  //       urlState[accessor] = {};
-  //     }
-
-  //     if (typeof attribute === 'string') {
-  //       if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-  //         return prevSearchString;
-  //       }
-
-  //       urlState[accessor][attribute] = value;
-  //     } else {
-  //       const attributes = attribute;
-  //       Object.keys(attributes).forEach((a) => {
-  //         urlState[accessor][a] = attributes[a];
-  //       });
-  //     }
-
-  //     try {
-  //       const oldLocationSearchString = stringify(parsedQueryString, {
-  //         sort: false,
-  //         encode: false,
-  //       });
-
-  //       Object.keys(urlState).forEach((a) => {
-  //         if (isRisonSerializationRequired(a)) {
-  //           parsedQueryString[a] = encode(urlState[a]);
-  //         } else {
-  //           parsedQueryString[a] = urlState[a];
-  //         }
-  //       });
-  //       const newLocationSearchString = stringify(parsedQueryString, {
-  //         sort: false,
-  //         encode: false,
-  //       });
-
-  //       if (oldLocationSearchString !== newLocationSearchString) {
-  //         const newSearchString = stringify(parsedQueryString, { sort: false });
-  //         if (replaceState) {
-  //           history.replace({ search: newSearchString });
-  //         } else {
-  //           history.push({ search: newSearchString });
-  //         }
-  //       }
-  //     } catch (error) {
-  //       // eslint-disable-next-line no-console
-  //       console.error('Could not save url state', error);
-  //     }
-  //   },
-  //   [history, urlSearchString]
-  // );
-
   useEffect(() => {
     // Update data query manager if input string is updated
     data?.query.queryString.setQuery({
@@ -255,77 +161,75 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
   if (!dataView || !timefilter) return null;
 
   return (
-    // <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
-            <EuiPageContentHeader className="aiopsPageHeader">
-              <EuiPageContentHeaderSection>
-                <div className="aiopsTitleHeader">
-                  <EuiTitle size={'s'}>
-                    <h2>{dataView.title}</h2>
-                  </EuiTitle>
-                </div>
-              </EuiPageContentHeaderSection>
+    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <EuiPageContentHeader className="aiopsPageHeader">
+            <EuiPageContentHeaderSection>
+              <div className="aiopsTitleHeader">
+                <EuiTitle size={'s'}>
+                  <h2>{dataView.title}</h2>
+                </EuiTitle>
+              </div>
+            </EuiPageContentHeaderSection>
 
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="flexEnd"
-                gutterSize="s"
-                data-test-subj="aiopsTimeRangeSelectorSection"
-              >
-                {dataView.timeFieldName !== undefined && (
-                  <EuiFlexItem grow={false}>
-                    <FullTimeRangeSelector
-                      dataView={dataView}
-                      query={undefined}
-                      disabled={false}
-                      timefilter={timefilter}
-                    />
-                  </EuiFlexItem>
-                )}
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="s"
+              data-test-subj="aiopsTimeRangeSelectorSection"
+            >
+              {dataView.timeFieldName !== undefined && (
                 <EuiFlexItem grow={false}>
-                  <DatePickerWrapper />
+                  <FullTimeRangeSelector
+                    dataView={dataView}
+                    query={undefined}
+                    disabled={false}
+                    timefilter={timefilter}
+                  />
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentHeader>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule />
-        <EuiPageContentBody>
-          <EuiFlexGroup gutterSize="m" direction="column">
-            {docStats?.totalCount !== undefined && (
-              <EuiFlexItem>
-                <DocumentCountContent
-                  brushSelectionUpdateHandler={setWindowParameters}
-                  documentCountStats={docStats.documentCountStats}
-                  totalCount={docStats.totalCount}
-                />
+              )}
+              <EuiFlexItem grow={false}>
+                <DatePickerWrapper />
               </EuiFlexItem>
-            )}
+            </EuiFlexGroup>
+          </EuiPageContentHeader>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <EuiPageContentBody>
+        <EuiFlexGroup gutterSize="m" direction="column">
+          {docStats?.totalCount !== undefined && (
             <EuiFlexItem>
-              <SearchPanel
-                dataView={dataView}
-                searchString={searchString}
-                searchQuery={searchQuery}
-                searchQueryLanguage={searchQueryLanguage}
-                setSearchParams={setSearchParams}
+              <DocumentCountContent
+                brushSelectionUpdateHandler={setWindowParameters}
+                documentCountStats={docStats.documentCountStats}
+                totalCount={docStats.totalCount}
               />
             </EuiFlexItem>
-            <EuiSpacer size="m" />
-            {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
-              <EuiFlexItem>
-                <ExplainLogRateSpikes
-                  dataView={dataView}
-                  earliest={earliest}
-                  latest={latest}
-                  windowParameters={windowParameters}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPageContentBody>
-      </EuiPageBody>
-    // </UrlStateContextProvider>
+          )}
+          <EuiFlexItem>
+            <SearchPanel
+              dataView={dataView}
+              searchString={searchString}
+              searchQuery={searchQuery}
+              searchQueryLanguage={searchQueryLanguage}
+              setSearchParams={setSearchParams}
+            />
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+            <EuiFlexItem>
+              <ExplainLogRateSpikes
+                dataView={dataView}
+                earliest={earliest}
+                latest={latest}
+                windowParameters={windowParameters}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiPageContentBody>
+    </EuiPageBody>
   );
 };

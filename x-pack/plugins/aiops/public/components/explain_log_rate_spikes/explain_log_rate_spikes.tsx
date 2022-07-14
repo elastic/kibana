@@ -37,7 +37,6 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   latest,
   windowParameters,
 }) => {
-  // TODO: Need to pass in unified search service manually
   const {
     services: { http },
   } = useAiOpsKibana();
