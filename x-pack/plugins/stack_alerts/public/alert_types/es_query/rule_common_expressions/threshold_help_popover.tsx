@@ -68,14 +68,14 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiCallOut iconType="pin" size="m">
-          <p>
-            <FormattedMessage
-              id="xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches"
-              defaultMessage="If the time window is greater than the check interval and a document matches the query in multiple runs, it is used in only the first threshold calculation."
-            />
-          </p>
-        </EuiCallOut>
+        <EuiCallOut
+          iconType="pin"
+          size="s"
+          title={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches', {
+            defaultMessage:
+              'If the time window is greater than the check interval and a document matches the query in multiple runs, it is used in only the first threshold calculation.',
+          })}
+        />
       </div>
     );
   }
