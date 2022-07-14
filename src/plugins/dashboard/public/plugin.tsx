@@ -72,7 +72,6 @@ import {
   CopyToDashboardAction,
   DashboardCapabilities,
   DashboardLoadedEvent,
-  PERFORMANCE_METRIC_EVENT_SCHEMA,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
@@ -82,6 +81,7 @@ import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
 import { DASHBOARD_LOADED_EVENT } from './events';
+import { PERFORMANCE_METRIC_EVENT_SCHEMA } from '@kbn/core/public/utils';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
