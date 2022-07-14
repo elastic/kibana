@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ExpandWildcard,
+  IndicesIndexState,
+  IndicesStatsIndicesStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
@@ -43,20 +47,28 @@ export const mapIndexStats = (
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
-  indexRegExp: RegExp
+  indexRegExp: RegExp,
+  returnHiddenIndices: boolean
 ): Promise<ElasticsearchIndex[]> => {
   // This call retrieves alias and settings information about indices
-  const indices = await client.asCurrentUser.indices.get({
-    expand_wildcards: ['open'],
+  const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
+  const totalIndices = await client.asCurrentUser.indices.get({
+    expand_wildcards: expandWildcards,
     // for better performance only compute aliases and settings of indices but not mappings
     features: ['aliases', 'settings'],
     // only get specified index properties from ES to keep the response under 536MB
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
-    filter_path: ['*.aliases'],
+    filter_path: ['*.aliases', '*.settings.index.hidden'],
     index: indexPattern,
   });
 
-  if (!Object.keys(indices).length) {
+  const indicesNames = returnHiddenIndices
+    ? Object.keys(totalIndices)
+    : Object.keys(totalIndices).filter((indexName) => {
+        return !(totalIndices[indexName]?.settings?.index?.hidden === 'true');
+      });
+
+  if (indicesNames.length === 0) {
     return [];
   }
 
@@ -65,10 +77,9 @@ export const fetchIndices = async (
     index: indexPattern,
     metric: ['docs', 'store'],
   });
-  const indicesNames = Object.keys(indices);
   return indicesNames
     .map((indexName: string) => {
-      const indexData = indices[indexName];
+      const indexData = totalIndices[indexName];
       const indexStats = indicesStats[indexName];
       return mapIndexStats(indexData, indexStats, indexName);
     })

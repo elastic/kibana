@@ -10,11 +10,18 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 import { SearchIndex } from '../../types';
 
-export const indicesApi = async ({ meta }: { meta: Meta }) => {
+export const indicesApi = async ({
+  meta,
+  returnHiddenIndices,
+}: {
+  meta: Meta;
+  returnHiddenIndices?: boolean;
+}) => {
   const { http } = HttpLogic.values;
   const route = '/internal/enterprise_search/indices';
   const query = {
     page: meta.page.current,
+    returnHiddenIndices: !!returnHiddenIndices,
     size: meta.page.size,
   };
   const response = await http.get<{ indices: SearchIndex[]; meta: Meta }>(route, {

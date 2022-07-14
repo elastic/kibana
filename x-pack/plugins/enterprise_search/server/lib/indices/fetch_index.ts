@@ -7,12 +7,16 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Crawler } from '../../types/crawler';
+import { Crawler } from '../../../common/types/crawler';
+import { EntSearchIndex } from '../../../common/types/indices';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 
 import { mapIndexStats } from './fetch_indices';
 
-export const fetchIndex = async (client: IScopedClusterClient, index: string) => {
+export const fetchIndex = async (
+  client: IScopedClusterClient,
+  index: string
+): Promise<EntSearchIndex> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });

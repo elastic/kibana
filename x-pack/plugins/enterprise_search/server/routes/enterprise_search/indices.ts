@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { fetchConnectors } from '../../lib/connectors/fetch_connectors';
+
 import { createApiIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
@@ -19,7 +21,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
     async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, 'search-*', /^search-.*/);
+        const indices = await fetchIndices(client, 'search-*', /^search-.*/, false);
         return response.ok({
           body: indices,
           headers: { 'content-type': 'application/json' },
@@ -38,22 +40,30 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       validate: {
         query: schema.object({
           page: schema.number({ defaultValue: 0, min: 0 }),
+          returnHiddenIndices: schema.maybe(schema.boolean()),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
     },
     async (context, request, response) => {
-      const { page, size } = request.query;
+      const { page, size, returnHiddenIndices } = request.query;
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, '*', /.*/);
-        const totalResults = indices.length;
+        const totalIndices = await fetchIndices(client, '*', /.*/, !!returnHiddenIndices);
+        const totalResults = totalIndices.length;
         const totalPages = Math.ceil(totalResults / size);
         const startIndex = (page - 1) * size;
         const endIndex = page * size;
+        const selectedIndices = totalIndices.slice(startIndex, endIndex);
+        const indexNames = selectedIndices.map(({ name }) => name);
+        const connectors = await fetchConnectors(client, indexNames);
+        const indices = selectedIndices.map((index) => ({
+          ...index,
+          connector: connectors.find((connector) => connector.index_name === index.name),
+        }));
         return response.ok({
           body: {
-            indices: indices.slice(startIndex, endIndex),
+            indices,
             meta: {
               page: {
                 current: page,
