@@ -450,3 +450,45 @@ export const PREVIOUS = i18n.translate(
     defaultMessage: 'Previous',
   }
 );
+
+export const CASE_TITLE_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.caseTitleDesc',
+  {
+    defaultMessage: 'Kibana case title',
+  }
+);
+
+export const CASE_DESCRIPTION_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.caseDescriptionDesc',
+  {
+    defaultMessage: 'Kibana case description',
+  }
+);
+
+export const CASE_TAGS_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.caseTagsDesc',
+  {
+    defaultMessage: 'Kibana case tags',
+  }
+);
+
+export const CASE_COMMENT_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.caseCommentDesc',
+  {
+    defaultMessage: 'Kibana case comment',
+  }
+);
+
+export const EXTERNAL_ID_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.externalIdDesc',
+  {
+    defaultMessage: 'External system id',
+  }
+);
+
+export const EXTERNAL_TITLE_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.externalTitleDesc',
+  {
+    defaultMessage: 'External system title',
+  }
+);
