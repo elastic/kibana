@@ -9,6 +9,7 @@ import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -29,10 +30,10 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  RecordRawType,
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { getTextBasedLanguageMode } from '../../../utils/get_text_based_language_mode';
 import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
@@ -82,19 +83,18 @@ export function fetchAll(
   };
 
   try {
-    const indexPattern = searchSource.getField('index')!;
-
+    const dataView = searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
-
     const { hideChart, sort, query } = appStateContainer.getState();
-    const textBasedLanguageMode = query ? getTextBasedLanguageMode(query) : '';
+    const recordRawType = getRawRecordType(query);
+    const useSql = recordRawType === RecordRawType.PLAIN;
 
-    // Update the base searchSource, base for all child fetches
-    if (!textBasedLanguageMode) {
+    if (recordRawType === RecordRawType.DOCUMENT) {
+      // Update the base searchSource, base for all child fetches
       updateSearchSource(searchSource, false, {
-        indexPattern,
+        indexPattern: dataView,
         services,
         sort: sort as SortOrder[],
         useNewFieldsApi,
@@ -102,29 +102,23 @@ export function fetchAll(
     }
 
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$, textBasedLanguageMode);
-    sendLoadingMsg(dataSubjects.documents$, textBasedLanguageMode);
-    sendLoadingMsg(dataSubjects.totalHits$, textBasedLanguageMode);
-    sendLoadingMsg(dataSubjects.charts$, textBasedLanguageMode);
+    sendLoadingMsg(dataSubjects.main$, recordRawType);
+    sendLoadingMsg(dataSubjects.documents$, recordRawType);
+    sendLoadingMsg(dataSubjects.totalHits$, recordRawType);
+    sendLoadingMsg(dataSubjects.charts$, recordRawType);
 
     const isChartVisible =
-      !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
+      !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
     // Start fetching all required requests
     const documents =
-      textBasedLanguageMode && query
+      useSql && query
         ? fetchSql(query, services.indexPatterns, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
-
     const charts =
-      isChartVisible && !textBasedLanguageMode
-        ? fetchChart(searchSource.createCopy(), fetchDeps)
-        : undefined;
+      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
     const totalHits =
-      !isChartVisible && !textBasedLanguageMode
-        ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
-        : undefined;
-
+      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
      * if there are results, indicating that we have finished some of the requests that have been
@@ -150,12 +144,14 @@ export function fetchAll(
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.PARTIAL,
             result: docs.length,
+            recordRawType,
           });
         }
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: docs,
+          recordRawType,
         });
 
         checkHitCount(docs.length);
@@ -170,12 +166,14 @@ export function fetchAll(
         dataSubjects.totalHits$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: chart.totalHits,
+          recordRawType,
         });
 
         dataSubjects.charts$.next({
           fetchStatus: FetchStatus.COMPLETE,
           chartData: chart.chartData,
           bucketInterval: chart.bucketInterval,
+          recordRawType,
         });
 
         checkHitCount(chart.totalHits);
@@ -184,7 +182,11 @@ export function fetchAll(
 
     totalHits
       ?.then((hitCount) => {
-        dataSubjects.totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: hitCount });
+        dataSubjects.totalHits$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: hitCount,
+          recordRawType,
+        });
         checkHitCount(hitCount);
       })
       .catch(sendErrorTo(dataSubjects.totalHits$));

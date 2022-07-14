@@ -37,7 +37,7 @@ import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types'
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../hooks/use_saved_search';
+import { DataMainMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
@@ -45,9 +45,9 @@ import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { getTextBasedLanguageMode } from '../../../../utils/get_text_based_language_mode';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 /**
  * Local storage key for sidebar persistence state
@@ -90,6 +90,7 @@ export function DiscoverLayout({
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+  const dataState: DataMainMsg = useDataState(main$);
 
   const viewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
@@ -112,7 +113,6 @@ export function DiscoverLayout({
   );
 
   const fetchCounter = useRef<number>(0);
-  const dataState: DataMainMsg = useDataState(main$);
 
   useEffect(() => {
     if (dataState.fetchStatus === FetchStatus.LOADING) {
@@ -132,14 +132,13 @@ export function DiscoverLayout({
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
+    [state.query]
+  );
   const resultState = useMemo(
-    () =>
-      getResultState(
-        dataState.fetchStatus,
-        dataState.foundDocuments!,
-        dataState.textBasedLanguageMode
-      ),
-    [dataState.fetchStatus, dataState.foundDocuments, dataState.textBasedLanguageMode]
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
+    [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
   );
 
   const onOpenInspector = useCallback(() => {
@@ -169,8 +168,6 @@ export function DiscoverLayout({
     state,
     useNewFieldsApi,
   });
-
-  const textBasedLanguageMode = state.query ? getTextBasedLanguageMode(state.query) : '';
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -217,10 +214,10 @@ export function DiscoverLayout({
   }, []);
 
   const textBasedLanguageModeErrors = useMemo(() => {
-    if (dataState.textBasedLanguageMode) {
+    if (isPlainRecord) {
       return dataState.error;
     }
-  }, [dataState.error, dataState.textBasedLanguageMode]);
+  }, [dataState.error, isPlainRecord]);
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
@@ -254,7 +251,7 @@ export function DiscoverLayout({
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
-        textBasedLanguageMode={textBasedLanguageMode}
+        isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
       />
@@ -271,7 +268,7 @@ export function DiscoverLayout({
               documents$={savedSearchData$.documents$}
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
-              onAddFilter={!textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined}
+              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
@@ -337,7 +334,7 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  {!textBasedLanguageMode && (
+                  {!isPlainRecord && (
                     <>
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
@@ -362,9 +359,7 @@ export function DiscoverLayout({
                       expandedDoc={expandedDoc}
                       indexPattern={indexPattern}
                       navigateTo={navigateTo}
-                      onAddFilter={
-                        !textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
-                      }
+                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
                       state={state}
@@ -380,9 +375,7 @@ export function DiscoverLayout({
                       filters={state.filters}
                       columns={columns}
                       stateContainer={stateContainer}
-                      onAddFilter={
-                        !textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
-                      }
+                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}
                     />

@@ -27,6 +27,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  RecordRawType,
 } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -44,7 +45,8 @@ function mountComponent(
   indexPattern: DataView,
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
-  query?: Query | AggregateQuery
+  query?: Query | AggregateQuery,
+  isPlainRecord?: boolean
 ) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
@@ -63,6 +65,7 @@ function mountComponent(
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
+    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$;
 
@@ -186,7 +189,8 @@ describe('Discover component', () => {
       indexPatternWithTimefieldMock,
       false,
       {},
-      { sql: 'SELECT * FROM test' }
+      { sql: 'SELECT * FROM test' },
+      true
     );
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });

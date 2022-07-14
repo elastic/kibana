@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
@@ -32,7 +32,7 @@ export type DiscoverTopNavProps = Pick<
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
-  textBasedLanguageMode?: string;
+  isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
 };
@@ -49,11 +49,12 @@ export const DiscoverTopNav = ({
   savedSearch,
   resetSavedSearch,
   onChangeIndexPattern,
-  textBasedLanguageMode,
+  isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+
   const showDatePicker = useMemo(
     () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
     [indexPattern]
@@ -144,7 +145,7 @@ export const DiscoverTopNav = ({
         onOpenInspector,
         searchSource,
         onOpenSavedSearch,
-        textBasedLanguageMode,
+        isPlainRecord,
       }),
     [
       indexPattern,
@@ -155,7 +156,7 @@ export const DiscoverTopNav = ({
       onOpenInspector,
       searchSource,
       onOpenSavedSearch,
-      textBasedLanguageMode,
+      isPlainRecord,
     ]
   );
 
@@ -189,7 +190,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: indexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
+    onChangeDataView: onChangeIndexPattern,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
@@ -220,7 +221,7 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!textBasedLanguageMode && Boolean(services.capabilities.discover.saveQuery)}
+      showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}
