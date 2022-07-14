@@ -598,8 +598,10 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   );
 };
 
+type ShowFunc = (jobUpdate: MlSummaryJob) => void;
+
 interface JobListDatafeedChartFlyoutProps {
-  setShowFunction: (callback: Function) => void;
+  setShowFunction: (showFunc: ShowFunc) => void;
   unsetShowFunction: () => void;
   refreshJobs(): void;
 }
