@@ -10,7 +10,7 @@ import type { getErrorMessage } from '@kbn/core-elasticsearch-client-server-inte
 
 export const mockGetEsErrorMessage = jest.fn() as jest.MockedFunction<typeof getErrorMessage>;
 
-jest.mock('../../../../elasticsearch', () => {
+jest.mock('@kbn/core-elasticsearch-client-server-internal', () => {
   return { getErrorMessage: mockGetEsErrorMessage };
 });
 
