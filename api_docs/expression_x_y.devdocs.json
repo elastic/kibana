@@ -96,10 +96,10 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.AnnotationLayerArgs.hide",
+            "id": "def-common.AnnotationLayerArgs.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -582,10 +582,10 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.DataLayerArgs.hide",
+            "id": "def-common.DataLayerArgs.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"

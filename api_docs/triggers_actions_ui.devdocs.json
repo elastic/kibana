@@ -1647,7 +1647,7 @@
         "label": "useLoadRuleTypes",
         "description": [],
         "signature": [
-          "({ filteredSolutions }: RuleTypesProps) => { ruleTypes: ",
+          "({ filteredRuleTypes }: RuleTypesProps) => { ruleTypes: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -1656,13 +1656,7 @@
             "text": "RuleType"
           },
           "<string, string>[]; error: string | null; ruleTypeIndex: ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.RuleTypeIndex",
-            "text": "RuleTypeIndex"
-          },
+          "RuleTypeIndex",
           "; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
@@ -1673,7 +1667,7 @@
             "id": "def-public.useLoadRuleTypes.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ filteredSolutions }",
+            "label": "{ filteredRuleTypes }",
             "description": [],
             "signature": [
               "RuleTypesProps"
@@ -2906,105 +2900,16 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.RuleTableItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuleTableItem",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.RuleTableItem",
-            "text": "RuleTableItem"
-          },
-          " extends ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.Rule",
-            "text": "Rule"
-          },
-          "<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.ruleType",
-            "type": "string",
-            "tags": [],
-            "label": "ruleType",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.index",
-            "type": "number",
+            "id": "def-public.RuleDefinitionProps.filteredRuleTypes",
+            "type": "Array",
             "tags": [],
-            "label": "index",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.actionsCount",
-            "type": "number",
-            "tags": [],
-            "label": "actionsCount",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.isEditable",
-            "type": "boolean",
-            "tags": [],
-            "label": "isEditable",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.enabledInLicense",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabledInLicense",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.showIntervalWarning",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showIntervalWarning",
+            "label": "filteredRuleTypes",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
@@ -4268,6 +4173,20 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RulesListVisibleColumns",
+        "type": "Type",
+        "tags": [],
+        "label": "RulesListVisibleColumns",
+        "description": [],
+        "signature": [
+          "\"ruleName\" | \"ruleTags\" | \"ruleExecutionStatusLastDate\" | \"ruleSnoozeNotify\" | \"ruleScheduleInterval\" | \"ruleExecutionStatusLastDuration\" | \"ruleExecutionPercentile\" | \"ruleExecutionSuccessRatio\" | \"ruleExecutionStatus\" | \"ruleExecutionState\""
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list_column_selector.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.RuleStatus",
         "type": "Type",
         "tags": [],
@@ -4275,28 +4194,6 @@
         "description": [],
         "signature": [
           "\"disabled\" | \"enabled\" | \"snoozed\""
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.RuleTypeIndex",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleTypeIndex",
-        "description": [],
-        "signature": [
-          "Map<string, ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -5772,6 +5669,38 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesList",
+          "type": "Function",
+          "tags": [],
+          "label": "getRulesList",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "RulesListProps",
+            ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesList.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "RulesListProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesListNotifyBadge",
           "type": "Function",
           "tags": [],
@@ -5802,21 +5731,6 @@
               "isRequired": true
             }
           ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesList",
-          "type": "Function",
-          "tags": [],
-          "label": "getRulesList",
-          "description": [],
-          "signature": [
-            "() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-          "deprecated": false,
-          "children": [],
           "returnComment": []
         },
         {

@@ -1306,7 +1306,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
@@ -4919,7 +4919,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           ">; }"
         ],
@@ -6104,7 +6104,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined) => { id?: string | undefined; params?: Record<string, any> | undefined; } | undefined"
         ],
@@ -6168,7 +6168,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined"
             ],
@@ -6267,7 +6267,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",

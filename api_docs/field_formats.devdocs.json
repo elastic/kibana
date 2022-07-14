@@ -2116,7 +2116,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined) => ",
               {
@@ -2145,7 +2145,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   "> | undefined"
                 ],
@@ -4878,7 +4878,8 @@
           "\nParams provided when creating a formatter.\nParams are vary per formatter\n\nTODO: support strict typing for params depending on format type\nhttps://github.com/elastic/kibana/issues/108158"
         ],
         "signature": [
-          "SerializableRecord"
+          "SerializableRecord",
+          " & P"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
@@ -5082,7 +5083,7 @@
         "label": "FormatFactory",
         "description": [],
         "signature": [
-          "(mapping?: ",
+          "<P = {}>(mapping?: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5090,9 +5091,15 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          "SerializableRecord",
-          "> | undefined) => ",
+          "<P, ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatParams",
+            "text": "FieldFormatParams"
+          },
+          "<P>> | undefined) => ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5120,9 +5127,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
-              "SerializableRecord",
-              "> | undefined"
+              "<P, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<P>> | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false

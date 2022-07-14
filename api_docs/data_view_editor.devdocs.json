@@ -128,6 +128,21 @@
             ],
             "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "\nif set to true user is presented with an option to create ad-hoc dataview without a saved object."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_view_editor/public/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

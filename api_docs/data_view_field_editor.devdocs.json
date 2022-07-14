@@ -127,7 +127,7 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(newParams?: {}) => void"
+              "(newParams?: Partial<{ type?: string | undefined; } & P>) => void"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
@@ -140,7 +140,7 @@
                 "label": "newParams",
                 "description": [],
                 "signature": [
-                  "{}"
+                  "Partial<{ type?: string | undefined; } & P>"
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
@@ -242,7 +242,9 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(newParams: { [key: string]: any; }) => void"
+              "(newParams: ",
+              "SerializableRecord",
+              ") => void"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
@@ -254,23 +256,12 @@
                 "tags": [],
                 "label": "newParams",
                 "description": [],
+                "signature": [
+                  "SerializableRecord"
+                ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                 "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViewFieldEditor",
-                    "id": "def-public.FormatEditorProps.onChange.$1.Unnamed",
-                    "type": "IndexSignature",
-                    "tags": [],
-                    "label": "[key: string]: any",
-                    "description": [],
-                    "signature": [
-                      "[key: string]:  any"
-                    ],
-                    "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-                    "deprecated": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -556,7 +547,7 @@
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
-            "<any>) => void; }"
+            "<{}>) => void; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false
@@ -679,7 +670,7 @@
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
-            "<any>[]; getById: (id: string) => ",
+            "<{}>[]; getById: <P>(id: string) => ",
             {
               "pluginId": "dataViewFieldEditor",
               "scope": "public",
@@ -687,7 +678,7 @@
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
-            "<any> | undefined; }"
+            "<P> | undefined; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false

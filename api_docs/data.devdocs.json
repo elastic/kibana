@@ -645,7 +645,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -12955,7 +12963,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -12995,7 +13003,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -19389,7 +19397,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -19429,7 +19437,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -19517,7 +19525,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
@@ -22619,7 +22627,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
@@ -23412,7 +23420,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           ">> | undefined; runtimeFieldMap?: Record<string, ",
           {
@@ -23509,7 +23517,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
