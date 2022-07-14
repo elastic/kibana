@@ -19164,8 +19164,6 @@
     "xpack.ml.itemsGrid.itemsPerPageButtonLabel": "Éléments par page : {itemsPerPage}",
     "xpack.ml.itemsGrid.noItemsAddedTitle": "Aucun élément n'a été ajouté",
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "Aucun élément correspondant",
-    "xpack.ml.jobDetails.datafeedChartAriaLabel": "Graphique de flux de données",
-    "xpack.ml.jobDetails.datafeedChartTooltipText": "Graphique de flux de données",
     "xpack.ml.jobMessages.actionsLabel": "Actions",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "Effacement des notifications non pris en charge.",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "Erreur lors de l'effacement des avertissements et erreurs du message lié à la tâche",

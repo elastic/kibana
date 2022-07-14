@@ -19156,8 +19156,6 @@
     "xpack.ml.itemsGrid.itemsPerPageButtonLabel": "ページごとの項目数：{itemsPerPage}",
     "xpack.ml.itemsGrid.noItemsAddedTitle": "項目が追加されていません",
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "一致する項目が見つかりません。",
-    "xpack.ml.jobDetails.datafeedChartAriaLabel": "データフィードグラフ",
-    "xpack.ml.jobDetails.datafeedChartTooltipText": "データフィードグラフ",
     "xpack.ml.jobMessages.actionsLabel": "アクション",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "通知の消去はサポートされていません。",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "ジョブメッセージ警告とエラーの消去エラー",

@@ -19177,8 +19177,6 @@
     "xpack.ml.itemsGrid.itemsPerPageButtonLabel": "每页中的项：{itemsPerPage}",
     "xpack.ml.itemsGrid.noItemsAddedTitle": "没有添加任何项",
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "没有匹配的项",
-    "xpack.ml.jobDetails.datafeedChartAriaLabel": "数据馈送图表",
-    "xpack.ml.jobDetails.datafeedChartTooltipText": "数据馈送图表",
     "xpack.ml.jobMessages.actionsLabel": "操作",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "不支持清除通知。",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "清除作业消息警告和错误时出错",

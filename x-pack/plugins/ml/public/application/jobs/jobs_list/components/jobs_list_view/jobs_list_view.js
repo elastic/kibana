@@ -14,6 +14,7 @@ import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
+import { JobListDatafeedChartFlyout } from '../datafeed_chart_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { ResetJobModal } from '../reset_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
@@ -53,6 +54,7 @@ export class JobsListView extends Component {
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
+    this.showDatafeedChartFlyout = () => {};
     this.showStopDatafeedsConfirmModal = () => {};
     this.showCloseJobsConfirmModal = () => {};
     this.showDeleteJobModal = () => {};
@@ -176,6 +178,13 @@ export class JobsListView extends Component {
   };
   unsetShowEditJobFlyoutFunction = () => {
     this.showEditJobFlyout = () => {};
+  };
+
+  setShowDatafeedChartFlyoutFunction = (func) => {
+    this.showDatafeedChartFlyout = func;
+  };
+  unsetShowDatafeedChartFlyoutFunction = () => {
+    this.showDatafeedChartFlyout = () => {};
   };
 
   setShowStopDatafeedsConfirmModalFunction = (func) => {
@@ -437,6 +446,7 @@ export class JobsListView extends Component {
                   toggleRow={this.toggleRow}
                   selectJobChange={this.selectJobChange}
                   showEditJobFlyout={this.showEditJobFlyout}
+                  showDatafeedChartFlyout={this.showDatafeedChartFlyout}
                   showDeleteJobModal={this.showDeleteJobModal}
                   showResetJobModal={this.showResetJobModal}
                   showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
@@ -459,13 +469,17 @@ export class JobsListView extends Component {
             refreshJobs={() => this.refreshJobSummaryList(true)}
             allJobIds={jobIds}
           />
+          <JobListDatafeedChartFlyout
+            setShowFunction={this.setShowDatafeedChartFlyoutFunction}
+            unsetShowFunction={this.unsetShowDatafeedChartFlyoutFunction}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
+          />
           <StopDatafeedsConfirmModal
             setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
             unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
             refreshJobs={() => this.refreshJobSummaryList(true)}
             allJobIds={jobIds}
           />
-
           <CloseJobsConfirmModal
             setShowFunction={this.setShowCloseJobsConfirmModalFunction}
             unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}

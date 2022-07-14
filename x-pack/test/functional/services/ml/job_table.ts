@@ -366,12 +366,37 @@ export function MachineLearningJobTableProvider(
       );
     }
 
+    public async assertJobActionResetJobButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonResetJob');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "reset job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
     public async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonCloneJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "clone job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionViewDatafeedCountsButtonEnabled(
+      jobId: string,
+      expectedValue: boolean
+    ) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonViewDatafeedChart');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "view datafeed counts" action button for AD job '${jobId}' to be '${
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
