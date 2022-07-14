@@ -68,7 +68,7 @@ export async function runKibanaServer({
   };
 
   const prefixArgs = devMode
-    ? [Path.relative(process.cwd(), Path.resolve(REPO_ROOT, 'scripts/kibana'))]
+    ? [Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana'))]
     : [];
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
