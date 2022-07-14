@@ -106,7 +106,12 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
       >
         <PageLayout {...layoutProps}>
           {showExitModal && (
-            <ConsoleExitModal onClose={onHide} agentId={agentId} hostName={hostName} />
+            <ConsoleExitModal
+              onClose={onHide}
+              agentId={agentId}
+              hostName={hostName}
+              data-test-subj={getTestId('console-exit-modal')}
+            />
           )}
           {console}
         </PageLayout>

@@ -19,7 +19,7 @@ export const ConsoleExitModal = memo(
     onClose,
   }: {
     agentId: string;
-    'data-test-subj': string;
+    'data-test-subj'?: string;
     hostName: string;
     onClose: () => void;
   }) => {
