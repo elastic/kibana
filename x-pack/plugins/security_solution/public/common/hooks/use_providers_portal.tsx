@@ -6,13 +6,13 @@
  */
 
 import { useState } from 'react';
-import { createPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode } from 'react-reverse-portal';
 
 /**
  * A singleton portal for rendering the draggable groups of providers in the
  * header of the timeline, or in the animated flyout
  */
-const proivdersPortalNodeSingleton = createPortalNode();
+const proivdersPortalNodeSingleton = createHtmlPortalNode();
 
 export const useProvidersPortal = () => {
   const [proivdersPortalNode] = useState(proivdersPortalNodeSingleton);
