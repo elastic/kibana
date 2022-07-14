@@ -121,21 +121,6 @@ export function TimeScaling({
             }}
           />
         </EuiFlexItem>
-        {/* {selectedOperation.timeScalingMode === 'optional' && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="indexPattern-time-scaling-remove"
-              color="danger"
-              aria-label={i18n.translate('xpack.lens.timeScale.removeLabel', {
-                defaultMessage: 'Remove normalizing by time unit',
-              })}
-              onClick={() => {
-                updateLayer(setTimeScaling(columnId, layer, undefined));
-              }}
-              iconType="cross"
-            />
-          </EuiFlexItem>
-        )} */}
       </EuiFlexGroup>
     </EuiFormRow>
   );

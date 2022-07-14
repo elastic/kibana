@@ -16,6 +16,7 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
     <EuiAccordion
       id="advancedOptionsAccordion"
       arrowProps={{ color: 'primary' }}
+      data-test-subj="indexPattern-advanced-accordion"
       buttonContent={
         <EuiText size="s" color={euiTheme.colors.primary}>
           {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
@@ -25,10 +26,10 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       }
     >
       {props.options.map(({ dataTestSubj, inlineElement }) => (
-        <React.Fragment key={dataTestSubj}>
+        <div key={dataTestSubj} data-test-subj={dataTestSubj}>
           <EuiSpacer size="s" />
           {inlineElement}
-        </React.Fragment>
+        </div>
       ))}
     </EuiAccordion>
   );
