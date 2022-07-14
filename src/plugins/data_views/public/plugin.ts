@@ -51,11 +51,11 @@ export class DataViewsPublicPlugin
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, application } = core;
 
-    const onNotifDebounced = debounceByKey(
+    const onNotifDebounced = debounceByKey<typeof notifications.toasts.add>(
       notifications.toasts.add.bind(notifications.toasts),
       10000
     );
-    const onErrorDebounced = debounceByKey(
+    const onErrorDebounced = debounceByKey<typeof notifications.toasts.addError>(
       notifications.toasts.addError.bind(notifications.toasts),
       10000
     );

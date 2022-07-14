@@ -8,11 +8,8 @@
 
 import { debounce } from 'lodash';
 
-export const debounceByKey = <T, F extends (...args: any[]) => T>(
-  fn: F,
-  waitInMs: number
-): ((key: string) => F) => {
-  const debouncerCollector: Record<string, F> = {};
+export const debounceByKey = <F extends (...args: any) => unknown>(fn: F, waitInMs: number) => {
+  const debouncerCollector: Record<string, Function> = {};
   return (key: string) => {
     if (!debouncerCollector[key]) {
       debouncerCollector[key] = debounce(fn, waitInMs, {

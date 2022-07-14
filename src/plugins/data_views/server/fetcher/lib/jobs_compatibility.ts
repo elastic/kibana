@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  Field,
-  RollupGetRollupIndexCapsRollupJobSummary,
-  RollupGetRollupIndexCapsRollupJobSummaryField,
-} from '@elastic/elasticsearch/lib/api/types';
+import { RollupGetRollupIndexCapsRollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
 import { SerializableRecord } from '@kbn/utility-types';
 import { get, isEqual, set } from 'lodash';
 
@@ -48,67 +44,60 @@ export function mergeJobConfigurations(jobs: RollupGetRollupIndexCapsRollupJobSu
   const allAggs: { [key: string]: SerializableRecord } = {};
 
   // For each job, look through all of its fields
-  jobs.forEach(
-    (job: { fields: { [key: Field]: RollupGetRollupIndexCapsRollupJobSummaryField[] } }) => {
-      const fields = job.fields;
-      const fieldNames = Object.keys(fields);
+  jobs.forEach((job) => {
+    const fields = job.fields;
+    const fieldNames = Object.keys(fields);
 
-      // Check each field
-      fieldNames.forEach((fieldName) => {
-        const fieldAggs = fields[fieldName];
+    // Check each field
+    fieldNames.forEach((fieldName) => {
+      const fieldAggs = fields[fieldName];
 
-        // Look through each field's capabilities (aggregations)
-        fieldAggs.forEach((agg) => {
-          const aggName = agg.agg;
-          const aggDoesntExist = !allAggs[aggName];
-          const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
-          const isDateHistogramAgg = aggName === 'date_histogram';
+      // Look through each field's capabilities (aggregations)
+      fieldAggs.forEach((agg) => {
+        const aggName = agg.agg;
+        const aggDoesntExist = !allAggs[aggName];
+        const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
+        const isDateHistogramAgg = aggName === 'date_histogram';
 
-          // If we currently don't have this aggregation, add it.
-          // Special case for date histogram, since there can only be one
-          // date histogram field.
-          if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
-            allAggs[aggName] = allAggs[aggName] || {};
-            allAggs[aggName][fieldName] = { ...agg };
+        // If we currently don't have this aggregation, add it.
+        // Special case for date histogram, since there can only be one
+        // date histogram field.
+        if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
+          allAggs[aggName] = allAggs[aggName] || {};
+          allAggs[aggName][fieldName] = { ...agg };
+        }
+        // If aggregation already exists, attempt to merge it
+        else {
+          const fieldAgg = allAggs[aggName][fieldName] as object | null;
+          switch (aggName) {
+            // For histograms, calculate the least common multiple between the
+            // new interval and existing interval
+            case 'histogram':
+              if (fieldAgg) {
+                const aggInterval = (agg as any).interval ?? agg.calendar_interval; // FIXME the interface infers only that calendar_interval property is valid
+                // TODO: Fix this with LCD algorithm
+                const intervals = [get(fieldAgg, 'interval'), aggInterval].sort((a, b) => a - b);
+                const isMultiple = intervals[1] % intervals[0] === 0;
+                set(fieldAgg, 'interval', isMultiple ? intervals[1] : intervals[0] * intervals[1]);
+              }
+              break;
+
+            // For date histograms, if it is on the same field, check that the configuration is identical,
+            // otherwise reject. If not the same field, reject;
+            case 'date_histogram':
+              if (fieldDoesntExist || !isEqual(fieldAgg, agg)) {
+                throw new Error('Multiple date histograms configured');
+              }
+              break;
+
+            // For other aggs (terms, metric aggs), no merging is necessary
+            default:
+              break;
           }
-          // If aggregation already exists, attempt to merge it
-          else {
-            const fieldAgg = allAggs[aggName][fieldName] as object | null;
-            switch (aggName) {
-              // For histograms, calculate the least common multiple between the
-              // new interval and existing interval
-              case 'histogram':
-                if (fieldAgg) {
-                  // FIXME: Property 'interval' does not exist on type 'RollupGetRollupIndexCapsRollupJobSummaryField'
-                  const aggInterval = (agg as any).interval;
-                  // TODO: Fix this with LCD algorithm
-                  const intervals = [get(fieldAgg, 'interval'), aggInterval].sort((a, b) => a - b);
-                  const isMultiple = intervals[1] % intervals[0] === 0;
-                  set(
-                    fieldAgg,
-                    'interval',
-                    isMultiple ? intervals[1] : intervals[0] * intervals[1]
-                  );
-                }
-                break;
-
-              // For date histograms, if it is on the same field, check that the configuration is identical,
-              // otherwise reject. If not the same field, reject;
-              case 'date_histogram':
-                if (fieldDoesntExist || !isEqual(fieldAgg, agg)) {
-                  throw new Error('Multiple date histograms configured');
-                }
-                break;
-
-              // For other aggs (terms, metric aggs), no merging is necessary
-              default:
-                break;
-            }
-          }
-        });
+        }
       });
-    }
-  );
+    });
+  });
 
   return {
     aggs: allAggs,
