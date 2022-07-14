@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FieldStatsProps, FieldStats } from './field_stats';
+export type { FieldStatsProps } from './field_stats';
+export { FieldStats } from './field_stats';

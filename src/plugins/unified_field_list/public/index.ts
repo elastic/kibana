@@ -22,4 +22,4 @@ export { BASE_API_PATH, FIELD_STATS_API_PATH } from '../common/constants';
 export function plugin() {
   return new UnifiedFieldListPlugin();
 }
-export { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+export type { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
