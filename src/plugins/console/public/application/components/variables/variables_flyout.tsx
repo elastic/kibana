@@ -24,7 +24,10 @@ import {
   EuiFieldText,
   useGeneratedHtmlId,
   EuiForm,
+  EuiFormRow,
   EuiButtonIcon,
+  EuiSpacer,
+  EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
@@ -82,15 +85,35 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
         defaultMessage: 'Variable',
       }),
       render: (name, { id }) => {
+        // Avoid characters that get URL-encoded, because they'll result in unusable variable names.
         const isInvalid = name && !name.match(/^[a-zA-Z0-9]+$/g);
         return (
-          <EuiFieldText
-            data-test-subj="variablesNameInput"
-            name="name"
-            value={name}
-            onChange={(e) => onChange(e, id)}
+          <EuiFormRow
             isInvalid={isInvalid}
-          />
+            error={[
+              <FormattedMessage
+                id="console.variablesPage.variablesTable.variableInputError.validCharactersText"
+                defaultMessage="Only letters and numbers are allowed"
+              />,
+            ]}
+            fullWidth={true}
+            css={{ flexGrow: 1 }}
+          >
+            <EuiFieldText
+              data-test-subj="variablesNameInput"
+              name="name"
+              value={name}
+              onChange={(e) => onChange(e, id)}
+              isInvalid={isInvalid}
+              fullWidth={true}
+              aria-label={i18n.translate(
+                'console.variablesPage.variablesTable.variableInput.ariaLabel',
+                {
+                  defaultMessage: 'Variable name',
+                }
+              )}
+            />
+          </EuiFormRow>
         );
       },
     },
@@ -105,6 +128,9 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
           name="value"
           onChange={(e) => onChange(e, id)}
           value={value}
+          aria-label={i18n.translate('console.variablesPage.variablesTable.valueInput.ariaLabel', {
+            defaultMessage: 'Variable value',
+          })}
         />
       ),
     },
@@ -125,16 +151,32 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
   ];
 
   return (
-    <EuiFlyout onClose={props.onClose} ownFocus={false}>
+    <EuiFlyout onClose={props.onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>
-            <FormattedMessage
-              id="console.variablesPage.pageTitle"
-              defaultMessage="Console Variables"
-            />
+            <FormattedMessage id="console.variablesPage.pageTitle" defaultMessage="Variables" />
           </h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued">
+          <p>
+            <FormattedMessage
+              id="console.variablesPage.descriptionText"
+              defaultMessage="Define variables and use them in your requests in the form of ${variableName}."
+              values={{
+                variable: (
+                  <code>
+                    <FormattedMessage
+                      id="console.variablesPage.descriptionText.variableNameText"
+                      defaultMessage="${variableName}"
+                    />
+                  </code>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm id={formId} component="form" onSubmit={onSubmit}>
