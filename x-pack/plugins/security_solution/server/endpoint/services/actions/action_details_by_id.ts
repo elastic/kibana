@@ -27,7 +27,7 @@ import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
-import { EndpointMetadataService } from '../metadata';
+import type { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
