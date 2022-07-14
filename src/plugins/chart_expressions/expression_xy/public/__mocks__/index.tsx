@@ -164,7 +164,7 @@ export const dateHistogramLayer: DataLayerConfig = {
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
   showLines: true,
-  hide: false,
+  simpleView: false,
   xAccessor: 'xAccessorId',
   xScaleType: 'time',
   isHistogram: true,
