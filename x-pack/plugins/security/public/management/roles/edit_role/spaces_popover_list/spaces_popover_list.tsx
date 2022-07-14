@@ -90,7 +90,7 @@ export class SpacesPopoverList extends Component<Props, State> {
           this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
             ? ({
                 placeholder: i18n.translate(
-                  'xpack.security.management.editRole.findSpacePlaceholder',
+                  'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
                   {
                     defaultMessage: 'Find a space',
                   }
@@ -115,9 +115,12 @@ export class SpacesPopoverList extends Component<Props, State> {
         {(list, search) => (
           <>
             <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('xpack.security.management.editRole.selectSpacesTitle', {
-                defaultMessage: 'Spaces',
-              })}
+              {i18n.translate(
+                'xpack.security.management.editRole.spacesPopoverList.selectSpacesTitle',
+                {
+                  defaultMessage: 'Spaces',
+                }
+              )}
             </EuiPopoverTitle>
             {search}
             {list}

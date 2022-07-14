@@ -82,50 +82,52 @@ class SpacesMenuUI extends Component<Props> {
     };
 
     return (
-      <EuiSelectable
-        {...panelProps}
-        isLoading={this.props.isLoading}
-        searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
-        searchProps={
-          this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
-            ? ({
-                placeholder: i18n.translate(
-                  'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
-                  {
-                    defaultMessage: 'Find a space',
-                  }
-                ),
-                compressed: true,
-                isClearable: true,
-                id: 'headerSpacesMenuListSearch',
-              } as any)
-            : undefined
-        }
-        noMatchesMessage={noSpacesMessage}
-        emptyMessage={noSpacesMessage}
-        options={spaceMenuOptions}
-        singleSelection={'always'}
-        style={{ width: 300 }}
-        onChange={this.spaceSelectionChange}
-        listProps={{
-          rowHeight: 40,
-          showIcons: false,
-          onFocusBadge: false,
-        }}
-      >
-        {(list, search) => (
-          <>
-            <EuiPopoverTitle paddingSize="s">
-              {search ||
-                i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                  defaultMessage: 'Your spaces',
-                })}
-            </EuiPopoverTitle>
-            {list}
-            <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
-          </>
-        )}
-      </EuiSelectable>
+      <>
+        <EuiSelectable
+          {...panelProps}
+          isLoading={this.props.isLoading}
+          searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
+          searchProps={
+            this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
+              ? ({
+                  placeholder: i18n.translate(
+                    'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
+                    {
+                      defaultMessage: 'Find a space',
+                    }
+                  ),
+                  compressed: true,
+                  isClearable: true,
+                  id: 'headerSpacesMenuListSearch',
+                } as any)
+              : undefined
+          }
+          noMatchesMessage={noSpacesMessage}
+          emptyMessage={noSpacesMessage}
+          options={spaceMenuOptions}
+          singleSelection={'always'}
+          style={{ width: 300 }}
+          onChange={this.spaceSelectionChange}
+          listProps={{
+            rowHeight: 40,
+            showIcons: false,
+            onFocusBadge: false,
+          }}
+        >
+          {(list, search) => (
+            <>
+              <EuiPopoverTitle paddingSize="s">
+                {search ||
+                  i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
+                    defaultMessage: 'Your spaces',
+                  })}
+              </EuiPopoverTitle>
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+        <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
+      </>
     );
   }
 
