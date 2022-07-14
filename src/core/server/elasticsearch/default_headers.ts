@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RESERVED_HEADERS } from '@kbn/core-elasticsearch-client-server';
+import { RESERVED_HEADERS } from '@kbn/core-elasticsearch-client-server-internal';
 
 export const getReservedHeaders = (headerNames: string[]): string[] => {
   const reservedHeaders = [];

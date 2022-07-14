@@ -70,7 +70,7 @@ export type {
   ElasticsearchClientMock,
   ClusterClientMock,
   ScopedClusterClientMock,
-} from './elasticsearch/client/mocks';
+} from '@kbn/core-elasticsearch-client-server-mocks';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 

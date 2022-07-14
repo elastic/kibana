@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getReservedHeaders, PRODUCT_ORIGIN_HEADER } from './default_headers';
+import { PRODUCT_ORIGIN_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
+import { getReservedHeaders } from './default_headers';
 
 describe('getReservedHeaders', () => {
   it('returns the list of reserved headers contained in a list', () => {

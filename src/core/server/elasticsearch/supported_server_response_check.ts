@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
+
 /**
  * Response headers check to determine if the response is from Elasticsearch
  * @param headers Response headers

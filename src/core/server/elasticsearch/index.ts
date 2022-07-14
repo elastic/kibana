@@ -23,7 +23,6 @@ export { pollEsNodesVersion } from './version_check/ensure_es_version';
 export {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
-  PRODUCT_RESPONSE_HEADER,
 } from './supported_server_response_check';
 export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
 export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';

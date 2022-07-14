@@ -22,9 +22,9 @@ import type {
   UnauthorizedErrorHandler,
   ElasticsearchClientConfig,
 } from '@kbn/core-elasticsearch-server';
+import { ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import { ClusterClient } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import {
   InternalElasticsearchServicePreboot,

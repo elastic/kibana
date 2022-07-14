@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchClientMock } from './client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { firstValueFrom } from 'rxjs';
 import { getClusterInfo$ } from './get_cluster_info';
 

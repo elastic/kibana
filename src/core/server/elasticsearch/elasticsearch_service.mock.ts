@@ -11,9 +11,9 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   elasticsearchClientMock,
-  ClusterClientMock,
-  CustomClusterClientMock,
-} from './client/mocks';
+  type ClusterClientMock,
+  type CustomClusterClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
