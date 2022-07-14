@@ -66,7 +66,14 @@ const getCurrentBreadcrumbs = (
 
 export const useMainRouteBreadcrumb = () => {
   // useRef needed to retrieve initial breadcrumb link from the push state without updates
-  return useRef(useHistory<HistoryState>().location.state?.breadcrumb).current;
+  const breadcrumb = useRef<string>();
+  const history = useHistory<HistoryState>();
+
+  if (history.location.state?.breadcrumb) {
+    breadcrumb.current = history.location.state.breadcrumb;
+  }
+
+  return breadcrumb.current;
 };
 
 export const useNavigationProps = ({
