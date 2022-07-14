@@ -9,10 +9,12 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 interface APIKeyResponse {
-  api_key: string;
-  expiration?: number;
-  id: string;
-  name: string;
+  apiKey: {
+    api_key: string;
+    expiration?: number;
+    id: string;
+    name: string;
+  };
 }
 
 export const generateApiKey = async ({
