@@ -7,7 +7,9 @@
  */
 
 export const MockClusterClient = jest.fn();
-jest.mock('./client/cluster_client', () => ({ ClusterClient: MockClusterClient }));
+jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
+  ClusterClient: MockClusterClient,
+}));
 
 export const isScriptingEnabledMock = jest.fn();
 jest.doMock('./is_scripting_enabled', () => ({
