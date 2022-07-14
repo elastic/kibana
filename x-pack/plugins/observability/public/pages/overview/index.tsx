@@ -162,7 +162,7 @@ export function OverviewPage({ routeParams }: Props) {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
-      isPageDataLoaded={Boolean(hasAnyData)}
+      isPageDataLoaded={isAllRequestsComplete}
       pageHeader={
         hasData
           ? {
