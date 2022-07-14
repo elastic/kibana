@@ -225,8 +225,9 @@ export function XYChart({
     [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
+  const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
+
   if (dataLayers.length === 0) {
-    const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
     return (
       <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
     );
@@ -359,7 +360,7 @@ export function XYChart({
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
+  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].simpleView : false;
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
@@ -627,6 +628,13 @@ export function XYChart({
   return (
     <Chart ref={chartRef}>
       <Settings
+        noResults={
+          <EmptyPlaceholder
+            className="xyChart__empty"
+            icon={icon}
+            renderComplete={onRenderChange}
+          />
+        }
         onRenderChange={onRenderChange}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
@@ -732,7 +740,7 @@ export function XYChart({
         }
         title={xTitle}
         gridLine={gridLineStyle}
-        hide={xAxisConfig?.hide || dataLayers[0]?.hide || !dataLayers[0]?.xAccessor}
+        hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
         tickFormat={(d) => {
           let value = safeXAccessorLabelRenderer(d) || '';
           if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
@@ -765,7 +773,7 @@ export function XYChart({
             gridLine={{
               visible: axis.showGridLines,
             }}
-            hide={axis.hide || dataLayers[0]?.hide}
+            hide={axis.hide || dataLayers[0]?.simpleView}
             tickFormat={(d) => {
               let value = axis.formatter?.convert(d) || '';
               if (axis.truncate && value.length > axis.truncate) {
@@ -840,7 +848,7 @@ export function XYChart({
           paddingMap={linesPaddings}
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
-          hide={annotationsLayers?.[0].hide}
+          simpleView={annotationsLayers?.[0].simpleView}
           outsideDimension={
             rangeAnnotations.length && shouldHideDetails
               ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION

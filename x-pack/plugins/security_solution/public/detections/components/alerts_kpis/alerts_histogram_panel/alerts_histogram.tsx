@@ -27,6 +27,7 @@ interface AlertsHistogramProps {
   from: string;
   legendItems: LegendItem[];
   legendPosition?: Position;
+  legendMinWidth?: number;
   loading: boolean;
   showLegend?: boolean;
   to: string;
@@ -40,6 +41,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     from,
     legendItems,
     legendPosition = Position.Right,
+    legendMinWidth,
     loading,
     showLegend,
     to,
@@ -98,7 +100,11 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {legendItems.length > 0 && (
-              <DraggableLegend legendItems={legendItems} height={chartHeight} />
+              <DraggableLegend
+                legendItems={legendItems}
+                height={chartHeight}
+                minWidth={legendMinWidth}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
