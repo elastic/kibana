@@ -87,7 +87,7 @@ action types.
 
 1. Develop and register an action type (see [Action types -> Example](#example)).
 2. Create an action by using the [RESTful API](#restful-api).
-3. Use alerts to generate actions or create them manually (see [Firing actions](#firing-actions)).
+3. Use alerting rules to generate actions or trigger them manually (see [Firing actions](#firing-actions)).
 
 ## Kibana Actions Configuration
 
