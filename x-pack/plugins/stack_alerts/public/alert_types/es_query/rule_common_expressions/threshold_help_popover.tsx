@@ -53,7 +53,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
-              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold. For example, IS ABOVE 1000."
+              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold."
             />
           </p>
           <p>
