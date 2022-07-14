@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiDescriptionList,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
+import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../types';
 import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const getDetailsList = (data: CspFinding) => [
+const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
@@ -46,6 +56,16 @@ const getDetailsList = (data: CspFinding) => [
       defaultMessage: 'CIS Section',
     }),
     description: data.rule.section,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
+      defaultMessage: 'Index',
+    }),
+    description: discoverIndexLink ? (
+      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+    ) : (
+      LATEST_FINDINGS_INDEX_DEFAULT_NS
+    ),
   },
 ];
 
@@ -99,6 +119,19 @@ const getEvidenceList = ({ result }: CspFinding) =>
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
 export const OverviewTab = ({ data }: { data: CspFinding }) => {
+  const {
+    services: { discover },
+  } = useKibana();
+  const latestFindingsDataView = useLatestFindingsDataView();
+
+  const discoverIndexLink = useMemo(
+    () =>
+      discover.locator?.getRedirectUrl({
+        indexPatternId: latestFindingsDataView.data?.id,
+      }),
+    [discover.locator, latestFindingsDataView.data?.id]
+  );
+
   const accordions: Accordion[] = useMemo(
     () => [
       {
@@ -107,7 +140,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
           defaultMessage: 'Details',
         }),
         id: 'detailsAccordion',
-        listItems: getDetailsList(data),
+        listItems: getDetailsList(data, discoverIndexLink),
       },
       {
         initialIsOpen: true,
@@ -127,7 +160,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
         listItems: getEvidenceList(data),
       },
     ],
-    [data]
+    [data, discoverIndexLink]
   );
 
   return (
