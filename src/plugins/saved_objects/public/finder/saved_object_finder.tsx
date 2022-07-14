@@ -9,8 +9,11 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
 
 import {
+  EuiBasicTable,
+  EuiLink,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
@@ -25,8 +28,11 @@ import {
   EuiPagination,
   EuiPopover,
   EuiSpacer,
+  EuiTableFieldDataColumnType,
   EuiTablePagination,
   IconType,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +45,7 @@ import {
 } from '@kbn/core/public';
 
 import { LISTING_LIMIT_SETTING } from '../../common';
+import { getSavedObjects } from '../services';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -57,14 +64,16 @@ interface FinderAttributes {
   type: string;
 }
 
+interface SavedObjectFinderItem {
+  title: string | null;
+  name: string | null;
+  id: SimpleSavedObject['id'];
+  type: SimpleSavedObject['type'];
+  savedObject: SimpleSavedObject<FinderAttributes>;
+}
+
 interface SavedObjectFinderState {
-  items: Array<{
-    title: string | null;
-    name: string | null;
-    id: SimpleSavedObject['id'];
-    type: SimpleSavedObject['type'];
-    savedObject: SimpleSavedObject<FinderAttributes>;
-  }>;
+  items: SavedObjectFinderItem[];
   query: string;
   isFetchingItems: boolean;
   page: number;
@@ -73,6 +82,7 @@ interface SavedObjectFinderState {
   sortOpen: boolean;
   filterOpen: boolean;
   filteredTypes: string[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 interface BaseSavedObjectFinder {
@@ -195,6 +205,7 @@ class SavedObjectFinderUi extends React.Component<
       filterOpen: false,
       filteredTypes: [],
       sortOpen: false,
+      allowedTypes: [],
     };
   }
 
@@ -206,6 +217,7 @@ class SavedObjectFinderUi extends React.Component<
   public componentDidMount() {
     this.isComponentMounted = true;
     this.fetchItems();
+    this.fetchAllowedTypes();
   }
 
   public render() {
@@ -274,6 +286,11 @@ class SavedObjectFinderUi extends React.Component<
       },
       this.debouncedFetch.bind(null, this.state.query)
     );
+  };
+
+  private fetchAllowedTypes = async () => {
+    const allowedTypes = await getSavedObjects().getAllowedTypes();
+    this.setState({ allowedTypes });
   };
 
   private getAvailableSavedObjectMetaData() {
@@ -451,6 +468,86 @@ class SavedObjectFinderUi extends React.Component<
   private renderListing() {
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
     const { onChoose, savedObjectMetaData } = this.props;
+    const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
+      {
+        field: 'type',
+        name: i18n.translate('savedObjects.finder.typeName', {
+          defaultMessage: 'Type',
+        }),
+        width: '50px',
+        align: 'center',
+        description: i18n.translate('savedObjects.finder.typeDescription', {
+          defaultMessage: 'Type of the saved object',
+        }),
+        sortable: true,
+        'data-test-subj': 'savedObjectFinderType',
+        render: (type, item) => {
+          const typeLabel = getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
+          const currentSavedObjectMetaData = savedObjectMetaData.find(
+            (metaData) => metaData.type === item.type
+          )!;
+          const iconType = (
+            currentSavedObjectMetaData ||
+            ({
+              getIconForSavedObject: () => 'document',
+            } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
+          ).getIconForSavedObject(item.savedObject);
+
+          return (
+            <EuiToolTip position="top" content={typeLabel}>
+              <EuiIcon
+                aria-label={typeLabel}
+                type={iconType}
+                size="s"
+                data-test-subj="objectType"
+              />
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        field: 'title',
+        name: i18n.translate('savedObjects.finder.titleName', {
+          defaultMessage: 'Title',
+        }),
+        description: i18n.translate('savedObjects.finder.titleDescription', {
+          defaultMessage: 'Title of the saved object',
+        }),
+        dataType: 'string',
+        sortable: true,
+        'data-test-subj': 'savedObjectFinderTitle',
+        render: (_, item) => {
+          const currentSavedObjectMetaData = savedObjectMetaData.find(
+            (metaData) => metaData.type === item.type
+          )!;
+          const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
+            ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
+            : `${item.name} (${currentSavedObjectMetaData!.name})`;
+
+          return (
+            <EuiLink
+              onClick={
+                onChoose
+                  ? () => {
+                      onChoose(item.id, item.type, fullName, item.savedObject);
+                    }
+                  : undefined
+              }
+              title={fullName}
+              data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
+            >
+              {item.name}
+            </EuiLink>
+          );
+        },
+      },
+    ];
+    const pagination = {
+      pageIndex: 0,
+      pageSize: 50,
+      totalItemCount: 1000,
+      pageSizeOptions: [5, 10, 20, 50],
+    };
 
     return (
       <>
@@ -528,6 +625,16 @@ class SavedObjectFinderUi extends React.Component<
               itemsPerPageOptions={[5, 10, 15, 25]}
             />
           ))}
+        <EuiBasicTable
+          loading={
+            (this.state.isFetchingItems && this.state.items.length === 0) ||
+            !this.state.allowedTypes.length
+          }
+          itemId="id"
+          items={items}
+          columns={columns}
+          // pagination={pagination}
+        />
       </>
     );
   }
