@@ -28,6 +28,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-dev-utils",
   "//packages/kbn-eslint-plugin-imports",
+  "//packages/kbn-eslint-plugin-packages",
   "@npm//eslint-config-prettier",
   "@npm//semver",
 ]

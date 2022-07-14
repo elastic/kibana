@@ -3360,6 +3360,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-packages@link:bazel-bin/packages/kbn-eslint-plugin-packages":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expect@link:bazel-bin/packages/kbn-expect":
   version "0.0.0"
   uid ""
@@ -6972,6 +6976,10 @@
   uid ""
 
 "@types/kbn__eslint-plugin-imports@link:bazel-bin/packages/kbn-eslint-plugin-imports/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__eslint-plugin-packages@link:bazel-bin/packages/kbn-eslint-plugin-packages/npm_module_types":
   version "0.0.0"
   uid ""
 
