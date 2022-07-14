@@ -20,14 +20,6 @@ const UNKNOWN_COMMAND_HINT = (commandName: string) =>
     values: { commandName },
   });
 
-const COMMAND_USAGE_HINT = (usage: string) =>
-  i18n.translate('xpack.securitySolution.useInputHints.commandUsage', {
-    defaultMessage: '{usage}',
-    values: {
-      usage,
-    },
-  });
-
 const NO_ARGUMENTS_HINT = i18n.translate('xpack.securitySolution.useInputHints.noArguments', {
   defaultMessage: 'Hit enter to execute',
 });
@@ -59,7 +51,13 @@ export const useInputHints = () => {
 
         if (exampleUsage) {
           if (exampleInstruction) {
-            hint += ` Ex: [ ${exampleUsage} ]`; // TODO:PT i18n this
+            // leading space below is intentional
+            hint += ` ${i18n.translate('xpack.securitySolution.useInputHints.exampleInstructions', {
+              defaultMessage: 'Ex: [ {exampleUsage} ]',
+              values: {
+                exampleUsage,
+              },
+            })}`;
           } else {
             hint += exampleUsage;
           }
@@ -74,7 +72,7 @@ export const useInputHints = () => {
           const commandArguments = getArgumentsForCommand(commandEnteredDefinition);
 
           if (commandArguments.length > 0) {
-            hint += COMMAND_USAGE_HINT(`${commandEnteredDefinition.name} ${commandArguments}`);
+            hint += `${commandEnteredDefinition.name} ${commandArguments}`;
           } else {
             hint += NO_ARGUMENTS_HINT;
           }
