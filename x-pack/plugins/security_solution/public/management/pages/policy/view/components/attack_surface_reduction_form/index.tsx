@@ -11,33 +11,39 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { isCredentialDumpingEnabled } from '../../../store/policy_details/selectors';
+import { isCredentialHardeningEnabled } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { ConfigForm } from '../config_form';
 
 const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
-  title: i18n.translate('xpack.securitySolution.endpoint.policy.details.credentialDumping.type', {
-    defaultMessage: 'Credential dumping',
-  }),
-  description: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.credentialDumping.explanation',
+  title: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.attackSurfaceReduction.type',
     {
-      defaultMessage: 'Toggle on to enable credential dumping.',
+      defaultMessage: 'Attack surface reduction',
     }
   ),
-  label: i18n.translate('xpack.securitySolution.endpoint.policy.details.credentialDumping.toggle', {
-    defaultMessage: 'Credential dumping',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.attackSurfaceReduction.explanation',
+    {
+      defaultMessage: 'Options to reduce your attack surface',
+    }
+  ),
+  label: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.credentialHardening.toggle',
+    {
+      defaultMessage: 'Credential hardening',
+    }
+  ),
 };
 
-export const CredentialDumpingForm = memo(() => {
-  const credentialDumpingEnabled = usePolicyDetailsSelector(isCredentialDumpingEnabled);
+export const AttackSurfaceReductionForm = memo(() => {
+  const credentialHardeningEnabled = usePolicyDetailsSelector(isCredentialHardeningEnabled);
   const dispatch = useDispatch();
 
   const handleSwitchChange = useCallback(
     (event) =>
       dispatch({
-        type: 'userChangedCredentialDumping',
+        type: 'userChangedcredentialHardening',
         payload: {
           enabled: event.target.checked,
         },
@@ -51,11 +57,11 @@ export const CredentialDumpingForm = memo(() => {
       <EuiSpacer size="s" />
       <EuiSwitch
         label={TRANSLATIONS.label}
-        checked={credentialDumpingEnabled}
+        checked={credentialHardeningEnabled}
         onChange={handleSwitchChange}
       />
     </ConfigForm>
   );
 });
 
-CredentialDumpingForm.displayName = 'CredentialDumpingForm';
+AttackSurfaceReductionForm.displayName = 'AttackSurfaceReductionForm';

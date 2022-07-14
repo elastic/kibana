@@ -184,7 +184,7 @@ export const policySettingsReducer: ImmutableReducer<PolicyDetailsState, AppActi
           ...policyConfig,
           windows: {
             ...policyConfig.windows,
-            credential_dumping: {
+            credential_hardening: {
               enabled: action.payload.enabled,
             },
           },

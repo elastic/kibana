@@ -213,8 +213,10 @@ function isEndpointCredentialDumpingPolicyValidForLicense(
 
   const defaults = policyFactoryWithoutPaidFeatures();
 
-  // only platinum or higher may use credential dumping
-  if (policy.windows.credential_dumping.enabled !== defaults.windows.credential_dumping.enabled) {
+  // only platinum or higher may use credential hardening
+  if (
+    policy.windows.credential_hardening.enabled !== defaults.windows.credential_hardening.enabled
+  ) {
     return false;
   }
 

@@ -63,7 +63,7 @@ export const policyFactory = (): PolicyConfig => {
       antivirus_registration: {
         enabled: false,
       },
-      credential_dumping: {
+      credential_hardening: {
         enabled: true,
       },
     },
@@ -172,7 +172,7 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
-      credential_dumping: {
+      credential_hardening: {
         enabled: false,
       },
       popup: {

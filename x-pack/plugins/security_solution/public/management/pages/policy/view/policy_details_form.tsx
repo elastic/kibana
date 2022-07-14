@@ -15,7 +15,7 @@ import { BehaviorProtection } from './policy_forms/protections/behavior';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
-import { CredentialDumpingForm } from './components/credential_dumping_form';
+import { AttackSurfaceReductionForm } from './components/attack_surface_reduction_form';
 import { Ransomware } from './policy_forms/protections/ransomware';
 import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -41,10 +41,10 @@ const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   }
 );
 
-const LOCKED_CARD_CREDENTIAL_DUMPING = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.credential_dumping',
+const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.credential_hardening',
   {
-    defaultMessage: 'Credential Dumping',
+    defaultMessage: 'Attack Surface Reduction',
   }
 );
 
@@ -84,9 +84,9 @@ export const PolicyDetailsForm = memo(() => {
       )}
       <EuiSpacer size="l" />
       {isPlatinumPlus ? (
-        <CredentialDumpingForm />
+        <AttackSurfaceReductionForm />
       ) : (
-        <LockedPolicyCard title={LOCKED_CARD_CREDENTIAL_DUMPING} />
+        <LockedPolicyCard title={LOCKED_CARD_ATTACK_SURFACE_REDUCTION} />
       )}
       <EuiSpacer size="l" />
 

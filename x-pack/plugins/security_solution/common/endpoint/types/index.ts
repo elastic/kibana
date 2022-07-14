@@ -952,7 +952,7 @@ export interface PolicyConfig {
     antivirus_registration: {
       enabled: boolean;
     };
-    credential_dumping: {
+    credential_hardening: {
       enabled: boolean;
     };
   };
@@ -1032,7 +1032,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'memory_protection'
     | 'behavior_protection'
-    | 'credential_dumping'
+    | 'credential_hardening'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
