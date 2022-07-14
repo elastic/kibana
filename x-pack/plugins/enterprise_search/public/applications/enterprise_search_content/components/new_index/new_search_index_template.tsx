@@ -57,7 +57,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   buttonLoading,
 }) => {
   const { name, language, rawName, languageSelectValue } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguage } = useActions(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -67,8 +67,9 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   };
 
   const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
+    setLanguageSelectValue(e.target.value);
   };
+
   return (
     <EuiPanel hasBorder>
       <EuiForm

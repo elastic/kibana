@@ -21,13 +21,13 @@ export interface NewSearchIndexValues {
 }
 
 export interface NewSearchIndexActions {
-  setLanguage(language: string): { language: string };
+  setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
   actions: {
-    setLanguage: (language) => ({ language }),
+    setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
   },
   path: ['enterprise_search', 'content', 'new_search_index'],
@@ -35,7 +35,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     languageSelectValue: [
       UNIVERSAL_LANGUAGE_VALUE,
       {
-        setLanguage: (_, { language }) => language ?? null,
+        setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
