@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import { set } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
-import { BlobAttributes } from '../../../types';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -24,9 +23,8 @@ describe('ContentStream', () => {
       encoding: 'base64' as ContentStreamEncoding,
       size: 1,
     } as ContentStreamParameters,
-    attributes = [] as BlobAttributes,
   } = {}) => {
-    return new ContentStream(client, id, index, logger, params, attributes);
+    return new ContentStream(client, id, index, logger, params);
   };
 
   beforeEach(() => {
@@ -48,7 +46,7 @@ describe('ContentStream', () => {
 
       const [[request]] = client.get.mock.calls;
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('id', '0.something');
+      expect(request).toHaveProperty('id', 'something.0');
     });
 
     it('should read the document contents', async () => {
@@ -103,11 +101,11 @@ describe('ContentStream', () => {
       const [[request1], [request2], [request3]] = client.get.mock.calls;
 
       expect(request1).toHaveProperty('index', 'somewhere');
-      expect(request1).toHaveProperty('id', '0.something');
+      expect(request1).toHaveProperty('id', 'something.0');
       expect(request2).toHaveProperty('index', 'somewhere');
-      expect(request2).toHaveProperty('id', '1.something');
+      expect(request2).toHaveProperty('id', 'something.1');
       expect(request3).toHaveProperty('index', 'somewhere');
-      expect(request3).toHaveProperty('id', '2.something');
+      expect(request3).toHaveProperty('id', 'something.2');
     });
 
     it('should stop reading on empty chunk', async () => {
@@ -188,7 +186,7 @@ describe('ContentStream', () => {
 
       const [[request]] = client.index.mock.calls;
 
-      expect(request).toHaveProperty('id', '0.something');
+      expect(request).toHaveProperty('id', 'something.0');
       expect(request).toHaveProperty('index', 'somewhere');
       expect(request).toHaveProperty('document.data', '123456');
     });
@@ -220,8 +218,8 @@ describe('ContentStream', () => {
       const [[request]] = client.deleteByQuery.mock.calls;
 
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('query.bool.should.0.match.head_chunk_id', '0.something');
-      expect(request).toHaveProperty('query.bool.should.1.match._id', '0.something');
+      expect(request).toHaveProperty('query.bool.should.0.match.head_chunk_id', 'something.0');
+      expect(request).toHaveProperty('query.bool.should.1.match._id', 'something.0');
     });
 
     it('should split raw data into chunks', async () => {
@@ -237,10 +235,10 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          id: '1.something',
+          id: 'something.1',
           index: 'somewhere',
           document: {
-            head_chunk_id: '0.something',
+            head_chunk_id: 'something.0',
             data: '34',
           },
         })
@@ -248,10 +246,10 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
-          id: '2.something',
+          id: 'something.2',
           index: 'somewhere',
           document: {
-            head_chunk_id: '0.something',
+            head_chunk_id: 'something.0',
             data: '56',
           },
         })
@@ -271,22 +269,22 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          id: '1.something',
+          id: 'something.1',
           index: 'somewhere',
           document: {
             data: Buffer.from('456').toString('base64'),
-            head_chunk_id: '0.something',
+            head_chunk_id: 'something.0',
           },
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
-          id: '2.something',
+          id: 'something.2',
           index: 'somewhere',
           document: {
             data: Buffer.from('78').toString('base64'),
-            head_chunk_id: '0.something',
+            head_chunk_id: 'something.0',
           },
         })
       );
@@ -303,90 +301,9 @@ describe('ContentStream', () => {
 
       expect(deleteRequest).toHaveProperty(
         'query.bool.should.0.match.head_chunk_id',
-        '0.something'
+        'something.0'
       );
-      expect(deleteRequest).toHaveProperty('query.bool.should.1.match._id', '0.something');
-    });
-
-    it('should store the attributes on the first document it creates', async () => {
-      base64Stream = getContentStream({
-        attributes: [['myName', 'myValue']],
-        params: { encoding: 'base64', maxChunkSize: '1028B' },
-      });
-      base64Stream.end('12345678');
-      await new Promise((resolve) => base64Stream.once('finish', resolve));
-
-      const expectedAttributeData = {
-        app_metadata: { myName: 'myValue' },
-      };
-
-      expect(client.index).toHaveBeenCalledTimes(3);
-      expect(client.index).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          id: '0.something',
-          index: 'somewhere',
-          document: {
-            data: Buffer.from('123').toString('base64'),
-            ...expectedAttributeData,
-          },
-        })
-      );
-      expect(client.index).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          id: '1.something',
-          index: 'somewhere',
-          document: {
-            data: Buffer.from('456').toString('base64'),
-            head_chunk_id: '0.something',
-          },
-        })
-      );
-      expect(client.index).toHaveBeenNthCalledWith(
-        2,
-        expect.not.objectContaining({
-          document: {
-            ...expectedAttributeData,
-          },
-        })
-      );
-      // Non-head chunks should not contain attributes
-      expect(client.index).toHaveBeenNthCalledWith(
-        3,
-        expect.objectContaining({
-          id: '2.something',
-          index: 'somewhere',
-          document: {
-            data: Buffer.from('78').toString('base64'),
-            head_chunk_id: '0.something',
-          },
-        })
-      );
-      // Non-head chunks should not contain attributes
-      expect(client.index).toHaveBeenNthCalledWith(
-        3,
-        expect.not.objectContaining({
-          document: {
-            ...expectedAttributeData,
-          },
-        })
-      );
-    });
-
-    it('should not allow duplicate attribute names', async () => {
-      base64Stream = getContentStream({
-        attributes: [
-          ['myName', 'myValue'],
-          ['myName', 'myOtherValue'],
-        ],
-        params: { encoding: 'base64', maxChunkSize: '1028B' },
-      });
-      base64Stream.end('12345678');
-      const error = await new Promise((resolve) => base64Stream.once('error', resolve));
-      expect(error).toEqual(
-        new Error('Duplicate attributes are not allowed. Found duplicate name "myName".')
-      );
+      expect(deleteRequest).toHaveProperty('query.bool.should.1.match._id', 'something.0');
     });
   });
 });
