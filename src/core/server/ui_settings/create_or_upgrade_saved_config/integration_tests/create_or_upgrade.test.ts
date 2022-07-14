@@ -16,7 +16,7 @@ import {
 } from '../../../../test_helpers/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { httpServerMock } from '../../../http/http_server.mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 const logger = loggingSystemMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
