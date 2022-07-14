@@ -78,20 +78,6 @@ describe('<Rules />', () => {
     expect(useCspIntegrationInfo).toHaveBeenCalledWith(params);
   });
 
-  it('displays error state when request had an error', async () => {
-    const Component = getTestComponent({ packagePolicyId: '1', policyId: '2' });
-    const request = createReactQueryResponse({
-      status: 'error',
-      error: new Error('some error message'),
-    });
-
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
-
-    render(<Component />);
-
-    expect(await screen.findByText(request.error?.message!)).toBeInTheDocument();
-  });
-
   it('displays success state when result request is resolved', async () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
     const request = createReactQueryResponse({

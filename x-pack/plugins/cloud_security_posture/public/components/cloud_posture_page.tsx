@@ -15,10 +15,10 @@ import { CspLoadingState } from './csp_loading_state';
 import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
-export const LOADING_STATE_TEST_SUBJECT = 'csp_setup_status_loading';
-export const ERROR_STATE_TEST_SUBJECT = 'csp_setup_status_error';
-export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'csp_setup_status_package_not_installed';
-export const DEFAULT_NO_DATA_TEST_SUBJECT = 'csp_setup_status_no_data';
+export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
+export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
+export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
+export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
 
 interface CommonError {
   body: {
@@ -28,14 +28,17 @@ interface CommonError {
   };
 }
 
-export const isCommonError = (error: any): error is CommonError => {
-  if (!error?.body) return false;
+export const isCommonError = (error: unknown): error is CommonError => {
+  if (
+    !(error as any)?.body ||
+    !(error as any)?.body?.error ||
+    !(error as any)?.body?.message ||
+    !(error as any)?.body?.statusCode
+  ) {
+    return false;
+  }
 
-  const {
-    body: { error: innerError, message, statusCode },
-  } = error;
-
-  return !!(innerError && message && statusCode);
+  return true;
 };
 
 const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
@@ -47,10 +50,10 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
       margin-left: auto;
       margin-right: auto;
     `}
-    pageTitle={i18n.translate('xpack.csp.setupStatus.packageNotInstalled.pageTitle', {
+    pageTitle={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
       defaultMessage: 'Install Integration to get started',
     })}
-    solution={i18n.translate('xpack.csp.setupStatus.packageNotInstalled.solutionNameLabel', {
+    solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
       defaultMessage: 'Cloud Security Posture',
     })}
     // TODO: Add real docs link once we have it
@@ -60,10 +63,10 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
       elasticAgent: {
         href: cisIntegrationLink,
         isDisabled: !cisIntegrationLink,
-        title: i18n.translate('xpack.csp.setupStatus.packageNotInstalled.buttonLabel', {
+        title: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
           defaultMessage: 'Add a CIS integration',
         }),
-        description: i18n.translate('xpack.csp.setupStatus.packageNotInstalled.description', {
+        description: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.description', {
           defaultMessage:
             'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
         }),
@@ -74,7 +77,10 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
 
 const defaultLoadingRenderer = () => (
   <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
-    <FormattedMessage id="xpack.csp.setupStatus.loadingDescription" defaultMessage="Loading..." />
+    <FormattedMessage
+      id="xpack.csp.cloudPosturePage.loadingDescription"
+      defaultMessage="Loading..."
+    />
   </CspLoadingState>
 );
 
@@ -89,7 +95,7 @@ const defaultErrorRenderer = (error: unknown) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.csp.setupStatus.errorRenderer.errorTitle"
+          id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
           defaultMessage="We couldn't fetch your cloud security posture data"
         />
       </h2>
@@ -98,7 +104,7 @@ const defaultErrorRenderer = (error: unknown) => (
       isCommonError(error) ? (
         <p>
           <FormattedMessage
-            id="xpack.csp.setupStatus.errorRenderer.errorDescription"
+            id="xpack.csp.cloudPosturePage.errorRenderer.errorDescription"
             defaultMessage="{error} {statusCode}: {body}"
             values={{
               error: error.body.error,
@@ -119,10 +125,10 @@ const defaultNoDataRenderer = () => {
       css={css`
         margin-top: 50px;
       `}
-      pageTitle={i18n.translate('xpack.csp.setupStatus.defaultNoDataConfig.pageTitle', {
+      pageTitle={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.pageTitle', {
         defaultMessage: 'No data found',
       })}
-      solution={i18n.translate('xpack.csp.setupStatus.defaultNoDataConfig.solutionNameLabel', {
+      solution={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.solutionNameLabel', {
         defaultMessage: 'Cloud Security Posture',
       })}
       // TODO: Add real docs link once we have it
@@ -133,7 +139,7 @@ const defaultNoDataRenderer = () => {
   );
 };
 
-interface SetupStatusProps<TData, TError> {
+interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
   query?: UseQueryResult<TData, TError>;
   loadingRender?: () => React.ReactNode;
@@ -141,13 +147,13 @@ interface SetupStatusProps<TData, TError> {
   noDataRenderer?: () => React.ReactNode;
 }
 
-export const SetupStatus = <TData, TError>({
+export const CloudPosturePage = <TData, TError>({
   children,
   query,
   loadingRender = defaultLoadingRenderer,
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
-}: SetupStatusProps<TData, TError>) => {
+}: CloudPosturePageProps<TData, TError>) => {
   const cisKubernetesPackageInfo = useCisKubernetesIntegration();
   const cisIntegrationLink = useCISIntegrationLink();
 

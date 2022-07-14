@@ -7,7 +7,7 @@
 import React from 'react';
 import type { UseQueryResult } from 'react-query';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
-import { SetupStatus } from '../../components/setup_status';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 import { FindingsEsPitContext } from './es_pit/findings_es_pit_context';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
@@ -29,7 +29,7 @@ export const Findings = () => {
 
   return (
     <CspPageTemplate paddingSize="none">
-      <SetupStatus query={queryForSetupStatus}>
+      <CloudPosturePage query={queryForSetupStatus}>
         <FindingsEsPitContext.Provider
           value={{
             pitQuery,
@@ -65,7 +65,7 @@ export const Findings = () => {
             />
           </Switch>
         </FindingsEsPitContext.Provider>
-      </SetupStatus>
+      </CloudPosturePage>
     </CspPageTemplate>
   );
 };

@@ -13,23 +13,23 @@ import {
   isCommonError,
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
-} from './setup_status';
+} from './cloud_posture_page';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { UseQueryResult } from 'react-query';
-import { SetupStatus } from './setup_status';
+import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 
 const chance = new Chance();
 jest.mock('../common/api/use_cis_kubernetes_integration');
 
-describe('<SetupStatus />', () => {
+describe('<CloudPosturePage />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // if package installation status is 'not_installed', SetupStatus will render a noDataConfig prompt
+    // if package installation status is 'not_installed', CloudPosturePage will render a noDataConfig prompt
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
@@ -37,7 +37,9 @@ describe('<SetupStatus />', () => {
     }));
   });
 
-  const renderSetupStatus = (props: ComponentProps<typeof SetupStatus> = { children: null }) => {
+  const renderCloudPosturePage = (
+    props: ComponentProps<typeof CloudPosturePage> = { children: null }
+  ) => {
     const mockCore = coreMock.createStart();
 
     render(
@@ -54,14 +56,14 @@ describe('<SetupStatus />', () => {
           },
         }}
       >
-        <SetupStatus {...props} />
+        <CloudPosturePage {...props} />
       </TestProvider>
     );
   };
 
   it('renders children if integration is installed', () => {
     const children = chance.sentence();
-    renderSetupStatus({ children });
+    renderCloudPosturePage({ children });
 
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -77,7 +79,7 @@ describe('<SetupStatus />', () => {
     }));
 
     const children = chance.sentence();
-    renderSetupStatus({ children });
+    renderCloudPosturePage({ children });
 
     expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -94,7 +96,7 @@ describe('<SetupStatus />', () => {
     );
 
     const children = chance.sentence();
-    renderSetupStatus({ children });
+    renderCloudPosturePage({ children });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -112,7 +114,7 @@ describe('<SetupStatus />', () => {
     );
 
     const children = chance.sentence();
-    renderSetupStatus({ children });
+    renderCloudPosturePage({ children });
 
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -126,7 +128,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({ children, query });
+    renderCloudPosturePage({ children, query });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -140,7 +142,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({ children, query });
+    renderCloudPosturePage({ children, query });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -165,7 +167,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({ children, query });
+    renderCloudPosturePage({ children, query });
 
     [error, message, statusCode].forEach((text) =>
       expect(screen.getByText(text, { exact: false })).toBeInTheDocument()
@@ -193,7 +195,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({
+    renderCloudPosturePage({
       children,
       query,
       errorRender: (err) => <div>{isCommonError(err) && err.body.message}</div>,
@@ -215,7 +217,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({
+    renderCloudPosturePage({
       children,
       query,
       loadingRender: () => <div>{loading}</div>,
@@ -235,7 +237,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({ children, query });
+    renderCloudPosturePage({ children, query });
 
     expect(screen.getByTestId(DEFAULT_NO_DATA_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -258,7 +260,7 @@ describe('<SetupStatus />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderSetupStatus({
+    renderCloudPosturePage({
       children,
       query,
       noDataRenderer,
