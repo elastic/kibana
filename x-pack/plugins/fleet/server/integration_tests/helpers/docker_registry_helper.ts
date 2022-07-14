@@ -35,8 +35,12 @@ function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
   const logLine$ = new Rx.Subject<string>();
 
   Rx.merge(
-    observeLines(childProcess.stdout!).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
-    observeLines(childProcess.stderr!).pipe(tap((line) => log.error(`[docker:${name}] ${line}`))) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+    observeLines(childProcess.stdout!).pipe(
+      tap((line) => log.info(`[docker:${DOCKER_IMAGE}] ${line}`))
+    ), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+    observeLines(childProcess.stderr!).pipe(
+      tap((line) => log.error(`[docker:${DOCKER_IMAGE}] ${line}`))
+    ) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
   ).subscribe(logLine$);
 
   return logLine$.asObservable();
@@ -89,7 +93,7 @@ export function useDockerRegistry() {
   }
 
   async function pullDockerImage() {
-    logger.info(`[docker:${name}] pulling docker image "${DOCKER_IMAGE}"`);
+    logger.info(`[docker:${DOCKER_IMAGE}] pulling docker image "${DOCKER_IMAGE}"`);
     await execa('docker', ['pull', DOCKER_IMAGE]);
   }
 
