@@ -48,19 +48,21 @@ export function createUpdateFilterReferencesAction(filterManager: FilterManager)
       }
 
       if (toDataView) {
-        filterManager.setFilters(filters.map((filter) => {
-          if (filter.meta.index === fromDataView) {
-            return {
-              ...filter,
-              meta: {
-                ...filter.meta,
-                index: toDataView,
-              },
-            };
-          } else {
-            return filter;
-          }
-        }));
+        filterManager.setFilters(
+          filters.map((filter) => {
+            if (filter.meta.index === fromDataView) {
+              return {
+                ...filter,
+                meta: {
+                  ...filter.meta,
+                  index: toDataView,
+                },
+              };
+            } else {
+              return filter;
+            }
+          })
+        );
       }
     },
   });
