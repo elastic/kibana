@@ -7,10 +7,15 @@
  */
 
 import { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Dictionary } from 'lodash';
+import { FieldDescriptor } from '../index_patterns_fetcher';
 import { mergeJobConfigurations } from './jobs_compatibility';
 
+/**
+ * A record of capabilities (aggregations) for an index rollup job
+ */
 export interface RollupIndexCapability {
-  [key: string]: { aggs?: Record<string, {}>; error?: string };
+  [key: string]: { aggs?: Dictionary<FieldDescriptor>; error?: string };
 }
 
 /**
@@ -18,7 +23,6 @@ export interface RollupIndexCapability {
  * @public
  * @param indices rollup job index capabilites
  */
-
 export function getCapabilitiesForRollupIndices(
   indices: RollupGetRollupIndexCapsResponse
 ): RollupIndexCapability {

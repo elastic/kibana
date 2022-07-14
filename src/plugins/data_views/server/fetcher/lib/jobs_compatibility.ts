@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { RollupGetRollupIndexCapsRollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
-import { SerializableRecord } from '@kbn/utility-types';
-import { get, isEqual, set } from 'lodash';
+import {
+  RollupGetRollupIndexCapsRollupJobSummary as RollupJobSummary,
+  RollupGetRollupIndexCapsRollupJobSummaryField as RollupJobSummaryField,
+} from '@elastic/elasticsearch/lib/api/types';
+import { Dictionary, get, isEqual, set } from 'lodash';
+import { FieldDescriptor } from '../index_patterns_fetcher';
 
 /**
  * Checks if given job configs are compatible by attempting to merge them
@@ -34,14 +37,16 @@ export function areJobsCompatible(jobs = []) {
  * by aggregation, then by field
  *
  * @param jobs
- * @returns {{}}
+ * @returns {{ aggs?: Dictionary<FieldDescriptor> }}
  */
-export function mergeJobConfigurations(jobs: RollupGetRollupIndexCapsRollupJobSummary[] = []) {
+export function mergeJobConfigurations(jobs: RollupJobSummary[] = []): {
+  aggs?: Dictionary<FieldDescriptor>;
+} {
   if (!jobs || !Array.isArray(jobs) || !jobs.length) {
     throw new Error('No capabilities available');
   }
 
-  const allAggs: { [key: string]: SerializableRecord } = {};
+  const allAggs: Dictionary<FieldDescriptor> = {};
 
   // For each job, look through all of its fields
   jobs.forEach((job) => {
@@ -50,31 +55,36 @@ export function mergeJobConfigurations(jobs: RollupGetRollupIndexCapsRollupJobSu
 
     // Check each field
     fieldNames.forEach((fieldName) => {
+      const typedFieldName = fieldName as keyof FieldDescriptor;
       const fieldAggs = fields[fieldName];
 
       // Look through each field's capabilities (aggregations)
       fieldAggs.forEach((agg) => {
         const aggName = agg.agg;
-        const aggDoesntExist = !allAggs[aggName];
-        const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
+        const aggregation = allAggs[aggName];
+        const aggDoesntExist = !aggregation;
+        const aggregationField = aggregation[typedFieldName];
+        const fieldDoesntExist = aggregation && !aggregationField;
         const isDateHistogramAgg = aggName === 'date_histogram';
 
         // If we currently don't have this aggregation, add it.
         // Special case for date histogram, since there can only be one
         // date histogram field.
         if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
-          allAggs[aggName] = allAggs[aggName] || {};
-          allAggs[aggName][fieldName] = { ...agg };
+          allAggs[aggName] = aggregation || {};
+          (aggregation[typedFieldName] as RollupJobSummaryField) = { ...agg };
         }
         // If aggregation already exists, attempt to merge it
         else {
-          const fieldAgg = allAggs[aggName][fieldName] as object | null;
+          const fieldAgg = aggregationField as object | null;
           switch (aggName) {
             // For histograms, calculate the least common multiple between the
             // new interval and existing interval
             case 'histogram':
               if (fieldAgg) {
-                const aggInterval = (agg as any).interval ?? agg.calendar_interval; // FIXME the interface infers only that calendar_interval property is valid
+                // FIXME the interface infers only that calendar_interval property is valid
+                const aggInterval = (agg as any).interval ?? agg.calendar_interval;
+
                 // TODO: Fix this with LCD algorithm
                 const intervals = [get(fieldAgg, 'interval'), aggInterval].sort((a, b) => a - b);
                 const isMultiple = intervals[1] % intervals[0] === 0;
