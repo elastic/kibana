@@ -130,10 +130,7 @@ export interface FileJSON<Meta = unknown> {
 
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
-export type UpdatableFileAttributes<Meta = unknown> = Pick<
-  FileSavedObjectAttributes<Meta>,
-  'Meta' | 'Alt' | 'name'
->;
+export type UpdatableFileAttributes<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileShareSavedObjectAttributes = {
