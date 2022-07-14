@@ -13,6 +13,7 @@ import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_pane
 
 const StyledEuiFlexItemWhite = styled(EuiFlexItem)`
   background-color: ${({ theme: { eui } }) => eui.euiHeaderBackgroundColor} !important;
+  border-radius: ${({ theme: { eui } }) => `0 ${eui.euiSizeXS} ${eui.euiSizeXS} 0`};
   box-shadow: 0 ${({ theme: { eui } }) => eui.euiSizeXS} ${({ theme: { eui } }) => eui.euiSizeXS}
     ${({ theme: { eui } }) => transparentize(eui.euiShadowColor, 0.04)};
 `;
