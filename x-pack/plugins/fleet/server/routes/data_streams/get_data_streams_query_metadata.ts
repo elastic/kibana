@@ -34,6 +34,8 @@ export async function getDataStreamsQueryMetadata({
         sort: {
           'event.ingested': {
             order: 'desc',
+            // Necessary because of https://github.com/elastic/elasticsearch/issues/81960
+            missing: 0,
             unmapped_type: 'long',
           },
         },
