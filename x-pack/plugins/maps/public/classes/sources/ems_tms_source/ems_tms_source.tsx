@@ -114,12 +114,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   async getDisplayName() {
-    try {
-      const emsTMSService = await this._getEMSTMSService();
-      return emsTMSService.getDisplayName();
-    } catch (error) {
-      return this.getTileLayerId();
-    }
+    return i18n.translate('xpack.maps.source.emsTile.basemapLabel', {
+      defaultMessage: 'Basemap',
+    });
   }
 
   getAttributionProvider() {
