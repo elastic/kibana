@@ -19,6 +19,7 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
+import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 
 /**
  * Parameters for initializing a cases client
@@ -36,4 +37,5 @@ export interface CasesClientArgs {
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
+  readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }

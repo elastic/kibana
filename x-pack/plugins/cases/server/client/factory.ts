@@ -130,6 +130,7 @@ export class CasesClientFactory {
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
+      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
     });
   }
 }

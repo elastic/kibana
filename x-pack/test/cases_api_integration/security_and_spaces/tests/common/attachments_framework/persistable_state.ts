@@ -247,6 +247,16 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('400s when creating a non registered persistable state attachment type', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
+          expectedHttpCode: 400,
+        });
+      });
     });
 
     describe('Migrations', () => {
