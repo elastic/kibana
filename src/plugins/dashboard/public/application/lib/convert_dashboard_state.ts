@@ -9,7 +9,13 @@
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ControlGroupInput } from '@kbn/controls-plugin/public';
-import { compareFilters, isFilterPinned, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import {
+  compareFilters,
+  isFilterPinned,
+  migrateFilter,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+} from '@kbn/es-query';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -121,7 +127,9 @@ export const stateToDashboardContainerInput = ({
       .filter(
         (filter) =>
           isFilterPinned(filter) ||
-          filters.some((dashboardFilter) => filtersAreEqual(dashboardFilter, filter))
+          filters.some((dashboardFilter) =>
+            filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
+          )
       ),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
