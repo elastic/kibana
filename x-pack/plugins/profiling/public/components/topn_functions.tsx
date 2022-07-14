@@ -15,7 +15,7 @@ export const TopNFunctionsTable = () => {
   const ctx = useContext(FunctionContext);
 
   const items = useMemo(() => {
-    if (!ctx || !ctx.TotalCount || ctx.TotalCount == 0) {
+    if (!ctx || !ctx.TotalCount || ctx.TotalCount === 0) {
       return [];
     }
 
