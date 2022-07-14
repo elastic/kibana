@@ -14,6 +14,7 @@ import {
   SyntheticsMonitorWithSecrets,
   SyntheticsMonitor,
   ConfigKey,
+  FormMonitorType,
 } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -82,12 +83,15 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
+      const isMultiStepMonitor =
+        monitor.type === 'browser' &&
+        monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE;
 
       const editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
-          monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
+          isMultiStepMonitor ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
       const errors = await syncEditedMonitor({
