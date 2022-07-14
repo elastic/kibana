@@ -22,7 +22,7 @@ export const BuildBazelPackages: Task = {
     log.info(`Preparing Bazel projects production build non-devOnly packages`);
     await runBazel({
       log,
-      bazelArgs: ['build', '//packages:build'],
+      args: ['build', '//packages:build'],
     });
 
     for (const pkg of packages) {

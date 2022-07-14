@@ -1,0 +1,30 @@
+---
+id: kibDevDocsOpsKbnPm
+slug: /kibana-dev-docs/ops/kbn-pm
+title: "@kbn/pm"
+description: 'The tool which bootstraps the repo and helps work with packages'
+date: 2022-05-16
+tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts']
+---
+
+`@kbn/pm` is the tool that we use to bootstrap the Kibana repository, build packages with Bazel, and run scripts in packages.
+
+## commands
+
+### `yarn kbn bootstrap`
+
+Use this command to install dependencies, build packages, and prepare the repo for local development.
+
+### `yarn kbn watch`
+
+Use this command to build all packages and make sure that they are rebuilt as you make changes.
+
+### and more!
+
+There are several commands supported by `@kbn/pm`, but rather than documenting them here they are documented in the help text. Please run `yarn kbn --help` locally to see the most up-to-date info.
+
+## Why isn't this TypeScript?
+
+Since this tool is required for bootstrapping the repository it needs to work without any dependencies installed and without a build toolchain. We accomplish this by writing the tool in vanilla JS (shocker!) and using TypeScript to validate the code which is typed via heavy use of JSDoc comments.
+
+In order to use import/export syntax and enhance the developer experience a little we use the `.mjs` file extension.

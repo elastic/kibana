@@ -451,6 +451,9 @@
           "label": "Build tooling",
           "items": [
             {
+              "id": "kibDevDocsOpsKbnPm"
+            },
+            {
               "id": "kibDevDocsOpsOptimizer"
             },
             {
