@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { LOADING_STATE_TEST_SUBJECT } from '../../components/csp_page_template';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
@@ -77,33 +76,6 @@ describe('<Rules />', () => {
     render(<Component />);
 
     expect(useCspIntegrationInfo).toHaveBeenCalledWith(params);
-  });
-
-  it('displays error state when request had an error', async () => {
-    const Component = getTestComponent({ packagePolicyId: '1', policyId: '2' });
-    const request = createReactQueryResponse({
-      status: 'error',
-      error: new Error('some error message'),
-    });
-
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
-
-    render(<Component />);
-
-    expect(await screen.findByText(request.error?.message!)).toBeInTheDocument();
-  });
-
-  it('displays loading state when request is pending', () => {
-    const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = createReactQueryResponse({
-      status: 'loading',
-    });
-
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
-
-    render(<Component />);
-
-    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 
   it('displays success state when result request is resolved', async () => {
