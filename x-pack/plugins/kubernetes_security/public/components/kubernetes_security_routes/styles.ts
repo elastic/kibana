@@ -59,7 +59,7 @@ export const useStyles = () => {
     };
 
     const countWidgets: CSSObject = {
-      margin: size.l,
+      marginBottom: size.l,
     };
 
     const widgetHolder: CSSObject = {
