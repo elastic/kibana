@@ -90,21 +90,17 @@ export class IndexPatternsFetcher {
       }
 
       const rollupIndexCapabilities = capabilityCheck.aggs;
-
-      if (rollupIndexCapabilities) {
-        const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
-        // Keep meta fields
-        metaFields!.forEach(
-          (field: string) =>
-            fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
-        );
-
-        return mergeCapabilitiesWithFields(
-          rollupIndexCapabilities,
-          fieldCapsResponseObj,
-          rollupFields
-        );
-      }
+      const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
+      // Keep meta fields
+      metaFields!.forEach(
+        (field: string) =>
+          fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
+      );
+      return mergeCapabilitiesWithFields(
+        rollupIndexCapabilities!,
+        fieldCapsResponseObj,
+        rollupFields
+      );
     }
     return fieldCapsResponse;
   }
