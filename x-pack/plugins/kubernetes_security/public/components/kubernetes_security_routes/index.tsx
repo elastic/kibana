@@ -107,9 +107,9 @@ const KubernetesSecurityRoutesComponent = ({
         </EuiFlexGroup>
         {!shouldHideCharts && (
           <>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="l" css={styles.countWidgets}>
+            <EuiFlexGroup>
+              <EuiFlexItem css={styles.leftWidgetsGroup}>
+                <EuiFlexGroup css={styles.countWidgetsGroup}>
                   <EuiFlexItem>
                     <CountWidget
                       title={COUNT_WIDGET_CLUSTERS}
@@ -156,8 +156,8 @@ const KubernetesSecurityRoutesComponent = ({
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiFlexGroup css={styles.percentageWidgets}>
-                  <EuiFlexItem>
+                <EuiFlexGroup css={styles.widgetsBottomSpacing}>
+                  <EuiFlexItem css={styles.noBottomSpacing}>
                     <PercentWidget
                       title={
                         <>
@@ -209,7 +209,7 @@ const KubernetesSecurityRoutesComponent = ({
                       onReduce={onReduceInteractiveAggs}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem css={styles.noBottomSpacing}>
                     <PercentWidget
                       title={
                         <>
@@ -258,18 +258,14 @@ const KubernetesSecurityRoutesComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem css={styles.widgetHolder}>
-                    <ContainerNameWidget
-                      widgetKey="containerNameSessions"
-                      indexPattern={indexPattern}
-                      globalFilter={globalFilter}
-                      groupedBy={CONTAINER_IMAGE_NAME}
-                      countBy={ENTRY_LEADER_ENTITY_ID}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              <EuiFlexItem grow={false} css={styles.rightWidgetsGroup}>
+                <ContainerNameWidget
+                  widgetKey="containerNameSessions"
+                  indexPattern={indexPattern}
+                  globalFilter={globalFilter}
+                  groupedBy={CONTAINER_IMAGE_NAME}
+                  countBy={ENTRY_LEADER_ENTITY_ID}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

@@ -21,10 +21,10 @@ export const useStyles = () => {
       border: euiTheme.border.thin,
       borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
-      minHeight: '250px',
       height: '100%',
-      minWidth: '332px',
+      minHeight: '250px',
       position: 'relative',
+      marginBottom: size.l,
     };
 
     const dataInfo: CSSObject = {
