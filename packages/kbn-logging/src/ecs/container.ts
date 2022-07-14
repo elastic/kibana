@@ -15,7 +15,7 @@ export interface EcsContainer {
   cpu?: { usage?: number };
   disk?: Disk;
   id?: string;
-  image?: { name?: string; tag?: string[] };
+  image?: Image;
   labels?: Record<string, string>;
   memory?: { usage?: number };
   name?: string;
@@ -26,6 +26,12 @@ export interface EcsContainer {
 interface Disk {
   read?: { bytes?: number };
   write?: { bytes?: number };
+}
+
+interface Image {
+  hash?: { all: string[] };
+  name?: string;
+  tag?: string[];
 }
 
 interface Network {
