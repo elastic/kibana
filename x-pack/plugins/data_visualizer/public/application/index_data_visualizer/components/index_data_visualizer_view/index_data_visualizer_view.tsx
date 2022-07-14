@@ -399,7 +399,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               <EuiPageContentHeaderSection>
                 <div className="dataViewTitleHeader">
                   <EuiTitle size={'s'}>
-                    <h2>{currentDataView.title}</h2>
+                    <h2>{currentDataView.getName()}</h2>
                   </EuiTitle>
                   <DataVisualizerDataViewManagement
                     currentDataView={currentDataView}
