@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 
 import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 
 import type { RouteDefinitionParams } from '..';
 import type { AuthenticationTypeAnalyticsEvent } from '../../analytics';
@@ -39,12 +40,15 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const authUser = getAuthenticationService().getCurrentUser(request);
+
         if (!authUser) {
           logger.warn('Cannot record authentication type: current user could not be retrieved.');
+
           return response.noContent();
         }
 
         let timestamp = new Date().getTime();
+
         const {
           signature: previouslyRegisteredSignature,
           timestamp: previousRegistrationTimestamp,
@@ -69,11 +73,17 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
           .digest('hex');
 
         const elapsedTimeInHrs = (timestamp - previousRegistrationTimestamp) / (1000 * 60 * 60);
+
         if (
           elapsedTimeInHrs >= MINIMUM_ELAPSED_TIME_HOURS ||
           previouslyRegisteredSignature !== signature
         ) {
           analyticsService.reportAuthenticationTypeEvent(authTypeEventToReport);
+
+          logApiKeyWithInteractiveUserDeprecated(
+            authTypeEventToReport.httpAuthenticationScheme,
+            logger
+          );
         } else {
           timestamp = previousRegistrationTimestamp;
         }
@@ -87,4 +97,24 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
       }
     })
   );
+}
+
+/**
+ * API Key authentication by interactive users is deprecated, this method logs a deprecation warning
+ *
+ * @param httpAuthenticationScheme A string representing the authentication type event's scheme (ApiKey, etc.) by an interactive user
+ * @param logger A reference to the Logger to log the deprecation message
+ */
+function logApiKeyWithInteractiveUserDeprecated(
+  httpAuthenticationScheme: string = '',
+  logger: Logger
+): void {
+  const isUsingApiKey = httpAuthenticationScheme?.toLowerCase() === 'apikey';
+
+  if (isUsingApiKey) {
+    logger.warn(
+      `Using API Key authentication as an interactive user is deprecated and will not be supported in a future version`,
+      { tags: ['deprecation'] }
+    );
+  }
 }

@@ -19,6 +19,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRecordAnalyticsOnAuthTypeRoutes } from './authentication_type';
 
 const FAKE_TIMESTAMP = 1637665318135;
+
 function getMockContext(
   licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
 ) {
@@ -33,14 +34,18 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
   });
 
   let routeHandler: RequestHandler<any, any, any, any>;
+
   let routeParamsMock: DeeplyMockedKeys<RouteDefinitionParams>;
+
   beforeEach(() => {
     routeParamsMock = routeDefinitionParamsMock.create();
+
     defineRecordAnalyticsOnAuthTypeRoutes(routeParamsMock);
 
     const [, recordAnalyticsOnAuthTypeRouteHandler] = routeParamsMock.router.post.mock.calls.find(
       ([{ path }]) => path === '/internal/security/analytics/_record_auth_type'
     )!;
+
     routeHandler = recordAnalyticsOnAuthTypeRouteHandler;
   });
 
@@ -49,6 +54,10 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
     const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
 
     expect(response.status).toBe(204);
+    expect(routeParamsMock.logger.warn).toBeCalledWith(
+      'Cannot record authentication type: current user could not be retrieved.'
+    );
+
     expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).not.toHaveBeenCalled();
   });
 
@@ -286,19 +295,23 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       });
 
       const mockAuthc = authenticationServiceMock.createStart();
+
       mockAuthc.getCurrentUser.mockReturnValue(
         mockAuthenticatedUser({
           authentication_provider: { type: HTTPAuthenticationProvider.type, name: '__http__' },
         })
       );
+
       routeParamsMock.getAuthenticationService.mockReturnValue(mockAuthc);
 
       const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
+
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         timestamp: FAKE_TIMESTAMP,
         signature: 'f4f6b485690816127c33d5aa13cd6cd12c9892641ba23b5d58e5c6590cd43db0',
       });
+
       routeParamsMock.analyticsService.reportAuthenticationTypeEvent.mockClear();
 
       initialTimestamp = response.payload.timestamp;
@@ -312,21 +325,95 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       });
 
       const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
+
       expect(response.status).toBe(200);
+
       expect(response.payload).toEqual({
         timestamp: initialTimestamp,
         signature: '46d5841ad21d29ca6c7c1c639adc6294c176c394adb0b40dfc05797cfe29218e',
       });
+
       expect(response.payload.signature).not.toEqual(initialSignature);
 
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledTimes(
         1
       );
+
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledWith({
         authenticationProviderType: 'http',
         authenticationRealmType: 'native',
         httpAuthenticationScheme: 'Custom',
       });
+    });
+  });
+
+  describe('logApiKeyWithInteractiveUserDeprecated', () => {
+    it('should log a deprecation warning if interactive user is using API Key', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey' },
+      });
+
+      const mockAuthc = authenticationServiceMock.createStart();
+
+      mockAuthc.getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          authentication_provider: { type: 'http', name: '__http__' },
+        })
+      );
+
+      routeParamsMock.getAuthenticationService.mockReturnValue(mockAuthc);
+
+      const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+
+      expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledTimes(
+        1
+      );
+
+      expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledWith({
+        authenticationProviderType: 'http',
+        authenticationRealmType: 'native',
+        httpAuthenticationScheme: 'ApiKey',
+      });
+
+      expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(1);
+      expect(routeParamsMock.logger.warn).toBeCalledWith(
+        'Using API Key authentication as an interactive user is deprecated and will stop working in the next major version.',
+        { tags: ['deprecation'] }
+      );
+    });
+
+    it('should not log a deprecation warning if interactive user is using API Key', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Basic' },
+      });
+
+      const mockAuthc = authenticationServiceMock.createStart();
+
+      mockAuthc.getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          authentication_provider: { type: 'http', name: '__http__' },
+        })
+      );
+
+      routeParamsMock.getAuthenticationService.mockReturnValue(mockAuthc);
+
+      const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+
+      expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledTimes(
+        1
+      );
+
+      expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledWith({
+        authenticationProviderType: 'http',
+        authenticationRealmType: 'native',
+        httpAuthenticationScheme: 'Basic',
+      });
+
+      expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(0);
     });
   });
 });
