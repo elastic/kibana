@@ -1007,10 +1007,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.DataLayerArgs.hide",
+            "id": "def-public.DataLayerArgs.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -5402,10 +5402,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.hide",
+            "id": "def-public.XYAnnotationLayerConfig.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -5889,10 +5889,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.XYDataLayerConfig.hide",
+            "id": "def-public.XYDataLayerConfig.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -9944,7 +9944,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined) => ",
           {
@@ -9974,7 +9974,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined"
             ],
