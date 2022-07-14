@@ -110,6 +110,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     });
   }, [isKeyInputBeingCaptured]);
 
+  const disableArrowButton = useMemo(
+    () => textEntered.length === 0 && rightOfCursor.text.length === 0,
+    [rightOfCursor.text.length, textEntered.length]
+  );
+
   const handleSubmitButton = useCallback<MouseEventHandler>(
     (ev) => {
       setCommandToExecute(textEntered + rightOfCursor.text);
@@ -301,15 +306,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              data-test-subj="inputTextSubmitButton"
+              data-test-subj={getTestId('inputTextSubmitButton')}
               aria-label="submit-command"
               iconType="playFilled"
               display="empty"
               color="primary"
-              isDisabled={useMemo(
-                () => textEntered.length === 0 && rightOfCursor.text.length === 0,
-                [rightOfCursor.text.length, textEntered.length]
-              )}
+              isDisabled={disableArrowButton}
               onClick={handleSubmitButton}
             />
           </EuiFlexItem>
