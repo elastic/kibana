@@ -68,43 +68,6 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.KibanaPageTemplateSolutionNav",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaPageTemplateSolutionNav",
-        "description": [
-          "\nA wrapper around EuiSideNav but also creates the appropriate title with optional solution logo"
-        ],
-        "signature": [
-          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: React.PropsWithChildren<",
-          "KibanaPageTemplateSolutionNavProps",
-          ">) => JSX.Element"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/page_template/solution_nav/solution_nav.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.KibanaPageTemplateSolutionNav.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  ...rest\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "KibanaPageTemplateSolutionNavProps",
-              ">"
-            ],
-            "path": "packages/kbn-shared-ux-components/src/page_template/solution_nav/solution_nav.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
         "id": "def-common.NoDataConfigPage",
         "type": "Function",
         "tags": [],
@@ -273,7 +236,7 @@
           " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
+          "SolutionNavProps",
           " | undefined; noDataConfig?: ",
           {
             "pluginId": "@kbn/shared-ux-components",
