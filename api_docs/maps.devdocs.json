@@ -646,6 +646,21 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._getIsFilterByMapExtent",
+            "type": "Function",
+            "tags": [],
+            "label": "_getIsFilterByMapExtent",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable._gotoSynchronizedLocation",
             "type": "Function",
             "tags": [],
@@ -1093,25 +1108,25 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.setMapExtentFilter",
+            "id": "def-public.MapEmbeddable._setMapExtentFilter",
             "type": "Function",
             "tags": [],
-            "label": "setMapExtentFilter",
+            "label": "_setMapExtentFilter",
             "description": [],
             "signature": [
-              "() => void"
+              "(() => void) & _.Cancelable"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.clearMapExtentFilter",
+            "id": "def-public.MapEmbeddable._clearMapExtentFilter",
             "type": "Function",
             "tags": [],
-            "label": "clearMapExtentFilter",
+            "label": "_clearMapExtentFilter",
             "description": [],
             "signature": [
               "() => void"
