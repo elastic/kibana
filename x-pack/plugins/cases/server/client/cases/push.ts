@@ -135,6 +135,7 @@ export const push = async (
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
     const alerts = await getAlerts(alertsInfo, clientArgs);
+
     const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,
     });

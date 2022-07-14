@@ -7,8 +7,5 @@
 
 import { GetMapping } from './types';
 
-export const getMapping: GetMapping = () => {
-  return [
-    // To do??
-  ];
-};
+// Mappings are done directly in the connector configuration
+export const getMapping: GetMapping = () => [];

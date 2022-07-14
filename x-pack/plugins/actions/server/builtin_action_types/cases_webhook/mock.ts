@@ -80,6 +80,4 @@ const executorParams: ExecutorSubActionPushParams = {
   ],
 };
 
-export const apiParams: PushToServiceApiParams = {
-  ...executorParams,
-};
+export const apiParams: PushToServiceApiParams = executorParams;

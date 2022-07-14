@@ -446,7 +446,6 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
       >
         {theCase.externalService?.externalTitle}
       </EuiLink>
-
       {hasDataToPush
         ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
         : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
