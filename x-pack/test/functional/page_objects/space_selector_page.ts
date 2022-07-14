@@ -208,13 +208,13 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async expectToFindThatManySpace(numberOfExpectedSpace: number) {
-    const spacesFound = await this.find.allByCssSelector('div[role="dialog"] a.euiContextMenuItem');
+    const spacesFound = await this.find.allByCssSelector('div[role="dialog"] li[role="option"]');
     expect(spacesFound.length).to.be(numberOfExpectedSpace);
   }
 
   async expectNoSpacesFound() {
     const msgElem = await this.find.byCssSelector(
-      'div[role="dialog"] .euiContextMenuPanel .euiText'
+      'div[role="dialog"] div[data-test-subj="euiSelectableMessage"]'
     );
     expect(await msgElem.getVisibleText()).to.be('no spaces found');
   }
