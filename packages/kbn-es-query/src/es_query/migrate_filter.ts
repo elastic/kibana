@@ -101,7 +101,7 @@ export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
       return;
     }
     // @ts-ignore
-    migratedFilter.query[key] = mutableFilter[key];
+    migratedFilter.query[key] = migratedFilter[key];
     // @ts-ignore
     delete migratedFilter[key];
   });
