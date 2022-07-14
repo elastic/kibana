@@ -4,9 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPageHeaderContentProps } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeaderContentProps,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import { StackTracesDisplayOption } from '../../../common/stack_traces';
 import {
   groupSamplesByCategory,
   TopNSample,
@@ -29,8 +36,9 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
   const profilingRouter = useProfilingRouter();
 
   const {
+    path,
     query,
-    query: { rangeFrom, rangeTo, projectID, n, index },
+    query: { rangeFrom, rangeTo, projectID, n, index, displayAs },
   } = useProfilingParams('/stacktraces/*');
 
   const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
@@ -73,7 +81,10 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
 
   const topNType = routePath.split('/')[2];
 
-  const [topn, setTopN] = useState<{ samples: TopNSample[]; subcharts: TopNSubchart[] }>({
+  const [topn, setTopN] = useState<{
+    samples: TopNSample[];
+    subcharts: TopNSubchart[];
+  }>({
     samples: [],
     subcharts: [],
   });
@@ -98,22 +109,78 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
     ).then((response: TopNSamples) => {
       const samples = response.TopN;
       const subcharts = groupSamplesByCategory(samples);
-      const samplesWithoutZero = samples.filter((sample: TopNSample) => sample.Count > 0);
-      setTopN({ samples: samplesWithoutZero, subcharts });
+      const samplesWithNullValues = samples.map((sample) => {
+        return sample.Count === 0 ? { ...sample, Count: null } : sample;
+      });
+      setTopN({ samples: samplesWithNullValues, subcharts });
     });
   }, [topNType, timeRange.start, timeRange.end, fetchTopN, index, projectID, n]);
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>
       <TopNContext.Provider value={topn}>
-        <StackedBarChart
-          id="topn"
-          name="topn"
-          height={400}
-          x="Timestamp"
-          y="Count"
-          category="Category"
-        />
+        <EuiPanel>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <EuiButtonGroup
+                idSelected={displayAs}
+                type="single"
+                onChange={(nextValue) => {
+                  profilingRouter.push(routePath, {
+                    path,
+                    query: {
+                      ...query,
+                      displayAs: nextValue,
+                    },
+                  });
+                }}
+                options={[
+                  {
+                    id: StackTracesDisplayOption.StackTraces,
+                    iconType: 'visLine',
+                    label: i18n.translate(
+                      'xpack.profiling.stackTracesView.stackTracesCountButton',
+                      {
+                        defaultMessage: 'Stack traces',
+                      }
+                    ),
+                  },
+                  {
+                    id: StackTracesDisplayOption.Percentage,
+                    iconType: 'percent',
+                    label: i18n.translate('xpack.profiling.stackTracesView.percentagesButton', {
+                      defaultMessage: 'Percentages',
+                    }),
+                  },
+                ]}
+                legend={i18n.translate('xpack.profiling.stackTracesView.displayOptionLegend', {
+                  defaultMessage: 'Display option',
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <StackedBarChart
+                id="topn"
+                name="topn"
+                height={400}
+                x="Timestamp"
+                y="Count"
+                category="Category"
+                asPercentages={displayAs === StackTracesDisplayOption.Percentage}
+                onBrushEnd={(nextRange) => {
+                  profilingRouter.push(routePath, {
+                    path,
+                    query: {
+                      ...query,
+                      rangeFrom: nextRange.rangeFrom,
+                      rangeTo: nextRange.rangeTo,
+                    },
+                  });
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
         <ChartGrid maximum={10} />
         {children}
       </TopNContext.Provider>

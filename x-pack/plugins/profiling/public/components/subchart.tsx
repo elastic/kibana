@@ -15,9 +15,11 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  Fit,
 } from '@elastic/charts';
 
 import { CountPerTime } from '../../common/topn';
+import { stackTraceAreaSeriesStyle } from '../utils/get_next_time_range/chart_styles';
 
 export interface SubChartProps {
   id: string;
@@ -31,7 +33,7 @@ export interface SubChartProps {
 export const SubChart: React.FC<SubChartProps> = ({ id, name, height, data, x, y }) => {
   return (
     <Chart size={{ height }}>
-      <Settings showLegend={false} />
+      <Settings showLegend={false} tooltip={{ showNullValues: false }} />
       <AreaSeries
         id={id}
         name={name}
@@ -40,8 +42,9 @@ export const SubChart: React.FC<SubChartProps> = ({ id, name, height, data, x, y
         yAccessors={[y]}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
-        areaSeriesStyle={{ area: { opacity: 0.3 }, line: { opacity: 1 } }}
+        areaSeriesStyle={stackTraceAreaSeriesStyle}
         curve={CurveType.CURVE_STEP_AFTER}
+        fit={Fit.Zero}
       />
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />
       <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(0)} />

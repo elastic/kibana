@@ -9,7 +9,7 @@ import { orderBy } from 'lodash';
 
 export interface CountPerTime {
   Timestamp: number;
-  Count: number;
+  Count: number | null;
 }
 
 export interface TopNSample extends CountPerTime {
@@ -85,12 +85,12 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     const series = seriesByCategory.get(sample.Category)!;
     series.push({ Timestamp: sample.Timestamp, Count: sample.Count });
 
-    total += sample.Count;
+    total += sample.Count ?? 0;
   }
 
   const subcharts: TopNSubchart[] = [];
   for (const [category, series] of seriesByCategory) {
-    const totalPerCategory = series.reduce((sum, { Count }) => sum + Count, 0);
+    const totalPerCategory = series.reduce((sum, { Count }) => sum + (Count ?? 0), 0);
     subcharts.push({
       Category: category,
       Percentage: (totalPerCategory / total) * 100,

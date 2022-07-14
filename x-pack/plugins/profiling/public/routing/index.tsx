@@ -11,6 +11,7 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { Redirect } from 'react-router-dom';
 import { StackTracesView } from '../components/stack_traces_view';
 import { FlameGraphsView } from '../components/flame_graphs_view';
+import { StackTracesDisplayOption } from '../../common/stack_traces';
 
 const routes = {
   '/': {
@@ -24,6 +25,19 @@ const routes = {
                 <Outlet />
               </StackTracesView>
             ),
+            params: t.type({
+              query: t.type({
+                displayAs: t.union([
+                  t.literal(StackTracesDisplayOption.StackTraces),
+                  t.literal(StackTracesDisplayOption.Percentage),
+                ]),
+              }),
+            }),
+            defaults: {
+              query: {
+                displayAs: StackTracesDisplayOption.StackTraces,
+              },
+            },
             children: {
               '/stacktraces/containers': {
                 element: <></>,
