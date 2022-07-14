@@ -36,24 +36,24 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
         const commentVal = comment.value.trim();
         const nakedESLintRegexResult = commentVal.match(nakedEslintDisableRegex);
         const ruleName = nakedESLintRegexResult?.groups?.ruleName;
-        const cStartLine = comment?.loc?.start?.line;
+        const cStart = comment?.loc?.start;
         const cEnd = comment?.loc?.end;
+        const cStartLine = comment?.loc?.start?.line;
 
-        if (!cStartLine || !cEnd) {
+        if (!cStart || !cEnd || !cStartLine) {
           return;
         }
 
+        const cStartColumn = comment?.loc?.start?.column ?? 0;
+        const reportLoc =
+          comment.type === 'Block'
+            ? { start: { line: cStartLine, column: cStartColumn - 1 }, end: cEnd }
+            : { start: cStart, end: cEnd };
+
         if (nakedESLintRegexResult && !ruleName) {
           context.report({
-            //node,
-            loc: {
-              start: {
-                line: cStartLine,
-                // we need to set this to -1 otherwise /* eslint-disable ones won't be reported
-                column: -1,
-              },
-              end: cEnd,
-            },
+            node,
+            loc: reportLoc,
             messageId: NAKED_DISABLE_MSG_ID,
             fix(fixer) {
               return fixer.removeRange(comment.range as Eslint.AST.Range);
