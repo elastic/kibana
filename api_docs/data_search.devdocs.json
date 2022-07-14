@@ -1465,16 +1465,7 @@
             "docId": "kibDataSearchPluginApi",
             "section": "def-server.ISearchSessionService",
             "text": "ISearchSessionService"
-          },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionSavedObjectAttributes",
-            "text": "SearchSessionSavedObjectAttributes"
-          },
-          ">"
+          }
         ],
         "path": "src/plugins/data/server/search/session/session_service.ts",
         "deprecated": false,
@@ -2718,9 +2709,25 @@
             "label": "saveSession",
             "description": [],
             "signature": [
-              "(sessionId: string, attributes: Partial<unknown>) => Promise<",
+              "(sessionId: string, attributes: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
               "SavedObject",
-              "<unknown> | undefined>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              "> | undefined>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2744,7 +2751,27 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ [P in keyof T]?: T[P] | undefined; }"
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionStatus",
+                    "text": "SearchSessionStatus"
+                  },
+                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "SerializableRecord",
+                  " | undefined; restoreState?: ",
+                  "SerializableRecord",
+                  " | undefined; idMapping?: Record<string, ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionRequestInfo",
+                    "text": "SearchSessionRequestInfo"
+                  },
+                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false
@@ -2761,7 +2788,15 @@
             "signature": [
               "(sessionId: string) => Promise<",
               "SavedObject",
-              "<unknown>>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2803,7 +2838,15 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<unknown, unknown>>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", unknown>>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2860,7 +2903,15 @@
             "label": "updateSession",
             "description": [],
             "signature": [
-              "(sessionId: string, attributes: Partial<unknown>) => Promise<",
+              "(sessionId: string, attributes: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2868,7 +2919,15 @@
                 "section": "def-server.SavedObjectsUpdateResponse",
                 "text": "SavedObjectsUpdateResponse"
               },
-              "<unknown>>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2892,7 +2951,27 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ [P in keyof T]?: T[P] | undefined; }"
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionStatus",
+                    "text": "SearchSessionStatus"
+                  },
+                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "SerializableRecord",
+                  " | undefined; restoreState?: ",
+                  "SerializableRecord",
+                  " | undefined; idMapping?: Record<string, ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionRequestInfo",
+                    "text": "SearchSessionRequestInfo"
+                  },
+                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false
@@ -2967,7 +3046,15 @@
                 "section": "def-server.SavedObjectsUpdateResponse",
                 "text": "SavedObjectsUpdateResponse"
               },
-              "<unknown>>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -3008,16 +3095,6 @@
         "tags": [],
         "label": "ISearchSessionService",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.ISearchSessionService",
-            "text": "ISearchSessionService"
-          },
-          "<T>"
-        ],
         "path": "src/plugins/data/server/search/session/types.ts",
         "deprecated": false,
         "children": [
@@ -3040,8 +3117,7 @@
               ") => (request: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
-              "IScopedSearchSessionsClient",
-              "<T>"
+              "IScopedSearchSessionsClient"
             ],
             "path": "src/plugins/data/server/search/session/types.ts",
             "deprecated": false,
@@ -3758,8 +3834,7 @@
             "label": "searchSessionsClient",
             "description": [],
             "signature": [
-              "IScopedSearchSessionsClient",
-              "<unknown>"
+              "IScopedSearchSessionsClient"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false
@@ -4481,7 +4556,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -7126,7 +7209,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -21671,7 +21762,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) | undefined"
             ],

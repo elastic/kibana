@@ -116,6 +116,7 @@
 /x-pack/plugins/monitoring/ @elastic/infra-monitoring-ui
 /x-pack/test/functional/apps/monitoring @elastic/infra-monitoring-ui
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
+/x-pack/test/api_integration/apis/monitoring_collection @elastic/infra-monitoring-ui
 
 # Fleet
 /fleet_packages.json @elastic/fleet
@@ -209,7 +210,6 @@
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
-/x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
@@ -272,6 +272,7 @@
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
 /typings/ @elastic/kibana-core
+/x-pack/plugins/global_search_providers  @elastic/kibana-core
 /x-pack/plugins/banners/  @elastic/kibana-core
 /x-pack/plugins/features/  @elastic/kibana-core
 /x-pack/plugins/licensing/  @elastic/kibana-core
@@ -330,6 +331,7 @@
 /packages/kbn-handlebars/ @elastic/kibana-security
 /packages/core/http/core-http-server-internal/src/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/interactive_setup/ @elastic/kibana-security
+/src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
 /test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
