@@ -39,7 +39,7 @@ export const SidePanelContentLayout = memo<SidePanelContentLayoutProps>(
             <EuiHorizontalRule margin="none" />
           </>
         )}
-        <StyledEuiFlexItemNoPadding grow className="eui-scrollBar eui-yScroll layout-container">
+        <StyledEuiFlexItemNoPadding className="eui-scrollBar eui-yScroll layout-container">
           <div>{children}</div>
         </StyledEuiFlexItemNoPadding>
       </EuiFlexGroup>

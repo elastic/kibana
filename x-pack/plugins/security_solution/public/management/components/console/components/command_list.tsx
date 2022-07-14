@@ -19,7 +19,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
   EuiCallOut,
   EuiLink,
   EuiToolTip,
@@ -40,7 +39,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
     .euiTableCellContent__text {
       color: ${({ theme: { eui } }) => eui.euiTextColor};
       font-size: ${({ theme: { eui } }) => eui.euiFontSize};
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeM};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeS};
       padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
     }
   }
@@ -85,7 +84,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const updateInputText = useCallback(
-    (text) => {
+    (text) => () => {
       dispatch({
         type: 'updateInputTextEnteredState',
         payload: () => {
@@ -175,7 +174,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                       <EuiButtonIcon
                         iconType="plusInCircle"
                         aria-label={`updateTextInputCommand-${command.name}`}
-                        onClick={() => updateInputText(`${commandNameWithArgs} `)}
+                        onClick={updateInputText(`${commandNameWithArgs} `)}
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -276,8 +275,8 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         );
       })}
       <EuiSpacer />
-      <EuiText size="s">
-        <EuiTextColor color="subdued">{footerMessage}</EuiTextColor>
+      <EuiText size="s" color="subdued">
+        {footerMessage}
       </EuiText>
     </>
   );
