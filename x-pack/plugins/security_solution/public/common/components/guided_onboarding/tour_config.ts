@@ -33,7 +33,7 @@ export const tourConfig: TourConfig = [
           'Take a quick tour to explore a unified workflow for  investigating suspicious activity.',
       }
     ),
-    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
+    anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
     'data-test-subj': 'welcomeStep',
   },
