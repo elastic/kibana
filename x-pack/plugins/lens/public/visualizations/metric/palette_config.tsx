@@ -8,13 +8,14 @@
 import { RequiredPaletteParamTypes } from '@kbn/coloring';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
-const DEFAULT_PALETTE_NAME = 'status';
-const DEFAULT_COLOR_STEPS = 3;
 export const RANGE_MIN = 0;
 
 export const defaultPaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
-  name: DEFAULT_PALETTE_NAME,
-  steps: DEFAULT_COLOR_STEPS,
+  name: 'status',
+  steps: 3,
   maxSteps: 5,
+  continuity: 'all',
+  colorStops: [],
+  stops: [],
 };

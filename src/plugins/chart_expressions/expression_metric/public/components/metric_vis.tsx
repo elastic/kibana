@@ -153,36 +153,27 @@ const getColor = (
     return defaultColor;
   }
 
-  let rangeMax = paletteParams.rangeMax;
+  let dataMax = paletteParams.rangeMax;
+  let dataMin = paletteParams.rangeMin;
 
   if (paletteParams.range === 'percent') {
-    if (!accessors.breakdownBy && !accessors.max) {
-      throw new Error(
-        i18n.translate('expressionMetricVis.errors.percentBasedPaletteInvalid', {
-          defaultMessage:
-            'Metric visualization expression - percent-based palette used with no maximum or breakdown-by dimension',
-        })
-      );
-    }
-
-    rangeMax = accessors.breakdownBy
+    dataMax = accessors.breakdownBy
       ? accessors.max
         ? data.rows[rowNumber][accessors.max]
         : Math.max(...data.rows.map((row) => row[accessors.metric]))
       : Math.max(...data.rows.map((row) => row[accessors.max!]));
+
+    dataMin =
+      accessors.breakdownBy && !accessors.max
+        ? Math.min(...data.rows.map((row) => row[accessors.metric]))
+        : 0;
   }
 
   return (
-    getPaletteService()
-      .get(CUSTOM_PALETTE)
-      ?.getColorForValue?.(
-        value,
-        { ...paletteParams, rangeMax },
-        {
-          min: paletteParams.rangeMin,
-          max: rangeMax,
-        }
-      ) || defaultColor
+    getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
+      min: dataMin,
+      max: dataMax,
+    }) || defaultColor
   );
 };
 

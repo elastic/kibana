@@ -15,6 +15,8 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import numeral from '@elastic/numeral';
 import { HtmlAttributes } from 'csstype';
+import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import { DimensionsVisParam } from '../../common';
 
 const mockDeserialize = jest.fn(() => ({
   getConverterFor: jest.fn(() => () => 'formatted duration'),
@@ -302,7 +304,7 @@ describe('MetricVisComponent', function () {
               },
               dimensions: {
                 ...config.dimensions,
-                progressMax: max,
+                max,
               },
             }}
             data={table}
@@ -339,56 +341,6 @@ describe('MetricVisComponent', function () {
       expect(
         (getConfig(basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
       ).toBe('horizontal');
-    });
-
-    it('should fetch color from palette if provided', () => {
-      const colorFromPalette = 'color-from-palette';
-
-      mockGetColorForValue.mockReturnValue(colorFromPalette);
-
-      const component = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: {
-              ...config.metric,
-              palette: {
-                colors: [],
-                gradient: true,
-                stops: [],
-                range: 'number',
-                rangeMin: 2,
-                rangeMax: 10,
-              },
-            },
-          }}
-          data={table}
-          renderComplete={() => {}}
-        />
-      );
-
-      const [[datum]] = component.find(Metric).props().data!;
-
-      expect(datum!.color).toBe(colorFromPalette);
-      expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            28.984375,
-            Object {
-              "colors": Array [],
-              "gradient": true,
-              "range": "number",
-              "rangeMax": 10,
-              "rangeMin": 2,
-              "stops": Array [],
-            },
-            Object {
-              "max": 10,
-              "min": 2,
-            },
-          ],
-        ]
-      `);
     });
   });
 
@@ -643,7 +595,7 @@ describe('MetricVisComponent', function () {
               },
               dimensions: {
                 ...config.dimensions,
-                progressMax: basePriceColumnId,
+                max: basePriceColumnId,
               },
             }}
             data={table}
@@ -791,6 +743,122 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('color palettes', () => {
+    const colorFromPalette = 'color-from-palette';
+    mockGetColorForValue.mockReturnValue(colorFromPalette);
+
+    it('should fetch color from palette if provided', () => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+              palette: {
+                colors: [],
+                gradient: true,
+                stops: [],
+                range: 'number',
+                rangeMin: 2,
+                rangeMax: 10,
+              },
+            },
+          }}
+          data={table}
+          renderComplete={() => {}}
+        />
+      );
+
+      const [[datum]] = component.find(Metric).props().data!;
+
+      expect(datum!.color).toBe(colorFromPalette);
+      expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            28.984375,
+            Object {
+              "colors": Array [],
+              "gradient": true,
+              "range": "number",
+              "rangeMax": 10,
+              "rangeMin": 2,
+              "stops": Array [],
+            },
+            Object {
+              "max": 10,
+              "min": 2,
+            },
+          ],
+        ]
+      `);
+    });
+
+    describe('percent-based', () => {
+      const renderWithPalette = (
+        palette: CustomPaletteState,
+        dimensions: MetricVisComponentProps['config']['dimensions']
+      ) =>
+        shallow(
+          <MetricVis
+            config={{
+              dimensions,
+              metric: {
+                palette,
+                progressDirection: 'vertical',
+                maxCols: 5,
+              },
+            }}
+            data={table}
+            renderComplete={() => {}}
+          />
+        );
+
+      const dimensionsAndExpectedBounds = [
+        [
+          'breakdown-by and max',
+          {
+            metric: minPriceColumnId,
+            max: basePriceColumnId,
+            breakdownBy: dayOfWeekColumnId,
+          },
+        ],
+        ['just breakdown-by', { metric: minPriceColumnId, breakdownBy: dayOfWeekColumnId }],
+        ['just max', { metric: minPriceColumnId, max: basePriceColumnId }],
+      ];
+
+      it.each(dimensionsAndExpectedBounds)(
+        'should set correct data bounds with %s dimension',
+        // @ts-expect-error
+        (label, dimensions) => {
+          mockGetColorForValue.mockClear();
+
+          renderWithPalette(
+            {
+              range: 'percent',
+              // the rest of these params don't matter
+              colors: [],
+              gradient: false,
+              stops: [],
+              rangeMin: 2,
+              rangeMax: 10,
+            },
+            dimensions as DimensionsVisParam
+          );
+
+          expect(
+            mockGetColorForValue.mock.calls.map(([value, _palette, bounds]) => ({
+              value,
+              ...bounds,
+            }))
+          ).toMatchSnapshot();
+        }
+      );
+    });
   });
 
   describe('metric value formatting', () => {

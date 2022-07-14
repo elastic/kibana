@@ -319,10 +319,6 @@ export const getMetricVisualization = ({
       delete updated.breakdownByAccessor;
     }
 
-    if (updated.palette && !updated.maxAccessor && !updated.breakdownByAccessor) {
-      updated.palette.params = { ...updated.palette.params, rangeType: 'number' };
-    }
-
     return updated;
   },
 

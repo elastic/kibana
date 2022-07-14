@@ -21,6 +21,8 @@ import {
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
+  DEFAULT_MAX_STOP,
+  DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
@@ -47,25 +49,20 @@ export function MetricDimensionEditor(
 
   const hasDynamicColoring = Boolean(state?.palette);
 
-  const canHavePercentPalette = Boolean(state.maxAccessor || state.breakdownByAccessor);
-
-  const currentMax = 100;
+  const startWithPercentPalette = Boolean(state.maxAccessor || state.breakdownByAccessor);
 
   const activePalette = state?.palette || {
     type: 'palette',
     name: defaultPaletteParams.name,
     params: {
       ...defaultPaletteParams,
-      continuity: 'all',
-      colorStops: undefined,
-      stops: undefined,
-      rangeType: canHavePercentPalette ? 'percent' : 'number',
+      rangeType: startWithPercentPalette ? 'percent' : 'number',
     },
   };
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, {
-    min: activePalette.params?.rangeMin || RANGE_MIN,
-    max: currentMax,
+    min: activePalette.params?.rangeMin || DEFAULT_MIN_STOP,
+    max: activePalette.params?.rangeMax || DEFAULT_MAX_STOP,
   });
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
@@ -154,7 +151,10 @@ export function MetricDimensionEditor(
                   <CustomizablePalette
                     palettes={props.paletteService}
                     activePalette={activePalette}
-                    dataBounds={{ min: RANGE_MIN, max: currentMax }}
+                    dataBounds={{
+                      min: activePalette.params!.rangeMin!,
+                      max: activePalette.params!.rangeMax!,
+                    }}
                     setPalette={(newPalette) => {
                       if (
                         newPalette.name !== CUSTOM_PALETTE &&
