@@ -42,6 +42,7 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
+  SavedObject,
 } from '@kbn/core/public';
 
 import { LISTING_LIMIT_SETTING } from '../../common';
@@ -64,12 +65,10 @@ interface FinderAttributes {
   type: string;
 }
 
-interface SavedObjectFinderItem {
+interface SavedObjectFinderItem extends SavedObject {
   title: string | null;
   name: string | null;
-  id: SimpleSavedObject['id'];
-  type: SimpleSavedObject['type'];
-  savedObject: SimpleSavedObject<FinderAttributes>;
+  simple: SimpleSavedObject<FinderAttributes>;
 }
 
 interface SavedObjectFinderState {
@@ -144,24 +143,36 @@ class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
-    const resp = await this.props.savedObjects.client.find<FinderAttributes>({
+    const originalSavedObjects = await getSavedObjects().savedObjectsClient.find<FinderAttributes>({
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
-      page: 1,
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],
-      defaultSearchOperator: 'AND',
     });
 
-    resp.savedObjects = resp.savedObjects.filter((savedObject) => {
-      const metaData = metaDataMap[savedObject.type];
-      if (metaData.showSavedObject) {
-        return metaData.showSavedObject(savedObject);
-      } else {
-        return true;
-      }
-    });
+    const savedObjects = originalSavedObjects
+      .map((savedObject) => {
+        const {
+          attributes: { name, title },
+        } = savedObject;
+        const titleToUse = typeof title === 'string' ? title : '';
+        const nameToUse = name && typeof name === 'string' ? name : titleToUse;
+        return {
+          ...savedObject,
+          title: titleToUse,
+          name: nameToUse,
+          simple: new SimpleSavedObject(this.props.savedObjects.client, savedObject),
+        };
+      })
+      .filter((savedObject) => {
+        const metaData = metaDataMap[savedObject.type];
+        if (metaData.showSavedObject) {
+          return metaData.showSavedObject(savedObject.simple);
+        } else {
+          return true;
+        }
+      });
 
     if (!this.isComponentMounted) {
       return;
@@ -173,22 +184,7 @@ class SavedObjectFinderUi extends React.Component<
       this.setState({
         isFetchingItems: false,
         page: 0,
-        items: resp.savedObjects.map((savedObject) => {
-          const {
-            attributes: { name, title },
-            id,
-            type,
-          } = savedObject;
-          const titleToUse = typeof title === 'string' ? title : '';
-          const nameToUse = name && typeof name === 'string' ? name : titleToUse;
-          return {
-            title: titleToUse,
-            name: nameToUse,
-            id,
-            type,
-            savedObject,
-          };
-        }),
+        items: savedObjects,
       });
     }
   }, 300);
@@ -468,6 +464,7 @@ class SavedObjectFinderUi extends React.Component<
   private renderListing() {
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
     const { onChoose, savedObjectMetaData } = this.props;
+    const taggingApi = getSavedObjects().getSavedObjectsTagging();
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       {
         field: 'type',
@@ -491,7 +488,7 @@ class SavedObjectFinderUi extends React.Component<
             ({
               getIconForSavedObject: () => 'document',
             } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
-          ).getIconForSavedObject(item.savedObject);
+          ).getIconForSavedObject(item.simple);
 
           return (
             <EuiToolTip position="top" content={typeLabel}>
@@ -521,7 +518,7 @@ class SavedObjectFinderUi extends React.Component<
             (metaData) => metaData.type === item.type
           )!;
           const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-            ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
+            ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
           return (
@@ -529,7 +526,7 @@ class SavedObjectFinderUi extends React.Component<
               onClick={
                 onChoose
                   ? () => {
-                      onChoose(item.id, item.type, fullName, item.savedObject);
+                      onChoose(item.id, item.type, fullName, item.simple);
                     }
                   : undefined
               }
@@ -541,6 +538,7 @@ class SavedObjectFinderUi extends React.Component<
           );
         },
       },
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
     ];
     const pagination = {
       pageIndex: 0,
@@ -551,7 +549,7 @@ class SavedObjectFinderUi extends React.Component<
 
     return (
       <>
-        {this.state.isFetchingItems && this.state.items.length === 0 && (
+        {/* {this.state.isFetchingItems && this.state.items.length === 0 && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiSpacer />
@@ -566,14 +564,14 @@ class SavedObjectFinderUi extends React.Component<
                 (metaData) => metaData.type === item.type
               )!;
               const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-                ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
+                ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
                 : `${item.name} (${currentSavedObjectMetaData!.name})`;
               const iconType = (
                 currentSavedObjectMetaData ||
                 ({
                   getIconForSavedObject: () => 'document',
                 } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
-              ).getIconForSavedObject(item.savedObject);
+              ).getIconForSavedObject(item.simple);
               return (
                 <EuiListGroupItem
                   key={item.id}
@@ -582,7 +580,7 @@ class SavedObjectFinderUi extends React.Component<
                   onClick={
                     onChoose
                       ? () => {
-                          onChoose(item.id, item.type, fullName, item.savedObject);
+                          onChoose(item.id, item.type, fullName, item.simple);
                         }
                       : undefined
                   }
@@ -624,7 +622,7 @@ class SavedObjectFinderUi extends React.Component<
               itemsPerPage={this.state.perPage}
               itemsPerPageOptions={[5, 10, 15, 25]}
             />
-          ))}
+          ))} */}
         <EuiBasicTable
           loading={
             (this.state.isFetchingItems && this.state.items.length === 0) ||
