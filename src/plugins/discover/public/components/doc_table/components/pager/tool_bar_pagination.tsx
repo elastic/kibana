@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
+import { getRowsPerPageOptions } from '../../../../utils/get_rows_per_page_options';
 
 interface ToolBarPaginationProps {
   pageSize: number;
@@ -53,7 +54,7 @@ export const ToolBarPagination = ({
     return size === pageSize ? 'check' : 'empty';
   };
 
-  const rowsPerPageOptions = [25, 50, 100].map((cur) => (
+  const rowsPerPageOptions = getRowsPerPageOptions(pageSize).map((cur) => (
     <EuiContextMenuItem
       key={`${cur} rows`}
       icon={getIconType(cur)}

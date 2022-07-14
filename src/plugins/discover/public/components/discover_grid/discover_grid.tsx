@@ -8,7 +8,6 @@
 
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import classnames from 'classnames';
-import { uniq, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
@@ -36,7 +35,7 @@ import {
   getVisibleColumns,
 } from './discover_grid_columns';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
-import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../../../common/constants';
+import { DEFAULT_ROWS_PER_PAGE } from '../../../common/constants';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -52,6 +51,7 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
+import { getRowsPerPageOptions } from '../../utils/get_rows_per_page_options';
 
 interface SortObj {
   id: string;
@@ -264,12 +264,12 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const sampleRowsPerPage = useMemo(
+  const defaultRowsPerPage = useMemo(
     () =>
       parseInt(services.uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE,
     [services.uiSettings]
   );
-  const currentPageSize = rowsPerPageState ?? sampleRowsPerPage;
+  const currentPageSize = rowsPerPageState ?? defaultRowsPerPage;
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: currentPageSize,
@@ -294,7 +294,7 @@ export const DiscoverGrid = ({
           onChangePage,
           pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
           pageSize: pagination.pageSize,
-          pageSizeOptions: sortBy(uniq([...ROWS_PER_PAGE_OPTIONS, pagination.pageSize])),
+          pageSizeOptions: getRowsPerPageOptions(pagination.pageSize),
         }
       : undefined;
   }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
