@@ -17,7 +17,7 @@ import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import moment, { MomentInput } from 'moment';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  INFO_ROUTE_PATH,
+  STATUS_ROUTE_PATH,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
 import type { CspAppContext } from '../../plugin';
@@ -130,7 +130,7 @@ const getCspSetupStatus = async (
 export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
-      path: INFO_ROUTE_PATH,
+      path: STATUS_ROUTE_PATH,
       validate: false,
     },
     async (context, _, response) => {
