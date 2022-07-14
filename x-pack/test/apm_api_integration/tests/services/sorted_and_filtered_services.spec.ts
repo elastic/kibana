@@ -50,7 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   type ServiceListItem = ValuesType<Awaited<ReturnType<typeof getSortedAndFilteredServices>>>;
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/127939
+  registry.when.skip(
     'Sorted and filtered services',
     { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
     () => {
