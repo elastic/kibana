@@ -63,11 +63,11 @@ export const useStyles = () => {
 
     const leftWidgetsGroup: CSSObject = {
       ...noBottomSpacing,
-      minWidth: '60%',
+      minWidth: `calc(70% - ${size.xxxl})`,
     };
 
     const rightWidgetsGroup: CSSObject = {
-      minWidth: `calc(40% - ${size.xxxl})`,
+      minWidth: '30%',
     };
 
     const percentageChartTitle: CSSObject = {
