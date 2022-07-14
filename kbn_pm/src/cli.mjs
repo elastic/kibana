@@ -72,19 +72,14 @@ try {
     }
   };
 
-  let success = false;
-  /** @type {Error | undefined} */
-  let error;
-  try {
-    await cmd.run({
-      args,
-      log,
-      time,
-    });
-    success = true;
-  } catch (_) {
-    error = _;
-  }
+  const [result] = await Promise.allSettled([
+    (async () =>
+      await cmd.run({
+        args,
+        log,
+        time,
+      }))(),
+  ]);
 
   if (cmd.reportTimings) {
     timings.push({
@@ -92,20 +87,19 @@ try {
       id: cmd.reportTimings.id,
       ms: Date.now() - start,
       meta: {
-        success,
+        success: result.status === 'fulfilled',
       },
     });
   }
 
   if (timings.length) {
-    log.debug('timings', timings);
-    // const { CiStatsReporter } = await import('@kbn/ci-stats-reporter');
-    // const reporter = CiStatsReporter.fromEnv(log);
-    // await reporter.timings({ timings });
+    const { CiStatsReporter } = await import('@kbn/ci-stats-reporter');
+    const reporter = CiStatsReporter.fromEnv(log);
+    await reporter.timings({ timings });
   }
 
-  if (error) {
-    throw error;
+  if (result.status === 'rejected') {
+    throw result.reason;
   }
 } catch (error) {
   if (!isCliError(error)) {
