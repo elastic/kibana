@@ -17,8 +17,8 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
       validate: {
         body: schema.object({
           name: schema.string(),
-          data: schema.maybe(schema.string()),
-          requiredAppPrivileges: schema.arrayOf(schema.string()),
+          dataPath: schema.maybe(schema.string()),
+          requiredAppPrivileges: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
@@ -26,15 +26,17 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
       const [, pluginDeps] = await core.getStartServices();
       const profiles = await pluginDeps.security.userProfiles.suggest({
         name: request.body.name,
-        dataPath: request.body.data,
-        requiredPrivileges: {
-          spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
-          privileges: {
-            kibana: request.body.requiredAppPrivileges.map((appPrivilege) =>
-              pluginDeps.security.authz.actions.app.get(appPrivilege)
-            ),
-          },
-        },
+        dataPath: request.body.dataPath,
+        requiredPrivileges: request.body.requiredAppPrivileges
+          ? {
+              spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
+              privileges: {
+                kibana: request.body.requiredAppPrivileges.map((appPrivilege) =>
+                  pluginDeps.security.authz.actions.app.get(appPrivilege)
+                ),
+              },
+            }
+          : undefined,
       });
       return response.ok({ body: profiles });
     }

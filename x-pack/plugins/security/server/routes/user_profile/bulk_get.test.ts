@@ -73,9 +73,9 @@ describe('Bulk get profile routes', () => {
       expect(bodySchema.validate({ uids: ['uid-1', 'uid-2'] })).toEqual({
         uids: ['uid-1', 'uid-2'],
       });
-      expect(bodySchema.validate({ uids: ['uid-1', 'uid-2'], data: '*' })).toEqual({
+      expect(bodySchema.validate({ uids: ['uid-1', 'uid-2'], dataPath: '*' })).toEqual({
         uids: ['uid-1', 'uid-2'],
-        data: '*',
+        dataPath: '*',
       });
     });
 
@@ -86,7 +86,7 @@ describe('Bulk get profile routes', () => {
       await expect(
         routeHandler(
           getMockContext(),
-          httpServerMock.createKibanaRequest({ body: { uids: ['uid-1', 'uid-2'], data: '*' } }),
+          httpServerMock.createKibanaRequest({ body: { uids: ['uid-1', 'uid-2'], dataPath: '*' } }),
           kibanaResponseFactory
         )
       ).resolves.toEqual(expect.objectContaining({ status: 500, payload: unhandledException }));
@@ -108,7 +108,7 @@ describe('Bulk get profile routes', () => {
       await expect(
         routeHandler(
           getMockContext(),
-          httpServerMock.createKibanaRequest({ body: { uids: ['uid-1', 'uid-2'], data: '*' } }),
+          httpServerMock.createKibanaRequest({ body: { uids: ['uid-1', 'uid-2'], dataPath: '*' } }),
           kibanaResponseFactory
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: userProfiles }));

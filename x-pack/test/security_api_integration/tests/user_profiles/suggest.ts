@@ -269,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
       suggestions = await supertest
         .post('/internal/user_profiles_consumer/_suggest')
         .set('kbn-xsrf', 'xxx')
-        .send({ name: 'one', requiredAppPrivileges: ['discover'], data: 'some' })
+        .send({ name: 'one', requiredAppPrivileges: ['discover'], dataPath: 'some' })
         .expect(200);
       expect(suggestions.body).to.have.length(1);
       expectSnapshot(
@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
       suggestions = await supertest
         .post('/internal/user_profiles_consumer/_suggest')
         .set('kbn-xsrf', 'xxx')
-        .send({ name: 'one', requiredAppPrivileges: ['discover'], data: '*' })
+        .send({ name: 'one', requiredAppPrivileges: ['discover'], dataPath: '*' })
         .expect(200);
       expect(suggestions.body).to.have.length(1);
       expectSnapshot(

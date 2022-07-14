@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           uids: [usersSessions.get('user_one')!.uid, usersSessions.get('user_two')!.uid],
-          data: 'some',
+          dataPath: 'some',
         })
         .expect(200);
       expect(profiles.body).to.have.length(2);

@@ -21,7 +21,7 @@ export function defineBulkGetUserProfilesRoute({
       validate: {
         body: schema.object({
           uids: schema.arrayOf(schema.string(), { minSize: 1 }),
-          data: schema.maybe(schema.string()),
+          dataPath: schema.maybe(schema.string()),
         }),
       },
       options: { tags: ['access:bulkGetUserProfiles'] },
@@ -31,7 +31,7 @@ export function defineBulkGetUserProfilesRoute({
       try {
         const profiles = await userProfileService.bulkGet({
           uids: new Set(request.body.uids),
-          dataPath: request.body.data,
+          dataPath: request.body.dataPath,
         });
         return response.ok({ body: profiles });
       } catch (error) {
