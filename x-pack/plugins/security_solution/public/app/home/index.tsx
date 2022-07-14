@@ -27,9 +27,6 @@ import { ConsoleManager } from '../../management/components/console/components/c
 
 import { TourContextProvider } from '../../common/components/guided_onboarding';
 
-import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
-import { useInitSearchBarUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
-
 import { useUrlState } from '../../common/hooks/use_url_state';
 
 interface HomePageProps {
