@@ -56,6 +56,11 @@ export const useKibana = jest.fn().mockReturnValue({
       OsqueryResults: jest.fn().mockReturnValue(null),
     },
     timelines: createTGridMocks(),
+    savedObjectsTagging: {
+      ui: {
+        getTableColumnDefinition: jest.fn(),
+      },
+    },
   },
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());

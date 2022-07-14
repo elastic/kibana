@@ -72,13 +72,9 @@ export const useSecuritySolutionNavigation = () => {
   ]);
 
   return usePrimaryNavigation({
-    query: urlState.query,
-    filters: urlState.filters,
     navTabs: enabledNavTabs,
     pageName,
-    savedQuery: urlState.savedQuery,
     tabName,
     timeline: urlState.timeline,
-    timerange: urlState.timerange,
   });
 };

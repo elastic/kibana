@@ -179,7 +179,7 @@ export const buildAlert = (
 
   const originalTime = getValidDateFromDoc({
     doc: docs[0],
-    timestampOverride: undefined,
+    primaryTimestamp: TIMESTAMP,
   });
 
   return {

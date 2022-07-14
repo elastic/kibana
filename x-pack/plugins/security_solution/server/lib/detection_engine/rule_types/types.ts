@@ -70,6 +70,8 @@ export interface RunOpts<TParams extends RuleParams> {
   ruleDataReader: IRuleDataReader;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export type SecurityAlertType<

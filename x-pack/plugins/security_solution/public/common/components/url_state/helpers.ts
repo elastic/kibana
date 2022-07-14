@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import type * as H from 'history';
-
-import type { Filter, Query } from '@kbn/es-query';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import type { State } from '../../store';
-import { inputsSelectors } from '../../store';
-import type { UrlInputsModel } from '../../store/inputs/model';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { formatDate } from '../super_date_picker';
 import type { NavTab } from '../navigation/types';
 import type { UrlStateType } from './constants';
 import { CONSTANTS } from './constants';
@@ -126,16 +120,8 @@ export const getTitle = (pageName: string, navTabs: Record<string, NavTab>): str
 };
 
 export const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
     const flyoutTimeline = getTimeline(state, TimelineId.active);
     const timeline =
       flyoutTimeline != null
@@ -147,34 +133,8 @@ export const makeMapStateToProps = () => {
           }
         : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
-    let searchAttr: {
-      [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
-      [CONSTANTS.savedQuery]?: string;
-    } = {
-      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
-      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
-    };
-    const savedQuery = getGlobalSavedQuerySelector(state);
-    if (savedQuery != null && savedQuery.id !== '') {
-      searchAttr = {
-        [CONSTANTS.savedQuery]: savedQuery.id,
-      };
-    }
-
     return {
       urlState: {
-        ...searchAttr,
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
         [CONSTANTS.timeline]: timeline,
       },
     };
@@ -183,31 +143,11 @@ export const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const updateTimerangeUrl = (
-  timeRange: UrlInputsModel,
-  isFirstPageLoad: boolean
-): UrlInputsModel => {
-  if (timeRange.global.timerange.kind === 'relative') {
-    timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
-    timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
-  }
-  if (timeRange.timeline.timerange.kind === 'relative' && isFirstPageLoad) {
-    timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
-    timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
-      roundUp: true,
-    });
-  }
-  return timeRange;
-};
-
 export const isQueryStateEmpty = (
   queryState: ValueUrlState | undefined | null,
   urlKey: KeyUrlState
 ): boolean =>
-  queryState == null ||
-  (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
-  (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
-  (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
+  queryState == null || (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
 
 export const replaceStatesInLocation = (
   states: ReplaceStateInLocation[],

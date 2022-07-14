@@ -78,16 +78,12 @@ export const TabNavigationComponent: React.FC<
 
     return (
       <TabNavigation
-        query={urlState.query}
         display={display}
-        filters={urlState.filters}
         navTabs={navTabs}
         pageName={pageName}
         pathName={pathName}
-        savedQuery={urlState.savedQuery}
         tabName={tabName}
         timeline={urlState.timeline}
-        timerange={urlState.timerange}
       />
     );
   }

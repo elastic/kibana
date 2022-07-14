@@ -19,7 +19,6 @@ import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
-
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -40,8 +39,8 @@ import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../users/store';
 import { hostsActions } from '../../../hosts/store';
 import { networkActions } from '../../../network/store';
-
-const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
+import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
+import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
@@ -80,7 +79,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           filterManager,
         },
       },
-      storage,
       unifiedSearch: {
         ui: { SearchBar },
       },
@@ -92,6 +90,9 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(hostsActions.setHostTablesActivePageToZero());
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
+
+    useSyncSearchBarUrlParams();
+    useSyncTimerangeUrlParam();
 
     useEffect(() => {
       if (fromStr != null && toStr != null) {
@@ -269,16 +270,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       setTablesActivePageToZero,
     ]);
 
-    const saveAppStateToStorage = useCallback(
-      (filters: Filter[]) => storage.set(APP_STATE_STORAGE_KEY, filters),
-      [storage]
-    );
-
-    const getAppStateFromStorage = useCallback(
-      () => storage.get(APP_STATE_STORAGE_KEY) ?? [],
-      [storage]
-    );
-
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
@@ -287,24 +278,14 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
-              saveAppStateToStorage(filterManager.getAppFilters());
-              setSearchBarFilter({
-                id,
-                filters: filterManager.getFilters(),
-              });
+              const filters = filterManager.getFilters();
 
+              setSearchBarFilter({ id, filters });
               setTablesActivePageToZero();
             }
           },
         })
       );
-
-      // for the initial state
-      filterManager.setAppFilters(getAppStateFromStorage());
-      setSearchBarFilter({
-        id,
-        filters: filterManager.getFilters(),
-      });
 
       return () => {
         isSubscribed = false;
@@ -405,8 +386,8 @@ export const dispatchUpdateSearch =
     savedQuery,
     start,
     timelineId,
-    filterManager,
     updateTime = false,
+    filterManager,
     setTablesActivePageToZero,
   }: UpdateReduxSearchBar): void => {
     if (updateTime) {
@@ -465,6 +446,7 @@ export const dispatchUpdateSearch =
     if (filters != null) {
       filterManager.setFilters(filters);
     }
+
     if (savedQuery != null || resetSavedQuery) {
       dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
     }
