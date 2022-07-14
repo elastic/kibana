@@ -37,7 +37,7 @@ export const UnverifiedPackageModal: React.FC<{
         <span className="eui-textBreakWord">
           <FormattedMessage
             id="xpack.fleet.unverifiedPackageModal.title"
-            defaultMessage=" Install unverified integration?"
+            defaultMessage="Install unverified integration?"
           />
         </span>
       }
