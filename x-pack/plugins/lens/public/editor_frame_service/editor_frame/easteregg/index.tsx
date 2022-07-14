@@ -22,7 +22,7 @@ function Bees({ query }: { query?: Query }) {
   }
   let amount = parseInt(match[2] || '1', 10);
   if (isNaN(amount)) {
-    amount = 1;
+    amount = 0;
   }
   amount = Math.max(1, Math.min(50, amount));
   return (
