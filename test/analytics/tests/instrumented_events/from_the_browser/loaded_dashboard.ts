@@ -8,8 +8,8 @@
 
 import { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
 import expect from '@kbn/expect';
+import { DASHBOARD_LOADED_EVENT } from '@kbn/dashboard-plugin/public/events';
 import { FtrProviderContext } from '../../../services';
-import { DASHBOARD_LOADED_EVENT } from '../../../../../src/plugins/dashboard/public/events';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
