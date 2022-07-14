@@ -17,7 +17,7 @@ Returns information about a case.
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`owner` of the cases you're seeking.
+`owner` of the case you're seeking.
 
 === {api-path-parms-title}
 
