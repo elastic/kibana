@@ -76,6 +76,17 @@ export const create = async (
     });
     const afterEnsureAuth = performance.now();
 
+    // const newCase = await caseService.postNewCase2(
+    //   {
+    //     attributes: transformNewCase({
+    //       user,
+    //       newCase: query,
+    //     }),
+    //     id: savedObjectID,
+    //   },
+    //   query
+    // );
+
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
         user,

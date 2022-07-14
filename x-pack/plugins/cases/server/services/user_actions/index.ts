@@ -365,6 +365,37 @@ export class CaseUserActionService {
     }
   }
 
+  public createUserAction2<T extends keyof BuilderParameters>({
+    action,
+    type,
+    caseId,
+    user,
+    owner,
+    payload,
+    connectorId,
+    attachmentId,
+  }: CreateUserActionClient<T>) {
+    try {
+      this.log.debug(`Attempting to create a user action of type: ${type}`);
+      const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+
+      const userAction = userActionBuilder?.build({
+        action,
+        caseId,
+        user,
+        owner,
+        connectorId,
+        attachmentId,
+        payload,
+      });
+
+      return userAction;
+    } catch (error) {
+      this.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
+      throw error;
+    }
+  }
+
   public async getAll({
     unsecuredSavedObjectsClient,
     caseId,

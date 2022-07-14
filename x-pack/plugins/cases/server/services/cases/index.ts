@@ -26,6 +26,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import {
@@ -37,6 +38,9 @@ import {
   CaseAttributes,
   CaseStatuses,
   caseStatuses,
+  CasePostRequest,
+  CaseSeverity,
+  ActionTypes,
 } from '../../../common/api';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
@@ -55,6 +59,7 @@ import { ESCaseAttributes } from './types';
 import { AttachmentService } from '../attachments';
 import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
+import { CaseUserActionService } from '../user_actions';
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -129,22 +134,26 @@ export class CasesService {
   private readonly authentication?: SecurityPluginSetup['authc'];
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  private readonly userActionService: CaseUserActionService;
 
   constructor({
     log,
     authentication,
     unsecuredSavedObjectsClient,
     attachmentService,
+    caseUserActionService,
   }: {
     log: Logger;
     authentication?: SecurityPluginSetup['authc'];
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    caseUserActionService: CaseUserActionService;
   }) {
     this.log = log;
     this.authentication = authentication;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.userActionService = caseUserActionService;
   }
 
   private buildCaseIdsAggs = (
@@ -574,6 +583,47 @@ export class CasesService {
         { id, references: transformedAttributes.referenceHandler.build(), refresh: false }
       );
       return transformSavedObjectToExternalModel(createdCase);
+    } catch (error) {
+      this.log.error(`Error on POST a new case: ${error}`);
+      throw error;
+    }
+  }
+
+  public async postNewCase2(
+    { attributes, id }: PostCaseArgs,
+    query: CasePostRequest
+  ): Promise<SavedObject<CaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to POST a new case`);
+      const userAction = this.userActionService.createUserAction2({
+        type: ActionTypes.create_case,
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+        caseId: id,
+        user: attributes.created_by,
+        payload: { ...query, severity: query.severity ?? CaseSeverity.LOW },
+        owner: attributes.owner,
+      });
+      const transformedAttributes = transformAttributesToESModel(attributes);
+
+      const bulkResult = await this.unsecuredSavedObjectsClient.bulkCreate([
+        {
+          id,
+          type: CASE_SAVED_OBJECT,
+          attributes: transformedAttributes.attributes,
+          references: transformedAttributes.referenceHandler.build(),
+        },
+        {
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          attributes: userAction?.attributes ?? {},
+          references: userAction?.references,
+        },
+      ]);
+      // const createdCase = await this.unsecuredSavedObjectsClient.create<ESCaseAttributes>(
+      //   CASE_SAVED_OBJECT,
+      //   transformedAttributes.attributes,
+      //   { id, references: transformedAttributes.referenceHandler.build(), refresh: false }
+      // );
+      return transformSavedObjectToExternalModel(bulkResult.saved_objects[0]);
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;

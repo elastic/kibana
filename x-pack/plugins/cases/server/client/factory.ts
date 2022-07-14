@@ -105,11 +105,17 @@ export class CasesClientFactory {
       this.options.persistableStateAttachmentTypeRegistry
     );
 
+    const userActionService = new CaseUserActionService(
+      this.logger,
+      this.options.persistableStateAttachmentTypeRegistry
+    );
+
     const caseService = new CasesService({
       log: this.logger,
       authentication: this.options?.securityPluginStart?.authc,
       unsecuredSavedObjectsClient,
       attachmentService,
+      caseUserActionService: userActionService,
     });
     const userInfo = caseService.getUser({ request });
 
@@ -121,10 +127,7 @@ export class CasesClientFactory {
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(
-        this.logger,
-        this.options.persistableStateAttachmentTypeRegistry
-      ),
+      userActionService,
       attachmentService,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
