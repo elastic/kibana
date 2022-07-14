@@ -164,6 +164,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
+        credential_dumping: windows.credential_dumping,
       },
       mac: {
         advanced: mac.advanced,
@@ -187,6 +188,10 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
 
 export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
   return uiPolicyConfig.windows.antivirus_registration.enabled;
+});
+
+export const isCredentialDumpingEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.credential_dumping.enabled;
 });
 
 /** Returns the total number of possible windows eventing configurations */

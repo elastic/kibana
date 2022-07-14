@@ -952,6 +952,9 @@ export interface PolicyConfig {
     antivirus_registration: {
       enabled: boolean;
     };
+    credential_dumping: {
+      enabled: boolean;
+    };
   };
   mac: {
     advanced?: {};
@@ -1029,6 +1032,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'memory_protection'
     | 'behavior_protection'
+    | 'credential_dumping'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI

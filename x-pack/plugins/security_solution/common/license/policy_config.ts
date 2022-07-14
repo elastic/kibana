@@ -202,6 +202,25 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointCredentialDumpingPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all advanced features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may use credential dumping
+  if (policy.windows.credential_dumping.enabled !== defaults.windows.credential_dumping.enabled) {
+    return false;
+  }
+
+  return true;
+}
+
 function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
     // platinum allows all advanced features
@@ -231,7 +250,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointRansomwarePolicyValidForLicense(policy, license) &&
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
     isEndpointBehaviorPolicyValidForLicense(policy, license) &&
-    isEndpointAdvancedPolicyValidForLicense(policy, license)
+    isEndpointAdvancedPolicyValidForLicense(policy, license) &&
+    isEndpointCredentialDumpingPolicyValidForLicense(policy, license)
   );
 };
 

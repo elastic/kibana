@@ -15,6 +15,7 @@ import { BehaviorProtection } from './policy_forms/protections/behavior';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
+import { CredentialDumpingForm } from './components/credential_dumping_form';
 import { Ransomware } from './policy_forms/protections/ransomware';
 import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -37,6 +38,13 @@ const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
   {
     defaultMessage: 'Malicious Behavior',
+  }
+);
+
+const LOCKED_CARD_CREDENTIAL_DUMPING = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.credential_dumping',
+  {
+    defaultMessage: 'Credential Dumping',
   }
 );
 
@@ -73,6 +81,12 @@ export const PolicyDetailsForm = memo(() => {
         <BehaviorProtection />
       ) : (
         <LockedPolicyCard title={LOCKED_CARD_BEHAVIOR_TITLE} />
+      )}
+      <EuiSpacer size="l" />
+      {isPlatinumPlus ? (
+        <CredentialDumpingForm />
+      ) : (
+        <LockedPolicyCard title={LOCKED_CARD_CREDENTIAL_DUMPING} />
       )}
       <EuiSpacer size="l" />
 

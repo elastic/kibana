@@ -63,6 +63,9 @@ export const policyFactory = (): PolicyConfig => {
       antivirus_registration: {
         enabled: false,
       },
+      credential_dumping: {
+        enabled: true,
+      },
     },
     mac: {
       events: {
@@ -168,6 +171,9 @@ export const policyFactoryWithoutPaidFeatures = (
       behavior_protection: {
         mode: ProtectionModes.off,
         supported: false,
+      },
+      credential_dumping: {
+        enabled: false,
       },
       popup: {
         ...policy.windows.popup,
