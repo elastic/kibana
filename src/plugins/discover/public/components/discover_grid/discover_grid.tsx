@@ -35,12 +35,10 @@ import {
   getVisibleColumns,
 } from './discover_grid_columns';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
-import { DEFAULT_ROWS_PER_PAGE } from '../../../common/constants';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
-  SAMPLE_ROWS_PER_PAGE_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
@@ -51,7 +49,7 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
-import { getRowsPerPageOptions } from '../../utils/get_rows_per_page_options';
+import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
 interface SortObj {
   id: string;
@@ -264,11 +262,7 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const defaultRowsPerPage = useMemo(
-    () =>
-      parseInt(services.uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE,
-    [services.uiSettings]
-  );
+  const defaultRowsPerPage = useMemo(() => getDefaultRowsPerPage(services), [services]);
   const currentPageSize = rowsPerPageState ?? defaultRowsPerPage;
   const [pagination, setPagination] = useState({
     pageIndex: 0,
