@@ -20,6 +20,7 @@ export const AGGREGATE_MAX_BUCKETS = 2000;
 // react-query caching keys
 export const QUERY_KEY_PERCENT_WIDGET = 'kubernetesSecurityPercentWidget';
 export const QUERY_KEY_COUNT_WIDGET = 'kubernetesSecurityCountWidget';
+export const QUERY_KEY_CONTAINER_NAME_WIDGET = 'kubernetesSecurityContainerNameWidget';
 
 export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}';
 

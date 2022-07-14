@@ -44,6 +44,7 @@ import {
   COUNT_WIDGET_PODS,
   COUNT_WIDGET_CONTAINER_IMAGES,
 } from '../../../common/translations';
+import { ContainerNameWidget } from '../container_name_widget';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
@@ -59,8 +60,8 @@ const KubernetesSecurityRoutesComponent = ({
   const lastUpdated = useLastUpdated(globalFilter);
 
   const onReduceInteractiveAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
         groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
           aggregate.count_by_aggs.value;
         return groupedByKeyValue;
@@ -69,9 +70,9 @@ const KubernetesSecurityRoutesComponent = ({
   );
 
   const onReduceRootAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key === '0') {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
+        if (aggregate.key.toString() === '0') {
           groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
         } else {
           groupedByKeyValue.nonRoot =
@@ -106,9 +107,9 @@ const KubernetesSecurityRoutesComponent = ({
         </EuiFlexGroup>
         {!shouldHideCharts && (
           <>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="l" css={styles.countWidgets}>
+            <EuiFlexGroup>
+              <EuiFlexItem css={styles.leftWidgetsGroup}>
+                <EuiFlexGroup css={styles.countWidgetsGroup}>
                   <EuiFlexItem>
                     <CountWidget
                       title={COUNT_WIDGET_CLUSTERS}
@@ -155,8 +156,8 @@ const KubernetesSecurityRoutesComponent = ({
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiFlexGroup css={styles.percentageWidgets}>
-                  <EuiFlexItem>
+                <EuiFlexGroup css={styles.widgetsBottomSpacing}>
+                  <EuiFlexItem css={styles.noBottomSpacing}>
                     <PercentWidget
                       title={
                         <>
@@ -208,7 +209,7 @@ const KubernetesSecurityRoutesComponent = ({
                       onReduce={onReduceInteractiveAggs}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem css={styles.noBottomSpacing}>
                     <PercentWidget
                       title={
                         <>
@@ -257,12 +258,14 @@ const KubernetesSecurityRoutesComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <div css={styles.widgetHolder}>PlaceHolder for Container Name Widget</div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              <EuiFlexItem grow={false} css={styles.rightWidgetsGroup}>
+                <ContainerNameWidget
+                  widgetKey="containerNameSessions"
+                  indexPattern={indexPattern}
+                  globalFilter={globalFilter}
+                  groupedBy={CONTAINER_IMAGE_NAME}
+                  countBy={ENTRY_LEADER_ENTITY_ID}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
