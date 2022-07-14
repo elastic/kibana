@@ -35,13 +35,13 @@ export const sampleMetricFormulaAttribute = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Monitor availability',
+                label: 'Availability',
                 operationType: 'formula',
                 params: {
                   format: {
                     id: 'percent',
                     params: {
-                      decimals: 2,
+                      decimals: 1,
                     },
                   },
                   formula: "1- (count(kql='summary.down > 0') / count())",
@@ -57,7 +57,7 @@ export const sampleMetricFormulaAttribute = {
                   query: 'summary.down > 0',
                 },
                 isBucketed: false,
-                label: 'Part of Monitor availability',
+                label: 'Part of Availability',
                 operationType: 'count',
                 params: {
                   emptyAsNull: false,
@@ -69,7 +69,7 @@ export const sampleMetricFormulaAttribute = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of Monitor availability',
+                label: 'Part of Availability',
                 operationType: 'count',
                 params: {
                   emptyAsNull: false,
@@ -81,7 +81,7 @@ export const sampleMetricFormulaAttribute = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of Monitor availability',
+                label: 'Part of Availability',
                 operationType: 'math',
                 params: {
                   tinymathAst: {
@@ -148,7 +148,7 @@ export const sampleMetricFormulaAttribute = {
           name: 'custom',
           progression: 'fixed',
           rangeMax: 1,
-          rangeMin: 0.8,
+          rangeMin: 0,
           rangeType: 'number',
           reverse: false,
           steps: 3,
@@ -169,6 +169,8 @@ export const sampleMetricFormulaAttribute = {
         },
         type: 'palette',
       },
+      size: 's',
+      titlePosition: 'bottom',
     },
   },
   title: 'Prefilled from exploratory view app',
