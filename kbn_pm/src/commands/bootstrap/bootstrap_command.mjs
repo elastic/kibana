@@ -36,6 +36,9 @@ export const command = {
     --no-validate        By default bootstrap validates the yarn.lock file to check for a handfull of',
                           conditions. If you run into issues with this process locally you can disable it by',
                           passing this flag.
+    --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
+                          settings for local development. Disable this process either pass this flag or set
+                          the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -46,6 +49,8 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const vscodeConfig =
+      args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
     // Force install is set in case a flag is passed into yarn kbn bootstrap or
     // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
@@ -110,11 +115,13 @@ export const command = {
       });
     }
 
-    await time('update vscode config', async () => {
-      // Update vscode settings
-      spawnSync('node', ['scripts/update_vscode_config']);
+    if (vscodeConfig) {
+      await time('update vscode config', async () => {
+        // Update vscode settings
+        spawnSync('node', ['scripts/update_vscode_config']);
 
-      log.success('vscode config updated');
-    });
+        log.success('vscode config updated');
+      });
+    }
   },
 };
