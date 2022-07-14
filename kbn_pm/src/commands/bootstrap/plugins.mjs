@@ -34,19 +34,18 @@ export function convertPluginIdToPackageId(pluginId) {
  */
 export async function pluginDiscovery() {
   /* eslint-disable no-unsanitized/method */
-  /** @type {import('@kbn/plugin-discovery')['getPluginSearchPaths']} */
-  const getSearchPaths = (await import(PLUGIN_DISCOVERY_SRC)).getPluginSearchPaths;
-
-  /** @type {import('@kbn/plugin-discovery')['simpleKibanaPlatformPluginDiscovery']} */
-  const discovery = (await import(PLUGIN_DISCOVERY_SRC)).simpleKibanaPlatformPluginDiscovery;
+  /** @type {import('@kbn/plugin-discovery')} */
+  const { getPluginSearchPaths, simpleKibanaPlatformPluginDiscovery } = await import(
+    PLUGIN_DISCOVERY_SRC
+  );
   /* eslint-enable no-unsanitized/method */
 
-  const searchPaths = getSearchPaths({
+  const searchPaths = getPluginSearchPaths({
     rootDir: REPO_ROOT,
     examples: true,
     oss: false,
     testPlugins: true,
   });
 
-  return discovery(searchPaths, []);
+  return simpleKibanaPlatformPluginDiscovery(searchPaths, []);
 }
