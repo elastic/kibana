@@ -430,7 +430,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/crawler/validate_url',
+        path: '/api/ent/v1/internal/crawler2/validate_url',
       });
     });
 
