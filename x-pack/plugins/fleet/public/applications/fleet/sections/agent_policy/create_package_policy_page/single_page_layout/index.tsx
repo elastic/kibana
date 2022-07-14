@@ -40,7 +40,7 @@ import {
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
 } from '../../../../hooks';
-import { Loading, Error, ExtensionWrapper, UnverifiedPackageModal } from '../../../../components';
+import { Loading, Error, ExtensionWrapper, ConfirmForceInstallModal } from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { useUIExtension } from '../../../../hooks';
@@ -565,7 +565,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         )}
 
         {formState === 'CONFIRM_FAILED_VERIFICATION' && agentPolicy && packageInfo && (
-          <UnverifiedPackageModal
+          <ConfirmForceInstallModal
             onConfirm={() => onSubmit({ force: true })}
             onCancel={() => setFormState('VALID')}
             pkg={packageInfo}

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { UnverifiedPackageModal } from './unverified_package_modal';
+import { ConfirmForceInstallModal } from './confirm_force_install_modal';
 
 export default {
   title: 'Unverified Package Confirm Modal',
@@ -45,7 +45,7 @@ const argTypes = {
 };
 
 export const UnverifiedIntegrationModal = ({ packageName, packageVersion }: Args) => (
-  <UnverifiedPackageModal
+  <ConfirmForceInstallModal
     onCancel={() => {}}
     onConfirm={() => {}}
     pkg={{ name: packageName, version: packageVersion }}

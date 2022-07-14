@@ -13,21 +13,21 @@ import React from 'react';
 
 import type { PackageInfo } from '../../common';
 
-export const UnverifiedPackageModal: React.FC<{
+export const ConfirmForceInstallModal: React.FC<{
   onCancel: () => void;
   onConfirm: () => void;
   pkg?: Pick<PackageInfo, 'name' | 'version'>;
 }> = ({ onCancel, onConfirm, pkg }) => {
   const title =
     pkg && pkg.name && pkg.version
-      ? i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleWithPkg', {
+      ? i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleWithPkg', {
           defaultMessage: 'Integration {pkgName}-{pkgVersion} has failed verification',
           values: {
             pkgName: pkg.name,
             pkgVersion: pkg.version,
           },
         })
-      : i18n.translate('xpack.fleet.unverifiedPackageModal.calloutTitleNoPkg', {
+      : i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleNoPkg', {
           defaultMessage: 'The integration has failed verification',
         });
   // TODO: add link to docs
@@ -36,7 +36,7 @@ export const UnverifiedPackageModal: React.FC<{
       title={
         <span className="eui-textBreakWord">
           <FormattedMessage
-            id="xpack.fleet.unverifiedPackageModal.title"
+            id="xpack.fleet.ConfirmForceInstallModal.title"
             defaultMessage="Install unverified integration?"
           />
         </span>
@@ -45,13 +45,13 @@ export const UnverifiedPackageModal: React.FC<{
       onConfirm={onConfirm}
       cancelButtonText={
         <FormattedMessage
-          id="xpack.fleet.unverifiedPackageModal.cancelButtonLabel"
+          id="xpack.fleet.ConfirmForceInstallModal.cancelButtonLabel"
           defaultMessage="Cancel"
         />
       }
       confirmButtonText={
         <FormattedMessage
-          id="xpack.fleet.unverifiedPackageModal.confirmButtonLabel"
+          id="xpack.fleet.ConfirmForceInstallModal.confirmButtonLabel"
           defaultMessage="Install anyway"
         />
       }
@@ -63,7 +63,7 @@ export const UnverifiedPackageModal: React.FC<{
         iconType="alert"
         children={
           <FormattedMessage
-            id="xpack.fleet.unverifiedPackageModal.calloutBody"
+            id="xpack.fleet.ConfirmForceInstallModal.calloutBody"
             defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. "
           />
         }

@@ -19,7 +19,7 @@ import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
 import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import { Error, UnverifiedPackageModal } from '../../../../../../components';
+import { Error, ConfirmForceInstallModal } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
@@ -213,7 +213,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   return (
     <>
       {formState === 'CONFIRM_FAILED_VERIFICATION' && agentPolicy && packageInfo && (
-        <UnverifiedPackageModal
+        <ConfirmForceInstallModal
           onConfirm={() => onSubmit({ force: true })}
           onCancel={() => setFormState('VALID')}
           pkg={packageInfo}
