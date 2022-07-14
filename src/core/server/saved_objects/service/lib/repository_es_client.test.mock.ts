@@ -7,6 +7,6 @@
  */
 
 export const retryCallClusterMock = jest.fn((fn) => fn());
-jest.doMock('../../../elasticsearch/retry_call_cluster', () => ({
+jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
   retryCallCluster: retryCallClusterMock,
 }));
