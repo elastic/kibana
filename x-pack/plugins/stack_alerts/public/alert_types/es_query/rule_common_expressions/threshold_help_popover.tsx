@@ -49,7 +49,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
   _renderContent() {
     return (
       <div css={PopoverStyles}>
-        <EuiText grow={false}>
+        <EuiText grow={false} size="s">
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
@@ -68,11 +68,11 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiCallOut title="Multiple matches of the same document" iconType="pin">
+        <EuiCallOut iconType="pin" size="m">
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches"
-              defaultMessage="This rule type checks for duplication of document matches across multiple runs. If you configure the rule with a time window greater than the check interval and a document matches the query in multiple runs, it is used in only the first threshold calculation."
+              defaultMessage="If the time window is greater than the check interval and a document matches the query in multiple runs, it is used in only the first threshold calculation."
             />
           </p>
         </EuiCallOut>
