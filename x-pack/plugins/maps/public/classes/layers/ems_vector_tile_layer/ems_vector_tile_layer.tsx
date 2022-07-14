@@ -492,7 +492,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return {
       icon: <EuiIcon size="m" type="grid" />,
       tooltipContent: i18n.translate('xpack.maps.emsVectorTileLayer.layerDescription', {
-        defaultMessage: `Reference map provided by Elastic Maps Service (EMS)`,
+        defaultMessage: `Reference map provided by Elastic Maps Service (EMS).`,
       }),
     };
   }
