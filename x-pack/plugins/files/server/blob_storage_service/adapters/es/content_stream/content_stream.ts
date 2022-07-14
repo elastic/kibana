@@ -7,11 +7,10 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { defaults, once, set } from 'lodash';
+import { defaults } from 'lodash';
 import Puid from 'puid';
 import { Duplex, Writable, Readable } from 'stream';
 
-import type { BlobAttributes } from '../../../types';
 import type { FileChunkDocument } from '../mappings';
 
 /**
@@ -79,8 +78,7 @@ export class ContentStream extends Duplex {
     private id: undefined | string,
     private readonly index: string,
     private readonly logger: Logger,
-    parameters: ContentStreamParameters = {},
-    private readonly attributes: BlobAttributes = []
+    parameters: ContentStreamParameters = {}
   ) {
     super();
     this.parameters = defaults(parameters, {
@@ -204,30 +202,12 @@ export class ContentStream extends Duplex {
   }
 
   private getHeadChunkId() {
-    return `0.${this.getId()}`;
+    return `${this.getId()}.0`;
   }
 
   private getChunkId(chunkNumber = 0) {
-    return chunkNumber === 0 ? this.getHeadChunkId() : `${chunkNumber}.${this.getId()}`;
+    return chunkNumber === 0 ? this.getHeadChunkId() : `${this.getId()}.${chunkNumber}`;
   }
-
-  private throwIfDuplicateAttributeKeyNames(): void {
-    const keyNameSet = new Set<string>();
-    for (const [name] of this.attributes) {
-      if (keyNameSet.has(name)) {
-        throw new Error(`Duplicate attributes are not allowed. Found duplicate name "${name}".`);
-      }
-      keyNameSet.add(name);
-    }
-  }
-
-  private getAttributes: () => undefined | Pick<FileChunkDocument, 'app_metadata'> = once(() => {
-    if (!this.attributes.length) return undefined;
-    this.throwIfDuplicateAttributeKeyNames();
-    return this.attributes.reduce((acc, [key, value]) => {
-      return set(acc, `app_metadata.${key}`, value);
-    }, {});
-  });
 
   private async writeChunk(data: string) {
     const chunkId = this.getChunkId(this.chunksWritten);
@@ -241,7 +221,6 @@ export class ContentStream extends Duplex {
       document: {
         data,
         head_chunk_id: isHeadChunk ? undefined : this.getHeadChunkId(),
-        ...(isHeadChunk ? this.getAttributes() : undefined),
       },
     });
   }
@@ -330,13 +309,6 @@ export class ContentStream extends Duplex {
   public getBytesWritten(): number {
     return this.bytesWritten;
   }
-
-  /**
-   * Get the ID of the document containing all attributes for the current file id.
-   */
-  public getAttributesChunkId(): string {
-    return this.getHeadChunkId();
-  }
 }
 
 export interface ContentStreamArgs {
@@ -357,18 +329,10 @@ export interface ContentStreamArgs {
    */
   logger: Logger;
   parameters?: ContentStreamParameters;
-  attributes?: BlobAttributes;
 }
 
-function getContentStream({
-  client,
-  id,
-  index,
-  logger,
-  parameters,
-  attributes,
-}: ContentStreamArgs) {
-  return new ContentStream(client, id, index, logger, parameters, attributes);
+function getContentStream({ client, id, index, logger, parameters }: ContentStreamArgs) {
+  return new ContentStream(client, id, index, logger, parameters);
 }
 
 export type WritableContentStream = Writable &
@@ -378,10 +342,10 @@ export function getWritableContentStream(args: ContentStreamArgs): WritableConte
   return getContentStream(args);
 }
 
-export type ReadableContentStream = Readable & Pick<ContentStream, 'getAttributesChunkId'>;
+export type ReadableContentStream = Readable;
 
 export function getReadableContentStream(
-  args: Omit<ContentStreamArgs, 'id' | 'attributes'> & { id: string }
+  args: Omit<ContentStreamArgs, 'id'> & { id: string }
 ): ReadableContentStream {
   return getContentStream(args);
 }

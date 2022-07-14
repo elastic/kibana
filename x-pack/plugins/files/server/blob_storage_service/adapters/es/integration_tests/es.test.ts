@@ -15,8 +15,6 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 
 import { ElasticsearchBlobStorage, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
-import { BlobAttributes } from '../../../types';
-import { FileChunkDocument } from '../mappings';
 
 describe('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;
@@ -133,35 +131,5 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toBe(fileString2);
-  });
-
-  it('sets attributes on a blob', async () => {
-    const attributes: BlobAttributes = [
-      ['foo', 'bar'],
-      ['myObject', { foo: 'bar' }],
-    ];
-    const { id } = await esBlobStorage.upload(Readable.from(['upload this']), { attributes });
-    const attrsResponse = await esBlobStorage.getAttributes(id);
-    expect(attrsResponse).toEqual(
-      expect.objectContaining({
-        foo: 'bar',
-        myObject: { foo: 'bar' },
-      })
-    );
-
-    const unsearchableAttributePath = 'app_metadata.foo';
-
-    // We cannot search by metadata
-    const {
-      hits: { hits: hits2 },
-    } = await esClient.search<FileChunkDocument>({
-      index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
-      query: {
-        match: {
-          [unsearchableAttributePath]: 'bar',
-        },
-      },
-    });
-    expect(hits2).toHaveLength(0);
   });
 });

@@ -10,22 +10,7 @@ import type { Readable, Transform } from 'stream';
 
 export type BlobAttribute = [key: string, value: JsonValue];
 
-/**
- * An array of {@link BlobAttribute}.
- *
- * @note Each key value must be unique.
- */
-export type BlobAttributes = BlobAttribute[];
-
-export interface BlobAttributesResponse {
-  [key: string]: JsonValue;
-}
-
 interface UploadOptions {
-  /**
-   * Optionally provide attributes to store on with the blob directly
-   */
-  attributes?: BlobAttributes;
   /**
    * Optionally provide any transforms to run on the readable source stream
    * as it is being uploaded.
@@ -61,11 +46,6 @@ export interface BlobStorage {
    * stream.
    */
   download(args: { id: string; size?: number }): Promise<Readable>;
-
-  /**
-   * Get attributes of a blob.
-   */
-  getAttributes(id: string): Promise<BlobAttributesResponse>;
 
   /**
    * Delete a file given a unique ID.

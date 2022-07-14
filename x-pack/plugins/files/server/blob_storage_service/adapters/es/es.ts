@@ -11,10 +11,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
-import type { BlobAttributes, BlobStorage, BlobAttributesResponse } from '../../types';
+import type { BlobStorage } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
-import { FileChunkDocument, mappings } from './mappings';
+import { mappings } from './mappings';
 
 /**
  * Export this value for convenience to be used in tests. Do not use outside of
@@ -67,7 +67,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   public async upload(
     src: Readable,
-    { attributes, transforms }: { attributes?: BlobAttributes; transforms?: Transform[] } = {}
+    { transforms }: { transforms?: Transform[] } = {}
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
@@ -81,7 +81,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
           encoding: 'base64',
           maxChunkSize: this.chunkSize,
         },
-        attributes,
       });
       await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
         typeof pipeline
@@ -112,22 +111,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
     return this.getReadableContentStream(id, size);
-  }
-
-  public async getAttributes(id: string): Promise<BlobAttributesResponse> {
-    const doc = await this.esClient.getSource<FileChunkDocument>({
-      index: this.index,
-      id: this.getReadableContentStream(id).getAttributesChunkId(),
-      _source_includes: ['app_metadata'],
-      refresh: true,
-    });
-
-    if (!doc) {
-      throw new Error('File not found');
-    }
-    return {
-      ...doc.app_metadata,
-    };
   }
 
   public async delete(id: string): Promise<void> {
