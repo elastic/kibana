@@ -19,15 +19,13 @@ export const TopNFunctionsTable = () => {
       return [];
     }
 
-    return ctx.TopN
-      .filter((topN) => (topN.CountExclusive > 0))
-      .map((topN, i) => ({
-        rank: i + 1,
-        function: topN.Frame.ExeFileName,
-        samples: topN.CountExclusive,
-        exclusiveCPU: topN.CountExclusive / ctx.TotalCount * 100,
-        inclusiveCPU: topN.CountInclusive / ctx.TotalCount * 100,
-      }));
+    return ctx.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => ({
+      rank: i + 1,
+      function: topN.Frame.ExeFileName,
+      samples: topN.CountExclusive,
+      exclusiveCPU: (topN.CountExclusive / ctx.TotalCount) * 100,
+      inclusiveCPU: (topN.CountInclusive / ctx.TotalCount) * 100,
+    }));
   }, [ctx]);
 
   const columns = [
