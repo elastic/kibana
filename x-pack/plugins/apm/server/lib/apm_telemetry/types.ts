@@ -32,6 +32,10 @@ export type APMPerService = Record<
       regions: string[];
       providers: string[];
     };
+    agent: {
+      name: string | null;
+      version: string | null;
+    };
   }
 >;
 

@@ -1176,6 +1176,11 @@ export const tasks: TelemetryTask[] = [
                     size: 1000,
                   },
                   aggs: {
+                    top_hits: {
+                      top_hits: {
+                        size: 1,
+                      },
+                    },
                     cloud_region: {
                       terms: {
                         field: CLOUD_REGION,
@@ -1223,6 +1228,10 @@ export const tasks: TelemetryTask[] = [
                 serviceBucket.cloud_provider?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
+            },
+            agent: {
+              name: serviceBucket.top_hits?.hits.hits[0].agent.name,
+              version: serviceBucket.top_hits?.hits.hits[0].agent.version,
             },
           };
         });
