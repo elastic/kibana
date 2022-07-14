@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ControlGroupInput } from '@kbn/controls-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -96,7 +97,7 @@ export const stateToDashboardContainerInput = ({
   dashboardState,
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
-  const { timefilter: timefilterService } = queryService;
+  const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
   const {
@@ -115,6 +116,7 @@ export const stateToDashboardContainerInput = ({
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
+    filters: [...filters, ...filterManager.getFilters().filter(isFilterPinned)],
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     dashboardCapabilities,
@@ -126,7 +128,6 @@ export const stateToDashboardContainerInput = ({
     description,
     viewMode,
     panels,
-    filters,
     query,
     title,
     timeRange: {
