@@ -25751,7 +25751,7 @@ module.exports.node = opts => {
 
 "use strict";
 
-const isStream = __webpack_require__("../../node_modules/execa/node_modules/is-stream/index.js");
+const isStream = __webpack_require__("../../node_modules/is-stream/index.js");
 const getStream = __webpack_require__("../../node_modules/get-stream/index.js");
 const mergeStream = __webpack_require__("../../node_modules/merge-stream/index.js");
 
@@ -25847,43 +25847,6 @@ module.exports = {
 	validateInputSync
 };
 
-
-
-/***/ }),
-
-/***/ "../../node_modules/execa/node_modules/is-stream/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const isStream = stream =>
-	stream !== null &&
-	typeof stream === 'object' &&
-	typeof stream.pipe === 'function';
-
-isStream.writable = stream =>
-	isStream(stream) &&
-	stream.writable !== false &&
-	typeof stream._write === 'function' &&
-	typeof stream._writableState === 'object';
-
-isStream.readable = stream =>
-	isStream(stream) &&
-	stream.readable !== false &&
-	typeof stream._read === 'function' &&
-	typeof stream._readableState === 'object';
-
-isStream.duplex = stream =>
-	isStream.writable(stream) &&
-	isStream.readable(stream);
-
-isStream.transform = stream =>
-	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
-
-module.exports = isStream;
 
 
 /***/ }),
@@ -34836,6 +34799,43 @@ module.exports = value => {
 	const prototype = Object.getPrototypeOf(value);
 	return prototype === null || prototype === Object.prototype;
 };
+
+
+/***/ }),
+
+/***/ "../../node_modules/is-stream/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
+
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
+
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
+
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
 
 
 /***/ }),
