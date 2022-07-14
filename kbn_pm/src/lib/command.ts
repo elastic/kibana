@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Helper function to easily time specific parts of a kbn command. Does not produce
+ * timings unless the reportTimings config is also defined
+ */
 export type SubCommandTimeFn = <T>(id: string, block: () => Promise<T>) => Promise<T>;
 
+/**
+ * Argument passed to the command run function
+ */
 export interface CommandRunContext {
   args: import('../lib/args.mjs').Args;
   log: import('@kbn/some-dev-log').SomeDevLog;
@@ -49,6 +56,11 @@ export interface Command {
    */
   run(ctx: CommandRunContext): Promise<void>;
 
+  /**
+   * Configuration to send timing data to ci-stats for this command. If the
+   * time() fn is used those timing records will use the group from this config.
+   * If this config is not used then the time() fn won't report any data.
+   */
   reportTimings?: {
     group: string;
     id: string;
