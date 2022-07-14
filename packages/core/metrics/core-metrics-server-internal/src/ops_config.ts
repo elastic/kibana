@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const opsConfig = {
   path: 'ops',

@@ -8,10 +8,13 @@
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { OpsMetrics } from '@kbn/core-metrics-server';
-import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
+import type {
+  OpsMetrics,
+  MetricsServiceSetup,
+  MetricsServiceStart,
+} from '@kbn/core-metrics-server';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
