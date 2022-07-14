@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { registerV1PrometheusRoute, PROMETHEUS_PATH, registerDynamicRoute } from './api/v1';
+export { registerDynamicRoute } from './dynamic_route';
+export { registerV1PrometheusRoute, PROMETHEUS_PATH } from './prometheus';
