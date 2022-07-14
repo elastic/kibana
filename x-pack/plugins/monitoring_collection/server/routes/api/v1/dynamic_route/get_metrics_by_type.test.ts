@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerDynamicRoute } from './dynamic_route';
+import { registerDynamicRoute } from '.';
 import { KibanaRequest, KibanaResponseFactory, ServiceStatusLevels } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -14,7 +14,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-jest.mock('../lib', () => ({
+jest.mock('../../../../lib', () => ({
   getESClusterUuid: () => 'clusterA',
   getKibanaStats: () => ({ name: 'myKibana' }),
 }));
