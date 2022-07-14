@@ -39,8 +39,8 @@ const ConsoleWindow = styled.div`
     }
 
     &-container {
-      padding: ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize}
-        ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
+      padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
+        ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL};
     }
 
     &-header {
@@ -48,6 +48,8 @@ const ConsoleWindow = styled.div`
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
       border-top-left-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
       border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+      padding: ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize}
+        ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
     }
 
     &-commandInput {
@@ -153,7 +155,7 @@ export const Console = memo<ConsoleProps>(
             responsive={false}
             data-test-subj={getTestId('mainPanel')}
           >
-            <EuiFlexItem grow={false} className="layout-container layout-header">
+            <EuiFlexItem grow={false} className="layout-header">
               <ConsoleHeader TitleComponent={TitleComponent} />
             </EuiFlexItem>
 

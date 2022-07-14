@@ -95,7 +95,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
           <UserCommandInput input={command.input} />
         </div>
         <div>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
 
           <RenderComponent
             command={command}
