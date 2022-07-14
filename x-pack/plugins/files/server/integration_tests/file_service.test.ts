@@ -155,7 +155,7 @@ describe('FileService', () => {
     const updatedFile2 = await fileService.find<CustomMeta>({ fileKind, id: file.id });
     expect(updatedFile2.meta).toEqual(expect.objectContaining(updatableFields.meta));
     // Below also tests that our meta type is work as expected by using `some` field.
-    expect(updatedFile2.meta.some).toBe(updatableFields.meta.some);
+    expect(updatedFile2.meta?.some).toBe(updatableFields.meta.some);
     expect(updatedFile2.name).toBe(updatableFields.name);
     expect(updatedFile2.alt).toBe(updatableFields.alt);
   });

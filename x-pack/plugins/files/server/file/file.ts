@@ -8,8 +8,8 @@
 import { Logger } from '@kbn/core/server';
 import mimeType from 'mime';
 import { Readable } from 'stream';
-import { FileShareJSON } from '../../common/types';
-import {
+import type { FileCompression, FileShareJSON } from '../../common/types';
+import type {
   File as IFile,
   FileKind,
   FileSavedObject,
@@ -63,8 +63,8 @@ export class File<M = unknown> implements IFile {
 
   private canUpload(): boolean {
     return (
-      this.fileSO.attributes.status === 'AWAITING_UPLOAD' ||
-      this.fileSO.attributes.status === 'UPLOAD_ERROR'
+      this.fileSO.attributes.Status === 'AWAITING_UPLOAD' ||
+      this.fileSO.attributes.Status === 'UPLOAD_ERROR'
     );
   }
 
@@ -101,26 +101,30 @@ export class File<M = unknown> implements IFile {
   }
 
   public downloadContent(): Promise<Readable> {
-    const { content_ref: id, size } = this.attributes;
-    if (!id) {
+    const { size } = this.attributes;
+    if (!this.id) {
       throw new Error('No content to download');
     }
     if (this.status !== 'READY') {
       throw new Error('This file is not ready for download.');
     }
-    return this.blobStorage.download({ id, size });
+    return this.blobStorage.download({ id: this.id, size });
   }
 
   public async delete(): Promise<void> {
-    const { attributes, id } = this.fileSO;
+    const { attributes } = this.fileSO;
+    if (attributes.Status === 'UPLOADING') {
+      throw new Error('Cannot delete file while upload in progress');
+    }
     await this.updateFileState({
       action: 'delete',
     });
-    if (attributes.content_ref) {
-      await this.blobStorage.delete(attributes.content_ref);
-    }
+    // Stop sharing this file
     await this.fileShareService.deleteForFile({ file: this });
-    await this.internalFileService.deleteSO(id);
+    if (attributes.Status === 'READY') {
+      await this.blobStorage.delete(this.id);
+    }
+    await this.internalFileService.deleteSO(this.id);
     this.logAuditEvent(
       createAuditEvent({
         action: 'delete',
@@ -161,10 +165,21 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  public toJSON(): FileJSON {
+  public toJSON(): FileJSON<M> {
     return {
-      ...this.attributes,
       id: this.id,
+      alt: this.alt,
+      chunkSize: this.attributes.ChunkSize,
+      extension: this.extension,
+      meta: this.meta,
+      mimeType: this.mimeType,
+      size: this.size,
+      compression: this.compression,
+      created: this.created,
+      updated: this.updated,
+      fileKind: this.fileKind,
+      name: this.name,
+      status: this.status,
     };
   }
 
@@ -176,6 +191,18 @@ export class File<M = unknown> implements IFile {
     return this.fileSO.id;
   }
 
+  public get created(): string {
+    return this.attributes.created;
+  }
+
+  public get updated(): string {
+    return this.attributes.Updated;
+  }
+
+  public get chunkSize(): number | undefined {
+    return this.attributes.ChunkSize;
+  }
+
   public get fileKind(): string {
     return this.fileKindDescriptor.id;
   }
@@ -185,23 +212,31 @@ export class File<M = unknown> implements IFile {
   }
 
   public get status(): FileStatus {
-    return this.attributes.status;
+    return this.attributes.Status;
+  }
+
+  public get compression(): undefined | FileCompression {
+    return this.attributes.Compression;
+  }
+
+  public get size(): undefined | number {
+    return this.attributes.size;
   }
 
   public get meta(): M {
-    return this.attributes.meta as M;
+    return this.attributes.Meta as M;
   }
 
   public get alt(): undefined | string {
-    return this.attributes.alt;
+    return this.attributes.Alt;
   }
 
-  public get mime(): undefined | string {
-    return this.attributes.mime;
+  public get mimeType(): undefined | string {
+    return this.attributes.mime_type;
   }
 
   public get extension(): undefined | string {
-    return this.attributes.extension;
+    return this.attributes.Extension;
   }
 
   /**
@@ -220,12 +255,12 @@ export class File<M = unknown> implements IFile {
   ) {
     const fileSO = await internalFileService.createSO({
       ...createDefaultFileAttributes(),
-      file_kind: fileKind.id,
+      FileKind: fileKind.id,
       name,
-      alt,
-      meta,
-      mime,
-      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+      Alt: alt,
+      Meta: meta,
+      mime_type: mime,
+      Extension: (mime && mimeType.getExtension(mime)) ?? undefined,
     });
 
     const file = internalFileService.toFile(fileSO, fileKind);

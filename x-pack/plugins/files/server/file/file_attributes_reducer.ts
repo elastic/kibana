@@ -22,13 +22,13 @@ export type Action =
 
 export function createDefaultFileAttributes(): Pick<
   FileSavedObjectAttributes,
-  'created_at' | 'updated_at' | 'status'
+  'created' | 'Updated' | 'Status'
 > {
   const dateString = new Date().toISOString();
   return {
-    created_at: dateString,
-    updated_at: dateString,
-    status: 'AWAITING_UPLOAD',
+    created: dateString,
+    Updated: dateString,
+    Status: 'AWAITING_UPLOAD',
   };
 }
 
@@ -38,21 +38,21 @@ export function fileAttributesReducer(
 ): FileSavedObjectAttributes {
   switch (action) {
     case 'delete':
-      return { ...state, status: 'DELETED' };
+      return { ...state, Status: 'DELETED' };
     case 'uploading':
-      return { ...state, content_ref: undefined, status: 'UPLOADING' };
+      return { ...state, Status: 'UPLOADING' };
     case 'uploaded':
-      return { ...state, ...payload, status: 'READY' };
+      return { ...state, ...payload, Status: 'READY' };
     case 'uploadError':
-      return { ...state, status: 'UPLOAD_ERROR', content_ref: undefined };
+      return { ...state, Status: 'UPLOAD_ERROR' };
     case 'updateFile':
       const d = new Date();
       return {
         ...state,
         name: payload.name ?? state.name,
-        alt: payload.alt ?? state.alt,
-        meta: payload.meta ?? state.meta,
-        updated_at: d.toISOString(),
+        Alt: payload.alt ?? state.Alt,
+        Meta: payload.meta ?? state.Meta,
+        Updated: d.toISOString(),
       };
     default:
       return state;

@@ -11,71 +11,126 @@ import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR' | 'DELETED';
 
+export type FileCompression = 'br' | 'gzip' | 'deflate' | 'none';
+
+/**
+ * File metadata fields are defined per the ECS specification:
+ *
+ * https://www.elastic.co/guide/en/ecs/current/ecs-file.html
+ *
+ * Custom fields are named according to the custom field convention: "CustomFieldName".
+ *
+ * TODO: Consider moving this to a commonly shareable package
+ */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FileSavedObjectAttributes<Meta = unknown> = {
-  created_at: string;
-
-  updated_at: string;
-
+export type FileMetadata = {
   /**
-   * User-friendly name given to the file
-   */
-  name: string;
-
-  /**
-   * Unique identifier of the kind of file. Kibana applications can register
-   * these at runtime.
-   */
-  file_kind: string;
-
-  status: FileStatus;
-
-  /**
-   * An alternate even more human-friendly name for the contents. This should be
-   * usable by, for example, the alt attribute in image tags if the content is an
-   * image.
-   */
-  alt?: string;
-
-  /**
-   * A unique ID for file content that enables retrieval from a blob store.
+   * Name of the file
    *
-   * May not be available at the time this object is created
+   * @note This field is recommended since it will provide a better UX
    */
-  content_ref?: string;
+  name?: string;
 
   /**
-   * MIME type of the file content, e.g.: image/png.
+   * MIME type of the file contents
    */
-  mime?: string;
+  mime_type?: string;
 
   /**
-   * Extension that should match the full mime type
+   * ISO string representing the file creation date
    */
-  extension?: string;
+  created?: string;
 
   /**
-   * Size of the contents in bytes.
+   * Size of the file
    */
   size?: number;
 
   /**
-   * User-defined metadata
+   * Hash of the file's contents
    */
-  meta?: Meta;
+  hash?: {
+    md5?: string;
+    sha1?: string;
+    sha256?: string;
+    sha384?: string;
+    sha512?: string;
+    ssdeep?: string;
+    tlsh?: string;
+    [hashName: string]: string | undefined;
+  };
+
+  /**
+   * Alternate text that can be used used to describe the contents of the file
+   * in human-friendly language
+   */
+  Alt?: string;
+
+  /**
+   * The file extension, for example "jpg", "png", "svg" and so forth
+   */
+  Extension?: string;
+
+  /**
+   * ISO string representing when the file was last updated
+   */
+  Updated?: string;
+
+  /**
+   * The file's current status
+   */
+  Status?: FileStatus;
+
+  /**
+   * The maximum number of bytes per file chunk
+   */
+  ChunkSize?: number;
+
+  /**
+   * Compression algorithm used to transform chunks before they were stored.
+   */
+  Compression?: FileCompression;
 };
+
+export type FileSavedObjectAttributes<Meta = unknown> = Required<
+  Pick<FileMetadata, 'created' | 'name' | 'Status' | 'Updated'>
+> &
+  FileMetadata & {
+    /**
+     * Unique identifier of the kind of file. Kibana applications can register
+     * these at runtime.
+     */
+    FileKind: string;
+
+    /**
+     * User-defined metadata
+     */
+    Meta?: Meta;
+  };
 
 /**
  * Attributes of a file that represent a serialised version of the file.
  */
-export type FileJSON = FileSavedObjectAttributes & { id: string };
+export interface FileJSON<Meta = unknown> {
+  id: string;
+  created: FileSavedObjectAttributes['created'];
+  updated: FileSavedObjectAttributes['Updated'];
+  name: FileSavedObjectAttributes['name'];
+  mimeType: FileSavedObjectAttributes['mime_type'];
+  size: FileSavedObjectAttributes['size'];
+
+  meta: FileSavedObjectAttributes<Meta>['Meta'];
+  extension: FileSavedObjectAttributes['Extension'];
+  alt: FileSavedObjectAttributes['Alt'];
+  chunkSize: FileSavedObjectAttributes['ChunkSize'];
+  fileKind: FileSavedObjectAttributes['FileKind'];
+  compression: FileSavedObjectAttributes['Compression'];
+  status: FileSavedObjectAttributes['Status'];
+}
 
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
-export type UpdatableFileAttributes<Meta = unknown> = Pick<
-  FileSavedObjectAttributes<Meta>,
-  'meta' | 'alt' | 'name'
->;
+export type UpdatableFileAttributes<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileShareSavedObjectAttributes = {
@@ -105,37 +160,10 @@ export type FileShareJSON = FileShareSavedObjectAttributes & { id: string; fileI
 export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 
 /**
- * The set of properties and behaviors of the "smart" file object. This is built
- * directly from the set of saved object attributes
+ * The set of properties and behaviors of the "smart" file object and adds
+ * behaviours for interacting with files on top of the pure data.
  */
-export interface File<Meta = unknown> {
-  id: string;
-
-  /**
-   * The ID of a {@link FileKind}.
-   */
-  fileKind: string;
-
-  /**
-   * The user-facing file name.
-   */
-  name: string;
-
-  status: FileStatus;
-  /**
-   * User provided metadata
-   */
-  meta: Meta;
-
-  alt: undefined | string;
-
-  /**
-   * MIME type of the file content, e.g.: image/png.
-   */
-  mime: undefined | string;
-
-  extension: undefined | string;
-
+export interface File<Meta = unknown> extends FileJSON<Meta> {
   update(attr: Partial<UpdatableFileAttributes<Meta>>): Promise<File<Meta>>;
 
   uploadContent(content: Readable): Promise<void>;
@@ -155,7 +183,7 @@ export interface File<Meta = unknown> {
     shareId: string;
   }): Promise<void>;
 
-  toJSON(): FileJSON;
+  toJSON(): FileJSON<Meta>;
 }
 
 /**
