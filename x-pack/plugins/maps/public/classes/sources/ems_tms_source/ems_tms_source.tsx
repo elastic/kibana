@@ -80,7 +80,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
           defaultMessage: `Tile service`,
         }),
-        value: this._descriptor.isAutoSelect ? `${tileServiceName} - ${autoSelectMsg}` : tileServiceName,
+        value: this._descriptor.isAutoSelect
+          ? `${tileServiceName} - ${autoSelectMsg}`
+          : tileServiceName,
       },
     ];
 
