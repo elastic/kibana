@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsCardinalityAggregate,
   AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import { SignalSource } from '../types';
-import {
+import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { SignalSource } from '../types';
+import type {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
