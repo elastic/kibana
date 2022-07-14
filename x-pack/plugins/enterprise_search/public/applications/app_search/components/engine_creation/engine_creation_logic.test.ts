@@ -389,10 +389,10 @@ describe('EngineCreationLogic', () => {
           selectedIndex: 'search-my-index-2',
         });
         const mockCheckedSearchIndexOptions = [...mockSearchIndexOptions];
-        mockCheckedSearchIndexOptions[1].checked = 'on';
+        mockCheckedSearchIndexOptions[2].checked = 'on';
 
         expect(EngineCreationLogic.values.selectedIndexFormatted).toEqual(
-          mockCheckedSearchIndexOptions[1]
+          mockCheckedSearchIndexOptions[2]
         );
       });
     });
