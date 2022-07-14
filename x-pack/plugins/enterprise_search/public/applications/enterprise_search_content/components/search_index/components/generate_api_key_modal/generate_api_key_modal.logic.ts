@@ -52,7 +52,7 @@ export const GenerateApiKeyModalLogic = kea<
     ],
   }),
   selectors: ({ selectors }) => ({
-    apiKey: [() => [selectors.data], (data) => data?.apiKey?.api_key || ''],
+    apiKey: [() => [selectors.data], (data) => data?.apiKey?.encoded || ''],
     isLoading: [() => [selectors.status], (status) => status === Status.LOADING],
     isSuccess: [() => [selectors.status], (status) => status === Status.SUCCESS],
   }),

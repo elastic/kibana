@@ -10,7 +10,6 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
-  EuiCopy,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -30,6 +29,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { ApiKey } from '../../../api_key/api_key';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
 
@@ -72,72 +73,56 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
           <EuiPanel hasShadow={false} color="primary">
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiFlexGroup direction="row" alignItems="center">
-                  <EuiFlexItem>
-                    {!isSuccess ? (
-                      <EuiFormRow label="Name your API key">
-                        <EuiFieldText
-                          placeholder="Type a name for your API key"
-                          onChange={(event) => setKeyName(event.currentTarget.value)}
-                          isLoading={isLoading}
-                        />
-                      </EuiFormRow>
-                    ) : (
-                      <EuiFormRow label={`"${keyName.trim()}"`}>
-                        <EuiFieldText value={apiKey} />
-                      </EuiFormRow>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiCopy
-                      textToCopy={apiKey}
-                      beforeMessage={i18n.translate(
-                        'xpack.enterpriseSearch.content.overview.generateApiKeyModal.copyToClipboard',
-                        { defaultMessage: 'Copy to clipboard' }
-                      )}
-                      afterMessage={i18n.translate(
-                        'xpack.enterpriseSearch.content.overview.generateApiKeyModal.copiedToClipboard',
-                        { defaultMessage: 'Copied Client ID to clipboard' }
-                      )}
-                    >
-                      {(copy) => (
+                <EuiFlexGroup direction="row" alignItems="flexEnd">
+                  {!isSuccess ? (
+                    <>
+                      <EuiFlexItem>
+                        <EuiFormRow label="Name your API key" fullWidth>
+                          <EuiFieldText
+                            fullWidth
+                            placeholder="Type a name for your API key"
+                            onChange={(event) => setKeyName(event.currentTarget.value)}
+                            isLoading={isLoading}
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="generateApiKeyButton"
+                          iconSide="left"
+                          iconType="plusInCircle"
+                          fill
+                          onClick={() => {
+                            makeRequest({
+                              indexName,
+                              keyName: keyName.trim(),
+                            });
+                          }}
+                          disabled={keyName.trim().length <= 0}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.overview.generateApiKeyModal.generateButton',
+                            {
+                              defaultMessage: 'Generate API key',
+                            }
+                          )}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </>
+                  ) : (
+                    <ApiKey
+                      apiKey={apiKey}
+                      label={keyName}
+                      actions={
                         <EuiButtonIcon
-                          display="fill"
-                          iconType="copyClipboard"
-                          disabled={!isSuccess}
-                          onClick={copy}
+                          iconType="download"
+                          href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
+                          download={`${keyName}.csv`}
                         />
-                      )}
-                    </EuiCopy>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {isSuccess ? (
-                      <EuiButtonIcon
-                        display="fill"
-                        iconType="download"
-                        href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
-                        download={`${keyName}.csv`}
-                      />
-                    ) : (
-                      <EuiButtonIcon display="fill" iconType="download" disabled />
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      iconSide="left"
-                      iconType="plusInCircle"
-                      fill
-                      onClick={() => {
-                        makeRequest({
-                          indexName,
-                          keyName: keyName.trim(),
-                        });
-                      }}
-                      disabled={keyName.trim().length <= 0 || isSuccess}
-                    >
-                      Generate API Key
-                    </EuiButton>
-                  </EuiFlexItem>
+                      }
+                    />
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>

@@ -11,7 +11,7 @@ import { HttpLogic } from '../../../shared/http';
 interface APIKeyResponse {
   apiKey: {
     api_key: string;
-    expiration?: number;
+    encoded: string;
     id: string;
     name: string;
   };

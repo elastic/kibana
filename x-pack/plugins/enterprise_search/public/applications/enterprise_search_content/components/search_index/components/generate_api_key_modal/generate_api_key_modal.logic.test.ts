@@ -83,16 +83,18 @@ describe('IndicesLogic', () => {
         GenerateApiKeyLogic.actions.apiSuccess({
           apiKey: {
             api_key: 'some-api-key-123123',
+            encoded: 'encoded-api-key123123==',
             id: 'api_key_id',
             name: 'test-key-123',
           },
         });
 
         expect(GenerateApiKeyModalLogic.values).toEqual({
-          apiKey: 'some-api-key-123123',
+          apiKey: 'encoded-api-key123123==',
           data: {
             apiKey: {
               api_key: 'some-api-key-123123',
+              encoded: 'encoded-api-key123123==',
               id: 'api_key_id',
               name: 'test-key-123',
             },
@@ -124,16 +126,18 @@ describe('IndicesLogic', () => {
         GenerateApiKeyLogic.actions.apiSuccess({
           apiKey: {
             api_key: 'some-api-key-123123',
+            encoded: 'encoded-api-key123123==',
             id: 'api_key_id',
             name: 'test-key-123',
           },
         });
 
         expect(GenerateApiKeyModalLogic.values).toEqual({
-          apiKey: 'some-api-key-123123',
+          apiKey: 'encoded-api-key123123==',
           data: {
             apiKey: {
               api_key: 'some-api-key-123123',
+              encoded: 'encoded-api-key123123==',
               id: 'api_key_id',
               name: 'test-key-123',
             },
