@@ -34,7 +34,8 @@ export interface IScopedSearchSessionsClient {
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => Promise<SavedObject<SearchSessionSavedObjectAttributes> | undefined>;
-  get: (sessionId: string) => Promise<SavedObject<SearchSessionSavedObjectAttributes>>;
+  get: (sessionId: string) =>
+    Promise<SavedObject<SearchSessionSavedObjectAttributes>>;
   find: (options: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SearchSessionsFindResponse>;
   update: (
     sessionId: string,
