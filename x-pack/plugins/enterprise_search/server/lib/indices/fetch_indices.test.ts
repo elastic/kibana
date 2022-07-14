@@ -62,6 +62,7 @@ describe('fetchIndices lib function', () => {
         health: 'green',
         name: 'search-regular-index',
         status: 'open',
+        alias: false,
         total: {
           docs: {
             count: 100,
@@ -88,7 +89,7 @@ describe('fetchIndices lib function', () => {
     });
   });
 
-  it('should return index with aliases', async () => {
+  it('should return index with unique aliases', async () => {
     const aliasedIndexResponse = {
       'index-without-prefix': {
         ...regularIndexResponse['search-regular-index'],
@@ -97,10 +98,17 @@ describe('fetchIndices lib function', () => {
           'search-double-aliased': {},
         },
       },
+      'second-index': {
+        ...regularIndexResponse['search-regular-index'],
+        aliases: {
+          'search-aliased': {},
+        },
+      },
     };
     const aliasedStatsResponse = {
       indices: {
         'index-without-prefix': { ...regularIndexStatsResponse.indices['search-regular-index'] },
+        'second-index': { ...regularIndexStatsResponse.indices['search-regular-index'] },
       },
     };
 
@@ -113,6 +121,7 @@ describe('fetchIndices lib function', () => {
         health: 'green',
         name: 'search-aliased',
         status: 'open',
+        alias: true,
         total: {
           docs: {
             count: 100,
@@ -128,6 +137,7 @@ describe('fetchIndices lib function', () => {
         health: 'green',
         name: 'search-double-aliased',
         status: 'open',
+        alias: true,
         total: {
           docs: {
             count: 100,
@@ -160,6 +170,7 @@ describe('fetchIndices lib function', () => {
         health: undefined,
         name: 'search-regular-index',
         status: undefined,
+        alias: false,
         total: {
           docs: {
             count: 0,
