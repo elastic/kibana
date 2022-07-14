@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { OsqueryResponseActionParamsForm } from './osquery_response_action_type';
 
 // @ts-expect-error update types

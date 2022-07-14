@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ResponseActionType, ResponseActionValue } from '../rules/response_action_field';
+import type { ResponseActionValue } from '../rules/response_action_field';
 
 export interface ResponseActionFormProps {
   items: ResponseActionValue[];
