@@ -3141,6 +3141,36 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/cases/{caseId}/user_actions:
+    get:
+      summary: Returns all user activity for a case in the default space.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      deprecated: true
+      operationId: getCaseActivityDefaultSpace
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_activity_response_properties'
+              examples:
+                getCaseActivityResponse:
+                  $ref: '#/components/examples/get_case_activity_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
       summary: Creates a case.
@@ -6288,6 +6318,37 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/user_actions:
+    get:
+      summary: Returns all user activity for a case.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      deprecated: true
+      operationId: getCaseActivity
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_activity_response_properties'
+              examples:
+                getCaseActivityResponse:
+                  $ref: '#/components/examples/get_case_activity_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -6743,6 +6804,200 @@ components:
         - owner
         - type
         - version
+    actions:
+      type: string
+      enum:
+        - add
+        - create
+        - delete
+        - push_to_service
+        - update
+      example: create
+    action_types:
+      type: string
+      description: The type of action.
+      enum:
+        - create_case
+        - comment
+        - connector
+        - delete_case
+        - description
+        - pushed
+        - tags
+        - title
+        - status
+        - settings
+        - severity
+      example: create_case
+    user_activity_response_properties:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/actions'
+        action_id:
+          type: string
+          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+        case_id:
+          type: string
+          example: 22df07d0-03b1-11ed-920c-974bfa104448
+        comment_id:
+          type: string
+          example: 578608d0-03b1-11ed-920c-974bfa104448
+        created_at:
+          type: string
+          format: date-time
+          example: '2022-05-13T09:16:17.416Z'
+        created_by:
+          type: object
+          properties:
+            email:
+              type: string
+              example: null
+            full_name:
+              type: string
+              example: null
+            username:
+              type: string
+              example: elastic
+        owner:
+          $ref: '#/components/schemas/owners'
+        payload:
+          type: object
+          properties:
+            comment:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  example: A new comment.
+                owner:
+                  $ref: '#/components/schemas/owners'
+                type:
+                  type: string
+                  example: user
+            connector:
+              type: object
+              properties:
+                fields:
+                  description: >-
+                    An object containing the connector fields. To create a case
+                    without a connector, specify null. If you want to omit any
+                    individual field, specify null as its value.
+                  nullable: true
+                  type: object
+                  properties:
+                    caseId:
+                      description: The case identifier for Swimlane connectors.
+                      type: string
+                    category:
+                      description: >-
+                        The category of the incident for ServiceNow ITSM and
+                        ServiceNow SecOps connectors.
+                      type: string
+                    destIp:
+                      description: >-
+                        A comma-separated list of destination IPs for ServiceNow
+                        SecOps connectors.
+                      type: string
+                    impact:
+                      description: >-
+                        The effect an incident had on business for ServiceNow
+                        ITSM connectors.
+                      type: string
+                    issueType:
+                      description: The type of issue for Jira connectors.
+                      type: string
+                    issueTypes:
+                      description: The type of incident for IBM Resilient connectors.
+                      type: array
+                      items:
+                        type: number
+                    malwareHash:
+                      description: >-
+                        A comma-separated list of malware hashes for ServiceNow
+                        SecOps connectors.
+                      type: string
+                    malwareUrl:
+                      description: >-
+                        A comma-separated list of malware URLs for ServiceNow
+                        SecOps connectors.
+                      type: string
+                    parent:
+                      description: >-
+                        The key of the parent issue, when the issue type is
+                        sub-task for Jira connectors.
+                      type: string
+                    priority:
+                      description: >-
+                        The priority of the issue for Jira and ServiceNow SecOps
+                        connectors.
+                      type: string
+                    severity:
+                      description: >-
+                        The severity of the incident for ServiceNow ITSM
+                        connectors.
+                      type: string
+                    severityCode:
+                      description: >-
+                        The severity code of the incident for IBM Resilient
+                        connectors.
+                      type: number
+                    sourceIp:
+                      description: >-
+                        A comma-separated list of source IPs for ServiceNow
+                        SecOps connectors.
+                      type: string
+                    subcategory:
+                      description: >-
+                        The subcategory of the incident for ServiceNow ITSM
+                        connectors.
+                      type: string
+                    urgency:
+                      description: >-
+                        The extent to which the incident resolution can be
+                        delayed for ServiceNow ITSM connectors.
+                      type: string
+                  example: null
+                id:
+                  description: >-
+                    The identifier for the connector. To create a case without a
+                    connector, use `none`.
+                  type: string
+                  example: none
+                name:
+                  description: >-
+                    The name of the connector. To create a case without a
+                    connector, use `none`.
+                  type: string
+                  example: none
+                type:
+                  $ref: '#/components/schemas/connector_types'
+            description:
+              type: string
+            owner:
+              $ref: '#/components/schemas/owners'
+            settings:
+              type: object
+              properties:
+                syncAlerts:
+                  type: boolean
+                  example: true
+            severity:
+              $ref: '#/components/schemas/severity_property'
+            status:
+              $ref: '#/components/schemas/status'
+            tags:
+              type: array
+              items:
+                type: string
+              example:
+                - tag-1
+            title:
+              type: string
+          additionalProperties: true
+          nullable: true
+        type:
+          $ref: '#/components/schemas/action_types'
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
@@ -7140,6 +7395,51 @@ components:
         pushed_by: null
         updated_at: null
         updated_by: null
+    get_case_activity_response:
+      summary: Retrieves all activity for a case
+      value:
+        - created_at: '2022-07-14T20:11:24.947Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          owner: cases
+          action: create
+          payload:
+            description: A case description
+            title: Case title 1
+            tags:
+              - tag 1
+            connector:
+              name: none
+              type: .none
+              fields: null
+              id: none
+            settings:
+              syncAlerts: true
+            owner: cases
+            severity: low
+            status: open
+          type: create_case
+          action_id: 22fd3e30-03b1-11ed-920c-974bfa104448
+          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+          comment_id: null
+        - created_at: '2022-07-14T20:12:53.354Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          owner: cases
+          action: create
+          payload:
+            comment:
+              type: user
+              owner: cases
+              comment: A new comment
+          type: comment
+          action_id: 57af14a0-03b1-11ed-920c-974bfa104448
+          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+          comment_id: 578608d0-03b1-11ed-920c-974bfa104448
 security:
   - basicAuth: []
   - apiKeyAuth: []

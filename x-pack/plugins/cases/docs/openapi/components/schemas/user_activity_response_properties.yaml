@@ -1,0 +1,74 @@
+type: object
+properties:
+  action:
+    $ref: 'actions.yaml'
+  action_id:
+    type: string
+    example: 22fd3e30-03b1-11ed-920c-974bfa104448
+  case_id:
+    type: string
+    example: 22df07d0-03b1-11ed-920c-974bfa104448
+  comment_id:
+    type: string
+    example: 578608d0-03b1-11ed-920c-974bfa104448
+  created_at:
+    type: string
+    format: date-time
+    example: 2022-05-13T09:16:17.416Z
+  created_by:
+    type: object
+    properties:
+      email:
+        type: string
+        example: null
+      full_name:
+        type: string
+        example: null
+      username: 
+        type: string
+        example: elastic
+  owner:
+    $ref: 'owners.yaml'
+  payload:
+    type: object
+    properties:
+      comment: 
+        type: object
+        properties:
+          comment:
+            type: string
+            example: A new comment.
+          owner:
+            $ref: 'owners.yaml'
+          type: 
+            type: string
+            example: user
+      connector: 
+        type: object
+        properties:
+          $ref: 'connector_properties.yaml'
+      description:
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        type: object
+        properties:
+          syncAlerts:
+            type: boolean
+            example: true
+      severity:
+        $ref: 'severity_property.yaml'
+      status: 
+        $ref: 'status.yaml'
+      tags: 
+        type: array
+        items:
+          type: string
+        example: ["tag-1"]
+      title:
+        type: string
+    additionalProperties: true
+    nullable: true
+  type: 
+    $ref: 'action_types.yaml'
