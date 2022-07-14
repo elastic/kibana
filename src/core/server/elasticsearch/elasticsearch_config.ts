@@ -13,6 +13,7 @@ import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
+import type { IElasticsearchConfig, ElasticsearchSslConfig } from '@kbn/core-elasticsearch-server';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -20,7 +21,6 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 export const DEFAULT_API_VERSION = 'master';
 
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
-type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
 /**
  * Validation schema for elasticsearch service config. It can be reused when plugins allow users
@@ -270,9 +270,9 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
 
 /**
  * Wrapper of config schema.
- * @public
+ * @internal
  */
-export class ElasticsearchConfig {
+export class ElasticsearchConfig implements IElasticsearchConfig {
   /**
    * @internal
    * Only valid in dev mode. Skip the valid connection check during startup. The connection check allows
@@ -381,10 +381,7 @@ export class ElasticsearchConfig {
    * are required when `xpack.ssl.verification_mode` in Elasticsearch is set to
    * either `certificate` or `full`.
    */
-  public readonly ssl: Pick<
-    SslConfigSchema,
-    Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>
-  > & { certificateAuthorities?: string[] };
+  public readonly ssl: ElasticsearchSslConfig;
 
   /**
    * Header names and values to send to Elasticsearch with every request. These

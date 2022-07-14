@@ -52,12 +52,12 @@ import type {
   HttpServiceStart,
 } from '@kbn/core-http-server';
 import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import {
+import { configSchema as elasticsearchConfigSchema } from './elasticsearch';
+import type {
   ElasticsearchServiceSetup,
-  configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
-} from './elasticsearch';
+} from '@kbn/core-elasticsearch-server';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -117,16 +117,15 @@ export type { CoreId } from '@kbn/core-base-common-internal';
 
 export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
 export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from './elasticsearch';
+export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  NodesVersionCompatibility,
   ElasticsearchConfigPreboot,
-  PollEsNodesVersionOptions,
   ElasticsearchRequestHandlerContext,
-} from './elasticsearch';
-export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,

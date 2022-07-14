@@ -23,3 +23,12 @@ export type {
   ElasticsearchClientSslConfig,
   ElasticsearchClientConfig,
 } from './client';
+
+export type {
+  ElasticsearchConfigPreboot,
+  ElasticsearchServicePreboot,
+  ElasticsearchServiceStart,
+  ElasticsearchServiceSetup,
+} from './contracts';
+export type { IElasticsearchConfig, ElasticsearchSslConfig } from './elasticsearch_config';
+export type { ElasticsearchRequestHandlerContext } from './request_handler_context';

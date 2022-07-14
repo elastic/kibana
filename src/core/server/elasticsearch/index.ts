@@ -14,14 +14,10 @@ export type {
   PollEsNodesVersionOptions,
 } from './version_check/ensure_es_version';
 export type {
-  ElasticsearchServicePreboot,
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-  ElasticsearchConfigPreboot,
 } from './types';
 export { getRequestDebugMeta, getErrorMessage } from './client';
 export { pollEsNodesVersion } from './version_check/ensure_es_version';
@@ -31,4 +27,3 @@ export {
   PRODUCT_RESPONSE_HEADER,
 } from './supported_server_response_check';
 export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
-export type { ElasticsearchRequestHandlerContext } from './elasticsearch_route_handler_context';

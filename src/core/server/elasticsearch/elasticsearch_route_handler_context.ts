@@ -7,16 +7,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type {
+  IScopedClusterClient,
+  ElasticsearchRequestHandlerContext,
+} from '@kbn/core-elasticsearch-server';
 import type { InternalElasticsearchServiceStart } from './types';
-
-/**
- * Core's `elasticsearch` request handler context.
- * @public
- */
-export interface ElasticsearchRequestHandlerContext {
-  client: IScopedClusterClient;
-}
 
 /**
  * The {@link UiSettingsRequestHandlerContext} implementation.
