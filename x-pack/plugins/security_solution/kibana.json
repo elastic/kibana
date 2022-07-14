@@ -42,7 +42,8 @@
     "home",
     "telemetry",
     "dataViewFieldEditor",
-    "osquery"
+    "osquery",
+    "savedObjectsTaggingOss"
   ],
   "server": true,
   "ui": true,
