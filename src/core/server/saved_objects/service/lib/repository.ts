@@ -11,7 +11,10 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
+import {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+} from '@kbn/core-elasticsearch-server-internal';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   ISavedObjectsPointInTimeFinder,

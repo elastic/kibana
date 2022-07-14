@@ -16,7 +16,7 @@ import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
-} from '../elasticsearch/elasticsearch_config';
+} from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 
 const createGlobalConfig = ({

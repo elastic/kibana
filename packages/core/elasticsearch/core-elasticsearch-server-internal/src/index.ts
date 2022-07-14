@@ -7,8 +7,8 @@
  */
 
 export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema } from './elasticsearch_config';
-export { ElasticsearchConfig } from './elasticsearch_config';
+export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
+export type { ElasticsearchConfigType } from './elasticsearch_config';
 export type {
   NodesVersionCompatibility,
   PollEsNodesVersionOptions,

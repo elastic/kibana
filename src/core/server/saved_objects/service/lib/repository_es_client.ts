@@ -9,7 +9,7 @@
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { retryCallCluster } from '../../../elasticsearch';
+import { retryCallCluster } from '@kbn/core-elasticsearch-server-internal';
 import { decorateEsError } from './decorate_es_error';
 
 const methods = [

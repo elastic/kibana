@@ -21,8 +21,8 @@ import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import type {

@@ -14,6 +14,10 @@ import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -21,10 +25,6 @@ import {
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
-import {
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-} from '../elasticsearch';
 import { InternalDeprecationsServiceSetup } from '../deprecations';
 import {
   SavedObjectsConfigType,
