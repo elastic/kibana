@@ -24,7 +24,17 @@ export const HostNameText = ({ hostName }: { hostName: string }) => (
 );
 
 export const ConsoleExitModalActionLogLink = memo(
-  ({ agentId, hostName, onClose }: { agentId: string; hostName: string; onClose: () => void }) => {
+  ({
+    agentId,
+    hostName,
+    onClose,
+    'data-test-subj': dataTestSubj,
+  }: {
+    agentId: string;
+    'data-test-subj'?: string;
+    hostName: string;
+    onClose: () => void;
+  }) => {
     const { getAppUrl } = useAppUrl();
     const { show: _, ...currentUrlQueryParams } = useEndpointSelector(uiQueryParams);
 
@@ -56,7 +66,11 @@ export const ConsoleExitModalActionLogLink = memo(
             hostName: <HostNameText hostName={hostName} />,
             link: (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
-              <EuiLink onClick={onClickActionLogLink} href={getAppUrl({ path: detailsRoutePath })}>
+              <EuiLink
+                data-test-subj={`${dataTestSubj}-link`}
+                onClick={onClickActionLogLink}
+                href={getAppUrl({ path: detailsRoutePath })}
+              >
                 {CONSOLE_EXIT_MODAL_INFO.actionLogLink}
               </EuiLink>
             ),

@@ -77,6 +77,13 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
       userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
       const exitModalConfirmButton = renderResult.queryByTestId('confirmModalConfirmButton');
       if (exitModalConfirmButton) {
+        const exitModal = renderResult.getByTestId('consolePageOverlay-console-exit-modal');
+        expect(exitModal).toBeTruthy();
+        const actionLogLink = renderResult.getByTestId(
+          'consolePageOverlay-console-exit-modal-link'
+        );
+        expect(actionLogLink.textContent).toEqual('Action log');
+        expect(actionLogLink.getAttribute('href')).toContain('&show=activity_log');
         userEvent.click(exitModalConfirmButton);
       }
       await waitFor(() => {

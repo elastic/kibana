@@ -34,7 +34,12 @@ export const ConsoleExitModal = memo(
         title={CONSOLE_EXIT_MODAL_INFO.title}
         maxWidth={500}
       >
-        <ConsoleExitModalActionLogLink agentId={agentId} hostName={hostName} onClose={onClose} />
+        <ConsoleExitModalActionLogLink
+          agentId={agentId}
+          hostName={hostName}
+          onClose={onClose}
+          data-test-subj={dataTestSubj}
+        />
         <EuiSpacer size="l" />
         <EuiText size="s">
           <FormattedMessage
