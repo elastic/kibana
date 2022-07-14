@@ -9,6 +9,9 @@
 import { Observable } from 'rxjs';
 import type { PluginName, ServiceStatus } from '@kbn/core-base-common';
 
+export type { ServiceStatusLevel, ServiceStatus } from '@kbn/core-base-common';
+export { ServiceStatusLevels } from '@kbn/core-base-common';
+
 /**
  * Status of core services.
  *

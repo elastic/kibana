@@ -7,14 +7,14 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from './elasticsearch_service.mock';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
 describe('isInlineScriptingEnabled', () => {
-  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    client = elasticsearchServiceMock.createElasticsearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
   });
 
   const mockSettingsValue = (settings: estypes.ClusterGetSettingsResponse) => {

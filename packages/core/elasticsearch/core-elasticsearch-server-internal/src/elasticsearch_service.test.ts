@@ -16,9 +16,6 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
-// Mocking the module to disable caching for tests
-jest.mock('../ui_settings/cache');
-
 import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
