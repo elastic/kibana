@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
-  ScopedClusterClientMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
@@ -18,7 +18,7 @@ import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import { getActionDetailsRequestHandler } from './details';
 import { NotFoundError } from '../../errors';
-import { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
+import type { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 describe('when calling the Action Details route handler', () => {

@@ -54,6 +54,7 @@ export const TableRowActions: React.FunctionComponent<{
         onClick={(event) => {
           onAddRemoveTagsClick((event.target as Element).closest('button')!);
         }}
+        disabled={!agent.active}
         key="addRemoveTags"
       >
         <FormattedMessage

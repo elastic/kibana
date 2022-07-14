@@ -10,6 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { UserActionPropertyActions } from './property_actions';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 
@@ -24,14 +25,17 @@ const props = {
   isLoading: false,
   onEdit,
   onQuote,
-  userCanCrud: true,
 };
 
 describe('UserActionPropertyActions ', () => {
   let wrapper: ReactWrapper;
 
   beforeAll(() => {
-    wrapper = mount(<UserActionPropertyActions {...props} />);
+    wrapper = mount(
+      <TestProviders>
+        <UserActionPropertyActions {...props} />
+      </TestProviders>
+    );
   });
 
   beforeEach(() => {
@@ -65,7 +69,11 @@ describe('UserActionPropertyActions ', () => {
   });
 
   it('shows the spinner when loading', async () => {
-    wrapper = mount(<UserActionPropertyActions {...props} isLoading={true} />);
+    wrapper = mount(
+      <TestProviders>
+        <UserActionPropertyActions {...props} isLoading={true} />
+      </TestProviders>
+    );
     expect(
       wrapper.find('[data-test-subj="user-action-title-loading"]').first().exists()
     ).toBeTruthy();
@@ -82,14 +90,22 @@ describe('UserActionPropertyActions ', () => {
       deleteConfirmlabel: 'confirm delete me',
     };
     it('shows the delete button', () => {
-      const renderResult = render(<UserActionPropertyActions {...deleteProps} />);
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       expect(renderResult.getByTestId('property-actions-trash')).toBeTruthy();
     });
 
     it('shows a confirm dialog when the delete button is clicked', () => {
-      const renderResult = render(<UserActionPropertyActions {...deleteProps} />);
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       userEvent.click(renderResult.getByTestId('property-actions-trash'));
@@ -98,7 +114,11 @@ describe('UserActionPropertyActions ', () => {
     });
 
     it('closes the confirm dialog when the cancel button is clicked', () => {
-      const renderResult = render(<UserActionPropertyActions {...deleteProps} />);
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       userEvent.click(renderResult.getByTestId('property-actions-trash'));
@@ -109,7 +129,11 @@ describe('UserActionPropertyActions ', () => {
     });
 
     it('calls onDelete when the confirm is pressed', () => {
-      const renderResult = render(<UserActionPropertyActions {...deleteProps} />);
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
       userEvent.click(renderResult.getByTestId('property-actions-trash'));

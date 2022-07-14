@@ -114,6 +114,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_legacy_metric/README.md[expressionLegacyMetricVis]
+|Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
 |Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
@@ -504,7 +508,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
-|Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
+|Lens is a visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]

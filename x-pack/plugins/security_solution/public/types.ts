@@ -32,8 +32,12 @@ import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
+import type {
+  SavedObjectsTaggingApi,
+  SavedObjectTaggingOssPluginStart,
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -47,7 +51,8 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import { LandingPages } from './landing_pages';
+import type { LandingPages } from './landing_pages';
+import type { CloudSecurityPosture } from './cloud_security_posture';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -82,10 +87,15 @@ export interface StartPlugins {
   security: SecurityPluginSetup;
 }
 
+export interface StartPluginsDependencies extends StartPlugins {
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
+}
+
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
     apm: ApmBase;
+    savedObjectsTagging?: SavedObjectsTaggingApi;
   };
 
 export interface PluginSetup {
@@ -114,6 +124,7 @@ export interface SubPlugins {
   timelines: Timelines;
   management: Management;
   landingPages: LandingPages;
+  cloudSecurityPosture: CloudSecurityPosture;
 }
 
 // TODO: find a better way to defined these types
@@ -130,4 +141,5 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
+  cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
 }

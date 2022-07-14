@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { ConsoleTestSetup, getConsoleTestSetup } from '../../mocks';
-import { ConsoleProps } from '../../types';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { ConsoleTestSetup } from '../../mocks';
+import { getConsoleTestSetup } from '../../mocks';
+import type { ConsoleProps } from '../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -81,24 +82,26 @@ describe('When entering data into the Console input', () => {
     render();
     enterCommand('cmd2 ', { inputOnly: true });
 
-    expect(getFooterText()).toEqual('Hint: cmd2 --file [--ext --bad]');
+    expect(getFooterText()).toEqual('cmd2 --file [--ext --bad]');
   });
 
   it('should display hint when an unknown command is typed', () => {
     render();
     enterCommand('abc ', { inputOnly: true });
 
-    expect(getFooterText()).toEqual('Hint: unknown command abc');
+    expect(getFooterText()).toEqual('Unknown command abc');
   });
 
-  it('should display the input history popover when UP key is pressed', async () => {
+  // FIXME:PT uncomment once task OLM task #4384 is implemented
+  it.skip('should display the input history popover when UP key is pressed', async () => {
     render();
     await showInputHistoryPopover();
 
     expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
   });
 
-  describe('and when the command input history popover is opened', () => {
+  // FIXME:PT uncomment once task OLM task #4384 is implemented
+  describe.skip('and when the command input history popover is opened', () => {
     const renderWithInputHistory = async (inputText: string = '') => {
       render();
       enterCommand('help');
@@ -233,10 +236,11 @@ describe('When entering data into the Console input', () => {
       expect(getUserInputText()).toEqual('c');
       expect(getRightOfCursorText()).toEqual('md1 ');
 
-      expect(getFooterText()).toEqual('Hint: cmd1 ');
+      expect(getFooterText()).toEqual('cmd1 ');
     });
 
-    it('should return original cursor position if input history is closed with no selection', async () => {
+    // FIXME:PT uncomment once task OLM task #4384 is implemented
+    it.skip('should return original cursor position if input history is closed with no selection', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
 
       typeKeyboardKey('release');
@@ -261,7 +265,8 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('elease');
     });
 
-    it('should reset cursor position to default (at end) if a selection is done from input history', async () => {
+    // FIXME:PT uncomment once task OLM task #4384 is implemented
+    it.skip('should reset cursor position to default (at end) if a selection is done from input history', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
 
       typeKeyboardKey('release');

@@ -38,7 +38,7 @@
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
     "xpack.aiops": [
-      "packages/ml/aiops_utils",
+      "packages/ml/aiops_components",
       "plugins/aiops"
     ],
     "xpack.ml": ["plugins/ml"],

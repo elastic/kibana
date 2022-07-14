@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../http';
 import { IKibanaMigrator } from '../migrations';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 export const registerMigrateRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   migratorPromise: Promise<IKibanaMigrator>
 ) => {
   router.post(

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesNotificationParams } from '../legacy_types';
+import type { LegacyRulesNotificationParams } from '../legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyExtractRuleId } from './legacy_extract_rule_id';
 

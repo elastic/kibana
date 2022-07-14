@@ -1122,6 +1122,55 @@ paths:
                         type: string
               required:
                 - agents
+  /agents/bulk_update_agent_tags:
+    post:
+      summary: Agents - Bulk update tags
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    error:
+                      type: string
+                  required:
+                    - success
+      operationId: bulk-update-agent-tags
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agents:
+                  oneOf:
+                    - type: string
+                      description: KQL query string, can be empty
+                    - type: array
+                      items:
+                        type: string
+                      description: list of agent IDs
+                tagsToAdd:
+                  type: array
+                  items:
+                    type: string
+                tagsToRemove:
+                  type: array
+                  items:
+                    type: string
+                batchSize:
+                  type: number
+              required:
+                - agents
   /agent_policies:
     get:
       summary: Agent policies - List
@@ -2508,6 +2557,8 @@ components:
             type: string
             enum:
               - encrypted_saved_object_encryption_key_required
+        package_verification_key_id:
+          type: string
       required:
         - isReady
         - missing_requirements

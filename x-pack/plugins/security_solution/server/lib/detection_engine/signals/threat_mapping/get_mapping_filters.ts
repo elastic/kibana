@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 interface MustExist {
   bool: { must: Array<{ exists: { field: string } }> };

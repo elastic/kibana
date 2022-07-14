@@ -19,18 +19,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 
-import { FieldsData } from '../types';
+import type { FieldsData } from '../types';
 
-import {
+import type {
   BrowserField,
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import { HostRisk } from '../../../../risk_score/containers';
+import type { HostRisk } from '../../../../risk_score/containers';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;

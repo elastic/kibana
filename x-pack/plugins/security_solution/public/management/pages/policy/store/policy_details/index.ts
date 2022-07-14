@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PolicyDetailsState } from '../../types';
-import { ImmutableReducer } from '../../../../../common/store';
-import { AppAction } from '../../../../../common/store/actions';
-import { Immutable } from '../../../../../../common/endpoint/types';
+import type { PolicyDetailsState } from '../../types';
+import type { ImmutableReducer } from '../../../../../common/store';
+import type { AppAction } from '../../../../../common/store/actions';
+import type { Immutable } from '../../../../../../common/endpoint/types';
 
 export { policyDetailsMiddlewareFactory } from './middleware';
 export { policyDetailsReducer, initialPolicyDetailsState } from './reducer';

@@ -12,7 +12,7 @@ import { CasesContextProps } from '../../components/cases_context';
 export type GetCasesContextPropsInternal = CasesContextProps;
 export type GetCasesContextProps = Omit<
   CasesContextProps,
-  'externalReferenceAttachmentTypeRegistry'
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >;
 
 const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = lazy(
@@ -21,8 +21,9 @@ const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = laz
 
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   children,
   releasePhase,
@@ -32,8 +33,9 @@ const CasesProviderLazyWrapper = ({
       <CasesProviderLazy
         value={{
           externalReferenceAttachmentTypeRegistry,
+          persistableStateAttachmentTypeRegistry,
           owner,
-          userCanCrud,
+          permissions,
           features,
           releasePhase,
         }}
@@ -48,9 +50,10 @@ CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
 export const getCasesContextLazy = ({
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
 }: Pick<
   GetCasesContextPropsInternal,
-  'externalReferenceAttachmentTypeRegistry'
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >): (() => React.FC<GetCasesContextProps>) => {
   const CasesProviderLazyWrapperWithRegistry: React.FC<GetCasesContextProps> = ({
     children,
@@ -59,6 +62,7 @@ export const getCasesContextLazy = ({
     <CasesProviderLazyWrapper
       {...props}
       externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+      persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
     >
       {children}
     </CasesProviderLazyWrapper>

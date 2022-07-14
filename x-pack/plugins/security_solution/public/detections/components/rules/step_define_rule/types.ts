@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../query_bar';
 
 export interface QueryBarStepDefineRule {
   queryBar: FieldValueQueryBar;

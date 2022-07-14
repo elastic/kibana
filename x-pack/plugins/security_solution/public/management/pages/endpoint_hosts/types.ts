@@ -6,8 +6,8 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
-import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
-import {
+import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type {
   HostInfo,
   Immutable,
   HostMetadata,
@@ -18,8 +18,8 @@ import {
   HostIsolationResponse,
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import { AsyncResourceState } from '../../state';
+import type { ServerApiError } from '../../../common/types';
+import type { AsyncResourceState } from '../../state';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 
 export interface EndpointState {

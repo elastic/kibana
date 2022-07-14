@@ -7,15 +7,21 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
+import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  flashSuccessToast,
+} from '../../../../shared/flash_messages';
 
 import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
 } from '../../../api/connector_package/update_connector_configuration_api_logic';
-import { ConnectorConfiguration } from '../../../api/index/fetch_index_api_logic';
 
 type ConnectorConfigurationActions = Pick<
   Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
@@ -54,6 +60,13 @@ export const ConnectorConfigurationLogic = kea<
   },
   listeners: {
     apiError: (error) => flashAPIErrors(error),
+    apiSuccess: () =>
+      flashSuccessToast(
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
+          { defaultMessage: 'Configuration successfully updated' }
+        )
+      ),
     makeRequest: () => clearFlashMessages(),
   },
   reducers: ({ props }) => ({
