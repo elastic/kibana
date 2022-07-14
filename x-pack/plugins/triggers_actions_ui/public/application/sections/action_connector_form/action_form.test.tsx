@@ -24,6 +24,8 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
+const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
+
 const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
@@ -234,6 +236,63 @@ describe('action_form', () => {
         mutedInstanceIds: [],
       } as unknown as Rule;
 
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType.id,
+          name: 'Test',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          featureConfig: ['alerting'],
+        },
+        {
+          id: '.index',
+          name: 'Index',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          featureConfig: ['alerting'],
+        },
+        {
+          id: 'preconfigured',
+          name: 'Preconfigured only',
+          enabled: true,
+          enabledInConfig: false,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          featureConfig: ['alerting'],
+        },
+        {
+          id: 'disabled-by-config',
+          name: 'Disabled by config',
+          enabled: false,
+          enabledInConfig: false,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold',
+          featureConfig: ['alerting'],
+        },
+        {
+          id: 'disabled-by-license',
+          name: 'Disabled by license',
+          enabled: false,
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          featureConfig: ['alerting'],
+        },
+        {
+          id: '.jira',
+          name: 'Disabled by action type',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          featureConfig: ['alerting'],
+        },
+      ]);
+
       const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
         <ActionForm
@@ -246,6 +305,7 @@ describe('action_form', () => {
             state: [],
             context: [{ name: 'contextVar', description: 'context var1' }],
           }}
+          featureId="alerting"
           defaultActionGroupId={'default'}
           isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
             const recoveryActionGroupId = customRecoveredActionGroup
@@ -275,56 +335,6 @@ describe('action_form', () => {
           }
           actionTypeRegistry={actionTypeRegistry}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          actionTypes={[
-            {
-              id: actionType.id,
-              name: 'Test',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: '.index',
-              name: 'Index',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: 'preconfigured',
-              name: 'Preconfigured only',
-              enabled: true,
-              enabledInConfig: false,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: 'disabled-by-config',
-              name: 'Disabled by config',
-              enabled: false,
-              enabledInConfig: false,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'gold',
-            },
-            {
-              id: 'disabled-by-license',
-              name: 'Disabled by license',
-              enabled: false,
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'gold',
-            },
-            {
-              id: '.jira',
-              name: 'Disabled by action type',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-          ]}
         />
       );
 
@@ -349,6 +359,11 @@ describe('action_form', () => {
           .exists()
       ).toBeFalsy();
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
+      expect(loadActionTypes).toBeCalledWith(
+        expect.objectContaining({
+          featureId: 'alerting',
+        })
+      );
     });
 
     it('does not render action types disabled by config', async () => {

@@ -188,6 +188,7 @@ function getActionTypeForm(
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      featureConfig: ['alerting'],
     },
     '.server-log': {
       id: '.server-log',
@@ -196,6 +197,7 @@ function getActionTypeForm(
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      featureConfig: ['alerting'],
     },
   };
 
