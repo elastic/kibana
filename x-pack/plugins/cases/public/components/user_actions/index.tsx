@@ -91,12 +91,12 @@ export const UserActions = React.memo(
     onUpdateField,
     statusActionButton,
     useFetchAlertData,
-    userCanCrud,
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
-    const { externalReferenceAttachmentTypeRegistry } = useCasesContext();
+    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
+      useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -123,7 +123,6 @@ export const UserActions = React.memo(
         <AddComment
           id={NEW_COMMENT_ID}
           caseId={caseId}
-          userCanCrud={userCanCrud}
           ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
@@ -131,14 +130,7 @@ export const UserActions = React.memo(
           statusActionButton={statusActionButton}
         />
       ),
-      [
-        caseId,
-        userCanCrud,
-        handleUpdate,
-        handleManageMarkdownEditId,
-        statusActionButton,
-        commentRefs,
-      ]
+      [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
     );
 
     useEffect(() => {
@@ -157,7 +149,6 @@ export const UserActions = React.memo(
           commentRefs,
           manageMarkdownEditIds,
           isLoadingDescription,
-          userCanCrud,
           onUpdateField,
           handleManageMarkdownEditId,
           handleManageQuote,
@@ -167,7 +158,6 @@ export const UserActions = React.memo(
         commentRefs,
         manageMarkdownEditIds,
         isLoadingDescription,
-        userCanCrud,
         onUpdateField,
         handleManageMarkdownEditId,
         handleManageQuote,
@@ -191,11 +181,11 @@ export const UserActions = React.memo(
             const userActionBuilder = builder({
               caseData,
               externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
               userAction,
               caseServices,
               comments: caseData.comments,
               index,
-              userCanCrud,
               commentRefs,
               manageMarkdownEditIds,
               selectedOutlineCommentId,
@@ -219,10 +209,10 @@ export const UserActions = React.memo(
       [
         caseUserActions,
         externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
         caseServices,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
@@ -241,7 +231,9 @@ export const UserActions = React.memo(
       ]
     );
 
-    const bottomActions = userCanCrud
+    const { permissions } = useCasesContext();
+
+    const bottomActions = permissions.all
       ? [
           {
             username: (

@@ -101,6 +101,7 @@ export function TimeScaling({
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiSelect
+            fullWidth
             compressed
             options={Object.entries(unitSuffixesLong).map(([unit, text]) => ({
               value: unit,

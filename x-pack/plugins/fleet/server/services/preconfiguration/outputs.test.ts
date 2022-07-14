@@ -13,7 +13,11 @@ import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
-import { createOrUpdatePreconfiguredOutputs, cleanPreconfiguredOutputs } from './outputs';
+import {
+  createOrUpdatePreconfiguredOutputs,
+  cleanPreconfiguredOutputs,
+  getPreconfiguredOutputFromConfig,
+} from './outputs';
 
 jest.mock('../agent_policy_update');
 jest.mock('../output');
@@ -62,6 +66,31 @@ describe('output preconfiguration', () => {
         },
       ];
     });
+  });
+
+  it('should generate a preconfigured output if elasticsearch.hosts is set in the config', async () => {
+    expect(
+      getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://elasticsearc:9201'] },
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "ca_sha256": undefined,
+          "hosts": Array [
+            "http://elasticsearc:9201",
+          ],
+          "id": "fleet-default-output",
+          "is_default": true,
+          "is_default_monitoring": true,
+          "is_preconfigured": true,
+          "name": "default",
+          "type": "elasticsearch",
+        },
+      ]
+    `);
   });
 
   it('should create preconfigured output that does not exists', async () => {

@@ -35,6 +35,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('Loads the app with actions but not alerting privilege', () => {
+      before(async () => {
+        await security.testUser.setRoles(['only_actions_role']);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('Loads the Alerts page but with error', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const headingText = await pageObjects.triggersActionsUI.getRulesListTitle();
+        expect(headingText).to.be('No permissions to create rules');
+      });
+    });
+
     describe('Loads the app', () => {
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');

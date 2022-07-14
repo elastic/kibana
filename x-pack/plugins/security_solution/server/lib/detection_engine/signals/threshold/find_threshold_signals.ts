@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
-import {
+import type {
   ThresholdNormalized,
+  TimestampOverride,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BuildRuleMessage } from '../rule_messages';
+import type { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
-import {
+import type {
   ThresholdMultiBucketAggregationResult,
   ThresholdBucket,
   ThresholdSingleBucketAggregationResult,
@@ -39,11 +40,12 @@ interface FindThresholdSignalsParams {
   inputIndexPattern: string[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
-  filter: unknown;
+  filter: ESBoolQuery;
   threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
-  timestampOverride: TimestampOverrideOrUndefined;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverrideOrUndefined;
 }
 
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
@@ -63,8 +65,9 @@ export const findThresholdSignals = async ({
   filter,
   threshold,
   buildRuleMessage,
-  timestampOverride,
   runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: FindThresholdSignalsParams): Promise<{
   buckets: ThresholdBucket[];
   searchDurations: string[];
@@ -85,21 +88,22 @@ export const findThresholdSignals = async ({
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
         aggregations: buildThresholdMultiBucketAggregation({
           threshold,
-          timestampField: timestampOverride != null ? timestampOverride : TIMESTAMP,
+          timestampField: primaryTimestamp,
           sortKeys,
         }),
-        searchAfterSortId: undefined,
-        timestampOverride,
         index: inputIndexPattern,
+        searchAfterSortIds: undefined,
         from,
         to,
         services,
         logger,
-        // @ts-expect-error refactor to pass type explicitly instead of unknown
         filter,
         pageSize: 0,
         sortOrder: 'desc',
         buildRuleMessage,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
 
       const searchResultWithAggs = searchResult as ThresholdMultiBucketAggregationResult;
@@ -121,22 +125,22 @@ export const findThresholdSignals = async ({
     const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
       aggregations: buildThresholdSingleBucketAggregation({
         threshold,
-        timestampField: timestampOverride != null ? timestampOverride : TIMESTAMP,
+        timestampField: primaryTimestamp,
       }),
-      searchAfterSortId: undefined,
-      timestampOverride,
+      searchAfterSortIds: undefined,
       index: inputIndexPattern,
       from,
       to,
       services,
       logger,
-      // @ts-expect-error refactor to pass type explicitly instead of unknown
       filter,
       pageSize: 0,
       sortOrder: 'desc',
       buildRuleMessage,
       trackTotalHits: true,
       runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
     const searchResultWithAggs = searchResult as ThresholdSingleBucketAggregationResult;

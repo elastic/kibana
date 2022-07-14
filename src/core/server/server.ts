@@ -29,10 +29,17 @@ import {
   ExecutionContextService,
   executionContextConfig,
 } from '@kbn/core-execution-context-server-internal';
+import { PrebootService } from '@kbn/core-preboot-server-internal';
+import { ContextService } from '@kbn/core-http-context-server-internal';
+import {
+  HttpService,
+  config as httpConfig,
+  cspConfig,
+  externalUrlConfig,
+} from '@kbn/core-http-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { UiSettingsService } from './ui_settings';
@@ -44,19 +51,17 @@ import { CapabilitiesService } from './capabilities';
 import { StatusService } from './status/status_service';
 
 import { config as elasticsearchConfig } from './elasticsearch';
-import { config as httpConfig, cspConfig, externalUrlConfig } from './http';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
-import { ContextService } from './context';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
-import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -208,9 +213,13 @@ export class Server {
 
     await this.plugins.preboot(corePreboot);
 
-    httpPreboot.registerRouteHandlerContext(coreId, 'core', (() => {
-      return new PrebootCoreRouteHandlerContext(corePreboot);
-    }) as any);
+    httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      () => {
+        return new PrebootCoreRouteHandlerContext(corePreboot);
+      }
+    );
 
     this.coreApp.preboot(corePreboot, uiPlugins);
 
@@ -413,9 +422,13 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req, res) => {
-      return new CoreRouteHandlerContext(this.coreStart!, req);
-    });
+    coreSetup.http.registerRouteHandlerContext<RequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      (context, req) => {
+        return new CoreRouteHandlerContext(this.coreStart!, req);
+      }
+    );
   }
 
   public setupCoreConfig() {

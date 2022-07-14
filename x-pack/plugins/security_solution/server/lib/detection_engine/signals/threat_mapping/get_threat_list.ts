@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import {
+import type {
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,

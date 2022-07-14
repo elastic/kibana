@@ -1211,6 +1211,14 @@ module.exports = {
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
       },
+      overrides: [
+        {
+          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          rules: {
+            '@typescript-eslint/consistent-type-imports': 'error',
+          },
+        },
+      ],
     },
     {
       files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
@@ -1632,6 +1640,7 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
@@ -1762,23 +1771,12 @@ module.exports = {
       },
     },
 
-    {
-      files: ['packages/kbn-type-summarizer/**/*.ts'],
-      rules: {
-        'no-bitwise': 'off',
-      },
-    },
-
     /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */
     {
       files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
+      rules: require('eslint-config-prettier').rules,
     },
     /**
      * Enterprise Search Prettier override

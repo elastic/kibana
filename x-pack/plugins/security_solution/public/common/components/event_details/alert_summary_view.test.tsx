@@ -10,7 +10,7 @@ import { waitFor, render, act } from '@testing-library/react';
 
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';

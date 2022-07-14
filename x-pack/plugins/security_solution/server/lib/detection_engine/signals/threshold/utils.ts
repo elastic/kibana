@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
 } from '../../../../../common/detection_engine/schemas/common';

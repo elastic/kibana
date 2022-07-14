@@ -6,27 +6,27 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   AggregationsCardinalityAggregate,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type { ThresholdSignalHistory, BulkCreate, WrapHits, SignalSource } from '../types';
-import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
-import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { ThresholdBucket } from './types';
+import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { ThresholdBucket } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   buckets: ThresholdBucket[];

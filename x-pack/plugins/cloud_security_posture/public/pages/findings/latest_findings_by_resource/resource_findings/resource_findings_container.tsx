@@ -17,7 +17,7 @@ import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcr
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
+import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
 import {
   getFindingsPageSizeInfo,
   addFilter,
@@ -37,6 +37,7 @@ const getDefaultQuery = ({
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query,
   filters,
+  sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
   pageSize: 10,
 });
@@ -77,6 +78,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       pageSize: urlQuery.pageSize,
       pageIndex: urlQuery.pageIndex,
     }),
+    sort: urlQuery.sort,
     query: baseEsQuery.query,
     resourceId: params.resourceId,
     enabled: !baseEsQuery.error,
@@ -138,8 +140,11 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 pageIndex: urlQuery.pageIndex,
                 totalItemCount: resourceFindings.data?.total || 0,
               })}
-              setTableOptions={({ page }) =>
-                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              sorting={{
+                sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+              }}
+              setTableOptions={({ page, sort }) =>
+                setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
               }
               onAddFilter={(field, value, negate) =>
                 setUrlQuery({
