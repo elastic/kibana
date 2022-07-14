@@ -31,8 +31,6 @@ export const useStyles = () => {
 
     const dataInfo: CSSObject = {
       marginBottom: size.xs,
-      display: 'flex',
-      alignItems: 'center',
       height: '18px',
       fontSize: size.l,
       fontWeight: font.weight.bold,

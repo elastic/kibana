@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// Default URL used to download Elastic Agent
-export const DEFAULT_DOWNLOAD_SOURCE = 'https://artifacts.elastic.co';
+// Default source URI used to download Elastic Agent
+export const DEFAULT_DOWNLOAD_SOURCE_URI =
+  'https://artifacts.elastic.co/downloads/beats/elastic-agent';
 
 export const DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE = 'ingest-download-sources';
 
