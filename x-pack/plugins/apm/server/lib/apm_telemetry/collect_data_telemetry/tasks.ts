@@ -49,7 +49,7 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry } from '../types';
+import { APMTelemetry, APMPerService } from '../types';
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
@@ -1188,6 +1188,12 @@ export const tasks: TelemetryTask[] = [
                         size: 3,
                       },
                     },
+                    availability_zone: {
+                      terms: {
+                        field: CLOUD_AVAILABILITY_ZONE,
+                        size: 3,
+                      },
+                    },
                   },
                 },
               },
@@ -1195,22 +1201,30 @@ export const tasks: TelemetryTask[] = [
           },
         },
       });
-      const data: Record<string, Record<string, Array<string | null>>> = {};
+      const data: APMPerService = {};
       const envBuckets = response.aggregations?.environments.buckets ?? [];
-      envBuckets.forEach((bucket) => {
-        const env = bucket.key;
-        const serviceBuckets = bucket.service_names?.buckets ?? [];
-        serviceBuckets.forEach((bucket2) => {
-          const name = bucket.key;
-          const fullServiceName = env + '_' + name;
-          data[fullServiceName] = {};
-          data[fullServiceName].cloud_regions =
-            bucket2.cloud_region?.buckets.map((inner) => inner.key as string) ??
-            [];
-          data[fullServiceName].cloud_provider =
-            bucket2.cloud_provider?.buckets.map(
-              (inner) => inner.key as string
-            ) ?? [];
+      envBuckets.forEach((envBucket) => {
+        const env = envBucket.key;
+        const serviceBuckets = envBucket.service_names?.buckets ?? [];
+        serviceBuckets.forEach((serviceBucket) => {
+          const name = serviceBucket.key;
+          const fullServiceName = env + '~' + name;
+          data[fullServiceName] = {
+            cloud: {
+              availability_zones:
+                serviceBucket.availability_zone?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+              regions:
+                serviceBucket.cloud_region?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+              providers:
+                serviceBucket.cloud_provider?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+            },
+          };
         });
       });
       return {

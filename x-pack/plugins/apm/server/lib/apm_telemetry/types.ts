@@ -24,6 +24,17 @@ export interface AggregatedTransactionsCounts {
   transaction_count: number;
 }
 
+export type APMPerService = Record<
+  string,
+  {
+    cloud: {
+      availability_zones: string[];
+      regions: string[];
+      providers: string[];
+    };
+  }
+>;
+
 export interface APMUsage {
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
@@ -133,7 +144,7 @@ export interface APMUsage {
   service_groups: {
     kuery_fields: string[];
   };
-  per_service: Record<string, Record<string, Array<string | null>>>;
+  per_service: APMPerService;
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
@@ -148,7 +159,8 @@ export interface APMUsage {
     | 'indices_stats'
     | 'cardinality'
     | 'environments'
-    | 'service_groups',
+    | 'service_groups'
+    | 'per_service',
     { took: { ms: number } }
   >;
 }
