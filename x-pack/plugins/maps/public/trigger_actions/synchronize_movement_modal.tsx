@@ -15,7 +15,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { synchronizeMovement } from '../embeddable/synchronize_movement';
+import { mapEmbeddablesSingleton } from '../embeddable/map_embeddables_singleton';
 
 interface Props {
   onClose: () => void;
@@ -23,7 +23,7 @@ interface Props {
 
 export class SynchronizeMovementModal extends Component<Props> {
   _renderSwitches() {
-    const mapPanels = synchronizeMovement.getMapPanels();
+    const mapPanels = mapEmbeddablesSingleton.getMapPanels();
 
     const synchronizedPanels = mapPanels.filter((mapPanel) => {
       return mapPanel.getIsMovementSynchronized();
