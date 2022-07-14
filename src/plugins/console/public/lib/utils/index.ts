@@ -13,6 +13,7 @@ import type {
   RequestResult,
 } from '../../application/hooks/use_send_current_request/send_request';
 import type { DevToolsVariable } from '../../application/components';
+import { DEFAULT_VARIABLES } from '../../../common/constants';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -117,6 +118,8 @@ export const replaceVariables = (
   requests: RequestArgs['requests'],
   variables: DevToolsVariable[]
 ) => {
+  // Default variables will be used in the default request to demonstrate variables in action
+  variables = [...DEFAULT_VARIABLES, ...variables];
   const urlRegex = /(\${\w+})/g;
   const bodyRegex = /("\${\w+}")/g;
   return requests.map((req) => {

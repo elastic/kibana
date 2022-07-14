@@ -18,7 +18,6 @@ import { sendRequest } from './send_request';
 import { track } from './track';
 import { replaceVariables } from '../../../lib/utils';
 import { StorageKeys } from '../../../services';
-import { DEFAULT_VARIABLES } from '../../../../common/constants';
 
 export const useSendCurrentRequest = () => {
   const {
@@ -31,8 +30,7 @@ export const useSendCurrentRequest = () => {
   return useCallback(async () => {
     try {
       const editor = registry.getInputEditor();
-      // Default variables will be used in the default request to demonstrate variables in action
-      const variables = [...DEFAULT_VARIABLES, ...storage.get(StorageKeys.VARIABLES, [])];
+      const variables = storage.get(StorageKeys.VARIABLES, []);
       let requests = await editor.getRequestsInRange();
       requests = replaceVariables(requests, variables);
       if (!requests.length) {

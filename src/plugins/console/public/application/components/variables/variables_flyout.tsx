@@ -163,13 +163,16 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
           <p>
             <FormattedMessage
               id="console.variablesPage.descriptionText"
-              defaultMessage="Define variables and use them in your requests in the form of {variableName}."
+              defaultMessage="Define variables and use them in your requests in the form of {variable}."
               values={{
-                variableName: (
+                variable: (
                   <code>
                     <FormattedMessage
                       id="console.variablesPage.descriptionText.variableNameText"
-                      defaultMessage="${variableName}"
+                      defaultMessage="{variableName}"
+                      values={{
+                        variableName: '${variableName}',
+                      }}
                     />
                   </code>
                 ),
