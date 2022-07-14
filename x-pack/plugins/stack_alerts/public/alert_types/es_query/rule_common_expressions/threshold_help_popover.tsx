@@ -84,7 +84,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
     return (
       <EuiPopover
         id="thresholdHelpPopover"
-        anchorPosition="leftCenter"
+        anchorPosition="upLeft"
         button={
           <EuiButtonIcon
             onClick={this._togglePopover}
