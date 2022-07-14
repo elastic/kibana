@@ -137,12 +137,15 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     metrics.setGlobalMeterProvider(meterProvider);
 
     const otlpConfig = this.config.opentelemetry?.metrics.otlp;
-    const url = otlpConfig?.url ?? process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT;
+    const url =
+      otlpConfig?.url ??
+      process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ??
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
     if (url) {
       // Add OTLP exporter
       // Set Authorization headers
       // OTLPMetricExporter internally will look at OTEL_EXPORTER_OTLP_METRICS_HEADERS env variable
-      // if `headers` are not present in the kibana config file
+      // if `headers` is not present in the kibana config file
       const metadata = new grpc.Metadata();
       if (otlpConfig.headers) {
         for (const [key, value] of Object.entries(otlpConfig.headers)) {
