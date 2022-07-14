@@ -122,7 +122,7 @@ describe('createUpdateFilterReferencesAction', () => {
     await executeActionFn({
       trigger,
       fromDataView: 'D1',
-      toDataView: null,
+      toDataView: undefined,
       usedDataViews: ['D1', 'D2'],
     });
 
@@ -150,7 +150,7 @@ describe('createUpdateFilterReferencesAction', () => {
     await executeActionFn({
       trigger,
       fromDataView: 'D1',
-      toDataView: null,
+      toDataView: undefined,
       usedDataViews: ['D1'],
       defaultDataView: 'D2',
     });

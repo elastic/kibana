@@ -196,7 +196,6 @@ export function LayerPanels(
 
             action?.execute({
               trigger,
-              toDataView: null,
               fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
               usedDataViews: layerDatasource
                 .getLayers(layerDatasourceState)

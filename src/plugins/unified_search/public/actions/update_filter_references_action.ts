@@ -15,9 +15,9 @@ export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta
   /** The initial data view of the editable layer **/
   fromDataView: string;
   /** New data view of the editable layer
-   *  @description null - in case of removing the layer
+   *  @description undefined - in case of removing the layer
    */
-  toDataView: string | null;
+  toDataView?: string | undefined;
   /** List of all Data Views used in all layers **/
   usedDataViews: string[] | [];
   /** Index to use by default if all layers are cleared **/
@@ -48,7 +48,19 @@ export function createUpdateFilterReferencesAction(filterManager: FilterManager)
       }
 
       if (toDataView) {
-        filterManager.updateDataViewReferences(filters, fromDataView, toDataView);
+        filterManager.setFilters(filters.map((filter) => {
+          if (filter.meta.index === fromDataView) {
+            return {
+              ...filter,
+              meta: {
+                ...filter.meta,
+                index: toDataView,
+              },
+            };
+          } else {
+            return filter;
+          }
+        }));
       }
     },
   });
