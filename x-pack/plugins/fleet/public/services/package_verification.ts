@@ -9,6 +9,8 @@ import type { FleetErrorResponse } from '../../common';
 
 import type { PackageInfo, PackageListItem } from '../types';
 
+import type { RequestError } from '../hooks';
+
 import { ExperimentalFeaturesService } from '.';
 
 export function isPackageUnverified(
@@ -27,5 +29,5 @@ export function isPackageUnverified(
   return isPackageVerificationEnabled && isUnverified;
 }
 
-export const isVerificationError = (err?: FleetErrorResponse) =>
-  err?.attributes?.type === 'verification_failed';
+export const isVerificationError = (err?: FleetErrorResponse | RequestError) =>
+  err && 'attributes' in err && err.attributes?.type === 'verification_failed';
