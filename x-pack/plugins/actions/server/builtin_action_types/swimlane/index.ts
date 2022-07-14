@@ -26,7 +26,7 @@ import {
 } from './schema';
 import { createExternalService } from './service';
 import { api } from './api';
-
+import { AlertingConnectorFeature, CasesConnectorFeature } from '../../../common';
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -51,7 +51,7 @@ export function getActionType(
     name: i18n.translate('xpack.actions.builtin.swimlaneTitle', {
       defaultMessage: 'Swimlane',
     }),
-    allowedFeatureIds: ['alerting', 'cases'],
+    featureConfig: [AlertingConnectorFeature.id, CasesConnectorFeature.id],
     validate: {
       config: schema.object(SwimlaneServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),

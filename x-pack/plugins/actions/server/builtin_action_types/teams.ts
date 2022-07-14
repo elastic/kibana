@@ -18,6 +18,7 @@ import { isOk, promiseResult, Result } from './lib/result_type';
 import { request } from './lib/axios_utils';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { AlertingConnectorFeature } from '../../common';
 
 export type TeamsActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type TeamsActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -58,7 +59,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.teamsTitle', {
       defaultMessage: 'Microsoft Teams',
     }),
-    allowedFeatureIds: ['alerting'],
+    featureConfig: [AlertingConnectorFeature.id],
     validate: {
       secrets: schema.object(secretsSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

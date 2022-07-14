@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export interface ConnectorFeatureConfig {
+interface ConnectorFeatureConfig {
   /**
    * Unique identifier for this feature.
    */
@@ -20,28 +20,28 @@ export interface ConnectorFeatureConfig {
   name: string;
 }
 
-export const AvailableConnectorFeatures: ConnectorFeatureConfig[] = [
-  {
-    id: 'alerting',
-    name: i18n.translate('xpack.actions.availableConnectorFeatures.alerting', {
-      defaultMessage: 'Alerting',
-    }),
-  },
-  {
-    id: 'cases',
-    name: i18n.translate('xpack.actions.availableConnectorFeatures.cases', {
-      defaultMessage: 'Cases',
-    }),
-  },
-];
+export const AlertingConnectorFeature: ConnectorFeatureConfig = {
+  id: 'alerting',
+  name: i18n.translate('xpack.actions.availableConnectorFeatures.alerting', {
+    defaultMessage: 'Alerting',
+  }),
+};
 
-export const AllAvailableConnectorFeatureIds: string[] = AvailableConnectorFeatures.map(
-  (config) => config.id
-);
+export const CasesConnectorFeature: ConnectorFeatureConfig = {
+  id: 'cases',
+  name: i18n.translate('xpack.actions.availableConnectorFeatures.cases', {
+    defaultMessage: 'Cases',
+  }),
+};
+
+const AllAvailableConnectorFeatures: ConnectorFeatureConfig[] = [
+  AlertingConnectorFeature,
+  CasesConnectorFeature,
+];
 
 export function areValidFeatures(ids: string[]) {
   return ids.every(
     (id: string) =>
-      !!AvailableConnectorFeatures.find((config: ConnectorFeatureConfig) => config.id === id)
+      !!AllAvailableConnectorFeatures.find((config: ConnectorFeatureConfig) => config.id === id)
   );
 }

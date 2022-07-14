@@ -113,7 +113,7 @@ export interface ActionType<
   name: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
-  allowedFeatureIds: string[];
+  featureConfig: string[];
   validate?: {
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;

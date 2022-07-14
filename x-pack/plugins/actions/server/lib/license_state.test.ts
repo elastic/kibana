@@ -61,7 +61,7 @@ describe('isLicenseValidForActionType', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
-    allowedFeatureIds: ['alerting'],
+    featureConfig: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -157,7 +157,7 @@ describe('ensureLicenseForActionType()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
-    allowedFeatureIds: ['alerting'],
+    featureConfig: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },

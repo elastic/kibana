@@ -19,6 +19,7 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { request } from './lib/axios_utils';
 import { renderMustacheString } from '../lib/mustache_renderer';
+import { AlertingConnectorFeature } from '../../common';
 
 // config definition
 export enum WebhookMethods {
@@ -88,7 +89,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),
-    allowedFeatureIds: ['alerting'],
+    featureConfig: [AlertingConnectorFeature.id],
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

@@ -124,19 +124,22 @@ export class ActionTypeRegistry {
     }
 
     if (
-      actionType.allowedFeatureIds.length === 0 ||
-      !areValidFeatures(actionType.allowedFeatureIds)
+      !actionType.featureConfig ||
+      actionType.featureConfig.length === 0 ||
+      !areValidFeatures(actionType.featureConfig)
     ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
-          defaultMessage: 'Invalid feature ids "{ids}" for connector type "{connectorTypeId}".',
+          defaultMessage:
+            'Invalid feature configuration "{ids}" for connector type "{connectorTypeId}".',
           values: {
             connectorTypeId: actionType.id,
-            ids: actionType.allowedFeatureIds.join(','),
+            ids: actionType.featureConfig.join(','),
           },
         })
       );
     }
+
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
@@ -190,7 +193,7 @@ export class ActionTypeRegistry {
   public list(featureId?: string): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) =>
-        featureId ? actionType.allowedFeatureIds.includes(featureId) : true
+        featureId ? actionType.featureConfig.includes(featureId) : true
       )
       .map(([actionTypeId, actionType]) => ({
         id: actionTypeId,

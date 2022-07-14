@@ -30,6 +30,7 @@ import {
   ExecutorSubActionCommonFieldsParams,
 } from './types';
 import * as i18n from './translations';
+import { AlertingConnectorFeature, CasesConnectorFeature } from '../../../common';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
@@ -55,7 +56,7 @@ export function getActionType(
     id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
-    allowedFeatureIds: ['alerting', 'cases'],
+    featureConfig: [AlertingConnectorFeature.id, CasesConnectorFeature.id],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
