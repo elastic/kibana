@@ -27,7 +27,7 @@ export class BlobStorageService {
     );
   }
 
-  public createBlobStore(args?: BlobStorageSettings) {
+  public createBlobStorage(args?: BlobStorageSettings): BlobStorage {
     return this.createESBlobStorage({ ...args?.esFixedSizeIndex });
   }
 }

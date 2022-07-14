@@ -49,7 +49,7 @@ export class File<M = unknown> implements IFile {
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
-    this.blobStorage = this.blobStorageService.createBlobStore(
+    this.blobStorage = this.blobStorageService.createBlobStorage(
       fileKindDescriptor.blobStoreSettings
     );
   }

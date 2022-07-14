@@ -67,7 +67,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   public async upload(
     src: Readable,
-    { transforms }: { transforms?: Transform[] } = {}
+    { transforms }: { transforms?: Transform[]; id?: string } = {}
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
