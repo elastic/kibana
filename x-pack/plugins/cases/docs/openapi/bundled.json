@@ -2699,6 +2699,326 @@
         }
       ]
     },
+    "/api/cases/{caseId}": {
+      "get": {
+        "summary": "Retrieves information about a case in the default space.",
+        "operationId": "getCaseDefaultSpace",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "in": "query",
+            "name": "includeComments",
+            "description": "Determines whether case comments are returned.",
+            "deprecated": true,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "closed_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "example": null
+                    },
+                    "closed_by": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string"
+                        },
+                        "full_name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "nullable": true,
+                      "example": null
+                    },
+                    "comments": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/alert_comment_response_properties"
+                          },
+                          {
+                            "$ref": "#/components/schemas/user_comment_response_properties"
+                          }
+                        ]
+                      },
+                      "example": []
+                    },
+                    "connector": {
+                      "type": "object",
+                      "properties": {
+                        "fields": {
+                          "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "caseId": {
+                              "description": "The case identifier for Swimlane connectors.",
+                              "type": "string"
+                            },
+                            "category": {
+                              "description": "The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "destIp": {
+                              "description": "A comma-separated list of destination IPs for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "impact": {
+                              "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            },
+                            "issueType": {
+                              "description": "The type of issue for Jira connectors.",
+                              "type": "string"
+                            },
+                            "issueTypes": {
+                              "description": "The type of incident for IBM Resilient connectors.",
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              }
+                            },
+                            "malwareHash": {
+                              "description": "A comma-separated list of malware hashes for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "malwareUrl": {
+                              "description": "A comma-separated list of malware URLs for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "parent": {
+                              "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
+                              "type": "string"
+                            },
+                            "priority": {
+                              "description": "The priority of the issue for Jira and ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "severity": {
+                              "description": "The severity of the incident for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            },
+                            "severityCode": {
+                              "description": "The severity code of the incident for IBM Resilient connectors.",
+                              "type": "number"
+                            },
+                            "sourceIp": {
+                              "description": "A comma-separated list of source IPs for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "subcategory": {
+                              "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            },
+                            "urgency": {
+                              "description": "The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            }
+                          },
+                          "example": null
+                        },
+                        "id": {
+                          "description": "The identifier for the connector. To create a case without a connector, use `none`.",
+                          "type": "string",
+                          "example": "none"
+                        },
+                        "name": {
+                          "description": "The name of the connector. To create a case without a connector, use `none`.",
+                          "type": "string",
+                          "example": "none"
+                        },
+                        "type": {
+                          "$ref": "#/components/schemas/connector_types"
+                        }
+                      }
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2022-05-13T09:16:17.416Z"
+                    },
+                    "created_by": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "full_name": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "elastic"
+                        }
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "A case description."
+                    },
+                    "duration": {
+                      "type": "integer",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
+                      "example": 120
+                    },
+                    "external_service": {
+                      "type": "object",
+                      "properties": {
+                        "connector_id": {
+                          "type": "string"
+                        },
+                        "connector_name": {
+                          "type": "string"
+                        },
+                        "external_id": {
+                          "type": "string"
+                        },
+                        "external_title": {
+                          "type": "string"
+                        },
+                        "external_url": {
+                          "type": "string"
+                        },
+                        "pushed_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pushed_by": {
+                          "type": "object",
+                          "properties": {
+                            "email": {
+                              "type": "string"
+                            },
+                            "full_name": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            }
+                          },
+                          "nullable": true,
+                          "example": null
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
+                    },
+                    "owner": {
+                      "$ref": "#/components/schemas/owners"
+                    },
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "syncAlerts": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    },
+                    "severity": {
+                      "$ref": "#/components/schemas/severity_property"
+                    },
+                    "status": {
+                      "$ref": "#/components/schemas/status"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "tag-1"
+                      ]
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Case title 1"
+                    },
+                    "totalAlerts": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalComment": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "example": null
+                    },
+                    "updated_by": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string"
+                        },
+                        "full_name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "nullable": true,
+                      "example": null
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "WzUzMiwxXQ=="
+                    }
+                  }
+                },
+                "examples": {
+                  "getCaseResponse": {
+                    "$ref": "#/components/examples/get_case_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case in the default space.",
@@ -6219,6 +6539,329 @@
         }
       ]
     },
+    "/s/{spaceId}/api/cases/{caseId}": {
+      "get": {
+        "summary": "Retrieves information about a case.",
+        "operationId": "getCase",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "query",
+            "name": "includeComments",
+            "description": "Determines whether case comments are returned.",
+            "deprecated": true,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "closed_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "example": null
+                    },
+                    "closed_by": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string"
+                        },
+                        "full_name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "nullable": true,
+                      "example": null
+                    },
+                    "comments": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/alert_comment_response_properties"
+                          },
+                          {
+                            "$ref": "#/components/schemas/user_comment_response_properties"
+                          }
+                        ]
+                      },
+                      "example": []
+                    },
+                    "connector": {
+                      "type": "object",
+                      "properties": {
+                        "fields": {
+                          "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "caseId": {
+                              "description": "The case identifier for Swimlane connectors.",
+                              "type": "string"
+                            },
+                            "category": {
+                              "description": "The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "destIp": {
+                              "description": "A comma-separated list of destination IPs for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "impact": {
+                              "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            },
+                            "issueType": {
+                              "description": "The type of issue for Jira connectors.",
+                              "type": "string"
+                            },
+                            "issueTypes": {
+                              "description": "The type of incident for IBM Resilient connectors.",
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              }
+                            },
+                            "malwareHash": {
+                              "description": "A comma-separated list of malware hashes for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "malwareUrl": {
+                              "description": "A comma-separated list of malware URLs for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "parent": {
+                              "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
+                              "type": "string"
+                            },
+                            "priority": {
+                              "description": "The priority of the issue for Jira and ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "severity": {
+                              "description": "The severity of the incident for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            },
+                            "severityCode": {
+                              "description": "The severity code of the incident for IBM Resilient connectors.",
+                              "type": "number"
+                            },
+                            "sourceIp": {
+                              "description": "A comma-separated list of source IPs for ServiceNow SecOps connectors.",
+                              "type": "string"
+                            },
+                            "subcategory": {
+                              "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            },
+                            "urgency": {
+                              "description": "The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.",
+                              "type": "string"
+                            }
+                          },
+                          "example": null
+                        },
+                        "id": {
+                          "description": "The identifier for the connector. To create a case without a connector, use `none`.",
+                          "type": "string",
+                          "example": "none"
+                        },
+                        "name": {
+                          "description": "The name of the connector. To create a case without a connector, use `none`.",
+                          "type": "string",
+                          "example": "none"
+                        },
+                        "type": {
+                          "$ref": "#/components/schemas/connector_types"
+                        }
+                      }
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2022-05-13T09:16:17.416Z"
+                    },
+                    "created_by": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "full_name": {
+                          "type": "string",
+                          "example": null
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "elastic"
+                        }
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "A case description."
+                    },
+                    "duration": {
+                      "type": "integer",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
+                      "example": 120
+                    },
+                    "external_service": {
+                      "type": "object",
+                      "properties": {
+                        "connector_id": {
+                          "type": "string"
+                        },
+                        "connector_name": {
+                          "type": "string"
+                        },
+                        "external_id": {
+                          "type": "string"
+                        },
+                        "external_title": {
+                          "type": "string"
+                        },
+                        "external_url": {
+                          "type": "string"
+                        },
+                        "pushed_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pushed_by": {
+                          "type": "object",
+                          "properties": {
+                            "email": {
+                              "type": "string"
+                            },
+                            "full_name": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            }
+                          },
+                          "nullable": true,
+                          "example": null
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
+                    },
+                    "owner": {
+                      "$ref": "#/components/schemas/owners"
+                    },
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "syncAlerts": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    },
+                    "severity": {
+                      "$ref": "#/components/schemas/severity_property"
+                    },
+                    "status": {
+                      "$ref": "#/components/schemas/status"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "tag-1"
+                      ]
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Case title 1"
+                    },
+                    "totalAlerts": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalComment": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "example": null
+                    },
+                    "updated_by": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string"
+                        },
+                        "full_name": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "nullable": true,
+                      "example": null
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "WzUzMiwxXQ=="
+                    }
+                  }
+                },
+                "examples": {
+                  "getCaseResponse": {
+                    "$ref": "#/components/examples/get_case_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case.",
@@ -7856,6 +8499,67 @@
           "tag 1",
           "tag 2"
         ]
+      },
+      "get_case_response": {
+        "summary": "Retrieves information about a case including its comments.",
+        "value": {
+          "id": "31cdada0-02c1-11ed-85f2-4f7c222ca2fa",
+          "version": "WzM2LDFd",
+          "comments": [
+            {
+              "id": "2134c1d0-02c2-11ed-85f2-4f7c222ca2fa",
+              "version": "WzM3LDFd",
+              "type": "user",
+              "owner": "cases",
+              "comment": "A new comment",
+              "created_at": "2022-07-13T15:40:32.335Z",
+              "created_by": {
+                "email": null,
+                "full_name": null,
+                "username": "elastic"
+              },
+              "pushed_at": null,
+              "pushed_by": null,
+              "updated_at": null,
+              "updated_by": null
+            }
+          ],
+          "totalComment": 1,
+          "totalAlerts": 0,
+          "title": "Case title 1",
+          "tags": [
+            "tag 1"
+          ],
+          "settings": {
+            "syncAlerts": true
+          },
+          "owner": "cases",
+          "description": "A case description",
+          "duration": null,
+          "severity": "low",
+          "closed_at": null,
+          "closed_by": null,
+          "created_at": "2022-07-13T15:33:50.604Z",
+          "created_by": {
+            "username": "elastic",
+            "email": null,
+            "full_name": null
+          },
+          "status": "open",
+          "updated_at": "2022-07-13T15:40:32.335Z",
+          "updated_by": {
+            "full_name": null,
+            "email": null,
+            "username": "elastic"
+          },
+          "connector": {
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+            "fields": null
+          },
+          "external_service": null
+        }
       },
       "add_comment_request": {
         "summary": "Adds a comment to a case.",
