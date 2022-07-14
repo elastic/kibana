@@ -143,8 +143,13 @@ export class InternalFileService {
     );
   }
 
-  public async createSO(attributes: FileSavedObjectAttributes): Promise<FileSavedObject<unknown>> {
-    return this.soClient.create<FileSavedObjectAttributes>(this.savedObjectType, attributes);
+  public async createSO(
+    id: string,
+    attributes: FileSavedObjectAttributes
+  ): Promise<FileSavedObject<unknown>> {
+    return this.soClient.create<FileSavedObjectAttributes>(this.savedObjectType, attributes, {
+      id,
+    });
   }
 
   public async deleteSO(id: string): Promise<void> {
