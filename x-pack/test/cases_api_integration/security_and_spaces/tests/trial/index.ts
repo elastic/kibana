@@ -20,16 +20,16 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     });
 
     // Trial
-    loadTestFile(require.resolve('./cases/push_case'));
-    loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
+    // loadTestFile(require.resolve('./cases/push_case'));
+    // loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
     loadTestFile(require.resolve('./configure'));
     // sub privileges are only available with a license above basic
-    loadTestFile(require.resolve('./delete_sub_privilege'));
+    // loadTestFile(require.resolve('./delete_sub_privilege'));
 
     // Common
-    loadTestFile(require.resolve('../common'));
+    // loadTestFile(require.resolve('../common'));
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
-    loadTestFile(require.resolve('../common/migrations'));
+    // loadTestFile(require.resolve('../common/migrations'));
   });
 };
