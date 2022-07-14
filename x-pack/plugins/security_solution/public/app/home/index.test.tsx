@@ -7,6 +7,7 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { Query, Filter } from '@kbn/es-query';
 import { HomePage } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -26,7 +27,6 @@ import {
   setRelativeRangeDatePicker,
 } from '../../common/store/inputs/actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Filter } from '@kbn/es-query';
 import { createStore } from '../../common/store';
 import type { TimeRange, UrlInputsModel } from '../../common/store/inputs/model';
 import { SecurityPageName } from '../types';
@@ -226,7 +226,7 @@ describe('HomePage', () => {
       expect(mockDispatch).toHaveBeenCalledWith(
         inputsActions.setFilterQuery({
           id: 'global',
-          ...savedQueryData.attributes.query,
+          ...(savedQueryData.attributes.query as Query),
         })
       );
       expect(setSearchBarFilter).toHaveBeenCalledWith({
