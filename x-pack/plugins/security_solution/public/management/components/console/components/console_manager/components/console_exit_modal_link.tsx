@@ -15,6 +15,14 @@ import { CONSOLE_EXIT_MODAL_INFO } from '../translations';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { uiQueryParams } from '../../../../../pages/endpoint_hosts/store/selectors';
 
+export const HostNameText = ({ hostName }: { hostName: string }) => (
+  <EuiText size="s" style={{ maxWidth: 120, display: 'inline-flex' }}>
+    <span className="eui-textTruncate">
+      <strong>{hostName}</strong>
+    </span>
+  </EuiText>
+);
+
 export const ConsoleExitModalActionLogLink = memo(
   ({ agentId, hostName, onClose }: { agentId: string; hostName: string; onClose: () => void }) => {
     const { getAppUrl } = useAppUrl();
@@ -43,12 +51,13 @@ export const ConsoleExitModalActionLogLink = memo(
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.consolePageOverlay.exitModal.actionLogLink"
-          defaultMessage="Track the pending actions in progress in {link}."
+          defaultMessage="Pending response actions will resume. You may track the actions progress on {hostName}'s {link}."
           values={{
+            hostName: <HostNameText hostName={hostName} />,
             link: (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiLink onClick={onClickActionLogLink} href={getAppUrl({ path: detailsRoutePath })}>
-                {CONSOLE_EXIT_MODAL_INFO.getActionLogLink(hostName)}
+                {CONSOLE_EXIT_MODAL_INFO.actionLogLink}
               </EuiLink>
             ),
           }}

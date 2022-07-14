@@ -7,6 +7,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONSOLE_EXIT_MODAL_INFO = Object.freeze({
+  cancelButtonText: i18n.translate(
+    'xpack.securitySolution.consolePageOverlay.exitModal.cancelButtonText',
+    {
+      defaultMessage: 'Close',
+    }
+  ),
   confirmButtonText: i18n.translate(
     'xpack.securitySolution.consolePageOverlay.exitModal.confirmButtonText',
     {
@@ -16,9 +22,7 @@ export const CONSOLE_EXIT_MODAL_INFO = Object.freeze({
   title: i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.title', {
     defaultMessage: 'Action is in progress',
   }),
-  getActionLogLink: (hostName: string) =>
-    i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.link', {
-      defaultMessage: 'Manage> Endpoints> {hostName}> Action log',
-      values: { hostName },
-    }),
+  actionLogLink: i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.link', {
+    defaultMessage: 'Action log',
+  }),
 });
