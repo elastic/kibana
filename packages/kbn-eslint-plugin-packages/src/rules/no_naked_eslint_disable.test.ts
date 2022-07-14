@@ -6,79 +6,137 @@
  * Side Public License, v 1.
  */
 
-const { RuleTester } = require('eslint');
-const rule = require('./no_naked_eslint_disable');
-const dedent = require('dedent');
+import dedent from 'dedent';
+import { RuleTester } from 'eslint';
+import { NoNakedESLintDisableRule } from './no_naked_eslint_disable';
 
-const ruleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 2018,
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-});
+const fmt = (str: TemplateStringsArray) => dedent(str);
 
-ruleTester.run('@kbn/eslint/no_naked_eslint_disable', rule, {
-  valid: [
-    {
-      code: dedent`
-        // eslint-disable no-var
-      `,
+const tsTester = [
+  '@typescript-eslint/parser',
+  new RuleTester({
+    parser: require.resolve('@typescript-eslint/parser'),
+    parserOptions: {
+      sourceType: 'module',
+      ecmaVersion: 2018,
+      ecmaFeatures: {
+        jsx: true,
+      },
     },
-    {
-      code: dedent`
-        // eslint-disable-next-line no-use-before-define
-      `,
-    },
-    {
-      code: dedent`
-        // eslint-disable-line no-use-before-define
-      `,
-    },
-    {
-      code: dedent`
-        /* eslint-disable no-var */
-      `,
-    },
-    {
-      code: dedent`
-        /* eslint-disable no-console, no-control-regex*/
-      `,
-    },
-  ],
+  }),
+] as const;
 
-  invalid: [
-    {
-      code: dedent`
-        /* eslint-disable */
-        const a = 1;
-      `,
-      errors: [
+const babelTester = [
+  '@babel/eslint-parser',
+  new RuleTester({
+    parser: require.resolve('@babel/eslint-parser'),
+    parserOptions: {
+      sourceType: 'module',
+      ecmaVersion: 2018,
+      requireConfigFile: false,
+      babelOptions: {
+        presets: ['@kbn/babel-preset/node_preset'],
+      },
+    },
+  }),
+] as const;
+
+for (const [name, tester] of [tsTester, babelTester]) {
+  describe(name, () => {
+    tester.run('@kbn/packages/no_naked_eslint_disable', NoNakedESLintDisableRule, {
+      valid: [
         {
-          line: 1,
-          message:
-            'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+          filename: 'foo.ts',
+          code: fmt`
+            // eslint-disable no-var
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            // eslint-disable-next-line no-use-before-define
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            // eslint-disable-line no-use-before-define
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            /* eslint-disable no-var */
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            /* eslint-disable no-console, no-control-regex*/
+          `,
         },
       ],
-      output: dedent`
-        const a = 1;
-      `,
-    },
-    {
-      code: dedent`
-        // eslint-disable-next-line
-      `,
-      errors: [
+
+      invalid: [
         {
-          line: 1,
-          message:
-            'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+          filename: 'foo.ts',
+          code: fmt`
+            /* eslint-disable */
+            const a = 1;
+          `,
+          errors: [
+            {
+              line: 1,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: '\nconst a = 1;',
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            // eslint-disable-next-line
+            const a = 1;
+          `,
+          errors: [
+            {
+              line: 1,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: `\nconst a = 1;`,
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            /* eslint-disable */
+          `,
+          errors: [
+            {
+              line: 1,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: '',
+        },
+        {
+          filename: 'foo.ts',
+          code: fmt`
+            // eslint-disable-next-line
+          `,
+          errors: [
+            {
+              line: 1,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: '',
         },
       ],
-      output: '',
-    },
-  ],
-});
+    });
+  });
+}

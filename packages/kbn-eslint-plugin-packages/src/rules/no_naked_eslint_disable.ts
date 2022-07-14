@@ -36,18 +36,22 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
         const commentVal = comment.value.trim();
         const nakedESLintRegexResult = commentVal.match(nakedEslintDisableRegex);
         const ruleName = nakedESLintRegexResult?.groups?.ruleName;
-        const cStart = comment?.loc?.start;
+        const cStartLine = comment?.loc?.start?.line;
         const cEnd = comment?.loc?.end;
 
-        if (!cStart || !cEnd) {
+        if (!cStartLine || !cEnd) {
           return;
         }
 
         if (nakedESLintRegexResult && !ruleName) {
           context.report({
-            node,
+            //node,
             loc: {
-              start: cStart,
+              start: {
+                line: cStartLine,
+                // we need to set this to -1 otherwise /* eslint-disable ones won't be reported
+                column: -1,
+              },
               end: cEnd,
             },
             messageId: NAKED_DISABLE_MSG_ID,
