@@ -72,6 +72,7 @@ import {
   CopyToDashboardAction,
   DashboardCapabilities,
   DashboardLoadedEvent,
+  PERFORMANCE_METRIC_EVENT_SCHEMA,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
@@ -80,6 +81,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
+import { DASHBOARD_LOADED_EVENT } from './events';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -141,23 +143,12 @@ export class DashboardPlugin
 
   private registerEvents(analytics: CoreSetup['analytics']) {
     analytics.registerEventType<DashboardLoadedEvent>({
-      eventType: 'dashboard-data-loaded',
+      eventType: DASHBOARD_LOADED_EVENT,
       schema: {
-        timeToData: {
-          type: 'long',
-          _meta: { description: 'Time all embeddables took to load data' },
-        },
-        timeToDone: {
-          type: 'long',
-          _meta: { description: 'Time all embeddables took to load data' },
-        },
+        ...PERFORMANCE_METRIC_EVENT_SCHEMA,
         status: {
           type: 'keyword',
-          _meta: { description: 'Error  ok' },
-        },
-        numOfPanels: {
-          type: 'long',
-          _meta: { description: 'Number of panels loaded' },
+          _meta: { description: 'Dashborad load status' },
         },
       },
     });

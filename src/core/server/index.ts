@@ -656,3 +656,5 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
+
+export { KIBANA_LOADED_EVENT } from '../utils';

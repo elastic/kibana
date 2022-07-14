@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginConfigDescriptor, KIBANA_LOADED_EVENT } from '@kbn/core/server';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
@@ -27,7 +27,7 @@ const fullStoryConfigSchema = schema.object({
     schema.maybe(schema.string())
   ),
   eventTypesAllowlist: schema.arrayOf(schema.string(), {
-    defaultValue: ['Loaded Kibana'],
+    defaultValue: [KIBANA_LOADED_EVENT],
   }),
 });
 

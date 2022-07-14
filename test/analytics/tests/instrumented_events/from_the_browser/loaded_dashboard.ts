@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const getEvents = async (count: number, options?: GetEventsOptions) =>
       ebtUIHelper.getEvents(count, {
-        eventTypes: ['dashboard-data-loaded'],
+        eventTypes: [DASHBOARD_LOADED_EVENT],
         fromTimestamp,
         withTimeoutMs: 1000,
         ...options,
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const events = await getEvents(Number.MAX_SAFE_INTEGER, options);
       expect(events.length).to.be(1);
       const event = events[0];
-      expect(event.event_type).to.eql('dashboard-data-loaded');
+      expect(event.event_type).to.eql(DASHBOARD_LOADED_EVENT);
       expect(event.context.applicationId).to.be('dashboards');
       expect(event.context.page).to.be('app');
       expect(event.context.pageName).to.be('application:dashboards:app');

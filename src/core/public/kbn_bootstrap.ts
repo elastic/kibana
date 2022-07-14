@@ -9,12 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
-import { KBN_LOAD_MARKS } from './utils';
+import { KBN_LOAD_MARKS, LOAD_BOOTSTRAP_START } from './utils';
 
 /** @internal */
 export async function __kbnBootstrap__() {
   performance.mark(KBN_LOAD_MARKS, {
-    detail: 'bootstrap_started',
+    detail: LOAD_BOOTSTRAP_START,
   });
 
   const injectedMetadata = JSON.parse(

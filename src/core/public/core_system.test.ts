@@ -41,6 +41,7 @@ import {
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
+import { KIBANA_LOADED_EVENT } from './utils';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -251,7 +252,7 @@ describe('#start()', () => {
   it('reports the event Loaded Kibana and clears marks', async () => {
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
       kibana_version: '1.2.3',
       load_started: 456,
       bootstrap_started: 123,
@@ -272,7 +273,7 @@ describe('#start()', () => {
 
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
       load_started: 456,
       bootstrap_started: 123,
       kibana_version: '1.2.3',

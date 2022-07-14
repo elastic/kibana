@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { Event } from '@kbn/core/public';
+import { KIBANA_LOADED_EVENT } from '@kbn/core/utils';
 import { FtrProviderContext } from '../../../services';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -19,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let event: Event;
     before(async () => {
       await common.navigateToApp('home');
-      [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] }); // Get the loaded Kibana event
+      [event] = await ebtUIHelper.getEvents(1, { eventTypes: [KIBANA_LOADED_EVENT] }); // Get the loaded Kibana event
     });
 
     it('should have the properties provided by the "cluster info" context provider', () => {

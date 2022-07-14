@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
-export { APP_WRAPPER_CLASS } from './app_wrapper_class';
-export { KIBANA_LOADED_EVENT } from './events';
+// TODO: replace with kibana-loaded
+export const KIBANA_LOADED_EVENT = 'Loaded Kibana';

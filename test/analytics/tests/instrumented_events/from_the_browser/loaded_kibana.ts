@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { KIBANA_LOADED_EVENT } from '@kbn/core/utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../services';
 
@@ -14,14 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const browser = getService('browser');
 
-  describe('Loaded Kibana', () => {
+  describe('Loaded kibana', () => {
     beforeEach(async () => {
       await common.navigateToApp('home');
     });
 
     it('should emit the "Loaded Kibana" event', async () => {
-      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] });
-      expect(event.event_type).to.eql('Loaded Kibana');
+      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: [KIBANA_LOADED_EVENT] });
+      expect(event.event_type).to.eql(KIBANA_LOADED_EVENT);
       expect(event.properties).to.have.property('kibana_version');
       expect(event.properties.kibana_version).to.be.a('string');
       expect(event.properties).to.have.property('protocol');

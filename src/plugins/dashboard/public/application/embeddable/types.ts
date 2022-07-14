@@ -7,14 +7,10 @@
  */
 
 export * from '../../../common/types';
+import type { PerformanceMetricEvent } from '@kbn/core/public';
 
 export type DashboardLoadedEventStatus = 'done' | 'error';
 
-export interface DashboardLoadedEvent {
-  // Time from start to when data is loaded
-  timeToData: number;
-  // Time from start until render or error
-  timeToDone: number;
-  numOfPanels: number;
+export interface DashboardLoadedEvent extends PerformanceMetricEvent {
   status: DashboardLoadedEventStatus;
 }

@@ -31,7 +31,7 @@ import {
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
-import { DashboardLoadedEvent, DashboardPanelState } from './types';
+import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import {
   KibanaContextProvider,
@@ -40,6 +40,7 @@ import {
   KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
+import { DASHBOARD_LOADED_EVENT } from '../../events';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
@@ -64,6 +65,13 @@ export interface DashboardContainerServices {
   theme: CoreStart['theme'];
   http: CoreStart['http'];
   analytics?: CoreStart['analytics'];
+}
+
+export interface DashboardLoadedInfo {
+  timeToData: number;
+  timeToDone: number;
+  numOfPanels: number;
+  status: string;
 }
 
 interface IndexSignature {
@@ -155,9 +163,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
   }
 
-  private onDataLoaded(data: DashboardLoadedEvent) {
-    this.services.analytics?.reportEvent('dashboard-data-loaded', {
-      ...data,
+  private onDataLoaded(data: DashboardLoadedInfo) {
+    this.services.analytics?.reportEvent(DASHBOARD_LOADED_EVENT, {
+      duration: data.timeToDone,
+      status: data.status,
+      key1: 'time-to-data',
+      value1: data.timeToData,
+      key2: 'num-of-panels',
+      value2: data.timeToData,
     });
   }
 
