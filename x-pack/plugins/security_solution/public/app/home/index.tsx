@@ -24,23 +24,13 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
-import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
-import { useInitSearchBarFromUrlParams } from '../../common/hooks/search_bar/use_init_search_bar_url_params';
-import { useInitTimerangeFromUrlParam } from '../../common/hooks/search_bar/use_init_timerange_url_params';
-import { useUpdateTimerangeOnPageChange } from '../../common/hooks/search_bar/use_update_timerange_on_page_change';
+import { useUrlState } from '../../common/hooks/use_url_state';
 
 interface HomePageProps {
   children: React.ReactNode;
   onAppLeave: (handler: AppLeaveHandler) => void;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
-
-const useUrlState = () => {
-  useSyncGlobalQueryString();
-  useInitSearchBarFromUrlParams();
-  useInitTimerangeFromUrlParam();
-  useUpdateTimerangeOnPageChange();
-};
 
 const HomePageComponent: React.FC<HomePageProps> = ({
   children,
