@@ -33,7 +33,8 @@ export const Field = memo<Props>(
     dependencies,
     customHook,
   }: Props) => {
-    const { register, watch, control, setValue, reset, getFieldState } = useFormContext();
+    const { register, watch, control, setValue, reset, getFieldState, formState } =
+      useFormContext();
     const { locations } = useSelector(selectServiceLocationsState);
     const { space } = useKibanaSpace();
     const isEdit = useIsEditFlow();
@@ -114,6 +115,7 @@ export const Field = memo<Props>(
           {...(props
             ? props({
                 field: undefined,
+                formState,
                 setValue,
                 reset,
                 locations,

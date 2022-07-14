@@ -58,7 +58,6 @@ const getScheduleContent = (value: number) => {
       defaultMessage: 'Every {value, number} {value, plural, one {hour} other {hours}}',
       values: {
         value: value / 60,
-        hour: 'hour',
       },
     });
   } else {
