@@ -27,7 +27,7 @@ import {
 import type { CspRule, CspRuleMetadata, CspRuleTemplate } from '../../common/schemas';
 
 type CloudbeatInputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
-type BenchmarkId = CspRuleMetadata['benchmark']['id'];
+export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
 
 const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;

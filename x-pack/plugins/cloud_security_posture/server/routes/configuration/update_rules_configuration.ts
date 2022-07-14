@@ -28,6 +28,7 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
+import { BenchmarkId, getBenchmarkInputType } from '../../fleet_integration/fleet_integration';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -66,12 +67,9 @@ export const getCspRules = (
 };
 
 export const createRulesConfig = (
-  cspRules: SavedObjectsFindResponse<CspRule>
+  cspRules: SavedObjectsFindResponse<CspRule>,
+  benchmarkId: BenchmarkId
 ): CspRulesConfiguration => {
-  const benchmarkType = cspRules.saved_objects[0]?.attributes.metadata.benchmark.id;
-
-  if (!benchmarkType) throw new Error('Expected benchmark type to exists');
-
   const activatedRules = cspRules.saved_objects
     .filter((cspRule) => cspRule.attributes.enabled)
     .map((activatedRule) => activatedRule.attributes.metadata.rego_rule_id);
@@ -79,7 +77,7 @@ export const createRulesConfig = (
   const config = {
     data_yaml: {
       activated_rules: {
-        [benchmarkType]: activatedRules,
+        [benchmarkId]: activatedRules,
       } as Record<CspRuleMetadata['benchmark']['id'], string[]>,
     },
   };
@@ -117,7 +115,7 @@ export const updateAgentConfiguration = async (
   user: AuthenticatedUser | null
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
-  const rulesConfig = createRulesConfig(cspRules);
+  const rulesConfig = createRulesConfig(cspRules, getBenchmarkInputType(packagePolicy.inputs));
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
   const options = { user: user ? user : undefined };
