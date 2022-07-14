@@ -236,6 +236,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [dispatch, rightOfCursor.text]
   );
 
+  const handleOnFocus = useCallback(() => {
+    if (!isKeyInputBeingCaptured) {
+      dispatch({ type: 'addFocusToKeyCapture' });
+    }
+  }, [dispatch, isKeyInputBeingCaptured]);
+
   // Execute the command if one was ENTER'd.
   useEffect(() => {
     if (commandToExecute) {
@@ -251,6 +257,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         className={focusClassName}
         onClick={handleTypingAreaClick}
         ref={containerRef}
+        tabIndex={0}
+        onFocus={handleOnFocus}
       >
         <EuiFlexGroup
           wrap={true}

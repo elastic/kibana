@@ -147,7 +147,7 @@ export const Console = memo<ConsoleProps>(
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
+        <ConsoleWindow {...commonProps}>
           <EuiFlexGroup
             direction="column"
             className="layout"
@@ -176,7 +176,11 @@ export const Console = memo<ConsoleProps>(
                         <HistoryOutput />
                       </div>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                    <EuiFlexItem
+                      onClick={setFocusOnInput}
+                      grow={false}
+                      className="layout-container layout-commandInput"
+                    >
                       <CommandInput prompt={prompt} focusRef={inputFocusRef} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="layout-container layout-footer">
