@@ -7,13 +7,20 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/master/ecs-base.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-faas.html
  *
  * @internal
  */
-export interface EcsBase {
-  ['@timestamp']: string;
-  labels?: Record<string, string>;
-  message?: string;
-  tags?: string[];
+export interface EcsFaas {
+  coldstart?: boolean;
+  execution?: string;
+  id?: string;
+  name?: string;
+  trigger?: Trigger;
+  version?: string;
+}
+
+interface Trigger {
+  request_id?: string;
+  type?: 'http' | 'pubsub' | 'datasource' | 'timer' | 'other';
 }

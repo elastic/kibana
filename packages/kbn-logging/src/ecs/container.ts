@@ -16,12 +16,19 @@ export interface EcsContainer {
   disk?: Disk;
   id?: string;
   image?: { name?: string; tag?: string[] };
-  labels?: Record<string, unknown>;
+  labels?: Record<string, string>;
+  memory?: { usage?: number };
   name?: string;
+  network?: Network;
   runtime?: string;
 }
 
 interface Disk {
   read?: { bytes?: number };
   write?: { bytes?: number };
+}
+
+interface Network {
+  egress?: { bytes?: number };
+  ingress?: { bytes?: number };
 }

@@ -30,6 +30,7 @@ interface IndicatorNestedFields {
 export interface EcsThreat {
   enrichments?: Enrichment[];
   indicator?: Indicator;
+  feed?: Feed;
   framework?: string;
   group?: Group;
   software?: Software;
@@ -57,6 +58,13 @@ interface Indicator extends IndicatorNestedFields {
   scanner_stats?: number;
   sightings?: number;
   type?: string;
+}
+
+interface Feed {
+  dashboard_id?: string;
+  description?: string;
+  name?: string;
+  reference?: string;
 }
 
 interface Matched {
