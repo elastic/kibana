@@ -151,6 +151,10 @@ export class SavedSearchEmbeddable
     });
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
@@ -178,7 +182,12 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      rendered: false,
+      error: undefined,
+    });
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
@@ -214,7 +223,11 @@ export class SavedSearchEmbeddable
           executionContext,
         })
       );
-      this.updateOutput({ loading: false, error: undefined });
+
+      this.updateOutput({
+        ...this.getOutput(),
+        loading: false,
+      });
 
       this.searchProps!.rows = resp.hits.hits.map((hit) =>
         buildDataTableRecord(hit, this.searchProps!.indexPattern)
@@ -223,7 +236,11 @@ export class SavedSearchEmbeddable
       this.searchProps!.isLoading = false;
     } catch (error) {
       if (!this.destroyed) {
-        this.updateOutput({ loading: false, error });
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+          error,
+        });
 
         this.searchProps!.isLoading = false;
       }
@@ -473,6 +490,11 @@ export class SavedSearchEmbeddable
         domNode
       );
     }
+
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   }
 
   public reload() {
