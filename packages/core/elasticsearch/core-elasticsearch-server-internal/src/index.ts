@@ -26,3 +26,4 @@ export {
 } from './supported_server_response_check';
 export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
 export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
+export { isInlineScriptingEnabled } from './is_scripting_enabled';

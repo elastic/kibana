@@ -57,7 +57,7 @@ import type {
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
 } from '@kbn/core-elasticsearch-server';
-import { configSchema as elasticsearchConfigSchema } from './elasticsearch';
+import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -115,8 +115,11 @@ export type {
 
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
-export type { NodesVersionCompatibility, PollEsNodesVersionOptions } from './elasticsearch';
+export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from '@kbn/core-elasticsearch-server-internal';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
