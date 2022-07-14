@@ -6,15 +6,15 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import { OsqueryResponseActionParamsForm } from './osquery_response_action_type';
 
 // @ts-expect-error update types
 // eslint-disable-next-line react/display-name
-export const getLazyOsqueryResponseActionTypeForm = (services) => (props) => {
-  const OsqueryResponseActionTypeForm = lazy(() => import('./osquery_response_action_type'));
+export const getLazyOsqueryResponseActionTypeForm = (services) => (props) =>
+  (
+    // const OsqueryResponseActionTypeForm = lazy(() => import('./osquery_response_action_type'));
 
-  return (
-    <Suspense fallback={null}>
-      <OsqueryResponseActionTypeForm {...props} />
-    </Suspense>
+    // <Suspense fallback={null}>
+    <OsqueryResponseActionParamsForm {...props} />
+    // </Suspense>
   );
-};

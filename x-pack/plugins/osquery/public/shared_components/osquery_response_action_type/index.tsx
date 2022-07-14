@@ -47,12 +47,10 @@ interface IProps {
   item: any;
   actionParams: OsqueryActionParams;
   updateAction: (key: string, value: any, index: number) => void;
-  index: number;
 }
 
-const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = (props) => {
-  const { actionParams, updateAction, index, item } = props;
-  const FORM_ID = useMemo(() => `osqueryActionParamsForm-${index}`, [index]);
+export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = (props) => {
+  const { actionParams, updateAction, item } = props;
 
   const uniqueId = useMemo(() => uuid.v4(), []);
   const { loading, disabled, permissionDenied } = useFetchStatus();
@@ -211,13 +209,19 @@ const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = (props)
         path={`${item.path}.params.query`}
         component={LiveQueryQueryField}
         componentProps={componentProps}
+        readDefaultValueOnForm={!item.isNew}
       />
       <UseField
         path={`${item.path}.params.id`}
         component={GhostFormField}
         defaultValue={uniqueId}
+        readDefaultValueOnForm={!item.isNew}
       />
-      <UseField path={`${item.path}.params.savedQueryId`} component={GhostFormField} />
+      <UseField
+        path={`${item.path}.params.savedQueryId`}
+        component={GhostFormField}
+        readDefaultValueOnForm={!item.isNew}
+      />
 
       <>
         <EuiSpacer size="m" />

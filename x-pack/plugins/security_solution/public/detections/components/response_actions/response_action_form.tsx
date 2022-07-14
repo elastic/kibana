@@ -21,15 +21,14 @@ import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/pub
 import { ResponseActionTypeForm } from './response_action_type_form';
 import type { ResponseActionFormProps } from './get_response_action_form';
 
-const ResponseActionForm = ({
-  actions,
-  supportedResponseActions,
-  updateAction,
-  addItem,
-  removeItem,
-}: ResponseActionFormProps) => {
+const supportedResponseActions = [
+  { id: '.osquery', name: 'osquery', iconClass: 'logoOsquery' },
+  // { id: '.endpointSecurity', name: 'endpointSecurity', iconClass: 'logoSecurity' },
+];
+
+export const ResponseActionForm = ({ items, addItem, removeItem }: ResponseActionFormProps) => {
   const [isAddResponseActionButtonShown, setAddResponseActionButtonShown] = useState(
-    actions.length > 0
+    items.length > 0
   );
   const addActionType = useCallback(
     (actionTypeModel) => {
@@ -110,7 +109,7 @@ const ResponseActionForm = ({
         );
       })
     );
-  }, []);
+  }, [addActionType]);
 
   return (
     <>
@@ -123,14 +122,15 @@ const ResponseActionForm = ({
         </h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {actions.map((actionItem, index: number) => {
+      {items.map((actionItem) => {
         return (
-          <ResponseActionTypeForm
-            action={actionItem}
-            index={index}
-            updateAction={updateAction}
-            onDeleteAction={onDeleteAction}
-          />
+          <div key={actionItem.id}>
+            <ResponseActionTypeForm
+              action={actionItem}
+              // updateAction={updateAction}
+              onDeleteAction={onDeleteAction}
+            />
+          </div>
         );
       })}
       {isAddResponseActionButtonShown ? renderAddResponseActionButton : renderResponseActionTypes}

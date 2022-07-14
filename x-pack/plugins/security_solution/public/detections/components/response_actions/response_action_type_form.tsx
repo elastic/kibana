@@ -20,13 +20,12 @@ import type { ResponseActionValue } from '../rules/response_action_field';
 
 interface IProps {
   action: ResponseActionValue;
-  index: number;
   updateAction: (key: string, value: any, index: number) => void;
   onDeleteAction: () => void;
 }
 
 export const ResponseActionTypeForm = React.memo((props: IProps) => {
-  const { action, index, updateAction, onDeleteAction } = props;
+  const { action, updateAction, onDeleteAction } = props;
   const { osquery } = useKibana().services;
   const [_isOpen, setIsOpen] = useState(true);
   const OsqueryForm = osquery?.OsqueryResponseActionTypeForm;
@@ -36,29 +35,24 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
     // if (action.actionTypeId === 'osquery') {
     return (
       <div>
-        <OsqueryForm
-          index={index}
-          actionParams={action.params}
-          updateAction={updateAction}
-          item={action}
-        />
+        <OsqueryForm actionParams={action.params} updateAction={updateAction} item={action} />
       </div>
     );
     // }
 
     // return <div>different</div>;
-  }, [OsqueryForm, action, index, updateAction]);
+  }, [OsqueryForm, action, updateAction]);
 
   return (
     <EuiAccordion
       initialIsOpen={true}
-      key={index}
-      id={index.toString()}
+      key={action.id}
+      id={action.id}
       onToggle={setIsOpen}
       paddingSize="l"
       className="actAccordionActionForm"
       buttonContentClassName="actAccordionActionForm__button"
-      data-test-subj={`alertActionAccordion-${index}`}
+      data-test-subj={`alertActionAccordion`}
       buttonContent={
         <EuiFlexGroup gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -93,3 +87,5 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
     </EuiAccordion>
   );
 });
+
+ResponseActionTypeForm.displayName = 'ResponseActionTypeForm';

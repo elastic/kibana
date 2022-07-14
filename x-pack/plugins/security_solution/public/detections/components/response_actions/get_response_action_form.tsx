@@ -9,9 +9,7 @@ import React, { lazy, Suspense } from 'react';
 import type { ResponseActionType, ResponseActionValue } from '../rules/response_action_field';
 
 export interface ResponseActionFormProps {
-  actions: ResponseActionValue[];
-  supportedResponseActions: ResponseActionType[] | undefined;
-  updateAction: (key: string, value: any, index: number) => void;
+  items: ResponseActionValue[];
   addItem: () => void;
   removeItem: () => void;
 }

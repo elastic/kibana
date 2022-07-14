@@ -37,6 +37,7 @@ import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
+import ResponseActionForm from '../../response_actions/response_action_form';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -92,6 +93,20 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
+    response_actions: [
+      {
+        id: '1',
+        params: {
+          query: 'select * from uptime',
+        },
+      },
+      {
+        id: '2',
+        params: {
+          query: 'select * from processes',
+        },
+      },
+    ],
   };
 
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
@@ -179,12 +194,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       <>
         <EuiSpacer />
 
-        <UseArray path="response_actions">
-          {({ items, addItem, removeItem }) => {
-            return (
-              <RuleResponseActionsField items={items} addItem={addItem} removeItem={removeItem} />
-            );
-          }}
+        <UseArray path="response_actions" initialNumberOfItems={2}>
+          {ResponseActionForm}
         </UseArray>
       </>
     ),
