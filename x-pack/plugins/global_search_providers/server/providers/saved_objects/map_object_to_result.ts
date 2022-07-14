@@ -41,8 +41,7 @@ export const mapToResult = (
   object: SavedObjectsFindResult<unknown>,
   type: SavedObjectsType
 ): GlobalSearchProviderResult => {
-  const { defaultSearchField, getInAppUrl } = type.management ?? {};
-  const getTitle = type.management?.getTitle;
+  const { defaultSearchField, getInAppUrl, getTitle } = type.management ?? {};
   if (defaultSearchField === undefined || getInAppUrl === undefined) {
     throw new Error('Trying to map an object from a type without management metadata');
   }
