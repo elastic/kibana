@@ -9,10 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
-
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -21,9 +18,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHealth,
   EuiHighlight,
-  EuiI18n,
   EuiPanel,
   EuiSelectable,
   EuiSpacer,
@@ -31,7 +26,6 @@ import {
   EuiText,
   EuiTextAlign,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -45,106 +39,9 @@ import {
 } from './constants';
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
+import { IndexStatusDetails, SearchIndexSelectableOption } from './search_index_selectable';
 
 import './engine_creation.scss';
-
-export interface SearchIndexSelectableOption {
-  label: string;
-  health?: HealthStatus;
-  status?: string;
-  alias: boolean;
-  badge: {
-    color: string;
-    icon: string;
-    label: string;
-    toolTipTitle: string;
-    toolTipContent: string;
-  };
-  disabled: boolean;
-  total: {
-    docs: {
-      count: number;
-      deleted: number;
-    };
-    store: {
-      size_in_bytes: string;
-    };
-  };
-  checked?: 'on';
-}
-
-const healthColorsMap = {
-  red: 'danger',
-  RED: 'danger',
-  green: 'success',
-  GREEN: 'success',
-  yellow: 'warning',
-  YELLOW: 'warning',
-};
-
-interface IndexStatusDetailsProps {
-  option: SearchIndexSelectableOption;
-}
-
-export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }) => (
-  <EuiFlexGroup className="entSearch__indexListItem" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiHealth color={option.health ? healthColorsMap[option.health] : ''}>
-        {option.health ?? '-'}
-      </EuiHealth>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false} data-test-subj="optionStatus">
-      <EuiI18n
-        token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.status"
-        default="{status}"
-        values={{
-          status: (
-            <span>
-              <b>Status</b>: {option.status ?? '-'}
-            </span>
-          ),
-        }}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false} data-test-subj="optionDocs">
-      <EuiI18n
-        token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.docCount"
-        default="{docsCount}"
-        values={{
-          docsCount: (
-            <span>
-              <b>Docs count</b>: {option.total?.docs?.count ?? '-'}
-            </span>
-          ),
-        }}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem data-test-subj="optionStorage">
-      <EuiI18n
-        token="xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.storage"
-        default="{storageSize}"
-        values={{
-          storageSize: (
-            <span>
-              <b>Storage size</b>: {option.total?.store?.size_in_bytes ?? '-'}
-            </span>
-          ),
-        }}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false} data-test-subj="optionStorage">
-      <EuiBadge color={option.badge.color} iconType={option.badge.icon}>
-        <EuiToolTip
-          position="left"
-          title={option.badge.toolTipTitle}
-          content={option.badge.toolTipContent}
-        >
-          <p>{option.badge.label}</p>
-        </EuiToolTip>
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: string) => {
   return (
@@ -218,6 +115,9 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
           },
         ]}
       />
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder>
         <EuiForm
           component="form"

@@ -68,6 +68,9 @@ export const ConfigureAppSearchEngine: React.FC = () => {
           },
         ]}
       />
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder paddingSize="l">
         <EuiForm
           component="form"

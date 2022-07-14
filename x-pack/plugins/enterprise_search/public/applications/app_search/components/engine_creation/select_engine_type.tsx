@@ -60,6 +60,9 @@ export const SelectEngineType: React.FC = () => {
           },
         ]}
       />
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder paddingSize="l">
         <EuiTextAlign textAlign="center">
           <EuiTitle>

@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
-import { IndexStatusDetails } from './configure_elasticsearch_engine';
+import { IndexStatusDetails } from './search_index_selectable';
 
 export const ReviewElasticsearchEngine: React.FC = () => {
   const { aliasName, name, selectedIndex, selectedIndexFormatted } = useValues(EngineCreationLogic);
@@ -59,6 +59,9 @@ export const ReviewElasticsearchEngine: React.FC = () => {
           },
         ]}
       />
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder>
         <EuiForm
           component="form"
@@ -180,15 +183,12 @@ export const ReviewElasticsearchEngine: React.FC = () => {
             >
               <EuiI18n
                 token="xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body"
-                default="{status}"
+                default={`The index you\'ve selected has a name that does not match the Enterprise Search
+                naming pattern of "search-." We will automatically create an alias for you
+                named {aliasName} and assign it to the engine, {name}.`}
                 values={{
-                  status: (
-                    <p>
-                      The index you&#39;ve selected has a name that does not match the Enterprise Search
-                      naming pattern of "search-." We will automatically create an alias for you
-                      named <b>{aliasName}</b> and assign it to the engine, <b>{name}</b>.
-                    </p>
-                  ),
+                  aliasName: <b>{aliasName}</b>,
+                  name: <b>{name}</b>,
                 }}
               />
             </EuiCallOut>
