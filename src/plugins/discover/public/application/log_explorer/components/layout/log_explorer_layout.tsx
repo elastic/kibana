@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import '../layout/discover_layout.scss';
+import '../../../main/components/layout/discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
@@ -24,23 +24,23 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverNoResults } from '../no_results';
-import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { DiscoverSidebarResponsive } from '../sidebar';
-import { DiscoverLayoutProps } from '../layout/types';
+import { DiscoverNoResults } from '../../../main/components/no_results';
+import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
+import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
+import { DiscoverLayoutProps } from '../../../main/components/layout/types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
-import { DiscoverTopNav } from '../top_nav/discover_topnav';
+import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { getResultState } from '../../utils/get_result_state';
-import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../hooks/use_saved_search';
+import { getResultState } from '../../../main/utils/get_result_state';
+import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
+import { DataMainMsg } from '../../../main/hooks/use_saved_search';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
+import { useDataState } from '../../../main/hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { hasActiveFilter } from '../layout/utils';
+import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
 
 /**

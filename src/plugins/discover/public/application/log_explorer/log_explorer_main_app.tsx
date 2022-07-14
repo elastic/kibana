@@ -9,14 +9,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
-import { LogExplorerLayout } from './log_explorer_layout';
-import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
-import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
-import { useDiscoverState } from '../../hooks/use_discover_state';
-import { useUrl } from '../../hooks/use_url';
-import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../../../services/saved_searches';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataTableRecord } from '../../../../types';
+import { LogExplorerLayout } from './components/layout/log_explorer_layout';
+import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
+import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
+import { useDiscoverState } from '../main/hooks/use_discover_state';
+import { useUrl } from '../main/hooks/use_url';
+import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/saved_searches';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { DataTableRecord } from '../../types';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 

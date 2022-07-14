@@ -17,7 +17,7 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import { DiscoverLogExplorerRoute } from './main/components/log_explorer';
+import { DiscoverLogExplorerRoute } from './log_explorer';
 
 export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
   <KibanaContextProvider services={services}>

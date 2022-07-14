@@ -23,15 +23,15 @@ import {
   SavedSearch,
   getSavedSearch,
   getSavedSearchFullPathUrl,
-} from '../../../../services/saved_searches';
-import { getState } from '../../services/discover_state';
-import { loadIndexPattern, resolveIndexPattern } from '../../utils/resolve_index_pattern';
+} from '../../services/saved_searches';
+import { getState } from '../main/services/discover_state';
+import { loadIndexPattern, resolveIndexPattern } from '../main/utils/resolve_index_pattern';
 import { LogExplorerMainApp } from './log_explorer_main_app';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../../../utils/breadcrumbs';
-import { LoadingIndicator } from '../../../../components/common/loading_indicator';
-import { DiscoverError } from '../../../../components/common/error_alert';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getUrlTracker } from '../../../../kibana_services';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { DiscoverError } from '../../components/common/error_alert';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getUrlTracker } from '../../kibana_services';
 
 const LogExplorerMainAppMemoized = memo(LogExplorerMainApp);
 
