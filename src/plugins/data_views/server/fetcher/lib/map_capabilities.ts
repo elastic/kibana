@@ -7,15 +7,15 @@
  */
 
 import { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Dictionary } from 'lodash';
-import { FieldDescriptor } from '../index_patterns_fetcher';
 import { mergeJobConfigurations } from './jobs_compatibility';
 
 /**
  * A record of capabilities (aggregations) for an index rollup job
  */
 export interface RollupIndexCapability {
-  [key: string]: { aggs?: Dictionary<FieldDescriptor>; error?: string };
+  [index: string]: { aggs?: Dictionary<Record<string, SerializableRecord>>; error?: string };
 }
 
 /**
