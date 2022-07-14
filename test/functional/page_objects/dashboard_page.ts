@@ -611,11 +611,6 @@ export class DashboardPageObject extends FtrService {
     return panels.length;
   }
 
-  public async getAllPanels() {
-    this.log.debug('getAllPanels');
-    return await this.testSubjects.findAll('embeddablePanel');
-  }
-
   public getTestVisualizations() {
     return [
       { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
