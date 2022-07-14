@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
 
 /**
