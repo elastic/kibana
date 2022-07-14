@@ -246,10 +246,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [initIsIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index, false);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
+  console.error('ANYTHING IN INDEX PATTERN?', indexPattern);
+  console.error('ANYTHING IN initIndexPattern PATTERN?', initIndexPattern);
+
   const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
   const [dataSourceRadioIdSelected, setDataSourceRadioIdSelected] = useState(
     dataView == null || dataView === '' ? INDEX_PATTERN_SELECT_ID : DATA_VIEW_SELECT_ID
   );
+  const [tempDataViewId, setTempDataViewId] = useState(dataView);
+  const [tempIndexPattern, setTempIndexPattern] = useState(index);
+
+  useEffect(() => {
+    if (dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
+      if (tempIndexPattern != null) {
+        form.setFieldValue('index', tempIndexPattern);
+      } else {
+        // form.setFieldValue('index', []);
+      }
+    } else {
+      form.setFieldValue('dataViewId', tempDataViewId);
+    }
+  }, [form, tempIndexPattern, dataSourceRadioIdSelected, tempDataViewId]);
 
   useEffect(() => {
     if (dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
@@ -457,6 +474,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [dataSourceRadioIdSelected]
   );
 
+  const onChangeSelectedDataSource = (val: string, idxPat: DataViewBase) => {
+    setTempDataViewId(val);
+    setIndexPattern(idxPat);
+  };
+
   const DataViewSelectorMemo = useMemo(() => {
     return (
       <UseField
@@ -465,7 +487,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={DataViewSelector}
         componentProps={{
           kibanaDataViews,
-          setIndexPattern,
+          onChangeSelectedDataSource,
           setIsIndexPatternLoading,
         }}
       />
@@ -518,6 +540,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             ) : (
               <CommonUseField
                 path="index"
+                onChange={(val) => setTempIndexPattern(val)}
                 config={{
                   ...schema.index,
                   labelAppend: indexModified ? (
@@ -619,6 +642,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           },
     [indexPattern]
   );
+
+  console.error('DID INDEX CHANGE', index);
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>

@@ -19,15 +19,15 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
 interface DataViewSelectorProps {
-  kibanaDataViews: { [x: string]: DataViewListItem };
+  kibanaDataViews: { [dataViewId: string]: DataViewListItem };
   field: FieldHook<DefineStepRule['dataViewId']>;
-  setIndexPattern: (indexPattern: DataViewBase) => void;
+  onChangeSelectedDataSource: (val: string, indexPattern: DataViewBase) => void;
 }
 
 export const DataViewSelector = ({
   kibanaDataViews,
   field,
-  setIndexPattern,
+  onChangeSelectedDataSource,
 }: DataViewSelectorProps) => {
   const { data } = useKibana().services;
 
@@ -64,6 +64,16 @@ export const DataViewSelector = ({
 
   const [selectedDataView, setSelectedDataView] = useState<DataViewListItem>();
 
+  useEffect(() => {
+    if (!selectedDataViewNotFound && dataViewId != null && dataViewId !== '') {
+      setSelectedOption([
+        { id: kibanaDataViews[dataViewId].id, label: kibanaDataViews[dataViewId].title },
+      ]);
+    } else {
+      setSelectedOption([]);
+    }
+  }, [dataViewId, field, kibanaDataViews, selectedDataViewNotFound]);
+
   // TODO: optimize this, pass down array of data view ids
   // at the same time we grab the data views in the top level form component
   const dataViewOptions = useMemo(() => {
@@ -79,12 +89,12 @@ export const DataViewSelector = ({
     const fetchSingleDataView = async () => {
       if (selectedDataView != null) {
         const dv = await data.dataViews.get(selectedDataView.id);
-        setIndexPattern(dv);
+        onChangeSelectedDataSource(selectedDataView.id, dv);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, selectedDataView, setIndexPattern]);
+  }, [data.dataViews, selectedDataView, onChangeSelectedDataSource]);
 
   const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;

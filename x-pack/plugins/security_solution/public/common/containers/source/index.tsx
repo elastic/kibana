@@ -167,6 +167,7 @@ export const useFetchIndex = (
                       response.indexFields
                     );
                     setLoading(false);
+                    console.error('WE FOUND STUFF', response.indicesExist);
                     setState({
                       browserFields,
                       docValueFields,
