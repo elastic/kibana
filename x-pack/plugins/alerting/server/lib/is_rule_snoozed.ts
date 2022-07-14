@@ -12,7 +12,9 @@ import { isSnoozeActive } from './snooze/is_snooze_active';
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string }>;
 
-export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
+export function getActiveSnoozes(
+  rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>
+): ActiveSnoozes | null {
   if (rule.snoozeSchedule == null) {
     return null;
   }

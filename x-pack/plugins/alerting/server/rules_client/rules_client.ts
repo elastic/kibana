@@ -2697,6 +2697,7 @@ export class RulesClient {
       },
     }));
     const includeSnoozeSchedule = snoozeSchedule !== undefined && !excludeFromPublicApi;
+
     const rule = {
       id,
       notifyWhen,
@@ -2707,6 +2708,13 @@ export class RulesClient {
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
+      ...(includeSnoozeSchedule
+        ? {
+            activeSnoozes: getActiveSnoozes({ snoozeSchedule })
+              ?.filter((s) => Boolean(s.id))
+              .map((s) => s.id),
+          }
+        : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
