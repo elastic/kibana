@@ -26,7 +26,7 @@ export const usePrimaryNavigation = ({
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
-    (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
+    (): string => (navTabs[pageName] || (tabName && navTabs[tabName]))?.id ?? '',
     [pageName, tabName, navTabs]
   );
 

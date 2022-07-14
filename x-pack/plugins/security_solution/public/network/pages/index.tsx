@@ -17,10 +17,8 @@ import { Network } from './network';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
-import { FlowTarget } from '../../../common/search_strategy';
 import { NETWORK_PATH } from '../../../common/constants';
-
-const ipDetailsPageBasePath = `${NETWORK_PATH}/ip/:detailName`;
+import { networkDetailsPagePath, networkDetailsTabPath } from './constants';
 
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
@@ -53,20 +51,20 @@ const NetworkContainerComponent = () => {
           hasMlUserPermissions={userHasMlUserPermissions}
         />
       </Route>
-      <Route path={`${ipDetailsPageBasePath}/:flowTarget`}>
+      <Route path={networkDetailsTabPath}>
         <NetworkDetails />
       </Route>
       <Route
-        path={ipDetailsPageBasePath}
+        path={networkDetailsPagePath}
         render={({
-          location: { search = '' },
           match: {
             params: { detailName },
           },
+          location: { search = '' },
         }) => (
           <Redirect
             to={{
-              pathname: `${NETWORK_PATH}/ip/${detailName}/${FlowTarget.source}`,
+              pathname: `${NETWORK_PATH}/${detailName}/${NetworkRouteType.flows}`,
               search,
             }}
           />
