@@ -14,15 +14,14 @@ import {
   ClusterClientMock,
   CustomClusterClientMock,
 } from './client/mocks';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+  ElasticsearchServicePreboot,
+} from '@kbn/core-elasticsearch-server';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import {
-  InternalElasticsearchServiceSetup,
-  ElasticsearchServiceSetup,
-  ElasticsearchStatusMeta,
-  ElasticsearchServicePreboot,
-} from './types';
+import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import type { ClusterInfo } from './get_cluster_info';
