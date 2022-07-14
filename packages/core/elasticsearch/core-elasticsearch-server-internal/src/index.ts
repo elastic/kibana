@@ -6,6 +6,23 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { ElasticsearchService } from './elasticsearch_service';
+export { config, configSchema } from './elasticsearch_config';
+export { ElasticsearchConfig } from './elasticsearch_config';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from './version_check/ensure_es_version';
+export type {
+  ElasticsearchStatusMeta,
+  InternalElasticsearchServicePreboot,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './types';
+export { pollEsNodesVersion } from './version_check/ensure_es_version';
+export {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+} from './supported_server_response_check';
+export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
+export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';

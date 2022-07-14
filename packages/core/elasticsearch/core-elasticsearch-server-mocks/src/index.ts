@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { elasticsearchServiceMock } from './elasticsearch_service.mock';
+export type {
+  MockedElasticSearchServiceSetup,
+  MockedElasticSearchServiceStart,
+} from './elasticsearch_service.mock';

@@ -19,12 +19,15 @@ import type {
   ElasticsearchServiceSetup,
   ElasticsearchServicePreboot,
 } from '@kbn/core-elasticsearch-server';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService } from './elasticsearch_service';
-import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { ServiceStatus, ServiceStatusLevels } from '../status';
-import type { ClusterInfo } from './get_cluster_info';
+import type {
+  ElasticsearchConfig,
+  ElasticsearchService,
+  InternalElasticsearchServiceSetup,
+  ElasticsearchStatusMeta,
+  NodesVersionCompatibility,
+  ClusterInfo,
+} from '@kbn/core-elasticsearch-server-internal';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-base-common';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 
