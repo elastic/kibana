@@ -249,6 +249,7 @@ describe('list()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
+        featureConfig: ['alerting'],
       },
     ]);
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -281,6 +282,7 @@ describe('list()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
+        featureConfig: ['alerting'],
       },
     ]);
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();

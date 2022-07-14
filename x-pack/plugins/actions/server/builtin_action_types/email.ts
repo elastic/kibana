@@ -15,6 +15,7 @@ import {
   AlertingConnectorFeature,
   AdditionalEmailServices,
   withoutMustacheTemplate,
+  SecuritySolutionFeature,
 } from '../../common';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
@@ -216,7 +217,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
-    featureConfig: [AlertingConnectorFeature.id],
+    featureConfig: [AlertingConnectorFeature.id, SecuritySolutionFeature.id],
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

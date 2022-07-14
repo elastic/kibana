@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { areValidFeatures } from './connector_feature_config';
+import { areValidFeatures, getConnectorFeatureName } from './connector_feature_config';
 
 describe('areValidFeatures', () => {
   it('returns true when all inputs are valid features', () => {
@@ -23,5 +23,15 @@ describe('areValidFeatures', () => {
 
   it('returns false when all items in input are invalid', () => {
     expect(areValidFeatures(['alerts', 'nope'])).toBeFalsy();
+  });
+});
+
+describe('getConnectorFeatureName', () => {
+  it('returns the feature name for valid feature ids', () => {
+    expect(getConnectorFeatureName('siem')).toEqual('Security Solutions');
+  });
+
+  it('returns the id for invalid feature ids', () => {
+    expect(getConnectorFeatureName('foo')).toEqual('foo');
   });
 });

@@ -22,6 +22,7 @@ describe('loadActionTypes', () => {
         enabled: true,
         enabled_in_config: true,
         enabled_in_license: true,
+        feature_config: ['alerting'],
         minimum_license_required: 'basic',
       },
     ];
@@ -34,6 +35,7 @@ describe('loadActionTypes', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        featureConfig: ['alerting'],
         minimumLicenseRequired: 'basic',
       },
     ];
@@ -55,6 +57,7 @@ describe('loadActionTypes', () => {
         enabled: true,
         enabled_in_config: true,
         enabled_in_license: true,
+        feature_config: ['alerting'],
         minimum_license_required: 'basic',
       },
     ];
@@ -67,6 +70,7 @@ describe('loadActionTypes', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        featureConfig: ['alerting'],
         minimumLicenseRequired: 'basic',
       },
     ];

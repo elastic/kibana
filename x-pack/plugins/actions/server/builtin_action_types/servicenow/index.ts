@@ -55,7 +55,11 @@ import { throwIfSubActionIsNotSupported } from './utils';
 import { createExternalServiceITOM } from './service_itom';
 import { apiITOM } from './api_itom';
 import { createServiceWrapper } from './create_service_wrapper';
-import { AlertingConnectorFeature, CasesConnectorFeature } from '../../../common';
+import {
+  AlertingConnectorFeature,
+  CasesConnectorFeature,
+  SecuritySolutionFeature,
+} from '../../../common';
 
 export {
   ServiceNowITSMActionTypeId,
@@ -93,7 +97,11 @@ export function getServiceNowITSMActionType(
     id: ServiceNowITSMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITSM,
-    featureConfig: [AlertingConnectorFeature.id, CasesConnectorFeature.id],
+    featureConfig: [
+      AlertingConnectorFeature.id,
+      CasesConnectorFeature.id,
+      SecuritySolutionFeature.id,
+    ],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -122,7 +130,11 @@ export function getServiceNowSIRActionType(
     id: ServiceNowSIRActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_SIR,
-    featureConfig: [AlertingConnectorFeature.id, CasesConnectorFeature.id],
+    featureConfig: [
+      AlertingConnectorFeature.id,
+      CasesConnectorFeature.id,
+      SecuritySolutionFeature.id,
+    ],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -151,7 +163,7 @@ export function getServiceNowITOMActionType(
     id: ServiceNowITOMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
-    featureConfig: [AlertingConnectorFeature.id],
+    featureConfig: [AlertingConnectorFeature.id, SecuritySolutionFeature.id],
     validate: {
       config: schema.object(ExternalIncidentServiceConfigurationBase, {
         validate: curry(validate.config)(configurationUtilities),

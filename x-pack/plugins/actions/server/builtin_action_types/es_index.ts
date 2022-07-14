@@ -15,6 +15,7 @@ import {
   buildAlertHistoryDocument,
   AlertHistoryEsIndexConnectorId,
   AlertingConnectorFeature,
+  SecuritySolutionFeature,
 } from '../../common';
 import { ALERT_HISTORY_PREFIX } from '../../common/alert_history_schema';
 
@@ -64,7 +65,7 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
-    featureConfig: [AlertingConnectorFeature.id],
+    featureConfig: [AlertingConnectorFeature.id, SecuritySolutionFeature.id],
     validate: {
       config: ConfigSchema,
       params: ParamsSchema,

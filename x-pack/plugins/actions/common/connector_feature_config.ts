@@ -34,9 +34,17 @@ export const CasesConnectorFeature: ConnectorFeatureConfig = {
   }),
 };
 
+export const SecuritySolutionFeature: ConnectorFeatureConfig = {
+  id: 'siem',
+  name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
+    defaultMessage: 'Security Solutions',
+  }),
+};
+
 const AllAvailableConnectorFeatures: ConnectorFeatureConfig[] = [
   AlertingConnectorFeature,
   CasesConnectorFeature,
+  SecuritySolutionFeature,
 ];
 
 export function areValidFeatures(ids: string[]) {
@@ -44,4 +52,9 @@ export function areValidFeatures(ids: string[]) {
     (id: string) =>
       !!AllAvailableConnectorFeatures.find((config: ConnectorFeatureConfig) => config.id === id)
   );
+}
+
+export function getConnectorFeatureName(id: string) {
+  const featureConfig = AllAvailableConnectorFeatures.find((config) => config.id === id);
+  return featureConfig ? featureConfig.name : id;
 }

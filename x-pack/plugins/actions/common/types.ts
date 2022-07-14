@@ -14,6 +14,7 @@ export interface ActionType {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
+  featureConfig: string[];
 }
 
 export enum InvalidEmailReason {

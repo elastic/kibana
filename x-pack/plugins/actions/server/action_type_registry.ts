@@ -202,6 +202,7 @@ export class ActionTypeRegistry {
         enabled: this.isActionTypeEnabled(actionTypeId),
         enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+        featureConfig: actionType.featureConfig,
       }));
   }
 }

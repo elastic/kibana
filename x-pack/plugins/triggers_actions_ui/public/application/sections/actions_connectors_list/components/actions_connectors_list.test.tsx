@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { uniq } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -39,10 +40,12 @@ describe('actions_connectors_list component empty', () => {
       {
         id: 'test',
         name: 'Test',
+        featureConfig: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        featureConfig: ['alerting'],
       },
     ]);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -140,11 +143,13 @@ describe('actions_connectors_list component with items', () => {
         id: 'test',
         name: 'Test',
         enabled: true,
+        featureConfig: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
         enabled: true,
+        featureConfig: ['alerting', 'cases'],
       },
     ]);
 
@@ -197,6 +202,16 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(4);
+
+    const actionTypeAvailabilityBadges = wrapper.find(
+      'EuiBadge[data-test-subj="connectorsTableCell-actionTypeAvailability"]'
+    );
+    expect(actionTypeAvailabilityBadges).toHaveLength(5);
+
+    expect(uniq(actionTypeAvailabilityBadges.map((badge) => badge.text()))).toEqual([
+      'Alerting',
+      'Cases',
+    ]);
   });
 
   it('renders table with preconfigured connectors', async () => {
@@ -272,10 +287,12 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         id: 'test',
         name: 'Test',
+        featureConfig: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        featureConfig: ['alerting'],
       },
     ]);
     const [
@@ -335,10 +352,12 @@ describe('actions_connectors_list with show only capability', () => {
       {
         id: 'test',
         name: 'Test',
+        featureConfig: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        featureConfig: ['alerting'],
       },
     ]);
     const [
@@ -406,6 +425,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
+        featureConfig: ['alerting'],
       },
       {
         id: 'test2',
@@ -413,6 +433,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
+        featureConfig: ['alerting'],
       },
     ]);
 
@@ -486,6 +507,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
+        featureConfig: ['alerting'],
       },
       {
         id: 'test2',
@@ -493,6 +515,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
+        featureConfig: ['alerting'],
       },
     ]);
 
