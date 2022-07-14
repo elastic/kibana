@@ -99,7 +99,9 @@ export function MetricDimensionEditor(
                     },
                   },
                 }
-              : {};
+              : {
+                  palette: undefined,
+                };
 
             setState({
               ...state,
