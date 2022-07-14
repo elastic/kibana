@@ -94,6 +94,15 @@ export const matchesOperator: OperatorOption = {
   value: 'matches',
 };
 
+export const doesNotMatchOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.doesNotMatchOperatorLabel', {
+    defaultMessage: 'does not match',
+  }),
+  operator: OperatorEnum.EXCLUDED,
+  type: OperatorTypeEnum.WILDCARD,
+  value: 'does_not_match',
+};
+
 export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
@@ -112,6 +121,7 @@ export const EXCEPTION_OPERATORS: OperatorOption[] = [
   isInListOperator,
   isNotInListOperator,
   matchesOperator,
+  doesNotMatchOperator,
 ];
 
 export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
@@ -122,6 +132,7 @@ export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
   existsOperator,
   doesNotExistOperator,
   matchesOperator,
+  doesNotMatchOperator,
 ];
 
 export const EXCEPTION_OPERATORS_ONLY_LISTS: OperatorOption[] = [
