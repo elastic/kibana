@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -98,25 +98,27 @@ export async function onSaveSearch({
   state: GetStateReturn;
   onClose?: () => void;
 }) {
+  const { uiSettings } = services;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
     newDescription,
-    newRowsPerPage,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
     newDescription: string;
-    newRowsPerPage?: number;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
+    const currentRowsPerPage = savedSearch.rowsPerPage;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
-    savedSearch.rowsPerPage = newRowsPerPage;
+    savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
+      ? currentRowsPerPage
+      : state.appStateContainer.getState().rowsPerPage;
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -133,6 +135,7 @@ export async function onSaveSearch({
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
       savedSearch.title = currentTitle;
+      savedSearch.rowsPerPage = currentRowsPerPage;
     } else {
       state.resetInitialAppState();
     }
@@ -141,12 +144,9 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
-      services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
-      rowsPerPageState={state.appStateContainer.getState().rowsPerPage}
-      rowsPerPageAlreadySaved={savedSearch.rowsPerPage}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
@@ -155,32 +155,14 @@ export async function onSaveSearch({
 }
 
 const SaveSearchObjectModal: React.FC<{
-  services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
   description?: string;
-  rowsPerPageState?: number;
-  rowsPerPageAlreadySaved?: number;
   onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
   onClose: () => void;
-}> = ({
-  services,
-  title,
-  description,
-  showCopyOnSave,
-  rowsPerPageState,
-  rowsPerPageAlreadySaved,
-  onSave,
-  onClose,
-}) => {
-  const { uiSettings } = services;
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-
+}> = ({ title, description, showCopyOnSave, onSave, onClose }) => {
   const onModalSave = (params: OnSaveProps) => {
-    onSave({
-      ...params,
-      newRowsPerPage: isLegacy ? rowsPerPageAlreadySaved : rowsPerPageState,
-    });
+    onSave(params);
   };
 
   return (
