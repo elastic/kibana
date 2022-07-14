@@ -38,6 +38,7 @@ import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -53,6 +54,7 @@ import type { Timelines } from './timelines';
 import type { Management } from './management';
 import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
+import type { ThreatIntelligence } from './threat_intelligence';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -85,6 +87,7 @@ export interface StartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
   security: SecurityPluginSetup;
+  threatIntelligence: ThreatIntelligencePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -125,6 +128,7 @@ export interface SubPlugins {
   management: Management;
   landingPages: LandingPages;
   cloudSecurityPosture: CloudSecurityPosture;
+  threatIntelligence: ThreatIntelligence;
 }
 
 // TODO: find a better way to defined these types
@@ -142,4 +146,5 @@ export interface StartedSubPlugins {
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
+  threatIntelligence: ReturnType<ThreatIntelligence['start']>;
 }
