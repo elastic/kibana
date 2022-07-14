@@ -56,7 +56,7 @@ describe('UserProfileService', () => {
 
   describe('#get', () => {
     beforeEach(() => {
-      const userProfile = userProfileMock.create({
+      const userProfile = userProfileMock.createWithSecurity({
         uid: 'UID',
         data: {
           kibana: {
@@ -76,24 +76,24 @@ describe('UserProfileService', () => {
     it('should get user profile', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.get('UID')).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "data": Object {
-                            "avatar": "fun.gif",
-                          },
-                          "enabled": true,
-                          "labels": Object {},
-                          "uid": "UID",
-                          "user": Object {
-                            "display_name": undefined,
-                            "email": "some@email",
-                            "full_name": undefined,
-                            "realm_domain": undefined,
-                            "realm_name": "some-realm",
-                            "roles": Array [],
-                            "username": "some-username",
-                          },
-                        }
-                  `);
+              Object {
+                "data": Object {
+                  "avatar": "fun.gif",
+                },
+                "enabled": true,
+                "labels": Object {},
+                "uid": "UID",
+                "user": Object {
+                  "display_name": undefined,
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledWith({
@@ -113,24 +113,24 @@ describe('UserProfileService', () => {
     it('should get user profile and application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.get('UID', '*')).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "data": Object {
-                          "avatar": "fun.gif",
-                        },
-                        "enabled": true,
-                        "labels": Object {},
-                        "uid": "UID",
-                        "user": Object {
-                          "display_name": undefined,
-                          "email": "some@email",
-                          "full_name": undefined,
-                          "realm_domain": undefined,
-                          "realm_name": "some-realm",
-                          "roles": Array [],
-                          "username": "some-username",
-                        },
-                      }
-                  `);
+              Object {
+                "data": Object {
+                  "avatar": "fun.gif",
+                },
+                "enabled": true,
+                "labels": Object {},
+                "uid": "UID",
+                "user": Object {
+                  "display_name": undefined,
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledWith({
@@ -175,7 +175,7 @@ describe('UserProfileService', () => {
   describe('#activate', () => {
     beforeEach(() => {
       mockStartParams.clusterClient.asInternalUser.security.activateUserProfile.mockResolvedValue(
-        userProfileMock.create() as unknown as SecurityActivateUserProfileResponse
+        userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse
       );
     });
 
@@ -188,22 +188,22 @@ describe('UserProfileService', () => {
           password: 'password',
         })
       ).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "data": Object {},
-                        "enabled": true,
-                        "labels": Object {},
-                        "uid": "some-profile-uid",
-                        "user": Object {
-                          "display_name": undefined,
-                          "email": "some@email",
-                          "full_name": undefined,
-                          "realm_domain": undefined,
-                          "realm_name": "some-realm",
-                          "roles": Array [],
-                          "username": "some-username",
-                        },
-                      }
-                  `);
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "labels": Object {},
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "display_name": undefined,
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledTimes(1);
@@ -220,22 +220,22 @@ describe('UserProfileService', () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.activate({ type: 'accessToken', accessToken: 'some-token' }))
         .resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "data": Object {},
-                          "enabled": true,
-                          "labels": Object {},
-                          "uid": "some-profile-uid",
-                          "user": Object {
-                            "display_name": undefined,
-                            "email": "some@email",
-                            "full_name": undefined,
-                            "realm_domain": undefined,
-                            "realm_name": "some-realm",
-                            "roles": Array [],
-                            "username": "some-username",
-                          },
-                        }
-                    `);
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "labels": Object {},
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "display_name": undefined,
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledTimes(1);
@@ -273,7 +273,7 @@ describe('UserProfileService', () => {
       mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
         .mockRejectedValueOnce(failureReason)
         .mockResolvedValueOnce(
-          userProfileMock.create() as unknown as SecurityActivateUserProfileResponse
+          userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse
         );
 
       const startContract = userProfileService.start(mockStartParams);
@@ -285,22 +285,22 @@ describe('UserProfileService', () => {
       jest.runAllTimers();
 
       await expect(activatePromise).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "data": Object {},
-                        "enabled": true,
-                        "labels": Object {},
-                        "uid": "some-profile-uid",
-                        "user": Object {
-                          "display_name": undefined,
-                          "email": "some@email",
-                          "full_name": undefined,
-                          "realm_domain": undefined,
-                          "realm_name": "some-realm",
-                          "roles": Array [],
-                          "username": "some-username",
-                        },
-                      }
-                  `);
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "labels": Object {},
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "display_name": undefined,
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledTimes(2);
@@ -351,7 +351,7 @@ describe('UserProfileService', () => {
     it('properly parses returned profiles', async () => {
       mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
         profiles: [
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: 'UID-1',
             user: {
               username: 'user-1',
@@ -360,10 +360,9 @@ describe('UserProfileService', () => {
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
               roles: ['role-1'],
-              authentication_provider: { name: 'basic', type: 'basic' },
             },
           }),
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: 'UID-2',
             user: {
               username: 'user-2',
@@ -372,7 +371,6 @@ describe('UserProfileService', () => {
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
               roles: ['role-2'],
-              authentication_provider: { name: 'basic', type: 'basic' },
             },
           }),
         ],
@@ -419,9 +417,9 @@ describe('UserProfileService', () => {
     it('filters out not requested profiles', async () => {
       mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
         profiles: [
-          userProfileMock.create({ uid: 'UID-1' }),
-          userProfileMock.create({ uid: 'UID-2' }),
-          userProfileMock.create({ uid: 'UID-NOT-REQUESTED' }),
+          userProfileMock.createWithSecurity({ uid: 'UID-1' }),
+          userProfileMock.createWithSecurity({ uid: 'UID-2' }),
+          userProfileMock.createWithSecurity({ uid: 'UID-NOT-REQUESTED' }),
         ],
       });
 
@@ -466,7 +464,7 @@ describe('UserProfileService', () => {
     it('should request data if data path is specified', async () => {
       mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
         profiles: [
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: 'UID-1',
             data: { some: 'data', kibana: { some: 'kibana-data' } },
           }),
@@ -533,7 +531,7 @@ describe('UserProfileService', () => {
     it('properly parses returned profiles without privileges check', async () => {
       mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
         profiles: [
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: 'UID-1',
             user: {
               username: 'user-1',
@@ -542,10 +540,9 @@ describe('UserProfileService', () => {
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
               roles: ['role-1'],
-              authentication_provider: { name: 'basic', type: 'basic' },
             },
           }),
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: 'UID-2',
             user: {
               username: 'user-2',
@@ -554,7 +551,6 @@ describe('UserProfileService', () => {
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
               roles: ['role-2'],
-              authentication_provider: { name: 'basic', type: 'basic' },
             },
           }),
         ],
@@ -603,7 +599,7 @@ describe('UserProfileService', () => {
     it('should request data if data path is specified', async () => {
       mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
         profiles: [
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: 'UID-1',
             data: { some: 'data', kibana: { some: 'kibana-data' } },
           }),
@@ -681,7 +677,7 @@ describe('UserProfileService', () => {
       // 3. Only UID-0, UID-1 and UID-8 profiles will have necessary privileges
       mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
         profiles: Array.from({ length: 10 }).map((_, index) =>
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: `UID-${index}`,
             data: { some: 'data', kibana: { some: `kibana-data-${index}` } },
           })
@@ -778,7 +774,7 @@ describe('UserProfileService', () => {
       // 3. Only UID-0 and UID-21 profiles will have necessary privileges
       mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
         profiles: Array.from({ length: 22 }).map((_, index) =>
-          userProfileMock.create({
+          userProfileMock.createWithSecurity({
             uid: `UID-${index}`,
             data: { some: 'data', kibana: { some: `kibana-data-${index}` } },
           })

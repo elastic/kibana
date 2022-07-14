@@ -10,6 +10,7 @@ import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { userProfileMock } from '../../../common/model/user_profile.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import type { UserProfileServiceStartInternal } from '../../user_profile';
 import { userProfileServiceMock } from '../../user_profile/user_profile_service.mock';
@@ -90,7 +91,33 @@ describe('Bulk get profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 500, payload: unhandledException }));
 
-      expect(userProfileService.update).not.toHaveBeenCalled();
+      expect(userProfileService.bulkGet).toBeCalledTimes(1);
+      expect(userProfileService.bulkGet).toBeCalledWith({
+        uids: new Set(['uid-1', 'uid-2']),
+        dataPath: '*',
+      });
+    });
+
+    it('returns user profiles.', async () => {
+      const userProfiles = [
+        userProfileMock.create({ uid: 'uid-1' }),
+        userProfileMock.create({ uid: 'uid-2' }),
+      ];
+      userProfileService.bulkGet.mockResolvedValue(userProfiles);
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { uids: ['uid-1', 'uid-2'], data: '*' } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: userProfiles }));
+
+      expect(userProfileService.bulkGet).toBeCalledTimes(1);
+      expect(userProfileService.bulkGet).toBeCalledWith({
+        uids: new Set(['uid-1', 'uid-2']),
+        dataPath: '*',
+      });
     });
   });
 });

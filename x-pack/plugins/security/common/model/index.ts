@@ -8,13 +8,13 @@
 export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
 export type { User, EditUser } from './user';
 export type {
-  AuthenticatedUserProfile,
-  BasicUserProfile,
-  BasicUserProfileUserInfo,
+  GetUserProfileResponse,
   UserProfile,
+  UserProfileUserInfo,
+  UserProfileWithSecurity,
   UserProfileData,
   UserProfileLabels,
-  UserProfileUserInfo,
+  UserProfileUserInfoWithSecurity,
   UserProfileAvatarData,
 } from './user_profile';
 export {

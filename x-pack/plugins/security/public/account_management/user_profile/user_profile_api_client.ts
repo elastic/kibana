@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { AuthenticatedUserProfile, UserProfileData } from '../../../common';
+import type { GetUserProfileResponse, UserProfileData } from '../../../common';
 
 const USER_PROFILE_URL = '/internal/security/user_profile';
 
@@ -30,7 +30,7 @@ export class UserProfileAPIClient {
    * @param dataPath By default `get()` returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user.
    */
   public get<D extends UserProfileData>(dataPath?: string) {
-    return this.http.get<AuthenticatedUserProfile<D>>(USER_PROFILE_URL, {
+    return this.http.get<GetUserProfileResponse<D>>(USER_PROFILE_URL, {
       query: { data: dataPath },
     });
   }

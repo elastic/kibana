@@ -10,7 +10,7 @@ import { EuiAvatar, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent, HTMLAttributes } from 'react';
 import React from 'react';
 
-import type { UserProfileAvatarData, UserProfileUserInfo } from '../../common';
+import type { UserProfileAvatarData, UserProfileUserInfoWithSecurity } from '../../common';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
@@ -19,7 +19,7 @@ import {
 } from '../../common/model';
 
 export interface UserAvatarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
-  user?: Pick<UserProfileUserInfo, 'username' | 'full_name'>;
+  user?: Pick<UserProfileUserInfoWithSecurity, 'username' | 'full_name'>;
   avatar?: UserProfileAvatarData;
   size?: EuiAvatarProps['size'];
   isDisabled?: EuiAvatarProps['isDisabled'];

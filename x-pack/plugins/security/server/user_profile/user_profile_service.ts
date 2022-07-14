@@ -13,7 +13,7 @@ import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWi
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
 
-import type { BasicUserProfile, UserProfile, UserProfileData } from '../../common';
+import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -36,7 +36,7 @@ export interface UserProfileServiceStart {
    */
   bulkGet<D extends UserProfileData>(
     params: UserProfileBulkGetParams
-  ): Promise<Array<BasicUserProfile<D>>>;
+  ): Promise<Array<UserProfile<D>>>;
 
   /**
    * Retrieves a single user profile by identifier.
@@ -48,7 +48,7 @@ export interface UserProfileServiceStart {
    */
   suggest<D extends UserProfileData>(
     params: UserProfileSuggestParams
-  ): Promise<Array<BasicUserProfile<D>>>;
+  ): Promise<Array<UserProfile<D>>>;
 }
 
 export interface UserProfileServiceStartInternal extends UserProfileServiceStart {
@@ -56,7 +56,7 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * Activates user profile using provided user profile grant.
    * @param grant User profile grant (username/password or access token).
    */
-  activate(grant: UserProfileGrant): Promise<UserProfile>;
+  activate(grant: UserProfileGrant): Promise<UserProfileWithSecurity>;
 
   /**
    * Retrieves a single user profile by its identifier.
@@ -64,7 +64,10 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * @param dataPath By default Elasticsearch returns user information, but does not return any user data. The optional
    * "dataPath" parameter can be used to return personal data for the requested user profile.
    */
-  get<D extends UserProfileData>(uid: string, dataPath?: string): Promise<UserProfile<D>>;
+  get<D extends UserProfileData>(
+    uid: string,
+    dataPath?: string
+  ): Promise<UserProfileWithSecurity<D>>;
 
   /**
    * Updates user preferences by identifier.
@@ -142,9 +145,9 @@ export interface UserProfileSuggestParams {
   requiredPrivileges?: UserProfileRequiredPrivileges;
 }
 
-function parseBasicUserProfile<D extends UserProfileData>(
+function parseUserProfile<D extends UserProfileData>(
   rawUserProfile: SecurityUserProfile
-): BasicUserProfile<D> {
+): UserProfile<D> {
   return {
     uid: rawUserProfile.uid,
     // @ts-expect-error @elastic/elasticsearch SecurityActivateUserProfileResponse.enabled: boolean
@@ -162,15 +165,15 @@ function parseBasicUserProfile<D extends UserProfileData>(
   };
 }
 
-function parseUserProfile<D extends UserProfileData>(
+function parseUserProfileWithSecurity<D extends UserProfileData>(
   rawUserProfile: SecurityUserProfile
-): UserProfile<D> {
-  const basicUserProfile = parseBasicUserProfile<D>(rawUserProfile);
+): UserProfileWithSecurity<D> {
+  const userProfile = parseUserProfile<D>(rawUserProfile);
   return {
-    ...basicUserProfile,
+    ...userProfile,
     labels: rawUserProfile.labels?.[KIBANA_DATA_ROOT] ?? {},
     user: {
-      ...basicUserProfile.user,
+      ...userProfile.user,
       roles: rawUserProfile.user.roles,
       // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.realm_name: string
       realm_name: rawUserProfile.user.realm_name,
@@ -224,7 +227,7 @@ export class UserProfileService {
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 
-        return parseUserProfile<{}>(response);
+        return parseUserProfileWithSecurity<{}>(response);
       } catch (err) {
         const detailedErrorMessage = getDetailedErrorMessage(err);
         if (getErrorStatusCode(err) !== 409) {
@@ -267,7 +270,7 @@ export class UserProfileService {
         uid,
         data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
       });
-      return parseUserProfile<D>(body[uid]!);
+      return parseUserProfileWithSecurity<D>(body[uid]!);
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile [uid=${uid}]: ${getDetailedErrorMessage(error)}`
@@ -282,7 +285,7 @@ export class UserProfileService {
   private async bulkGet<D extends UserProfileData>(
     clusterClient: IClusterClient,
     { uids, dataPath }: UserProfileBulkGetParams
-  ): Promise<Array<BasicUserProfile<D>>> {
+  ): Promise<Array<UserProfile<D>>> {
     if (uids.size === 0) {
       return [];
     }
@@ -308,7 +311,7 @@ export class UserProfileService {
           // returned list, but if Elasticsearch cannot find user profiles for all requested uids it might include
           // other "matched" user profiles as well.
           .filter((rawProfile) => uids.has(rawProfile.uid))
-          .map((rawProfile) => parseBasicUserProfile<D>(rawProfile))
+          .map((rawProfile) => parseUserProfile<D>(rawProfile))
       );
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
@@ -343,7 +346,7 @@ export class UserProfileService {
   private async suggest<D extends UserProfileData>(
     clusterClient: IClusterClient,
     params: UserProfileSuggestParams
-  ): Promise<Array<BasicUserProfile<D>>> {
+  ): Promise<Array<UserProfile<D>>> {
     const { name, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
     if (size > MAX_SUGGESTIONS_COUNT) {
       throw Error(
@@ -373,7 +376,7 @@ export class UserProfileService {
         requiredPrivileges && requiredPrivileges?.privileges.kibana.length > 0
           ? await this.filterProfilesByPrivileges(body.profiles, requiredPrivileges, size)
           : body.profiles;
-      return filteredProfiles.map((rawProfile) => parseBasicUserProfile<D>(rawProfile));
+      return filteredProfiles.map((rawProfile) => parseUserProfile<D>(rawProfile));
     } catch (error) {
       this.logger.error(
         `Failed to get user profiles suggestions [name=${name}]: ${getDetailedErrorMessage(error)}`

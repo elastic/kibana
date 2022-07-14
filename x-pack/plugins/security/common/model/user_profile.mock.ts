@@ -5,24 +5,38 @@
  * 2.0.
  */
 
-import type { AuthenticatedUserProfile } from './user_profile';
+import type { UserProfile, UserProfileWithSecurity } from './user_profile';
+
+function createUserProfileMock(userProfile: Partial<UserProfile> = {}) {
+  return {
+    uid: 'some-profile-uid',
+    enabled: true,
+    user: {
+      username: 'some-username',
+      email: 'some@email',
+      ...userProfile.user,
+    },
+    data: {},
+    ...userProfile,
+  };
+}
 
 export const userProfileMock = {
-  create: (userProfile: Partial<AuthenticatedUserProfile> = {}): AuthenticatedUserProfile => {
+  create: createUserProfileMock,
+
+  createWithSecurity: (
+    userProfileWithSecurity: Partial<UserProfileWithSecurity> = {}
+  ): UserProfileWithSecurity => {
+    const userProfile = createUserProfileMock(userProfileWithSecurity);
     return {
-      uid: 'some-profile-uid',
-      enabled: true,
-      user: {
-        username: 'some-username',
-        realm_name: 'some-realm',
-        roles: [],
-        email: 'some@email',
-        authentication_provider: { type: 'basic', name: 'basic1' },
-        ...userProfile.user,
-      },
-      data: {},
       labels: {},
       ...userProfile,
+      user: {
+        realm_domain: 'some-realm-domain',
+        realm_name: 'some-realm',
+        roles: [],
+        ...userProfile.user,
+      },
     };
   },
 };

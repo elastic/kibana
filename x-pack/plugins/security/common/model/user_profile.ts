@@ -11,22 +11,38 @@ import type { AuthenticatedUser } from './authenticated_user';
 import { getUserDisplayName } from './user';
 
 /**
+ * Describes basic properties stored in user profile.
+ */
+export interface UserProfile<D extends UserProfileData = UserProfileData> {
+  /**
+   * Unique ID for of the user profile.
+   */
+  uid: string;
+
+  /**
+   * Indicates whether user profile is enabled or not.
+   */
+  enabled: boolean;
+
+  /**
+   * Information about the user that owns profile.
+   */
+  user: UserProfileUserInfo;
+
+  /**
+   * User specific data associated with the profile.
+   */
+  data: Partial<D>;
+}
+
+/**
  * Basic user information returned in user profile.
  */
-export interface BasicUserProfileUserInfo {
+export interface UserProfileUserInfo {
   username: string;
   email?: string;
   full_name?: string;
   display_name?: string;
-}
-
-/**
- * Extended user information returned in user profile (both basic and security related properties).
- */
-export interface UserProfileUserInfo extends BasicUserProfileUserInfo {
-  roles: readonly string[];
-  realm_name: string;
-  realm_domain?: string;
 }
 
 /**
@@ -49,44 +65,29 @@ export interface UserProfileAvatarData {
 }
 
 /**
- * Describes basic properties stored in user profile.
+ * Extended user information returned in user profile (both basic and security related properties).
  */
-export interface BasicUserProfile<D extends UserProfileData = UserProfileData> {
-  /**
-   * Unique ID for of the user profile.
-   */
-  uid: string;
-
-  /**
-   * Indicates whether user profile is enabled or not.
-   */
-  enabled: boolean;
-
-  /**
-   * Information about the user that owns profile.
-   */
-  user: BasicUserProfileUserInfo;
-
-  /**
-   * User specific data associated with the profile.
-   */
-  data: D;
+export interface UserProfileUserInfoWithSecurity extends UserProfileUserInfo {
+  roles: readonly string[];
+  realm_name: string;
+  realm_domain?: string;
 }
 
 /**
  * Describes all properties stored in user profile (both basic and security related properties).
  */
-export interface UserProfile<
+export interface UserProfileWithSecurity<
   D extends UserProfileData = UserProfileData,
   L extends UserProfileLabels = UserProfileLabels
-> extends BasicUserProfile<D> {
+> extends UserProfile<D> {
   /**
    * Information about the user that owns profile.
    */
-  user: UserProfileUserInfo;
+  user: UserProfileUserInfoWithSecurity;
 
   /**
-   * User specific _searchable_ labels associated with the profile.
+   * User specific _searchable_ labels associated with the profile. Note that labels are considered
+   * security related field since it's going to be used to store user's space ID.
    */
   labels: L;
 }
@@ -94,12 +95,12 @@ export interface UserProfile<
 /**
  * User profile enriched with session information.
  */
-export interface AuthenticatedUserProfile<D extends UserProfileData = UserProfileData>
-  extends UserProfile<D> {
+export interface GetUserProfileResponse<D extends UserProfileData = UserProfileData>
+  extends UserProfileWithSecurity<D> {
   /**
    * Information about the currently authenticated user that owns the profile.
    */
-  user: UserProfile['user'] & Pick<AuthenticatedUser, 'authentication_provider'>;
+  user: UserProfileWithSecurity['user'] & Pick<AuthenticatedUser, 'authentication_provider'>;
 }
 
 export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
@@ -110,11 +111,11 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  * If a color is present on the user profile itself, then that is used.
  * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
  *
- * @param {UserProfileUserInfo} user User info
+ * @param {UserProfileUserInfoWithSecurity} user User info
  * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarColor(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
+  user: Pick<UserProfileUserInfoWithSecurity, 'username' | 'full_name'>,
   avatar?: UserProfileAvatarData
 ) {
   if (avatar && avatar.color) {
@@ -131,11 +132,11 @@ export function getUserAvatarColor(
  * If initials are present on the user profile itself, then that is used.
  * Otherwise, the initials are calculated based off the words in the display name, with a max length of 2 characters.
  *
- * @param {UserProfileUserInfo} user User info
+ * @param {UserProfileUserInfoWithSecurity} user User info
  * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarInitials(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
+  user: Pick<UserProfileUserInfoWithSecurity, 'username' | 'full_name'>,
   avatar?: UserProfileAvatarData
 ) {
   if (avatar && avatar.initials) {
