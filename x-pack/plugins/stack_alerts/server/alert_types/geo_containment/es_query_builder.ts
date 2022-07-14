@@ -18,7 +18,6 @@ import {
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
-const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
@@ -53,28 +52,40 @@ export async function getShapesFilters(
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
+      _source: false,
+      fields: boundaryNameField ? [boundaryNameField] : [],
       ...(boundaryIndexQuery ? { query: getEsFormattedQuery(boundaryIndexQuery) } : {}),
     },
   });
 
-  boundaryData.hits.hits.forEach(({ _index, _id }: { _index: string; _id: string }) => {
-    filters[_id] = {
+  for (let i = 0; i < boundaryData.hits.hits.length; i++) {
+    const hit = boundaryData.hits.hits[i] as {
+      _index: string;
+      _id: string;
+      fields?: Record<string, unknown[]>;
+    };
+    filters[hit._id] = {
       geo_shape: {
         [geoField]: {
           indexed_shape: {
-            index: _index,
-            id: _id,
+            index: hit._index,
+            id: hit._id,
             path: boundaryGeoField,
           },
         },
       },
     };
-  });
-  if (boundaryNameField) {
-    boundaryData.hits.hits.forEach(({ _source, _id }) => {
-      shapesIdsNamesMap[_id] = _source![boundaryNameField];
-    });
+    if (
+      boundaryNameField &&
+      hit.fields &&
+      hit.fields[boundaryNameField] &&
+      hit.fields[boundaryNameField].length
+    ) {
+      // fields API always returns an array, grab first value
+      shapesIdsNamesMap[hit._id] = hit.fields[boundaryNameField][0];
+    }
   }
+
   return {
     shapesFilters: filters,
     shapesIdsNamesMap,
@@ -125,7 +136,7 @@ export async function executeEsQueryFactory(
     const esQuery: Record<string, any> = {
       index,
       body: {
-        size: MAX_TOP_LEVEL_QUERY_SIZE,
+        size: 0, // do not fetch hits
         aggs: {
           shapes: {
             filters: {

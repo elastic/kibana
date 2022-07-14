@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from './alert_type';
 
-function getAlertId(entityName: string, boundaryName: unknown) {
+export function getAlertId(entityName: string, boundaryName: unknown) {
   return `${entityName}-${boundaryName}`;
 }
 
-function splitAlertId(alertId: string): { entityName: string, boundaryName: string } {
+function splitAlertId(alertId: string): { entityName: string; boundaryName: string } {
   const split = alertId.split('-');
-  
+
   // entityName and boundaryName values are "user provided data" from elasticsearch
   // Values may contain '-', breaking alertId parsing
   // In these cases, recovered alert context cannot be obtained
   if (split.length !== 2) {
-    throw new Error(`Can not split alertId '${alertId}' into entity name and boundary name. This can happen when entity name and boundary name contain '-' character.`);
+    throw new Error(
+      `Can not split alertId '${alertId}' into entity name and boundary name. This can happen when entity name and boundary name contain '-' character.`
+    );
   }
 
   return {
@@ -27,30 +30,44 @@ function splitAlertId(alertId: string): { entityName: string, boundaryName: stri
   };
 }
 
-function getBoundaryId(boundaryName: string, shapesIdsNamesMap: Record<string, unknown>): string {
-  
-}
-
-export function getAlertContext(entityName: string, boundaryName: string, containmentState: GeoContainmentInstanceState): { context: GeoContainmentInstanceContext, alertId: string } {
-    const boundaryName = 
-    const context = {
-        entityId: entityName,
-        entityDateTime: dateInShape || null,
-        entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityLocation: `POINT (${location[0]} ${location[1]})`,
-        containingBoundaryId: shapeLocationId,
-        containingBoundaryName: shapesIdsNamesMap[shapeLocationId] || shapeLocationId,
-      };
-      const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
+export function getAlertContext(
+  entityName: string,
+  containment: GeoContainmentInstanceState,
+  shapesIdsNamesMap: Record<string, unknown>,
+  windowEnd: Date
+): GeoContainmentInstanceContext {
+  return {
+    entityId: entityName,
+    entityDateTime: containment.dateInShape || null,
+    entityDocumentId: containment.docId,
+    detectionDateTime: new Date(windowEnd).toISOString(),
+    entityLocation: `POINT (${containment.location[0]} ${containment.location[1]})`,
+    containingBoundaryId: containment.shapeLocationId,
+    containingBoundaryName:
+      shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId,
+  };
 }
 
 export function getRecoveredAlertContext(
   alertId: string,
+  activeEntities: Map<string, GeoContainmentInstanceState[]>,
+  inactiveEntities: Map<string, GeoContainmentInstanceState[]>,
   shapesIdsNamesMap: Record<string, unknown>,
-  prevLocationMap: Map<string, GeoContainmentInstanceState[]>,
-) GeoContainmentInstanceContext | null {
-  const { entityName, boundaryName } = splitAlertId(alertId);
-  // boundaryName can be boundaryName 
-  boundaryId = 
+  windowEnd: Date
+): GeoContainmentInstanceContext | null {
+  const { entityName } = splitAlertId(alertId);
+
+  // recovered alert's latest entity location is either:
+  // 1) activeEntities - entity moved from one boundary to another boundary
+  // 2) inactiveEntities - entity moved from one boundary to outside all boundaries
+  let latestLocation: GeoContainmentInstanceState | undefined;
+  if (activeEntities.has(entityName) && activeEntities.get(entityName)?.length) {
+    latestLocation = _.orderBy(activeEntities.get(entityName), ['dateInShape'], ['desc'])[0];
+  } else if (inactiveEntities.has(entityName) && inactiveEntities.get(entityName)?.length) {
+    latestLocation = inactiveEntities.get(entityName)![0];
+  }
+
+  return latestLocation
+    ? getAlertContext(entityName, latestLocation, shapesIdsNamesMap, windowEnd)
+    : null;
 }
