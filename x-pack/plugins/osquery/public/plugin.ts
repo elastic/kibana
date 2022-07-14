@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import type {
@@ -101,6 +102,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         kibanaVersion: this.kibanaVersion,
       }),
       OsqueryResults: getLazyOsqueryResults({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+      OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm({
         ...core,
         ...plugins,
         storage: this.storage,

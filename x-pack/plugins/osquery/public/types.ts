@@ -18,6 +18,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { getLazyOsqueryAction } from './shared_components';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import type { getLazyOsqueryResponseActionTypeForm } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -26,6 +27,7 @@ export interface OsqueryPluginStart {
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
+  OsqueryResponseActionTypeForm: ReturnType<typeof getLazyOsqueryResponseActionTypeForm>;
 }
 
 export interface AppPluginStartDependencies {

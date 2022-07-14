@@ -30,10 +30,6 @@ export const ConnectorEditFlyout = suspendedComponentWithProps<EditConnectorFlyo
 export const ActionForm = suspendedComponentWithProps(
   lazy(() => import('./action_connector_form/action_form'))
 );
-export const ResponseActionForm = suspendedComponentWithProps(
-  lazy(() => import('./action_connector_form/response_action_form'))
-);
-
 export const RuleStatusDropdown = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_status_dropdown'))
 );

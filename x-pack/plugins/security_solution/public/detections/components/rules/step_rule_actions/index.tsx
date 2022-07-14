@@ -19,6 +19,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { RuleResponseActionsField } from '../response_action_field';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
@@ -174,27 +175,24 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
   );
   const displayResponseActionsOptions = useMemo(
-    () =>
-      throttle !== stepActionsDefaultValue.throttle ? (
-        <>
-          <EuiSpacer />
-          <EuiSpacer />
+    () => (
+      <>
+        <EuiSpacer />
 
-          <UseField
-            path="response_actions"
-            component={RuleResponseActionsField}
-            componentProps={{
-              isOsqueryDisabled: !isOsqueryEnabled,
-            }}
-          />
-        </>
-      ) : (
-        <UseField path="response_actions" component={GhostFormField} />
-      ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction, isOsqueryEnabled]
+        <UseArray path="response_actions">
+          {({ items, addItem, removeItem }) => {
+            return (
+              <RuleResponseActionsField items={items} addItem={addItem} removeItem={removeItem} />
+            );
+          }}
+        </UseArray>
+      </>
+    ),
+    []
   );
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
+    console.log('rererender');
     return application.capabilities.actions.show ? (
       <>
         <UseField
@@ -221,7 +219,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         <UseField path="enabled" component={GhostFormField} />
       </>
     );
-  }, [application.capabilities.actions.show, displayActionsOptions, throttleFieldComponentProps]);
+  }, [
+    application.capabilities.actions.show,
+    displayActionsOptions,
+    displayResponseActionsOptions,
+    throttleFieldComponentProps,
+  ]);
 
   if (isReadOnlyView) {
     return (

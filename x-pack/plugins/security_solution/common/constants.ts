@@ -354,6 +354,8 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.webhook',
 ];
 
+export const RESPONSE_SUPPORTED_ACTION_TYPES_IDS = ['.osquery'];
+
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
 

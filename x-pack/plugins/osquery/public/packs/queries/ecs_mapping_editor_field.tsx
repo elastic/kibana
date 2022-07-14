@@ -39,6 +39,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { prepareEcsFieldsToValidate } from '../../common/helpers';
 import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
@@ -513,6 +514,7 @@ export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent);
 
 export interface ECSMappingEditorFieldProps {
   euiFieldProps?: EuiComboBoxProps<{}>;
+  formPath: string;
 }
 
 interface ECSMappingEditorFormProps {
@@ -763,12 +765,13 @@ interface OsqueryColumn {
 }
 
 export const ECSMappingEditorField = React.memo(
-  ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
+  ({ euiFieldProps, formPath = '' }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
     const itemsList = useRef<ArrayItem[]>([]);
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
-    const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
+    const [initialFormData, formDataSerializer, isMounted] = useFormData();
+    const { query = '', ...formData } = get(initialFormData, formPath);
 
     const { validateFields } = useFormContext();
 
@@ -1024,21 +1027,32 @@ export const ECSMappingEditorField = React.memo(
           return;
         }
 
-        const itemKey = get(formData, `${lastItemPath.current}.key`);
+        const itemKey = get(initialFormData, `${lastItemPath.current}.key`);
 
         if (itemKey) {
-          const serializedFormData = formDataSerializer();
+          const serializedFormData = get(formDataSerializer(), formPath);
+          const data = {
+            ...serializedFormData,
+            ecs_mapping: convertECSMappingToObject(serializedFormData.ecs_mapping),
+          };
           const itemValue =
-            serializedFormData.ecs_mapping &&
-            (serializedFormData.ecs_mapping[`${itemKey}`]?.field ||
-              serializedFormData.ecs_mapping[`${itemKey}`]?.value);
+            data.ecs_mapping &&
+            (data.ecs_mapping[`${itemKey}`]?.field || data.ecs_mapping[`${itemKey}`]?.value);
 
           if (itemValue && onAdd.current) {
             onAdd.current();
           }
         }
       }
-    }, [euiFieldProps?.isDisabled, formData, formDataSerializer, isMounted, onAdd]);
+    }, [
+      euiFieldProps?.isDisabled,
+      formData,
+      formDataSerializer,
+      formPath,
+      initialFormData,
+      isMounted,
+      onAdd,
+    ]);
 
     return (
       <>
@@ -1080,7 +1094,7 @@ export const ECSMappingEditorField = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <UseArray path="ecs_mapping">
+        <UseArray path={formPath ? `${formPath}.ecs_mapping` : 'ecs_mapping'}>
           {({ items, addItem, removeItem }) => {
             lastItemPath.current = items[items.length - 1]?.path;
             onAdd.current = addItem;
