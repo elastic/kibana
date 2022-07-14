@@ -16,13 +16,14 @@ import * as Colors from './colors.mjs';
  * @implements {SomeDevLog}
  */
 export class Log {
+  #flags;
+
   /**
    *
    * @param {import('@kbn/some-dev-log').SomeLogLevel} level
    */
   constructor(level) {
-    /** @private */
-    this.flags = {
+    this.#flags = {
       error: true,
       success: true,
       info: level !== 'quiet',
@@ -38,7 +39,7 @@ export class Log {
    * @param  {...any} rest
    */
   error(msg, ...rest) {
-    if (this.flags.error) {
+    if (this.#flags.error) {
       this._fmt(' ERROR ', Colors.err, msg, rest);
     }
   }
@@ -49,7 +50,7 @@ export class Log {
    * @param  {...any} rest
    */
   warning(msg, ...rest) {
-    if (this.flags.warning) {
+    if (this.#flags.warning) {
       this._fmt('warn', Colors.warning, msg, rest);
     }
   }
@@ -60,7 +61,7 @@ export class Log {
    * @param  {...any} rest
    */
   info(msg, ...rest) {
-    if (this.flags.info) {
+    if (this.#flags.info) {
       this._fmt('info', Colors.info, msg, rest);
     }
   }
@@ -71,7 +72,7 @@ export class Log {
    * @param  {...any} rest
    */
   success(msg, ...rest) {
-    if (this.flags.success) {
+    if (this.#flags.success) {
       this._fmt('success', Colors.success, msg, rest);
     }
   }
@@ -82,7 +83,7 @@ export class Log {
    * @param  {...any} rest
    */
   debug(msg, ...rest) {
-    if (this.flags.debug) {
+    if (this.#flags.debug) {
       this._fmt('debg', Colors.debug, msg, rest);
     }
   }
@@ -93,7 +94,7 @@ export class Log {
    * @param  {...any} rest
    */
   verbose(msg, ...rest) {
-    if (this.flags.verbose) {
+    if (this.#flags.verbose) {
       this._fmt('verb', Colors.verbose, msg, rest);
     }
   }

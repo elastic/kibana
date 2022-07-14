@@ -48,21 +48,21 @@ function parseArgv(argv) {
 }
 
 export class Args {
+  #flags;
+  #positional;
+  #raw;
+  #defaults;
+
   /**
    * @param {string[]} argv
    * @param {string[]} defaultArgv
    */
   constructor(argv, defaultArgv) {
     const { flags, positional, raw } = parseArgv(argv);
-    /** @private */
-    this.flags = flags;
-    /** @private */
-    this.positional = positional;
-    /** @private */
-    this.raw = raw;
-
-    /** @private */
-    this.defaults = parseArgv(defaultArgv).flags;
+    this.#flags = flags;
+    this.#positional = positional;
+    this.#raw = raw;
+    this.#defaults = parseArgv(defaultArgv).flags;
   }
 
   /**
@@ -88,21 +88,21 @@ export class Args {
    * Get the command name from the args
    */
   getCommandName() {
-    return this.positional[0];
+    return this.#positional[0];
   }
 
   /**
    * Get the positional arguments, excludes the command name
    */
   getPositionalArgs() {
-    return this.positional.slice(1);
+    return this.#positional.slice(1);
   }
 
   /**
    * Get all of the passed args
    */
   getRawArgs() {
-    return this.raw.slice();
+    return this.#raw.slice();
   }
 
   /**
@@ -113,7 +113,7 @@ export class Args {
    * @param {string} name
    */
   getStringValue(name) {
-    const value = this.flags.get(name) ?? this.defaults.get(name);
+    const value = this.#flags.get(name) ?? this.#defaults.get(name);
     if (Array.isArray(value)) {
       return value.at(-1);
     }
@@ -131,7 +131,7 @@ export class Args {
    * @param {string} name
    */
   getStringValues(name) {
-    const value = this.flags.get(name) ?? this.defaults.get(name);
+    const value = this.#flags.get(name) ?? this.#defaults.get(name);
     if (typeof value === 'string') {
       return [value];
     }
@@ -149,7 +149,7 @@ export class Args {
    * @param {string} name
    */
   getBooleanValue(name) {
-    const value = this.flags.get(name) ?? this.defaults.get(name);
+    const value = this.#flags.get(name) ?? this.#defaults.get(name);
     if (typeof value === 'boolean' || value === undefined) {
       return value;
     }
