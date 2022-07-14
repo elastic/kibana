@@ -15,20 +15,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutSize,
-  EuiButtonIcon,
   EuiPanel,
-  EuiTitle,
   EuiPopover,
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiSuperSelectOption,
+  EuiButton,
 } from '@elastic/eui';
 
 import {
-  enableRule,
-  disableRule,
-  snoozeRule,
-  unsnoozeRule,
   deleteRules,
   useLoadRuleTypes,
   RuleType,
@@ -61,7 +56,6 @@ export function RuleDetailsPage() {
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getRuleStatusDropdown,
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable,
@@ -93,9 +87,10 @@ export function RuleDetailsPage() {
     loadNotifyWhenOption();
   }, []);
 
-  const handleClosePopover = useCallback(() => setIsRuleEditPopoverOpen(false), []);
+  const togglePopover = () =>
+    setIsRuleEditPopoverOpen((pervIsRuleEditPopoverOpen) => !pervIsRuleEditPopoverOpen);
 
-  const handleOpenPopover = useCallback(() => setIsRuleEditPopoverOpen(true), []);
+  const handleClosePopover = () => setIsRuleEditPopoverOpen(false);
 
   const handleRemoveRule = useCallback(() => {
     setIsRuleEditPopoverOpen(false);
@@ -228,20 +223,6 @@ export function RuleDetailsPage() {
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
-  const getRuleStatusComponent = () =>
-    getRuleStatusDropdown({
-      rule,
-      enableRule: async () => await enableRule({ http, id: rule.id }),
-      disableRule: async () => await disableRule({ http, id: rule.id }),
-      onRuleChanged: () => reloadRule(),
-      hideSnoozeOption: true,
-      isEditable: hasEditButton,
-      snoozeRule: async (snoozeSchedule) => {
-        await snoozeRule({ http, id: rule.id, snoozeSchedule });
-      },
-      unsnoozeRule: async (scheduleIds) => await unsnoozeRule({ http, id: rule.id, scheduleIds }),
-    });
-
   return (
     <ObservabilityPageTemplate
       data-test-subj="ruleDetails"
@@ -257,14 +238,11 @@ export function RuleDetailsPage() {
                     isOpen={isRuleEditPopoverOpen}
                     closePopover={handleClosePopover}
                     button={
-                      <EuiButtonIcon
-                        display="base"
-                        size="m"
-                        iconType="boxesHorizontal"
-                        aria-label="More"
-                        onClick={handleOpenPopover}
-                        data-test-subj="moreButton"
-                      />
+                      <EuiButton fill iconSide="right" onClick={togglePopover} iconType="arrowDown">
+                        {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {
+                          defaultMessage: 'Actions',
+                        })}
+                      </EuiButton>
                     }
                   >
                     <EuiFlexGroup direction="column" alignItems="flexStart">
@@ -300,17 +278,6 @@ export function RuleDetailsPage() {
                   </EuiPopover>
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
-                <EuiFlexItem>
-                  <EuiTitle size="xxs">
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.triggreAction.status', {
-                        defaultMessage: 'Status',
-                      })}
-                    </EuiFlexItem>
-                  </EuiTitle>
-
-                  {getRuleStatusComponent()}
-                </EuiFlexItem>
               </EuiFlexGroup>,
             ]
           : [],
