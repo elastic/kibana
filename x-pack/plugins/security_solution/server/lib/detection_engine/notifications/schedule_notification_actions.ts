@@ -6,16 +6,16 @@
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { Alert } from '@kbn/alerting-plugin/server';
+import type { Alert } from '@kbn/alerting-plugin/server';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { isThresholdRule } from '../../../../common/detection_engine/utils';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { isDetectionAlert } from '../signals/utils';
-import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;

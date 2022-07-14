@@ -13,7 +13,7 @@ import {
   getPinnedEventCount,
   getNotesCount,
 } from '../../../../timelines/components/open_timeline/helpers';
-import { OpenTimelineResult } from '../../../../timelines/components/open_timeline/types';
+import type { OpenTimelineResult } from '../../../../timelines/components/open_timeline/types';
 
 import * as i18n from '../translations';
 

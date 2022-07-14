@@ -124,6 +124,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('with query params', () => {
+      it('should issue a successful request', async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest(
+          '\n GET _cat/aliases?format=json&v=true&pretty=true'
+        );
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
+      });
+    });
+
     describe('multiple requests output', () => {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
@@ -155,7 +171,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('with folded/unfolded lines in request body', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135914
+    describe.skip('with folded/unfolded lines in request body', () => {
       const enterRequestWithBody = async () => {
         await PageObjects.console.enterRequest();
         await PageObjects.console.pressEnter();

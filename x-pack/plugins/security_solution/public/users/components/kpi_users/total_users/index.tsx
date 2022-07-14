@@ -8,14 +8,14 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import { kpiTotalUsersMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
 import { kpiTotalUsersAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { UsersKpiProps } from '../types';
+import type { UsersKpiProps } from '../types';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];

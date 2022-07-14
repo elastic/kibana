@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../../common/mock/match_media';

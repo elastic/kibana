@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { URLTimeRange } from '../../store/inputs/model';
+import type { URLTimeRange } from '../../store/inputs/model';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 import { getMaybeDate } from '../formatted_date/maybe_date';
 

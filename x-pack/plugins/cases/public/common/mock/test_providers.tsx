@@ -24,9 +24,8 @@ import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
 import { CasesPermissions } from '../../client/helpers/capabilities';
-import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -34,7 +33,8 @@ interface TestProviderProps {
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
-  externalReferenceAttachmentTypeRegistry?: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -49,6 +49,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
+  persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
 }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -64,7 +65,13 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
             <CasesProvider
-              value={{ externalReferenceAttachmentTypeRegistry, features, owner, permissions }}
+              value={{
+                externalReferenceAttachmentTypeRegistry,
+                persistableStateAttachmentTypeRegistry,
+                features,
+                owner,
+                permissions,
+              }}
             >
               {children}
             </CasesProvider>
@@ -80,6 +87,7 @@ export const TestProviders = React.memo(TestProvidersComponent);
 
 export interface AppMockRenderer {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
@@ -113,6 +121,7 @@ export const createAppMockRenderer = ({
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
+  persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock();
   const queryClient = new QueryClient({
@@ -131,6 +140,7 @@ export const createAppMockRenderer = ({
             <CasesProvider
               value={{
                 externalReferenceAttachmentTypeRegistry,
+                persistableStateAttachmentTypeRegistry,
                 features,
                 owner,
                 permissions,
@@ -160,6 +170,7 @@ export const createAppMockRenderer = ({
     render,
     AppWrapper,
     externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
   };
 };
 

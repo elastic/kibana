@@ -35,7 +35,8 @@ exports[`EditableTitle renders 1`] = `
           value={
             Object {
               "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
-                "attachmentTypes": Map {},
+                "collection": Map {},
+                "name": "ExternalReferenceAttachmentTypeRegistry",
               },
               "features": undefined,
               "owner": Array [
@@ -44,6 +45,10 @@ exports[`EditableTitle renders 1`] = `
               "permissions": Object {
                 "all": true,
                 "read": true,
+              },
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
               },
             }
           }

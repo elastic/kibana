@@ -13,6 +13,10 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../common/utils/attachments';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
 import {
   OWNER_FIELD,
@@ -27,7 +31,8 @@ import {
   ExternalReferenceStorageType,
   ExternalReferenceSORt,
   CommentRequestExternalReferenceType,
-  ExternalReferenceWithoutSORefsRt,
+  ExternalReferenceNoSORt,
+  PersistableStateAttachmentRt,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -35,7 +40,6 @@ import {
   isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
-  isCommentRequestTypeExternalReference,
   assertUnreachable,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
@@ -91,6 +95,11 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
     }
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment);
+  } else if (isCommentRequestTypePersistableState(comment)) {
+    pipe(
+      excess(PersistableStateAttachmentRt).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -106,7 +115,7 @@ const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalRef
     pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
   } else {
     pipe(
-      excess(ExternalReferenceWithoutSORefsRt).decode(attachment),
+      excess(ExternalReferenceNoSORt).decode(attachment),
       fold(throwErrors(badRequest), identity)
     );
   }

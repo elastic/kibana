@@ -167,18 +167,15 @@ describe('rule_event_log_list', () => {
     // Loading
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeTruthy();
 
-    // Verify the initial columns are rendered
-    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
-      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
-    });
-
-    // No data initially
-    expect(wrapper.find('[data-gridcell-column-id="timestamp"]').length).toEqual(1);
-
     // Let the load resolve
     await act(async () => {
       await nextTick();
       wrapper.update();
+    });
+
+    // Verify the initial columns are rendered
+    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
+      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
     });
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();

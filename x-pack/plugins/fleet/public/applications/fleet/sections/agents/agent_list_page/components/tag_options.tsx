@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { debounce } from 'lodash';
+import type { MouseEvent, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useUpdateTags } from '../hooks';
+import { sanitizeTag } from '../utils';
 
 interface Props {
   tagName: string;
@@ -30,29 +31,65 @@ interface Props {
 export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdated }: Props) => {
   const [tagOptionsVisible, setTagOptionsVisible] = useState<boolean>(false);
   const [tagOptionsButton, setTagOptionsButton] = useState<HTMLElement>();
-
   const [tagMenuButtonVisible, setTagMenuButtonVisible] = useState<boolean>(isTagHovered);
+  const [updatedName, setUpdatedName] = useState<string | undefined>(tagName);
 
   useEffect(() => {
     setTagMenuButtonVisible(isTagHovered || tagOptionsVisible);
   }, [isTagHovered, tagOptionsVisible]);
 
-  const [updatedName, setUpdatedName] = useState<string | undefined>(tagName);
+  useEffect(() => {
+    setUpdatedName(tagName);
+  }, [tagName]);
 
-  const closePopover = () => setTagOptionsVisible(false);
+  const closePopover = (isDelete = false) => {
+    setTagOptionsVisible(false);
+    if (isDelete) {
+      handleDelete();
+    } else {
+      handleRename(updatedName);
+    }
+  };
 
   const updateTagsHook = useUpdateTags();
+  const bulkUpdateTags = updateTagsHook.bulkUpdateTags;
 
-  const TAGS_QUERY = 'tags:{name}';
+  const TAGS_QUERY = 'tags:"{name}"';
 
-  const debouncedSendRenameTag = useMemo(
-    () =>
-      debounce((newName: string) => {
-        const kuery = TAGS_QUERY.replace('{name}', tagName);
-        updateTagsHook.bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
-      }, 1000),
-    [onTagsUpdated, tagName, updateTagsHook]
-  );
+  const handleRename = (newName?: string) => {
+    if (newName === tagName || !newName) {
+      return;
+    }
+    const kuery = TAGS_QUERY.replace('{name}', tagName);
+    bulkUpdateTags(
+      kuery,
+      [newName],
+      [tagName],
+      () => onTagsUpdated(),
+      i18n.translate('xpack.fleet.renameAgentTags.successNotificationTitle', {
+        defaultMessage: 'Tag renamed',
+      }),
+      i18n.translate('xpack.fleet.renameAgentTags.errorNotificationTitle', {
+        defaultMessage: 'Tag rename failed',
+      })
+    );
+  };
+
+  const handleDelete = () => {
+    const kuery = TAGS_QUERY.replace('{name}', tagName);
+    updateTagsHook.bulkUpdateTags(
+      kuery,
+      [],
+      [tagName],
+      () => onTagsUpdated(),
+      i18n.translate('xpack.fleet.deleteAgentTags.successNotificationTitle', {
+        defaultMessage: 'Tag deleted',
+      }),
+      i18n.translate('xpack.fleet.deleteAgentTags.errorNotificationTitle', {
+        defaultMessage: 'Tag delete failed',
+      })
+    );
+  };
 
   return (
     <>
@@ -63,8 +100,8 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
             defaultMessage: 'Tag Options',
           })}
           color="text"
-          onClick={(event: any) => {
-            setTagOptionsButton(event.target);
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            setTagOptionsButton(event.currentTarget);
             setTagOptionsVisible(!tagOptionsVisible);
           }}
         />
@@ -84,13 +121,14 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                 })}
                 value={updatedName}
                 required
-                onChange={(e: any) => {
-                  const newName = e.target.value;
-                  setUpdatedName(newName);
-                  if (!newName) {
-                    return;
+                onKeyDown={(e: { key: string }) => {
+                  if (e.key === 'Enter') {
+                    closePopover();
                   }
-                  debouncedSendRenameTag(newName);
+                }}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const newName = e.currentTarget.value;
+                  setUpdatedName(sanitizeTag(newName));
                 }}
               />
             </EuiFlexItem>
@@ -99,9 +137,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
                 size="s"
                 color="danger"
                 onClick={() => {
-                  const kuery = TAGS_QUERY.replace('{name}', tagName);
-                  updateTagsHook.bulkUpdateTags(kuery, [], [tagName], () => onTagsUpdated());
-                  closePopover();
+                  closePopover(true);
                 }}
               >
                 <EuiIcon type="trash" />{' '}

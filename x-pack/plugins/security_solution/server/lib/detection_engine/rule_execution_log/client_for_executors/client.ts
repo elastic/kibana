@@ -6,22 +6,22 @@
  */
 
 import { sum } from 'lodash';
-import { Duration } from 'moment';
-import { Logger } from '@kbn/core/server';
+import type { Duration } from 'moment';
+import type { Logger } from '@kbn/core/server';
 
-import {
+import type {
   RuleExecutionStatus,
-  ruleExecutionStatusOrderByStatus,
   RuleExecutionMetrics,
 } from '../../../../../common/detection_engine/schemas/common';
+import { ruleExecutionStatusOrderByStatus } from '../../../../../common/detection_engine/schemas/common';
 
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { ExtMeta } from '../utils/console_logging';
+import type { ExtMeta } from '../utils/console_logging';
 import { truncateValue } from '../utils/normalization';
 
-import { IEventLogWriter } from '../event_log/event_log_writer';
-import { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
-import {
+import type { IEventLogWriter } from '../event_log/event_log_writer';
+import type { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
+import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
   StatusChangeArgs,

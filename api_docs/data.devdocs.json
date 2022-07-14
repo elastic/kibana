@@ -645,7 +645,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -4667,7 +4675,13 @@
         "description": [],
         "signature": [
           "(x: unknown) => x is ",
-          "TimeRange"
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
         ],
         "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
         "deprecated": false,
@@ -7061,13 +7075,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -8450,7 +8458,13 @@
         ],
         "signature": [
           "{ calculateAutoTimeExpression: (range: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
@@ -8661,7 +8675,13 @@
           " | ",
           "Query",
           "[] | undefined; timeRange?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
@@ -9398,7 +9418,13 @@
         ],
         "signature": [
           "{ time?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -12937,7 +12963,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -12977,7 +13003,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -14709,13 +14735,7 @@
                 "text": "ElasticsearchClient"
               },
               ", request?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
@@ -16276,13 +16296,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any> | undefined"
                 ],
                 "path": "src/plugins/data_views/server/types.ts",
@@ -19383,7 +19397,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -19423,7 +19437,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -19511,7 +19525,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
@@ -22613,7 +22627,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
@@ -23406,7 +23420,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           ">> | undefined; runtimeFieldMap?: Record<string, ",
           {
@@ -23503,7 +23517,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 import { ALERT_THRESHOLD_RESULT_COUNT } from '../../../../common/field_maps/field_names';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
+import type { NotificationRuleTypeParams } from './schedule_notification_actions';
 import {
-  NotificationRuleTypeParams,
   formatAlertsForNotificationActions,
   normalizeAlertForNotificationActions,
   scheduleNotificationActions,
@@ -49,6 +50,7 @@ describe('schedule_notification_actions', () => {
     severityMapping: [],
     threat: [],
     timestampOverride: undefined,
+    timestampOverrideFallbackDisabled: undefined,
     to: 'now',
     type: 'query',
     references: ['http://www.example.com'],

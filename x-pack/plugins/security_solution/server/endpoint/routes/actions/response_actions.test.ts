@@ -8,12 +8,12 @@
 
 import { Subject } from 'rxjs';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { License } from '@kbn/licensing-plugin/common/license';
-import { AwaitedProperties } from '@kbn/utility-types';
-import {
+import type { License } from '@kbn/licensing-plugin/common/license';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -29,7 +29,7 @@ import {
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
 import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
-import { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { LicenseService } from '../../../../common/license';
@@ -44,7 +44,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
-import {
+import type {
   ActionDetails,
   EndpointAction,
   ResponseActionApiResponse,
@@ -53,9 +53,9 @@ import {
   ResponseActionRequestBody,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
@@ -131,6 +131,7 @@ describe('Response actions', () => {
           },
         ],
         keep_policies_up_to_date: false,
+        verification_status: 'unknown',
       });
 
       licenseEmitter = new Subject();

@@ -8,7 +8,8 @@
 import * as t from 'io-ts';
 
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
-import { queryFilter, fields, sort_field, sort_order, PerPage, Page } from '../common/schemas';
+import type { PerPage, Page } from '../common/schemas';
+import { queryFilter, fields, sort_field, sort_order } from '../common/schemas';
 
 export const findRulesSchema = t.exact(
   t.partial({

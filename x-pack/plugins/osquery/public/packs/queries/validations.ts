@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ValidationConfig, ValidationFunc, fieldValidators } from '../../shared_imports';
+import type { ValidationConfig, ValidationFunc } from '../../shared_imports';
+import { fieldValidators } from '../../shared_imports';
 export { queryFieldValidation } from '../../common/validations';
 
 const idPattern = /^[a-zA-Z0-9-_]+$/;
