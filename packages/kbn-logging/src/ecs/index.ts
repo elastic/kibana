@@ -49,13 +49,13 @@ export type { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } fr
 
 interface EcsField {
   /**
-   * These typings were written as of ECS 8.3.0.
+   * These typings were written as of ECS 8.4.0.
    * Don't change this value without checking the rest
    * of the types to conform to that ECS version.
    *
    * https://www.elastic.co/guide/en/ecs/master/index.html
    */
-  version: '8.3.0';
+  version: '8.4.0';
 }
 
 /**

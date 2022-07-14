@@ -44,20 +44,20 @@ interface Enrichment {
 }
 
 interface Indicator extends IndicatorNestedFields {
-  confidence?: string;
+  confidence?: 'Not Specified' | 'None' | 'Low' | 'Medium' | 'High';
   description?: string;
   email?: { address?: string };
   first_seen?: string;
   ip?: string;
   last_seen?: string;
-  marking?: { tlp?: string };
+  marking?: Marking;
   modified_at?: string;
   port?: number;
   provider?: string;
   reference?: string;
   scanner_stats?: number;
   sightings?: number;
-  type?: string;
+  type?: IndicatorType;
 }
 
 interface Feed {
@@ -65,6 +65,10 @@ interface Feed {
   description?: string;
   name?: string;
   reference?: string;
+}
+
+interface Marking {
+  tlp?: 'WHITE' | 'GREEN' | 'AMBER' | 'RED';
 }
 
 interface Matched {
@@ -85,10 +89,22 @@ interface Group {
 interface Software {
   id?: string;
   name?: string;
-  platforms?: string[];
+  platforms?: SoftwarePlatforms[];
   reference?: string;
-  type?: string;
+  type?: 'Malware' | 'Tool';
 }
+
+type SoftwarePlatforms =
+  | 'AWS'
+  | 'Azure'
+  | 'Azure AD'
+  | 'GCP'
+  | 'Linux'
+  | 'macOS'
+  | 'Network'
+  | 'Office 365'
+  | 'SaaS'
+  | 'Windows';
 
 interface Tactic {
   id?: string[];
@@ -102,3 +118,22 @@ interface Technique {
   reference?: string[];
   subtechnique?: Technique;
 }
+
+type IndicatorType =
+  | 'autonomous-system'
+  | 'artifact'
+  | 'directory'
+  | 'domain-name'
+  | 'email-addr'
+  | 'file'
+  | 'ipv4-addr'
+  | 'ipv6-addr'
+  | 'mac-addr'
+  | 'mutex'
+  | 'port'
+  | 'process'
+  | 'software'
+  | 'url'
+  | 'user-account'
+  | 'windows-registry-key'
+  | 'x509-certificate';
