@@ -7,14 +7,14 @@
  */
 
 import { Observable } from 'rxjs';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { ServiceStatus } from '../status';
-import { ClusterInfo } from './get_cluster_info';
 import type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceStart,
   ElasticsearchServiceSetup,
 } from '@kbn/core-elasticsearch-server';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { ServiceStatus } from '../status';
+import { ClusterInfo } from './get_cluster_info';
 
 /** @internal */
 export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
