@@ -7,12 +7,11 @@
 
 import * as t from 'io-ts';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
-import { HomePage } from '../pages/home';
-import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
@@ -31,17 +30,25 @@ export interface Params {
   path?: t.HasProps;
 }
 
+// Note: React Router DOM <Redirect> component was not working here
+// so I've recreated this simple version for this purpose.
+function SimpleRedirect({ to }: { to: string }) {
+  const history = useHistory();
+  history.replace(to);
+  return null;
+}
+
 export const routes = {
   '/': {
     handler: () => {
-      return <HomePage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
     exact: true,
   },
   '/landing': {
     handler: () => {
-      return <LandingPage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
     exact: true,
