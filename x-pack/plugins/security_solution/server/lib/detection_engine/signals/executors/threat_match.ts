@@ -40,6 +40,8 @@ export const threatMatchExecutor = async ({
   buildRuleMessage,
   bulkCreate,
   wrapHits,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -56,6 +58,8 @@ export const threatMatchExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -89,6 +93,8 @@ export const threatMatchExecutor = async ({
       type: ruleParams.type,
       wrapHits,
       runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
   });
 };

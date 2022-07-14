@@ -9,9 +9,9 @@ import Boom from '@hapi/boom';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
+import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
 import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { isCommentRequestTypeExternalReference } from '../../common/utils';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
