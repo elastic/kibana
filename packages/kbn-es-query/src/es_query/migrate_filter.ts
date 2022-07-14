@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, omit, pick, cloneDeep } from 'lodash';
+import { get, omit, pick } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { DataViewBase } from './types';
@@ -63,48 +63,47 @@ export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
     };
   }
 
-  let migratedFilter = cloneDeep(filter);
-  if (!migratedFilter.query) {
-    migratedFilter.query = {};
+  if (!filter.query) {
+    filter.query = {};
   } else {
     // handle the case where .query already exists and filter has other top level keys on there
-    migratedFilter = pick(migratedFilter, ['meta', 'query', '$state']);
+    filter = pick(filter, ['meta', 'query', '$state']);
   }
 
   // @ts-ignore
-  if (migratedFilter.exists) {
+  if (filter.exists) {
     // @ts-ignore
-    migratedFilter.query.exists = migratedFilter.exists;
+    filter.query.exists = filter.exists;
     // @ts-ignore
-    delete migratedFilter.exists;
+    delete filter.exists;
   }
 
   // @ts-ignore
-  if (migratedFilter.range) {
+  if (filter.range) {
     // @ts-ignore
-    migratedFilter.query.range = migratedFilter.range;
+    filter.query.range = filter.range;
     // @ts-ignore
-    delete migratedFilter.range;
+    delete filter.range;
   }
 
   // @ts-ignore
-  if (migratedFilter.match_all) {
+  if (filter.match_all) {
     // @ts-ignore
-    migratedFilter.query.match_all = migratedFilter.match_all;
+    filter.query.match_all = filter.match_all;
     // @ts-ignore
-    delete migratedFilter.match_all;
+    delete filter.match_all;
   }
 
   // move all other keys under query
-  Object.keys(migratedFilter).forEach((key) => {
+  Object.keys(filter).forEach((key) => {
     if (key === 'meta' || key === 'query' || key === '$state') {
       return;
     }
     // @ts-ignore
-    migratedFilter.query[key] = migratedFilter[key];
+    filter.query[key] = filter[key];
     // @ts-ignore
-    delete migratedFilter[key];
+    delete filter[key];
   });
 
-  return migratedFilter;
+  return filter;
 }
