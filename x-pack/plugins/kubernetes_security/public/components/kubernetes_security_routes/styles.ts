@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font } = euiTheme;
+    const { size, font, border } = euiTheme;
 
     const titleSection: CSSObject = {
       marginBottom: size.l,
@@ -48,8 +48,26 @@ export const useStyles = () => {
       height: '500px',
     };
 
-    const percentageWidgets: CSSObject = {
-      marginBottom: size.l,
+    const widgetsBottomSpacing: CSSObject = {
+      marginBottom: size.m,
+    };
+
+    const noBottomSpacing: CSSObject = {
+      marginBottom: 0,
+    };
+
+    const countWidgetsGroup: CSSObject = {
+      ...widgetsBottomSpacing,
+      flexWrap: 'wrap',
+    };
+
+    const leftWidgetsGroup: CSSObject = {
+      ...noBottomSpacing,
+      minWidth: `calc(70% - ${size.xxxl})`,
+    };
+
+    const rightWidgetsGroup: CSSObject = {
+      minWidth: '30%',
     };
 
     const percentageChartTitle: CSSObject = {
@@ -58,14 +76,29 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
+    const widgetHolder: CSSObject = {
+      position: 'relative',
+      width: '332px',
+      height: '235px',
+      borderRadius: border.radius.medium,
+      fontWeight: font.weight.bold,
+      fontSize: size.m,
+      lineHeight: size.base,
+    };
+
     return {
       titleSection,
       titleActions,
       updatedAt,
       widgetBadge,
       treeViewContainer,
-      percentageWidgets,
+      countWidgetsGroup,
+      leftWidgetsGroup,
+      rightWidgetsGroup,
+      widgetsBottomSpacing,
       percentageChartTitle,
+      noBottomSpacing,
+      widgetHolder,
     };
   }, [euiTheme]);
 

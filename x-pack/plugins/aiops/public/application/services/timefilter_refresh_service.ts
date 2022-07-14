@@ -12,4 +12,4 @@ export interface Refresh {
   timeRange?: { start: string; end: string };
 }
 
-export const aiOpsRefresh$ = new Subject<Refresh>();
+export const aiopsRefresh$ = new Subject<Refresh>();
