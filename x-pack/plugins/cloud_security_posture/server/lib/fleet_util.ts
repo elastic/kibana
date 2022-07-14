@@ -38,6 +38,7 @@ export const addRunningAgentToAgentPolicy = async (
   agentPolicies: AgentPolicy[]
 ): Promise<GetAgentPoliciesResponseItem[]> => {
   if (!agentPolicies.length) return [];
+
   return Promise.all(
     agentPolicies.map((agentPolicy) =>
       agentService.asInternalUser

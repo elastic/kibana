@@ -15,11 +15,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import moment, { MomentInput } from 'moment';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  STATUS_ROUTE_PATH,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '../../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, STATUS_ROUTE_PATH } from '../../../common/constants';
 import type { CspAppContext } from '../../plugin';
 import type { CspRouter } from '../../types';
 import type { CspSetupStatus, Status } from '../../../common/types';
@@ -28,24 +24,9 @@ import {
   getCspAgentPolicies,
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
+import { isLatestFindingsIndexExists } from '../../lib/is_latest_findings_index_exists';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
-
-const isFindingsIndexExists = async (esClient: ElasticsearchClient): Promise<boolean> => {
-  try {
-    const queryResult = await esClient.search({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-      query: {
-        match_all: {},
-      },
-      size: 1,
-    });
-
-    return !!queryResult.hits.hits.length;
-  } catch (e) {
-    return false;
-  }
-};
 
 const getHealthyAgents = (enrichedAgentPolicies: GetAgentPoliciesResponseItem[]): number =>
   enrichedAgentPolicies.reduce(
@@ -68,10 +49,11 @@ const getStatus = (
   if (minutesPassedSinceInstallation <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (minutesPassedSinceInstallation > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
-  throw new Error('could not determine csp setup status');
+  throw new Error('Could not determine csp setup status');
 };
 
 const getCspSetupStatus = async (
+  logger: CspAppContext['logger'],
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   packageService: PackageService,
@@ -81,7 +63,7 @@ const getCspSetupStatus = async (
 ): Promise<CspSetupStatus> => {
   const [findingsIndexExists, installationPackageInfo, latestPackageInfo, installedIntegrations] =
     await Promise.all([
-      isFindingsIndexExists(esClient),
+      isLatestFindingsIndexExists(esClient, logger),
       packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
       packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
       getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
@@ -132,6 +114,9 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
     {
       path: STATUS_ROUTE_PATH,
       validate: false,
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
     },
     async (context, _, response) => {
       try {
@@ -148,6 +133,7 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
         }
 
         const cspSetupStatus = await getCspSetupStatus(
+          cspContext.logger,
           esClient,
           soClient,
           packageService,

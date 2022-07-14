@@ -48,7 +48,7 @@ export interface ComplianceDashboardData {
 }
 
 export type Status =
-  | 'indexed' // latest findings index exists
+  | 'indexed' // latest findings index exists and has results
   | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
