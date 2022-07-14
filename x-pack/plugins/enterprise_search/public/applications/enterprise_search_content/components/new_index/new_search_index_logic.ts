@@ -9,10 +9,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
 
-import { DEFAULT_LANGUAGE } from './constants';
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { LanguageForOptimization } from './types';
+import { getLanguageForOptimizatioin } from './utils';
 
 export interface NewSearchIndexValues {
-  language: string;
+  language: LanguageForOptimization;
+  languageSelectValue: string;
   name: string;
   rawName: string;
 }
@@ -29,10 +32,10 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   },
   path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
-    language: [
-      DEFAULT_LANGUAGE,
+    languageSelectValue: [
+      UNIVERSAL_LANGUAGE_VALUE,
       {
-        setLanguage: (_, { language }) => language,
+        setLanguage: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
@@ -43,6 +46,10 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     ],
   },
   selectors: ({ selectors }) => ({
+    language: [
+      () => [selectors.languageSelectValue],
+      (languageSelectValue) => getLanguageForOptimizatioin(languageSelectValue),
+    ],
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
   }),
 });
