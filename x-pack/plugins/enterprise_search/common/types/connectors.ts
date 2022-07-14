@@ -7,30 +7,44 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string | null;
+  value: string;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | undefined>;
+export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
 }
 
+export enum ConnectorStatus {
+  CREATED = 'created',
+  NEEDS_CONFIGURATION = 'needs_configuration',
+  CONFIGURED = 'configured',
+  CONNECTED = 'connected',
+  ERROR = 'error',
+}
+
+export enum SyncStatus {
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  ERROR = 'error',
+}
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
-  created_at: string | null;
+  id: string;
   index_name: string;
   last_seen: string | null;
   last_synced: string | null;
-  scheduling: ConnectorScheduling;
+  scheduling: {
+    enabled: boolean;
+    interval: string; // crontab syntax
+  };
   service_type: string | null;
-  status: string | null;
+  status: ConnectorStatus;
   sync_error: string | null;
   sync_now: boolean;
   sync_status: string | null;
 }
 
-export interface ConnectorWithId extends Connector {
-  id: string;
-}
+export type ConnectorDocument = Omit<Connector, 'id'>;
