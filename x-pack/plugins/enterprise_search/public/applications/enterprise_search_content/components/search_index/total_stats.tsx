@@ -7,45 +7,62 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import { useValues } from 'kea';
+
+import { EuiStatProps } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { Status } from '../../../../../common/types/api';
+
+import { CustomFormattedTimestamp } from '../../../shared/custom_formatted_timestamp/custom_formatted_timestamp';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+
+import { StatRow } from './stat_row';
 
 interface TotalStatsProps {
-  lastUpdated: string;
-  documentCount: number;
-  indexHealth: string;
+  additionalItems?: EuiStatProps[];
   ingestionType: string;
 }
 
-export const TotalStats: React.FC<TotalStatsProps> = ({
-  lastUpdated,
-  documentCount,
-  indexHealth,
-  ingestionType,
-}) => {
-  return (
-    <EuiFlexGroup direction="row">
-      <EuiFlexItem>
-        <EuiPanel color="success" hasShadow={false} paddingSize="l">
-          <EuiStat description="Ingestion type" title={ingestionType} />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Document count" title={documentCount} />
-        </EuiPanel>
-      </EuiFlexItem>
+export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
+  const { data, status } = useValues(FetchIndexApiLogic);
+  const documentCount = data?.index.total.docs.count ?? 0;
+  const lastUpdated = <CustomFormattedTimestamp timestamp={Date.now().toString()} />;
+  const isLoading = status !== Status.SUCCESS;
+  const stats: EuiStatProps[] = [
+    {
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
+        {
+          defaultMessage: 'Ingestion type',
+        }
+      ),
+      isLoading,
+      title: ingestionType,
+    },
+    {
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
+        {
+          defaultMessage: 'Document count',
+        }
+      ),
+      isLoading,
+      title: documentCount,
+    },
+    {
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
+        {
+          defaultMessage: 'Last updated',
+        }
+      ),
+      isLoading,
+      title: lastUpdated,
+    },
+    ...additionalItems,
+  ];
 
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Index health" title={indexHealth} />
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Last Updated" title={lastUpdated} />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return <StatRow items={stats} />;
 };
