@@ -20,6 +20,7 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-r
 import { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -34,16 +35,18 @@ export const renderApp = (deps: RenderAppProps) => {
 
 interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
-  ({ externalReferenceAttachmentTypeRegistry }) => {
+  ({ externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry }) => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
     return (
       <StyledComponentsThemeProvider darkMode={darkMode}>
         <CasesApp
           externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+          persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
         />
       </StyledComponentsThemeProvider>
     );
@@ -73,6 +76,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
                 externalReferenceAttachmentTypeRegistry={
                   deps.externalReferenceAttachmentTypeRegistry
                 }
+                persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
               />
             </Router>
           </KibanaContextProvider>

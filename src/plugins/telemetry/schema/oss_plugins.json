@@ -8561,6 +8561,12 @@
     },
     "saved_objects_counts": {
       "properties": {
+        "total": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects in the cluster"
+          }
+        },
         "by_type": {
           "type": "array",
           "items": {
@@ -8577,6 +8583,21 @@
                   "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
                 }
               }
+            }
+          }
+        },
+        "others": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of SO objects outside the breakdown. If it is not 0, there may be an unexpected state of the deployment 0 and future migrations might fail."
+          }
+        },
+        "non_registered_types": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
             }
           }
         }

@@ -35,6 +35,7 @@ import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import { changeDataViewStyles } from './change_dataview.styles';
 
+const hideAnnouncementsUISetting = 'hideAnnouncements';
 // local storage key for the tour component
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 // local storage key for the text based languages transition modal
@@ -104,21 +105,23 @@ export function ChangeDataView({
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { application, data, storage } = kibana.services;
+  const { application, data, storage, uiSettings } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
+  const isHideAnnouncementSettingsOn = Boolean(uiSettings.get(hideAnnouncementsUISetting));
+
   const [isTourDismissed, setIsTourDismissed] = useState(() =>
     Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
   );
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
-    if (showNewMenuTour && !isTourDismissed) {
+    if (showNewMenuTour && !isTourDismissed && !isHideAnnouncementSettingsOn) {
       setIsTourOpen(true);
     }
-  }, [isTourDismissed, setIsTourOpen, showNewMenuTour]);
+  }, [isHideAnnouncementSettingsOn, isTourDismissed, setIsTourOpen, showNewMenuTour]);
 
   const onTourDismiss = () => {
     storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);

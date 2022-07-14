@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type { Location } from 'history';
 
 import type { Filter, Query } from '@kbn/es-query';
+import { isEmpty } from 'lodash/fp';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from '../url_state/constants';
@@ -32,11 +32,11 @@ export const getSearch = (
 ): string => {
   if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
     // TODO: Temporary code while we are migrating all query strings to global_query_string_manager
-    if (globalQueryString.length > 0) {
-      return `${getUrlStateSearch(urlState)}&${globalQueryString}`;
-    } else {
-      return getUrlStateSearch(urlState);
-    }
+    const urlStateSearch = getQueryStringFromLocation(getUrlStateSearch(urlState));
+    const isNotEmpty = (e: string) => !isEmpty(e);
+    const search = [urlStateSearch, globalQueryString].filter(isNotEmpty).join('&');
+
+    return search.length > 0 ? `?${search}` : '';
   }
 
   return '';
@@ -47,21 +47,7 @@ export const getUrlStateSearch = (urlState: UrlState): string =>
     (myLocation: Location, urlKey: KeyUrlState) => {
       let urlStateToReplace: Filter[] | Query | TimelineUrl | UrlInputsModel | string = '';
 
-      if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
-        if (urlState.query.query === '') {
-          urlStateToReplace = '';
-        } else {
-          urlStateToReplace = urlState.query;
-        }
-      } else if (urlKey === CONSTANTS.filters && urlState.filters != null) {
-        if (isEmpty(urlState.filters)) {
-          urlStateToReplace = '';
-        } else {
-          urlStateToReplace = urlState.filters;
-        }
-      } else if (urlKey === CONSTANTS.timerange) {
-        urlStateToReplace = urlState[CONSTANTS.timerange];
-      } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
+      if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
         const timeline = urlState[CONSTANTS.timeline];
         if (timeline.id === '') {
           urlStateToReplace = '';

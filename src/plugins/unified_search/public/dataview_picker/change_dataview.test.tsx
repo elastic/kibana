@@ -42,7 +42,8 @@ describe('DataView component', () => {
 
   function wrapDataViewComponentInContext(
     testProps: DataViewPickerPropsExtended,
-    storageValue: boolean
+    storageValue: boolean,
+    uiSettingValue: boolean = false
   ) {
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
@@ -55,6 +56,9 @@ describe('DataView component', () => {
     const services = {
       data: dataMock,
       storage: getStorage(storageValue),
+      uiSettings: {
+        get: jest.fn(() => uiSettingValue),
+      },
     };
 
     return (
@@ -90,6 +94,13 @@ describe('DataView component', () => {
       wrapDataViewComponentInContext({ ...props, showNewMenuTour: true }, false)
     );
     expect(component.find(EuiTourStep).prop('isStepOpen')).toBe(true);
+  });
+
+  it('should not render the tour component if the showNewMenuTour is true but the hideAnnouncements setting is on', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext({ ...props, showNewMenuTour: true }, false, true)
+    );
+    expect(component.find(EuiTourStep).prop('isStepOpen')).toBe(false);
   });
 
   it('should not render the add runtime field menu if addField is not given', async () => {

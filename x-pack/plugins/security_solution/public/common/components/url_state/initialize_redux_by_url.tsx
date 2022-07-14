@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
-import type { Dispatch } from 'redux';
-
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type { Filter, Query } from '@kbn/es-query';
-import { isOfQueryType } from '@kbn/es-query';
-import { inputsActions } from '../../store/actions';
-import type { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
-import type {
-  UrlInputsModel,
-  LinkTo,
-  AbsoluteTimeRange,
-  RelativeTimeRange,
-} from '../../store/inputs/model';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
-import { normalizeTimeRange } from './normalize_time_range';
 import type { SetInitialStateFromUrl } from './types';
 import {
   queryTimelineById,
@@ -33,7 +19,6 @@ import { timelineActions } from '../../../timelines/store/timeline';
 
 export const useSetInitialStateFromUrl = () => {
   const dispatch = useDispatch();
-
   const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
   const updateTimelineIsLoading = useMemo(
@@ -43,54 +28,8 @@ export const useSetInitialStateFromUrl = () => {
   );
 
   const setInitialStateFromUrl = useCallback(
-    ({
-      filterManager,
-      indexPattern,
-      pageName,
-      savedQueries,
-      urlStateToUpdate,
-    }: SetInitialStateFromUrl) => {
+    ({ urlStateToUpdate }: SetInitialStateFromUrl) => {
       urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
-        if (urlKey === CONSTANTS.timerange) {
-          updateTimerange(newUrlStateString, dispatch);
-        }
-
-        if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
-          const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
-          if (appQuery != null) {
-            dispatch(
-              inputsActions.setFilterQuery({
-                id: 'global',
-                query: appQuery.query,
-                language: appQuery.language,
-              })
-            );
-          }
-        }
-
-        if (urlKey === CONSTANTS.filters) {
-          const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
-          filterManager.setFilters(filters || []);
-        }
-
-        if (urlKey === CONSTANTS.savedQuery) {
-          const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
-          if (savedQueryId != null && savedQueryId !== '') {
-            savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
-              filterManager.setFilters(savedQueryData.attributes.filters || []);
-              if (isOfQueryType(savedQueryData.attributes.query)) {
-                dispatch(
-                  inputsActions.setFilterQuery({
-                    id: 'global',
-                    ...savedQueryData.attributes.query,
-                  })
-                );
-              }
-              dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
-            });
-          }
-        }
-
         if (urlKey === CONSTANTS.timeline) {
           const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
           if (timeline != null && timeline.id !== '') {
@@ -107,87 +46,8 @@ export const useSetInitialStateFromUrl = () => {
         }
       });
     },
-    [dispatch, updateTimeline, updateTimelineIsLoading]
+    [updateTimeline, updateTimelineIsLoading]
   );
 
   return Object.freeze({ setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading });
-};
-
-const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
-  const timerangeStateData = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
-
-  const globalId: InputsModelId = 'global';
-  const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
-  const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
-
-  const timelineId: InputsModelId = 'timeline';
-  const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
-  const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
-
-  if (isEmpty(globalLinkTo.linkTo)) {
-    dispatch(inputsActions.removeGlobalLinkTo());
-  } else {
-    dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
-  }
-
-  if (isEmpty(timelineLinkTo.linkTo)) {
-    dispatch(inputsActions.removeTimelineLinkTo());
-  } else {
-    dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
-  }
-
-  if (timelineType) {
-    if (timelineType === 'absolute') {
-      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-        get('timeline.timerange', timerangeStateData)
-      );
-
-      dispatch(
-        inputsActions.setAbsoluteRangeDatePicker({
-          ...absoluteRange,
-          id: timelineId,
-        })
-      );
-    }
-
-    if (timelineType === 'relative') {
-      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-        get('timeline.timerange', timerangeStateData)
-      );
-
-      dispatch(
-        inputsActions.setRelativeRangeDatePicker({
-          ...relativeRange,
-          id: timelineId,
-        })
-      );
-    }
-  }
-
-  if (globalType) {
-    if (globalType === 'absolute') {
-      const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-        get('global.timerange', timerangeStateData)
-      );
-
-      dispatch(
-        inputsActions.setAbsoluteRangeDatePicker({
-          ...absoluteRange,
-          id: globalId,
-        })
-      );
-    }
-    if (globalType === 'relative') {
-      const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-        get('global.timerange', timerangeStateData)
-      );
-
-      dispatch(
-        inputsActions.setRelativeRangeDatePicker({
-          ...relativeRange,
-          id: globalId,
-        })
-      );
-    }
-  }
 };

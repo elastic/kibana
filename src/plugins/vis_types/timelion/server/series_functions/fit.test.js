@@ -8,7 +8,7 @@
 
 const fn = require('./fit');
 import moment from 'moment';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 import invoke from './helpers/invoke_series_fn';
 import getSeriesList from './helpers/get_single_series_list';
 import _ from 'lodash';
