@@ -37,5 +37,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./logs_ui'));
     loadTestFile(require.resolve('./osquery'));
     loadTestFile(require.resolve('./cases'));
+    loadTestFile(require.resolve('./monitoring_collection'));
   });
 }

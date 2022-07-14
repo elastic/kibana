@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiPageTemplate } from '@elastic/eui';
+
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
+import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
+
 import { NoDataPage } from '../no_data_page';
-import { withSolutionNav } from '../../with_solution_nav';
 import { KibanaPageTemplateProps } from '../../types';
 import { getClasses, NO_DATA_PAGE_TEMPLATE_PROPS } from '../../util';
 

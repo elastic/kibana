@@ -22,6 +22,8 @@ import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes
 import type { DataView } from '@kbn/data-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
@@ -34,12 +36,14 @@ const Wrapper = ({
   data = dataPluginMock.createStartContract(),
   unifiedSearch = unifiedSearchPluginMock.createStartContract(),
   charts = chartPluginMock.createStartContract(),
+  discover = discoverPluginMock.createStartContract(),
 }: {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   charts: ChartsPluginStart;
+  discover: DiscoverStart;
 }) => (
-  <TestProvider deps={{ data, unifiedSearch, charts }}>
+  <TestProvider deps={{ data, unifiedSearch, charts, discover }}>
     <Findings />
   </TestProvider>
 );
@@ -49,6 +53,7 @@ describe.skip('<Findings />', () => {
     const data = dataPluginMock.createStartContract();
     const unifiedSearch = unifiedSearchPluginMock.createStartContract();
     const charts = chartPluginMock.createStartContract();
+    const discover = discoverPluginMock.createStartContract();
     const source = await data.search.searchSource.create();
 
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
@@ -65,7 +70,9 @@ describe.skip('<Findings />', () => {
       }),
     } as UseQueryResult<DataView>);
 
-    render(<Wrapper data={data} unifiedSearch={unifiedSearch} charts={charts} />);
+    render(
+      <Wrapper data={data} unifiedSearch={unifiedSearch} charts={charts} discover={discover} />
+    );
 
     expect(await screen.findByTestId(TEST_SUBJECTS.FINDINGS_CONTAINER)).toBeInTheDocument();
   });

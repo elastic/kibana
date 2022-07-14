@@ -18,11 +18,7 @@ import {
   useKibana,
   useGetUserCasesPermissions,
 } from '../../../../common/lib/kibana';
-import {
-  mockBrowserFields,
-  mockDocValueFields,
-  mockRuntimeMappings,
-} from '../../../../common/containers/source/mock';
+import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { allCasesPermissions } from '../../../../cases_test_utils';
@@ -114,7 +110,6 @@ const defaultProps = {
   detailsData: mockAlertDetailsDataWithIsObject,
   tabType: TimelineTabs.query,
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   runtimeMappings: mockRuntimeMappings,
 };
 

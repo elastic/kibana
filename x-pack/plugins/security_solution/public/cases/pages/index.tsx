@@ -27,13 +27,10 @@ import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   return (
     <DetailsPanel
       browserFields={browserFields}
-      docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}

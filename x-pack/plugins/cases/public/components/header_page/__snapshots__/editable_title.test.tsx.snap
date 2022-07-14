@@ -50,6 +50,10 @@ exports[`EditableTitle renders 1`] = `
                 "read": true,
                 "update": true,
               },
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
+              },
             }
           }
         >
