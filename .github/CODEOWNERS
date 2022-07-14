@@ -273,6 +273,7 @@
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
 /typings/ @elastic/kibana-core
+/x-pack/plugins/global_search_providers  @elastic/kibana-core
 /x-pack/plugins/banners/  @elastic/kibana-core
 /x-pack/plugins/features/  @elastic/kibana-core
 /x-pack/plugins/licensing/  @elastic/kibana-core
