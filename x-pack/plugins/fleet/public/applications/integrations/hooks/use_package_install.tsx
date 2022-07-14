@@ -107,8 +107,7 @@ function usePackageInstall({
       const res = await sendInstallPackage(name, version, isReinstall || force);
       if (res.error) {
         if (isVerificationError(res.error)) {
-          optionallyForceInstall(props, prevStatus);
-          return;
+          return optionallyForceInstall(props, prevStatus);
         }
         if (fromUpdate) {
           // if there is an error during update, set it back to the previous version
