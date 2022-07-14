@@ -81,6 +81,7 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
+import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -250,6 +251,70 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
+  }
+
+  getActiveIndexFilter() {
+    const { filter: originalFilters, query } = this.getFields();
+
+    let filters: Filter[] = [];
+    if (originalFilters) {
+      filters = this.getFilters(originalFilters);
+    }
+
+    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/gi;
+    const queryString = Array.isArray(query) ? query.map((q) => q.query) : query?.query;
+
+    type ParseActiveIndexPatternFromString = (
+      str: string,
+      indexPatternSet?: Set<string>
+    ) => string[];
+    const parseActiveIndexPatternFromQueryString: ParseActiveIndexPatternFromString = (
+      str,
+      indexPatternSet = new Set()
+    ) => {
+      let m;
+      while ((m = regex.exec(str)) !== null) {
+        // This is necessary to avoid infinite loops with zero-width matches
+        if (m.index === regex.lastIndex) {
+          regex.lastIndex++;
+        }
+
+        m.forEach((match, groupIndex) => {
+          if (groupIndex === 2) {
+            indexPatternSet.add(match);
+          }
+        });
+      }
+
+      return [...indexPatternSet];
+    };
+
+    const matchedIndexPatternFromQuery =
+      typeof queryString === 'string'
+        ? parseActiveIndexPatternFromQueryString(queryString)
+        : queryString?.reduce((acc: string[], currStr: string) => {
+            return acc.concat(parseActiveIndexPatternFromQueryString(currStr));
+          }, []) ?? [];
+
+    const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
+      if (f.meta.key === '_index' && f.meta.disabled === false) {
+        if (f.meta.negate === false) {
+          return _.concat(acc, f.meta.params.query ?? f.meta.params);
+        } else {
+          if (Array.isArray(f.meta.params)) {
+            return _.difference(acc, f.meta.params);
+          } else {
+            return _.difference(acc, [f.meta.params.query]);
+          }
+        }
+      } else {
+        return acc;
+      }
+    }, matchedIndexPatternFromQuery);
+
+    const dedupActiveIndexPattern = new Set([...activeIndexPattern]);
+
+    return [...dedupActiveIndexPattern];
   }
 
   /**
