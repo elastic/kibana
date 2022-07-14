@@ -35,11 +35,19 @@ export interface CommandArgs {
 
 export interface CommandDefinition<TMeta = any> {
   name: string;
-  about: string;
+  about: ComponentType | string;
   /**
    * The Component that will be used to render the Command
    */
   RenderComponent: CommandExecutionComponent;
+  /** Will be used to sort the commands when building the output for the `help` command */
+  helpCommandPosition?: number;
+
+  /** A grouping label for the command */
+  helpGroupLabel?: string;
+
+  /** Used only when command help "grouping" is detected. Used to sort the groups of commands */
+  helpGroupPosition?: number;
   /**
    * If defined, this command's use of `--help` will be displayed using this component instead of
    * the console's built in output.
