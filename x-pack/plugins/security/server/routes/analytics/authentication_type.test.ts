@@ -379,7 +379,7 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
 
       expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(1);
       expect(routeParamsMock.logger.warn).toBeCalledWith(
-        'Using API Key authentication as an interactive user is deprecated and will stop working in the next major version.',
+        'Using API Key authentication as an interactive user is deprecated and will not be supported in a future version',
         { tags: ['deprecation'] }
       );
     });
