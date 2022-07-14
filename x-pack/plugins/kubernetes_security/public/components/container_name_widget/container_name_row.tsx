@@ -22,19 +22,19 @@ export const ContainerNameRow = ({
   filterButtonIn,
   filterButtonOut,
 }: ContainerNameRowDeps) => {
-  const [isHoveredFilter, setHoveredFilter] = useState<boolean | null>(false);
+  const [isHover, seIsHover] = useState<boolean | null>(false);
 
   const styles = useStyles();
 
   return (
     <EuiFlexItem
-      onMouseEnter={() => setHoveredFilter(!isHoveredFilter!)}
-      onMouseLeave={() => setHoveredFilter(false)}
+      onMouseEnter={() => seIsHover(true)}
+      onMouseLeave={() => seIsHover(false)}
       data-test-subj={ROW_TEST_ID}
     >
       <EuiText size="xs" css={styles.dataInfo}>
         {name}
-        {isHoveredFilter && (
+        {isHover && (
           <div css={styles.filters}>
             {filterButtonIn}
             {filterButtonOut}
