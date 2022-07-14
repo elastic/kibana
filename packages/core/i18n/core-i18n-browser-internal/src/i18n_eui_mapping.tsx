@@ -401,10 +401,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGridCell.position': ({ row, col }: EuiValues) =>
+    'euiDataGridCell.position': ({ columnId, row, col }: EuiValues) =>
       i18n.translate('core.euiDataGridCell.position', {
-        defaultMessage: 'Row: {row}; Column: {col}',
-        values: { row, col },
+        defaultMessage: '{columnId}, column {col}, row {row}',
+        values: { columnId, row, col },
       }),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
