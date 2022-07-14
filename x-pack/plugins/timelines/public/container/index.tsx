@@ -28,7 +28,6 @@ import {
   EntityType,
 } from '../../common/search_strategy';
 import type {
-  DocValueFields,
   Inspect,
   PaginationInputPaginated,
   TimelineStrategyResponseType,
@@ -75,7 +74,6 @@ export interface UseTimelineEventsProps {
   alertConsumers?: AlertConsumers[];
   data?: DataPublicPluginStart;
   dataViewId: string | null;
-  docValueFields?: DocValueFields[];
   endDate: string;
   entityType: EntityType;
   excludeEcsData?: boolean;
@@ -121,7 +119,6 @@ const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
   dataViewId,
-  docValueFields,
   endDate,
   entityType,
   excludeEcsData = false,
@@ -298,7 +295,6 @@ export const useTimelineEvents = ({
       const currentRequest = {
         alertConsumers,
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         excludeEcsData,
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
@@ -331,7 +327,6 @@ export const useTimelineEvents = ({
     dispatch,
     indexNames,
     activePage,
-    docValueFields,
     endDate,
     excludeEcsData,
     filterQuery,
