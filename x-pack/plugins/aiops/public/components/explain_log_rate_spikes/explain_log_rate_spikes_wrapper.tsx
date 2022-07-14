@@ -6,10 +6,10 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { parse, stringify } from 'query-string';
-import { isEqual } from 'lodash';
-import { encode } from 'rison-node';
-import { useHistory, useLocation } from 'react-router-dom';
+// import { parse, stringify } from 'query-string';
+// import { isEqual } from 'lodash';
+// import { encode } from 'rison-node';
+// import { useHistory, useLocation } from 'react-router-dom';
 import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
@@ -28,15 +28,15 @@ import {
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import {
-  Accessor,
-  Dictionary,
-  parseUrlState,
-  Provider as UrlStateContextProvider,
-  isRisonSerializationRequired,
-  getNestedProperty,
-  SetUrlState,
-} from '../../hooks/url_state';
+// import {
+//   Accessor,
+//   Dictionary,
+//   parseUrlState,
+//   Provider as UrlStateContextProvider,
+//   isRisonSerializationRequired,
+//   getNestedProperty,
+//   SetUrlState,
+// } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 
@@ -179,70 +179,70 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
-  const history = useHistory();
-  const { search: urlSearchString } = useLocation();
+  // const history = useHistory();
+  // const { search: urlSearchString } = useLocation();
 
-  const setUrlState: SetUrlState = useCallback(
-    (
-      accessor: Accessor,
-      attribute: string | Dictionary<any>,
-      value?: any,
-      replaceState?: boolean
-    ) => {
-      const prevSearchString = urlSearchString;
-      const urlState = parseUrlState(prevSearchString);
-      const parsedQueryString = parse(prevSearchString, { sort: false });
+  // const setUrlState: SetUrlState = useCallback(
+  //   (
+  //     accessor: Accessor,
+  //     attribute: string | Dictionary<any>,
+  //     value?: any,
+  //     replaceState?: boolean
+  //   ) => {
+  //     const prevSearchString = urlSearchString;
+  //     const urlState = parseUrlState(prevSearchString);
+  //     const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-        urlState[accessor] = {};
-      }
+  //     if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+  //       urlState[accessor] = {};
+  //     }
 
-      if (typeof attribute === 'string') {
-        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-          return prevSearchString;
-        }
+  //     if (typeof attribute === 'string') {
+  //       if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+  //         return prevSearchString;
+  //       }
 
-        urlState[accessor][attribute] = value;
-      } else {
-        const attributes = attribute;
-        Object.keys(attributes).forEach((a) => {
-          urlState[accessor][a] = attributes[a];
-        });
-      }
+  //       urlState[accessor][attribute] = value;
+  //     } else {
+  //       const attributes = attribute;
+  //       Object.keys(attributes).forEach((a) => {
+  //         urlState[accessor][a] = attributes[a];
+  //       });
+  //     }
 
-      try {
-        const oldLocationSearchString = stringify(parsedQueryString, {
-          sort: false,
-          encode: false,
-        });
+  //     try {
+  //       const oldLocationSearchString = stringify(parsedQueryString, {
+  //         sort: false,
+  //         encode: false,
+  //       });
 
-        Object.keys(urlState).forEach((a) => {
-          if (isRisonSerializationRequired(a)) {
-            parsedQueryString[a] = encode(urlState[a]);
-          } else {
-            parsedQueryString[a] = urlState[a];
-          }
-        });
-        const newLocationSearchString = stringify(parsedQueryString, {
-          sort: false,
-          encode: false,
-        });
+  //       Object.keys(urlState).forEach((a) => {
+  //         if (isRisonSerializationRequired(a)) {
+  //           parsedQueryString[a] = encode(urlState[a]);
+  //         } else {
+  //           parsedQueryString[a] = urlState[a];
+  //         }
+  //       });
+  //       const newLocationSearchString = stringify(parsedQueryString, {
+  //         sort: false,
+  //         encode: false,
+  //       });
 
-        if (oldLocationSearchString !== newLocationSearchString) {
-          const newSearchString = stringify(parsedQueryString, { sort: false });
-          if (replaceState) {
-            history.replace({ search: newSearchString });
-          } else {
-            history.push({ search: newSearchString });
-          }
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Could not save url state', error);
-      }
-    },
-    [history, urlSearchString]
-  );
+  //       if (oldLocationSearchString !== newLocationSearchString) {
+  //         const newSearchString = stringify(parsedQueryString, { sort: false });
+  //         if (replaceState) {
+  //           history.replace({ search: newSearchString });
+  //         } else {
+  //           history.push({ search: newSearchString });
+  //         }
+  //       }
+  //     } catch (error) {
+  //       // eslint-disable-next-line no-console
+  //       console.error('Could not save url state', error);
+  //     }
+  //   },
+  //   [history, urlSearchString]
+  // );
 
   useEffect(() => {
     // Update data query manager if input string is updated
@@ -255,7 +255,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
   if (!dataView || !timefilter) return null;
 
   return (
-    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+    // <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
@@ -326,6 +326,6 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
           </EuiFlexGroup>
         </EuiPageContentBody>
       </EuiPageBody>
-    </UrlStateContextProvider>
+    // </UrlStateContextProvider>
   );
 };
