@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/test-helpers/core-test-helpers-browser'],
+  roots: ['<rootDir>/packages/core/test-helpers/core-test-helpers-http-setup-browser'],
 };

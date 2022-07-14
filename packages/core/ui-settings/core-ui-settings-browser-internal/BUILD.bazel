@@ -30,7 +30,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//rxjs",
   "@npm//lodash",
-  "//packages/core/test-helpers/core-test-helpers-browser"
+  "//packages/core/test-helpers/core-test-helpers-http-setup-browser"
 ]
 
 TYPES_DEPS = [
@@ -38,7 +38,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//rxjs",
   "@npm//lodash",
-  "//packages/core/test-helpers/core-test-helpers-browser:npm_module_types",
+  "//packages/core/test-helpers/core-test-helpers-http-setup-browser:npm_module_types",
   "//packages/core/http/core-http-browser:npm_module_types",
   "//packages/core/ui-settings/core-ui-settings-browser:npm_module_types"
 ]

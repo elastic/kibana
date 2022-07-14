@@ -3300,7 +3300,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-browser":
+"@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
 
@@ -6963,7 +6963,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-test-helpers-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-browser/npm_module_types":
+"@types/kbn__core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
