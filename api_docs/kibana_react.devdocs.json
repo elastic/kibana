@@ -1114,15 +1114,15 @@
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/product_selector/product_selector.tsx"
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/product_selector/product_selector.tsx"
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/product_selector/product_selector.tsx"
+            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
           },
           {
             "plugin": "enterpriseSearch",
@@ -1135,18 +1135,6 @@
           {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
           },
           {
             "plugin": "enterpriseSearch",
@@ -4391,13 +4379,7 @@
           " | undefined; fatalErrors?: ",
           "FatalErrorsSetup",
           " | undefined; deprecations?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.DeprecationsServiceStart",
-            "text": "DeprecationsServiceStart"
-          },
+          "DeprecationsServiceStart",
           " | undefined; theme?: ",
           "ThemeServiceStart",
           " | undefined; injectedMetadata?: ",
