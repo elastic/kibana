@@ -177,15 +177,18 @@ async function upgradeBatch(
     source_uri: options.sourceUri,
   };
 
+  const upgradeOptions = {
+    start_time: options.startTime ?? now,
+  };
   const rollingUpgradeOptions = options?.upgradeDurationSeconds
     ? {
-        start_time: options.startTime ?? now,
         minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
         expiration: moment(options.startTime ?? now)
           .add(options?.upgradeDurationSeconds, 'seconds')
           .toISOString(),
+        ...upgradeOptions,
       }
-    : {};
+    : upgradeOptions;
 
   await createAgentAction(esClient, {
     created_at: now,

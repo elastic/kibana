@@ -449,6 +449,50 @@ export default function (providerContext: FtrProviderContext) {
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');
       });
+      it('should create a .fleet-actions document with the agents, version, and start_time if start_time passed', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            agents: ['agent1', 'agent2'],
+            start_time: '2022-07-14T08:54:46.987Z',
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+
+        const action: any = actionsRes.hits.hits[0]._source;
+
+        expect(action).to.have.keys('agents', 'expiration', 'start_time');
+        expect(action.agents).contain('agent1');
+        expect(action.agents).contain('agent2');
+      });
 
       it('should allow to upgrade multiple upgradeable agents by kuery', async () => {
         await es.update({
