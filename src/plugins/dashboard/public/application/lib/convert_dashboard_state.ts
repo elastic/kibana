@@ -127,9 +127,7 @@ export const stateToDashboardContainerInput = ({
       .filter(
         (filter) =>
           isFilterPinned(filter) ||
-          filters.some((dashboardFilter) =>
-            filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
-          )
+          filters.some((dashboardFilter) => filtersAreEqual(migrateFilter(dashboardFilter), filter))
       ),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
