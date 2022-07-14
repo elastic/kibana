@@ -16,6 +16,7 @@ import { FunctionContext } from '../contexts/function';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { FunctionNavigation } from '../function_nav';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
+import { TopNFunctionsTable } from '../topn_functions';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const {
@@ -64,6 +65,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
           getter={fetchTopNFunctions}
           setter={setTopNFunctions}
         />
+        <TopNFunctionsTable />
         {children}
       </FunctionContext.Provider>
     </ProfilingAppPageTemplate>
