@@ -42,6 +42,7 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -603,6 +604,11 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('getPanelCount');
     const panels = await this.testSubjects.findAll('embeddablePanel');
     return panels.length;
+  }
+
+  public async getAllPanels() {
+    this.log.debug('getAllPanels');
+    return await this.testSubjects.findAll('embeddablePanel');
   }
 
   public getTestVisualizations() {
