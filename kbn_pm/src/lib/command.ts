@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Args } from './args.mjs';
+
 /**
  * Helper function to easily time specific parts of a kbn command. Does not produce
  * timings unless the reportTimings config is also defined
@@ -16,8 +19,8 @@ export type SubCommandTimeFn = <T>(id: string, block: () => Promise<T>) => Promi
  * Argument passed to the command run function
  */
 export interface CommandRunContext {
-  args: import('../lib/args.mjs').Args;
-  log: import('@kbn/some-dev-log').SomeDevLog;
+  args: Args;
+  log: SomeDevLog;
   time: SubCommandTimeFn;
 }
 
