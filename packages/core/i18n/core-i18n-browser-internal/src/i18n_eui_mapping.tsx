@@ -418,6 +418,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Header actions',
       }
     ),
+    'euiDataGridHeaderCell.actionsPopoverScreenReaderText': i18n.translate(
+      'core.euiDataGridHeaderCell.actionsPopoverScreenReaderText',
+      {
+        defaultMessage:
+          'To navigate through the list of column actions, press the Tab or Up and Down arrow keys.',
+      }
+    ),
     'euiDataGridPagination.detailedPaginationLabel': ({ label }: EuiValues) =>
       i18n.translate('core.euiDataGridPagination.detailedPaginationLabel', {
         defaultMessage: 'Pagination for preceding grid: {label}',
