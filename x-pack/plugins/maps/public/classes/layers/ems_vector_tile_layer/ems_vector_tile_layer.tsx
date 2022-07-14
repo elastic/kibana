@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
 import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { EuiIcon } from '@elastic/eui';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
-import { AbstractLayer } from '../layer';
+import { AbstractLayer, type LayerIcon } from '../layer';
 import {
   AUTOSELECT_EMS_LOCALE,
   NO_EMS_LOCALE,
@@ -482,8 +484,13 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return this._source.getLicensedFeatures();
   }
 
-  getLayerTypeIconName() {
-    return 'grid';
+  getLayerIcon(): LayerIcon {
+    return {
+      icon: <EuiIcon size="m" type="grid" />,
+      tooltipContent: i18n.translate('xpack.maps.emsVectorTileLayer.tooltipMessage', {
+        defaultMessage: `Reference map provided by Elastic Maps Service (EMS)`,
+      })
+    };
   }
 
   isBasemap(order: number) {
