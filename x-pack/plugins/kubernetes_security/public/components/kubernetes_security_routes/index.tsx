@@ -270,7 +270,11 @@ const KubernetesSecurityRoutesComponent = ({
             </EuiFlexGroup>
           </>
         )}
-        <TreeViewContainer globalFilter={globalFilter} renderSessionsView={renderSessionsView} />
+        <TreeViewContainer
+          globalFilter={globalFilter}
+          renderSessionsView={renderSessionsView}
+          indexPattern={indexPattern}
+        />
       </Route>
     </Switch>
   );

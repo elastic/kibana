@@ -7,35 +7,33 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
-import { useEuiTheme } from '../../hooks';
+import { useEuiTheme } from '../../../hooks';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border } = euiTheme;
+    const { size } = euiTheme;
 
-    const outerPanel: CSSObject = {
-      minHeight: '500px',
+    const treeViewSwitcher: CSSObject = {
+      '.euiButton__text': {
+        fontSize: size.m,
+      },
     };
 
-    const navPanel: CSSObject = {
-      borderRight: border.thin,
+    const treeViewContainer: CSSObject = {
+      height: '600px',
+      overflowY: 'auto',
     };
 
-    const treeViewNav: CSSObject = {
-      width: '316px',
-    };
-
-    const sessionsPanel: CSSObject = {
-      overflowX: 'auto',
+    const treeViewLegend: CSSObject = {
+      textTransform: 'capitalize',
     };
 
     return {
-      outerPanel,
-      navPanel,
-      treeViewNav,
-      sessionsPanel,
+      treeViewSwitcher,
+      treeViewContainer,
+      treeViewLegend,
     };
   }, [euiTheme]);
 
