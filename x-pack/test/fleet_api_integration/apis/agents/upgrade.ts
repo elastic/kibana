@@ -400,7 +400,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       });
 
-      it('should create a .fleet-actions document with the agents, version, and upgrade window', async () => {
+      it('should create a .fleet-actions document with the agents, version, and upgrade window when rollout_duration_seconds passed', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -489,7 +489,12 @@ export default function (providerContext: FtrProviderContext) {
 
         const action: any = actionsRes.hits.hits[0]._source;
 
-        expect(action).to.have.keys('agents', 'expiration', 'start_time');
+        expect(action).to.have.keys(
+          'agents',
+          'expiration',
+          'start_time',
+          'minimum_execution_duration'
+        );
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');
       });
