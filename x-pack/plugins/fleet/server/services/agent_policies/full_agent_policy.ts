@@ -22,6 +22,8 @@ import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
+import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
@@ -75,6 +77,9 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
+
+  const sourceUri = await getSourceUriForAgentPolicy(soClient, agentPolicy);
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -93,23 +98,21 @@ export async function getFullAgentPolicy(
       getOutputIdForAgentPolicy(dataOutput)
     ),
     revision: agentPolicy.revision,
-    ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-      ? {
-          agent: {
-            monitoring: {
+    agent: {
+      download: {
+        source_uri: sourceUri,
+      },
+      monitoring:
+        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
+          ? {
               namespace: agentPolicy.namespace,
               use_output: getOutputIdForAgentPolicy(monitoringOutput),
               enabled: true,
               logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            },
-          },
-        }
-      : {
-          agent: {
-            monitoring: { enabled: false, logs: false, metrics: false },
-          },
-        }),
+            }
+          : { enabled: false, logs: false, metrics: false },
+    },
   };
 
   const dataPermissions =

@@ -46,6 +46,7 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createSavedQueryAlertType,
   createThresholdAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
@@ -287,6 +288,19 @@ export const previewRulesRoute = async (
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
+              previewRuleParams,
+              () => true,
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+            );
+            break;
+          case 'saved_query':
+            const savedQueryAlertType = previewRuleTypeWrapper(
+              createSavedQueryAlertType(ruleOptions)
+            );
+            await runExecutors(
+              savedQueryAlertType.executor,
+              savedQueryAlertType.id,
+              savedQueryAlertType.name,
               previewRuleParams,
               () => true,
               { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
