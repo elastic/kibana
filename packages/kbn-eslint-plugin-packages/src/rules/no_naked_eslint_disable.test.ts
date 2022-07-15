@@ -10,8 +10,6 @@ import dedent from 'dedent';
 import { RuleTester } from 'eslint';
 import { NoNakedESLintDisableRule } from './no_naked_eslint_disable';
 
-const fmt = (str: TemplateStringsArray) => dedent(str);
-
 const tsTester = [
   '@typescript-eslint/parser',
   new RuleTester({
@@ -47,31 +45,31 @@ for (const [name, tester] of [tsTester, babelTester]) {
       valid: [
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             // eslint-disable no-var
           `,
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             // eslint-disable-next-line no-use-before-define
           `,
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             // eslint-disable-line no-use-before-define
           `,
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             /* eslint-disable no-var */
           `,
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             /* eslint-disable no-console, no-control-regex*/
           `,
         },
@@ -80,7 +78,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
       invalid: [
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             /* eslint-disable */
             const a = 1;
           `,
@@ -95,7 +93,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             // eslint-disable-next-line
             const a = 1;
           `,
@@ -110,7 +108,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             /* eslint-disable */
           `,
           errors: [
@@ -124,7 +122,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          code: fmt`
+          code: dedent`
             // eslint-disable-next-line
           `,
           errors: [
