@@ -77,7 +77,6 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
             return fixer.removeRange(comment.range as Eslint.AST.Range);
           },
         });
-
       });
     },
   };
