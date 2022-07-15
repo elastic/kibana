@@ -29,7 +29,8 @@ export interface PollEsNodesVersionOptions {
   esVersionCheckInterval: number;
 }
 
-interface NodeInfo {
+/** @public */
+export interface NodeInfo {
   version: string;
   ip: string;
   http?: {

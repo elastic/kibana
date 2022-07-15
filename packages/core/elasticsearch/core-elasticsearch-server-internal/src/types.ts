@@ -13,8 +13,8 @@ import type {
   ElasticsearchServiceSetup,
 } from '@kbn/core-elasticsearch-server';
 import type { ServiceStatus } from '@kbn/core-base-common';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { ClusterInfo } from './get_cluster_info';
+import type { NodesVersionCompatibility, NodeInfo } from './version_check/ensure_es_version';
+import type { ClusterInfo } from './get_cluster_info';
 
 /** @internal */
 export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
@@ -33,7 +33,7 @@ export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
 
 /** @internal */
 export interface ElasticsearchStatusMeta {
-  warningNodes: NodesVersionCompatibility['warningNodes'];
-  incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
-  nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
+  warningNodes: NodeInfo[];
+  incompatibleNodes: NodeInfo[];
+  nodesInfoRequestError?: Error;
 }

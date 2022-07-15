@@ -32,7 +32,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
+import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';

@@ -12,6 +12,8 @@ export type { ElasticsearchConfigType } from './elasticsearch_config';
 export type {
   NodesVersionCompatibility,
   PollEsNodesVersionOptions,
+  NodesInfo,
+  NodeInfo,
 } from './version_check/ensure_es_version';
 export type {
   ElasticsearchStatusMeta,
