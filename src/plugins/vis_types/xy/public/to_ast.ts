@@ -126,7 +126,6 @@ const prepareLayers = (
     decorations: yAccessors.map((accessor) =>
       prepareDecoration(seriesParam.valueAxis, accessor, seriesParam.data.id)
     ),
-    hide: !seriesParam.show,
     accessors: yAccessors.map((accessor) => prepareVisDimension(accessor)),
     xAccessor: xAccessor ? prepareVisDimension(xAccessor) : undefined,
     xScaleType: getScaleType(
@@ -379,6 +378,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       }
     }
   });
+
   let legendSize = vis.params.legendSize;
 
   if (vis.params.legendPosition === Position.Top || vis.params.legendPosition === Position.Bottom) {
@@ -400,19 +400,21 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const visTypeXy = buildExpressionFunction('layeredXyVis', {
     layers: [
-      ...finalSeriesParams.map((seriesParam) =>
-        prepareLayers(
-          seriesParam,
-          isHistogram,
-          vis.params.valueAxes,
-          yAccessors[seriesParam.data.id],
-          dimensions.x,
-          dimensions.series,
-          dimensions.z ? dimensions.z[0] : undefined,
-          vis.params.palette,
-          xScale
-        )
-      ),
+      ...finalSeriesParams
+        .filter((seriesParam) => seriesParam.show)
+        .map((seriesParam) =>
+          prepareLayers(
+            seriesParam,
+            isHistogram,
+            vis.params.valueAxes,
+            yAccessors[seriesParam.data.id],
+            dimensions.x,
+            dimensions.series,
+            dimensions.z ? dimensions.z[0] : undefined,
+            vis.params.palette,
+            xScale
+          )
+        ),
       ...(vis.params.thresholdLine.show
         ? [prepareReferenceLine(vis.params.thresholdLine, vis.params.valueAxes[0].id)]
         : []),

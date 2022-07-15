@@ -16,7 +16,7 @@ import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-
+import { PersistedState } from '@kbn/visualizations-plugin/public';
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -54,6 +54,7 @@ interface Props {
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
   handleEmptyXAccessor?: boolean;
+  uiState?: PersistedState;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -75,6 +76,7 @@ export const DataLayers: FC<Props> = ({
   defaultXScaleType,
   fieldFormats,
   handleEmptyXAccessor,
+  uiState,
 }) => {
   const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
   return (
@@ -118,6 +120,7 @@ export const DataLayers: FC<Props> = ({
             defaultXScaleType,
             fieldFormats,
             handleEmptyXAccessor,
+            uiState,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

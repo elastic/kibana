@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
@@ -52,6 +53,7 @@ type GetSeriesPropsFn = (config: {
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
   handleEmptyXAccessor?: boolean;
+  uiState?: PersistedState;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -76,7 +78,8 @@ type GetColorFn = (
     paletteService: PaletteRegistry;
     getSeriesNameFn: (d: XYChartSeriesIdentifier) => SeriesName;
     syncColors?: boolean;
-  }
+  },
+  uiState?: PersistedState
 ) => string | null;
 
 type GetPointConfigFn = (config: {
@@ -291,11 +294,18 @@ const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
 
 const getColor: GetColorFn = (
   series,
-  { layer, accessor, colorAssignments, paletteService, syncColors, getSeriesNameFn }
+  { layer, accessor, colorAssignments, paletteService, syncColors, getSeriesNameFn },
+  uiState
 ) => {
   const overwriteColor = getSeriesColor(layer, accessor);
   if (overwriteColor !== null) {
     return overwriteColor;
+  }
+
+  const overwriteColors: Record<string, string> = uiState?.get ? uiState.get('vis.colors', {}) : {};
+
+  if (Object.keys(overwriteColors).includes(series.key)) {
+    return overwriteColors[series.key];
   }
   const colorAssignment = colorAssignments[layer.palette.name];
 
@@ -362,6 +372,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   defaultXScaleType,
   fieldFormats,
   handleEmptyXAccessor,
+  uiState,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -466,14 +477,18 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         ? ScaleType.LinearBinary
         : scaleType,
     color: (series) =>
-      getColor(series, {
-        layer,
-        accessor,
-        colorAssignments,
-        paletteService,
-        getSeriesNameFn,
-        syncColors,
-      }),
+      getColor(
+        series,
+        {
+          layer,
+          accessor,
+          colorAssignments,
+          paletteService,
+          getSeriesNameFn,
+          syncColors,
+        },
+        uiState
+      ),
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode,

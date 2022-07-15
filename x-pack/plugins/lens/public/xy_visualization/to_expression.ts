@@ -10,6 +10,7 @@ import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import {
   State,
   YConfig,
@@ -429,7 +430,7 @@ const dataLayerToExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
   datasourceExpression: Ast,
-  curveType: any
+  curveType: XYCurveType
 ): Ast => {
   const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
 

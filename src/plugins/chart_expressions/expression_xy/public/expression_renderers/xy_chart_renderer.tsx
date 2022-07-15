@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -64,10 +65,9 @@ export const getXyChartRenderer = ({
     ]);
 
     const chartContainerStyle = css({
+      position: 'relative',
       width: '100%',
       height: '100%',
-      overflowX: 'hidden',
-      position: handlers.uiState ? 'absolute' : 'relative',
     });
 
     ReactDOM.render(
@@ -92,6 +92,7 @@ export const getXyChartRenderer = ({
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
               renderComplete={() => handlers.done()}
+              uiState={handlers.uiState as PersistedState}
             />
           </div>{' '}
         </I18nProvider>
