@@ -131,14 +131,16 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // push searchString changes into a debounced typeahead subject
     const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString)),
-      debounceTime(100)
+      tap((newSearchString) => (this.searchString = newSearchString))
     );
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
       merge(dataFetchPipe, typeaheadPipe)
-        .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
+        .pipe(
+          skip(1), // Skip the first input update because options list query will be run by initialize.
+          debounceTime(100) // Skip all the updates emitted during the last n seconds, executing only the last one, if updates have stopped.
+        )
         .subscribe(this.runOptionsListQuery)
     );
 
