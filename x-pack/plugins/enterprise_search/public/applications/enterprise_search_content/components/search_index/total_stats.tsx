@@ -53,7 +53,7 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
     },
     {
       description: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.lastUpdatedCardLabel',
         {
           defaultMessage: 'Last updated',
         }
