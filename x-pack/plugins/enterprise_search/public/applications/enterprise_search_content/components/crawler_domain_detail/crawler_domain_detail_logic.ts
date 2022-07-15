@@ -19,7 +19,8 @@ import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   DeleteCrawlerDomainApiLogic,
-  GetCrawlerDomainsArgs,
+  DeleteCrawlerDomainArgs,
+  DeleteCrawlerDomainResponse,
 } from '../../api/crawler/delete_crawler_domain_api_logic';
 import {
   CrawlerDomain,
@@ -47,9 +48,9 @@ export interface CrawlerDomainDetailValues {
 
 interface CrawlerDomainDetailActions {
   deleteApiError(error: HttpError): HttpError;
-  deleteApiSuccess(result: { domain: CrawlerDomain }): { domain: CrawlerDomain };
+  deleteApiSuccess(response: DeleteCrawlerDomainResponse): DeleteCrawlerDomainResponse;
   deleteDomain(): void;
-  deleteMakeRequest(args: GetCrawlerDomainsArgs): GetCrawlerDomainsArgs;
+  deleteMakeRequest(args: DeleteCrawlerDomainArgs): DeleteCrawlerDomainArgs;
   fetchDomainData(domainId: string): { domainId: string };
   receiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
   submitDeduplicationUpdate(payload: { enabled?: boolean; fields?: string[] }): {
