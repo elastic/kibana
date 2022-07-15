@@ -525,6 +525,12 @@
             },
             {
               "id": "kibDevDocsOpsEs"
+            },
+            {
+              "id": "kibDevDocsOpsSomeDevLog"
+            },
+            {
+              "id": "kibDevDocsOpsDevCliRunner"
             }
           ]
         }

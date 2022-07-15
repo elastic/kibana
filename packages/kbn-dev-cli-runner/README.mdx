@@ -1,8 +1,17 @@
-# @kbn/dev-cli-runner
+---
+id: kibDevDocsOpsKbnDevCliRunner
+slug: /kibana-dev-docs/ops/kbn-dev-cli-runner
+title: "@kbn/dev-cli-runner"
+description: 'Helper functions for writing little scripts for random build/ci/dev tasks'
+date: 2022-07-14
+tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts', 'cli']
+---
+
+## @kbn/dev-cli-runner
 
 Helper functions for writing little scripts for random build/ci/dev tasks.
 
-## Usage
+### Usage
 
 Define the function that should validate the CLI arguments and call your task fn:
 
@@ -63,7 +72,7 @@ $ node scripts/my_task
 #
 ```
 
-## API
+### API
 
 - ***`run(fn: async ({ flags: Flags, log: ToolingLog, addCleanupTask }) => Promise<void>, options: Options)`***
   
