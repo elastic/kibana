@@ -12,9 +12,12 @@ import { AggregationRestrictions } from '../../../common';
 import { mergeJobConfigurations } from './jobs_compatibility';
 
 /**
- * A record of capabilities (aggregations) for an index rollup job
+ * A record of capabilities (aggregations) for index rollup jobs
  */
 export interface RollupIndexCapability {
+  /**
+   * A record of capabilities (aggregations) for an index rollup job
+   */
   [index: string]: { aggs?: Dictionary<AggregationRestrictions>; error?: string };
 }
 

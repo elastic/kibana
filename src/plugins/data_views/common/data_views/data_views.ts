@@ -38,6 +38,10 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
+/*
+ * Attributes of the data view saved object
+ * @public
+ */
 export type DataViewSavedObjectAttrs = Pick<
   DataViewAttributes,
   'title' | 'type' | 'typeMeta' | 'name'
