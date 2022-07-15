@@ -230,9 +230,6 @@
           "id": "kibCoreChromePluginApi"
         },
         {
-          "id": "kibCoreHttpPluginApi"
-        },
-        {
           "id": "kibCoreSavedObjectsPluginApi"
         },
         {
