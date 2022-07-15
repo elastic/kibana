@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createComment({
         supertest,
         caseId: postedCase.id,
-        params: { ...postExternalReferenceSOReq, persistableStateAttachmentTypeId: 'not-exists' },
+        params: { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
         expectedHttpCode: 400,
       });
     });
