@@ -32,7 +32,7 @@ const DOT_PREFIX_RE = /(.).+?\./g;
  * version (d.n.string)
  */
 export function shortenDottedString(input: string): string {
-  return typeof input !== 'string' ? (input as string) : input.replace(DOT_PREFIX_RE, '$1.');
+  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
 }
 
 // Note - this code is duplicated from @kbn/es-query

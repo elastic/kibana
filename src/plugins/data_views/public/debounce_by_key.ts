@@ -8,7 +8,18 @@
 
 import { debounce } from 'lodash';
 
-export const debounceByKey = <F extends (...args: any) => unknown>(fn: F, waitInMs: number) => {
+/**
+ * Uses a debouncer collector behind a debouncing factory to work on a set of functions
+ *
+ * @template F - function type
+ * @param {F} fn - function to debounce
+ * @param {number} waitInMs
+ * @returns {(key: string) => Function}
+ */
+export const debounceByKey = <F extends (...args: any) => unknown>(
+  fn: F,
+  waitInMs: number
+): ((key: string) => Function) => {
   const debouncerCollector: Record<string, Function> = {};
   return (key: string) => {
     if (!debouncerCollector[key]) {
