@@ -122,7 +122,11 @@ export function useExpressionRenderer(
 
   useEffect(() => {
     const subscription = expressionLoaderRef.current?.data$.subscribe(({ partial, result }) => {
-      setState({ isEmpty: false });
+      const newState: Partial<ExpressionRendererState> = { isEmpty: false };
+      if (!hasHandledErrorRef.current) {
+        newState.error = null;
+      }
+      setState(newState);
       onData$?.(result, expressionLoaderRef.current?.inspect(), partial);
     });
 
