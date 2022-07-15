@@ -85,7 +85,7 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 
 export const mockMetricsService = metricsServiceMock.create();
-jest.doMock('./metrics/metrics_service', () => ({
+jest.doMock('@kbn/core-metrics-server-internal', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
 }));
 
