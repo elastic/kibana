@@ -23,7 +23,8 @@ import { useGetEndpointDetails } from '../../hooks';
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 
-describe('when on the policy response', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/136272
+describe.skip('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
   const createPolicyResponse = (
     overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success,
