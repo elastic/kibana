@@ -7,7 +7,6 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import { isNestedField } from '@kbn/data-views-plugin/common';
@@ -93,7 +92,8 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
       Object.fromEntries(
         Object.entries(fieldFormatMap).map(([id, format]) => [
           id,
-          'toJSON' in format ? (format as unknown as FieldFormat).toJSON() : format, // FIXME SerializedFieldFormat was inferred... was this intended to work with FieldFormat instead?
+          // @ts-expect-error FIXME Property 'toJSON' does not exist on type 'SerializedFieldFormat'
+          'toJSON' in format ? format.toJSON() : format,
         ])
       ),
     fields: newFields,
