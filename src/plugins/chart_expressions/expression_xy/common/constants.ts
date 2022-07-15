@@ -35,6 +35,8 @@ export const FittingFunctions = {
   LINEAR: 'Linear',
   CARRY: 'Carry',
   LOOKAHEAD: 'Lookahead',
+  AVERAGE: 'Average',
+  NEAREST: 'Nearest',
 } as const;
 
 export const EndValues = {
@@ -98,6 +100,7 @@ export const XScaleTypes = {
 export const XYCurveTypes = {
   LINEAR: 'LINEAR',
   CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
+  CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
 } as const;
 
 export const ValueLabelModes = {

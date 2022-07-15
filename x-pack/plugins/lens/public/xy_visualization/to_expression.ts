@@ -295,7 +295,6 @@ export const buildExpression = (
           fittingFunction: [state.fittingFunction || 'None'],
           endValue: [state.endValue || 'None'],
           emphasizeFitting: [state.emphasizeFitting || false],
-          curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
@@ -330,7 +329,8 @@ export const buildExpression = (
                 datasourceLayers[layer.layerId],
                 metadata,
                 paletteService,
-                datasourceExpressionsByLayers[layer.layerId]
+                datasourceExpressionsByLayers[layer.layerId],
+                state.curveType || 'LINEAR'
               )
             ),
             ...validReferenceLayers.map((layer) =>
@@ -428,7 +428,8 @@ const dataLayerToExpression = (
   datasourceLayer: DatasourcePublicAPI,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
-  datasourceExpression: Ast
+  datasourceExpression: Ast,
+  curveType: any
 ): Ast => {
   const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
 
@@ -450,6 +451,24 @@ const dataLayerToExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression
+        ? [
+            ...datasourceExpression.chain,
+            ...(layer.collapseFn
+              ? [
+                  {
+                    type: 'function',
+                    function: 'lens_collapse',
+                    arguments: {
+                      by: layer.xAccessor ? [layer.xAccessor] : [],
+                      metric: layer.accessors,
+                      fn: [layer.collapseFn!],
+                    },
+                  } as AstFunction,
+                ]
+              : []),
+          ]
+        : []),
       {
         type: 'function',
         function: 'extendedDataLayer',
@@ -468,34 +487,10 @@ const dataLayerToExpression = (
                 yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
               )
             : [],
+          curveType: [curveType],
           seriesType: [seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression
-            ? {
-                table: [
-                  {
-                    ...datasourceExpression,
-                    chain: [
-                      ...datasourceExpression.chain,
-                      ...(layer.collapseFn
-                        ? [
-                            {
-                              type: 'function',
-                              function: 'lens_collapse',
-                              arguments: {
-                                by: layer.xAccessor ? [layer.xAccessor] : [],
-                                metric: layer.accessors,
-                                fn: [layer.collapseFn!],
-                              },
-                            } as AstFunction,
-                          ]
-                        : []),
-                    ],
-                  },
-                ],
-              }
-            : {}),
           palette: [
             {
               type: 'expression',

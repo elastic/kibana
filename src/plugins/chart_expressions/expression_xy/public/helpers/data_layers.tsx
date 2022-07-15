@@ -51,6 +51,7 @@ type GetSeriesPropsFn = (config: {
   formattedDatatableInfo: DatatableWithFormatInfo;
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
+  handleEmptyXAccessor?: boolean;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -323,19 +324,21 @@ const EMPTY_ACCESSOR = '-';
 const SPLIT_CHAR = '.';
 
 export const generateSeriesId = (
-  { layerId, xAccessor }: Pick<CommonXYDataLayerConfig, 'layerId' | 'xAccessor'>,
+  { layerId }: Pick<CommonXYDataLayerConfig, 'layerId'>,
   splitColumnIds: string[],
-  accessor?: string
+  accessor?: string,
+  xColumnId?: string
 ) =>
-  [layerId, xAccessor ?? EMPTY_ACCESSOR, accessor ?? EMPTY_ACCESSOR, ...splitColumnIds].join(
+  [layerId, xColumnId ?? EMPTY_ACCESSOR, accessor ?? EMPTY_ACCESSOR, ...splitColumnIds].join(
     SPLIT_CHAR
   );
 
-export const getMetaFromSeriesId = (seriesId: string) => {
+export const getMetaFromSeriesId = (seriesId: string, handleEmptyXAccessor?: boolean) => {
   const [layerId, xAccessor, yAccessor, ...splitAccessors] = seriesId.split(SPLIT_CHAR);
   return {
     layerId,
-    xAccessor: xAccessor === EMPTY_ACCESSOR ? undefined : xAccessor,
+    xAccessor:
+      xAccessor === EMPTY_ACCESSOR ? (handleEmptyXAccessor ? 'all' : undefined) : xAccessor,
     yAccessor,
     splitAccessor: splitAccessors[0] === EMPTY_ACCESSOR ? undefined : splitAccessors,
   };
@@ -358,6 +361,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   formattedDatatableInfo,
   defaultXScaleType,
   fieldFormats,
+  handleEmptyXAccessor,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -367,7 +371,10 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   }
   const scaleType = yAxis?.scaleType || ScaleType.Linear;
   const isBarChart = layer.seriesType === SeriesTypes.BAR;
-  const xColumnId = layer.xAccessor && getAccessorByDimension(layer.xAccessor, table.columns);
+  const xColumnId =
+    layer.xAccessor !== undefined
+      ? getAccessorByDimension(layer.xAccessor, table.columns)
+      : undefined;
   const splitColumnIds =
     layer.splitAccessors?.map((splitAccessor) => {
       return getAccessorByDimension(splitAccessor, table.columns);
@@ -403,12 +410,24 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       )
   );
 
+  let emptyX: Record<string, string> = {
+    unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
+      defaultMessage: '(empty)',
+    }),
+  };
+
+  if (handleEmptyXAccessor) {
+    emptyX = {
+      all: i18n.translate('expressionXY.xyChart.handledEmptyXLabel', {
+        defaultMessage: '_all',
+      }),
+    };
+  }
+
   if (!xColumnId) {
     rows = rows.map((row) => ({
       ...row,
-      unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
-        defaultMessage: '(empty)',
-      }),
+      ...emptyX,
     }));
   }
 
@@ -429,13 +448,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
-    stackAccessors: isStacked ? [layer.xAccessor as string] : [],
+    stackAccessors: isStacked && xColumnId ? [xColumnId] : [],
     id: generateSeriesId(
       layer,
       splitColumnIds.length ? splitColumnIds : [EMPTY_ACCESSOR],
-      accessor
+      accessor,
+      xColumnId
     ),
-    xAccessor: xColumnId || 'unifiedX',
+    xAccessor: xColumnId || (handleEmptyXAccessor ? 'all' : 'unifiedX'),
     yAccessors: [accessor],
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),

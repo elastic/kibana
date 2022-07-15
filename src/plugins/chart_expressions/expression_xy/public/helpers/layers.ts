@@ -80,7 +80,9 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
 
       if (isDataLayer(layer)) {
         xAccessor =
-          layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
+          layer.xAccessor !== undefined && table
+            ? getAccessorByDimension(layer.xAccessor, table.columns)
+            : undefined;
         splitAccessors = table
           ? layer.splitAccessors?.map((splitAccessor) =>
               getAccessorByDimension(splitAccessor, table!.columns)
@@ -197,7 +199,8 @@ export const getLayerTitles = (
   { xAccessor, accessors, splitAccessors = [], table, layerId }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
   { xTitle }: CustomTitles,
-  groups: GroupsConfiguration
+  groups: GroupsConfiguration,
+  handleEmptyXAccessor?: boolean
 ): LayerAccessorsTitles => {
   const mapTitle = (dimension?: string | ExpressionValueVisDimension) => {
     if (!dimension) {
@@ -212,8 +215,12 @@ export const getLayerTitles = (
     [accessor]: getTitleForYAccessor(layerId, accessor, groups, table.columns),
   });
 
-  const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
-  const yColumnIds = accessors.map((a) => a && getAccessorByDimension(a, table.columns));
+  const xColumnId = xAccessor
+    ? getAccessorByDimension(xAccessor, table.columns)
+    : handleEmptyXAccessor
+    ? 'all'
+    : undefined;
+  const yColumnIds = accessors.map((a) => getAccessorByDimension(a, table.columns));
   const splitColumnAccessors: Array<string | ExpressionValueVisDimension> = splitAccessors;
 
   return {
@@ -238,12 +245,19 @@ export const getLayersTitles = (
   layers: CommonXYDataLayerConfig[],
   splitAccessors: SplitAccessors,
   customTitles: CustomTitles,
-  groups: GroupsConfiguration
+  groups: GroupsConfiguration,
+  handleEmptyXAccessor?: boolean
 ): LayersAccessorsTitles =>
   layers.reduce<LayersAccessorsTitles>(
     (formatters, layer) => ({
       ...formatters,
-      [layer.layerId]: getLayerTitles(layer, splitAccessors, customTitles, groups),
+      [layer.layerId]: getLayerTitles(
+        layer,
+        splitAccessors,
+        customTitles,
+        groups,
+        handleEmptyXAccessor
+      ),
     }),
     {}
   );

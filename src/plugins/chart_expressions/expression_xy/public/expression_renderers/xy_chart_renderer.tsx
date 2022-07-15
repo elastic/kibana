@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -62,13 +63,17 @@ export const getXyChartRenderer = ({
       import('../helpers/interval'),
     ]);
 
+    const chartContainerStyle = css({
+      width: '100%',
+      height: '100%',
+      overflowX: 'hidden',
+      position: handlers.uiState ? 'absolute' : 'relative',
+    });
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <div
-            style={{ width: '100%', height: '100%', overflowX: 'hidden' }}
-            data-test-subj="xyVisChart"
-          >
+          <div css={chartContainerStyle} data-test-subj="xyVisChart">
             <XYChartReportable
               {...config}
               data={deps.data}

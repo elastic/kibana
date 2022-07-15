@@ -27,6 +27,7 @@ import {
   Direction,
   XYChartElementEvent,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
@@ -190,6 +191,7 @@ export function XYChart({
     xAxisConfig,
     splitColumnAccessor,
     splitRowAccessor,
+    handleEmptyXAccessor,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -272,7 +274,14 @@ export function XYChart({
     [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
   );
 
-  const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
+  const allDocs = i18n.translate('visTypeXy.aggResponse.allDocsTitle', {
+    defaultMessage: 'All docs',
+  });
+
+  const xTitle =
+    xAxisConfig?.title ||
+    (xAxisColumn && xAxisColumn.name) ||
+    (handleEmptyXAccessor ? allDocs : undefined);
   const yAxesMap = {
     left: yAxesConfiguration.find(
       ({ position }) => position === getAxisPosition(Position.Left, shouldRotate)
@@ -286,7 +295,8 @@ export function XYChart({
     dataLayers,
     { splitColumnAccessor, splitRowAccessor },
     { xTitle },
-    yAxesConfiguration
+    yAxesConfiguration,
+    handleEmptyXAccessor
   );
 
   const filteredBarLayers = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR);
@@ -303,6 +313,7 @@ export function XYChart({
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
+  const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     data.datatableUtilities,
@@ -310,6 +321,7 @@ export function XYChart({
     minInterval,
     isTimeViz,
     isHistogramViz,
+    hasBars,
     xAxisConfig?.extent
   );
 
@@ -546,7 +558,9 @@ export function XYChart({
 
     const { table } = dataLayers[0];
     const xAccessor =
-      dataLayers[0].xAccessor && getAccessorByDimension(dataLayers[0].xAccessor, table.columns);
+      dataLayers[0].xAccessor !== undefined
+        ? getAccessorByDimension(dataLayers[0].xAccessor, table.columns)
+        : undefined;
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
 
     const context: BrushEvent['data'] = { range: [min, max], table, column: xAxisColumnIndex };
@@ -699,6 +713,7 @@ export function XYChart({
                     splitRowAccessor: splitRowId,
                   }}
                   xDomain={isTimeViz ? rawXDomain : undefined}
+                  handleEmptyXAccessor={handleEmptyXAccessor}
                 />
               )
             : undefined,
@@ -740,7 +755,11 @@ export function XYChart({
         }
         title={xTitle}
         gridLine={gridLineStyle}
-        hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
+        hide={
+          xAxisConfig?.hide ||
+          dataLayers[0]?.simpleView ||
+          !(handleEmptyXAccessor || dataLayers[0]?.xAccessor)
+        }
         tickFormat={(d) => {
           let value = safeXAccessorLabelRenderer(d) || '';
           if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
@@ -757,9 +776,7 @@ export function XYChart({
         <SplitChart
           splitColumnAccessor={splitColumnAccessor}
           splitRowAccessor={splitRowAccessor}
-          formatFactory={formatFactory}
           columns={splitTable.columns}
-          fieldFormats={splitFieldFormats}
         />
       )}
       {yAxesConfiguration.map((axis) => {
@@ -812,7 +829,6 @@ export function XYChart({
           layers={dataLayers}
           endValue={endValue}
           timeZone={timeZone}
-          curveType={args.curveType}
           syncColors={syncColors}
           valueLabels={valueLabels}
           fillOpacity={args.fillOpacity}
@@ -826,6 +842,7 @@ export function XYChart({
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
           defaultXScaleType={defaultXScaleType}
           fieldFormats={fieldFormats}
+          handleEmptyXAccessor={handleEmptyXAccessor}
         />
       )}
       {referenceLineLayers.length ? (

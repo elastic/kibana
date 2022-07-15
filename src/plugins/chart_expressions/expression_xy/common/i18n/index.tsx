@@ -117,6 +117,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
       defaultMessage: 'Specifies split row of the xy chart',
     }),
+  getHandleEmptyXAccessorHelp: () =>
+    i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
+      defaultMessage: 'Allow handling empty x accessor',
+    }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {
       defaultMessage: 'Layers of visual series',

@@ -22,7 +22,6 @@ import {
   EndValue,
   FittingFunction,
   ValueLabelMode,
-  XYCurveType,
   XScaleType,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
@@ -42,7 +41,6 @@ interface Props {
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
-  curveType?: XYCurveType;
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
@@ -55,6 +53,7 @@ interface Props {
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
+  handleEmptyXAccessor?: boolean;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -62,7 +61,6 @@ export const DataLayers: FC<Props> = ({
   layers,
   endValue,
   timeZone,
-  curveType,
   syncColors,
   valueLabels,
   fillOpacity,
@@ -76,6 +74,7 @@ export const DataLayers: FC<Props> = ({
   chartHasMoreThanOneBarSeries,
   defaultXScaleType,
   fieldFormats,
+  handleEmptyXAccessor,
 }) => {
   const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
   return (
@@ -118,11 +117,12 @@ export const DataLayers: FC<Props> = ({
             fillOpacity,
             defaultXScaleType,
             fieldFormats,
+            handleEmptyXAccessor,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
 
-          const curve = curveType ? CurveType[curveType] : undefined;
+          const curve = layer.curveType ? CurveType[layer.curveType] : undefined;
 
           switch (seriesType) {
             case SeriesTypes.LINE:

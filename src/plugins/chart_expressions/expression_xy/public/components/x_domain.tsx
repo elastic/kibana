@@ -47,6 +47,7 @@ export const getXDomain = (
   minInterval: number | undefined,
   isTimeViz: boolean,
   isHistogram: boolean,
+  hasBars: boolean,
   xExtent?: AxisExtentConfigResult
 ) => {
   const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers)?.timeRange;
@@ -62,7 +63,7 @@ export const getXDomain = (
     ? { minInterval, min: NaN, max: NaN }
     : undefined;
 
-  if (isHistogram && isFullyQualified(baseDomain)) {
+  if ((isHistogram || isTimeViz) && isFullyQualified(baseDomain)) {
     if (xExtent && !isTimeViz) {
       return {
         extendedDomain: {
@@ -76,7 +77,8 @@ export const getXDomain = (
     const xValues = uniq(
       layers
         .flatMap<number>(({ table, xAccessor }) => {
-          const accessor = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+          const accessor =
+            xAccessor !== undefined ? getAccessorByDimension(xAccessor, table.columns) : undefined;
           return table.rows.map((row) => accessor && row[accessor] && row[accessor].valueOf());
         })
         .filter((v) => !isUndefined(v))
@@ -86,8 +88,8 @@ export const getXDomain = (
     const lastXValue = xValues[xValues.length - 1];
 
     const domainMin = Math.min(firstXValue, baseDomain.min);
-    const domainMaxValue = baseDomain.max - baseDomain.minInterval;
-    const domainMax = Math.max(domainMaxValue, lastXValue);
+    const domainMaxValue = Math.max(baseDomain.max - baseDomain.minInterval, lastXValue);
+    const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
 
     return {
       extendedDomain: {
