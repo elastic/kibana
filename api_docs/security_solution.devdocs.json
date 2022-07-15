@@ -121,7 +121,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              "StartPlugins",
+              "StartPluginsDependencies",
               ", ",
               "PluginStart",
               ">, plugins: ",
@@ -154,7 +154,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  "StartPlugins",
+                  "StartPluginsDependencies",
                   ", ",
                   "PluginStart",
                   ">"

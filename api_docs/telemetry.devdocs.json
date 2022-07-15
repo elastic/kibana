@@ -161,6 +161,21 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.labels",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [
+              "Extra labels to add to the telemetry context"
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

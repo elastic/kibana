@@ -62,13 +62,7 @@
                     "label": "uiSettings",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "core",
-                        "scope": "public",
-                        "docId": "kibCorePluginApi",
-                        "section": "def-public.IUiSettingsClient",
-                        "text": "IUiSettingsClient"
-                      }
+                      "IUiSettingsClient"
                     ],
                     "path": "src/core/public/notifications/toasts/toasts_api.tsx",
                     "deprecated": false
@@ -1318,13 +1312,7 @@
               "{@link IUiSettingsClient}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1610,13 +1598,7 @@
               "{@link IUiSettingsClient}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -4469,7 +4451,7 @@
         "description": [
           "\nClient-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n{@link IUiSettingsClient}\n"
         ],
-        "path": "src/core/public/ui_settings/types.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -4484,7 +4466,7 @@
             "signature": [
               "<T = any>(key: string, defaultOverride?: T | undefined) => T"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4497,7 +4479,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -4511,7 +4493,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -4532,7 +4514,7 @@
               "Observable",
               "<T>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4545,7 +4527,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -4559,7 +4541,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -4582,7 +4564,7 @@
               "UserProvidedValues",
               "<any>>>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -4599,7 +4581,7 @@
             "signature": [
               "(key: string, value: any) => Promise<boolean>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4612,7 +4594,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -4626,7 +4608,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4645,7 +4627,7 @@
             "signature": [
               "(key: string) => Promise<boolean>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4658,7 +4640,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4677,7 +4659,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4690,7 +4672,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4709,7 +4691,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4722,7 +4704,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4741,7 +4723,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4754,7 +4736,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4773,7 +4755,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -4786,7 +4768,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4807,7 +4789,7 @@
               "Observable",
               "<{ key: string; newValue: T; oldValue: T; }>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -4826,7 +4808,7 @@
               "Observable",
               "<Error>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -8783,7 +8765,7 @@
           "UiSettingsParams",
           "<T>"
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -8798,7 +8780,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8813,7 +8795,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8828,7 +8810,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8843,7 +8825,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8858,7 +8840,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8873,7 +8855,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8888,7 +8870,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8903,7 +8885,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8918,7 +8900,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8934,7 +8916,7 @@
               "UiSettingsType",
               " | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8950,7 +8932,7 @@
               "DeprecationSettings",
               " | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8965,7 +8947,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8979,7 +8961,7 @@
               "Type",
               "<T>"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -8996,7 +8978,7 @@
             "signature": [
               "{ type: string; name: string; } | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": true,
             "references": [
               {
@@ -9027,7 +9009,7 @@
         "tags": [],
         "label": "UiSettingsState",
         "description": [],
-        "path": "src/core/public/ui_settings/types.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -9044,7 +9026,7 @@
               "UserProvidedValues",
               "<any>"
             ],
-            "path": "src/core/public/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -9063,7 +9045,7 @@
           "UserProvidedValues",
           "<T>"
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -9076,7 +9058,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -9089,7 +9071,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -9553,7 +9535,7 @@
           "DeprecationSettings",
           " | undefined; }"
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10123,7 +10105,7 @@
         "signature": [
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"json\" | \"markdown\" | \"select\" | \"array\""
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -13236,7 +13218,7 @@
         "description": [
           "\nUiSettings deprecation field options."
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13248,7 +13230,7 @@
             "description": [
               "Deprecation message"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -13260,7 +13242,7 @@
             "description": [
               "Key to documentation links"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -27221,7 +27203,7 @@
           "UiSettingsParams",
           "<T>"
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27236,7 +27218,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27251,7 +27233,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27266,7 +27248,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27281,7 +27263,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27296,7 +27278,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27311,7 +27293,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27326,7 +27308,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27341,7 +27323,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27356,7 +27338,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27372,7 +27354,7 @@
               "UiSettingsType",
               " | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27388,7 +27370,7 @@
               "DeprecationSettings",
               " | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27403,7 +27385,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27417,7 +27399,7 @@
               "Type",
               "<T>"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27434,7 +27416,7 @@
             "signature": [
               "{ type: string; name: string; } | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": true,
             "references": [
               {
@@ -27848,7 +27830,7 @@
           "UserProvidedValues",
           "<T>"
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27861,7 +27843,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -27874,7 +27856,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/types/ui_settings.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -31088,7 +31070,7 @@
           "DeprecationSettings",
           " | undefined; }"
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -31718,7 +31700,7 @@
         "signature": [
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"json\" | \"markdown\" | \"select\" | \"array\""
         ],
-        "path": "src/core/types/ui_settings.ts",
+        "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

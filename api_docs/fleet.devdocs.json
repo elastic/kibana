@@ -2996,10 +2996,57 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_edit_download_sources",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_edit_download_sources",
+            "description": [],
+            "signature": [
+              "({ downloadSourceId }: ",
+              "DynamicPagePathValues",
+              ") => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.settings_edit_download_sources.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ downloadSourceId }",
+                "description": [],
+                "signature": [
+                  "DynamicPagePathValues"
+                ],
+                "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.pagePathGetters.settings_create_outputs",
             "type": "Function",
             "tags": [],
             "label": "settings_create_outputs",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_create_download_sources",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_create_download_sources",
             "description": [],
             "signature": [
               "() => [string, string]"
@@ -17784,7 +17831,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ id: string; name: string; hosts: string; is_default?: boolean | undefined; }"
+              "{ id?: string | undefined; name: string; host: string; is_default?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
             "deprecated": false
@@ -18296,7 +18343,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ id: string; name: string; hosts: string; is_default?: boolean | undefined; }"
+              "{ name: string; host: string; is_default?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
             "deprecated": false
@@ -20643,20 +20690,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-common.DEFAULT_DOWNLOAD_SOURCE",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_DOWNLOAD_SOURCE",
-        "description": [],
-        "signature": [
-          "\"https://artifacts.elastic.co\""
-        ],
-        "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.DEFAULT_DOWNLOAD_SOURCE_ID",
         "type": "string",
         "tags": [],
@@ -20664,6 +20697,20 @@
         "description": [],
         "signature": [
           "\"fleet-default-download-source\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DEFAULT_DOWNLOAD_SOURCE_URI",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_DOWNLOAD_SOURCE_URI",
+        "description": [],
+        "signature": [
+          "\"https://artifacts.elastic.co/downloads/beats/elastic-agent\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
         "deprecated": false,
@@ -21313,8 +21360,8 @@
             "pluginId": "fleet",
             "scope": "common",
             "docId": "kibFleetPluginApi",
-            "section": "def-common.DownloadSourceBase",
-            "text": "DownloadSourceBase"
+            "section": "def-common.DownloadSource",
+            "text": "DownloadSource"
           },
           ">"
         ],
@@ -24350,6 +24397,139 @@
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.downloadSourceRoutesService",
+        "type": "Object",
+        "tags": [],
+        "label": "downloadSourceRoutesService",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/services/routes.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getInfoPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getInfoPath",
+            "description": [],
+            "signature": [
+              "(downloadSourceId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.downloadSourceRoutesService.getInfoPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "downloadSourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getUpdatePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getUpdatePath",
+            "description": [],
+            "signature": [
+              "(downloadSourceId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.downloadSourceRoutesService.getUpdatePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "downloadSourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getListPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getListPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getDeletePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeletePath",
+            "description": [],
+            "signature": [
+              "(downloadSourceId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.downloadSourceRoutesService.getDeletePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "downloadSourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getCreatePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreatePath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
