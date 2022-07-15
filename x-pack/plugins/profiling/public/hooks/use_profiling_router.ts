@@ -38,8 +38,6 @@ export function useProfilingRouter(): StatefulProfilingRouter {
     push: (...args) => {
       const next = link(...args);
 
-      console.log(next, ...args);
-
       history.push(next);
     },
     replace: (path, ...args) => {
