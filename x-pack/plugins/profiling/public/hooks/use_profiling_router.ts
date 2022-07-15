@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingRouter, profilingRouter, ProfilingRoutes } from '../routing';
 
-interface StatefulProfilingRouter extends ProfilingRouter {
+export interface StatefulProfilingRouter extends ProfilingRouter {
   push<T extends PathsOf<ProfilingRoutes>>(
     path: T,
     ...params: TypeAsArgs<TypeOf<ProfilingRoutes, T>>
@@ -37,6 +37,8 @@ export function useProfilingRouter(): StatefulProfilingRouter {
     ...profilingRouter,
     push: (...args) => {
       const next = link(...args);
+
+      console.log(next, ...args);
 
       history.push(next);
     },

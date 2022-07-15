@@ -6,40 +6,58 @@
  */
 
 import {
-  AreaSeries,
   Axis,
   BrushAxis,
   Chart,
-  CurveType,
-  Fit,
+  HistogramBarSeries,
   Settings,
   StackMode,
   timeFormatter,
+  TooltipInfo,
+  XYChartElementEvent,
 } from '@elastic/charts';
+import { EuiPanel } from '@elastic/eui';
 import React, { useContext } from 'react';
-import { stackTraceAreaSeriesStyle } from '../utils/get_next_time_range/chart_styles';
+import { TopNSample, TopNSubchart } from '../../common/topn';
+import { chartTheme } from '../utils/chart_styles';
+import { asPercentage } from '../utils/formatters/as_percentage';
 import { TopNContext } from './contexts/topn';
+import { SubChart } from './subchart';
+
+function SubchartTooltip({
+  highlightedSubchart,
+}: TooltipInfo & { highlightedSubchart: TopNSubchart }) {
+  return (
+    <EuiPanel>
+      <SubChart
+        index={highlightedSubchart.Index}
+        color={highlightedSubchart.Color}
+        category={highlightedSubchart.Category}
+        percentage={highlightedSubchart.Percentage}
+        data={highlightedSubchart.Series}
+        height={200}
+        width={400}
+      />
+    </EuiPanel>
+  );
+}
 
 export interface StackedBarChartProps {
-  id: string;
-  name: string;
   height: number;
-  x: string;
-  y: string;
-  category: string;
   asPercentages: boolean;
   onBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
+  onSampleClick: (sample: TopNSample) => void;
+  onSampleOut: () => void;
+  highlightedSubchart?: TopNSubchart;
 }
 
 export const StackedBarChart: React.FC<StackedBarChartProps> = ({
-  id,
-  name,
   height,
-  x,
-  y,
-  category,
   asPercentages,
   onBrushEnd,
+  onSampleClick,
+  onSampleOut,
+  highlightedSubchart,
 }) => {
   const ctx = useContext(TopNContext);
 
@@ -47,7 +65,11 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     <Chart size={{ height }}>
       <Settings
         showLegend={false}
-        tooltip={{ showNullValues: false }}
+        tooltip={{
+          customTooltip: highlightedSubchart
+            ? (props) => <SubchartTooltip {...props} highlightedSubchart={highlightedSubchart} />
+            : () => <></>,
+        }}
         brushAxis={BrushAxis.X}
         onBrushEnd={(brushEvent) => {
           const rangeFrom = new Date(brushEvent.x![0]).toISOString();
@@ -55,26 +77,36 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
           onBrushEnd({ rangeFrom, rangeTo });
         }}
+        theme={chartTheme}
+        onElementClick={(events) => {
+          const [value] = events[0] as XYChartElementEvent;
+          onSampleClick(value.datum as TopNSample);
+        }}
+        onElementOver={() => {
+          onSampleOut();
+        }}
+        onElementOut={() => {
+          onSampleOut();
+        }}
       />
-      <AreaSeries
-        id={id}
-        name={name}
-        data={ctx.samples}
-        xAccessor={x}
-        yAccessors={[y]}
-        stackAccessors={[x]}
-        splitSeriesAccessors={[category]}
-        areaSeriesStyle={stackTraceAreaSeriesStyle}
-        curve={CurveType.CURVE_STEP_AFTER}
-        fit={Fit.Zero}
-        stackMode={asPercentages ? StackMode.Percentage : undefined}
-      />
+      {ctx.charts.map((chart) => (
+        <HistogramBarSeries
+          key={chart.Category}
+          id={chart.Category}
+          name={chart.Category}
+          data={chart.Series}
+          color={chart.Color}
+          xAccessor={'Timestamp'}
+          yAccessors={['Count']}
+          stackMode={asPercentages ? StackMode.Percentage : undefined}
+        />
+      ))}
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />
       <Axis
         id="left-axis"
         position="left"
         showGridLines
-        tickFormat={(d) => (asPercentages ? `${Number(d * 100).toFixed(0)} %` : d.toFixed(0))}
+        tickFormat={(d) => (asPercentages ? asPercentage(d) : d.toFixed(0))}
       />
     </Chart>
   );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { orderBy } from 'lodash';
 
 export interface CountPerTime {
@@ -70,6 +71,8 @@ export interface TopNSubchart {
   Category: string;
   Percentage: number;
   Series: CountPerTime[];
+  Color: string;
+  Index: number;
 }
 
 export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
@@ -88,7 +91,8 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     total += sample.Count ?? 0;
   }
 
-  const subcharts: TopNSubchart[] = [];
+  const subcharts: Array<Omit<TopNSubchart, 'Color' | 'Index'>> = [];
+
   for (const [category, series] of seriesByCategory) {
     const totalPerCategory = series.reduce((sum, { Count }) => sum + (Count ?? 0), 0);
     subcharts.push({
@@ -98,5 +102,21 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     });
   }
 
-  return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']);
+  const colors = euiPaletteColorBlind({
+    rotations: Math.ceil(subcharts.length / 10),
+  });
+
+  return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
+    return {
+      ...chart,
+      Color: colors[index],
+      Index: index + 1,
+      Series: chart.Series.map((value) => {
+        return {
+          ...value,
+          Category: chart.Category,
+        };
+      }),
+    };
+  });
 }

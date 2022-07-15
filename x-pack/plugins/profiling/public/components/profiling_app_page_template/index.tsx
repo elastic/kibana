@@ -11,6 +11,7 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { useHistory } from 'react-router-dom';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -41,6 +42,8 @@ export function ProfilingAppPageTemplate({
 
   const [dataView, setDataView] = useState<DataView>();
 
+  const history = useHistory();
+
   useEffect(() => {
     // set time if both to and from are given in the url
     if (rangeFrom && rangeTo) {
@@ -59,6 +62,10 @@ export function ProfilingAppPageTemplate({
       })
       .then((nextDataView) => setDataView(nextDataView));
   }, [index, dataViews]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [history.location.pathname]);
 
   const searchBarQuery: Required<React.ComponentProps<typeof SearchBar>>['query'] = {
     language: 'kuery',
