@@ -11,6 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import {
   NewSearchIndexTemplate,
   Props as NewSearchIndexTemplateProps,
@@ -27,8 +28,13 @@ describe('NewSearchIndexTemplate', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues({ name: 'my-name', rawName: 'MY$_RAW_$NAME', language: 'Universal' });
-    setMockActions({ makeRequest: jest.fn() });
+    setMockValues({
+      name: 'my-name',
+      rawName: 'MY$_RAW_$NAME',
+      language: null,
+      languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
+    });
+    setMockActions({ makeRequest: jest.fn(), setLanguageSelectValue: jest.fn() });
   });
 
   it('renders children', () => {

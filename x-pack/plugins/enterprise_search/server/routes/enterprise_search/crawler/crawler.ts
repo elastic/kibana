@@ -22,12 +22,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       validate: {
         body: schema.object({
           index_name: schema.string(),
-          language: schema.string(),
+          language: schema.oneOf([schema.string(), schema.literal(null)]),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/ent/v1/internal/indices/',
+      path: '/api/ent/v1/internal/indices',
     })
   );
 

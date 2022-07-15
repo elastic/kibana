@@ -7,13 +7,14 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { DEFAULT_LANGUAGE } from './constants';
-import { NewSearchIndexLogic } from './new_search_index_logic';
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { NewSearchIndexLogic, NewSearchIndexValues } from './new_search_index_logic';
 
-const DEFAULT_VALUES = {
+const DEFAULT_VALUES: NewSearchIndexValues = {
   rawName: '',
   name: '',
-  language: DEFAULT_LANGUAGE,
+  language: null,
+  languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
 };
 
 describe('NewSearchIndexLogic', () => {
@@ -25,13 +26,27 @@ describe('NewSearchIndexLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setLanguage', () => {
+    describe('setLanguageSelectValue', () => {
       it('sets language to the provided value', () => {
         mount();
-        NewSearchIndexLogic.actions.setLanguage('English');
+        NewSearchIndexLogic.actions.setLanguageSelectValue('en');
         expect(NewSearchIndexLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          language: 'English',
+          language: 'en',
+          languageSelectValue: 'en',
+        });
+      });
+
+      it('sets language to null when the universal language option is picked', () => {
+        mount({
+          language: 'en',
+          languageSelectValue: 'en',
+        });
+        NewSearchIndexLogic.actions.setLanguageSelectValue(UNIVERSAL_LANGUAGE_VALUE);
+        expect(NewSearchIndexLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          language: null,
+          languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
         });
       });
     });
