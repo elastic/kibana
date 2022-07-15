@@ -167,7 +167,7 @@ export class Server {
     const analyticsPreboot = this.analytics.preboot();
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
-    const nodePreboot = await this.node.preboot();
+    const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({

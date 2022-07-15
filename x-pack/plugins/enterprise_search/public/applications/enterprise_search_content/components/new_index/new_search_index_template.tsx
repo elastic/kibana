@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
+import { LanguageForOptimization } from './types';
 
 export interface Props {
   title: React.ReactNode;
@@ -41,7 +42,7 @@ export interface Props {
   docsUrl: string;
   type: string;
   onNameChange?(name: string): void;
-  onSubmit(name: string, language: string): void;
+  onSubmit(name: string, language: LanguageForOptimization): void;
   buttonLoading?: boolean;
   formDisabled?: boolean;
 }
@@ -55,8 +56,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   formDisabled,
   buttonLoading,
 }) => {
-  const { name, language, rawName } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguage } = useActions(NewSearchIndexLogic);
+  const { name, language, rawName, languageSelectValue } = useValues(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -66,7 +67,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   };
 
   const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
+    setLanguageSelectValue(e.target.value);
   };
 
   return (
@@ -153,7 +154,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   <EuiSelect
                     options={SUPPORTED_LANGUAGES}
                     onChange={handleLanguageChange}
-                    value={language}
+                    value={languageSelectValue}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
