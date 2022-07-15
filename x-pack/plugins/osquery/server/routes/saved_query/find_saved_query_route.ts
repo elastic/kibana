@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
+import { omit } from 'lodash';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
@@ -18,13 +18,13 @@ import { getInstalledSavedQueriesMap } from './utils';
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/api/osquery/saved_query',
+      path: '/api/osquery/saved_queries',
       validate: {
         query: schema.object({
-          pageIndex: schema.maybe(schema.string()),
+          page: schema.maybe(schema.number()),
           pageSize: schema.maybe(schema.number()),
-          sortField: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.string()),
+          sort: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
         }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
@@ -38,10 +38,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         prebuilt: boolean;
       }>({
         type: savedQuerySavedObjectType,
-        page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
+        page: request.query.page ?? 1,
         perPage: request.query.pageSize,
-        sortField: request.query.sortField,
-        sortOrder: (request.query.sortOrder ?? 'desc') as unknown as estypes.SortOrder,
+        sortField: request.query.sort,
+        sortOrder: request.query.sortOrder ?? 'desc',
       });
 
       const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(osqueryContext);
@@ -61,8 +61,8 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
       return response.ok({
         body: {
-          ...savedQueries,
-          saved_objects: savedObjects,
+          ...omit(savedQueries, 'saved_objects'),
+          data: savedObjects,
         },
       });
     }

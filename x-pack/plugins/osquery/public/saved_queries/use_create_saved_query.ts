@@ -28,9 +28,9 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation<SavedQuerySO, { body: { error: string; message: string } }>(
+  return useMutation<{ data: SavedQuerySO }, { body: { error: string; message: string } }>(
     (payload) =>
-      http.post('/api/osquery/saved_query', {
+      http.post('/api/osquery/saved_queries', {
         body: JSON.stringify(payload),
       }),
     {
@@ -40,7 +40,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
           toastMessage: error.body.message,
         });
       },
-      onSuccess: (payload: { attributes: { id: string } }) => {
+      onSuccess: (response) => {
         queryClient.invalidateQueries(SAVED_QUERIES_ID);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
@@ -50,7 +50,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
           i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully saved "{savedQueryId}" query',
             values: {
-              savedQueryId: payload.attributes?.id ?? '',
+              savedQueryId: response.data.attributes?.id ?? '',
             },
           })
         );

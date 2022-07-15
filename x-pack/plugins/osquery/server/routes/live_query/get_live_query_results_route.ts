@@ -93,7 +93,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         );
 
         return response.ok({
-          body: res,
+          body: { data: res },
         });
       } catch (e) {
         return response.customError({

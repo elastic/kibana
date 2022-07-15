@@ -8,25 +8,26 @@
 import * as t from 'io-ts';
 
 import {
-  agentSelection,
   ecsMappingOrUndefined,
   savedQueryIdOrUndefined,
   packIdOrUndefined,
   queryOrUndefined,
-  executionContextOrUndefined,
   stringArrayOrUndefined,
 } from '../../common/schemas';
 
 export const createLiveQueryRequestBodySchema = t.type({
-  agentSelection,
+  agent_ids: stringArrayOrUndefined,
+  agent_all: t.union([t.boolean, t.undefined]),
+  agent_platforms: stringArrayOrUndefined,
+  agent_policy_ids: stringArrayOrUndefined,
   query: queryOrUndefined,
   saved_query_id: savedQueryIdOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,
-  execution_context: executionContextOrUndefined,
   alert_ids: stringArrayOrUndefined,
   case_ids: stringArrayOrUndefined,
   event_ids: stringArrayOrUndefined,
+  metadata: t.union([t.object, t.undefined]),
 });
 
 export type CreateLiveQueryRequestBodySchema = t.OutputOf<typeof createLiveQueryRequestBodySchema>;

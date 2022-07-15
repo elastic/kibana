@@ -13,7 +13,6 @@ import type { IRouter } from '@kbn/core/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-import type { AgentSelection } from '../../lib/parse_agent_groups';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
@@ -26,6 +25,7 @@ import { ACTIONS_INDEX } from '../../../common/constants';
 import { convertSOQueriesToPack } from '../pack/utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 import { TELEMETRY_CHANNEL_LIVE_QUERIES } from '../../lib/telemetry/constants';
+import { isSavedQueryPrebuilt } from '../saved_query/utils';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -71,12 +71,14 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
       }
 
-      const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = await parseAgentSelection(
-        internalSavedObjectsClient,
-        osqueryContext,
-        agentSelection
-      );
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { agent_all, agent_ids, agent_platforms, agent_policy_ids } = request.body;
+      const selectedAgents = await parseAgentSelection(internalSavedObjectsClient, osqueryContext, {
+        agents: agent_ids,
+        allAgentsSelected: !!agent_all,
+        platformsSelected: agent_platforms,
+        policiesSelected: agent_policy_ids,
+      });
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
@@ -105,18 +107,18 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           alert_ids: request.body.alert_ids,
           event_ids: request.body.event_ids,
           case_ids: request.body.case_ids,
-          agent_selection: agentSelection,
+          agent_ids: request.body.agent_ids,
+          agent_all: request.body.agent_all,
+          agent_platforms: request.body.agent_platforms,
+          agent_policy_ids: request.body.agent_policy_ids,
           agents: selectedAgents,
-          execution_context: request.body.execution_context,
           user_id: currentUser,
-          saved_query_id: savedQueryId,
-          // TODO: add condition
-          saved_query_prebuilt: false,
+          metadata: request.body.metadata,
           pack_id: request.body.pack_id,
           pack_name: packSO?.attributes?.name,
-          pack_prebuilt: !!(packSO
-            ? some(packSO?.references, ['type', 'osquery-pack-asset'])
-            : undefined),
+          pack_prebuilt: request.body.pack_id
+            ? !!(packSO ? some(packSO?.references, ['type', 'osquery-pack-asset']) : undefined)
+            : undefined,
           queries: packSO
             ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>
                 pickBy(
@@ -139,6 +141,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
                     id: uuid.v4(),
                     query: request.body.query,
                     saved_query_id: savedQueryId,
+                    saved_query_prebuilt: savedQueryId
+                      ? await isSavedQueryPrebuilt(osqueryContext, savedQueryId)
+                      : undefined,
                     ecs_mapping: request.body.ecs_mapping,
                     agents: selectedAgents,
                   },
@@ -185,7 +190,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         return response.ok({
-          body: osqueryAction,
+          body: { data: osqueryAction },
         });
       } catch (error) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');

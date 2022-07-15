@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -20,7 +13,6 @@ import { useParams } from 'react-router-dom';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
-import { ResultTabs } from '../../saved_queries/edit/tabs';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 
@@ -30,11 +22,6 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
-  const isPackResults = useMemo(
-    () => (data?.queries?.length ? data?.queries?.length > 1 : false),
-    [data]
-  );
-  const singleQueryDetails = useMemo(() => data?.queries?.[0], [data]);
 
   const LeftColumn = useMemo(
     () => (
@@ -63,36 +50,18 @@ const LiveQueryDetailsPageComponent = () => {
   );
 
   useLayoutEffect(() => {
-    setIsLive(() => !(data?.status === 'completed'));
-  }, [data?.status]);
+    setIsLive(() => !(data?.data?.status === 'completed'));
+  }, [data?.data?.status]);
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      {isPackResults ? (
-        <PackQueriesStatusTable
-          actionId={actionId}
-          data={data?.queries}
-          startDate={data?.['@timestamp']}
-          expirationDate={data?.expiration}
-          agentIds={data?.agents}
-        />
-      ) : (
-        <>
-          <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {singleQueryDetails?.query}
-          </EuiCodeBlock>
-          <EuiSpacer />
-
-          {singleQueryDetails ? (
-            <ResultTabs
-              actionId={singleQueryDetails?.action_id}
-              agentIds={singleQueryDetails?.agents}
-              startDate={data?.['@timestamp']}
-              endDate={singleQueryDetails?.expiration}
-            />
-          ) : null}
-        </>
-      )}
+      <PackQueriesStatusTable
+        actionId={actionId}
+        data={data?.data?.queries}
+        startDate={data?.data?.['@timestamp']}
+        expirationDate={data?.data?.expiration}
+        agentIds={data?.data?.agents}
+      />
     </WithHeaderLayout>
   );
 };

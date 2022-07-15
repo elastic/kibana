@@ -120,7 +120,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const { data, isLoading, mutateAsync, isError, isSuccess } = useCreateLiveQuery({ onSuccess });
 
   const { data: liveQueryDetails } = useLiveQueryDetails({
-    actionId: data?.action_id,
+    actionId: data?.data?.action_id,
     isLive,
   });
 
@@ -159,8 +159,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
 
-  const actionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails?.action_id]);
-  const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
+  const actionId = useMemo(
+    () => liveQueryDetails?.data?.action_id,
+    [liveQueryDetails?.data?.action_id]
+  );
+  const agentIds = useMemo(() => liveQueryDetails?.data?.agents, [liveQueryDetails?.data?.agents]);
   const [
     { agentSelection, ecs_mapping: ecsMapping, query, savedQueryId, packId },
     formDataSerializer,
@@ -380,7 +383,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ]
   );
 
-  const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
+  const singleQueryDetails = useMemo(
+    () => liveQueryDetails?.data?.queries?.[0],
+    [liveQueryDetails]
+  );
 
   const resultsStepContent = useMemo(
     () =>
@@ -425,7 +431,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const packOptions = useMemo<Array<EuiSuperSelectOption<string>>>(
     () =>
-      packsData?.saved_objects?.map((packSO) => ({
+      packsData?.data?.map((packSO) => ({
         value: packSO.id,
         inputDisplay: <>{`${packSO.attributes.name} (${packSO.id})`}</>,
         dropdownDisplay: (
@@ -441,7 +447,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const selectedPackData = useMemo(
-    () => find(packsData?.saved_objects, { id: packId }),
+    () => find(packsData?.data, { id: packId }),
     [packId, packsData]
   );
 
@@ -476,8 +482,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   }, [defaultValue, packOptions, updateFieldValues]);
 
   useLayoutEffect(() => {
-    setIsLive(() => !(liveQueryDetails?.status === 'completed'));
-  }, [liveQueryDetails?.status]);
+    setIsLive(() => !(liveQueryDetails?.data?.status === 'completed'));
+  }, [liveQueryDetails?.data?.status]);
 
   return (
     <>
@@ -530,16 +536,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   }}
                 />
               </EuiFlexItem>
-              <EuiSpacer />
               {submitButtonContent}
               <EuiSpacer />
-              {(liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries) && (
+              {(liveQueryDetails?.data?.queries?.length ||
+                selectedPackData?.attributes?.queries) && (
                 <>
                   <EuiFlexItem>
                     <PackQueriesStatusTable
                       actionId={actionId}
                       agentIds={agentIds}
-                      data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
+                      data={
+                        liveQueryDetails?.data?.queries ?? selectedPackData?.attributes?.queries
+                      }
                     />
                   </EuiFlexItem>
                 </>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
+import { filter, map, omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -21,10 +21,10 @@ export const findPackRoute = (router: IRouter) => {
       validate: {
         query: schema.object(
           {
-            pageIndex: schema.maybe(schema.number()),
+            page: schema.maybe(schema.number()),
             pageSize: schema.maybe(schema.number()),
-            sortField: schema.maybe(schema.string()),
-            sortOrder: schema.maybe(schema.string()),
+            sort: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           },
           { unknowns: 'allow' }
         ),
@@ -37,10 +37,9 @@ export const findPackRoute = (router: IRouter) => {
 
       const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
         type: packSavedObjectType,
-        page: (request.query.pageIndex ?? 0) + 1,
+        page: request.query.page ?? 1,
         perPage: request.query.pageSize ?? 20,
-        sortField: request.query.sortField ?? 'updated_at',
-        // @ts-expect-error sortOrder type must be union of ['asc', 'desc']
+        sortField: request.query.sort ?? 'updated_at',
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 
@@ -58,8 +57,8 @@ export const findPackRoute = (router: IRouter) => {
 
       return response.ok({
         body: {
-          ...soClientResponse,
-          saved_objects: packSavedObjects,
+          ...omit(soClientResponse, 'saved_objects'),
+          data: packSavedObjects,
         },
       });
     }

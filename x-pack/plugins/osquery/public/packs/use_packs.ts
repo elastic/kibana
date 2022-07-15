@@ -26,7 +26,7 @@ export const usePacks = ({
     async () =>
       http.get<
         Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
-          saved_objects: PackSavedObject[];
+          data: PackSavedObject[];
         }
       >('/api/osquery/packs', {
         query: { pageIndex, pageSize, sortField, sortOrder },

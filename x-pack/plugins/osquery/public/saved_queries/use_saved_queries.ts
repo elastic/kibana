@@ -23,13 +23,13 @@ export const useSavedQueries = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<
-    { saved_objects: SavedQuerySO[]; total: number },
+    { data: SavedQuerySO[]; total: number },
     { body: { error: string; message: string } }
   >(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
-      http.get('/api/osquery/saved_query', {
-        query: { pageIndex, pageSize, sortField, sortOrder },
+      http.get('/api/osquery/saved_queries', {
+        query: { page: pageIndex + 1, pageSize, sort: sortField, sortOrder },
       }),
     {
       keepPreviousData: true,

@@ -13,7 +13,27 @@ export const actionResponsesMapping: MappingTypeMapping = {
     },
     action_data: {
       properties: {
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
+        },
+        id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        platform: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         query: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        saved_query_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        version: {
           type: 'keyword',
           ignore_above: 1024,
         },
@@ -22,6 +42,21 @@ export const actionResponsesMapping: MappingTypeMapping = {
     action_id: {
       type: 'keyword',
       ignore_above: 1024,
+    },
+    action_input_type: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    action_response: {
+      properties: {
+        osquery: {
+          properties: {
+            count: {
+              type: 'long',
+            },
+          },
+        },
+      },
     },
     agent_id: {
       type: 'keyword',

@@ -152,7 +152,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       set(packSO, 'attributes.queries', queries);
 
-      return response.ok({ body: packSO });
+      return response.ok({
+        body: {
+          data: packSO,
+        },
+      });
     }
   );
 };

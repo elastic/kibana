@@ -41,11 +41,13 @@ export const readPackRoute = (router: IRouter) => {
 
       return response.ok({
         body: {
-          ...rest,
-          ...attributes,
-          queries: convertSOQueriesToPack(attributes.queries),
-          policy_ids: policyIds,
-          read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          data: {
+            ...rest,
+            ...attributes,
+            queries: convertSOQueriesToPack(attributes.queries),
+            policy_ids: policyIds,
+            read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          },
         },
       });
     }

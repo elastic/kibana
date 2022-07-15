@@ -35,7 +35,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
     { body: { error: string; message: string } }
   >(
     [SAVED_QUERY_ID, { savedQueryId }],
-    () => http.get(`/api/osquery/saved_query/${savedQueryId}`),
+    () => http.get(`/api/osquery/saved_queries/${savedQueryId}`),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,

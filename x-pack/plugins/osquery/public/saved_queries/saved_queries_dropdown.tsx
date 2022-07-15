@@ -57,7 +57,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   const queryOptions = useMemo(
     () =>
-      data?.saved_objects?.map((savedQuery) => ({
+      data?.data?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {
           savedQueryId: savedQuery.id,
@@ -67,7 +67,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
           ecs_mapping: savedQuery.attributes.ecs_mapping,
         },
       })) ?? [],
-    [data?.saved_objects]
+    [data?.data]
   );
 
   const handleSavedQueryChange = useCallback(
@@ -81,7 +81,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
       const selectedSavedQuery = find(
         ['attributes.id', newSelectedOptions[0].value.id],
-        data?.saved_objects
+        data?.data
       );
 
       if (selectedSavedQuery) {
@@ -90,7 +90,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
       setSelectedOptions(newSelectedOptions);
     },
-    [data?.saved_objects, onChange]
+    [data?.data, onChange]
   );
 
   const renderOption = useCallback(

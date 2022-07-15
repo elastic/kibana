@@ -69,46 +69,48 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
 
         return response.ok({
           body: {
-            ...pick(
-              actionDetails._source,
-              'action_id',
-              'expiration',
-              '@timestamp',
-              'agent_selection',
-              'agents',
-              'user_id',
-              'pack_id',
-              'pack_name',
-              'prebuilt_pack'
-            ),
-            queries: reduce<
-              {
-                action_id: string;
-                id: string;
-                query: string;
-                agents: string[];
-                ecs_mapping?: unknown;
-                version?: string;
-                platform?: string;
-                saved_query_id?: string;
-              },
-              Array<Record<string, unknown>>
-            >(
-              actionDetails._source?.queries,
-              (acc, query) => {
-                const agentStatus = agentByActionIdStatusMap[query.action_id];
+            data: {
+              ...pick(
+                actionDetails._source,
+                'action_id',
+                'expiration',
+                '@timestamp',
+                'agent_selection',
+                'agents',
+                'user_id',
+                'pack_id',
+                'pack_name',
+                'prebuilt_pack'
+              ),
+              queries: reduce<
+                {
+                  action_id: string;
+                  id: string;
+                  query: string;
+                  agents: string[];
+                  ecs_mapping?: unknown;
+                  version?: string;
+                  platform?: string;
+                  saved_query_id?: string;
+                },
+                Array<Record<string, unknown>>
+              >(
+                actionDetails._source?.queries,
+                (acc, query) => {
+                  const agentStatus = agentByActionIdStatusMap[query.action_id];
 
-                acc.push({
-                  ...query,
-                  ...agentStatus,
-                  status: isCompleted || agentStatus?.pending === 0 ? 'completed' : 'running',
-                });
+                  acc.push({
+                    ...query,
+                    ...agentStatus,
+                    status: isCompleted || agentStatus?.pending === 0 ? 'completed' : 'running',
+                  });
 
-                return acc;
-              },
-              [] as Array<Record<string, unknown>>
-            ),
-            status: isCompleted ? 'completed' : 'running',
+                  return acc;
+                },
+                [] as Array<Record<string, unknown>>
+              ),
+              status: isCompleted ? 'completed' : 'running',
+            },
           },
         });
       } catch (e) {

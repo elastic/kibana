@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { SavedObject } from '@kbn/core/public';
+import { Direction } from '../../../../common/search_strategy';
 import type { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -116,7 +117,7 @@ const SavedQueriesPageComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sortField, setSortField] = useState('attributes.updated_at');
-  const [sortDirection, setSortDirection] = useState('desc');
+  const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
   const { data } = useSavedQueries({ isLive: true });
 
@@ -271,13 +272,12 @@ const SavedQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data?.saved_objects && (
+      {data?.data && (
         <EuiInMemoryTable
-          items={data?.saved_objects}
+          items={data?.data}
           itemId="id"
           columns={columns}
           pagination={pagination}
-          // @ts-expect-error update types
           sorting={sorting}
           onChange={onTableChange}
           rowHeader="id"

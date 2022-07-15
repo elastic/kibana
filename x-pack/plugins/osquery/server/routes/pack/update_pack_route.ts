@@ -326,7 +326,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      return response.ok({ body: updatedPackSO });
+      return response.ok({ body: { data: updatedPackSO } });
     }
   );
 };

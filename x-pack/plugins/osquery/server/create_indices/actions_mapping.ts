@@ -15,6 +15,10 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    agent_ids: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     agents: {
       type: 'keyword',
       ignore_above: 1024,
@@ -53,6 +57,59 @@ export const actionsMapping: MappingTypeMapping = {
     user_id: {
       type: 'keyword',
       ignore_above: 1024,
+    },
+    metadata: {
+      type: 'object',
+      enabled: false,
+    },
+    pack_id: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    pack_name: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    pack_prebuilt: {
+      type: 'boolean',
+    },
+    queries: {
+      properties: {
+        action_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        agents: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
+        },
+        id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        platform: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        query: {
+          type: 'text',
+        },
+        saved_query_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        saved_query_prebuilt: {
+          type: 'boolean',
+        },
+        version: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+      },
     },
   },
 };

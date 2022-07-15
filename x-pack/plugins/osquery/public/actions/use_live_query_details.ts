@@ -37,32 +37,34 @@ export const useLiveQueryDetails = ({
     {},
     Error,
     {
-      action_id: string;
-      expiration: string;
-      '@timestamp': string;
-      agent_selection: {
-        agents: string[];
-        allAgentsSelected: boolean;
-        platformsSelected: string[];
-        policiesSelected: string[];
-      };
-      agents: string[];
-      user_id?: string;
-      pack_id?: string;
-      pack_name?: string;
-      pack_prebuilt?: boolean;
-      status?: string;
-      queries?: Array<{
+      data: {
         action_id: string;
-        id: string;
-        query: string;
+        expiration: string;
+        '@timestamp': string;
+        agent_selection: {
+          agents: string[];
+          allAgentsSelected: boolean;
+          platformsSelected: string[];
+          policiesSelected: string[];
+        };
         agents: string[];
-        ecs_mapping?: unknown;
-        version?: string;
-        platform?: string;
-        saved_query_id?: string;
-        expiration?: string;
-      }>;
+        user_id?: string;
+        pack_id?: string;
+        pack_name?: string;
+        pack_prebuilt?: boolean;
+        status?: string;
+        queries?: Array<{
+          action_id: string;
+          id: string;
+          query: string;
+          agents: string[];
+          ecs_mapping?: unknown;
+          version?: string;
+          platform?: string;
+          saved_query_id?: string;
+          expiration?: string;
+        }>;
+      };
     }
   >(
     ['liveQueries', { actionId, filterQuery }],

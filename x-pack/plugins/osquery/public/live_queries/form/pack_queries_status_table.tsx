@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -34,11 +34,14 @@ import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/co
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 import styled from 'styled-components';
+import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../../common/lib/kibana';
 import { usePackQueryLastResults } from '../../packs/use_pack_query_last_results';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
+
+const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -262,6 +265,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         disabled={false}
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
+        isDisabled={!actionId}
       />
     </EuiToolTip>
   );
@@ -371,6 +375,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         aria-label={VIEW_IN_DISCOVER}
         href={discoverUrl}
         target="_blank"
+        isDisabled={!actionId}
       />
     </EuiToolTip>
   );
@@ -425,18 +430,17 @@ interface PackViewInActionProps {
     id: string;
     interval: number;
     action_id?: string;
+    agents: string[];
   };
   actionId?: string;
   logsDataView: DataView | undefined;
-  agentIds?: string[];
 }
 
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   item,
   logsDataView,
-  agentIds,
 }) => {
-  const { action_id: actionId, interval } = item;
+  const { action_id: actionId, agents: agentIds, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
@@ -464,13 +468,8 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
-  item,
-  logsDataView,
-  agentIds,
-  actionId,
-}) => {
-  const { interval } = item;
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, logsDataView }) => {
+  const { action_id: actionId, agents: agentIds, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
@@ -579,15 +578,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => (
-      <PackViewInDiscoverAction item={item} agentIds={agentIds} logsDataView={logsDataView} />
-    ),
-    [agentIds, logsDataView]
+    (item) => <PackViewInDiscoverAction item={item} logsDataView={logsDataView} />,
+    [logsDataView]
   );
 
   const renderLensResultsAction = useCallback(
-    (item) => <PackViewInLensAction item={item} agentIds={agentIds} logsDataView={logsDataView} />,
-    [agentIds, logsDataView]
+    (item) => <PackViewInLensAction item={item} logsDataView={logsDataView} />,
+    [logsDataView]
   );
 
   const getHandleErrorsToggle = useCallback(
@@ -620,12 +617,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderToggleResultsAction = useCallback(
-    (item) => (
-      <EuiButtonIcon
-        onClick={getHandleErrorsToggle(item)}
-        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
+    (item) =>
+      item?.action_id ? (
+        <EuiButtonIcon
+          onClick={getHandleErrorsToggle(item)}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+        />
+      ) : (
+        <></>
+      ),
     [getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
@@ -701,16 +701,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     () => ({
       sort: {
         field: 'id' as keyof PackItem,
-        direction: 'asc' as const,
+        direction: Direction.asc,
       },
     }),
     []
   );
 
+  useLayoutEffect(() => {
+    if (data?.length === 1) {
+      getHandleErrorsToggle(data?.[0])();
+    }
+  }, [data, getHandleErrorsToggle]);
+
   return (
     <StyledEuiBasicTable
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      items={data ?? []}
+      items={data ?? EMPTY_ARRAY}
       itemId={getItemId}
       columns={columns}
       sorting={sorting}
