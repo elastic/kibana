@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const { common } = getPageObjects(['common']);
 
-  describe('General "click"', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/133800
+  describe.skip('General "click"', () => {
     beforeEach(async () => {
       await common.navigateToApp('home');
       // Just clicking the top-nav-button and expecting it's still there... we're just testing the click event generation
