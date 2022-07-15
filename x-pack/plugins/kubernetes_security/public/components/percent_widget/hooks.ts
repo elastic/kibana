@@ -11,7 +11,7 @@ import { QUERY_KEY_PERCENT_WIDGET, AGGREGATE_ROUTE } from '../../../common/const
 import { AggregateResult } from '../../../common/types/aggregate';
 
 export const useFetchPercentWidgetData = (
-  onReduce: (result: AggregateResult[]) => Record<string, number>,
+  onReduce: (result: AggregateResult) => Record<string, number>,
   filterQuery: string,
   widgetKey: string,
   groupBy: string,
@@ -20,27 +20,19 @@ export const useFetchPercentWidgetData = (
 ) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_PERCENT_WIDGET, widgetKey, filterQuery, groupBy, countBy, index];
-  const query = useQuery(
-    cachingKeys,
-    async (): Promise<Record<string, number>> => {
-      const res = await http.get<AggregateResult[]>(AGGREGATE_ROUTE, {
-        query: {
-          query: filterQuery,
-          groupBy,
-          countBy,
-          page: 0,
-          index,
-        },
-      });
+  const query = useQuery(cachingKeys, async (): Promise<Record<string, number>> => {
+    const res = await http.get<AggregateResult>(AGGREGATE_ROUTE, {
+      query: {
+        query: filterQuery,
+        groupBy,
+        countBy,
+        page: 0,
+        index,
+      },
+    });
 
-      return onReduce(res);
-    },
-    {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-    }
-  );
+    return onReduce(res);
+  });
 
   return query;
 };
