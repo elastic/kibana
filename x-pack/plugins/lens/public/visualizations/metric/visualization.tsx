@@ -9,10 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter';
+import { Ast, AstFunction } from '@kbn/interpreter';
 import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { LayerType } from '../../../common';
@@ -31,6 +29,9 @@ export interface MetricVisualizationState {
   secondaryMetricAccessor?: string;
   maxAccessor?: string;
   breakdownByAccessor?: string;
+  // the dimensions can optionally be single numbers
+  // computed by collapsing all rows
+  collapseFn?: string;
   subtitle?: string;
   extraText?: string;
   progressDirection?: LayoutDirection;
@@ -56,31 +57,47 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricVisualizationState,
   datasourceLayers: DatasourceLayers,
-  // attributes?:  Partial<{ title: string; description: string }>,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {},
-  isPreview: boolean = false
+  isSuggestion: boolean = false
 ): Ast | null => {
-  const datasource = datasourceLayers[state.layerId];
-  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
-
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
-  if (!originalOrder || !state.metricAccessor) {
+  if (!state.metricAccessor) {
     return null;
   }
+
+  const datasource = datasourceLayers[state.layerId];
+  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
   // we constrain the tile sizes in the lens editor for aesthetic reasons
   const sideLength = state.breakdownByAccessor ? 200 : 300;
 
-  const maxTilesPrediction = isPreview
-    ? null
-    : state.breakdownByAccessor
-    ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
-    : null;
+  const maxPossibleTiles =
+    // if there's a collapse function, no need to calculate since we're dealing with a single tile
+    state.breakdownByAccessor && !isSuggestion && !state.collapseFn
+      ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+      : null;
 
   return {
     type: 'expression',
     chain: [
       ...(datasourceExpression?.chain ?? []),
+      ...(state.collapseFn
+        ? [
+            {
+              type: 'function',
+              function: 'lens_collapse',
+              arguments: {
+                by: [],
+                metric: [
+                  state.breakdownByAccessor!,
+                  state.metricAccessor,
+                  state.secondaryMetricAccessor,
+                  state.maxAccessor,
+                ].filter(Boolean),
+                fn: [state.collapseFn!],
+              },
+            } as AstFunction,
+          ]
+        : []),
       {
         type: 'function',
         function: 'metricVis', // TODO import from plugin
@@ -96,15 +113,13 @@ const toExpression = (
             ? [
                 paletteService
                   .get(CUSTOM_PALETTE)
-                  .toExpression(
-                    computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                  ),
+                  .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
               ]
             : [],
           maxCols: state.maxCols ? [state.maxCols] : [],
-          minTiles: maxTilesPrediction ? [maxTilesPrediction] : [],
-          maxTileWidth: !isPreview ? [sideLength] : [],
-          maxTileHeight: !isPreview ? [sideLength] : [],
+          minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
+          maxTileWidth: !isSuggestion ? [sideLength] : [],
+          maxTileHeight: !isSuggestion ? [sideLength] : [],
         },
       },
     ],
@@ -120,10 +135,8 @@ const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
 
 export const getMetricVisualization = ({
   paletteService,
-  theme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
 }): Visualization<MetricVisualizationState> => ({
   id: LENS_METRIC_ID,
 
@@ -146,6 +159,7 @@ export const getMetricVisualization = ({
     delete newState.metricAccessor;
     delete newState.secondaryMetricAccessor;
     delete newState.breakdownByAccessor;
+    delete newState.collapseFn;
     delete newState.maxAccessor;
     delete newState.palette;
     // TODO - clear more?
@@ -217,7 +231,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
           filterOperations: isSupportedMetricOperation,
-          enableDimensionEditor: true,
+          enableDimensionEditor: false,
           required: false,
         },
         {
@@ -233,7 +247,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetricOperation,
-          enableDimensionEditor: true,
+          enableDimensionEditor: false,
           required: false,
         },
         {
@@ -279,7 +293,7 @@ export const getMetricVisualization = ({
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 
   toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers) =>
-    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, false),
+    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, true),
 
   setDimension({ prevState, columnId, groupId }) {
     const updated = { ...prevState };
@@ -317,6 +331,7 @@ export const getMetricVisualization = ({
     }
     if (prevState.breakdownByAccessor === columnId) {
       delete updated.breakdownByAccessor;
+      delete updated.collapseFn;
     }
 
     return updated;
@@ -324,22 +339,18 @@ export const getMetricVisualization = ({
 
   renderToolbar(domElement, props) {
     render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <MetricToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <I18nProvider>
+        <MetricToolbar {...props} />
+      </I18nProvider>,
       domElement
     );
   },
 
   renderDimensionEditor(domElement, props) {
     render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <MetricDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <I18nProvider>
+        <MetricDimensionEditor {...props} paletteService={paletteService} />
+      </I18nProvider>,
       domElement
     );
   },

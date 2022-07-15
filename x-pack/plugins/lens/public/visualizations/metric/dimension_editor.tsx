@@ -30,20 +30,44 @@ import { applyPaletteParams, PalettePanelContainer } from '../../shared_componen
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams, RANGE_MIN } from './palette_config';
 import { MetricVisualizationState } from './visualization';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
-export function MetricDimensionEditor(
-  props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
-    paletteService: PaletteRegistry;
+type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
+  paletteService: PaletteRegistry;
+};
+
+export function MetricDimensionEditor(props: Props) {
+  const { state, setState, accessor } = props;
+
+  switch (accessor) {
+    case state?.metricAccessor:
+      return <PrimaryMetricEditor {...props} />;
+    case state.breakdownByAccessor:
+      return (
+        <CollapseSetting
+          value={state.collapseFn || ''}
+          onChange={(collapseFn: string) => {
+            setState({
+              ...state,
+              collapseFn,
+            });
+          }}
+        />
+      );
+    default:
+      return null;
   }
-) {
-  const { state, setState, frame, accessor } = props;
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+}
 
-  if (state?.metricAccessor !== accessor) return null;
+function PrimaryMetricEditor(props: Props) {
+  const { state, setState, frame, accessor } = props;
+
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   const currentData = frame.activeData?.[state.layerId];
 
   if (accessor == null || !isNumericFieldForDatatable(currentData, accessor)) {
+    // TODO - do we need both these guarding conditions?
     return null;
   }
 
@@ -66,6 +90,7 @@ export function MetricDimensionEditor(
   });
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
+
   return (
     <>
       <EuiFormRow
