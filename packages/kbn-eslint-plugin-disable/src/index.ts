@@ -9,7 +9,7 @@
 import { NoNakedESLintDisableRule } from './rules/no_naked_eslint_disable';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-packages'` to your eslint config to use them
+ * Custom ESLint rules, add `'@kbn/eslint-plugin-disable'` to your eslint config to use them
  * @internal
  */
 export const rules = {

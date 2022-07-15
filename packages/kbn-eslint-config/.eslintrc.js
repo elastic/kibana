@@ -9,9 +9,9 @@ module.exports = {
   ],
 
   plugins: [
+    '@kbn/eslint-plugin-disable',
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
-    '@kbn/eslint-plugin-packages',
     'prettier',
   ],
 
@@ -233,6 +233,7 @@ module.exports = {
       },
     ]],
 
+    '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
@@ -241,6 +242,5 @@ module.exports = {
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
-    '@kbn/packages/no_naked_eslint_disable': 'error',
   },
 };

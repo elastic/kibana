@@ -41,7 +41,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/packages/no_naked_eslint_disable', NoNakedESLintDisableRule, {
+    tester.run('@kbn/disable/no_naked_eslint_disable', NoNakedESLintDisableRule, {
       valid: [
         {
           filename: 'foo.ts',
