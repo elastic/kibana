@@ -79,6 +79,36 @@ for (const [name, tester] of [tsTester, babelTester]) {
             alert('foo'); // eslint-disable-line no-alert
           `,
         },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            /* eslint-disable no-alert */
+            alert(foo);
+            /* eslint-enable no-alert */
+            bar += 'r';
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            /* eslint-disable-next-line no-alert */
+            alert(foo);
+            bar += 'r';
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            alert(foo);/* eslint-disable-line no-alert */
+            bar += 'r';
+          `,
+        },
       ],
 
       invalid: [
@@ -153,6 +183,102 @@ for (const [name, tester] of [tsTester, babelTester]) {
             },
           ],
           output: `alert('foo');`,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            /* eslint-disable */
+            alert(foo);
+            /* eslint-enable */
+            bar += 'r';
+          `,
+          errors: [
+            {
+              line: 3,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+
+            alert(foo);
+            /* eslint-enable */
+            bar += 'r';
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            /* eslint-disable */
+            alert(foo);
+            bar += 'r';
+          `,
+          errors: [
+            {
+              line: 3,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+
+            alert(foo);
+            bar += 'r';
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            /* eslint-disable-next-line */
+            alert(foo);
+            bar += 'r';
+          `,
+          errors: [
+            {
+              line: 3,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+
+            alert(foo);
+            bar += 'r';
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            alert(foo);/* eslint-disable-line */
+            bar += 'r';
+          `,
+          errors: [
+            {
+              line: 3,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: dedent`
+            const foo = 'foo';
+            let bar = 'ba';
+            alert(foo);
+            bar += 'r';
+          `,
         },
       ],
     });
