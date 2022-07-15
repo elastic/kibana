@@ -490,6 +490,9 @@
             },
             {
               "id": "kibDevDocsOpsEslintPluginImports"
+            },
+            {
+              "id": "kibDevDocsOpsKbnYarnLockValidator"
             }
           ]
         },
