@@ -258,11 +258,14 @@ async function createADJobFromLensSavedObject(
   if (splitField) {
     jobConfig.analysis_config.influencers = [splitField.sourceField];
   }
-
-  const createdBy =
-    splitField || jobConfig.analysis_config.detectors.length > 1
-      ? CREATED_BY_LABEL.MULTI_METRIC
-      : CREATED_BY_LABEL.SINGLE_METRIC;
+  const isSingleMetric = splitField === null && jobConfig.analysis_config.detectors.length === 1;
+  const createdBy = isSingleMetric ? CREATED_BY_LABEL.SINGLE_METRIC : CREATED_BY_LABEL.MULTI_METRIC;
+  if (isSingleMetric) {
+    jobConfig.model_plot_config = {
+      enabled: true,
+      annotations_enabled: true,
+    };
+  }
 
   return {
     jobConfig,
