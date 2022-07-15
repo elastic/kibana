@@ -73,6 +73,12 @@ for (const [name, tester] of [tsTester, babelTester]) {
             /* eslint-disable no-console, no-control-regex*/
           `,
         },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            alert('foo'); // eslint-disable-line no-alert
+          `,
+        },
       ],
 
       invalid: [
@@ -133,6 +139,20 @@ for (const [name, tester] of [tsTester, babelTester]) {
             },
           ],
           output: '',
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            alert('foo');// eslint-disable-line
+          `,
+          errors: [
+            {
+              line: 1,
+              message:
+                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+            },
+          ],
+          output: `alert('foo');`,
         },
       ],
     });

@@ -56,11 +56,17 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           return;
         }
 
+        const disableStartsOnNextLine = comment.value.includes('disable-next-line');
+        const disableStartsInline = comment.value.includes('disable-line');
         const cStartColumn = comment?.loc?.start?.column ?? 0;
-        const reportLoc =
-          comment.type === 'Block'
-            ? { start: { line: cStartLine, column: cStartColumn - 1 }, end: cEnd }
-            : { start: cStart, end: cEnd };
+        const reportLoc = disableStartsOnNextLine
+          ? { start: cStart, end: cEnd }
+          : {
+              // At this point we could have eslint-disable block or an eslint-disable-line.
+              // If we have an inline disable we need to report the column as -1 in order to get the report
+              start: { line: cStartLine, column: disableStartsInline ? -1 : cStartColumn - 1 },
+              end: cEnd,
+            };
 
         // At this point we have a regex match, no rule name and a valid loc so lets report here
         context.report({
