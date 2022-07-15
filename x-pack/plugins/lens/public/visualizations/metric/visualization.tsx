@@ -76,6 +76,34 @@ const toExpression = (
       ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
+  const getCollapseFnArguments = () => {
+    const metric = [
+      state.breakdownByAccessor!,
+      state.metricAccessor,
+      state.secondaryMetricAccessor,
+      state.maxAccessor,
+    ].filter(Boolean);
+
+    const fn = metric.map((accessor) => {
+      if (accessor !== state.maxAccessor) {
+        return state.collapseFn;
+      } else {
+        const isMaxStatic = Boolean(
+          datasource.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
+        );
+        // we do this because the user expects the static value they set to be the same
+        // even if they define a collapse on the breakdown by
+        return isMaxStatic ? 'max' : state.collapseFn;
+      }
+    });
+
+    return {
+      by: [],
+      metric,
+      fn,
+    };
+  };
+
   return {
     type: 'expression',
     chain: [
@@ -85,16 +113,7 @@ const toExpression = (
             {
               type: 'function',
               function: 'lens_collapse',
-              arguments: {
-                by: [],
-                metric: [
-                  state.breakdownByAccessor!,
-                  state.metricAccessor,
-                  state.secondaryMetricAccessor,
-                  state.maxAccessor,
-                ].filter(Boolean),
-                fn: [state.collapseFn!],
-              },
+              arguments: getCollapseFnArguments(),
             } as AstFunction,
           ]
         : []),
@@ -248,6 +267,7 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetricOperation,
           enableDimensionEditor: false,
+          supportStaticValue: true,
           required: false,
         },
         {

@@ -9,7 +9,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin';
 import { createMockDatasource } from '../../mocks';
-import { DatasourceLayers } from '../../types';
+import { DatasourceLayers, DatasourcePublicAPI, OperationDescriptor } from '../../types';
 import { getMetricVisualization, MetricVisualizationState } from './visualization';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -48,6 +48,10 @@ describe('metric visualization', () => {
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
       mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        isStaticValue: false,
+      } as OperationDescriptor);
+
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
@@ -199,36 +203,79 @@ describe('metric visualization', () => {
       `);
     });
 
-    it('builds breakdown by metric with collapse function', () => {
-      const ast = visualization.toExpression(
-        {
-          ...fullState,
-          collapseFn: 'sum',
-          // Turning off maxAccessor to make sure it gets filtered out from the collapse arguments
-          maxAccessor: undefined,
-        },
-        datasourceLayers
-      ) as ExpressionAstExpression;
-
-      expect(ast.chain).toHaveLength(2);
-      expect(ast.chain[0]).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Object {
-            "by": Array [],
-            "fn": Array [
-              "sum",
-            ],
-            "metric": Array [
-              "breakdown-col-id",
-              "metric-col-id",
-              "secondary-metric-col-id",
-            ],
+    describe('with collapse function', () => {
+      it('builds breakdown by metric with collapse function', () => {
+        const ast = visualization.toExpression(
+          {
+            ...fullState,
+            collapseFn: 'sum',
+            // Turning off an accessor to make sure it gets filtered out from the collapse arguments
+            secondaryMetricAccessor: undefined,
           },
-          "function": "lens_collapse",
-          "type": "function",
-        }
-      `);
-      expect(ast.chain[1].arguments.minTiles).toHaveLength(0);
+          datasourceLayers
+        ) as ExpressionAstExpression;
+
+        expect(ast.chain).toHaveLength(2);
+        expect(ast.chain[0]).toMatchInlineSnapshot(`
+          Object {
+            "arguments": Object {
+              "by": Array [],
+              "fn": Array [
+                "sum",
+                "sum",
+                "sum",
+              ],
+              "metric": Array [
+                "breakdown-col-id",
+                "metric-col-id",
+                "max-metric-col-id",
+              ],
+            },
+            "function": "lens_collapse",
+            "type": "function",
+          }
+        `);
+        expect(ast.chain[1].arguments.minTiles).toHaveLength(0);
+      });
+
+      it('always applies max function to static max dimensions', () => {
+        (
+          datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
+        ).getOperationForColumnId.mockReturnValueOnce({
+          isStaticValue: true,
+        } as OperationDescriptor);
+
+        const ast = visualization.toExpression(
+          {
+            ...fullState,
+            collapseFn: 'sum', // this should be overridden for the max dimension
+          },
+          datasourceLayers
+        ) as ExpressionAstExpression;
+
+        expect(ast.chain).toHaveLength(2);
+        expect(ast.chain[0]).toMatchInlineSnapshot(`
+          Object {
+            "arguments": Object {
+              "by": Array [],
+              "fn": Array [
+                "sum",
+                "sum",
+                "sum",
+                "max",
+              ],
+              "metric": Array [
+                "breakdown-col-id",
+                "metric-col-id",
+                "secondary-metric-col-id",
+                "max-metric-col-id",
+              ],
+            },
+            "function": "lens_collapse",
+            "type": "function",
+          }
+        `);
+      });
     });
 
     it('builds version for suggestions', () => {
