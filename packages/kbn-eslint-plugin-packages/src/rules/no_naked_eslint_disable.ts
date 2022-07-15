@@ -36,11 +36,23 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
         const commentVal = comment.value.trim();
         const nakedESLintRegexResult = commentVal.match(ESLINT_DISABLE_RE);
         const ruleName = nakedESLintRegexResult?.groups?.ruleName;
+
+        // no regex match, exit early
+        if (!nakedESLintRegexResult) {
+          return;
+        }
+
+        // we have a rule name, exit early
+        if (ruleName) {
+          return;
+        }
+
         const cStart = comment?.loc?.start;
         const cEnd = comment?.loc?.end;
         const cStartLine = comment?.loc?.start?.line;
 
-        if (!cStart || !cEnd || !cStartLine) {
+        // start or end loc is undefined, exit early
+        if (cStart === undefined || cEnd === undefined || cStartLine === undefined) {
           return;
         }
 
@@ -50,16 +62,16 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
             ? { start: { line: cStartLine, column: cStartColumn - 1 }, end: cEnd }
             : { start: cStart, end: cEnd };
 
-        if (nakedESLintRegexResult && !ruleName) {
-          context.report({
-            node,
-            loc: reportLoc,
-            messageId: NAKED_DISABLE_MSG_ID,
-            fix(fixer) {
-              return fixer.removeRange(comment.range as Eslint.AST.Range);
-            },
-          });
-        }
+        // At this point we have a regex match, no rule name and a valid loc so lets report here
+        context.report({
+          node,
+          loc: reportLoc,
+          messageId: NAKED_DISABLE_MSG_ID,
+          fix(fixer) {
+            return fixer.removeRange(comment.range as Eslint.AST.Range);
+          },
+        });
+
       });
     },
   };
