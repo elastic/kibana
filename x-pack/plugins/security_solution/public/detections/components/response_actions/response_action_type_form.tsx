@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -16,38 +15,51 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ResponseActionValue } from '../rules/response_action_field';
+import { get } from 'lodash';
+import { useKibana } from '../../../common/lib/kibana';
+import { useFormData, UseField } from '../../../shared_imports';
+import type { ArrayItem } from '../../../shared_imports';
+import { RESPONSE_ACTION_TYPES } from './constants';
 
 interface IProps {
-  action: ResponseActionValue;
-  updateAction: (key: string, value: any, index: number) => void;
-  onDeleteAction: () => void;
+  item: ArrayItem;
+  onDeleteAction: (id: number) => void;
 }
 
+const GhostFormField = () => <></>;
+
 export const ResponseActionTypeForm = React.memo((props: IProps) => {
-  const { action, updateAction, onDeleteAction } = props;
+  const { item, onDeleteAction } = props;
   const { osquery } = useKibana().services;
   const [_isOpen, setIsOpen] = useState(true);
-  const OsqueryForm = osquery?.OsqueryResponseActionTypeForm;
 
-  console.log({ action });
-  const getContent = useMemo(() => {
-    // if (action.actionTypeId === 'osquery') {
-    return (
-      <div>
-        <OsqueryForm actionParams={action.params} updateAction={updateAction} item={action} />
-      </div>
-    );
-    // }
+  const [data] = useFormData();
+  const action = get(data, item.path);
 
-    // return <div>different</div>;
-  }, [OsqueryForm, action, updateAction]);
+  const getResponseActionTypeForm = useCallback(() => {
+    if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+      const OsqueryForm = osquery?.OsqueryResponseActionTypeForm;
+      if (OsqueryForm) {
+        return (
+          <div>
+            <OsqueryForm updateAction={() => null} item={item} />
+          </div>
+        );
+      }
+    }
+    // Place for other ResponseActionTypes
+    return null;
+  }, [action?.actionTypeId, item, osquery?.OsqueryResponseActionTypeForm]);
+
+  const handleDelete = useCallback(() => {
+    onDeleteAction(item.id);
+  }, [item, onDeleteAction]);
 
   return (
     <EuiAccordion
       initialIsOpen={true}
-      key={action.id}
-      id={action.id}
+      key={item.id}
+      id={item.id.toString()}
       onToggle={setIsOpen}
       paddingSize="l"
       className="actAccordionActionForm"
@@ -61,7 +73,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
           <EuiFlexItem>
             <EuiText>
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>{action.actionTypeId}</EuiFlexItem>
+                <EuiFlexItem grow={false}>{action?.actionTypeId}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiText>
           </EuiFlexItem>
@@ -78,12 +90,16 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
               defaultMessage: 'Delete',
             }
           )}
-          // onClick={onDeleteAcction}
-          onClick={() => onDeleteAction(action.id)}
+          onClick={handleDelete}
         />
       }
     >
-      {getContent}
+      <UseField
+        path={`${item.path}`}
+        component={GhostFormField}
+        readDefaultValueOnForm={!item.isNew}
+      />
+      {getResponseActionTypeForm()}
     </EuiAccordion>
   );
 });

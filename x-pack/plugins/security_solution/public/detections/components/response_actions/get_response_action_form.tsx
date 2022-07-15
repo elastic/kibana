@@ -6,12 +6,12 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ResponseActionValue } from '../rules/response_action_field';
+import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export interface ResponseActionFormProps {
-  items: ResponseActionValue[];
+  items: ArrayItem[];
   addItem: () => void;
-  removeItem: () => void;
+  removeItem: (id: number) => void;
 }
 
 export const getLazyResponseActionForm = (props: ResponseActionFormProps) => {

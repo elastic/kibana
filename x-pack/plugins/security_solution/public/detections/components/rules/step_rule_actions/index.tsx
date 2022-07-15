@@ -20,6 +20,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { RESPONSE_ACTION_TYPES } from '../../response_actions/constants';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -41,6 +42,7 @@ import ResponseActionForm from '../../response_actions/response_action_form';
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
+  ruleType?: string;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
@@ -70,12 +72,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   onSubmit,
   setForm,
   actionMessageParams,
+  ruleType,
 }) => {
   const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
-      osquery,
       triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
@@ -86,24 +88,27 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }),
     [application]
   );
-  const osqueryStatus = osquery?.fetchInstallationStatus();
-  const isOsqueryEnabled = !osqueryStatus?.disabled && !osqueryStatus?.permissionDenied;
 
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
+    // mock data, to be removed
     response_actions: [
       {
         id: '1',
+        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
         params: {
           query: 'select * from uptime',
+          ecs_mapping: [],
         },
       },
       {
         id: '2',
         params: {
           query: 'select * from processes',
+          ecs_mapping: [],
         },
+        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
       },
     ],
   };
@@ -188,21 +193,30 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       ),
     [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
   );
-  const displayResponseActionsOptions = useMemo(
-    () => (
-      <>
-        <EuiSpacer />
+  const displayResponseActionsOptions = useMemo(() => {
+    if (ruleType === 'query') {
+      if (throttle !== stepActionsDefaultValue.throttle) {
+        return (
+          <>
+            <EuiSpacer />
 
-        <UseArray path="response_actions" initialNumberOfItems={2}>
-          {ResponseActionForm}
-        </UseArray>
-      </>
-    ),
-    []
-  );
+            <UseArray path="response_actions" initialNumberOfItems={2}>
+              {({ items, addItem, removeItem, ...rest }) => {
+                return (
+                  <ResponseActionForm items={items} addItem={addItem} removeItem={removeItem} />
+                );
+              }}
+            </UseArray>
+          </>
+        );
+      } else {
+        return <UseField path="response_actions" component={GhostFormField} />;
+      }
+    }
+    return null;
+  }, [ruleType, throttle]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
-    console.log('rererender');
     return application.capabilities.actions.show ? (
       <>
         <UseField

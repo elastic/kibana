@@ -11,10 +11,4 @@ import { OsqueryResponseActionParamsForm } from './osquery_response_action_type'
 // @ts-expect-error update types
 // eslint-disable-next-line react/display-name
 export const getLazyOsqueryResponseActionTypeForm = (services) => (props) =>
-  (
-    // const OsqueryResponseActionTypeForm = lazy(() => import('./osquery_response_action_type'));
-
-    // <Suspense fallback={null}>
-    <OsqueryResponseActionParamsForm {...props} />
-    // </Suspense>
-  );
+  <OsqueryResponseActionParamsForm {...props} />;

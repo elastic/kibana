@@ -15,7 +15,8 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { createGlobalStyle } from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { UseField, useFormContext, useFormData } from '../../shared_imports';
+import { UseField, useFormContext } from '../../shared_imports';
+import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import {
   NOT_AVAILABLE,
@@ -28,11 +29,12 @@ import { queryClient } from '../../query_client';
 import { useFetchStatus } from '../../fleet_integration/use_fetch_status';
 import { StyledEuiAccordion } from '../../components/accordion';
 
-export interface OsqueryActionParams {
-  query: string;
-  ecs_mapping: Record<string, Record<'field', string>>;
-  id?: string;
-}
+// export interface OsqueryActionParams {
+//   query: string;
+//   ecs_mapping: Record<string, Record<'field', string>>;
+//   id?: string;
+// }
+
 const GhostFormField = () => <></>;
 
 const OverwriteGlobalStyle = createGlobalStyle`
@@ -44,13 +46,12 @@ const OverwriteGlobalStyle = createGlobalStyle`
 `;
 
 interface IProps {
-  item: any;
-  actionParams: OsqueryActionParams;
+  item: ArrayItem;
   updateAction: (key: string, value: any, index: number) => void;
 }
 
 export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = (props) => {
-  const { actionParams, updateAction, item } = props;
+  const { item } = props;
 
   const uniqueId = useMemo(() => uuid.v4(), []);
   const { loading, disabled, permissionDenied } = useFetchStatus();
@@ -102,34 +103,9 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
   // });
 
   const context = useFormContext();
-  console.log({ context });
-  const fields = context.getFields();
-  const [data] = useFormData();
-
-  console.log({ data, fields });
-  // const { updateFieldValues, setFieldValue, getFormData } = form;
-  const ecsFieldProps = useMemo(
-    () => ({
-      isDisabled: !permissions.writeLiveQueries,
-    }),
-    [permissions.writeLiveQueries]
-  );
-
-  // const formData = getFormData();
-  // const formDataRef = useRef(formData);
-  // console.log({ formData, formDataRef });
-  const handleUpdate = useCallback(() => {
-    context.setFieldValue(`${item.path}.params.query`, data.query);
-
-    // updateAction('ecs_mapping', formData.ecs_mapping, index);
-    // updateAction('id', uniqueId, index);
-  }, [context, data.query, item.path]);
-  //
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        console.log({ savedQuery });
-
         context.setFieldValue(`${item.path}.params.savedQueryId`, savedQuery.savedQueryId);
         context.setFieldValue(`${item.path}.params.query`, savedQuery.query);
         // context.setFieldValue(`${item.path}.params.ecs_mapping`, savedQuery.ecs_mapping;
@@ -144,17 +120,10 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
     [context, item.path]
   );
 
-  // useEffect(() => {
-  //   if (!isDeepEqual(formDataRef.current, formData)) {
-  //     formDataRef.current = formData;
-  //     handleUpdate();
-  //   }
-  // }, [formData, formData.query, handleUpdate]);
-
   useEffectOnce(() => {
-    if (actionParams?.ecs_mapping) {
-      setAdvancedContentState('open');
-    }
+    // if (actionParams?.ecs_mapping) {
+    //   setAdvancedContentState('open');
+    // }
   });
 
   const componentProps = useMemo(() => ({ onChange: () => null }), []);
@@ -212,9 +181,15 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
         readDefaultValueOnForm={!item.isNew}
       />
       <UseField
-        path={`${item.path}.params.id`}
+        path={`${item.path}.id`}
         component={GhostFormField}
         defaultValue={uniqueId}
+        readDefaultValueOnForm={!item.isNew}
+      />
+      <UseField
+        path={`${item.path}.actionTypeId`}
+        component={GhostFormField}
+        defaultValue={'osquery'}
         readDefaultValueOnForm={!item.isNew}
       />
       <UseField

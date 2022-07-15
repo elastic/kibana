@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
@@ -16,44 +16,43 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiButton,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ResponseActionTypeForm } from './response_action_type_form';
 import type { ResponseActionFormProps } from './get_response_action_form';
-
-const supportedResponseActions = [
-  { id: '.osquery', name: 'osquery', iconClass: 'logoOsquery' },
-  // { id: '.endpointSecurity', name: 'endpointSecurity', iconClass: 'logoSecurity' },
-];
+import type { ResponseActionType } from './get_supported_response_actions';
+import { getSupportedResponseActions, responseActionTypes } from './get_supported_response_actions';
+import { useOsqueryEnabled } from './useOsqueryEnabled';
 
 export const ResponseActionForm = ({ items, addItem, removeItem }: ResponseActionFormProps) => {
   const [isAddResponseActionButtonShown, setAddResponseActionButtonShown] = useState(
     items.length > 0
   );
-  const addActionType = useCallback(
-    (actionTypeModel) => {
-      const ID = Math.floor(Math.random() * 100);
-      setAddResponseActionButtonShown(false);
-      addItem();
-      // setActions((prev) => [
-      //   ...prev,
-      //   {
-      //     id: ID.toString(),
-      //     actionTypeId: actionTypeModel.name,
-      //     params: {},
-      //   },
-      // ]);
-      // setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
-    },
-    [addItem]
-  );
+
+  const [supportedResponseActionTypes, setSupportedResponseActionTypes] = useState<
+    ResponseActionType[] | undefined
+  >();
+
+  const isOsqueryEnabled = useOsqueryEnabled();
+
+  useEffect(() => {
+    const actionEnabledMap: Record<string, boolean> = {
+      '.osquery': isOsqueryEnabled,
+    };
+    const supportedTypes = getSupportedResponseActions(responseActionTypes, actionEnabledMap);
+    setSupportedResponseActionTypes(supportedTypes);
+  }, [isOsqueryEnabled]);
+
+  const addActionType = useCallback(() => {
+    setAddResponseActionButtonShown(false);
+    addItem();
+  }, [addItem]);
 
   const onDeleteAction = useCallback(
-    (id: string) => {
+    (id: number) => {
       removeItem(id);
-      // const updatedActions = actions.filter((item) => item.id !== id);
-      //
-      // setActions(updatedActions);
     },
     [removeItem]
   );
@@ -79,15 +78,15 @@ export const ResponseActionForm = ({ items, addItem, removeItem }: ResponseActio
 
   const renderResponseActionTypes = useMemo(() => {
     return (
-      supportedResponseActions?.length &&
-      supportedResponseActions.map(function (item, index) {
+      supportedResponseActionTypes?.length &&
+      supportedResponseActionTypes.map(function (item, index) {
         const keyPadItem = (
           <EuiKeyPadMenuItem
             key={index}
             isDisabled={false}
             data-test-subj={`${item.id}-ActionTypeSelectOption`}
             label={item.name}
-            onClick={() => addActionType(item)}
+            onClick={addActionType}
           >
             <EuiIcon
               size="xl"
@@ -109,30 +108,49 @@ export const ResponseActionForm = ({ items, addItem, removeItem }: ResponseActio
         );
       })
     );
-  }, [addActionType]);
+  }, [addActionType, supportedResponseActionTypes?.length]);
+
+  if (!supportedResponseActionTypes?.length) return <></>;
 
   return (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Response Actions"
-            id="xpack.triggersActionsUI.sections.actionForm.responseActionSectionsTitle"
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                defaultMessage="Response Actions"
+                id="xpack.triggersActionsUI.sections.actionForm.responseActionSectionsTitle"
+              />
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            tooltipContent={i18n.translate('xpack.securitySolution.rules.experimentalTooltip', {
+              defaultMessage:
+                'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+            })}
+            label={i18n.translate('xpack.securitySolution.rules.experimentalTitle', {
+              defaultMessage: 'Technical preview',
+            })}
           />
-        </h4>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       {items.map((actionItem) => {
         return (
           <div key={actionItem.id}>
             <ResponseActionTypeForm
-              action={actionItem}
+              item={actionItem}
               // updateAction={updateAction}
               onDeleteAction={onDeleteAction}
             />
           </div>
         );
       })}
+      <EuiSpacer size="m" />
+
       {isAddResponseActionButtonShown ? renderAddResponseActionButton : renderResponseActionTypes}
       <EuiSpacer size="m" />
     </>
