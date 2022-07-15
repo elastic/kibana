@@ -9,7 +9,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { StatusResponse } from '../../../../types/status';
 import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
-import { mocked } from '../../../../server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
+import { eventLoopDelaysMonitorMock } from '@kbn/core-metrics-server-internal';
 import { loadStatus } from './load_status';
 
 const mockedResponse: StatusResponse = {
@@ -72,7 +72,7 @@ const mockedResponse: StatusResponse = {
         resident_set_size_in_bytes: 1,
       },
       event_loop_delay: 1,
-      event_loop_delay_histogram: mocked.createHistogram(),
+      event_loop_delay_histogram: eventLoopDelaysMonitorMock.createHistogram(),
       uptime_in_millis: 1,
     },
     processes: [
@@ -87,7 +87,7 @@ const mockedResponse: StatusResponse = {
           resident_set_size_in_bytes: 1,
         },
         event_loop_delay: 1,
-        event_loop_delay_histogram: mocked.createHistogram(),
+        event_loop_delay_histogram: eventLoopDelaysMonitorMock.createHistogram(),
         uptime_in_millis: 1,
       },
     ],
