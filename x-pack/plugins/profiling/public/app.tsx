@@ -19,6 +19,7 @@ import { RedirectWithDefaultDateRange } from './components/redirect_with_default
 import { profilingRouter } from './routing';
 import { Services } from './services';
 import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -41,6 +42,8 @@ function App({
   theme$,
   history,
 }: Props) {
+  const i18nCore = coreStart.i18n;
+
   const profilingDependencies = useMemo(() => {
     return {
       start: {
@@ -58,15 +61,19 @@ function App({
   return (
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
-        <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-          <RouterProvider router={profilingRouter as any} history={history}>
-            <ProfilingDependenciesContextProvider value={profilingDependencies}>
-              <RedirectWithDefaultDateRange>
-                <RouteRenderer />
-              </RedirectWithDefaultDateRange>
-            </ProfilingDependenciesContextProvider>
-          </RouterProvider>
-        </RedirectAppLinks>
+        <i18nCore.Context>
+          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
+            <RouterProvider router={profilingRouter as any} history={history}>
+              <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                <RedirectWithDefaultDateRange>
+                  <RouteBreadcrumbsContextProvider>
+                    <RouteRenderer />
+                  </RouteBreadcrumbsContextProvider>
+                </RedirectWithDefaultDateRange>
+              </ProfilingDependenciesContextProvider>
+            </RouterProvider>
+          </RedirectAppLinks>
+        </i18nCore.Context>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

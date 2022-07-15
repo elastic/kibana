@@ -6,7 +6,11 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import {
+  ProfilingPluginSetupDeps,
+  ProfilingPluginStartDeps,
+  ProfilingRequestHandlerContext,
+} from '../types';
 
 import { registerFlameChartElasticSearchRoute } from './flamechart';
 
@@ -20,12 +24,21 @@ import {
   registerTraceEventsTopNThreadsSearchRoute,
 } from './topn';
 
-export function registerRoutes(router: IRouter<DataRequestHandlerContext>, logger?: Logger) {
-  registerFlameChartElasticSearchRoute(router, logger!);
-  registerTopNFunctionsSearchRoute(router, logger!);
-  registerTraceEventsTopNContainersSearchRoute(router, logger!);
-  registerTraceEventsTopNDeploymentsSearchRoute(router, logger!);
-  registerTraceEventsTopNHostsSearchRoute(router, logger!);
-  registerTraceEventsTopNStackTracesSearchRoute(router, logger!);
-  registerTraceEventsTopNThreadsSearchRoute(router, logger!);
+export interface RouteRegisterParameters {
+  router: IRouter<ProfilingRequestHandlerContext>;
+  logger: Logger;
+  dependencies: {
+    start: ProfilingPluginStartDeps;
+    setup: ProfilingPluginSetupDeps;
+  };
+}
+
+export function registerRoutes(params: RouteRegisterParameters) {
+  registerFlameChartElasticSearchRoute(params);
+  registerTopNFunctionsSearchRoute(params);
+  registerTraceEventsTopNContainersSearchRoute(params);
+  registerTraceEventsTopNDeploymentsSearchRoute(params);
+  registerTraceEventsTopNHostsSearchRoute(params);
+  registerTraceEventsTopNStackTracesSearchRoute(params);
+  registerTraceEventsTopNThreadsSearchRoute(params);
 }

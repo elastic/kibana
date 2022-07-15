@@ -28,14 +28,14 @@ export class ProfilingPlugin implements Plugin {
         title: i18n.translate('xpack.profiling.navigation.stacktracesLinkLabel', {
           defaultMessage: 'Stacktraces',
         }),
-        path: '/stacktraces/containers',
+        path: '/stacktraces',
       },
       {
         id: 'flamegraphs',
         title: i18n.translate('xpack.profiling.navigation.flameGraphsLinkLabel', {
           defaultMessage: 'Flamegraphs',
         }),
-        path: '/flamegraphs/flamegraph',
+        path: '/flamegraphs',
       },
     ];
 

@@ -4,24 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createContext } from 'react';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  ObservabilityPublicStart,
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import {
   ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { createContext } from 'react';
 import { Services } from '../../../services';
 
 export interface ProfilingDependencies {
   start: {
     core: CoreStart;
     data: DataPublicPluginStart;
+    dataViews: DataViewsPublicPluginStart;
     observability: ObservabilityPublicStart;
   };
   setup: {
     core: CoreSetup;
     data: DataPublicPluginSetup;
+    dataViews: DataViewsPublicPluginSetup;
     observability: ObservabilityPublicSetup;
   };
   services: Services;

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
-  data: PluginSetup;
   observability: ObservabilityPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-export interface ProfilingPluginStartDeps {
-  data: PluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ProfilingPluginStartDeps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfilingPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfilingPluginStart {}
+
+export type ProfilingRequestHandlerContext = RequestHandlerContext;

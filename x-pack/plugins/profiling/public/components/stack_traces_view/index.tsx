@@ -38,7 +38,7 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, projectID, n, index, displayAs },
+    query: { rangeFrom, rangeTo, projectID, n, index, kuery, displayAs },
   } = useProfilingParams('/stacktraces/*');
 
   const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
@@ -99,14 +99,20 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
   });
 
   useEffect(() => {
-    fetchTopN(
-      topNType,
+    if (!topNType) {
+      setTopN({ samples: [], subcharts: [] });
+      return;
+    }
+
+    fetchTopN({
+      type: topNType,
       index,
       projectID,
-      new Date(timeRange.start).getTime() / 1000,
-      new Date(timeRange.end).getTime() / 1000,
-      n
-    ).then((response: TopNSamples) => {
+      timeFrom: new Date(timeRange.start).getTime() / 1000,
+      timeTo: new Date(timeRange.end).getTime() / 1000,
+      n,
+      kuery,
+    }).then((response: TopNSamples) => {
       const samples = response.TopN;
       const subcharts = groupSamplesByCategory(samples);
       const samplesWithNullValues = samples.map((sample) => {
@@ -114,7 +120,7 @@ export function StackTracesView({ children }: { children: React.ReactElement }) 
       });
       setTopN({ samples: samplesWithNullValues, subcharts });
     });
-  }, [topNType, timeRange.start, timeRange.end, fetchTopN, index, projectID, n]);
+  }, [topNType, timeRange.start, timeRange.end, fetchTopN, index, projectID, n, kuery]);
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>

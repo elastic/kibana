@@ -16,7 +16,7 @@ const index = 'test';
 const testAgg = { aggs: { test: {} } };
 
 jest.mock('./query', () => ({
-  createProjectTimeQuery: (proj: string, from: string, to: string) => {
+  createCommonFilter: ({}: {}) => {
     return anyQuery;
   },
   autoHistogramSumCountOnGroupByField: (searchField: string): AggregationsAggregationContainer => {
@@ -35,17 +35,18 @@ describe('TopN data from Elasticsearch', () => {
 
   describe('when fetching Stack Traces', () => {
     it('should search first then skip mget', async () => {
-      const response = await topNElasticSearchQuery(
+      const response = await topNElasticSearchQuery({
         client,
         logger,
         index,
-        '123',
-        '456',
-        '789',
-        200,
-        'StackTraceID',
-        kibanaResponseFactory
-      );
+        projectID: '123',
+        timeFrom: '456',
+        timeTo: '789',
+        n: 200,
+        searchField: 'StackTraceID',
+        kuery: '',
+        response: kibanaResponseFactory,
+      });
 
       // Calls to mget are skipped since data doesn't exist
       expect(client.search).toHaveBeenCalledTimes(2);
