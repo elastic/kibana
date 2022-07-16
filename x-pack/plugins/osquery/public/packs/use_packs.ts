@@ -24,9 +24,7 @@ export const usePacks = ({
   return useQuery<
     Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
       data: PackSavedObject[];
-    },
-    unknown,
-    PackSavedObject[]
+    }
   >(
     [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
@@ -34,7 +32,6 @@ export const usePacks = ({
         query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {
-      select: (response) => response.data,
       keepPreviousData: true,
       // Refetch the data every 10 seconds
       refetchInterval: isLive ? 10000 : false,

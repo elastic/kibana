@@ -27,8 +27,7 @@ export const useSavedQueries = ({
     Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
       data: SavedQuerySO[];
     },
-    { body: { error: string; message: string } },
-    SavedQuerySO[]
+    { body: { error: string; message: string } }
   >(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
@@ -38,7 +37,6 @@ export const useSavedQueries = ({
     {
       keepPreviousData: true,
       refetchInterval: isLive ? 10000 : false,
-      select: (response) => response.data,
       onError: (error) => {
         setErrorToast(error, {
           title: error.body.error,

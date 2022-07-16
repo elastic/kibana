@@ -187,7 +187,7 @@ const PacksTableComponent = () => {
 
   return (
     <EuiInMemoryTable<PackSavedObject>
-      items={data ?? EMPTY_ARRAY}
+      items={data?.data ?? EMPTY_ARRAY}
       columns={columns}
       pagination={true}
       sorting={sorting}

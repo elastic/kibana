@@ -272,9 +272,9 @@ const SavedQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data && (
+      {data?.data && (
         <EuiInMemoryTable
-          items={data}
+          items={data?.data}
           itemId="id"
           columns={columns}
           pagination={pagination}

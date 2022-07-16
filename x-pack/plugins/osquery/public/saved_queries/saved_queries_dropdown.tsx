@@ -57,7 +57,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   const queryOptions = useMemo(
     () =>
-      data?.map((savedQuery) => ({
+      data?.data?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {
           savedQueryId: savedQuery.id,
@@ -79,7 +79,10 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
         return;
       }
 
-      const selectedSavedQuery = find(['attributes.id', newSelectedOptions[0].value.id], data);
+      const selectedSavedQuery = find(
+        ['attributes.id', newSelectedOptions[0].value.id],
+        data?.data
+      );
 
       if (selectedSavedQuery) {
         onChange({ ...selectedSavedQuery.attributes, savedQueryId: selectedSavedQuery.id });

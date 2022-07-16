@@ -425,7 +425,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const packOptions = useMemo<Array<EuiSuperSelectOption<string>>>(
     () =>
-      packsData?.map((packSO) => ({
+      packsData?.data?.map((packSO) => ({
         value: packSO.id,
         inputDisplay: <>{`${packSO.attributes.name} (${packSO.id})`}</>,
         dropdownDisplay: (
@@ -440,7 +440,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [packsData]
   );
 
-  const selectedPackData = useMemo(() => find(packsData, { id: packId }), [packId, packsData]);
+  const selectedPackData = useMemo(
+    () => find(packsData?.data, { id: packId }),
+    [packId, packsData]
+  );
 
   const queryCardSelectable = useMemo(
     () => ({
