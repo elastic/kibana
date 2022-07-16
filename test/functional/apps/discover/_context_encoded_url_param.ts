@@ -23,14 +23,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
-        path: '/context-encoded-param/_doc/1+1=2',
+        path: '/context_encoded_param/_doc/1+1=2',
         method: 'PUT',
         body: {
           username: 'Dmitry',
           '@timestamp': '2015-09-21T09:30:23',
         },
       });
-      await PageObjects.settings.createIndexPattern('context-encoded-param');
+      await PageObjects.settings.createIndexPattern('context_encoded_param');
 
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate correctly', async () => {
-      await PageObjects.discover.selectIndexPattern('context-encoded-param');
+      await PageObjects.discover.selectIndexPattern('context_encoded_param');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // navigate to the context view
