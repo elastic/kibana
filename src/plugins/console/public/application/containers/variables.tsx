@@ -10,6 +10,7 @@ import React from 'react';
 import { DevToolsVariablesFlyout, DevToolsVariable } from '../components';
 import { useServicesContext } from '../contexts';
 import { StorageKeys } from '../../services';
+import { DEFAULT_VARIABLES } from '../../../common/constants';
 
 interface VariablesProps {
   onClose: () => void;
@@ -28,7 +29,7 @@ export function Variables({ onClose }: VariablesProps) {
     <DevToolsVariablesFlyout
       onClose={onClose}
       onSaveVariables={onSaveVariables}
-      variables={storage.get(StorageKeys.VARIABLES, [])}
+      variables={storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES)}
     />
   );
 }

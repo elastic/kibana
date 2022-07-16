@@ -13,10 +13,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const DEFAULT_REQUEST = `
 
 # Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1}
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "\${exampleVariable2}": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }
 

@@ -82,7 +82,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
     {
       field: 'name',
       name: i18n.translate('console.variablesPage.variablesTable.columns.variableHeader', {
-        defaultMessage: 'Variable',
+        defaultMessage: 'Variable name',
       }),
       render: (name, { id }) => {
         // Avoid characters that get URL-encoded, because they'll result in unusable variable names.

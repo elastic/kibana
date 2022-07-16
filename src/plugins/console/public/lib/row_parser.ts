@@ -153,4 +153,14 @@ export default class RowParser {
       t = tokenIter.stepBackward();
     return t;
   }
+
+  isCommentToken(token: Token | null) {
+    return (
+      token &&
+      token.type &&
+      (token.type === 'comment.punctuation' ||
+        token.type === 'comment.line' ||
+        token.type === 'comment.block')
+    );
+  }
 }

@@ -72,13 +72,15 @@ export function InputHighlightRules() {
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
       addEOL(['url.comma'], /(,)/, 'start'),
       addEOL(['url.slash'], /(\/)/, 'start'),
-      addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams')
+      addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams'),
+      addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'start')
     ),
     urlParams: mergeTokens(
       addEOL(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/, 'start'),
       addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
       addEOL(['url.param'], /([^&=]+)/, 'start'),
-      addEOL(['url.amp'], /(&)/, 'start')
+      addEOL(['url.amp'], /(&)/, 'start'),
+      addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'start')
     ),
     'url-sql': mergeTokens(
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start-sql'),

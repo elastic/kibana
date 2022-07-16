@@ -55,10 +55,10 @@ const abs: CSSProperties = {
 };
 
 const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1}
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "\${exampleVariable2}": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }`;
 

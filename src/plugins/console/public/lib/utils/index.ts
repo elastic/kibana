@@ -13,7 +13,6 @@ import type {
   RequestResult,
 } from '../../application/hooks/use_send_current_request/send_request';
 import type { DevToolsVariable } from '../../application/components';
-import { DEFAULT_VARIABLES } from '../../../common/constants';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -118,8 +117,6 @@ export const replaceVariables = (
   requests: RequestArgs['requests'],
   variables: DevToolsVariable[]
 ) => {
-  // Default variables will be used in the default request to demonstrate variables in action
-  variables = [...DEFAULT_VARIABLES, ...variables];
   const urlRegex = /(\${\w+})/g;
   const bodyRegex = /("\${\w+}")/g;
   return requests.map((req) => {
@@ -141,19 +138,32 @@ export const replaceVariables = (
           const variable = variables.find(({ name }) => name === key);
 
           if (variable) {
+            // All values must be stringified to send a successful request to ES.
             const { value } = variable;
-            if (
-              // Stringify if value is an object, array, number or boolean, this is necessary in order to send a successful request to es
-              !(value.startsWith('{') && value.endsWith('}')) &&
-              isNaN(parseFloat(value)) &&
-              !(value.startsWith('[') && value.endsWith(']')) &&
-              value !== 'true' &&
-              value !== 'false'
-            ) {
-              return JSON.stringify(value);
+
+            const isStringifiedObject = value.startsWith('{') && value.endsWith('}');
+            if (isStringifiedObject) {
+              return value;
             }
 
-            return value;
+            const isStringifiedNumber = !isNaN(parseFloat(value));
+            if (isStringifiedNumber) {
+              return value;
+            }
+
+            const isStringifiedArray = value.startsWith('[') && value.endsWith(']');
+            if (isStringifiedArray) {
+              return value;
+            }
+
+            const isStringifiedBool = value === 'true' || value === 'false';
+            if (isStringifiedBool) {
+              return value;
+            }
+
+            // At this point the value must be an unstringified string, so we have to stringify it.
+            // Example: 'stringValue' -> '"stringValue"'
+            return JSON.stringify(value);
           }
 
           return match;
