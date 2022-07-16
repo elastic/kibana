@@ -159,7 +159,7 @@ export function StackTracesView() {
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem style={{ width: '100%' }}>
             <ChartGrid maximum={Math.min(limit, topn.charts.length)} />
           </EuiFlexItem>
           {topn.charts.length > limit ? (
