@@ -97,7 +97,12 @@ const ActionsTableComponent = () => {
           form: pickBy(
             {
               packId: item._source.pack_id,
-              agentSelection: item._source.agent_selection,
+              agentSelection: {
+                agents: item._source.agent_ids,
+                allAgentsSelected: item._source.agent_all,
+                platformsSelected: item._source.agent_platforms,
+                policiesSelected: item._source.agent_policy_ids,
+              },
             },
             (value) => !isEmpty(value)
           ),
@@ -110,7 +115,12 @@ const ActionsTableComponent = () => {
             query: item._source.queries[0].query,
             ecs_mapping: item._source.queries[0].ecs_mapping,
             savedQueryId: item._source.queries[0].saved_query_id,
-            agentSelection: item._source.agent_selection,
+            agentSelection: {
+              agents: item._source.agent_ids,
+              allAgentsSelected: item._source.agent_all,
+              platformsSelected: item._source.agent_platforms,
+              policiesSelected: item._source.agent_policy_ids,
+            },
           },
           (value) => !isEmpty(value)
         ),

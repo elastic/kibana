@@ -44,6 +44,7 @@ export const liveQueryFormSchema = {
     ],
   },
   packId: {
+    label: 'Pack',
     type: FIELD_TYPES.SUPER_SELECT,
   },
   ecs_mapping: {

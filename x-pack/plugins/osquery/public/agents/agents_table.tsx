@@ -135,11 +135,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         }
       }
 
-      if (agentSelection.policiesSelected.length) {
+      if (agentSelection.policiesSelected?.length) {
         handleSelectedOptions(agentSelection.policiesSelected, AGENT_POLICY_LABEL);
       }
 
-      if (agentSelection.agents.length) {
+      if (agentSelection.agents?.length) {
         handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }

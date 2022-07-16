@@ -708,10 +708,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   useLayoutEffect(() => {
-    if (data?.length === 1) {
+    if (
+      data?.length === 1 &&
+      agentIds?.length &&
+      data?.[0].id &&
+      !itemIdToExpandedRowMap[data?.[0].id]
+    ) {
       getHandleErrorsToggle(data?.[0])();
     }
-  }, [data, getHandleErrorsToggle]);
+  }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
 
   return (
     <StyledEuiBasicTable
