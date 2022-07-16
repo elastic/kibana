@@ -7,6 +7,7 @@
 
 import { useQuery } from 'react-query';
 
+import type { SavedObjectsFindResponsePublic } from '@kbn/core/public';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
@@ -23,8 +24,11 @@ export const useSavedQueries = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<
-    { data: SavedQuerySO[]; total: number },
-    { body: { error: string; message: string } }
+    Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
+      data: SavedQuerySO[];
+    },
+    { body: { error: string; message: string } },
+    SavedQuerySO[]
   >(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
@@ -34,6 +38,7 @@ export const useSavedQueries = ({
     {
       keepPreviousData: true,
       refetchInterval: isLive ? 10000 : false,
+      select: (response) => response.data,
       onError: (error) => {
         setErrorToast(error, {
           title: error.body.error,

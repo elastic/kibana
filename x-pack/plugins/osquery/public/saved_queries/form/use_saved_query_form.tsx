@@ -38,7 +38,7 @@ interface UseSavedQueryFormProps {
 
 export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
-  const ids: string[] = useMemo<string[]>(() => map(data?.data, 'attributes.id') ?? [], [data]);
+  const ids: string[] = useMemo<string[]>(() => map(data, 'attributes.id') ?? [], [data]);
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);

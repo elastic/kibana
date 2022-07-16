@@ -21,17 +21,20 @@ export const usePacks = ({
 }) => {
   const { http } = useKibana().services;
 
-  return useQuery(
+  return useQuery<
+    Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
+      data: PackSavedObject[];
+    },
+    unknown,
+    PackSavedObject[]
+  >(
     [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
-    async () =>
-      http.get<
-        Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
-          data: PackSavedObject[];
-        }
-      >('/api/osquery/packs', {
+    () =>
+      http.get('/api/osquery/packs', {
         query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {
+      select: (response) => response.data,
       keepPreviousData: true,
       // Refetch the data every 10 seconds
       refetchInterval: isLive ? 10000 : false,

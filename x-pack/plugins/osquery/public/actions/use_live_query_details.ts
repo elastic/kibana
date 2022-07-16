@@ -24,6 +24,33 @@ interface UseLiveQueryDetails {
   skip?: boolean;
 }
 
+export interface LiveQueryDetailsItem {
+  action_id: string;
+  expiration: string;
+  '@timestamp': string;
+  agent_all: boolean;
+  agent_ids: string[];
+  agent_platforoms: string[];
+  agent_policy_ids: string[];
+  agents: string[];
+  user_id?: string;
+  pack_id?: string;
+  pack_name?: string;
+  pack_prebuilt?: boolean;
+  status?: string;
+  queries?: Array<{
+    action_id: string;
+    id: string;
+    query: string;
+    agents: string[];
+    ecs_mapping?: unknown;
+    version?: string;
+    platform?: string;
+    saved_query_id?: string;
+    expiration?: string;
+  }>;
+}
+
 export const useLiveQueryDetails = ({
   actionId,
   filterQuery,
@@ -33,40 +60,7 @@ export const useLiveQueryDetails = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<
-    {},
-    Error,
-    {
-      data: {
-        action_id: string;
-        expiration: string;
-        '@timestamp': string;
-        agent_selection: {
-          agents: string[];
-          allAgentsSelected: boolean;
-          platformsSelected: string[];
-          policiesSelected: string[];
-        };
-        agents: string[];
-        user_id?: string;
-        pack_id?: string;
-        pack_name?: string;
-        pack_prebuilt?: boolean;
-        status?: string;
-        queries?: Array<{
-          action_id: string;
-          id: string;
-          query: string;
-          agents: string[];
-          ecs_mapping?: unknown;
-          version?: string;
-          platform?: string;
-          saved_query_id?: string;
-          expiration?: string;
-        }>;
-      };
-    }
-  >(
+  return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, filterQuery }],
     () => http.get(`/api/osquery/live_queries/${actionId}`),
     {
@@ -79,6 +73,7 @@ export const useLiveQueryDetails = ({
             defaultMessage: 'Error while fetching action details',
           }),
         }),
+      select: (response) => response.data,
       refetchOnWindowFocus: false,
       retryDelay: 5000,
     }

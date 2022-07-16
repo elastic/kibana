@@ -50,17 +50,17 @@ const LiveQueryDetailsPageComponent = () => {
   );
 
   useLayoutEffect(() => {
-    setIsLive(() => !(data?.data?.status === 'completed'));
-  }, [data?.data?.status]);
+    setIsLive(() => !(data?.status === 'completed'));
+  }, [data?.status]);
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
       <PackQueriesStatusTable
         actionId={actionId}
-        data={data?.data?.queries}
-        startDate={data?.data?.['@timestamp']}
-        expirationDate={data?.data?.expiration}
-        agentIds={data?.data?.agents}
+        data={data?.queries}
+        startDate={data?.['@timestamp']}
+        expirationDate={data?.expiration}
+        agentIds={data?.agents}
       />
     </WithHeaderLayout>
   );

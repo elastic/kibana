@@ -10,6 +10,7 @@ import { useMutation } from 'react-query';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/routes/live_query';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import type { LiveQueryDetailsItem } from '../actions/use_live_query_details';
 
 interface UseLiveQueryProps {
   onSuccess?: () => void;
@@ -21,24 +22,30 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
   const { executionContext, http } = useKibana().services;
   const queryExecutionContext = executionContext?.get();
 
-  return useMutation<{ data: { action_id: string } }, Error, CreateLiveQueryRequestBodySchema>(
+  return useMutation<LiveQueryDetailsItem, Error, CreateLiveQueryRequestBodySchema>(
     // @ts-expect-error update types
-    ({ agentSelection, ...payload }) =>
-      http.post('/api/osquery/live_queries', {
-        body: JSON.stringify(
-          pickBy(
-            {
-              ...payload,
-              agent_all: agentSelection.allAgentsSelected,
-              agent_ids: agentSelection.agents,
-              agent_platforms: agentSelection.platformsSelected,
-              agent_policy_ids: agentSelection.policiesSelected,
-              metadata: { execution_context: queryExecutionContext },
-            },
-            (value) => !isEmpty(value)
-          )
-        ),
-      }),
+    async ({ agentSelection, ...payload }) => {
+      const response = await http.post<{ data: LiveQueryDetailsItem }>(
+        '/api/osquery/live_queries',
+        {
+          body: JSON.stringify(
+            pickBy(
+              {
+                ...payload,
+                agent_all: agentSelection.allAgentsSelected,
+                agent_ids: agentSelection.agents,
+                agent_platforms: agentSelection.platformsSelected,
+                agent_policy_ids: agentSelection.policiesSelected,
+                metadata: { execution_context: queryExecutionContext },
+              },
+              (value) => !isEmpty(value)
+            )
+          ),
+        }
+      );
+
+      return response?.data;
+    },
     {
       onSuccess: () => {
         setErrorToast();

@@ -17,8 +17,13 @@ interface UsePack {
 export const usePack = ({ packId, skip = false }: UsePack) => {
   const { http } = useKibana().services;
 
-  return useQuery<PackItem>(['pack', { packId }], () => http.get(`/api/osquery/packs/${packId}`), {
-    keepPreviousData: true,
-    enabled: !skip || !packId,
-  });
+  return useQuery<{ data: PackItem }, unknown, PackItem>(
+    ['pack', { packId }],
+    () => http.get(`/api/osquery/packs/${packId}`),
+    {
+      select: (response) => response?.data,
+      keepPreviousData: true,
+      enabled: !skip || !packId,
+    }
+  );
 };

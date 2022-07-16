@@ -120,7 +120,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const { data, isLoading, mutateAsync, isError, isSuccess } = useCreateLiveQuery({ onSuccess });
 
   const { data: liveQueryDetails } = useLiveQueryDetails({
-    actionId: data?.data?.action_id,
+    actionId: data?.action_id,
     isLive,
   });
 
@@ -159,11 +159,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
 
-  const actionId = useMemo(
-    () => liveQueryDetails?.data?.action_id,
-    [liveQueryDetails?.data?.action_id]
-  );
-  const agentIds = useMemo(() => liveQueryDetails?.data?.agents, [liveQueryDetails?.data?.agents]);
+  const actionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails?.action_id]);
+  const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
   const [
     { agentSelection, ecs_mapping: ecsMapping, query, savedQueryId, packId },
     formDataSerializer,
@@ -383,10 +380,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ]
   );
 
-  const singleQueryDetails = useMemo(
-    () => liveQueryDetails?.data?.queries?.[0],
-    [liveQueryDetails]
-  );
+  const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
 
   const resultsStepContent = useMemo(
     () =>
@@ -431,7 +425,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const packOptions = useMemo<Array<EuiSuperSelectOption<string>>>(
     () =>
-      packsData?.data?.map((packSO) => ({
+      packsData?.map((packSO) => ({
         value: packSO.id,
         inputDisplay: <>{`${packSO.attributes.name} (${packSO.id})`}</>,
         dropdownDisplay: (
@@ -446,10 +440,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [packsData]
   );
 
-  const selectedPackData = useMemo(
-    () => find(packsData?.data, { id: packId }),
-    [packId, packsData]
-  );
+  const selectedPackData = useMemo(() => find(packsData, { id: packId }), [packId, packsData]);
 
   const queryCardSelectable = useMemo(
     () => ({
@@ -482,8 +473,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   }, [defaultValue, packOptions, updateFieldValues]);
 
   useLayoutEffect(() => {
-    setIsLive(() => !(liveQueryDetails?.data?.status === 'completed'));
-  }, [liveQueryDetails?.data?.status]);
+    setIsLive(() => !(liveQueryDetails?.status === 'completed'));
+  }, [liveQueryDetails?.status]);
 
   return (
     <>
@@ -538,16 +529,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               </EuiFlexItem>
               {submitButtonContent}
               <EuiSpacer />
-              {(liveQueryDetails?.data?.queries?.length ||
-                selectedPackData?.attributes?.queries) && (
+              {(liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries) && (
                 <>
                   <EuiFlexItem>
                     <PackQueriesStatusTable
                       actionId={actionId}
                       agentIds={agentIds}
-                      data={
-                        liveQueryDetails?.data?.queries ?? selectedPackData?.attributes?.queries
-                      }
+                      data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
                     />
                   </EuiFlexItem>
                 </>
