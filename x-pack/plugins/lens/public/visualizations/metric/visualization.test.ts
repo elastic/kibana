@@ -223,10 +223,8 @@ describe('metric visualization', () => {
               "fn": Array [
                 "sum",
                 "sum",
-                "sum",
               ],
               "metric": Array [
-                "breakdown-col-id",
                 "metric-col-id",
                 "max-metric-col-id",
               ],
@@ -261,11 +259,9 @@ describe('metric visualization', () => {
               "fn": Array [
                 "sum",
                 "sum",
-                "sum",
                 "max",
               ],
               "metric": Array [
-                "breakdown-col-id",
                 "metric-col-id",
                 "secondary-metric-col-id",
                 "max-metric-col-id",

@@ -77,12 +77,9 @@ const toExpression = (
       : null;
 
   const getCollapseFnArguments = () => {
-    const metric = [
-      state.breakdownByAccessor!,
-      state.metricAccessor,
-      state.secondaryMetricAccessor,
-      state.maxAccessor,
-    ].filter(Boolean);
+    const metric = [state.metricAccessor, state.secondaryMetricAccessor, state.maxAccessor].filter(
+      Boolean
+    );
 
     const fn = metric.map((accessor) => {
       if (accessor !== state.maxAccessor) {
