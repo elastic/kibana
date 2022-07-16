@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { MouseEventHandler, HTMLAttributes } from 'react';
+import React from 'react';
 import {
   EuiScreenReaderOnly,
   EuiFlexGroup,
@@ -18,6 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import cx from 'classnames';
+
+import type { ExitFullScreenButtonComponentProps as Props } from '@kbn/shared-ux-button-exit-full-screen-types';
 
 import './exit_full_screen_button.scss';
 
@@ -31,13 +33,6 @@ const description = i18n.translate(
     defaultMessage: 'In full screen mode, press ESC to exit.',
   }
 );
-
-/**
- * Props for the `ExitFullScreenButton` component.
- */
-export interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
-  onClick: MouseEventHandler<HTMLButtonElement>;
-}
 
 /**
  * A presentational component that renders a button designed to exit "full screen" mode.

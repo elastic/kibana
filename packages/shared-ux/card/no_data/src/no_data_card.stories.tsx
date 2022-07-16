@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { action } from '@storybook/addon-actions';
 
-import { Params, getStoryArgTypes, getStoryServices } from './mocks';
+import { NoDataCardStorybookMocks as StorybookMocks } from '@kbn/shared-ux-card-no-data-mocks';
+import type { NoDataCardStorybookParams as StorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
 
 import { NoDataCard as Component } from './no_data_card.component';
 import { NoDataCard as ConnectedComponent } from './no_data_card';
@@ -27,11 +27,11 @@ export default {
   },
 };
 
-const argTypes = getStoryArgTypes();
+const argTypes = StorybookMocks.getArgumentTypes();
 
-export const NoDataCard = (params: Params) => {
+export const NoDataCard = (params: StorybookParams) => {
   return (
-    <NoDataCardProvider {...getStoryServices(params, action)}>
+    <NoDataCardProvider {...StorybookMocks.getServices(params)}>
       <ConnectedComponent {...params} />
     </NoDataCardProvider>
   );
@@ -39,7 +39,7 @@ export const NoDataCard = (params: Params) => {
 
 NoDataCard.argTypes = argTypes;
 
-export const NoDataCardComponent = (params: Params) => {
+export const NoDataCardComponent = (params: StorybookParams) => {
   return <Component {...params} />;
 };
 

@@ -6,40 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { MouseEventHandler, ReactNode } from 'react';
-import {
-  EuiButton,
-  EuiCard,
-  EuiScreenReaderOnly,
-  EuiTextColor,
-  EuiCardProps,
-  EuiImage,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiCard, EuiScreenReaderOnly, EuiTextColor, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
 
 import { NoDataCardStyles } from './no_data_card.styles';
 import ElasticAgentCardIllustration from './assets/elastic_agent_card.svg';
-
-export type Props = Partial<
-  Omit<EuiCardProps, 'layout' | 'isDisabled' | 'button' | 'onClick' | 'description'>
-> & {
-  /**
-   * Provide just a string for the button's label, or a whole component;
-   * The button will be hidden completely if `isDisabled=true`
-   */
-  button?: string | ReactNode;
-  /** Remapping `onClick` to any element */
-  onClick?: MouseEventHandler<HTMLElement>;
-  /**
-   * Description for the card;
-   * If not provided, the default will be used
-   */
-  description?: string | ReactNode;
-  /** Category to auto-select within Fleet */
-  category?: string;
-  /** True if the person has permission to access Fleet, false otherwise */
-  canAccessFleet?: boolean;
-};
 
 const noPermissionTitle = i18n.translate('sharedUXPackages.card.noData.noPermission.title', {
   defaultMessage: `Contact your administrator`,

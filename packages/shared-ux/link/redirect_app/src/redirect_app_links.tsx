@@ -7,21 +7,41 @@
  */
 
 import React, { FC } from 'react';
+import type {
+  RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
+} from '@kbn/shared-ux-link-redirect-app-types';
 
-import { useServices } from './services';
-import { RedirectAppLinks as Component } from './redirect_app_links.component';
+import { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links.container';
+import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
+
+const isKibanaContract = (services: any): services is RedirectAppLinksKibanaDependencies => {
+  return typeof services.coreStart !== 'undefined';
+};
 
 /**
- * A service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`
- * pure component.
- *
- * @example
- * ```tsx
- * <RedirectAppLinks>
- *   <a href="/base-path/app/another-app/some-path">Go to another-app</a>
- * </RedirectAppLinks>
- * ```
+ * This component composes `RedirectAppLinksContainer` with either `RedirectAppLinksProvider` or
+ * `RedirectAppLinksKibanaProvider` based on the services provided, creating a single component
+ * with which consumers can wrap their components or solutions.
  */
-export const RedirectAppLinks: FC<{}> = ({ children }) => (
-  <Component {...useServices()}>{children}</Component>
-);
+export const RedirectAppLinks: FC<
+  RedirectAppLinksServices | RedirectAppLinksKibanaDependencies
+> = ({ children, ...services }) => {
+  const container = <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>;
+
+  if (isKibanaContract(services)) {
+    const { coreStart } = services;
+    return (
+      <RedirectAppLinksKibanaProvider {...{ coreStart }}>
+        {container}
+      </RedirectAppLinksKibanaProvider>
+    );
+  }
+
+  const { navigateToUrl, currentAppId } = services;
+  return (
+    <RedirectAppLinksProvider {...{ currentAppId, navigateToUrl }}>
+      {container}
+    </RedirectAppLinksProvider>
+  );
+};

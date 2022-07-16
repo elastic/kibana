@@ -10,7 +10,7 @@ export { SharedUxServicesProvider as LegacyServicesProvider } from '@kbn/shared-
 export type { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services';
 
 import { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services';
-import { KibanaNoDataPageServices } from './services';
+import type { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 /**
  * This list is temporary, a stop-gap as we migrate to a package-based architecture, where

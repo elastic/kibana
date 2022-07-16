@@ -8,26 +8,17 @@
 
 import React, { FC, useContext } from 'react';
 import {
-  RedirectAppLinksServices,
-  RedirectAppLinksKibanaDependencies,
   RedirectAppLinksProvider,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
 
-/**
- * A list of services that are consumed by this component.
- */
-interface Services {
-  addBasePath: (path: string) => string;
-  canAccessFleet: boolean;
-}
+import type {
+  Services,
+  NoDataCardServices,
+  NoDataCardKibanaDependencies,
+} from '@kbn/shared-ux-card-no-data-types';
 
 const Context = React.createContext<Services | null>(null);
-
-/**
- * Services that are consumed by this component and its dependencies.
- */
-export type NoDataCardServices = Services & RedirectAppLinksServices;
 
 /**
  * A Context Provider that provides services to the component and its dependencies.
@@ -41,26 +32,6 @@ export const NoDataCardProvider: FC<NoDataCardServices> = ({ children, ...servic
     </Context.Provider>
   );
 };
-
-interface KibanaDependencies {
-  coreStart: {
-    http: {
-      basePath: {
-        prepend: (path: string) => string;
-      };
-    };
-    application: {
-      capabilities: {
-        navLinks: Record<string, boolean>;
-      };
-    };
-  };
-}
-/**
- * An interface containing a collection of Kibana plugins and services required to
- * render this component as well as its dependencies.
- */
-export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinksKibanaDependencies;
 
 /**
  * Kibana-specific Provider that maps dependencies to services.

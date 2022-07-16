@@ -8,25 +8,17 @@
 
 import React, { FC, useContext } from 'react';
 import {
-  KibanaNoDataPageServices,
-  KibanaNoDataPageKibanaDependencies,
   KibanaNoDataPageKibanaProvider,
   KibanaNoDataPageProvider,
 } from '@kbn/shared-ux-page-kibana-no-data';
 
-/**
- * A list of services that are consumed by this component.
- */
-interface Services {
-  kibanaGuideDocLink: string;
-}
+import {
+  Services,
+  AnalyticsNoDataPageServices,
+  AnalyticsNoDataPageKibanaDependencies,
+} from '@kbn/shared-ux-page-analytics-no-data-types';
 
 const Context = React.createContext<Services | null>(null);
-
-/**
- * Services that are consumed by this component and its dependencies.
- */
-export type AnalyticsNoDataPageServices = Services & KibanaNoDataPageServices;
 
 /**
  * A Context Provider that provides services to the component and its dependencies.
@@ -43,24 +35,6 @@ export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
     </Context.Provider>
   );
 };
-
-interface KibanaDependencies {
-  coreStart: {
-    docLinks: {
-      links: {
-        kibana: {
-          guide: string;
-        };
-      };
-    };
-  };
-}
-/**
- * An interface containing a collection of Kibana plugins and services required to
- * render this component as well as its dependencies.
- */
-export type AnalyticsNoDataPageKibanaDependencies = KibanaDependencies &
-  KibanaNoDataPageKibanaDependencies;
 
 /**
  * Kibana-specific Provider that maps dependencies to services.

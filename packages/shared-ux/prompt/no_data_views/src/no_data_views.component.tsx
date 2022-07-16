@@ -9,23 +9,13 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { DocumentationLink } from './documentation_link';
-
-export interface Props {
-  /** True if the user has permission to create a data view, false otherwise. */
-  canCreateNewDataView: boolean;
-  /** Click handler for create button. **/
-  onClickCreate?: () => void;
-  /** Link to documentation on data views. */
-  dataViewsDocLink?: string;
-  /** The background color of the prompt; defaults to `plain`. */
-  emptyPromptColor?: EuiEmptyPromptProps['color'];
-}
 
 const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewText', {
   defaultMessage: 'Create data view',
@@ -42,7 +32,7 @@ export const NoDataViewsPrompt = ({
   canCreateNewDataView,
   dataViewsDocLink,
   emptyPromptColor = 'plain',
-}: Props) => {
+}: NoDataViewsPromptComponentProps) => {
   const actions = canCreateNewDataView && (
     <EuiButton
       onClick={onClickCreate}

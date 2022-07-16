@@ -14,10 +14,10 @@ import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
-import { getMockServices } from './mocks';
+import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 describe('AnalyticsNoDataPageComponent', () => {
-  const services = getMockServices();
+  const services = getAnalyticsNoDataPageServicesMock();
   const onDataViewCreated = jest.fn();
 
   it('renders correctly', async () => {

@@ -11,18 +11,10 @@ import { useEuiTheme, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useMountedState from 'react-use/lib/useMountedState';
 
+import type { ExitFullScreenButtonProps as Props } from '@kbn/shared-ux-button-exit-full-screen-types';
+
 import { ExitFullScreenButton as Component } from './exit_full_screen_button.component';
 import { useServices } from './services';
-
-/**
- * Props for the service-enabled `ExitFullScreenButton` component.
- */
-export interface Props {
-  /** Optional handler to call when one exits full-screen mode. */
-  onExit?: () => void;
-  /** Should the button toggle the Chrome visibility? */
-  toggleChrome?: boolean;
-}
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `ExitFullScreenButton`

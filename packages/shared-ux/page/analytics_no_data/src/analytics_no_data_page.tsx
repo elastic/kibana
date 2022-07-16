@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
+
 import { useServices } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
-
-/**
- * Props for the `AnalyticsNoDataPage` component.
- */
-export interface AnalyticsNoDataPageProps {
-  /** Handler for successfully creating a new data view. */
-  onDataViewCreated: (dataView: unknown) => void;
-}
 
 /**
  * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.  Uses

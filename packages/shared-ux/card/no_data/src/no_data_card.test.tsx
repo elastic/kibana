@@ -9,18 +9,17 @@
 import { render as enzymeRender } from 'enzyme';
 import React from 'react';
 
+import { getNoDataCardServicesMock } from '@kbn/shared-ux-card-no-data-mocks';
+
 import { NoDataCard } from './no_data_card';
 import { NoDataCardProvider } from './services';
-
-const services = {
-  addBasePath: (path: string) => path,
-  navigateToUrl: () => {},
-};
 
 describe('NoDataCard', () => {
   const render = (element: React.ReactElement, canAccessFleet: boolean = true) =>
     enzymeRender(
-      <NoDataCardProvider {...{ canAccessFleet, ...services }}>{element}</NoDataCardProvider>
+      <NoDataCardProvider {...getNoDataCardServicesMock({ canAccessFleet })}>
+        {element}
+      </NoDataCardProvider>
     );
 
   test('renders', () => {

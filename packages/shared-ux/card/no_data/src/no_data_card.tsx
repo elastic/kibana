@@ -7,13 +7,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { RedirectAppLinksContainer } from '@kbn/shared-ux-link-redirect-app';
 
-import { NoDataCard as Component, Props as ComponentProps } from './no_data_card.component';
+import { RedirectAppLinksContainer } from '@kbn/shared-ux-link-redirect-app';
+import type { NoDataCardProps as Props } from '@kbn/shared-ux-card-no-data-types';
+
+import { NoDataCard as Component } from './no_data_card.component';
 
 import { useServices } from './services';
-
-export type Props = Omit<ComponentProps, 'canAccessFleet'>;
 
 export const NoDataCard = ({ href: srcHref, category, description, ...props }: Props) => {
   const { canAccessFleet, addBasePath } = useServices();

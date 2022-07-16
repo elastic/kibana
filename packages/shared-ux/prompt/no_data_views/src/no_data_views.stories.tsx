@@ -8,14 +8,18 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
+import {
+  NoDataViewsPromptStorybookMocks,
+  NoDataViewsPromptComponentStorybookMocks,
+  NoDataViewsPromptStorybookParams,
+  NoDataViewsPromptComponentStorybookParams,
+} from '@kbn/shared-ux-prompt-no-data-views-mocks';
+
 import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';
 
 import mdx from '../README.mdx';
-import { Params, getStoryArgTypes, getStoryServices } from './mocks';
-
-const argTypes = getStoryArgTypes();
 
 export default {
   title: 'No Data/Prompt',
@@ -27,36 +31,18 @@ export default {
   },
 };
 
-export const NoDataViews = (params: Params) => {
+export const NoDataViews = (params: NoDataViewsPromptStorybookParams) => {
   return (
-    <NoDataViewsPromptProvider {...getStoryServices(params, action)}>
+    <NoDataViewsPromptProvider {...NoDataViewsPromptStorybookMocks.getServices(params)}>
       <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />
     </NoDataViewsPromptProvider>
   );
 };
 
-NoDataViews.argTypes = argTypes;
+NoDataViews.argTypes = NoDataViewsPromptStorybookMocks.getArgumentTypes();
 
-const componentArgTypes = {
-  ...argTypes,
-  emptyPromptColor: {
-    options: [
-      'plain',
-      'transparent',
-      'subdued',
-      'accent',
-      'primary',
-      'success',
-      'warning',
-      'danger',
-    ],
-    control: { type: 'select' },
-    defaultValue: 'plain',
-  },
-};
-
-export const NoDataViewsComponent = (params: Record<keyof typeof componentArgTypes, any>) => {
+export const NoDataViewsComponent = (params: NoDataViewsPromptComponentStorybookParams) => {
   return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
 };
 
-NoDataViewsComponent.argTypes = componentArgTypes;
+NoDataViewsComponent.argTypes = NoDataViewsPromptComponentStorybookMocks.getArgumentTypes();

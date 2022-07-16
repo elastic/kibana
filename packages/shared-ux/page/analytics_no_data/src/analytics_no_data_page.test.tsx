@@ -9,16 +9,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 import { AnalyticsNoDataPageProvider } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPage } from './analytics_no_data_page';
-import { getMockServices } from './mocks';
 
 describe('AnalyticsNoDataPage', () => {
   const onDataViewCreated = jest.fn();
 
-  const services = getMockServices();
+  const services = getAnalyticsNoDataPageServicesMock();
 
   afterAll(() => {
     jest.resetAllMocks();

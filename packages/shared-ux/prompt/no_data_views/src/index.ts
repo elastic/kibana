@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+export type {
+  NoDataViewsPromptComponentProps,
+  NoDataViewsPromptKibanaServices,
+  NoDataViewsPromptProps,
+  NoDataViewsPromptServices,
+} from '@kbn/shared-ux-prompt-no-data-views-types';
+
 export { NoDataViewsPrompt } from './no_data_views';
 export { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
 export { NoDataViewsPromptKibanaProvider, NoDataViewsPromptProvider } from './services';
-export type { NoDataViewsPromptKibanaServices, NoDataViewsPromptServices } from './services';
-
-export {
-  getMockServices as getNoDataViewsPromptMockServices,
-  getStoryArgTypes as getNoDataViewsPromptStoryArgTypes,
-  getStoryServices as getNoDataViewsPromptStorybookServices,
-} from './mocks';

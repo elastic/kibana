@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, MouseEventHandler, useCallback } from 'react';
-import type { HTMLAttributes, DetailedHTMLProps, FC } from 'react';
+import React, { FC, useRef, MouseEventHandler, useCallback } from 'react';
+
+import type { RedirectAppLinksProps } from '@kbn/shared-ux-link-redirect-app-types';
 
 import { navigateToUrlClickHandler } from './click_handler';
-import { NavigateToUrl } from './types';
-
-export interface Props extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-  navigateToUrl: NavigateToUrl;
-  currentAppId?: string | undefined;
-}
 
 /**
  * Utility component that will intercept click events on children anchor (`<a>`) elements to call
@@ -29,7 +24,11 @@ export interface Props extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>,
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<Props> = ({ children, navigateToUrl, currentAppId }) => {
+export const RedirectAppLinks: FC<RedirectAppLinksProps> = ({
+  children,
+  navigateToUrl,
+  currentAppId,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(

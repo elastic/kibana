@@ -12,16 +12,18 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
 
+import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
+
 import { NoDataViewsPrompt } from './no_data_views';
-import { NoDataViewsPromptServices, NoDataViewsPromptProvider } from './services';
-import { getMockServices } from './mocks';
+import { NoDataViewsPromptProvider } from './services';
 
 describe('<NoDataViewsPromptTest />', () => {
   let services: NoDataViewsPromptServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
-    services = getMockServices();
+    services = getNoDataViewsPromptServicesMock();
     mount = (element: JSX.Element) =>
       mountWithIntl(<NoDataViewsPromptProvider {...services}>{element}</NoDataViewsPromptProvider>);
   });

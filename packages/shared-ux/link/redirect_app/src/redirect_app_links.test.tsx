@@ -11,8 +11,8 @@ import React, { MouseEvent } from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
 import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
-import { RedirectAppLinks } from './redirect_app_links';
-import { RedirectAppLinks as ComposedWrapper } from '.';
+import { RedirectAppLinks } from './redirect_app_links.container';
+import { RedirectAppLinks as ComposedWrapper } from './redirect_app_links';
 import { Observable } from 'rxjs';
 
 export type UnmountCallback = () => void;

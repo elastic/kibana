@@ -8,19 +8,21 @@
 
 import React, { FC, useContext } from 'react';
 
-/**
- * Abstract external services for this component.
- */
-export interface Services {
-  setIsFullscreen: (isFullscreen: boolean) => void;
-}
+import type {
+  Services,
+  ExitFullScreenButtonServices,
+  ExitFullScreenButtonKibanaDependencies,
+} from '@kbn/shared-ux-button-exit-full-screen-types';
 
 const ExitFullScreenButtonContext = React.createContext<Services | null>(null);
 
 /**
  * Abstract external service Provider.
  */
-export const ExitFullScreenButtonProvider: FC<Services> = ({ children, ...services }) => {
+export const ExitFullScreenButtonProvider: FC<ExitFullScreenButtonServices> = ({
+  children,
+  ...services
+}) => {
   return (
     <ExitFullScreenButtonContext.Provider value={services}>
       {children}
@@ -29,20 +31,9 @@ export const ExitFullScreenButtonProvider: FC<Services> = ({ children, ...servic
 };
 
 /**
- * Kibana-specific service types.
- */
-export interface KibanaServices {
-  coreStart: {
-    chrome: {
-      setIsVisible: (isVisible: boolean) => void;
-    };
-  };
-}
-
-/**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ExitFullScreenButtonKibanaProvider: FC<KibanaServices> = ({
+export const ExitFullScreenButtonKibanaProvider: FC<ExitFullScreenButtonKibanaDependencies> = ({
   children,
   ...services
 }) => {

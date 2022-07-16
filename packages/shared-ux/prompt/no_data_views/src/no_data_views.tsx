@@ -8,14 +8,13 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
-import { useServices, NoDataViewsPromptServices } from './services';
+import {
+  NoDataViewsPromptServices,
+  NoDataViewsPromptProps,
+} from '@kbn/shared-ux-prompt-no-data-views-types';
 
-// TODO: https://github.com/elastic/kibana/issues/127695
-export interface Props {
-  /** Handler for successfully creating a new data view. */
-  onDataViewCreated: (dataView: unknown) => void;
-}
+import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
+import { useServices } from './services';
 
 type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewEditor']>;
 
@@ -25,7 +24,7 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
  *
  * Use of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider.
  */
-export const NoDataViewsPrompt = ({ onDataViewCreated }: Props) => {
+export const NoDataViewsPrompt = ({ onDataViewCreated }: NoDataViewsPromptProps) => {
   const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 

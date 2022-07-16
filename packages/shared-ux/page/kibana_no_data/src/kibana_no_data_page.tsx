@@ -7,25 +7,16 @@
  */
 import React, { useEffect, useState } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
-import { NoDataConfigPage, NoDataPageProps } from '@kbn/shared-ux-components';
+import { NoDataConfigPage } from '@kbn/shared-ux-components';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
+import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 import { useServices } from './services';
 
 /**
- * Props for `KibanaNoDataPage`.
- */
-export interface Props {
-  /** Handler for successfully creating a new data view. */
-  onDataViewCreated: (dataView: unknown) => void;
-  /** `NoDataPage` configuration; see `NoDataPageProps`. */
-  noDataConfig: NoDataPageProps;
-}
-
-/**
  * A page to display when Kibana has no data, prompting a person to add integrations or create a new data view.
  */
-export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => {
+export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
   const { hasESData, hasUserDataView } = services;
