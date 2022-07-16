@@ -18,7 +18,6 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 
-import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import { ACTIONS_INDEX } from '../../../common/constants';
@@ -79,10 +78,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         platformsSelected: agent_platforms,
         policiesSelected: agent_policy_ids,
       });
-      incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
-        incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
-
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
@@ -193,8 +189,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           body: { data: osqueryAction },
         });
       } catch (error) {
-        incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
-
         return response.customError({
           statusCode: 500,
           body: new Error(`Error occurred while processing ${error}`),

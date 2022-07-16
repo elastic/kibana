@@ -28,14 +28,13 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation<PackSavedObject>(
+  return useMutation<PackSavedObject, { body: { error: string; message: string } }>(
     (payload) =>
       http.post('/api/osquery/packs', {
         body: JSON.stringify(payload),
       }),
     {
       onError: (error) => {
-        // @ts-expect-error update types
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
       onSuccess: (payload) => {

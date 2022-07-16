@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
 import { useMutation } from 'react-query';
+import type { AgentSelection } from '../../common/schemas/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/routes/live_query';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -22,25 +22,28 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
   const { executionContext, http } = useKibana().services;
   const queryExecutionContext = executionContext?.get();
 
-  return useMutation<LiveQueryDetailsItem, Error, CreateLiveQueryRequestBodySchema>(
-    // @ts-expect-error update types
+  return useMutation<
+    LiveQueryDetailsItem,
+    { body: { error: string; message: string } },
+    Omit<
+      CreateLiveQueryRequestBodySchema,
+      'agent_all' | 'agent_ids' | 'agent_platforms' | 'agent_policy_ids'
+    > & {
+      agentSelection: AgentSelection;
+    }
+  >(
     async ({ agentSelection, ...payload }) => {
       const response = await http.post<{ data: LiveQueryDetailsItem }>(
         '/api/osquery/live_queries',
         {
-          body: JSON.stringify(
-            pickBy(
-              {
-                ...payload,
-                agent_all: agentSelection.allAgentsSelected,
-                agent_ids: agentSelection.agents,
-                agent_platforms: agentSelection.platformsSelected,
-                agent_policy_ids: agentSelection.policiesSelected,
-                metadata: { execution_context: queryExecutionContext },
-              },
-              (value) => !isEmpty(value)
-            )
-          ),
+          body: JSON.stringify({
+            ...payload,
+            agent_all: agentSelection.allAgentsSelected,
+            agent_ids: agentSelection.agents,
+            agent_platforms: agentSelection.platformsSelected,
+            agent_policy_ids: agentSelection.policiesSelected,
+            metadata: { execution_context: queryExecutionContext },
+          }),
         }
       );
 
@@ -54,7 +57,10 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
         }
       },
       onError: (error) => {
-        setErrorToast(error);
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
       },
     }
   );
