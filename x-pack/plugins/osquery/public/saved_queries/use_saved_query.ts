@@ -26,19 +26,21 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   const setErrorToast = useErrorToast();
 
   return useQuery<
-    SavedQuerySO & {
+    { data: SavedQuerySO } & {
       error?: {
         error: string;
         message: string;
       };
     },
-    { body: { error: string; message: string } }
+    { body: { error: string; message: string } },
+    SavedQuerySO
   >(
     [SAVED_QUERY_ID, { savedQueryId }],
     () => http.get(`/api/osquery/saved_queries/${savedQueryId}`),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      select: (response) => response.data,
       onSuccess: (data) => {
         if (data.error) {
           setErrorToast(data.error, {
