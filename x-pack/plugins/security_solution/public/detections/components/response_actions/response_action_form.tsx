@@ -108,7 +108,7 @@ export const ResponseActionForm = ({ items, addItem, removeItem }: ResponseActio
         );
       })
     );
-  }, [addActionType, supportedResponseActionTypes?.length]);
+  }, [addActionType, supportedResponseActionTypes]);
 
   if (!supportedResponseActionTypes?.length) return <></>;
 

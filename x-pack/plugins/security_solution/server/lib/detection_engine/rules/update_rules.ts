@@ -70,6 +70,7 @@ export const updateRules = async ({
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
+    responseActions: ruleUpdate.response_actions ?? [],
     throttle: transformToAlertThrottle(ruleUpdate.throttle),
     notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };

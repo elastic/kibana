@@ -48,6 +48,7 @@ export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCrea
     schedule: rule.schedule,
     enabled: false,
     actions: rule.actions,
+    responseActions: rule.responseActions,
     throttle: null,
     notifyWhen: null,
   };
