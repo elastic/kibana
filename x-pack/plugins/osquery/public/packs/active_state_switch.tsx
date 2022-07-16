@@ -58,23 +58,20 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
         queryClient.invalidateQueries(PACKS_ID);
         setErrorToast();
         toasts.addSuccess(
-          response.attributes.enabled
+          response?.data?.attributes.enabled
             ? i18n.translate('xpack.osquery.pack.table.activatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully activated "{packName}" pack',
                 values: {
-                  packName: response.attributes.name,
+                  packName: response?.data?.attributes.name,
                 },
               })
             : i18n.translate('xpack.osquery.pack.table.deactivatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully deactivated "{packName}" pack',
                 values: {
-                  packName: response.attributes.name,
+                  packName: response?.data?.attributes.name,
                 },
               })
         );
-      },
-      onError: (error) => {
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
     },
   });

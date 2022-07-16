@@ -19,7 +19,7 @@ import type { PackSavedObject } from './types';
 interface UseUpdatePackProps {
   withRedirect?: boolean;
   options?: UseMutationOptions<
-    PackSavedObject,
+    { data: PackSavedObject },
     { body: { message: string; error: string } },
     Partial<PackSavedObject['attributes']> & { id: string }
   >;
@@ -35,7 +35,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   const setErrorToast = useErrorToast();
 
   return useMutation<
-    PackSavedObject,
+    { data: PackSavedObject },
     { body: { message: string; error: string } },
     Partial<PackSavedObject['attributes']> & { id: string }
   >(
@@ -45,9 +45,9 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
       }),
     {
       onError: (error) => {
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error, { title: error?.body?.error, toastMessage: error?.body?.message });
       },
-      onSuccess: (payload) => {
+      onSuccess: (response) => {
         queryClient.invalidateQueries(PACKS_ID);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
@@ -57,7 +57,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
             defaultMessage: 'Successfully updated "{packName}" pack',
             values: {
-              packName: payload.attributes?.name ?? '',
+              packName: response?.data?.attributes?.name ?? '',
             },
           })
         );
