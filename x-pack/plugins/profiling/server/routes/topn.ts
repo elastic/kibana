@@ -69,6 +69,7 @@ export async function topNElasticSearchQuery({
     return response.ok({
       body: {
         TopN: [],
+        Metadata: {},
       },
     });
   }
@@ -78,7 +79,7 @@ export async function topNElasticSearchQuery({
 
   if (searchField !== 'StackTraceID') {
     return response.ok({
-      body: { TopN: topN },
+      body: { TopN: topN, Metadata: {} },
     });
   }
 
