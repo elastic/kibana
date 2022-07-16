@@ -205,7 +205,7 @@
             "section": "def-public.ObservabilityRuleTypeFormatter",
             "text": "ObservabilityRuleTypeFormatter"
           },
-          " | undefined; list: () => string[]; } & { getFormatter: () => () => string; registerFormatter: () => void; }"
+          " | undefined; list: () => string[]; } & { getFormatter: () => () => string; registerFormatter: () => void; list: () => string[]; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
         "deprecated": false,
@@ -3364,47 +3364,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.features",
-            "type": "Object",
-            "tags": [],
-            "label": "features",
-            "description": [],
-            "signature": [
-              "{ getFeatures: () => Promise<",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeature",
-                "text": "KibanaFeature"
-              },
-              "[]>; }"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.kibanaFeatures",
-            "type": "Array",
-            "tags": [],
-            "label": "kibanaFeatures",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeature",
-                "text": "KibanaFeature"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.sharedUX",
             "type": "Object",
             "tags": [],
@@ -3418,6 +3377,86 @@
                 "section": "def-public.SharedUXPluginStart",
                 "text": "SharedUXPluginStart"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.ruleTypeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleTypeRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">[]; get: (id: string) => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">; register: (objectType: ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.actionTypeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "actionTypeRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>[]; get: (id: string) => ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>; register: (objectType: ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
