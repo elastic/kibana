@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  AggregationsAggregationContainer,
-  QueryDslBoolQuery,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 
 export interface ProjectTimeQuery {
@@ -50,10 +47,7 @@ export function createCommonFilter({
   };
 }
 
-export function autoHistogramSumCountOnGroupByField(
-  searchField: string,
-  topNItems: number
-): AggregationsAggregationContainer {
+export function autoHistogramSumCountOnGroupByField(searchField: string, topNItems: number) {
   return {
     auto_date_histogram: {
       field: '@timestamp',

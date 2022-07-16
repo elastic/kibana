@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import seedrandom from 'seedrandom';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ProjectTimeQuery } from './query';
 import { StackTraceID } from '../../common/profiling';
-import { getHits } from './compat';
+import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { ProjectTimeQuery } from './query';
 
 export interface DownsampledEventsIndex {
   name: string;
@@ -61,19 +61,25 @@ export function getSampledTraceEventsIndex(
   };
 }
 
-export async function findDownsampledIndex(
-  logger: Logger,
-  client: ElasticsearchClient,
-  index: string,
-  filter: ProjectTimeQuery,
-  sampleSize: number
-): Promise<DownsampledEventsIndex> {
+export async function findDownsampledIndex({
+  logger,
+  client,
+  index,
+  filter,
+  sampleSize,
+}: {
+  logger: Logger;
+  client: ProfilingESClient;
+  index: string;
+  filter: ProjectTimeQuery;
+  sampleSize: number;
+}): Promise<DownsampledEventsIndex> {
   // Start with counting the results in the index down-sampled by 5^6.
   // That is in the middle of our down-sampled indexes.
   const initialExp = 6;
   let sampleCountFromInitialExp = 0;
   try {
-    const resp = await client.search({
+    const resp = await client.search('find_downsampled_index', {
       index: getFullDownsampledIndex(index, initialExp, 5),
       body: {
         query: filter,
@@ -81,7 +87,7 @@ export async function findDownsampledIndex(
         track_total_hits: true,
       },
     });
-    sampleCountFromInitialExp = getHits(resp).total?.value as number;
+    sampleCountFromInitialExp = resp.hits.total.value;
   } catch (e) {
     logger.info(e.message);
   }

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import LRUCache from 'lru-cache';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  ProfilingExecutable,
+  ProfilingStackFrame,
+  ProfilingStackTrace,
+} from '../../common/elasticsearch';
 import {
   Executable,
   FileID,
@@ -16,7 +21,9 @@ import {
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
-import { getAggs, getDocs, getHitsItems } from './compat';
+import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { withProfilingSpan } from '../utils/with_profiling_span';
+import { getDocs } from './compat';
 import { DownsampledEventsIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { ProjectTimeQuery } from './query';
@@ -168,71 +175,57 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   } as StackTrace;
 }
 
-export async function searchEventsGroupByStackTrace(
-  logger: Logger,
-  client: ElasticsearchClient,
-  index: DownsampledEventsIndex,
-  filter: ProjectTimeQuery
-) {
-  const resEvents = await logExecutionLatency(
-    logger,
-    'query to fetch events from ' + index.name,
-    async () => {
-      return await client.search(
-        {
-          index: index.name,
-          track_total_hits: false,
-          query: filter,
-          aggs: {
-            group_by: {
-              terms: {
-                // 'size' should be max 100k, but might be slightly more. Better be on the safe side.
-                size: 150000,
-                field: 'StackTraceID',
-                // 'execution_hint: map' skips the slow building of ordinals that we don't need.
-                // Especially with high cardinality fields, this makes aggregations really slow.
-                // E.g. it reduces the latency from 70s to 0.7s on our 8.1. MVP cluster (as of 28.04.2022).
-                execution_hint: 'map',
-              },
-              aggs: {
-                count: {
-                  sum: {
-                    field: 'Count',
-                  },
-                },
-              },
-            },
-            total_count: {
-              sum: {
-                field: 'Count',
-              },
+export async function searchEventsGroupByStackTrace({
+  logger,
+  client,
+  index,
+  filter,
+}: {
+  logger: Logger;
+  client: ProfilingESClient;
+  index: DownsampledEventsIndex;
+  filter: ProjectTimeQuery;
+}) {
+  const resEvents = await client.search('get_events_group_by_stack_trace', {
+    index: index.name,
+    track_total_hits: false,
+    query: filter,
+    aggs: {
+      group_by: {
+        terms: {
+          // 'size' should be max 100k, but might be slightly more. Better be on the safe side.
+          size: 150000,
+          field: 'StackTraceID',
+          // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+          // Especially with high cardinality fields, this makes aggregations really slow.
+          // E.g. it reduces the latency from 70s to 0.7s on our 8.1. MVP cluster (as of 28.04.2022).
+          execution_hint: 'map',
+        },
+        aggs: {
+          count: {
+            sum: {
+              field: 'Count',
             },
           },
         },
-        {
-          // Adrien and Dario found out this is a work-around for some bug in 8.1.
-          // It reduces the query time by avoiding unneeded searches.
-          querystring: {
-            pre_filter_shard_size: 1,
-            filter_path:
-              'aggregations.group_by.buckets.key,aggregations.group_by.buckets.count,aggregations.total_count,_shards.failures',
-          },
-        }
-      );
-    }
-  );
+      },
+      total_count: {
+        sum: {
+          field: 'Count',
+        },
+      },
+    },
+    pre_filter_shard_size: 1,
+    filter_path:
+      'aggregations.group_by.buckets.key,aggregations.group_by.buckets.count,aggregations.total_count,_shards.failures',
+  });
 
-  const totalCount: number =
-    (getAggs(resEvents) as { total_count: { value: number } } | undefined)?.total_count.value ?? 0;
+  const totalCount = resEvents.aggregations?.total_count.value ?? 0;
   const stackTraceEvents = new Map<StackTraceID, number>();
 
-  (
-    getAggs(resEvents) as
-      | { group_by: { buckets: Array<{ key: string; count: { value: number } }> } }
-      | undefined
-  )?.group_by?.buckets.forEach((item: any) => {
-    const traceid: StackTraceID = item.key;
-    stackTraceEvents.set(traceid, item.count.value);
+  resEvents.aggregations?.group_by?.buckets.forEach((item) => {
+    const traceid: StackTraceID = String(item.key);
+    stackTraceEvents.set(traceid, item.count.value ?? 0);
   });
 
   logger.info('events total count: ' + totalCount);
@@ -241,12 +234,17 @@ export async function searchEventsGroupByStackTrace(
   return { totalCount, stackTraceEvents };
 }
 
-export async function searchStackTraces(
-  logger: Logger,
-  client: ElasticsearchClient,
-  events: Map<StackTraceID, number>,
-  concurrency: number = 1
-) {
+export async function mgetStackTraces({
+  logger,
+  client,
+  events,
+  concurrency = 1,
+}: {
+  logger: Logger;
+  client: ProfilingESClient;
+  events: Map<StackTraceID, number>;
+  concurrency?: number;
+}) {
   const stackTraceIDs = [...events.keys()];
   const chunkSize = Math.floor(events.size / concurrency);
   let chunks = chunk(stackTraceIDs, chunkSize);
@@ -256,94 +254,20 @@ export async function searchStackTraces(
     chunks = chunks.slice(0, concurrency);
   }
 
-  const stackResponses = await logExecutionLatency(
-    logger,
-    'search query for ' + events.size + ' stacktraces',
-    async () => {
-      return await Promise.all(
-        chunks.map((ids) => {
-          return client.search(
-            {
-              index: 'profiling-stacktraces',
-              size: events.size,
-              sort: '_doc',
-              query: {
-                ids: {
-                  values: [...ids],
-                },
-              },
-              _source: false,
-              docvalue_fields: ['FrameID', 'Type'],
-            },
-            {
-              querystring: {
-                filter_path: 'hits.hits._id,hits.hits.fields.FrameID,hits.hits.fields.Type',
-                pre_filter_shard_size: 1,
-              },
-            }
-          );
-        })
-      );
-    }
-  );
-
-  const stackTraces = new Map<StackTraceID, StackTrace>();
-  const stackFrameDocIDs = new Set<string>();
-  const executableDocIDs = new Set<string>();
-
-  await logExecutionLatency(logger, 'processing data', async () => {
-    const traces = stackResponses.flatMap((response) => getHitsItems(response));
-    for (const trace of traces) {
-      const stackTrace = decodeStackTrace(trace.fields as EncodedStackTrace);
-      stackTraces.set(trace._id, stackTrace);
-      for (const frameID of stackTrace.FrameID) {
-        stackFrameDocIDs.add(frameID);
-      }
-      for (const fileID of stackTrace.FileID) {
-        executableDocIDs.add(fileID);
-      }
-    }
-  });
-
-  if (stackTraces.size < events.size) {
-    logger.info(
-      'failed to find ' + (events.size - stackTraces.size) + ' stacktraces (todo: find out why)'
-    );
-  }
-
-  return { stackTraces, stackFrameDocIDs, executableDocIDs };
-}
-
-export async function mgetStackTraces(
-  logger: Logger,
-  client: ElasticsearchClient,
-  events: Map<StackTraceID, number>,
-  concurrency: number = 1
-) {
-  const stackTraceIDs = [...events.keys()];
-  const chunkSize = Math.floor(events.size / concurrency);
-  let chunks = chunk(stackTraceIDs, chunkSize);
-
-  if (chunks.length !== concurrency) {
-    // The last array element contains the remainder, just drop it as irrelevant.
-    chunks = chunks.slice(0, concurrency);
-  }
-
-  const stackResponses = await logExecutionLatency(
-    logger,
-    'mget query (' + concurrency + ' parallel) for ' + events.size + ' stacktraces',
-    async () => {
-      return await Promise.all(
-        chunks.map((ids) => {
-          return client.mget({
+  const stackResponses = await withProfilingSpan('mget_stacktraces', () =>
+    Promise.all(
+      chunks.map((ids) => {
+        return client.mget<Pick<ProfilingStackTrace, 'FrameID' | 'Type'>>(
+          'mget_stacktraces_chunk',
+          {
             index: 'profiling-stacktraces',
             ids,
             realtime: false,
             _source_includes: ['FrameID', 'Type'],
-          });
-        })
-      );
-    }
+          }
+        );
+      })
+    )
   );
 
   let totalFrames = 0;
@@ -392,28 +316,26 @@ export async function mgetStackTraces(
   return { stackTraces, stackFrameDocIDs, executableDocIDs };
 }
 
-export async function mgetStackFrames(
-  logger: Logger,
-  client: ElasticsearchClient,
-  stackFrameIDs: Set<string>
-): Promise<Map<StackFrameID, StackFrame>> {
+export async function mgetStackFrames({
+  logger,
+  client,
+  stackFrameIDs,
+}: {
+  logger: Logger;
+  client: ProfilingESClient;
+  stackFrameIDs: Set<string>;
+}): Promise<Map<StackFrameID, StackFrame>> {
   const stackFrames = new Map<StackFrameID, StackFrame>();
 
   if (stackFrameIDs.size === 0) {
     return stackFrames;
   }
 
-  const resStackFrames = await logExecutionLatency(
-    logger,
-    'mget query for ' + stackFrameIDs.size + ' stackframes',
-    async () => {
-      return await client.mget({
-        index: 'profiling-stackframes',
-        ids: [...stackFrameIDs],
-        realtime: false,
-      });
-    }
-  );
+  const resStackFrames = await client.mget<ProfilingStackFrame>('mget_stackframes', {
+    index: 'profiling-stackframes',
+    ids: [...stackFrameIDs],
+    realtime: false,
+  });
 
   // Create a lookup map StackFrameID -> StackFrame.
   let framesFound = 0;
@@ -440,28 +362,26 @@ export async function mgetStackFrames(
   return stackFrames;
 }
 
-export async function mgetExecutables(
-  logger: Logger,
-  client: ElasticsearchClient,
-  executableIDs: Set<string>
-): Promise<Map<FileID, Executable>> {
+export async function mgetExecutables({
+  logger,
+  client,
+  executableIDs,
+}: {
+  logger: Logger;
+  client: ProfilingESClient;
+  executableIDs: Set<string>;
+}): Promise<Map<FileID, Executable>> {
   const executables = new Map<FileID, Executable>();
 
   if (executableIDs.size === 0) {
     return executables;
   }
 
-  const resExecutables = await logExecutionLatency(
-    logger,
-    'mget query for ' + executableIDs.size + ' executables',
-    async () => {
-      return await client.mget<any>({
-        index: 'profiling-executables',
-        ids: [...executableIDs],
-        _source_includes: ['FileName'],
-      });
-    }
-  );
+  const resExecutables = await client.mget<ProfilingExecutable>('mget_executables', {
+    index: 'profiling-executables',
+    ids: [...executableIDs],
+    _source_includes: ['FileName'],
+  });
 
   // Create a lookup map StackFrameID -> StackFrame.
   let exeFound = 0;
