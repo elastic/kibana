@@ -8,7 +8,7 @@
 
 import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
-import type { IntervalHistogram } from '@kbn/core-metrics-server';
+import type { IntervalHistogram, MetricsMonitor } from '@kbn/core-metrics-server';
 
 /**
  * Nanosecond to milisecond conversion unit
@@ -22,7 +22,7 @@ export function nsToMs(metric: number) {
   return metric / ONE_MILLISECOND_AS_NANOSECONDS;
 }
 
-export class EventLoopDelaysMonitor {
+export class EventLoopDelaysMonitor implements MetricsMonitor<IntervalHistogram> {
   private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
 

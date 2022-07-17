@@ -7,12 +7,25 @@
  */
 import type { MaybePromise } from '@kbn/utility-types';
 
-/** Base interface for all metrics gatherers */
+/**
+ * Base interface for all metrics collectors
+ *s
+ * @public
+ */
 export interface MetricsCollector<T> {
   /** collect the data currently gathered by the collector */
   collect(): MaybePromise<T>;
   /** reset the internal state of the collector */
   reset(): void;
+}
+
+/**
+ * See {@link MetricsCollector}.
+ * @public
+ */
+export interface MetricsMonitor<T> extends MetricsCollector<T> {
+  /** stop monitoring metrics */
+  stop(): void;
 }
 
 /**

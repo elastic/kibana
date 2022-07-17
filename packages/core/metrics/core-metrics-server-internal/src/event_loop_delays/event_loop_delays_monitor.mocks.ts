@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type { IntervalHistogram } from '@kbn/core-metrics-server';
-import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+import type { IntervalHistogram, MetricsMonitor } from '@kbn/core-metrics-server';
+// import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}
@@ -57,19 +57,32 @@ function createMockMonitorDataMsHistogram(
   return mockedRawCollectedDataInMs;
 }
 
+const createMonitor = <T = unknown>(
+  collectReturnValue: unknown = {}
+): jest.Mocked<MetricsMonitor<T>> => {
+  const metricsMonitor: jest.Mocked<MetricsMonitor<T>> = {
+    collect: jest.fn().mockReturnValue(collectReturnValue),
+    reset: jest.fn(),
+    stop: jest.fn(),
+  };
+  return metricsMonitor;
+};
+// metricsMonitorMock
 function createMockEventLoopDelaysMonitor() {
-  const mockCollect = jest.fn();
-  const MockEventLoopDelaysMonitor: jest.MockedClass<typeof EventLoopDelaysMonitor> = jest
-    .fn()
-    .mockReturnValue({
-      collect: mockCollect,
-      reset: jest.fn(),
-      stop: jest.fn(),
-    });
+  const MockEventLoopDelaysMonitor = createMonitor(createMockMonitorDataMsHistogram());
 
-  mockCollect.mockReturnValue(createMockMonitorDataMsHistogram()); // this must mock the return value of the public collect method from this monitor.
+  // jest.MockedClass<typeof EventLoopDelaysMonitor> = jest
+  //   .fn()
+  //   .mockReturnValue({
+  //     collect: mockCollect,
+  //     reset: jest.fn(),
+  //     stop: jest.fn(),
+  //   });
 
-  return new MockEventLoopDelaysMonitor();
+  // mockCollect.mockReturnValue(createMockMonitorDataMsHistogram()); // this must mock the return value of the public collect method from this monitor.
+
+  // return new MockEventLoopDelaysMonitor();
+  return MockEventLoopDelaysMonitor;
 }
 
 export const eventLoopDelaysMonitorMock = {

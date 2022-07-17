@@ -7,7 +7,7 @@
  */
 
 import type { MetricsCollector } from '@kbn/core-metrics-server';
-
+// move to `core-metrics-server-mocks`
 const createCollector = <T = any>(
   collectReturnValue: any = {}
 ): jest.Mocked<MetricsCollector<T>> => {

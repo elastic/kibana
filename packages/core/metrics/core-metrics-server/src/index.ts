@@ -9,6 +9,7 @@
 export type { MetricsServiceSetup, MetricsServiceStart } from './contracts';
 export type {
   MetricsCollector,
+  MetricsMonitor,
   OpsMetrics,
   OpsProcessMetrics,
   OpsOsMetrics,
