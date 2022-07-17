@@ -24,7 +24,7 @@ import {
   severity_mapping,
   throttleOrNull,
   max_signals,
-  response_actions,
+  responseActionsCamel,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
@@ -261,7 +261,7 @@ export const internalRuleCreate = t.type({
   }),
   enabled,
   actions: actionsCamel,
-  responseActions: response_actions,
+  responseActions: responseActionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen,
@@ -275,7 +275,7 @@ export const internalRuleUpdate = t.type({
     interval: t.string,
   }),
   actions: actionsCamel,
-  responseActions: response_actions,
+  responseActions: responseActionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen,

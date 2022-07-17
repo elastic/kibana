@@ -31,15 +31,17 @@ export const action = t.exact(
 
 export const responseAction = t.exact(
   t.type({
-    query: t.string,
+    action_type_id: action_action_type_id,
+    params: action_params,
   })
 );
 
 export type Action = t.TypeOf<typeof action>;
 
 export const actions = t.array(action);
-export const response_actions = t.array(responseAction);
 export type Actions = t.TypeOf<typeof actions>;
+export const response_actions = t.array(responseAction);
+export type ResponseActions = t.TypeOf<typeof response_actions>;
 
 export const actionsCamel = t.array(
   t.exact(
@@ -52,3 +54,13 @@ export const actionsCamel = t.array(
   )
 );
 export type ActionsCamel = t.TypeOf<typeof actions>;
+
+export const responseActionsCamel = t.array(
+  t.exact(
+    t.type({
+      actionTypeId: action_action_type_id,
+      params: action_params,
+    })
+  )
+);
+export type ResponseActionsCamel = t.TypeOf<typeof responseActionsCamel>;

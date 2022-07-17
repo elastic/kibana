@@ -68,7 +68,10 @@ import {
   DEFAULT_MAX_SIGNALS,
   SERVER_APP_ID,
 } from '../../../../common/constants';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import {
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../common/detection_engine/transform_actions';
 import {
   transformFromAlertThrottle,
   transformToAlertThrottle,
@@ -403,7 +406,9 @@ export const convertPatchAPIToInternalSchema = (
     },
     schedule: { interval: params.interval ?? existingRule.schedule.interval },
     actions: params.actions ? params.actions.map(transformRuleToAlertAction) : existingRule.actions,
-    responseActions: params.response_actions ?? existingRule.responseActions,
+    responseActions: params.response_actions
+      ? params.response_actions.map(transformRuleToAlertResponseAction)
+      : existingRule.responseActions,
     throttle: params.throttle ? transformToAlertThrottle(params.throttle) : existingRule.throttle,
     notifyWhen: params.throttle ? transformToNotifyWhen(params.throttle) : existingRule.notifyWhen,
   };
@@ -461,7 +466,7 @@ export const convertCreateAPIToInternalSchema = (
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
     actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    responseActions: input.response_actions ?? [],
+    responseActions: input.response_actions?.map(transformRuleToAlertResponseAction) ?? [],
     throttle: transformToAlertThrottle(input.throttle),
     notifyWhen: transformToNotifyWhen(input.throttle),
   };
@@ -615,7 +620,7 @@ export const internalRuleToAPIResponse = (
     // Actions
     throttle: transformFromAlertThrottle(rule, legacyRuleActions),
     actions: transformActions(rule.actions, legacyRuleActions),
-    response_actions: rule.responseActions,
+    response_actions: rule.responseActions.map(transformRuleToAlertResponseAction),
     // Execution summary
     execution_summary: mergedExecutionSummary ?? undefined,
   };

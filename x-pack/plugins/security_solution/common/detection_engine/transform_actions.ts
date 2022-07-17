@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
-import type { RuleAlertAction } from './types';
+import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
+import type { RuleAlertAction, RuleAlertResponseAction } from './types';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -28,6 +28,22 @@ export const transformAlertToRuleAction = ({
 }: RuleAction): RuleAlertAction => ({
   group,
   id,
+  params,
+  action_type_id: actionTypeId,
+});
+
+export const transformRuleToAlertResponseAction = ({
+  action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
+  params,
+}: RuleAlertResponseAction): RuleResponseAction => ({
+  params,
+  actionTypeId: action_type_id,
+});
+
+export const transformAlertToRuleResponseAction = ({
+  actionTypeId,
+  params,
+}: RuleResponseAction): RuleAlertResponseAction => ({
   params,
   action_type_id: actionTypeId,
 });

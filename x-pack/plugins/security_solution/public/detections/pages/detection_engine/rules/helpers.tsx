@@ -22,9 +22,15 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type {
+  RuleAlertAction,
+  RuleAlertResponseAction,
+} from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
+import {
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../../common/detection_engine/transform_actions';
 import type { Rule } from '../../../containers/detection_engine/rules';
 import type {
   AboutStepRule,
@@ -66,12 +72,16 @@ export const getStepsData = ({
 };
 
 export const getActionsStepsData = (
-  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+  rule: Omit<Rule, 'actions'> & {
+    actions: RuleAlertAction[];
+    responseActions: RuleAlertResponseAction[];
+  }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [] } = rule;
+  const { enabled, throttle, meta, actions = [], responseActions = [] } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
+    responseActions: responseActions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,

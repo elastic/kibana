@@ -72,7 +72,7 @@ export interface RuleAction {
   params: RuleActionParams;
 }
 export interface RuleResponseAction {
-  type: string;
+  actionTypeId: string;
   params: RuleActionParams;
 }
 

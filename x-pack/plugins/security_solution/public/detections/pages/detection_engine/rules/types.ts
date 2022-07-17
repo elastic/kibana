@@ -17,7 +17,7 @@ import type {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -163,6 +163,7 @@ export interface ScheduleStepRule {
 
 export interface ActionsStepRule {
   actions: RuleAction[];
+  responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
   throttle?: string | null;

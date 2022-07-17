@@ -20,6 +20,7 @@ import {
   type,
   severity_mapping,
   severity,
+  response_actions,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   SortOrder,
@@ -127,6 +128,7 @@ export const RuleSchema = t.intersection([
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(action),
+    response_actions,
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
