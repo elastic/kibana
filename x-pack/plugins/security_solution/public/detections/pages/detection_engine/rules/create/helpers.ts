@@ -25,7 +25,10 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import {
+  transformAlertToRuleAction,
+  transformAlertToRuleResponseAction,
+} from '../../../../../../common/detection_engine/transform_actions';
 import type { Rule } from '../../../../containers/detection_engine/rules';
 import type {
   AboutStepRule,
@@ -446,6 +449,7 @@ export const formatAboutStepData = (
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const {
     actions = [],
+    responseActions = [],
     enabled,
     kibanaSiemAppUrl,
     throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -453,6 +457,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
 
   return {
     actions: actions.map(transformAlertToRuleAction),
+    response_actions: responseActions.map(transformAlertToRuleResponseAction),
     enabled,
     throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {

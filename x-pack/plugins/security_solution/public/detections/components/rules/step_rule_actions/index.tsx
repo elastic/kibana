@@ -48,6 +48,22 @@ interface StepRuleActionsProps extends RuleStepProps {
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
+  responseActions: [
+    {
+      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        query: 'select * from uptime',
+        ecs_mapping: [],
+      },
+    },
+    {
+      params: {
+        query: 'select * from processes',
+        ecs_mapping: [],
+      },
+      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+    },
+  ],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
 };
@@ -92,25 +108,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
-    // mock data, to be removed
-    response_actions: [
-      {
-        id: '1',
-        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
-        params: {
-          query: 'select * from uptime',
-          ecs_mapping: [],
-        },
-      },
-      {
-        id: '2',
-        params: {
-          query: 'select * from processes',
-          ecs_mapping: [],
-        },
-        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
-      },
-    ],
   };
 
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
@@ -200,7 +197,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           <>
             <EuiSpacer />
 
-            <UseArray path="response_actions" initialNumberOfItems={2}>
+            <UseArray path="responseActions" initialNumberOfItems={2}>
               {({ items, addItem, removeItem, ...rest }) => {
                 return (
                   <ResponseActionForm items={items} addItem={addItem} removeItem={removeItem} />
@@ -210,7 +207,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           </>
         );
       } else {
-        return <UseField path="response_actions" component={GhostFormField} />;
+        return <UseField path="responseActions" component={GhostFormField} />;
       }
     }
     return null;
