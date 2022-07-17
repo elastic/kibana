@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { eventLoopDelaysMonitorMock } from '../event_loop_delays_monitor.mocks';
+import { createMockRawNsDataHistogram } from '../event_loop_delays_monitor.test.mocks';
 
 export const monitorEventLoopDelay = jest.fn().mockImplementation(() => {
-  const mockedHistogram = eventLoopDelaysMonitorMock.createHistogram();
+  const mockedHistogram = createMockRawNsDataHistogram();
 
   return {
     ...mockedHistogram,

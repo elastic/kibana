@@ -10,7 +10,7 @@
 jest.mock('perf_hooks');
 import { monitorEventLoopDelay } from 'perf_hooks';
 import { EventLoopDelaysMonitor, nsToMs } from './event_loop_delays_monitor';
-import { eventLoopDelaysMonitorMock } from './event_loop_delays_monitor.mocks';
+import { createMockRawNsDataHistogram } from './event_loop_delays_monitor.test.mocks';
 
 describe('EventLoopDelaysMonitor', () => {
   beforeAll(() => {
@@ -42,7 +42,8 @@ describe('EventLoopDelaysMonitor', () => {
     // mocked perf_hook returns `eventLoopDelaysMonitorMock.createNsHistogram()` that returns data in ns.
     // The `collect` function returns the data in ms.
     // This ensures that the wiring of the `collect` function is correct.
-    const mockedHistogram = eventLoopDelaysMonitorMock.createHistogram();
+    // const mockedHistogram = eventLoopDelaysMonitorMock.createHistogram();
+    const mockedHistogram = createMockRawNsDataHistogram();
 
     expect(histogramData.min).toEqual(nsToMs(mockedHistogram.min));
     expect(histogramData.max).toEqual(nsToMs(mockedHistogram.max));

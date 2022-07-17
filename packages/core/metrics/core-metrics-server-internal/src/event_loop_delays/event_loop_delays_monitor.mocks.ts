@@ -7,7 +7,6 @@
  */
 import moment from 'moment';
 import type { IntervalHistogram, MetricsMonitor } from '@kbn/core-metrics-server';
-// import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}
@@ -67,21 +66,9 @@ const createMonitor = <T = unknown>(
   };
   return metricsMonitor;
 };
-// metricsMonitorMock
+
 function createMockEventLoopDelaysMonitor() {
   const MockEventLoopDelaysMonitor = createMonitor(createMockMonitorDataMsHistogram());
-
-  // jest.MockedClass<typeof EventLoopDelaysMonitor> = jest
-  //   .fn()
-  //   .mockReturnValue({
-  //     collect: mockCollect,
-  //     reset: jest.fn(),
-  //     stop: jest.fn(),
-  //   });
-
-  // mockCollect.mockReturnValue(createMockMonitorDataMsHistogram()); // this must mock the return value of the public collect method from this monitor.
-
-  // return new MockEventLoopDelaysMonitor();
   return MockEventLoopDelaysMonitor;
 }
 
