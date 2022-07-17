@@ -167,7 +167,6 @@ const baseParams = {
     timestamp_override,
     timestamp_override_fallback_disabled,
     namespace,
-    response_actions,
   },
   defaultable: {
     tags,
@@ -175,6 +174,7 @@ const baseParams = {
     enabled,
     throttle,
     actions,
+    response_actions,
     author,
     false_positives,
     from,

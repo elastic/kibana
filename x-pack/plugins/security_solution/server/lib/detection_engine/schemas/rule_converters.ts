@@ -69,6 +69,7 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import {
+  transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../common/detection_engine/transform_actions';
@@ -620,7 +621,7 @@ export const internalRuleToAPIResponse = (
     // Actions
     throttle: transformFromAlertThrottle(rule, legacyRuleActions),
     actions: transformActions(rule.actions, legacyRuleActions),
-    response_actions: rule.responseActions.map(transformRuleToAlertResponseAction),
+    response_actions: rule.responseActions.map(transformAlertToRuleResponseAction),
     // Execution summary
     execution_summary: mergedExecutionSummary ?? undefined,
   };

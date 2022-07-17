@@ -188,6 +188,11 @@ export interface RawRuleAction extends SavedObjectAttributes {
   params: RuleActionParams;
 }
 
+export interface RawRuleResponseAction extends SavedObjectAttributes {
+  actionTypeId: string;
+  params: RuleActionParams;
+}
+
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
 }
@@ -236,6 +241,7 @@ export interface RawRule extends SavedObjectAttributes {
   legacyId: string | null;
   schedule: SavedObjectAttributes;
   actions: RawRuleAction[];
+  responseActions: RawRuleResponseAction[];
   params: SavedObjectAttributes;
   mapped_params?: MappedParams;
   scheduledTaskId?: string | null;

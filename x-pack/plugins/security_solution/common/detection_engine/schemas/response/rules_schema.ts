@@ -13,6 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
   actions,
+  response_actions,
   from,
   machine_learning_job_id,
   risk_score,
@@ -175,6 +176,7 @@ export const dependentRulesSchema = t.partial({
  */
 export const partialRulesSchema = t.partial({
   actions,
+  response_actions,
   building_block_type,
   license,
   throttle,
