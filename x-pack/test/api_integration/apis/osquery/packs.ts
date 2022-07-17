@@ -114,13 +114,13 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
 
-      packId = createPackResponse.body.id;
+      packId = createPackResponse.body.data.id;
       expect(createPackResponse.status).to.be(200);
 
       const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
 
       expect(pack.status).to.be(200);
-      expect(pack.body.queries.testQuery.query).to.be(multiLineQuery);
+      expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
 
       const {
         body: {
@@ -140,10 +140,10 @@ export default function ({ getService }: FtrProviderContext) {
         .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
 
       expect(updatePackResponse.status).to.be(200);
-      expect(updatePackResponse.body.id).to.be(packId);
+      expect(updatePackResponse.body.data.id).to.be(packId);
       const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
 
-      expect(pack.body.queries.testQuery.query).to.be(multiLineQuery);
+      expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
       const {
         body: {
           item: { inputs },
