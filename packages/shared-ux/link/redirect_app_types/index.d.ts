@@ -7,6 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { DetailedHTMLProps, HTMLAttributes } from 'react';
 
 export type NavigateToUrl = (url: string) => Promise<void> | void;
 
