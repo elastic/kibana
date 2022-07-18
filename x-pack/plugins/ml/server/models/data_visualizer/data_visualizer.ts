@@ -13,7 +13,7 @@ import {
   fetchHistogramsForFields,
   getSamplerAggregationsResponsePath,
 } from '@kbn/ml-agg-utils';
-import type { AggCardinality } from '@kbn/ml-agg-utils';
+import type { AggCardinality, HistogramField } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -41,11 +41,6 @@ export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
-}
-
-export interface HistogramField {
-  fieldName: string;
-  type: string;
 }
 
 interface Distribution {

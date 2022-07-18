@@ -6,9 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import { HistogramField } from '@kbn/ml-agg-utils';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
-import { HistogramField } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldHistogramsSchema,
   indexPatternSchema,

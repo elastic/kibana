@@ -32,11 +32,6 @@ export function isValidField(arg: unknown): arg is Field {
   return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
 }
 
-export interface HistogramField {
-  fieldName: string;
-  type: string;
-}
-
 export interface Distribution {
   percentiles: Array<{ value?: number; percent: number; minValue: number; maxValue: number }>;
   minPercentile: number;

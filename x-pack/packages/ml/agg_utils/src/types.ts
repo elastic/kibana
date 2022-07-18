@@ -42,6 +42,11 @@ export interface FieldValuePair {
   fieldValue: string | number;
 }
 
+export interface HistogramField {
+  fieldName: string;
+  type: string;
+}
+
 export interface HistogramItem {
   doc_count: number;
   key: number;

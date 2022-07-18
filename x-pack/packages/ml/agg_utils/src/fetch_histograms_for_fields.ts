@@ -16,14 +16,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import type { AggCardinality, ElasticsearchClient } from './types';
+import type { AggCardinality, ElasticsearchClient, HistogramField } from './types';
 
 const MAX_CHART_COLUMNS = 20;
-
-interface HistogramField {
-  fieldName: string;
-  type: string;
-}
 
 interface AggHistogram {
   histogram: {

@@ -15,14 +15,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import type { ElasticsearchClient } from './types';
+import type { ElasticsearchClient, HistogramField } from './types';
 
 const MAX_CHART_COLUMNS = 20;
-
-interface HistogramField {
-  fieldName: string;
-  type: string;
-}
 
 interface NumericColumnStats {
   interval: number;
