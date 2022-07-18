@@ -3008,7 +3008,7 @@
               "\nDetermine if a service is avaliable"
             ],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3021,7 +3021,7 @@
                 "label": "serviceName",
                 "description": [],
                 "signature": [
-                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\""
+                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\""
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
@@ -3038,7 +3038,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3068,7 +3068,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3134,6 +3134,8 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -3198,6 +3200,8 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -3262,6 +3266,8 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -3326,6 +3332,8 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -3390,6 +3398,8 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -3454,6 +3464,74 @@
                 "section": "def-server.EsVersion",
                 "text": "EsVersion"
               },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
+              "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "type": "string",
+                "tags": [],
+                "label": "serviceName",
+                "description": [],
+                "signature": [
+                  "\"dedicatedTaskRunner\""
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.GenericFtrProviderContext.getService",
+            "type": "Function",
+            "tags": [],
+            "label": "getService",
+            "description": [],
+            "signature": [
+              "{ (serviceName: \"config\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.Config",
+                "text": "Config"
+              },
+              "; (serviceName: \"log\"): ",
+              "ToolingLog",
+              "; (serviceName: \"lifecycle\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.Lifecycle",
+                "text": "Lifecycle"
+              },
+              "; (serviceName: \"dockerServers\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.DockerServersService",
+                "text": "DockerServersService"
+              },
+              "; (serviceName: \"esVersion\"): ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.EsVersion",
+                "text": "EsVersion"
+              },
+              "; (serviceName: \"dedicatedTaskRunner\"): ",
+              "DedicatedTaskRunner",
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4082,17 +4160,6 @@
           " & { getUrl: () => string; }"
         ],
         "path": "packages/kbn-test/src/es/test_es_cluster.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
-        "id": "def-server.KIBANA_ROOT",
-        "type": "string",
-        "tags": [],
-        "label": "KIBANA_ROOT",
-        "description": [],
-        "path": "packages/kbn-test/src/functional_tests/lib/paths.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
