@@ -29,6 +29,8 @@ export default function ({ getService }: FtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     before(async () => {
+      await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
+
       _httpMonitorJson = getFixtureJson('http_monitor');
     });
 
