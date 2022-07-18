@@ -6,7 +6,8 @@
  */
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 
@@ -18,6 +19,7 @@ import {
 
 export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
+  coreStart: ReturnType<typeof coreMock['createStart']>;
 };
 
 export const setup = async (
@@ -32,8 +34,10 @@ export const setup = async (
     doMountAsync: true,
   };
 
+  const coreStart = coreMock.createStart();
+
   const initTestBed = registerTestBed(
-    WithAppDependencies(ComponentTemplateEdit, httpSetup),
+    WithAppDependencies(ComponentTemplateEdit, httpSetup, coreStart),
     testBedConfig
   );
   const testBed = await initTestBed();
@@ -41,5 +45,6 @@ export const setup = async (
   return {
     ...testBed,
     actions: getFormActions(testBed),
+    coreStart,
   };
 };
