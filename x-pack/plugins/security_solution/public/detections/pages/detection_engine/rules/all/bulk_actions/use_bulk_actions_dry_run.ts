@@ -9,15 +9,13 @@ import type { UseMutateAsyncFunction } from 'react-query';
 import { useMutation } from 'react-query';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
+import type { ExportRulesDetails } from '../../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
 
 import type {
   BulkAction,
   BulkActionEditType,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
-import type {
-  BulkActionResponse,
-  BulkActionSummary,
-} from '../../../../../containers/detection_engine/rules';
+import type { BulkActionResponse } from '../../../../../containers/detection_engine/rules';
 import { performBulkAction } from '../../../../../containers/detection_engine/rules';
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 
@@ -42,17 +40,17 @@ export interface DryRunResult {
   }>;
 }
 
-export const transformExportDataToDryRunResult = (summary: BulkActionSummary) => {
+export const transformExportDetailsToDryRunResult = (details: ExportRulesDetails) => {
   return {
-    succeededRulesCount: summary.succeeded,
-    failedRulesCount: summary.failed,
+    succeededRulesCount: details.exported_count,
+    failedRulesCount: details.missing_rules_count,
     // if there are rules that can't be exported, it means they are immutable. So we can safely put error code as immutable
-    ruleErrors: summary.failed
+    ruleErrors: details.missing_rules.length
       ? [
           {
             errorCode: BulkActionsDryRunErrCode.IMMUTABLE,
             message: BulkActionsDryRunErrCode.IMMUTABLE,
-            ruleIds: Array(summary.failed),
+            ruleIds: details.missing_rules.map(({ rule_id: ruleId }) => ruleId),
           },
         ]
       : [],

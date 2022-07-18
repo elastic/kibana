@@ -25,10 +25,10 @@ import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
 import { executeRulesBulkAction, downloadExportedRules } from '../actions';
-import { getExportedRulesCounts } from '../helpers';
+import { getExportedRulesDetails } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { transformExportDataToDryRunResult } from './use_bulk_actions_dry_run';
+import { transformExportDetailsToDryRunResult } from './use_bulk_actions_dry_run';
 import type { ExecuteBulkActionsDryRun, DryRunResult } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
@@ -206,13 +206,13 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
 
-        const summary = await getExportedRulesCounts(response);
+        const details = await getExportedRulesDetails(response);
 
         // if there are failed exported rules notify users.
         // they can either cancel action or proceed with export of succeeded rules
         if (
           (await showBulkActionConfirmation(
-            transformExportDataToDryRunResult(summary),
+            transformExportDetailsToDryRunResult(details),
             BulkAction.export
           )) === false
         ) {
