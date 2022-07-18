@@ -6,64 +6,26 @@
  */
 
 import { defaults } from 'lodash';
-import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
-import pRetry from 'p-retry';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  createTestServers,
   createRootWithCorePlugins,
   TestElasticsearchUtils,
   request,
 } from '@kbn/core/test_helpers/kbn_server';
 
 import type { FileJSON, UpdatableFileAttributes } from '../../../../common/types';
-import { fileKindsRegistry } from '../../../file_kinds_registry';
+
+import { setupIntegrationEnvironment } from '../../tests';
 
 describe('File kind HTTP API', () => {
-  const fileKind: string = 'test-file-kind';
-  const testIndex = '.kibana-test-files';
-  const testConfig = {
-    xpack: {
-      reporting: { enabled: false },
-    },
-  };
-
+  let fileKind: string;
+  let testIndex: string;
   let manageES: TestElasticsearchUtils;
   let root: ReturnType<typeof createRootWithCorePlugins>;
   let esClient: ElasticsearchClient;
-  let coreStart: CoreStart;
 
   beforeAll(async () => {
-    fileKindsRegistry.register({
-      id: fileKind,
-      blobStoreSettings: {
-        esFixedSizeIndex: { index: testIndex },
-      },
-      http: {
-        create: { tags: ['access:myapp'] },
-        delete: { tags: ['access:myapp'] },
-        update: { tags: ['access:myapp'] },
-        download: { tags: ['access:myapp'] },
-        getById: { tags: ['access:myapp'] },
-        list: { tags: ['access:myapp'] },
-      },
-    });
-
-    const { startES } = createTestServers({
-      adjustTimeout: jest.setTimeout,
-      settings: {
-        es: {
-          license: 'basic',
-        },
-      },
-    });
-    manageES = await startES();
-    root = createRootWithCorePlugins(testConfig, { oss: false });
-    await root.preboot();
-    await root.setup();
-    coreStart = await root.start();
-    esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    await pRetry(() => request.get(root, '/api/licensing/info').expect(200), { retries: 5 });
+    ({ esClient, manageES, esClient, fileKind, testIndex } = await setupIntegrationEnvironment());
   });
 
   afterAll(async () => {
