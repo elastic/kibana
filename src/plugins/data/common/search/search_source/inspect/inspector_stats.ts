@@ -23,8 +23,20 @@ import type { ISearchSource } from '../../../../public';
 export function getRequestInspectorStats(searchSource: ISearchSource) {
   const stats: RequestStatistics = {};
   const index = searchSource.getField('index');
+  const indexFilters = searchSource.getActiveIndexFilter();
 
   if (index) {
+    if (indexFilters.length > 0) {
+      stats.indexFilter = {
+        label: i18n.translate('data.search.searchSource.indexFilterLabel', {
+          defaultMessage: 'Index Pattern',
+        }),
+        value: indexFilters.join(', '),
+        description: i18n.translate('data.search.searchSource.indexFilterDescription', {
+          defaultMessage: 'The active index pattern.',
+        }),
+      };
+    }
     stats.indexPattern = {
       label: i18n.translate('data.search.searchSource.dataViewLabel', {
         defaultMessage: 'Data view',
