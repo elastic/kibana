@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   AlertsTableConfigurationRegistryContract,
@@ -36,6 +38,29 @@ const registerAlertsTableConfiguration = (
     useInternalFlyout: () => {
       const { header, body, footer } = useToGetInternalFlyout();
       return { header, body, footer };
+    },
+
+    useBulkActions: () => {
+      return {
+        render: (isAllSelected: boolean, ids: string[]) => [
+          <EuiContextMenuItem
+            key="open"
+            onClick={() => {
+              console.log('isAllSelected', isAllSelected, 'ids', ids);
+            }}
+          >
+            {'do something'}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="open"
+            onClick={() => {
+              console.log('isAllSelected', isAllSelected, 'ids', ids);
+            }}
+          >
+            {'do something else'}
+          </EuiContextMenuItem>,
+        ],
+      };
     },
   });
 };

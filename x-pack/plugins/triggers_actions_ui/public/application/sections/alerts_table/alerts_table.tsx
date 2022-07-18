@@ -66,12 +66,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   });
 
   const toolbarVisibility = useCallback(() => {
-    const { rowSelection, isAllSelected } = bulkActionsState;
+    const { rowSelection } = bulkActionsState;
     return getToolbarVisibility({
       renderBulkActions,
       alertsCount,
       rowSelection,
-      isAllSelected,
       alerts: alertsData.alerts,
     });
   }, [alertsCount, alertsData.alerts, renderBulkActions, bulkActionsState])();

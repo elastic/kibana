@@ -34,6 +34,18 @@ const DefaultPagination = {
   pageIndex: 0,
 };
 
+interface CasePermission {
+  all: boolean;
+  read: boolean;
+}
+
+interface CaseUi {
+  ui: {
+    getCasesContext: () => React.FC<any>;
+  };
+  permissions: CasePermission;
+}
+
 export interface AlertsTableStateProps {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   configurationId: string;
@@ -43,6 +55,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  cases?: CaseUi;
 }
 
 interface AlertsTableStorage {
@@ -77,6 +90,7 @@ const AlertsTableState = ({
   query,
   pageSize,
   showExpandToDetails,
+  cases,
 }: AlertsTableStateProps) => {
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
@@ -229,6 +243,14 @@ const AlertsTableState = ({
     ]
   );
 
+  console.log('alerts_table booom');
+  console.log(cases?.ui);
+  const CasesContext = cases?.ui?.getCasesContext();
+
+  if (!cases?.ui) {
+    return null;
+  }
+
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && <EmptyState />}
@@ -236,9 +258,15 @@ const AlertsTableState = ({
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
       {alertsCount !== 0 && (
-        <BulkActionsContext.Provider value={initialBulkActionsState}>
-          <AlertsTable {...tableProps} />
-        </BulkActionsContext.Provider>
+        <CasesContext
+          owner={[configurationId]}
+          permissions={cases.permissions}
+          features={{ alerts: { sync: false } }}
+        >
+          <BulkActionsContext.Provider value={initialBulkActionsState}>
+            <AlertsTable {...tableProps} />
+          </BulkActionsContext.Provider>
+        </CasesContext>
       )}
     </>
   ) : (

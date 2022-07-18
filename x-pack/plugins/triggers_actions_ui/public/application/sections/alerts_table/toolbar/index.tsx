@@ -12,25 +12,19 @@ import { RenderBulkActions } from '../../../../types';
 import { BulkActions } from '../bulk_actions/components/toolbar';
 
 export const getToolbarVisibility = ({
-  renderBulkActions,
+  renderBulkActions: useBulkActions,
   alertsCount,
-  isAllSelected,
   rowSelection,
   alerts,
 }: {
   renderBulkActions: RenderBulkActions;
   alertsCount: number;
-  isAllSelected: boolean;
   rowSelection: Set<number>;
   alerts: EcsFieldsResponse[];
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  if (selectedRowsCount === 0 || selectedRowsCount === undefined || renderBulkActions === undefined)
+  if (selectedRowsCount === 0 || selectedRowsCount === undefined || useBulkActions === undefined)
     return {};
-
-  const selectedAlertIds = Array.from(rowSelection.values()).map(
-    (rowIndex: number) => alerts[rowIndex]._id
-  );
 
   const options = {
     showColumnSelector: false,
@@ -38,10 +32,7 @@ export const getToolbarVisibility = ({
     additionalControls: {
       left: {
         append: (
-          <BulkActions
-            totalItems={alertsCount}
-            bulkActionItems={renderBulkActions(isAllSelected, selectedAlertIds)}
-          />
+          <BulkActions totalItems={alertsCount} useBulkActions={useBulkActions} alerts={alerts} />
         ),
       },
     },
