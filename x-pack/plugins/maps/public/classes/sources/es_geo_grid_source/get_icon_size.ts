@@ -24,7 +24,7 @@ export function getIconSize(resolution: GRID_RESOLUTION) {
 
   if (resolution === GRID_RESOLUTION.MOST_FINE) {
     return {
-      minSize: 2,
+      minSize: 4,
       maxSize: 12,
     };
   }
