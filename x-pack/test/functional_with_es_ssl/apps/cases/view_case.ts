@@ -12,7 +12,6 @@ import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const common = getPageObject('common');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -182,10 +181,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes the case successfully', async () => {
-        await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
-        await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
-        await testSubjects.click('confirmModalConfirmButton');
-        await header.waitUntilLoadingHasFinished();
+        await cases.singleCase.deleteCase();
         await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });

@@ -7,18 +7,18 @@
 
 import React, { Suspense, useCallback, useState } from 'react';
 
+import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 import { useFetchAlertData } from './use_fetch_alert_data';
-import { UseGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { paths } from '../../config';
 import { ObservabilityAppServices } from '../../application/types';
 
 interface CasesProps {
-  permissions: UseGetUserCasesPermissions;
+  permissions: CasesPermissions;
 }
 export const Cases = React.memo<CasesProps>(({ permissions }) => {
   const {
@@ -30,7 +30,6 @@ export const Cases = React.memo<CasesProps>(({ permissions }) => {
   } = useKibana<ObservabilityAppServices>().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const [selectedAlertId, setSelectedAlertId] = useState<string>('');
-  const casesPermissions = { all: permissions.crud, read: permissions.read };
 
   const handleFlyoutClose = useCallback(() => {
     setSelectedAlertId('');
@@ -51,7 +50,7 @@ export const Cases = React.memo<CasesProps>(({ permissions }) => {
       )}
       {cases.ui.getCases({
         basePath: CASES_PATH,
-        permissions: casesPermissions,
+        permissions,
         owner: [CASES_OWNER],
         features: { alerts: { sync: false } },
         useFetchAlertData,

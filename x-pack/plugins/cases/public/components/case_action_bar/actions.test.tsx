@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { useDeleteCases } from '../../containers/use_delete_cases';
-import { TestProviders } from '../../common/mock';
+import { noDeleteCasesPermissions, TestProviders } from '../../common/mock';
 import { basicCase, basicPush } from '../../containers/mock';
 import { Actions } from './actions';
 import * as i18n from '../case_view/translations';
@@ -65,6 +65,17 @@ describe('CaseView actions', () => {
     wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
     expect(handleToggleModal).toHaveBeenCalled();
+  });
+
+  it('does not show trash icon when user does not have deletion privileges', () => {
+    const wrapper = mount(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
+        <Actions {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+    expect(wrapper.find('button[data-test-subj="property-actions-ellipses"]').exists()).toBeFalsy();
   });
 
   it('toggle delete modal and confirm', () => {

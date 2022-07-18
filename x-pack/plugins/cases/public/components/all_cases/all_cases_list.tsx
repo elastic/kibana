@@ -185,7 +185,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, setFilterOptions, refreshCases, setQueryParams]
     );
 
-    const showActions = permissions.all && !isSelectorView;
+    /**
+     * At the time of changing this from all to delete the only bulk action we have is to delete. When we add more
+     * actions we'll need to revisit this to allow more granular checks around the bulk actions.
+     */
+    const showActions = permissions.delete && !isSelectorView;
 
     const columns = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,

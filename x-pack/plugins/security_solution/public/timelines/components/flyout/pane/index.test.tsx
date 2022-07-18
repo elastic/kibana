@@ -11,8 +11,16 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { Pane } from '.';
+import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
+const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
 jest.mock('../../../../common/components/url_state/normalize_time_range');
 
 jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
