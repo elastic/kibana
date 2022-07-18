@@ -296,14 +296,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Unique count of @timestamp',
+          'Value count of @timestamp',
         ]);
-        await PageObjects.lens.assertFocusedDimension('Unique count of @timestamp');
+        await PageObjects.lens.assertFocusedDimension('Value count of @timestamp');
       });
       it('should reorder elements with keyboard', async () => {
         await PageObjects.lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @timestamp',
+          'Value count of @timestamp',
           'Count of records',
         ]);
         await PageObjects.lens.assertFocusedDimension('Count of records');
