@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { FC, useContext } from 'react';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { SampleDataSet } from '@kbn/home-sample-data-types';
+import {
+  SampleDataCardServices,
+  SampleDataCardKibanaDependencies,
+  SampleDataCardProvider,
+  SampleDataCardKibanaProvider,
+} from '@kbn/home-sample-data-card';
+
+import { SAMPLE_DATA_API } from './constants';
+
+type UnmountCallback = () => void;
+type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+type ValidNotifyString = string | MountPoint<HTMLElement>;
+
+type NotifyInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+  title?: ValidNotifyString;
+  text?: ValidNotifyString;
+};
+
+type NotifyInput = string | NotifyInputFields;
+type NotifyFn = (notification: NotifyInput) => void;
+
+/**
+ * A list of services that are consumed by this component.
+ */
+export interface Services {
+  fetchSampleDataSets: () => Promise<SampleDataSet[]>;
+  notifyError: NotifyFn;
+}
+
+export type SampleDataTabContentServices = Services & SampleDataCardServices;
+
+const Context = React.createContext<Services | null>(null);
+
+/**
+ * A Context Provider that provides services to the component and its dependencies.
+ */
+export const SampleDataTabContentProvider: FC<SampleDataTabContentServices> = ({
+  children,
+  ...services
+}) => {
+  const { fetchSampleDataSets, notifyError } = services;
+
+  return (
+    <Context.Provider
+      value={{
+        fetchSampleDataSets,
+        notifyError,
+      }}
+    >
+      <SampleDataCardProvider {...services}>{children}</SampleDataCardProvider>
+    </Context.Provider>
+  );
+};
+
+interface KibanaDependencies {
+  coreStart: {
+    http: {
+      get: (path: string) => Promise<unknown>;
+    };
+    notifications: {
+      toasts: {
+        addDanger: NotifyFn;
+      };
+    };
+  };
+}
+
+export type SampleDataTabContentKibanaDependencies = KibanaDependencies &
+  SampleDataCardKibanaDependencies;
+
+/**
+ * Kibana-specific Provider that maps dependencies to services.
+ */
+export const SampleDataTabContentKibanaProvider: FC<SampleDataTabContentKibanaDependencies> = ({
+  children,
+  ...dependencies
+}) => {
+  const { http, notifications } = dependencies.coreStart;
+
+  const value: Services = {
+    fetchSampleDataSets: async () => (await http.get(SAMPLE_DATA_API)) as SampleDataSet[],
+    notifyError: (input) => notifications.toasts.addDanger(input),
+  };
+
+  return (
+    <Context.Provider {...{ value }}>
+      <SampleDataCardKibanaProvider {...dependencies}>{children}</SampleDataCardKibanaProvider>
+    </Context.Provider>
+  );
+};
+
+/**
+ * React hook for accessing pre-wired services.
+ */
+export function useServices() {
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error(
+      'SampleDataTabContent Context is missing.  Ensure your component or React root is wrapped with SampleDataTabContentContext.'
+    );
+  }
+
+  return context;
+}

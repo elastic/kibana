@@ -17,7 +17,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 
-import { SampleDataCardsKibanaProvider } from '@kbn/home-sample-data-cards';
+import { SampleDataTabContentKibanaProvider } from '@kbn/home-sample-data-tab-content';
 
 // @ts-ignore
 import { HomeApp } from './components/home_app';
@@ -47,9 +47,9 @@ export const renderApp = async (
       <RedirectAppLinks application={coreStart.application}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
-            <SampleDataCardsKibanaProvider {...{ coreStart, dataViews }}>
+            <SampleDataTabContentKibanaProvider {...{ coreStart, dataViews }}>
               <HomeApp directories={directories} solutions={solutions} />
-            </SampleDataCardsKibanaProvider>
+            </SampleDataTabContentKibanaProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </RedirectAppLinks>,
