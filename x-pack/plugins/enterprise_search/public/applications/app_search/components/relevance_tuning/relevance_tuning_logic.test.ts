@@ -942,7 +942,7 @@ describe('RelevanceTuningLogic', () => {
       it('will parse the provided provided value and set the center to that parsed value', () => {
         mount({
           schema: {
-            foo: 'number',
+            foo: { type: 'number', capabilities: { boost: true } },
           },
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -1046,7 +1046,7 @@ describe('RelevanceTuningLogic', () => {
         // consider a tunable field.
         mount({
           schema: {
-            id: 'foo',
+            id: { type: 'text', capabilities: {} },
           },
         });
         expect(RelevanceTuningLogic.values.engineHasSchemaFields).toEqual(false);
@@ -1055,8 +1055,8 @@ describe('RelevanceTuningLogic', () => {
       it('should return true otherwise', () => {
         mount({
           schema: {
-            id: 'foo',
-            bar: 'bar',
+            id: { type: 'text', capabilities: {} },
+            text_field: { type: 'text', capabilities: { fulltext: true } },
           },
         });
         expect(RelevanceTuningLogic.values.engineHasSchemaFields).toEqual(true);
@@ -1067,11 +1067,39 @@ describe('RelevanceTuningLogic', () => {
       it('should return the list of field names from the schema', () => {
         mount({
           schema: {
-            id: 'foo',
-            bar: 'bar',
+            fulltext_only_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+              },
+            },
+            boost_only_field: {
+              type: 'text',
+              capabilities: {
+                boost: true,
+              },
+            },
+            fulltext_and_boost_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+                boost: true,
+              },
+            },
+            ignored_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: false,
+                boost: false,
+              },
+            },
           },
         });
-        expect(RelevanceTuningLogic.values.schemaFields).toEqual(['id', 'bar']);
+        expect(RelevanceTuningLogic.values.schemaFields).toEqual([
+          'fulltext_only_field',
+          'boost_only_field',
+          'fulltext_and_boost_field',
+        ]);
       });
     });
 
@@ -1092,15 +1120,40 @@ describe('RelevanceTuningLogic', () => {
     describe('filteredSchemaFields', () => {
       it('should return a list of schema field names that contain the text from filterInputValue ', () => {
         mount({
-          filterInputValue: 'ba',
+          filterInputValue: 'fu',
           schema: {
-            id: 'string',
-            foo: 'string',
-            bar: 'string',
-            baz: 'string',
+            fulltext_only_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+              },
+            },
+            boost_only_field: {
+              type: 'text',
+              capabilities: {
+                boost: true,
+              },
+            },
+            fulltext_and_boost_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+                boost: true,
+              },
+            },
+            ignored_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: false,
+                boost: false,
+              },
+            },
           },
         });
-        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual(['bar', 'baz']);
+        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual([
+          'fulltext_only_field',
+          'fulltext_and_boost_field',
+        ]);
       });
     });
 
@@ -1108,12 +1161,7 @@ describe('RelevanceTuningLogic', () => {
       it('should return a list of schema field names that contain the text from filterInputValue, and if that field has a schema conflict', () => {
         mount({
           filterInputValue: 'ba',
-          schema: {
-            id: 'string',
-            foo: 'string',
-            bar: 'string',
-            baz: 'string',
-          },
+          schema: {},
           schemaConflicts: {
             bar: {
               text: ['source_engine_1'],
