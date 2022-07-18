@@ -113,6 +113,7 @@ const PreviewRenderer = ({
         <ExpressionRendererComponent
           className="lnsSuggestionPanel__expressionRenderer"
           padding="s"
+          renderMode="preview"
           expression={expression}
           debounce={2000}
           renderError={() => {
