@@ -11,6 +11,7 @@ import { EuiConfirmModal, EuiCode, EuiSpacer, EuiText, EuiCallOut, EuiLink } fro
 
 import type { useComponentTemplatesContext } from '../../component_templates_context';
 import { documentationService } from '../../../../services/documentation';
+import type { Error } from '../../shared_imports';
 
 interface Props {
   componentTemplatename: string;
@@ -25,7 +26,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
   onClose,
   api,
 }) => {
-  const [error, setError] = useState<any>();
+  const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
 
   const onConfirm = useCallback(() => {
@@ -84,7 +85,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
             iconType="alert"
             data-test-subj="applyMappingsRolloverError"
           >
-            <div>{error.message || error.statusText}</div>
+            <div>{error.message}</div>
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
