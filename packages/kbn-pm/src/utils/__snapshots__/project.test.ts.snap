@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`#getExecutables() throws CliError when bin is something strange 1`] = `"[kibana] has an invalid \\"bin\\" field in its package.json, expected an object or a string"`;
