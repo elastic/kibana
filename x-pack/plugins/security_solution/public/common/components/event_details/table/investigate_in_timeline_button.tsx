@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import { inputsActions } from '../../../store/inputs';
@@ -19,8 +19,9 @@ import { useCreateTimeline } from '../../../../timelines/components/timeline/pro
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
 export const InvestigateInTimelineButton: React.FunctionComponent<{
+  asEmptyButton: boolean;
   dataProviders: DataProvider[];
-}> = ({ children, dataProviders }) => {
+}> = ({ asEmptyButton, children, dataProviders }) => {
   const dispatch = useDispatch();
 
   const clearTimeline = useCreateTimeline({
@@ -53,7 +54,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
     }
   }, [dispatch, clearTimeline, dataProviders]);
 
-  return (
+  return asEmptyButton ? (
     <EuiButtonEmpty
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       onClick={configureAndOpenTimeline}
@@ -62,6 +63,10 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
     >
       {children}
     </EuiButtonEmpty>
+  ) : (
+    <EuiButton aria-label={ACTION_INVESTIGATE_IN_TIMELINE} onClick={configureAndOpenTimeline}>
+      {children}
+    </EuiButton>
   );
 };
 

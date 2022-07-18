@@ -11,6 +11,7 @@ import { find } from 'lodash/fp';
 
 import * as i18n from '../translations';
 
+import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
@@ -19,77 +20,93 @@ import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 
 interface Props {
+  browserFields: BrowserFields;
   eventId: string;
   data: TimelineEventsDetailsItem[];
+  timelineId: string;
   isReadOnly?: boolean;
-  timelineId?: string;
 }
 
-export const Insights = React.memo<Props>(({ eventId, data, isReadOnly, timelineId }) => {
-  const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
-  const hasProcessEntityInfo = processEntityField && processEntityField.values;
+export const Insights = React.memo<Props>(
+  ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+    const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
+    const hasProcessEntityInfo = processEntityField && processEntityField.values;
 
-  const processSessionField = find(
-    { category: 'process', field: 'process.entry_leader.entity_id' },
-    data
-  );
-  const hasProcessSessionInfo = processSessionField && processSessionField.values;
+    const processSessionField = find(
+      { category: 'process', field: 'process.entry_leader.entity_id' },
+      data
+    );
+    const hasProcessSessionInfo = processSessionField && processSessionField.values;
 
-  const sourceEventField = find(
-    { category: 'kibana', field: 'kibana.alert.original_event.id' },
-    data
-  );
-  const hasSourceEventInfo = sourceEventField && sourceEventField.values;
+    const sourceEventField = find(
+      { category: 'kibana', field: 'kibana.alert.original_event.id' },
+      data
+    );
+    const hasSourceEventInfo = sourceEventField && sourceEventField.values;
 
-  const userCasesPermissions = useGetUserCasesPermissions();
-  const hasCasesReadPermissions = userCasesPermissions.read;
+    const userCasesPermissions = useGetUserCasesPermissions();
+    const hasCasesReadPermissions = userCasesPermissions.read;
 
-  const canShowAtLeastOneInsight =
-    hasCasesReadPermissions || hasProcessEntityInfo || hasSourceEventInfo || hasProcessSessionInfo;
+    const canShowAtLeastOneInsight =
+      hasCasesReadPermissions ||
+      hasProcessEntityInfo ||
+      hasSourceEventInfo ||
+      hasProcessSessionInfo;
 
-  if (isReadOnly || !canShowAtLeastOneInsight) {
-    return null;
+    if (isReadOnly || !canShowAtLeastOneInsight) {
+      return null;
+    }
+
+    return (
+      <div>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h5>{i18n.INSIGHTS}</h5>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          {hasCasesReadPermissions && (
+            <EuiFlexItem>
+              <RelatedCases eventId={eventId} />
+            </EuiFlexItem>
+          )}
+
+          {sourceEventField && sourceEventField.values && (
+            <EuiFlexItem>
+              <RelatedAlertsBySourceEvent
+                browserFields={browserFields}
+                data={sourceEventField}
+                eventId={eventId}
+                timelineId={timelineId}
+              />
+            </EuiFlexItem>
+          )}
+
+          {processEntityField && processEntityField.values && (
+            <EuiFlexItem>
+              <RelatedAlertsByProcessAncestry
+                data={processEntityField}
+                eventId={eventId}
+                timelineId={timelineId}
+              />
+            </EuiFlexItem>
+          )}
+
+          {processSessionField && processSessionField.values && (
+            <EuiFlexItem>
+              <RelatedAlertsBySession
+                browserFields={browserFields}
+                data={processSessionField}
+                eventId={eventId}
+                timelineId={timelineId}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+    );
   }
-
-  return (
-    <div>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="xxxs">
-            <h5>{i18n.INSIGHTS}</h5>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        {hasCasesReadPermissions && (
-          <EuiFlexItem>
-            <RelatedCases eventId={eventId} />
-          </EuiFlexItem>
-        )}
-
-        {sourceEventField && sourceEventField.values && (
-          <EuiFlexItem>
-            <RelatedAlertsBySourceEvent data={sourceEventField} timelineId={timelineId} />
-          </EuiFlexItem>
-        )}
-
-        {processEntityField && processEntityField.values && (
-          <EuiFlexItem>
-            <RelatedAlertsByProcessAncestry
-              data={processEntityField}
-              eventId={eventId}
-              timelineId={timelineId}
-            />
-          </EuiFlexItem>
-        )}
-
-        {processSessionField && processSessionField.values && (
-          <EuiFlexItem>
-            <RelatedAlertsBySession data={processSessionField} timelineId={timelineId} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </div>
-  );
-});
+);
 
 Insights.displayName = 'Insights';

@@ -17,43 +17,55 @@ import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevale
 /**
  * Renders a Prevalence cell based on a regular alert prevalence query
  */
-export const PrevalenceCellRenderer = React.memo<AlertSummaryRow['description']>(
-  ({ data, eventId, fieldFromBrowserField, linkValue, timelineId, values }) => {
-    const { loading, count } = useAlertPrevalence({
-      field: data.field,
-      timelineId,
-      value: values,
-      signalIndexName: null,
-    });
+const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
+  data,
+  eventId,
+  fieldFromBrowserField,
+  linkValue,
+  timelineId,
+  values,
+}) => {
+  const { loading, count } = useAlertPrevalence({
+    field: data.field,
+    timelineId,
+    value: values,
+    signalIndexName: null,
+  });
 
-    const cellDataProviders = useActionCellDataProvider({
-      contextId: timelineId,
-      eventId,
-      field: data.field,
-      fieldFormat: data.format,
-      fieldFromBrowserField,
-      fieldType: data.type,
-      isObjectArray: data.isObjectArray,
-      linkValue,
-      values,
-    });
+  const cellDataProviders = useActionCellDataProvider({
+    contextId: timelineId,
+    eventId,
+    field: data.field,
+    fieldFormat: data.format,
+    fieldFromBrowserField,
+    fieldType: data.type,
+    isObjectArray: data.isObjectArray,
+    linkValue,
+    values,
+  });
 
-    if (loading) {
-      return <EuiLoadingSpinner />;
-    } else if (
-      typeof count === 'number' &&
-      cellDataProviders?.dataProviders &&
-      cellDataProviders?.dataProviders.length
-    ) {
-      return (
-        <InvestigateInTimelineButton dataProviders={cellDataProviders?.dataProviders}>
-          <span data-test-subj="alert-prevalence">{count}</span>
-        </InvestigateInTimelineButton>
-      );
-    } else {
-      return getEmptyTagValue();
-    }
+  if (loading) {
+    return <EuiLoadingSpinner />;
+  } else if (
+    typeof count === 'number' &&
+    cellDataProviders?.dataProviders &&
+    cellDataProviders?.dataProviders.length
+  ) {
+    return (
+      <InvestigateInTimelineButton
+        asEmptyButton={true}
+        dataProviders={cellDataProviders.dataProviders}
+      >
+        <span data-test-subj="alert-prevalence">{count}</span>
+      </InvestigateInTimelineButton>
+    );
+  } else {
+    return getEmptyTagValue();
   }
-);
+};
 
-PrevalenceCellRenderer.displayName = 'PrevalenceCellRenderer';
+PrevalenceCell.displayName = 'PrevalenceCell';
+
+export const PrevalenceCellRenderer = (data: AlertSummaryRow['description']) => (
+  <PrevalenceCell {...data} />
+);

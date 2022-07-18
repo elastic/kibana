@@ -7,13 +7,16 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 
-import type { ActionCellValuesAndDataProvider } from '../table/use_action_cell_data_provider';
+import type { DataProvider } from '../../../../../common/types';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { getDataProvider } from '../table/use_action_cell_data_provider';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
 import { InsightAccordion } from './insight_accordion';
 import { SimpleAlertTable } from './simple_alert_table';
+import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
@@ -28,30 +31,31 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
     signalIndexName: null,
   });
 
-  const fakeData = useMemo<Partial<ActionCellValuesAndDataProvider>>(() => {
+  const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
-      return alertIds.reduce<ActionCellValuesAndDataProvider>(
-        (result, alertId, index) => {
-          const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
-          result.values.push(alertId);
-          result.dataProviders.push(getDataProvider('event.id', id, alertId));
-          return result;
-        },
-        {
-          values: [],
-          dataProviders: [],
-        }
-      );
+      return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+        const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
+        result.push(getDataProvider('event.id', id, alertId));
+        return result;
+      }, []);
     }
-    return {};
+    return null;
   }, [alertIds, eventId, timelineId]);
 
   const renderContent = useCallback(() => {
-    if (!alertIds) {
+    if (!alertIds || !dataProviders) {
       return null;
     }
-    return <SimpleAlertTable alertIds={alertIds} />;
-  }, [alertIds]);
+    return (
+      <>
+        <SimpleAlertTable alertIds={alertIds} />
+        <EuiSpacer />
+        <InvestigateInTimelineButton asEmptyButton={false} dataProviders={dataProviders}>
+          {ACTION_INVESTIGATE_IN_TIMELINE}
+        </InvestigateInTimelineButton>
+      </>
+    );
+  }, [alertIds, dataProviders]);
 
   return (
     <InsightAccordion

@@ -190,7 +190,13 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
 
                 <EuiSpacer size="l" />
-                <Insights eventId={id} data={data} isReadOnly={isReadOnly} />
+                <Insights
+                  browserFields={browserFields}
+                  eventId={id}
+                  data={data}
+                  timelineId={timelineId}
+                  isReadOnly={isReadOnly}
+                />
 
                 {(enrichmentCount > 0 || hostRisk) && (
                   <ThreatSummaryView
