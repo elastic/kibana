@@ -20,7 +20,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { RESPONSE_ACTION_TYPES } from '../../response_actions/constants';
+import { ResponseActionsForm } from '../../response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -37,7 +37,6 @@ import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
-import ResponseActionForm from '../../response_actions/response_action_form';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -48,22 +47,7 @@ interface StepRuleActionsProps extends RuleStepProps {
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
-  responseActions: [
-    {
-      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
-      params: {
-        query: 'select * from uptime',
-        ecs_mapping: [],
-      },
-    },
-    {
-      params: {
-        query: 'select * from processes',
-        ecs_mapping: [],
-      },
-      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
-    },
-  ],
+  responseActions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
 };
@@ -195,14 +179,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       if (throttle !== stepActionsDefaultValue.throttle) {
         return (
           <>
-            <EuiSpacer />
-
-            <UseArray path="responseActions" initialNumberOfItems={2}>
-              {({ items, addItem, removeItem, ...rest }) => {
-                return (
-                  <ResponseActionForm items={items} addItem={addItem} removeItem={removeItem} />
-                );
-              }}
+            <UseArray path="responseActions" readDefaultValueOnForm={true}>
+              {ResponseActionsForm}
             </UseArray>
           </>
         );

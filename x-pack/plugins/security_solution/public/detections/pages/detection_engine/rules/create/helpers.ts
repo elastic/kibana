@@ -459,7 +459,8 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
     actions: actions.map(transformAlertToRuleAction),
     response_actions: responseActions.map(transformAlertToRuleResponseAction),
     enabled,
-    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
+    throttle:
+      actions.length || responseActions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
       kibana_siem_app_url: kibanaSiemAppUrl,
     },

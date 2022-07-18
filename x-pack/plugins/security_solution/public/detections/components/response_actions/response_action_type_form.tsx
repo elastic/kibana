@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 
 import {
   EuiAccordion,
@@ -16,21 +16,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { useKibana } from '../../../common/lib/kibana';
-import { useFormData, UseField } from '../../../shared_imports';
+import { OsqueryResponseAction } from './osquery/osquery_response_action';
+import { getLogo, RESPONSE_ACTION_TYPES } from './constants';
+import { UseField, useFormData } from '../../../shared_imports';
 import type { ArrayItem } from '../../../shared_imports';
-import { RESPONSE_ACTION_TYPES } from './constants';
 
 interface IProps {
   item: ArrayItem;
   onDeleteAction: (id: number) => void;
 }
 
-const GhostFormField = () => <></>;
-
 export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const { item, onDeleteAction } = props;
-  const { osquery } = useKibana().services;
   const [_isOpen, setIsOpen] = useState(true);
 
   const [data] = useFormData();
@@ -38,23 +35,49 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
 
   const getResponseActionTypeForm = useCallback(() => {
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
-      const OsqueryForm = osquery?.OsqueryResponseActionTypeForm;
-      if (OsqueryForm) {
-        return (
-          <div>
-            <OsqueryForm updateAction={() => null} item={item} />
-          </div>
-        );
-      }
+      return <OsqueryResponseAction item={item} />;
     }
     // Place for other ResponseActionTypes
     return null;
-  }, [action?.actionTypeId, item, osquery?.OsqueryResponseActionTypeForm]);
+  }, [action?.actionTypeId, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);
   }, [item, onDeleteAction]);
 
+  const renderButtonContent = useMemo(() => {
+    return (
+      <EuiFlexGroup gutterSize="l" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={getLogo(action?.actionTypeId)} size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>{action?.actionTypeId}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, [action?.actionTypeId]);
+
+  const renderExtraContent = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        iconType="minusInCircle"
+        color="danger"
+        className="actAccordionActionForm__extraAction"
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+          {
+            defaultMessage: 'Delete',
+          }
+        )}
+        onClick={handleDelete}
+      />
+    );
+  }, [handleDelete]);
   return (
     <EuiAccordion
       initialIsOpen={true}
@@ -65,41 +88,14 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
       className="actAccordionActionForm"
       buttonContentClassName="actAccordionActionForm__button"
       data-test-subj={`alertActionAccordion`}
-      buttonContent={
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'logoOsquery'} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>{action?.actionTypeId}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      extraAction={
-        <EuiButtonIcon
-          iconType="minusInCircle"
-          color="danger"
-          className="actAccordionActionForm__extraAction"
-          aria-label={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
-            {
-              defaultMessage: 'Delete',
-            }
-          )}
-          onClick={handleDelete}
-        />
-      }
+      buttonContent={renderButtonContent}
+      extraAction={renderExtraContent}
     >
       <UseField
-        path={`${item.path}`}
-        component={GhostFormField}
-        readDefaultValueOnForm={!item.isNew}
+        path={item.path}
+        component={getResponseActionTypeForm}
+        defaultValue={{ actionTypeId: '.osquery', params: {} }}
       />
-      {getResponseActionTypeForm()}
     </EuiAccordion>
   );
 });

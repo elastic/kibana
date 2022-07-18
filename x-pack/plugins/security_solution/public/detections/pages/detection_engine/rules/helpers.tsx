@@ -74,14 +74,15 @@ export const getStepsData = ({
 export const getActionsStepsData = (
   rule: Omit<Rule, 'actions'> & {
     actions: RuleAlertAction[];
-    responseActions: RuleAlertResponseAction[];
+    response_actions: RuleAlertResponseAction[];
   }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [], responseActions = [] } = rule;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { enabled, throttle, meta, actions = [], response_actions = [] } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
-    responseActions: responseActions?.map(transformRuleToAlertResponseAction),
+    responseActions: response_actions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,

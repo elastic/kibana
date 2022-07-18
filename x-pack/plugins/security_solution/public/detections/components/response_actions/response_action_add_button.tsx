@@ -1,0 +1,94 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo, useState, useCallback } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyPadMenuItem } from '@elastic/eui';
+import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ResponseActionType } from './get_supported_response_actions';
+import { useFormData } from '../../../shared_imports';
+
+interface IResponseActionsAddButtonProps {
+  supportedResponseActionTypes: ResponseActionType[];
+  addActionType: () => void;
+}
+
+export const ResponseActionAddButton = ({
+  supportedResponseActionTypes,
+  addActionType,
+}: IResponseActionsAddButtonProps) => {
+  const [data] = useFormData();
+  const [isAddResponseActionButtonShown, setAddResponseActionButtonShown] = useState(
+    data.responseActions && data.responseActions.length > 0
+  );
+
+  const handleAddActionType = useCallback(() => {
+    setAddResponseActionButtonShown(false);
+    addActionType();
+  }, [addActionType]);
+
+  const renderAddResponseActionButton = useMemo(() => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            data-test-subj="addAlertActionButton"
+            onClick={() => setAddResponseActionButtonShown(false)}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel"
+              defaultMessage="Add action"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
+
+  const renderResponseActionTypes = useMemo(() => {
+    return (
+      supportedResponseActionTypes?.length &&
+      supportedResponseActionTypes.map(function (item, index) {
+        const keyPadItem = (
+          <EuiKeyPadMenuItem
+            key={index}
+            isDisabled={false}
+            data-test-subj={`${item.id}-ResponseActionTypeSelectOption`}
+            label={item.name}
+            onClick={handleAddActionType}
+          >
+            <EuiIcon
+              size="xl"
+              type={
+                typeof item.iconClass === 'string'
+                  ? item.iconClass
+                  : suspendedComponentWithProps(item.iconClass as React.ComponentType)
+              }
+            />
+          </EuiKeyPadMenuItem>
+        );
+
+        return (
+          <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
+            {/* <EuiToolTip position="top" content={item.description}>*/}
+            {keyPadItem}
+            {/* </EuiToolTip>*/}
+          </EuiFlexItem>
+        );
+      })
+    );
+  }, [handleAddActionType, supportedResponseActionTypes]);
+
+  if (!supportedResponseActionTypes?.length) return <></>;
+
+  return (
+    <>
+      {isAddResponseActionButtonShown ? renderAddResponseActionButton : renderResponseActionTypes}
+    </>
+  );
+};

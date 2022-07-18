@@ -6,5 +6,15 @@
  */
 
 export enum RESPONSE_ACTION_TYPES {
-  OSQUERY = 'osquery',
+  OSQUERY = '.osquery',
 }
+
+export const getLogo = (actionTypeId: string) => {
+  switch (actionTypeId) {
+    case 'osquery':
+      return 'logoOsquery';
+    // update when new responseActions are provided
+    default:
+      return 'logoOsquery';
+  }
+};

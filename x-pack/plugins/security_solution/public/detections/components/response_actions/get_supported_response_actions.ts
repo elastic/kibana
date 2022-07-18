@@ -17,6 +17,7 @@ export interface ResponseActionType {
   id: string;
   name: string;
   iconClass: string;
+  description: string;
   // enabled: boolean;
   // enabledInConfig: boolean;
   // enabledInLicense: boolean;
@@ -36,6 +37,11 @@ export const getSupportedResponseActions = (
 };
 
 export const responseActionTypes = [
-  { id: '.osquery', name: 'osquery', iconClass: 'logoOsquery' },
+  {
+    id: '.osquery',
+    name: 'osquery',
+    iconClass: 'logoOsquery',
+    description: 'Run Osquery query on each rule execution',
+  },
   // { id: '.endpointSecurity', name: 'endpointSecurity', iconClass: 'logoSecurity' },
 ];
