@@ -8,8 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import fs from 'fs';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { KIBANA_ROOT } from '@kbn/test';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
