@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
 import { generatePath } from 'react-router-dom';
 
 import { ElasticsearchIndex } from '../../../../../common/types';
@@ -31,9 +32,6 @@ export const getRedirectToAfterEngineCreation = ({
   return enginePath;
 };
 
-// Needed for string equality in tests
-export const removeWhitespace = (heredoc: string) => heredoc.replace(/\s+/g, ' ');
-
 export const formatIndicesToSelectable = (
   indices: ElasticsearchIndex[],
   selectedIndexName: string
@@ -46,7 +44,7 @@ export const formatIndicesToSelectable = (
 
       if (index.alias) {
         toolTipTitle = 'Alias name conforms to pattern';
-        toolTipContent = removeWhitespace(`
+        toolTipContent = dedent(`
           Aliases cannot be created for other aliases. Choosing this alias will
           disable the Alias input below.
         `);
@@ -59,7 +57,7 @@ export const formatIndicesToSelectable = (
         icon = 'alert';
         color = 'danger';
         toolTipTitle = 'Alias name does not conform to pattern';
-        toolTipContent = removeWhitespace(`
+        toolTipContent = dedent(`
           This alias is incompatible with Enterprise Search. Please choose
           another index or alias.
         `);
@@ -67,7 +65,7 @@ export const formatIndicesToSelectable = (
         icon = 'iInCircle';
         color = 'warning';
         toolTipTitle = 'Index name does not conform to pattern';
-        toolTipContent = removeWhitespace(`
+        toolTipContent = dedent(`
           Choosing this index will require specifying an alias prefixed with
           'search-' in the Alias input below.
         `);

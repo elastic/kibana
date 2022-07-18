@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import { SearchIndexSelectableOption } from '../components/engine_creation/search_index_selectable';
 import { EngineCreationSteps } from '../components/engine_creation/engine_creation_logic';
-import { removeWhitespace } from '../components/engine_creation/utils';
 
 export const DEFAULT_VALUES = {
   ingestionMethod: '',
@@ -131,7 +132,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
       label: 'Index',
       icon: 'iInCircle',
       toolTipTitle: 'Index name does not conform to pattern',
-      toolTipContent: removeWhitespace(`
+      toolTipContent: dedent(`
         Choosing this index will require specifying an alias prefixed with
         'search-' in the Alias input below.
       `),
@@ -156,7 +157,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
       color: 'success',
       label: 'Alias',
       toolTipTitle: 'Alias name conforms to pattern',
-      toolTipContent: removeWhitespace(`
+      toolTipContent: dedent(`
         Aliases cannot be created for other aliases. Choosing this alias will
         disable the Alias input below.
       `),
@@ -182,7 +183,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
       label: 'Alias',
       icon: 'alert',
       toolTipTitle: 'Alias name does not conform to pattern',
-      toolTipContent: removeWhitespace(`
+      toolTipContent: dedent(`
         This alias is incompatible with Enterprise Search. Please choose
         another index or alias.
       `),
