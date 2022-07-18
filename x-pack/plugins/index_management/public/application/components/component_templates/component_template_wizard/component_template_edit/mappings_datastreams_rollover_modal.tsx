@@ -98,10 +98,9 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
               <>
                 <EuiSpacer size="m" />
                 <ul>
-                  {dataStreams.map((datastream) => (
+                  {dataStreams.map((dataStream) => (
                     <li>
-                      <EuiCode>{datastream}</EuiCode>
-                      <br />
+                      <EuiCode>{dataStream}</EuiCode>
                     </li>
                   ))}
                 </ul>

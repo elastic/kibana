@@ -48,11 +48,11 @@ const getDescriptionText = (data: any) => {
 
 interface Props {
   componentTemplate: ComponentTemplateDeserialized;
-  datastreams?: string[];
+  dataStreams?: string[];
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ datastreams, componentTemplate }) => {
+  ({ dataStreams, componentTemplate }) => {
     const { name } = componentTemplate;
 
     const serializedComponentTemplate = serializeComponentTemplate(
@@ -68,7 +68,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     } = serializedComponentTemplate;
 
     const isFleetDatastreamsVisible =
-      datastreams?.length && componentTemplate._meta?.managed_by === 'fleet';
+      dataStreams?.length && componentTemplate._meta?.managed_by === 'fleet';
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
@@ -134,9 +134,9 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiSpacer size="s" />
               <EuiText>
                 <ul>
-                  {datastreams.map((datastream) => (
-                    <li key={datastream}>
-                      <EuiCode>{datastream}</EuiCode>
+                  {dataStreams.map((dataStream) => (
+                    <li key={dataStream}>
+                      <EuiCode>{dataStream}</EuiCode>
                     </li>
                   ))}
                 </ul>

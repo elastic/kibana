@@ -13,17 +13,17 @@ import { StepReview } from './step_review';
 
 interface Props {
   getComponentTemplateData: (wizardContent: WizardContent) => ComponentTemplateDeserialized;
-  datastreams?: string[];
+  dataStreams?: string[];
 }
 
 export const StepReviewContainer = React.memo(
-  ({ getComponentTemplateData, datastreams }: Props) => {
+  ({ getComponentTemplateData, dataStreams }: Props) => {
     const { getData } = Forms.useMultiContentContext<WizardContent>();
 
     const wizardContent = getData();
     // Build the final template object, providing the wizard content data
     const componentTemplate = getComponentTemplateData(wizardContent);
 
-    return <StepReview datastreams={datastreams} componentTemplate={componentTemplate} />;
+    return <StepReview dataStreams={dataStreams} componentTemplate={componentTemplate} />;
   }
 );

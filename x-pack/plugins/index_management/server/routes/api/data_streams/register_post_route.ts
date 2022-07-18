@@ -85,6 +85,7 @@ export function registerPostOneRollover({
       const { client } = (await context.core).elasticsearch;
       try {
         const { data_streams: dataStreams } = await getDataStreams(client, name);
+        // That API is mean to be used to rollover one specific datastream
         if (dataStreams[0]) {
           await client.asCurrentUser.indices.rollover({
             alias: name,
