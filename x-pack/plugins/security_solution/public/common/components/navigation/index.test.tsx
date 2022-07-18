@@ -69,28 +69,6 @@ describe('SIEM Navigation', () => {
     tabName: HostsTableType.authentications,
     navTabs,
     urlState: {
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-          linkTo: ['timeline'],
-        },
-        timeline: {
-          [CONSTANTS.timerange]: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-          linkTo: ['global'],
-        },
-      },
       [CONSTANTS.timeline]: {
         activeTab: TimelineTabs.query,
         id: '',
