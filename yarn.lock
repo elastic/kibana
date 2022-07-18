@@ -1429,10 +1429,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.12.0":
-  version "46.12.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.12.0.tgz#95c5ba2d4eff75b52fb294b867fb7b147da3383a"
-  integrity sha512-YIILkL3CXSoBMBiwj1N6FJTWMB9PpKi1bfMZVJCGHb23+J3LiiAqsQYsZbm7L28ziH3s0RveRomRcfVo38NvMg==
+"@elastic/charts@46.13.0":
+  version "46.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.13.0.tgz#6000de23944f264c8ac2bb0a8728fac1eb8c3b2f"
+  integrity sha512-v3qGpARn8stI5v6aSUaQE3tEYdZLmGgA//oU4BSLemmKUaBpaK5ZOYwjoBGdqzo52F7gqM7/O1QepdfxS/CBRw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -3319,6 +3319,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -3328,6 +3332,22 @@
   uid ""
 
 "@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-browser-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-browser-mocks@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-browser@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-common@link:bazel-bin/packages/core/ui-settings/core-ui-settings-common":
   version "0.0.0"
   uid ""
 
@@ -6978,6 +6998,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6987,6 +7011,22 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-browser-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-browser-mocks@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-browser@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-common@link:bazel-bin/packages/core/ui-settings/core-ui-settings-common/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7522,12 +7562,12 @@
   dependencies:
     moment ">=2.14.0"
 
-"@types/moment-timezone@^0.5.12":
-  version "0.5.12"
-  resolved "https://registry.yarnpkg.com/@types/moment-timezone/-/moment-timezone-0.5.12.tgz#0fb680c03db194fe8ff4551eaeb1eec8d3d80e9f"
-  integrity sha512-hnHH2+Efg2vExr/dSz+IX860nSiyk9Sk4pJF2EmS11lRpMcNXeB4KBW5xcgw2QPsb9amTXdsVNEe5IoJXiT0uw==
+"@types/moment-timezone@^0.5.30":
+  version "0.5.30"
+  resolved "https://registry.yarnpkg.com/@types/moment-timezone/-/moment-timezone-0.5.30.tgz#340ed45fe3e715f4a011f5cfceb7cb52aad46fc7"
+  integrity sha512-aDVfCsjYnAQaV/E9Qc24C5Njx1CoDjXsEgkxtp9NyXDpYu4CCbmclb6QhWloS9UTU/8YROUEEdEkWI0D7DxnKg==
   dependencies:
-    moment ">=2.14.0"
+    moment-timezone "*"
 
 "@types/mustache@^0.8.31":
   version "0.8.31"
@@ -13600,7 +13640,7 @@ domhandler@^3.0.0:
   dependencies:
     domelementtype "^2.0.1"
 
-domhandler@^4.0.0, domhandler@^4.0, domhandler@^4.2.0, domhandler@^4.2.2:
+domhandler@^4.0, domhandler@^4.0.0, domhandler@^4.2.0, domhandler@^4.2.2:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-4.3.0.tgz#16c658c626cf966967e306f966b431f77d4a5626"
   integrity sha512-fC0aXNQXqKSFTr2wDNZDhsEYjCiYsDWl3D01kwt25hm1YIPyDGHvvi3rw+PLqHAl/m71MaiF7d5zvBr0p5UB2g==
@@ -21194,10 +21234,10 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.27:
-  version "0.5.27"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.27.tgz#73adec8139b6fe30452e78f210f27b1f346b8877"
-  integrity sha512-EIKQs7h5sAsjhPCqN6ggx6cEbs94GK050254TIJySD1bzoM5JTYDwAU1IoVOeTOL6Gm27kYJ51/uuvq1kIlrbw==
+moment-timezone@*, moment-timezone@^0.5.34:
+  version "0.5.34"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.34.tgz#a75938f7476b88f155d3504a9343f7519d9a405c"
+  integrity sha512-3zAEHh2hKUs3EXLESx/wsgw6IQdusOT8Bxm3D9UrHPQR7zlMmzwybC8zHEM1tQ4LJwP7fcxrWr8tuBg05fFCbg==
   dependencies:
     moment ">= 2.9.0"
 
