@@ -35,7 +35,7 @@ describe('ContentStream', () => {
 
   describe('read', () => {
     beforeEach(() => {
-      stream = getContentStream({ params: { encoding: 'raw', size: 1 } });
+      stream = getContentStream({ params: { size: 1 } });
       base64Stream = getContentStream();
     });
 
@@ -88,7 +88,7 @@ describe('ContentStream', () => {
       client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
       client.get.mockResponseOnce(set<any>({}, '_source.data', '56'));
       stream = getContentStream({
-        params: { encoding: 'raw', size: 6 },
+        params: { size: 6 },
       });
       let data = '';
       for await (const chunk of stream) {
@@ -112,7 +112,7 @@ describe('ContentStream', () => {
       client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
       client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
       client.get.mockResponseOnce(set<any>({}, '_source.data', ''));
-      stream = getContentStream({ params: { encoding: 'raw', size: 12 } });
+      stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of stream) {
         data += chunk;
@@ -126,7 +126,7 @@ describe('ContentStream', () => {
       client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
       client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
       client.get.mockResponseOnce({} as any);
-      stream = getContentStream({ params: { size: undefined, encoding: 'raw' } });
+      stream = getContentStream({ params: { size: undefined } });
       let data = '';
       for await (const chunk of stream) {
         data += chunk;
@@ -159,7 +159,7 @@ describe('ContentStream', () => {
 
   describe('write', () => {
     beforeEach(() => {
-      stream = getContentStream({ params: { encoding: 'raw', size: 1 } });
+      stream = getContentStream({ params: { size: 1 } });
       base64Stream = getContentStream();
     });
     it('should not send a request until stream is closed', () => {
@@ -221,8 +221,8 @@ describe('ContentStream', () => {
       expect(request).toHaveProperty('query.bool.must.match.bid', 'something');
     });
 
-    it('should split raw data into chunks', async () => {
-      stream = getContentStream({ params: { encoding: 'raw', maxChunkSize: '1028B' } });
+    it('should split data into chunks', async () => {
+      stream = getContentStream({ params: { maxChunkSize: '1028B' } });
       stream.end('123456');
       await new Promise((resolve) => stream.once('finish', resolve));
 
@@ -258,7 +258,7 @@ describe('ContentStream', () => {
     });
 
     it('should encode every chunk separately', async () => {
-      base64Stream = getContentStream({ params: { encoding: 'base64', maxChunkSize: '1028B' } });
+      base64Stream = getContentStream({ params: { maxChunkSize: '1028B' } });
       base64Stream.end('12345678');
       await new Promise((resolve) => base64Stream.once('finish', resolve));
 
