@@ -18,6 +18,7 @@ import {
   htmlIdGenerator,
   EuiButtonGroup,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -617,6 +618,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       ? currentColumn.params.secondaryFields.length
       : 0;
 
+    const { euiTheme } = useEuiTheme();
+
     return (
       <>
         <ValuesInput
@@ -911,9 +914,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             <EuiSpacer size="s" />
             <EuiAccordion
               id="lnsTermsAdvanced"
-              buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                defaultMessage: 'Advanced',
-              })}
+              arrowProps={{ color: 'primary' }}
+              buttonContent={
+                <EuiText size="s" color={euiTheme.colors.primary}>
+                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                    defaultMessage: 'Advanced',
+                  })}
+                </EuiText>
+              }
               data-test-subj="indexPattern-terms-advanced"
             >
               <EuiSwitch
