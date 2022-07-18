@@ -140,16 +140,16 @@ describe('policy_config and licenses', () => {
       expect(valid).toBeFalsy();
     });
 
-    it('allows credential dumping option when Platinum', () => {
+    it('allows credential hardening option when Platinum', () => {
       const policy = policyFactory();
-      policy.windows.credential_hardening.enabled = true; // make policy change
+      policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
 
-    it('blocks credential dumping option when below Platinum', () => {
+    it('blocks credential hardening option when below Platinum', () => {
       const policy = policyFactory();
-      policy.windows.credential_hardening.enabled = true; // make policy change
+      policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
 

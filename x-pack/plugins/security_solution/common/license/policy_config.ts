@@ -215,7 +215,8 @@ function isEndpointCredentialDumpingPolicyValidForLicense(
 
   // only platinum or higher may use credential hardening
   if (
-    policy.windows.credential_hardening.enabled !== defaults.windows.credential_hardening.enabled
+    policy.windows.attack_surface_reduction.credential_hardening.enabled !==
+    defaults.windows.attack_surface_reduction.credential_hardening.enabled
   ) {
     return false;
   }

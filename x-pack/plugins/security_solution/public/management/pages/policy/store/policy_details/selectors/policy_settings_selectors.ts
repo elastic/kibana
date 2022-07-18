@@ -164,7 +164,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
-        credential_hardening: windows.credential_hardening,
+        attack_surface_reduction: windows.attack_surface_reduction,
       },
       mac: {
         advanced: mac.advanced,
@@ -191,7 +191,7 @@ export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPo
 });
 
 export const isCredentialHardeningEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
-  return uiPolicyConfig.windows.credential_hardening.enabled;
+  return uiPolicyConfig.windows.attack_surface_reduction.credential_hardening.enabled;
 });
 
 /** Returns the total number of possible windows eventing configurations */

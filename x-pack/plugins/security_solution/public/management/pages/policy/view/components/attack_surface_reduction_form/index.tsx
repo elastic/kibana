@@ -43,7 +43,7 @@ export const AttackSurfaceReductionForm = memo(() => {
   const handleSwitchChange = useCallback(
     (event) =>
       dispatch({
-        type: 'userChangedcredentialHardening',
+        type: 'userChangedCredentialHardening',
         payload: {
           enabled: event.target.checked,
         },

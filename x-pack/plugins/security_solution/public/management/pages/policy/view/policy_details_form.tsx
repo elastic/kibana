@@ -42,7 +42,7 @@ const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
 );
 
 const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.credential_hardening',
+  'xpack.securitySolution.endpoint.policy.details.attack_surface_reduction',
   {
     defaultMessage: 'Attack Surface Reduction',
   }

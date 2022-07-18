@@ -63,8 +63,10 @@ export const policyFactory = (): PolicyConfig => {
       antivirus_registration: {
         enabled: false,
       },
-      credential_hardening: {
-        enabled: true,
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
       },
     },
     mac: {
@@ -172,8 +174,10 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
-      credential_hardening: {
-        enabled: false,
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
       },
       popup: {
         ...policy.windows.popup,
