@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 // TODO Temporary type definition until we can import from `@kbn/core`.
 // Copied from src/core/server/elasticsearch/client/types.ts
@@ -52,20 +52,7 @@ export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 export interface HistogramField {
   fieldName: string;
-  type: string;
-}
-
-export type HistogramFieldWithNumericColumnStats = HistogramField & NumericColumnStats;
-export function isHistogramFieldWithNumericColumnStats(
-  arg: unknown
-): arg is HistogramFieldWithNumericColumnStats {
-  return isPopulatedObject(arg, ['fieldName', 'fieldValue', 'interval', 'min', 'max']);
-}
-
-export interface HistogramItem {
-  doc_count: number;
-  key: number;
-  key_as_string: string;
+  type: KBN_FIELD_TYPES;
 }
 
 export interface ChangePoint extends FieldValuePair {
@@ -74,8 +61,15 @@ export interface ChangePoint extends FieldValuePair {
   score: number;
   pValue: number | null;
   normalizedScore: number;
-  histogram?: HistogramItem[];
+  histogram?: ChangePointHistogramItem[];
+}
+
+interface ChangePointHistogramItem {
+  doc_count_overall: number;
+  doc_count_change_point: number;
+  key: number;
+  key_as_string: string;
 }
 export interface ChangePointHistogram extends FieldValuePair {
-  histogram: HistogramItem[];
+  histogram: ChangePointHistogramItem[];
 }

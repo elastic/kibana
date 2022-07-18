@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { HistogramField } from '@kbn/ml-agg-utils';
+import { FieldsForHistograms } from '@kbn/ml-agg-utils';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import {
@@ -20,7 +20,7 @@ function getHistogramsForFields(
   client: IScopedClusterClient,
   indexPattern: string,
   query: any,
-  fields: HistogramField[],
+  fields: FieldsForHistograms,
   samplerShardSize: number,
   runtimeMappings: RuntimeMappings
 ) {

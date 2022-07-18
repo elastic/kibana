@@ -16,12 +16,11 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import { isHistogramFieldWithNumericColumnStats } from './types';
 import type {
   AggCardinality,
   ElasticsearchClient,
   HistogramField,
-  HistogramFieldWithNumericColumnStats,
+  NumericColumnStats,
   NumericColumnStatsMap,
 } from './types';
 
@@ -47,12 +46,32 @@ interface NumericDataItem {
   doc_count: number;
 }
 
-interface NumericChartData {
+export interface NumericChartData {
   data: NumericDataItem[];
   id: string;
   interval: number;
   stats: [number, number];
   type: 'numeric';
+}
+
+export interface NumericHistogramField extends HistogramField {
+  type: KBN_FIELD_TYPES.DATE | KBN_FIELD_TYPES.NUMBER;
+}
+type NumericHistogramFieldWithColumnStats = NumericHistogramField & NumericColumnStats;
+
+function isNumericHistogramField(arg: unknown): arg is NumericHistogramField {
+  return (
+    isPopulatedObject(arg, ['fieldName', 'type']) &&
+    (arg.type === KBN_FIELD_TYPES.DATE || arg.type === KBN_FIELD_TYPES.NUMBER)
+  );
+}
+function isNumericHistogramFieldWithColumnStats(
+  arg: unknown
+): arg is NumericHistogramFieldWithColumnStats {
+  return (
+    isPopulatedObject(arg, ['fieldName', 'type', 'min', 'max', 'interval']) &&
+    (arg.type === KBN_FIELD_TYPES.DATE || arg.type === KBN_FIELD_TYPES.NUMBER)
+  );
 }
 
 interface OrdinalDataItem {
@@ -68,21 +87,43 @@ interface OrdinalChartData {
   id: string;
 }
 
+interface OrdinalHistogramField extends HistogramField {
+  type: KBN_FIELD_TYPES.STRING | KBN_FIELD_TYPES.BOOLEAN;
+}
+
+function isOrdinalHistogramField(arg: unknown): arg is OrdinalHistogramField {
+  return (
+    isPopulatedObject(arg, ['fieldName', 'type']) &&
+    (arg.type === KBN_FIELD_TYPES.STRING || arg.type === KBN_FIELD_TYPES.BOOLEAN)
+  );
+}
+
 interface UnsupportedChartData {
   id: string;
   type: 'unsupported';
 }
 
+interface UnsupportedHistogramField extends HistogramField {
+  type: Exclude<
+    KBN_FIELD_TYPES,
+    KBN_FIELD_TYPES.STRING | KBN_FIELD_TYPES.BOOLEAN | KBN_FIELD_TYPES.DATE | KBN_FIELD_TYPES.NUMBER
+  >;
+}
+
 type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
 
-// type ChartDataItem = NumericDataItem | OrdinalDataItem;
-type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
+export type FieldsForHistograms = Array<
+  | NumericHistogramField
+  | NumericHistogramFieldWithColumnStats
+  | OrdinalHistogramField
+  | UnsupportedHistogramField
+>;
 
 export const fetchHistogramsForFields = async (
   client: ElasticsearchClient,
   indexPattern: string,
   query: any,
-  fields: Array<HistogramField | HistogramFieldWithNumericColumnStats>,
+  fields: FieldsForHistograms,
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
@@ -91,11 +132,11 @@ export const fetchHistogramsForFields = async (
       client,
       indexPattern,
       query,
-      fields.filter((f) => !isHistogramFieldWithNumericColumnStats(f)),
+      fields.filter((f) => !isNumericHistogramFieldWithColumnStats(f)),
       samplerShardSize,
       runtimeMappings
     )),
-    ...fields.filter(isHistogramFieldWithNumericColumnStats).reduce((p, field) => {
+    ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {
       const { interval, min, max, fieldName } = field;
       p[stringHash(fieldName)] = { interval, min, max };
 
@@ -104,29 +145,27 @@ export const fetchHistogramsForFields = async (
   };
 
   const chartDataAggs = fields.reduce((aggs, field) => {
-    const fieldName = field.fieldName;
-    const fieldType = field.type;
-    const id = stringHash(fieldName);
-    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+    const id = stringHash(field.fieldName);
+    if (isNumericHistogramField(field)) {
       if (aggIntervals[id] !== undefined) {
         aggs[`${id}_histogram`] = {
           histogram: {
-            field: fieldName,
+            field: field.fieldName,
             interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
           },
         };
       }
-    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
-      if (fieldType === KBN_FIELD_TYPES.STRING) {
+    } else if (isOrdinalHistogramField(field)) {
+      if (field.type === KBN_FIELD_TYPES.STRING) {
         aggs[`${id}_cardinality`] = {
           cardinality: {
-            field: fieldName,
+            field: field.fieldName,
           },
         };
       }
       aggs[`${id}_terms`] = {
         terms: {
-          field: fieldName,
+          field: field.fieldName,
           size: MAX_CHART_COLUMNS,
         },
       };
@@ -155,20 +194,18 @@ export const fetchHistogramsForFields = async (
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
 
-  const chartsData: ChartData[] = fields.map((field): ChartData => {
-    const fieldName = field.fieldName;
-    const fieldType = field.type;
+  return fields.map((field) => {
     const id = stringHash(field.fieldName);
 
-    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+    if (isNumericHistogramField(field)) {
       if (aggIntervals[id] === undefined) {
         return {
           type: 'numeric',
           data: [],
           interval: 0,
           stats: [0, 0],
-          id: fieldName,
-        };
+          id: field.fieldName,
+        } as NumericChartData;
       }
 
       return {
@@ -176,23 +213,21 @@ export const fetchHistogramsForFields = async (
         interval: aggIntervals[id].interval,
         stats: [aggIntervals[id].min, aggIntervals[id].max],
         type: 'numeric',
-        id: fieldName,
-      };
-    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+        id: field.fieldName,
+      } as NumericChartData;
+    } else if (isOrdinalHistogramField(field)) {
       return {
-        type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
+        type: field.type === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
         cardinality:
-          fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
+          field.type === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
         data: aggregations[`${id}_terms`].buckets,
-        id: fieldName,
-      };
+        id: field.fieldName,
+      } as OrdinalChartData;
     }
 
     return {
       type: 'unsupported',
-      id: fieldName,
-    };
+      id: field.fieldName,
+    } as UnsupportedChartData;
   });
-
-  return chartsData;
 };

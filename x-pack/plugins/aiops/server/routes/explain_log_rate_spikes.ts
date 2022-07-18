@@ -9,10 +9,11 @@ import { chunk } from 'lodash';
 
 import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { ChangePoint, NumericChartData, NumericHistogramField } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
@@ -155,6 +156,21 @@ export const defineExplainLogRateSpikesRoute = (
           }
         }
 
+        const histogramFields: [NumericHistogramField] = [
+          { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
+        ];
+
+        const [overallTimeSeries] = (await fetchHistogramsForFields(
+          client,
+          request.body.index,
+          { match_all: {} },
+          // fields
+          histogramFields,
+          // samplerShardSize
+          -1,
+          undefined
+        )) as [NumericChartData];
+
         // time series filtered by fields
         if (changePoints) {
           await asyncForEach(changePoints, async (cp, index) => {
@@ -169,7 +185,7 @@ export const defineExplainLogRateSpikesRoute = (
                 },
               };
 
-              const cpTimeSeries = await fetchHistogramsForFields(
+              const [cpTimeSeries] = (await fetchHistogramsForFields(
                 client,
                 request.body.index,
                 histogramQuery,
@@ -177,16 +193,31 @@ export const defineExplainLogRateSpikesRoute = (
                 [
                   {
                     fieldName: request.body.timeFieldName,
-                    type: 'date',
-                    // interval: overallTimeSeries[0].interval,
-                    // min: overallTimeSeries[0].stats[0],
-                    // max: overallTimeSeries[0].stats[1],
+                    type: KBN_FIELD_TYPES.DATE,
+                    interval: overallTimeSeries.interval,
+                    min: overallTimeSeries.stats[0],
+                    max: overallTimeSeries.stats[1],
                   },
                 ],
                 // samplerShardSize
                 -1,
                 undefined
-              );
+              )) as [NumericChartData];
+
+              const histogram =
+                overallTimeSeries.data.map((o, i) => {
+                  const current = cpTimeSeries.data.find(
+                    (d1) => d1.key_as_string === o.key_as_string
+                  ) ?? {
+                    doc_count: 0,
+                  };
+                  return {
+                    key: o.key,
+                    key_as_string: o.key_as_string ?? '',
+                    doc_count_change_point: current.doc_count,
+                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                  };
+                }) ?? [];
 
               const { fieldName, fieldValue } = cp;
 
@@ -203,9 +234,7 @@ export const defineExplainLogRateSpikesRoute = (
                   {
                     fieldName,
                     fieldValue,
-                    // TODO Fix types
-                    // @ts-ignore
-                    histogram: cpTimeSeries[0].data,
+                    histogram,
                   },
                 ])
               );

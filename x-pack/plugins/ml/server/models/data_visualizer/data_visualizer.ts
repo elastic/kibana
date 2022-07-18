@@ -13,7 +13,7 @@ import {
   fetchHistogramsForFields,
   getSamplerAggregationsResponsePath,
 } from '@kbn/ml-agg-utils';
-import type { AggCardinality, HistogramField } from '@kbn/ml-agg-utils';
+import type { AggCardinality, FieldsForHistograms } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -215,7 +215,7 @@ export class DataVisualizer {
   async getHistogramsForFields(
     indexPattern: string,
     query: any,
-    fields: HistogramField[],
+    fields: FieldsForHistograms,
     samplerShardSize: number,
     runtimeMappings?: RuntimeMappings
   ): Promise<any> {
