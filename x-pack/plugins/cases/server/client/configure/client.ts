@@ -14,7 +14,7 @@ import { identity } from 'fp-ts/lib/function';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { ActionType } from '@kbn/actions-plugin/common';
+import { ActionType, CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
@@ -221,7 +221,10 @@ function isConnectorSupported(
   action: FindActionResult,
   actionTypes: Record<string, ActionType>
 ): boolean {
-  return actionTypes[action.actionTypeId]?.enabledInLicense;
+  return (
+    (actionTypes[action.actionTypeId]?.featureConfig ?? []).includes(CasesConnectorFeatureId) &&
+    actionTypes[action.actionTypeId]?.enabledInLicense
+  );
 }
 
 async function update(
