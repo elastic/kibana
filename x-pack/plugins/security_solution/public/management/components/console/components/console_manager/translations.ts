@@ -28,7 +28,4 @@ export const CONSOLE_EXIT_MODAL_INFO = Object.freeze({
   title: i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.title', {
     defaultMessage: 'Action is in progress',
   }),
-  actionLogLink: i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.link', {
-    defaultMessage: 'Action log',
-  }),
 });

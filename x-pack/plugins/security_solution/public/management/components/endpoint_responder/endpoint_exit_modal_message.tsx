@@ -9,15 +9,12 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { HostMetadata } from '../../../../common/endpoint/types';
-import {
-  ConsoleExitModalActionLogLink,
-  HostNameText,
-} from '../console/components/console_manager/components/console_exit_modal_link';
+import { ConsoleExitModalInfo, HostNameText } from './console_exit_modal_info';
 
 export const EndpointExitModalMessage = memo(({ meta }: { meta: { endpoint: HostMetadata } }) => {
   return (
     <>
-      <ConsoleExitModalActionLogLink hostName={meta.endpoint.host.hostname} />
+      <ConsoleExitModalInfo hostName={meta.endpoint.host.hostname} />
       <EuiSpacer size="l" />
       <EuiText size="s">
         <FormattedMessage

@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 
-import { CONSOLE_EXIT_MODAL_INFO } from '../translations';
+import { CONSOLE_EXIT_MODAL_INFO } from '../console/components/console_manager/translations';
+
+const actionLogLink = i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.link', {
+  defaultMessage: 'Action log',
+});
 
 export const HostNameText = ({ hostName }: { hostName: string }) => (
   <EuiText size="s" style={{ maxWidth: 100, display: 'inline-flex' }}>
@@ -19,7 +24,7 @@ export const HostNameText = ({ hostName }: { hostName: string }) => (
   </EuiText>
 );
 
-export const ConsoleExitModalActionLogLink = memo(({ hostName }: { hostName: string }) => {
+export const ConsoleExitModalInfo = memo(({ hostName }: { hostName: string }) => {
   return (
     <EuiText size="s">
       <FormattedMessage
@@ -28,11 +33,11 @@ export const ConsoleExitModalActionLogLink = memo(({ hostName }: { hostName: str
         values={{
           genericMessage: CONSOLE_EXIT_MODAL_INFO.genericMessage,
           hostName: <HostNameText hostName={hostName} />,
-          link: <strong>{CONSOLE_EXIT_MODAL_INFO.actionLogLink}</strong>,
+          link: <strong>{actionLogLink}</strong>,
         }}
       />
     </EuiText>
   );
 });
 
-ConsoleExitModalActionLogLink.displayName = 'ConsoleExitModalActionLogLink';
+ConsoleExitModalInfo.displayName = 'ConsoleExitModalInfo';
