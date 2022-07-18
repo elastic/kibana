@@ -154,7 +154,7 @@ export function PanelHeader({
 
   if (!showPanelBar) {
     return (
-      <>
+      <div className={classes}>
         <PanelOptionsMenu
           getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
@@ -163,7 +163,7 @@ export function PanelHeader({
           index={index}
         />
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-      </>
+      </div>
     );
   }
 
