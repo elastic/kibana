@@ -7,7 +7,6 @@
 
 import React, { FC, MouseEventHandler, useRef, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 import { CANVAS } from '../../../i18n';
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
