@@ -240,6 +240,7 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
                         >
                           <EuiHealth
                             color={locationStatus.monitor.status === 'up' ? 'success' : 'danger'}
+                            style={{ paddingTop: 4 }}
                             textSize="xs"
                           >
                             {locationStatus.observer?.geo?.name}
