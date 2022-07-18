@@ -22515,7 +22515,6 @@
     "xpack.observability.ruleDetails.rule.eventLogTabText": "実行履歴",
     "xpack.observability.ruleDetails.ruleLoadError": "ルールを読み込めません。理由：{message}",
     "xpack.observability.ruleDetails.tagsTitle": "タグ",
-    "xpack.observability.ruleDetails.triggreAction.status": "ステータス",
     "xpack.observability.rules.addRuleButtonLabel": "ルールを作成",
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.cancelButtonLabel": "キャンセル",
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.deleteButtonLabel": "{numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}}を削除 ",
