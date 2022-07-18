@@ -118,36 +118,30 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return [
       {
         dataTestSubj: 'hide-zero-values',
-        optionElement: (
-          <>
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                defaultMessage: 'Hide zero values',
-              })}
-              labelProps={{
-                style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
-                },
-              }}
-              checked={Boolean(currentColumn.params?.emptyAsNull)}
-              onChange={() => {
-                paramEditorUpdater(
-                  updateColumnParam({
-                    layer,
-                    columnId,
-                    paramName: 'emptyAsNull',
-                    value: !currentColumn.params?.emptyAsNull,
-                  })
-                );
-              }}
-              compressed
-            />
-          </>
+        inlineElement: (
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+              defaultMessage: 'Hide zero values',
+            })}
+            labelProps={{
+              style: {
+                fontWeight: euiThemeVars.euiFontWeightMedium,
+              },
+            }}
+            checked={Boolean(currentColumn.params?.emptyAsNull)}
+            onChange={() => {
+              paramEditorUpdater(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'emptyAsNull',
+                  value: !currentColumn.params?.emptyAsNull,
+                })
+              );
+            }}
+            compressed
+          />
         ),
-        title: '',
-        showInPopover: true,
-        inlineElement: null,
-        onClick: () => {},
       },
     ];
   },
