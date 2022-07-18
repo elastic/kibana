@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { lazy } from 'react';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from './common/navigation/constants';
-import { CspRouter } from './application/app';
 import type {
   CspClientPluginSetup,
   CspClientPluginStart,
@@ -52,7 +51,9 @@ export class CspPlugin
   }
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
     return {
-      getCloudSecurityPostureRouter: () => CspRouter,
+      getCloudSecurityPostureRouter: () => {
+        return lazy(() => import('./application/csp_router'));
+      },
     };
   }
 

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getRoutesFromMapping, addSpyRouteComponentToRoute } from './csp_router';
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { CloudSecurityPosturePageId } from '../common/navigation/types';
 import { createPageNavigationItemFixture } from '../test/fixtures/navigation_item';
-import { addSpyRouteComponentToRoute, getRoutesFromMapping } from './app';
 
 const chance = new Chance();
 const DummyComponent = () => null;
