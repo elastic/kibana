@@ -55,7 +55,11 @@ export const getObjectValueByKey = (
   obj: Record<string, Record<string, unknown> | unknown>,
   key: string
 ): string => {
-  return findTheValue(obj, splitKeys(key)) as string;
+  try {
+    return findTheValue(obj, splitKeys(key)) as string;
+  } catch (e) {
+    throw new Error(`Value not found in object for key ${key}`);
+  }
 };
 
 export const throwIfResponseIsNotValidSpecial = ({
@@ -66,13 +70,18 @@ export const throwIfResponseIsNotValidSpecial = ({
   requiredAttributesToBeInTheResponse?: string[];
 }) => {
   const requiredContentType = 'application/json';
-  const contentType = res.headers['content-type'] ?? 'undefined';
+  const contentType = res.headers['content-type'];
   const data = res.data;
 
   /**
    * Check that the content-type of the response is application/json.
    * Then includes is added because the header can be application/json;charset=UTF-8.
    */
+  if (contentType == null) {
+    throw new Error(
+      `Missing content type header in ${res.config.method} ${res.config.url}. Supported content types: ${requiredContentType}`
+    );
+  }
   if (!contentType.includes(requiredContentType)) {
     throw new Error(
       `Unsupported content type: ${contentType} in ${res.config.method} ${res.config.url}. Supported content types: ${requiredContentType}`
@@ -86,7 +95,7 @@ export const throwIfResponseIsNotValidSpecial = ({
    * isObjectLike will fail.
    * Axios converts automatically JSON to JS objects.
    */
-  if (!isEmpty(data) && !isObjectLike(data)) {
+  if (isEmpty(data) || !isObjectLike(data)) {
     throw new Error('Response is not a valid JSON');
   }
 
@@ -105,7 +114,9 @@ export const throwIfResponseIsNotValidSpecial = ({
      */
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
-      if (getObjectValueByKey(data, attr) === undefined) {
+      try {
+        getObjectValueByKey(data, attr);
+      } catch (e) {
         errorAttributes.push(attr);
       }
     });
