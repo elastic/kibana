@@ -11,6 +11,7 @@ import {
   FieldFormatter,
   MAX_ZOOM,
   MIN_ZOOM,
+  SOURCE_TYPES,
   TooltipFeatureAction,
   VECTOR_SHAPE_TYPE,
   VectorSourceRequestMeta,
@@ -29,7 +30,6 @@ import {
   AnomalySourceTooltipProperty,
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
-import { ML_ANOMALY } from './anomaly_source_factory';
 import { getResultsForJobId, ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 import type { MlApiServices } from '../application/services/ml_api_service';
@@ -51,7 +51,7 @@ export class AnomalySource implements IVectorSource {
     }
 
     return {
-      type: ML_ANOMALY,
+      type: SOURCE_TYPES.ES_ML_ANOMALIES,
       jobId: descriptor.jobId,
       typicalActual: descriptor.typicalActual || ML_ANOMALY_LAYERS.ACTUAL,
     };
