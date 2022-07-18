@@ -8,14 +8,14 @@
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { Ping } from '../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
   SUMMARY_FILTER,
-} from '../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../common/constants';
-import { useSyntheticsRefreshContext } from '../apps/synthetics/contexts';
+} from '../../../../common/constants/client_defaults';
+import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
+import { useSyntheticsRefreshContext } from '../contexts';
 
 export function useStatusByLocation(monitorIdArg?: string) {
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -69,6 +69,9 @@ export function useStatusByLocation(monitorIdArg?: string) {
       return loc.summary.hits.hits?.[0]._source as Ping;
     });
 
-    return { locations, loading };
+    return {
+      locations,
+      loading,
+    };
   }, [data, loading]);
 }
