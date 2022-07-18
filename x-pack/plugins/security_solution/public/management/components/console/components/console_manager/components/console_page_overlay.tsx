@@ -17,7 +17,7 @@ import { PageOverlay } from '../../../../page_overlay/page_overlay';
 import { ConsoleExitModal } from './console_exit_modal';
 
 const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.backButtonLabel', {
-  defaultMessage: 'Return to page content',
+  defaultMessage: 'Back',
 });
 
 export interface ConsolePageOverlayProps {

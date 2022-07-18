@@ -111,7 +111,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
-        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  or type help for assistance.'
+        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  Help or type help for assistance.'
       );
     });
   });

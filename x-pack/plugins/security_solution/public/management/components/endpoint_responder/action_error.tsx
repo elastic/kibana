@@ -12,10 +12,10 @@ import type { CommandExecutionResultComponent } from '../console/components/comm
 import type { ImmutableArray } from '../../../../common/endpoint/types';
 
 export const ActionError = memo<{
-  title: string;
-  dataTestSubj?: string;
   errors: ImmutableArray<string>;
+  title?: string;
   ResultComponent: CommandExecutionResultComponent;
+  dataTestSubj?: string;
 }>(({ title, dataTestSubj, errors, ResultComponent }) => {
   return (
     <ResultComponent showAs="failure" title={title} data-test-subj={dataTestSubj}>

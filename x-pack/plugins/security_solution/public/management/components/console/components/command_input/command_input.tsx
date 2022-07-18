@@ -33,8 +33,8 @@ const CommandInputContainer = styled.div`
   }
 
   &.active {
-    border-bottom: solid ${({ theme: { eui } }) => eui.euiBorderWidthThin}
-      ${({ theme: { eui } }) => eui.euiColorPrimary};
+    border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
+    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
 
   .textEntered {
@@ -256,6 +256,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [dispatch, rightOfCursor.text]
   );
 
+  const handleOnFocus = useCallback(() => {
+    if (!isKeyInputBeingCaptured) {
+      dispatch({ type: 'addFocusToKeyCapture' });
+    }
+  }, [dispatch, isKeyInputBeingCaptured]);
+
   // Execute the command if one was ENTER'd.
   useEffect(() => {
     if (commandToExecute) {
@@ -271,6 +277,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         className={focusClassName}
         onClick={handleTypingAreaClick}
         ref={containerRef}
+        tabIndex={0}
+        onFocus={handleOnFocus}
       >
         <EuiFlexGroup
           wrap={true}
