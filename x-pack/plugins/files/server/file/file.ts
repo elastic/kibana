@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import Puid from 'puid';
 import mimeType from 'mime';
 import { Readable } from 'stream';
 import type { FileCompression, FileShareJSON } from '../../common/types';
@@ -49,7 +50,7 @@ export class File<M = unknown> implements IFile {
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
-    this.blobStorage = this.blobStorageService.createBlobStore(
+    this.blobStorage = this.blobStorageService.createBlobStorage(
       fileKindDescriptor.blobStoreSettings
     );
   }
@@ -86,12 +87,13 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { id: contentRef, size } = await this.blobStorage.upload(content, {
+      const { size } = await this.blobStorage.upload(content, {
+        id: this.id, // By sharing this ID with the blob content we can retrieve the content later
         transforms: [enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity)],
       });
       await this.updateFileState({
         action: 'uploaded',
-        payload: { content_ref: contentRef, size },
+        payload: { size },
       });
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
@@ -102,12 +104,10 @@ export class File<M = unknown> implements IFile {
 
   public downloadContent(): Promise<Readable> {
     const { size } = this.attributes;
-    if (!this.id) {
-      throw new Error('No content to download');
-    }
     if (this.status !== 'READY') {
       throw new Error('This file is not ready for download.');
     }
+    // We pass through this file ID to retrieve blob content.
     return this.blobStorage.download({ id: this.id, size });
   }
 
@@ -253,13 +253,14 @@ export class File<M = unknown> implements IFile {
     }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
     internalFileService: InternalFileService
   ) {
-    const fileSO = await internalFileService.createSO({
+    const puid = new Puid();
+    const fileSO = await internalFileService.createSO(puid.generate(), {
       ...createDefaultFileAttributes(),
-      FileKind: fileKind.id,
       name,
+      mime_type: mime,
       Alt: alt,
       Meta: meta,
-      mime_type: mime,
+      FileKind: fileKind.id,
       Extension: (mime && mimeType.getExtension(mime)) ?? undefined,
     });
 
