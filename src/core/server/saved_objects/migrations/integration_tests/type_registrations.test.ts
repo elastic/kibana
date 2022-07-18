@@ -38,6 +38,8 @@ const previouslyRegisteredTypes = [
   'config',
   'connector_token',
   'core-usage-stats',
+  'csp-rule-template',
+  'csp_rule',
   'dashboard',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',

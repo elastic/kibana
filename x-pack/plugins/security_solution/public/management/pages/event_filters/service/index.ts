@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type {
   FoundExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -14,9 +14,9 @@ import type {
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Immutable } from '../../../../../common/endpoint/types';
+import type { Immutable } from '../../../../../common/endpoint/types';
 
-import { EventFiltersService } from '../types';
+import type { EventFiltersService } from '../types';
 import {
   addEventFilters,
   getList,

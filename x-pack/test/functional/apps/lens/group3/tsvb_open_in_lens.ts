@@ -157,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const button = await testSubjects.find('visualizeEditInLensButton');
         await button.click();
-        await lens.waitForVisualization('mtrVis');
+        await lens.waitForVisualization('legacyMtrVis');
         await retry.try(async () => {
           const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
           expect(await dimensions[1].getVisibleText()).to.be('Count of records');

@@ -14,7 +14,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import { UserAuthenticationsRequestOptions } from '../../../../../../common/search_strategy';
+import type { UserAuthenticationsRequestOptions } from '../../../../../../common/search_strategy';
 
 describe('authentications search strategy', () => {
   const buildAuthenticationQuery = jest.spyOn(buildQuery, 'buildQuery');

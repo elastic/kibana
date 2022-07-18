@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { ServerApiError } from '../../common/types';
+import type { ServerApiError } from '../../common/types';
 
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',

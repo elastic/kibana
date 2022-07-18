@@ -12,12 +12,12 @@ import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { AlertSearchResponse } from '../alerts/types';
+import type { AlertSearchResponse } from '../alerts/types';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
 import * as i18n from './translations';
-import { Rule } from './types';
+import type { Rule } from './types';
 
 interface UseRuleWithFallback {
   error: unknown;

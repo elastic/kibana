@@ -54,7 +54,7 @@ export interface SchemaChildValue<Value> {
 }
 
 /**
- * Type that defines all the possible values that the  Schema accepts.
+ * Type that defines all the possible values that the Schema accepts.
  * These types definitions are helping to identify earlier the possible missing `properties` nesting when
  * manually defining the schemas.
  */

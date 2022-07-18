@@ -41,6 +41,7 @@ disabled:
   - x-pack/plugins/synthetics/e2e/config.ts
   - x-pack/plugins/synthetics/e2e/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
+  - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts
@@ -54,7 +55,9 @@ disabled:
   - x-pack/test/load/config.ts
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
+  - x-pack/test/fleet_packages/config.ts
 
+defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
@@ -95,6 +98,9 @@ enabled:
   - test/interactive_setup_functional/manual_configuration.config.ts
   - test/interpreter_functional/config.ts
   - test/new_visualize_flow/config.ts
+  - test/node_roles_functional/all.config.ts
+  - test/node_roles_functional/background_tasks.config.ts
+  - test/node_roles_functional/ui.config.ts
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
@@ -205,6 +211,7 @@ enabled:
   - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
+  - x-pack/test/reporting_functional/reporting_and_timeout.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts

@@ -27,8 +27,14 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   path: API_URLS.SYNTHETICS_MONITORS,
   validate: {
     body: schema.any(),
+    query: schema.object({
+      id: schema.maybe(schema.string()),
+    }),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+    // usually id is auto generated, but this is useful for testing
+    const { id } = request.query;
+
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
     const monitorWithDefaults = {
@@ -51,7 +57,13 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         formatSecrets({
           ...monitorWithDefaults,
           revision: 1,
-        })
+        }),
+        id
+          ? {
+              id,
+              overwrite: true,
+            }
+          : undefined
       );
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {

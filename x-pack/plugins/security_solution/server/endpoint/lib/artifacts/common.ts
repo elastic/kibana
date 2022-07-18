@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   InternalArtifactSchema,
   InternalArtifactCompleteSchema,
-  internalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
+import { internalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',

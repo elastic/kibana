@@ -127,7 +127,7 @@ export class Screenshots {
       .pipe(
         this.semaphore.acquire(),
         mergeMap(({ driver, error$, close }) => {
-          const screen = new ScreenshotObservableHandler(
+          const screen: ScreenshotObservableHandler = new ScreenshotObservableHandler(
             driver,
             this.config,
             eventLogger,
@@ -143,7 +143,7 @@ export class Screenshots {
 
                   this.logger.error(error);
                   eventLogger.error(error, Transactions.SCREENSHOTTING);
-                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
+                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow "as-is" screenshot with injected warning message
                 }),
                 takeUntil(error$),
                 screen.getScreenshots()

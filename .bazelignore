@@ -2,16 +2,26 @@
 # Issues are opened for to include that feature but not available yet
 # https://github.com/bazelbuild/bazel/issues/7093
 # https://github.com/bazelbuild/bazel/issues/8106
+.buildkite
 .ci
+.chromium
 .git
 .github
 .idea
+.native_modules
 .teamcity
 .yarn-local-mirror
+.vscode
+api_docs
 bazel-bin
 bazel-kibana
 bazel-out
 bazel-testlogs
 build
+data
+dev_docs
+docs
+legacy_rfcs
 node_modules
 target
+vars

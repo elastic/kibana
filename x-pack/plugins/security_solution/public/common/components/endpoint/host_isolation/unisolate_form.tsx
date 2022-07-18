@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, useCallback } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM, UNISOLATE, ISOLATED } from './translations';
-import { EndpointIsolatedFormProps } from './isolate_form';
+import type { EndpointIsolatedFormProps } from './isolate_form';
 
 export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
   ({ hostName, onCancel, onConfirm, onChange, comment = '', messageAppend, isLoading = false }) => {
