@@ -145,7 +145,7 @@ export const IncludeExcludeRow = ({
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.terms.include', {
-          defaultMessage: 'Include terms',
+          defaultMessage: 'Include values',
         })}
         display="rowCompressed"
         fullWidth
@@ -155,7 +155,7 @@ export const IncludeExcludeRow = ({
               label={
                 <EuiText size="xs">
                   {i18n.translate('xpack.lens.indexPattern.terms.addRegex', {
-                    defaultMessage: 'Use a regex instead',
+                    defaultMessage: 'Use regular expression',
                   })}
                 </EuiText>
               }
@@ -184,7 +184,7 @@ export const IncludeExcludeRow = ({
             placeholder={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
               {
-                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+                defaultMessage: 'Enter a regex to filter values',
               }
             )}
             data-test-subj="lens-include-terms-regex-input"
@@ -200,17 +200,17 @@ export const IncludeExcludeRow = ({
             aria-label={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
               {
-                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+                defaultMessage: 'Enter a regex to filter values',
               }
             )}
           />
         ) : (
           <EuiComboBox
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.include', {
-              defaultMessage: 'Include terms',
+              defaultMessage: 'Include values',
             })}
             placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
-              defaultMessage: 'Select existing terms or add a new one',
+              defaultMessage: 'Select values to include or create a new one',
             })}
             options={termsOptions}
             selectedOptions={includeExcludeSelectedOptions.include}
@@ -227,7 +227,7 @@ export const IncludeExcludeRow = ({
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.terms.exclude', {
-          defaultMessage: 'Exclude terms',
+          defaultMessage: 'Exclude values',
         })}
         display="rowCompressed"
         fullWidth
@@ -237,7 +237,7 @@ export const IncludeExcludeRow = ({
               label={
                 <EuiText size="xs">
                   {i18n.translate('xpack.lens.indexPattern.terms.addRegex', {
-                    defaultMessage: 'Use a regex instead',
+                    defaultMessage: 'Use regular expression',
                   })}
                 </EuiText>
               }
@@ -265,7 +265,7 @@ export const IncludeExcludeRow = ({
             placeholder={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
               {
-                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+                defaultMessage: 'Enter a regex to filter values',
               }
             )}
             value={regex.exclude}
@@ -280,17 +280,17 @@ export const IncludeExcludeRow = ({
             aria-label={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
               {
-                defaultMessage: 'Use a regular expression i.e. .*sport.*',
+                defaultMessage: 'Enter a regex to filter values',
               }
             )}
           />
         ) : (
           <EuiComboBox
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.exclude', {
-              defaultMessage: 'Exclude terms',
+              defaultMessage: 'Exclude values',
             })}
             placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
-              defaultMessage: 'Select existing terms or add a new one',
+              defaultMessage: 'Select values to include or create a new one',
             })}
             options={termsOptions}
             selectedOptions={includeExcludeSelectedOptions.exclude}
