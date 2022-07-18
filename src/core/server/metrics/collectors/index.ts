@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics, MetricsCollector } from './types';
+// export type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics, MetricsCollector } from './types';
 export { OsMetricsCollector } from './os';
 export type { OpsMetricsCollectorOptions } from './os';
 export { ProcessMetricsCollector } from './process';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MetricsCollector } from './types';
+import type { MetricsCollector } from '@kbn/core-metrics-server';
 import { createMockOpsProcessMetrics } from './process.mocks';
 
 const createMock = () => {

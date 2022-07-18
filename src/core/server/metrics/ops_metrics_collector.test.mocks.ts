@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+// move to public mocks
 import { collectorMock } from './collectors/mocks';
 
 export const mockOsCollector = collectorMock.create();

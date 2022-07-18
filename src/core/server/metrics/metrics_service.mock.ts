@@ -8,15 +8,14 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { MetricsService } from './metrics_service';
-import { collectorMock } from './collectors/mocks';
-import { mocked as eventLoopDelaysMonitorMock } from './event_loop_delays/event_loop_delays_monitor.mocks';
-import {
+import type {
+  MetricsService,
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
-  MetricsServiceSetup,
-  MetricsServiceStart,
-} from './types';
+} from './metrics_service';
+import { collectorMock } from './collectors/mocks';
+import { mocked as eventLoopDelaysMonitorMock } from './event_loop_delays/event_loop_delays_monitor.mocks';
+import { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
 
 const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {

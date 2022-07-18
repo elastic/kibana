@@ -6,9 +6,29 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type { IntervalHistogram } from '@kbn/core-metrics-server';
-import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
-// move to public mocks
+import type { MetricsCollector, IntervalHistogram } from '@kbn/core-metrics-server';
+import { EventLoopDelaysMonitor } from '../event_loop_delays';
+import { createMockOpsProcessMetrics } from './process.mocks';
+
+const createMock = () => {
+  const mocked: jest.Mocked<MetricsCollector<any>> = {
+    collect: jest.fn(),
+    reset: jest.fn(),
+  };
+
+  mocked.collect.mockResolvedValue({});
+
+  return mocked;
+};
+
+/* internal duplicate of `collectorMock` exposed in @kbn/core-metrics-collectors-server-mocks for unit tests*/
+export const collectorMock = {
+  create: createMock,
+  createOpsProcessMetrics: createMockOpsProcessMetrics,
+};
+
+// EventLoopDelay mocks
+// internal duplicate of EventLoopDelay mocks exposed in @kbn/core-metrics-collectors-server-mocks for unit tests
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}
 ): IntervalHistogram {

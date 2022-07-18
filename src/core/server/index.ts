@@ -52,7 +52,8 @@ import type {
   HttpServiceStart,
 } from '@kbn/core-http-server';
 import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import type {
+import { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
+import {
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
@@ -64,7 +65,6 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
@@ -402,7 +402,7 @@ export type {
   MetricsServiceSetup,
   MetricsServiceStart,
   IntervalHistogram,
-} from './metrics';
+} from '@kbn/core-metrics-server';
 export { EventLoopDelaysMonitor } from './metrics';
 export type { IEventLoopDelaysMonitor } from './metrics';
 

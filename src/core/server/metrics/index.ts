@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-export type {
-  InternalMetricsServiceStart,
-  InternalMetricsServiceSetup,
-  MetricsServiceSetup,
-  MetricsServiceStart,
-  OpsMetrics,
-  IntervalHistogram,
-} from './types';
-export type { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from './collectors';
+// export type {
+//   InternalMetricsServiceStart,
+//   InternalMetricsServiceSetup,
+//   MetricsServiceSetup,
+//   MetricsServiceStart,
+//   OpsMetrics,
+//   IntervalHistogram,
+// } from './types';
+// export type { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from './collectors';
 export { MetricsService } from './metrics_service';
+export type { InternalMetricsServiceStart, InternalMetricsServiceSetup } from './metrics_service';
 export { opsConfig } from './ops_config';
 export type { OpsConfigType } from './ops_config';
 export { type IEventLoopDelaysMonitor, EventLoopDelaysMonitor } from './event_loop_delays';

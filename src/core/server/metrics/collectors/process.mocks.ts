@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { OpsProcessMetrics } from '@kbn/core-metrics-server';
 import { mocked } from '../event_loop_delays/event_loop_delays_monitor.mocks';
-import type { OpsProcessMetrics } from './types';
-
+// move to public mocks
 export function createMockOpsProcessMetrics(): OpsProcessMetrics {
   const histogram = mocked.createHistogram();
 
