@@ -181,7 +181,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } catch (exc) {
               let errorMessage;
               if (exc instanceof DataViewError) {
-                errorMessage = buildRuleMessage(`Data view not found ${exc}`);
+                errorMessage = buildRuleMessage(`Data View not found ${exc}`);
               } else {
                 errorMessage = buildRuleMessage(`Check for indices to search failed ${exc}`);
               }
