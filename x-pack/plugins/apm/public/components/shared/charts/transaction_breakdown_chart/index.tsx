@@ -68,6 +68,7 @@ export function TransactionBreakdownChart({
             showAnnotations={showAnnotations}
             timeseries={timeseries}
             yAxisType="percentage"
+            id="transactionBreakdownChart"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -66,6 +66,7 @@ export function ServiceDependenciesBreakdownChart({
       annotations={[]}
       timeseries={timeseries}
       yAxisType="duration"
+      id="serviceDependenciesBreakdownChart"
     />
   );
 }

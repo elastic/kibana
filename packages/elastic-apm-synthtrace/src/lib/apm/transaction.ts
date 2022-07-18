@@ -40,6 +40,7 @@ export class Transaction extends BaseSpan {
     errors.forEach((error) => {
       error.fields['trace.id'] = this.fields['trace.id'];
       error.fields['transaction.id'] = this.fields['transaction.id'];
+      error.fields['transaction.name'] = this.fields['transaction.name'];
       error.fields['transaction.type'] = this.fields['transaction.type'];
     });
 

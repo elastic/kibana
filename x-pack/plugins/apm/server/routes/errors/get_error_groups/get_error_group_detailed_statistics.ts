@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  rangeQuery,
+  kqlQuery,
+  termQuery,
+  termsQuery,
+} from '@kbn/observability-plugin/server';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
 import {
@@ -64,8 +69,8 @@ export async function getErrorGroupDetailedStatistics({
         query: {
           bool: {
             filter: [
-              { terms: { [ERROR_GROUP_ID]: groupIds } },
-              { term: { [SERVICE_NAME]: serviceName } },
+              ...termsQuery(ERROR_GROUP_ID, ...groupIds),
+              ...termQuery(SERVICE_NAME, serviceName),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
