@@ -15,7 +15,6 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
-import type { HttpStart } from '@kbn/core/public';
 
 import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import {
