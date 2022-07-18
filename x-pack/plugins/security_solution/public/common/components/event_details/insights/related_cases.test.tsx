@@ -12,7 +12,7 @@ import { TestProviders } from '../../../mock';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { RelatedCases } from './related_cases';
-import { noCasesPermissions, readCasesPermissions } from '../../../cases_test_utils';
+import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
