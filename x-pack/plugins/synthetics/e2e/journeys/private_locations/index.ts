@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// export * from './manage_locations';
+export * from './manage_locations';
 export * from './add_monitor_private_location';
