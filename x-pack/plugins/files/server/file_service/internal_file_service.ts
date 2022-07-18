@@ -224,6 +224,7 @@ export class InternalFileService {
                 {
                   term: { [`${this.savedObjectType}.attributes.status`]: 'READY' },
                 },
+                ...filter,
               ],
             },
           })
