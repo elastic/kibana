@@ -10,9 +10,12 @@ import { ElasticsearchClient } from '../../../..';
 import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { Root } from '../../../../root';
-import { isWriteBlockException, isClusterShardLimitExceeded } from '../es_errors';
-import { createIndex } from '../create_index';
-import { setWriteBlock } from '../set_write_block';
+import {
+  isWriteBlockException,
+  isClusterShardLimitExceeded,
+} from '../../../../saved_objects/migrations/actions/es_errors';
+import { createIndex } from '../../../../saved_objects/migrations/actions/create_index';
+import { setWriteBlock } from '../../../../saved_objects/migrations/actions/set_write_block';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

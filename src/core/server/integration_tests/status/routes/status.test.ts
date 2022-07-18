@@ -16,9 +16,9 @@ import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-serve
 import { metricsServiceMock } from '../../../metrics/metrics_service.mock';
 import type { MetricsServiceSetup } from '../../../metrics';
 
-import { registerStatusRoute } from '../status';
-import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../types';
-import { statusServiceMock } from '../../status_service.mock';
+import { registerStatusRoute } from '../../../status/routes/status';
+import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../../status/types';
+import { statusServiceMock } from '../../../status/status_service.mock';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 

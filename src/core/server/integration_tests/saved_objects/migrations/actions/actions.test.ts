@@ -13,7 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { ElasticsearchClient } from '../../../..';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import type { SavedObjectsRawDoc } from '../../../serialization';
+import type { SavedObjectsRawDoc } from '../../../../saved_objects/serialization';
 import {
   bulkOverwriteTransformedDocuments,
   cloneIndex,
@@ -40,8 +40,11 @@ import {
   transformDocs,
   waitForIndexStatusYellow,
   initAction,
-} from '..';
-import type { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../core';
+} from '../../../../saved_objects/migrations/actions';
+import type {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../../../../saved_objects/migrations/core';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
