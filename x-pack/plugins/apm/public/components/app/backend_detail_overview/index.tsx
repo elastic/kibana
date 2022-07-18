@@ -30,25 +30,31 @@ export function BackendDetailOverview() {
 
   const apmRouter = useApmRouter();
 
-  useBreadcrumb([
-    {
-      title: i18n.translate('xpack.apm.backendDetailOverview.breadcrumbTitle', {
-        defaultMessage: 'Overview',
-      }),
-      href: apmRouter.link('/backends/overview', {
-        query: {
-          backendName,
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-  ]);
+  useBreadcrumb(
+    [
+      {
+        title: i18n.translate(
+          'xpack.apm.backendDetailOverview.breadcrumbTitle',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        href: apmRouter.link('/backends/overview', {
+          query: {
+            backendName,
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+    ],
+    []
+  );
 
   return (
     <>

@@ -124,23 +124,26 @@ export function ErrorGroupDetails() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  useBreadcrumb({
-    title: groupId,
-    href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
-      path: {
-        serviceName,
-        groupId,
-      },
-      query: {
-        rangeFrom,
-        rangeTo,
-        environment,
-        kuery,
-        serviceGroup,
-        comparisonEnabled,
-      },
-    }),
-  });
+  useBreadcrumb(
+    {
+      title: groupId,
+      href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
+        path: {
+          serviceName,
+          groupId,
+        },
+        query: {
+          rangeFrom,
+          rangeTo,
+          environment,
+          kuery,
+          serviceGroup,
+          comparisonEnabled,
+        },
+      }),
+    },
+    []
+  );
 
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {

@@ -44,13 +44,16 @@ export function TransactionDetails() {
     replace(history, { query: { transactionType } });
   }
 
-  useBreadcrumb({
-    title: transactionName,
-    href: apmRouter.link('/services/{serviceName}/transactions/view', {
-      path,
-      query,
-    }),
-  });
+  useBreadcrumb(
+    {
+      title: transactionName,
+      href: apmRouter.link('/services/{serviceName}/transactions/view', {
+        path,
+        query,
+      }),
+    },
+    []
+  );
 
   const isServerless = isServerlessAgent(runtimeName);
 

@@ -26,24 +26,27 @@ export function useBackendDetailOperationsBreadcrumb() {
 
   const apmRouter = useApmRouter();
 
-  useBreadcrumb([
-    {
-      title: i18n.translate(
-        'xpack.apm.backendDetailOperations.breadcrumbTitle',
-        { defaultMessage: 'Operations' }
-      ),
-      href: apmRouter.link('/backends/operations', {
-        query: {
-          backendName,
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-  ]);
+  useBreadcrumb(
+    [
+      {
+        title: i18n.translate(
+          'xpack.apm.backendDetailOperations.breadcrumbTitle',
+          { defaultMessage: 'Operations' }
+        ),
+        href: apmRouter.link('/backends/operations', {
+          query: {
+            backendName,
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+    ],
+    []
+  );
 }

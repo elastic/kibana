@@ -31,37 +31,40 @@ export function BackendDetailView({
 
   const apmRouter = useApmRouter();
 
-  useBreadcrumb([
-    {
-      title: DependenciesInventoryTitle,
-      href: apmRouter.link('/backends/inventory', {
-        query: {
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-    {
-      title: backendName,
-      href: apmRouter.link('/backends', {
-        query: {
-          backendName,
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-  ]);
+  useBreadcrumb(
+    [
+      {
+        title: DependenciesInventoryTitle,
+        href: apmRouter.link('/backends/inventory', {
+          query: {
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+      {
+        title: backendName,
+        href: apmRouter.link('/backends', {
+          query: {
+            backendName,
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+    ],
+    []
+  );
 
   return <BackendDetailTemplate>{children}</BackendDetailTemplate>;
 }
