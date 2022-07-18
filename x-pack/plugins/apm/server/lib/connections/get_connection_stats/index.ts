@@ -53,7 +53,8 @@ export function getConnectionStats({
 
     const statsWithLocationIds = allMetrics.map((statsItem) => {
       const { from, timeseries, value } = statsItem;
-      const to = destinationMap.get(statsItem.to.backendName) ?? statsItem.to;
+      const to =
+        destinationMap.get(statsItem.to.dependencyName) ?? statsItem.to;
 
       const location = collapseBy === 'upstream' ? from : to;
 
