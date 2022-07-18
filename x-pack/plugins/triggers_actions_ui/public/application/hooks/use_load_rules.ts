@@ -8,7 +8,7 @@ import { useMemo, useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { Rule, Pagination } from '../../types';
-import { loadRules, LoadRulesProps } from '../lib/rule_api';
+import { loadRulesWithKueryFilter, LoadRulesProps } from '../lib/rule_api';
 import { useKibana } from '../../common/lib/kibana';
 
 interface RuleState {
@@ -112,7 +112,7 @@ export function useLoadRules({
     dispatch({ type: ActionTypes.SET_LOADING, payload: true });
 
     try {
-      const rulesResponse = await loadRules({
+      const rulesResponse = await loadRulesWithKueryFilter({
         http,
         page,
         searchText,

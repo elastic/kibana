@@ -7,8 +7,9 @@
 
 export { alertingFrameworkHealth } from './health';
 export { mapFilterToKueryNode } from './map_filters_to_kql';
-export type { LoadRuleAggregationsProps } from './aggregate';
+export type { LoadRuleAggregationsProps } from './aggregate_helpers';
 export { loadRuleAggregations, loadRuleTags } from './aggregate';
+export { loadRuleAggregationsWithKueryFilter } from './aggregate_kuery_filter';
 export { createRule } from './create';
 export { deleteRules } from './delete';
 export { disableRule, disableRules } from './disable';
@@ -18,8 +19,9 @@ export { loadRuleSummary } from './rule_summary';
 export { muteAlertInstance } from './mute_alert';
 export { muteRule, muteRules } from './mute';
 export { loadRuleTypes } from './rule_types';
-export type { LoadRulesProps } from './rules';
+export type { LoadRulesProps } from './rules_helpers';
 export { loadRules } from './rules';
+export { loadRulesWithKueryFilter } from './rules_kuery_filter';
 export { loadRuleState } from './state';
 export type { LoadExecutionLogAggregationsProps } from './load_execution_log_aggregations';
 export { loadExecutionLogAggregations } from './load_execution_log_aggregations';
