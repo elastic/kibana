@@ -186,6 +186,7 @@ export const Console = memo<ConsoleProps>(
                           onClick={setFocusOnInput}
                           grow={false}
                           className="layout-container layout-commandInput"
+                          data-test-subj={getTestId('mainPanel-inputArea')}
                         >
                           <CommandInput prompt={prompt} focusRef={inputFocusRef} />
                         </EuiFlexItem>
