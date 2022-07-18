@@ -29,8 +29,8 @@ import { CrawlerLogic } from '../crawler_logic';
 
 interface DeleteDomainModalValues {
   domain: CrawlerDomain | null;
-  isLoading: boolean;
   isHidden: boolean;
+  isLoading: boolean;
   status: Status;
 }
 
@@ -38,8 +38,8 @@ type DeleteDomainModalActions = Pick<
   Actions<DeleteCrawlerDomainArgs, DeleteCrawlerDomainResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  hideModal(): void;
   deleteDomain(): void;
+  hideModal(): void;
   showModal(domain: CrawlerDomain): { domain: CrawlerDomain };
 };
 
@@ -52,8 +52,8 @@ export const DeleteDomainModalLogic = kea<
     values: [DeleteCrawlerDomainApiLogic, ['status']],
   },
   actions: {
-    hideModal: () => true,
     deleteDomain: () => true,
+    hideModal: () => true,
     showModal: (domain) => ({ domain }),
   },
   reducers: {
