@@ -1426,7 +1426,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count').simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {

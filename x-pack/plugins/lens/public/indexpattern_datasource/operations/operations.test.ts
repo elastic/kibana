@@ -56,7 +56,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(['terms', 'unique_count', 'last_value']);
+      ).toEqual(['terms', 'unique_count', 'last_value', 'count']);
     });
 
     it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
@@ -95,6 +95,7 @@ describe('getOperationTypesForField', () => {
         'percentile',
         'percentile_rank',
         'last_value',
+        'count',
       ]);
     });
 
@@ -120,6 +121,7 @@ describe('getOperationTypesForField', () => {
         'percentile',
         'percentile_rank',
         'last_value',
+        'count',
       ]);
     });
 

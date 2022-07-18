@@ -1124,7 +1124,7 @@ invalid: "
           indexPattern,
           operationDefinitionMap
         )
-      ).toEqual([]);
+      ).toEqual(undefined);
     });
 
     it('returns an error if an operation with required parameters does not receive them', () => {

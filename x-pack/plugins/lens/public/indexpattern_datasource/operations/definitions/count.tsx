@@ -33,6 +33,18 @@ const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'number_range',
+  'ip',
+  'ip_range',
+  'date',
+  'date_range',
+  'murmur3',
+]);
+
 function ofName(
   field: IndexPatternField | undefined,
   timeShift: string | undefined,
@@ -87,7 +99,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'document' ||
-      (aggregatable && (!aggregationRestrictions || aggregationRestrictions.value_count))
+      (aggregatable &&
+        (!aggregationRestrictions || aggregationRestrictions.value_count) &&
+        supportedTypes.has(type))
     ) {
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
@@ -183,8 +197,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       }).toAst();
     }
   },
-  isTransferable: () => {
-    return true;
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
+
+    return Boolean(
+      newField &&
+        (newField.type === 'document' ||
+          (supportedTypes.has(newField.type) &&
+            newField.aggregatable &&
+            (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)))
+    );
   },
   timeScalingMode: 'optional',
   filterable: true,

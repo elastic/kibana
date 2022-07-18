@@ -137,6 +137,7 @@ describe('Aggs service', () => {
           "max",
           "std_dev",
           "cardinality",
+          "value_count",
           "percentiles",
           "percentile_ranks",
           "top_hits",

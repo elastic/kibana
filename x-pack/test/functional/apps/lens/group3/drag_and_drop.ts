@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql([]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @message.raw',
+          'Value count of @message.raw',
         ]);
       });
       it('should duplicate the column when dragging to empty dimension in the same group', async () => {
