@@ -75,12 +75,8 @@ export async function getErrorGroupMainStatistics({
           bool: {
             filter: [
               ...termQuery(SERVICE_NAME, serviceName),
-              ...(transactionName
-                ? termQuery(TRANSACTION_NAME, transactionName)
-                : []),
-              ...(transactionType
-                ? termQuery(TRANSACTION_TYPE, transactionType)
-                : []),
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              ...termQuery(TRANSACTION_TYPE, transactionType),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
