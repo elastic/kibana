@@ -56,6 +56,7 @@ export const transformExportDetailsToDryRunResult = (details: ExportRulesDetails
       : [],
   };
 };
+
 /**
  * helper utility that transforms raw BulkActionResponse response to DryRunResult format
  * @param response - raw bulk_actions API response ({@link BulkActionResponse})
