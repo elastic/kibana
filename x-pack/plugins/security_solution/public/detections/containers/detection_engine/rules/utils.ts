@@ -31,6 +31,7 @@ export const convertRulesFilterToKQL = ({
   showElasticRules,
   filter,
   tags,
+  excludeRuleTypes = [],
 }: FilterOptions): string => {
   const filters: string[] = [];
 
@@ -54,6 +55,14 @@ export const convertRulesFilterToKQL = ({
     ).join(' OR ');
 
     filters.push(`(${searchQuery})`);
+  }
+
+  if (excludeRuleTypes.length) {
+    filters.push(
+      `NOT alert.attributes.params.type: (${excludeRuleTypes
+        .map((ruleType) => `"${escapeKuery(ruleType)}"`)
+        .join(' OR ')})`
+    );
   }
 
   return filters.join(' AND ');

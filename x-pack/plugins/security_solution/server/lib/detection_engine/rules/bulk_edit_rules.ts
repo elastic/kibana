@@ -9,11 +9,11 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { BulkActionEditPayload } from '../../../../common/detection_engine/schemas/common';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import type { MlAuthz } from '../../machine_learning/authz';
-import { throwAuthzError } from '../../machine_learning/validation';
 
-import { ruleParamsModifier } from './bulk_edit/rule_params_modifier';
-import { splitBulkEditActions } from './bulk_edit/split_bulk_edit_actions';
-import { bulkEditActionToRulesClientOperation } from './bulk_edit/action_to_rules_client_operation';
+import { ruleParamsModifier } from './bulk_actions/rule_params_modifier';
+import { splitBulkEditActions } from './bulk_actions/split_bulk_edit_actions';
+import { validateBulkEditRule } from './bulk_actions/validations';
+import { bulkEditActionToRulesClientOperation } from './bulk_actions/action_to_rules_client_operation';
 
 import type { RuleAlertType } from './types';
 
@@ -45,8 +45,7 @@ export const bulkEditRules = ({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations: attributesActions.map(bulkEditActionToRulesClientOperation),
     paramsModifier: async (ruleParams: RuleAlertType['params']) => {
-      throwAuthzError(await mlAuthz.validateRuleType(ruleParams.type));
-
+      await validateBulkEditRule({ mlAuthz, ruleType: ruleParams.type });
       return ruleParamsModifier(ruleParams, paramsActions);
     },
   });
