@@ -18,9 +18,9 @@ import {
 } from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { BasePathProxyServer, BasePathProxyServerOptions } from './base_path_proxy_server';
-import { DevConfig } from './config/dev_config';
-import { TestLog } from './log';
+import { BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy_server';
+import { DevConfig } from '../config/dev_config';
+import { TestLog } from '../log';
 
 describe('BasePathProxyServer', () => {
   let server: Server;
