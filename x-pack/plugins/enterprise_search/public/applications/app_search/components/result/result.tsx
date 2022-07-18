@@ -16,11 +16,11 @@ import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { Schema } from '../../../shared/schema/types';
+import { AdvancedSchema, Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
-import { flattenDocument } from '../../utils/results';
+import { formatResultWithoutMeta } from '../../utils/results';
 
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
@@ -32,7 +32,7 @@ interface Props {
   showScore?: boolean;
   resultPosition?: number;
   shouldLinkToDetailPage?: boolean;
-  schemaForTypeHighlights?: Schema;
+  schemaForTypeHighlights?: Schema | AdvancedSchema;
   actions?: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
   showClick?: boolean;
@@ -57,12 +57,24 @@ export const Result: React.FC<Props> = ({
   const META = '_meta';
   const resultMeta = result[META];
   const resultFields = useMemo(
-    () => Object.entries(flattenDocument(result)).filter(([key]) => key !== META && key !== ID),
+    () => Object.entries(formatResultWithoutMeta(result)).filter(([key]) => key !== ID),
     [result]
   );
   const numResults = resultFields.length;
+  const isAdvancedSchema = (schema: Schema | AdvancedSchema): schema is AdvancedSchema => {
+    return (
+      schema &&
+      Object.values(schema).reduce((isAdvanced, schemaField) => {
+        return isAdvanced && typeof schemaField !== 'string';
+      }, true)
+    );
+  };
   const typeForField = (fieldName: string) => {
-    if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
+    if (schemaForTypeHighlights) {
+      return isAdvancedSchema(schemaForTypeHighlights)
+        ? schemaForTypeHighlights[fieldName].type
+        : schemaForTypeHighlights[fieldName];
+    }
   };
 
   const documentLink = shouldLinkToDetailPage
