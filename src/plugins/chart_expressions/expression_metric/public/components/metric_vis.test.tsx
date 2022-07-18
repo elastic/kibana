@@ -210,7 +210,7 @@ describe('MetricVisComponent', function () {
 
     it('should render a single metric value', () => {
       const component = shallow(
-        <MetricVis config={config} data={table} renderComplete={() => {}} />
+        <MetricVis config={config} data={table} renderComplete={() => {}} renderMode={'view'} />
       );
 
       const { data } = component.find(Metric).props();
@@ -240,6 +240,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          renderMode={'view'}
         />
       );
 
@@ -271,6 +272,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          renderMode={'view'}
         />
       );
 
@@ -309,6 +311,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            renderMode={'view'}
           />
         )
           .find(Metric)
@@ -358,7 +361,7 @@ describe('MetricVisComponent', function () {
 
     it('should render a grid if breakdownBy dimension supplied', () => {
       const component = shallow(
-        <MetricVis config={config} data={table} renderComplete={() => {}} />
+        <MetricVis config={config} data={table} renderComplete={() => {}} renderMode={'view'} />
       );
 
       const { data } = component.find(Metric).props();
@@ -425,6 +428,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          renderMode={'view'}
         />
       );
 
@@ -461,6 +465,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          renderMode={'view'}
         />
       );
 
@@ -504,6 +509,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            renderMode={'view'}
           />
         )
           .find(Metric)
@@ -600,6 +606,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            renderMode={'view'}
           />
         )
           .find(Metric)
@@ -779,6 +786,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          renderMode={'view'}
         />
       );
 
@@ -823,6 +831,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            renderMode={'view'}
           />
         );
 
@@ -906,6 +915,7 @@ describe('MetricVisComponent', function () {
             rows: [{ '1': value, '2': secondaryValue }],
           }}
           renderComplete={() => {}}
+          renderMode={'view'}
         />
       );
 
