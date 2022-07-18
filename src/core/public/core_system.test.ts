@@ -277,9 +277,18 @@ describe('#start()', () => {
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
       kibana_version: '1.2.3',
-      load_started: 456,
-      bootstrap_started: 123,
       protocol: 'http:',
+      key1: LOAD_START,
+      key2: LOAD_BOOTSTRAP_START,
+      key3: LOAD_CORE_CREATED,
+      key4: LOAD_SETUP_DONE,
+      key5: LOAD_START_DONE,
+      value1: 111,
+      value2: 222,
+      value3: 333,
+      value4: 444,
+      value5: 555,
+      duration: 666,
     });
 
     expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
