@@ -17,7 +17,7 @@ import { useUrl } from '../main/hooks/use_url';
 import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/saved_searches';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
-import { useQueryData } from './hooks/use_query_data';
+import { useQueryData } from './hooks/query_data/use_query_data';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
