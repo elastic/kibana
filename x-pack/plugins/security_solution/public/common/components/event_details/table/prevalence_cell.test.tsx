@@ -58,40 +58,6 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
   values: [...hostIpValues],
 };
 
-const processEntityValues = ['d8787283h827h3'];
-const processEntityFieldFromBrowserField: BrowserField = {
-  aggregatable: true,
-  category: 'process',
-  description: 'Process entity ID.',
-  example: '3847h384',
-  fields: {},
-  format: '',
-  indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  name: 'process.entity_id',
-  readFromDocValues: false,
-  searchable: true,
-  type: 'string',
-};
-const processEntityData: EventFieldsData = {
-  ...processEntityFieldFromBrowserField,
-  ariaRowindex: 35,
-  field: 'process.entity_id',
-  fields: {},
-  format: '',
-  isObjectArray: false,
-  originalValue: [...processEntityValues],
-  values: [...processEntityValues],
-};
-
-const enrichedProcessEntityData: AlertSummaryRow['description'] = {
-  data: { ...processEntityData },
-  eventId,
-  fieldFromBrowserField: { ...processEntityFieldFromBrowserField },
-  isDraggable: false,
-  timelineId: TimelineId.test,
-  values: [...processEntityValues],
-};
-
 describe('PrevalenceCellRenderer', () => {
   describe('From Query', () => {
     describe('When data is loading', () => {
