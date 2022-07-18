@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 
@@ -38,29 +39,49 @@ export const DeleteDomainModal: React.FC = () => {
   }
 
   return (
-    <EuiModal onClose={hideModal} aria-label={'Delete domain'}>
+    <EuiModal
+      onClose={hideModal}
+      aria-label={i18n.translate('xpack.enterpriseSearch.crawler.deleteDomainModal.title', {
+        defaultMessage: 'Delete domain',
+      })}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{'Delete domain'}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.enterpriseSearch.crawler.deleteDomainModal.title', {
+            defaultMessage: 'Delete domain',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText>
-          Remove the domain <strong>{domain?.url}</strong> from your crawler. This will also delete
-          all entry points and crawl rules you have set up. Any documents related to this domain
-          will be removed on the next crawl. <strong>This cannot be undone.</strong>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.crawler.crawlRulesTable.description"
+            defaultMessage="Remove the domain {domainUrl} from your crawler. This will also delete all entry points and crawl rules you have set up. Any documents related to this domain will be removed on the next crawl. {thisCannotBeUndoneMessage}"
+            values={{
+              domainUrl: <strong>{domain?.url}</strong>,
+              thisCannotBeUndoneMessage: (
+                <strong>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.crawler.deleteDomainModal.thisCannotBeUndoneMessage',
+                    {
+                      defaultMessage: 'This cannot be undone.',
+                    }
+                  )}
+                </strong>
+              ),
+            }}
+          />
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="GenericConfirmationModalCancel" onClick={hideModal}>
-          {CANCEL_BUTTON_LABEL}
-        </EuiButtonEmpty>
-        <EuiButton
-          data-test-subj="GenericConfirmationModalSave"
-          onClick={deleteDomain}
-          isLoading={isLoading}
-        >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.modal.save', {
-            defaultMessage: 'Delete domain',
-          })}
+        <EuiButtonEmpty onClick={hideModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButton onClick={deleteDomain} isLoading={isLoading} color="danger" fill>
+          {i18n.translate(
+            'xpack.enterpriseSearch.crawler.deleteDomainModal.deleteDomainButtonLabel',
+            {
+              defaultMessage: 'Delete domain',
+            }
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
