@@ -171,29 +171,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/135914
-    describe.skip('with folded/unfolded lines in request body', () => {
+    describe('with folded/unfolded lines in request body', () => {
       const enterRequestWithBody = async () => {
         await PageObjects.console.enterRequest();
         await PageObjects.console.pressEnter();
         await PageObjects.console.enterText('{\n\t\t"_source": []');
       };
 
-      it('should save the state of folding/unfolding when navigating back to Console', async () => {
+      it('should restore the state of folding/unfolding when navigating back to Console', async () => {
         await PageObjects.console.clearTextArea();
         await enterRequestWithBody();
         await PageObjects.console.clickFoldWidget();
         await PageObjects.common.navigateToApp('home');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.navigateToApp('console');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.dismissTutorial();
         expect(await PageObjects.console.hasFolds()).to.be(true);
       });
 
-      it('should save the state of folding/unfolding when the page reloads', async () => {
-        // blocks the close help button for several seconds so just retry until we can click it.
-        await retry.try(async () => {
-          await PageObjects.console.collapseHelp();
-        });
+      it('should restore the state of folding/unfolding when the page reloads', async () => {
         await PageObjects.console.clearTextArea();
         await enterRequestWithBody();
         await PageObjects.console.clickFoldWidget();
