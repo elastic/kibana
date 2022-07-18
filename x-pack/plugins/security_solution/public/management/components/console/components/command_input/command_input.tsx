@@ -37,6 +37,10 @@ const CommandInputContainer = styled.div`
       ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
 
+  &.error {
+    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
+  }
+
   .textEntered {
     white-space: break-spaces;
   }
@@ -103,10 +107,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     });
   }, [isKeyInputBeingCaptured]);
 
-  const focusClassName = useMemo(() => {
+  const inputContainerClassname = useMemo(() => {
     return classNames({
       cmdInput: true,
       active: isKeyInputBeingCaptured,
+      error: false,
     });
   }, [isKeyInputBeingCaptured]);
 
@@ -268,7 +273,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     <InputAreaPopover width={popoverWidth}>
       <CommandInputContainer
         {...commonProps}
-        className={focusClassName}
+        className={inputContainerClassname}
         onClick={handleTypingAreaClick}
         ref={containerRef}
       >
