@@ -23,6 +23,7 @@ import {
 import { ComponentTemplateForm } from '../component_template_form';
 import type { WizardSection } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
+import { MANAGED_BY_FLEET } from '../../constants';
 
 import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
 
@@ -90,7 +91,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    if (updatedComponentTemplate._meta?.managed_by === 'fleet' && dataStreams.length) {
+    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET && dataStreams.length) {
       const dataStreamsToRollover: string[] = [];
       for (const dataStream of dataStreams) {
         try {

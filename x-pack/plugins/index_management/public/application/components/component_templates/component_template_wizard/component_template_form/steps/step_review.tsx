@@ -27,6 +27,7 @@ import {
   serializers,
   serializeComponentTemplate,
 } from '../../../shared_imports';
+import { MANAGED_BY_FLEET } from '../../../constants';
 
 const { stripEmptyFields } = serializers;
 
@@ -68,7 +69,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     } = serializedComponentTemplate;
 
     const isFleetDatastreamsVisible =
-      dataStreams?.length && componentTemplate._meta?.managed_by === 'fleet';
+      dataStreams?.length && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
