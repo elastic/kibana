@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SearchIndexSelectableOption } from '../components/engine_creation/search_index_selectable';
 import { EngineCreationSteps } from '../components/engine_creation/engine_creation_logic';
+import { SearchIndexSelectableOption } from '../components/engine_creation/search_index_selectable';
 import { removeWhitespace } from '../components/engine_creation/utils';
 
 export const DEFAULT_VALUES = {

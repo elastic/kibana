@@ -28,8 +28,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
-
 import {
   ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
   SANITIZED_NAME_NOTE,
@@ -39,6 +37,7 @@ import {
   ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
   SUPPORTED_LANGUAGES,
 } from './constants';
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
 export const ConfigureAppSearchEngine: React.FC = () => {
   const { isSubmitDisabled, language, name, rawName } = useValues(EngineCreationLogic);

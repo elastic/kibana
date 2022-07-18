@@ -12,28 +12,30 @@ export const DEFAULT_LANGUAGE = 'Universal';
 export const ENGINE_CREATION_SELECT_APP_SEARCH_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineCreation.selectAppSearchEngine.title',
   {
-    defaultMessage: 'Use App Search defaults'
+    defaultMessage: 'Use App Search defaults',
   }
 );
 
 export const ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineCreation.selectAppSearchEngine.description',
   {
-    defaultMessage: 'App Search will manage your index for you. Data is tied directly to your search engine and usage across the platform yada yada yada. Blah blah blah.'
+    defaultMessage:
+      'App Search will manage your index for you. Data is tied directly to your search engine and usage across the platform yada yada yada. Blah blah blah.',
   }
 );
 
 export const ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineCreation.selectElasticsearchEngine.title',
   {
-    defaultMessage: 'Use an Elasticsearch index'
+    defaultMessage: 'Use an Elasticsearch index',
   }
 );
 
 export const ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineCreation.selectElasticsearchEngine.description',
   {
-    defaultMessage: 'Using an Elasticsearch index for your App Search engine allows you to build a search experience for your existing data sets. Your index will continue to be usable across the Elastic platform.'
+    defaultMessage:
+      'Using an Elasticsearch index for your App Search engine allows you to build a search experience for your existing data sets. Your index will continue to be usable across the Elastic platform.',
   }
 );
 
