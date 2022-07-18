@@ -17,8 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
-import { getLogo, RESPONSE_ACTION_TYPES } from './constants';
-import { UseField, useFormData } from '../../../shared_imports';
+import { getLogo } from './constants';
+import { useFormData } from '../../../shared_imports';
 import type { ArrayItem } from '../../../shared_imports';
 
 interface IProps {
