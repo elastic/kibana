@@ -194,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('meta attributes injected properly', () => {
       before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
@@ -202,6 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('should inject meta attributes for searches', async () =>
