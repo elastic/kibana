@@ -59,6 +59,7 @@ export interface FieldStatsProps {
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
   testSubject: string;
+  overrideContent?: (field: DataViewField) => JSX.Element | null;
 }
 
 // TODO: catch errors during rendering
@@ -71,6 +72,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
   dataViewOrDataViewId,
   field,
   testSubject,
+  overrideContent,
 }) => {
   const services = useUnifiedFieldListServices();
   const { http, fieldFormats, uiSettings, charts, dataViews } = services;
@@ -80,6 +82,13 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
   const [dataView, setDataView] = useState<DataView | null>(null);
 
   async function fetchData() {
+    const loadedDataView =
+      typeof dataViewOrDataViewId === 'string'
+        ? await dataViews.get(dataViewOrDataViewId)
+        : dataViewOrDataViewId;
+
+    setDataView(loadedDataView);
+
     // Range types don't have any useful stats we can show
     if (
       state.isLoading ||
@@ -91,12 +100,6 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
       return;
     }
 
-    const loadedDataView =
-      typeof dataViewOrDataViewId === 'string'
-        ? await dataViews.get(dataViewOrDataViewId)
-        : dataViewOrDataViewId;
-
-    setDataView(loadedDataView);
     setState((s) => ({ ...s, isLoading: true }));
 
     http
@@ -118,6 +121,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
           sampledValues: results.sampledValues,
           histogram: results.histogram,
           topValues: results.topValues,
+          dataView: loadedDataView,
         }));
       })
       .catch(() => {
@@ -156,8 +160,12 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
 
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
 
-  if (isLoading || !dataView) {
+  if (isLoading) {
     return <EuiLoadingSpinner />;
+  }
+
+  if (!dataView) {
+    return null;
   }
 
   const formatter = dataView.getFormatterForField(field);
@@ -189,7 +197,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
   }
 
   if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return <>{/* TODO allow to add a custom view (Visualize)?*/}</>;
+    return overrideContent?.(field) || null;
   }
 
   if (

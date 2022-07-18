@@ -401,6 +401,11 @@ function DiscoverFieldComponent({
               dataViewOrDataViewId={indexPattern}
               field={multiFields ? multiFields[0].field : field} // TODO: how to handle multifields?
               testSubject="dscFieldListPanel"
+              overrideContent={(currentField) => {
+                return (
+                  <EuiText size="s">{`TODO: add a custom "not available" message for ${currentField.type} field`}</EuiText>
+                );
+              }}
             />
             {/* TODO: remove previous field stats view when we finish FieldStats component and add addFilter buttons to it */}
             <EuiSpacer size="l" />

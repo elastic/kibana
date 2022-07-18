@@ -333,19 +333,9 @@ function FieldItemPopoverContents(props: FieldItemProps) {
     return panelHeader;
   }
 
-  const stats =
-    field.type === 'geo_point' || field.type === 'geo_shape' ? (
-      <>
-        <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
-
-        <EuiSpacer size="m" />
-        <VisualizeGeoFieldButton
-          uiActions={uiActions}
-          indexPatternId={indexPattern.id}
-          fieldName={field.name}
-        />
-      </>
-    ) : (
+  return (
+    <>
+      <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
       <FieldStats
         query={query}
         filters={filters}
@@ -354,13 +344,24 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         dataViewOrDataViewId={indexPattern.id}
         field={field as DataViewField}
         testSubject="lnsFieldListPanel"
-      />
-    );
+        overrideContent={(currentField) => {
+          if (currentField.type === 'geo_point' || currentField.type === 'geo_shape') {
+            return (
+              <>
+                <EuiText size="s">{getVisualizeGeoFieldMessage(currentField.type)}</EuiText>
 
-  return (
-    <>
-      <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
-      {stats}
+                <EuiSpacer size="m" />
+                <VisualizeGeoFieldButton
+                  uiActions={uiActions}
+                  indexPatternId={indexPattern.id}
+                  fieldName={currentField.name}
+                />
+              </>
+            );
+          }
+          return null;
+        }}
+      />
     </>
   );
 }
