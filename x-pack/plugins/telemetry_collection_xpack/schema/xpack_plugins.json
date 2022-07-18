@@ -2,6 +2,12 @@
   "properties": {
     "actions": {
       "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "error_message": {
+          "type": "keyword"
+        },
         "alert_history_connector_enabled": {
           "type": "boolean",
           "_meta": {
@@ -261,6 +267,12 @@
     },
     "alerts": {
       "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "error_message": {
+          "type": "keyword"
+        },
         "count_total": {
           "type": "long"
         },
